@@ -1,0 +1,38 @@
+{
+    "MPN": [
+        false,
+        "0402WGF1002TCE"
+    ],
+    "base": "44fe0594-19d5-403e-9ae8-7c4c59c3668f",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "10k 0402 1%"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "UniOhm"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "parametric": {
+        "pmax": "0.0625",
+        "table": "resistors",
+        "tolerance": "1",
+        "value": "10000"
+    },
+    "tags": [
+        "jlc-smt-base",
+        "resistor"
+    ],
+    "type": "part",
+    "uuid": "dfe71f0e-ceb0-44cc-8dca-88cefbb8849c",
+    "value": [
+        false,
+        "10k"
+    ]
+}

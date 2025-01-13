@@ -1,0 +1,68 @@
+{
+    "MPN": [
+        false,
+        "Hi7001"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "5~100V/1.5A"
+    ],
+    "entity": "a6cfa077-0524-497e-83a0-2fd604526b98",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "HiChips"
+    ],
+    "model": "b99785a3-c0da-4658-969d-6287cec3be05",
+    "orderable_MPNs": {
+        "38716177-078b-4e75-857c-cfdd195c16a0": "C315560"
+    },
+    "package": "0932e22e-0cf7-46dc-b09c-4cc761a67608",
+    "pad_map": {
+        "17341892-a120-44e2-97ea-6e4f8e3d7da5": {
+            "gate": "d12ec370-db2d-467e-b29e-e50e0ac33820",
+            "pin": "ef231a71-5740-42be-baf9-c5dcf9797a58"
+        },
+        "29f18ab8-6cea-44fc-9bf5-4fb888f5245b": {
+            "gate": "d12ec370-db2d-467e-b29e-e50e0ac33820",
+            "pin": "5bb4b835-b22f-49ef-a740-deb9a1af7503"
+        },
+        "3d725e25-0d60-46cb-a21f-82462d3ce156": {
+            "gate": "d12ec370-db2d-467e-b29e-e50e0ac33820",
+            "pin": "5a8e28ed-e477-4491-b5b9-9d4221bab04f"
+        },
+        "51d7c05f-acae-46d5-9c26-2ea9d17bf7a8": {
+            "gate": "d12ec370-db2d-467e-b29e-e50e0ac33820",
+            "pin": "4766a978-9072-410d-b722-2af35ee77334"
+        },
+        "68b17b6f-ab52-4c2b-9389-c36d3c06eeef": {
+            "gate": "d12ec370-db2d-467e-b29e-e50e0ac33820",
+            "pin": "553a79e3-36e0-4e5d-8731-8673b72a3fd8"
+        },
+        "6f82c7c4-9578-4cb0-a92c-8b09534d5dc9": {
+            "gate": "d12ec370-db2d-467e-b29e-e50e0ac33820",
+            "pin": "da76454c-cbd0-4571-92c2-25da9a1e66c5"
+        },
+        "82d773fb-4473-4bd9-a879-a6ca2756055c": {
+            "gate": "d12ec370-db2d-467e-b29e-e50e0ac33820",
+            "pin": "da76454c-cbd0-4571-92c2-25da9a1e66c5"
+        },
+        "b9ad4acf-f78d-438d-8b7b-e83ee0f9cc19": {
+            "gate": "d12ec370-db2d-467e-b29e-e50e0ac33820",
+            "pin": "5a8e28ed-e477-4491-b5b9-9d4221bab04f"
+        }
+    },
+    "parametric": {},
+    "tags": [],
+    "type": "part",
+    "uuid": "6e2c29ac-ec17-4304-9940-efc1cb6869ae",
+    "value": [
+        false,
+        ""
+    ]
+}

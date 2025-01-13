@@ -1,0 +1,62 @@
+{
+    "MPN": [
+        false,
+        "A2501WR-S-4P"
+    ],
+    "datasheet": [
+        false,
+        "https://cjt.com/up/A2501WR-S-XP_dwg.pdf"
+    ],
+    "description": [
+        false,
+        "2.5mm/4P/SMD Horizontal"
+    ],
+    "entity": "91900053-d618-435a-bb79-8654e2996d06",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "CJT"
+    ],
+    "model": "00000000-0000-0000-0000-000000000000",
+    "package": "fc56ea56-5d77-4ab0-8a7f-20095e1e02c3",
+    "pad_map": {
+        "1c2e7b79-ab42-4f78-b587-8469daeacedf": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "aab503ca-26da-43ff-a268-cf0db0698910"
+        },
+        "27f3479a-4079-44f8-89a9-00bc8a3b1ee9": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "9c153b03-fb7b-4f99-a5ed-ca45d3ae512e"
+        },
+        "2c0052f1-9cf8-4e1a-886b-a4d712e00db7": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "423d0d6c-4330-417f-a6f0-267741d4c770"
+        },
+        "80df9629-c44f-40c8-a864-cb961ef602b0": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "6e4c6134-93b5-49b1-95dd-830ea0cd1475"
+        },
+        "a2ad66b4-f2b0-4987-b23a-f9270dc478a6": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "4b3e1234-17b7-41dc-af26-90574ec82303"
+        },
+        "f30051aa-4e0e-45a8-83c9-d6991d11f2eb": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "6e4c6134-93b5-49b1-95dd-830ea0cd1475"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "connector",
+        "jlc-smt-extended",
+        "smd",
+        "socket"
+    ],
+    "type": "part",
+    "uuid": "c50f6669-5367-4244-93fd-4e0db2c0ffd0",
+    "value": [
+        false,
+        ""
+    ]
+}

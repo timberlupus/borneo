@@ -1,0 +1,23 @@
+{
+    "gates": {
+        "6725aa98-60de-4ff7-8b47-922d75e35290": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "4b2cd8d6-1ccc-4c43-8acc-07e2d6271e74"
+        }
+    },
+    "manufacturer": "Borneo IoT",
+    "name": "BLC05MK3",
+    "prefix": "U",
+    "tags": [
+        "aquarium",
+        "borneo",
+        "bst",
+        "module",
+        "rf",
+        "wireless"
+    ],
+    "type": "entity",
+    "uuid": "752a0520-520e-4cd3-8d10-28c618edd027"
+}

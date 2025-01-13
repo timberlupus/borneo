@@ -1,0 +1,40 @@
+{
+    "MPN": [
+        false,
+        "0402WGF0000TCE"
+    ],
+    "base": "44fe0594-19d5-403e-9ae8-7c4c59c3668f",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "0Ω ±1% 62.5mW"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "UniOhm"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "c1566300-b47e-48be-a66a-449d8e3c0ccb": "C17168"
+    },
+    "parametric": {
+        "pmax": "0.0625",
+        "table": "resistors",
+        "tolerance": "1",
+        "value": "0"
+    },
+    "tags": [
+        "jlc-smt-base"
+    ],
+    "type": "part",
+    "uuid": "74cc7591-aa92-4144-aae6-4128de4fd4dd",
+    "value": [
+        false,
+        "0R"
+    ]
+}

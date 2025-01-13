@@ -1,0 +1,53 @@
+{
+    "MPN": [
+        false,
+        "RVT1H101M0607"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "100uF ±20% 50V"
+    ],
+    "entity": "b0c2b8f8-aecf-4873-9458-c06eee2f7a00",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Roqang"
+    ],
+    "model": "b1817010-3d57-422e-894e-f6f3c52aa8db",
+    "orderable_MPNs": {
+        "d10af0e6-db10-406b-93b1-a6590b6816e3": "C3151829"
+    },
+    "package": "6dc12e97-4f92-4cb9-8031-80cce4041d23",
+    "pad_map": {
+        "7ed0b01f-91de-44df-be29-9c04e41b4a27": {
+            "gate": "23766b63-6ffc-4831-baee-ba1635a735b3",
+            "pin": "bb8460b5-34e6-41b0-9a9f-10eed3a3d8d6"
+        },
+        "abfe904c-69aa-4b7f-b6ad-b4c6b9ef5249": {
+            "gate": "23766b63-6ffc-4831-baee-ba1635a735b3",
+            "pin": "1e7cd34f-86db-4b34-9e0b-c276756301ab"
+        }
+    },
+    "parametric": {
+        "table": "capacitors",
+        "tolerance": "20",
+        "type": "Electrolytic",
+        "value": "0.0001",
+        "wvdc": "50"
+    },
+    "tags": [
+        "capacitor",
+        "cp-elec"
+    ],
+    "type": "part",
+    "uuid": "e1d17855-415f-49e0-b58e-fe90f23ed3e2",
+    "value": [
+        false,
+        "100u/50V"
+    ]
+}

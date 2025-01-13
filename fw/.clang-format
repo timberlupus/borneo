@@ -1,0 +1,8 @@
+BasedOnStyle: WebKit
+ColumnLimit: 120
+TabWidth: 4
+KeepEmptyLinesAtTheStartOfBlocks: true
+SpaceAfterCStyleCast: false
+SortIncludes: false
+AlignAfterOpenBracket: Align
+BreakBeforeBraces: Stroustrup

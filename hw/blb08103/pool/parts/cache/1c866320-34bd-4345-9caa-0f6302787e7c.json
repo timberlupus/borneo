@@ -1,0 +1,51 @@
+{
+    "MPN": [
+        false,
+        "Base 6070 1W/3W SMD LED"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        ""
+    ],
+    "entity": "7aea1811-235c-4f06-933b-1080df3d31ba",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        ""
+    ],
+    "model": "b39f1698-4929-4390-8d79-d664a2382f48",
+    "package": "4807ce68-e090-45ad-9cb3-d40ff137ad0d",
+    "pad_map": {
+        "344e9383-f9ca-4478-9d11-fa355c19ee5e": {
+            "gate": "c8168f99-a1ca-4d98-bbb7-066f8cad2346",
+            "pin": "22a4d1bc-6ea2-4f21-b4de-4c1636ae3a3b"
+        },
+        "6304887a-7ea5-4d60-a7d4-eab256ba67cc": {
+            "gate": "c8168f99-a1ca-4d98-bbb7-066f8cad2346",
+            "pin": "3c305ca9-14d3-40b4-a365-8938959c043e"
+        },
+        "c3510590-7926-4271-8e02-3477f8d2e421": {
+            "gate": "c8168f99-a1ca-4d98-bbb7-066f8cad2346",
+            "pin": "f3a0ce45-6d5e-453b-9649-33baf57cc7b7"
+        }
+    },
+    "parametric": {},
+    "tags": [],
+    "type": "part",
+    "uuid": "1c866320-34bd-4345-9caa-0f6302787e7c",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}

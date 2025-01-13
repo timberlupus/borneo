@@ -1,0 +1,20 @@
+{
+    "gates": {
+        "5cacab72-c521-4582-9f44-df82188fe56d": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "d16d8a90-4449-4fff-810a-3a06287587c6"
+        }
+    },
+    "manufacturer": "PowTech",
+    "name": "PT4115",
+    "prefix": "U",
+    "tags": [
+        "buck",
+        "led-driver",
+        "regulator"
+    ],
+    "type": "entity",
+    "uuid": "00e5607c-34da-4bb7-814c-a5f74268bc50"
+}

@@ -1,0 +1,35 @@
+{
+    "MPN": [
+        false,
+        "74HC245PW,118"
+    ],
+    "base": "5f7319d2-3119-4043-b397-8c3f7b74b149",
+    "datasheet": [
+        false,
+        "https://item.szlcsc.com/6077.html"
+    ],
+    "description": [
+        false,
+        "Octal bus tranceiver; 3-state"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "Nexperia"
+    ],
+    "model": "bdf2c6cc-057b-4f8d-94b4-56d5b43f86aa",
+    "orderable_MPNs": {
+        "0ef9de1d-477a-4ec0-bf5c-4ce552debc5a": "C5626"
+    },
+    "parametric": {},
+    "tags": [
+        "jlc-smt-extended"
+    ],
+    "type": "part",
+    "uuid": "ccc32c4a-cd7d-4634-a08c-a475dbb22353",
+    "value": [
+        false,
+        "74HC245"
+    ]
+}

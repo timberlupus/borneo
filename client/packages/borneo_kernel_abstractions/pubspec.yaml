@@ -1,0 +1,20 @@
+name: borneo_kernel_abstractions
+description: A starting point for Dart libraries or applications.
+version: 1.0.0
+publish_to: none
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.5.4
+
+# Add regular dependencies here.
+dependencies:
+  borneo_common:
+    path: ../borneo_common
+  cancellation_token: ^2.0.1
+  event_bus: ^2.0.1
+  pub_semver: ^2.1.5
+
+dev_dependencies:
+  lints: ^4.0.0
+  test: ^1.25.0

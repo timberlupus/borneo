@@ -1,0 +1,73 @@
+{
+    "MPN": [
+        false,
+        "MBI6658"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "2A 40V LED Driver"
+    ],
+    "entity": "0877c0ac-78bc-49f7-90b9-40ff2a307c01",
+    "inherit_model": false,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Macroblock"
+    ],
+    "model": "00000000-0000-0000-0000-000000000000",
+    "package": "af4253b3-fd46-492b-88af-cf090d073337",
+    "pad_map": {
+        "50c6ca80-29e7-4c53-a51c-295439459f07": {
+            "gate": "e77368ab-06b6-4e84-ad6a-6ccbd38bded7",
+            "pin": "dbfe07dc-756e-40db-b473-3d6d57afdb66"
+        },
+        "69386c04-c171-40f9-a63f-fef4f2411b65": {
+            "gate": "e77368ab-06b6-4e84-ad6a-6ccbd38bded7",
+            "pin": "6bd6b3be-1011-430c-a87c-fc501f32540c"
+        },
+        "6bc42629-406a-42ea-afcb-faf9419250e5": {
+            "gate": "e77368ab-06b6-4e84-ad6a-6ccbd38bded7",
+            "pin": "0faa3922-7e48-4680-965f-170c16510d85"
+        },
+        "9b9fe240-d13e-409c-9266-6da31e761197": {
+            "gate": "e77368ab-06b6-4e84-ad6a-6ccbd38bded7",
+            "pin": "dbfe07dc-756e-40db-b473-3d6d57afdb66"
+        },
+        "b83b13bb-ac49-4a5c-83d9-dcfd214a6420": {
+            "gate": "e77368ab-06b6-4e84-ad6a-6ccbd38bded7",
+            "pin": "c9725f4e-da06-4a37-90f0-8cc0a30bf34f"
+        },
+        "c5844fe9-ac0d-4e9d-9549-72b47a7ff2d3": {
+            "gate": "e77368ab-06b6-4e84-ad6a-6ccbd38bded7",
+            "pin": "39988829-8d92-4291-8d89-3cba869aadfc"
+        },
+        "ce0dde6f-8ece-4722-bbf5-d323df45d468": {
+            "gate": "e77368ab-06b6-4e84-ad6a-6ccbd38bded7",
+            "pin": "d2b66cd7-b885-4b83-9719-0c1efcb0fd73"
+        },
+        "ee30a7a1-6719-4cfc-b627-44975aee84bf": {
+            "gate": "e77368ab-06b6-4e84-ad6a-6ccbd38bded7",
+            "pin": "8be99343-e742-49ae-b8ba-63e222a322ff"
+        },
+        "f44bdd8a-6d68-4ea5-b140-3193ca779eec": {
+            "gate": "e77368ab-06b6-4e84-ad6a-6ccbd38bded7",
+            "pin": "a84fe895-e93d-48a7-9cd0-c6d4590a1f59"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "led-driver",
+        "smd",
+        "soic-8"
+    ],
+    "type": "part",
+    "uuid": "3b6484bb-11ce-41b6-af5c-297181715eaa",
+    "value": [
+        false,
+        ""
+    ]
+}

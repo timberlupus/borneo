@@ -1,0 +1,17 @@
+name: borneo_common
+description: "Borneo Common Package."
+version: 0.0.1
+publish_to: none
+homepage:
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  coap: ^9.0.7
+  cbor: ^6.3.3
+  cancellation_token: ^2.0.1
+
+
+dev_dependencies:
+  test: ^1.25.0

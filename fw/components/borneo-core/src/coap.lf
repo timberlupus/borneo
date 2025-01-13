@@ -1,0 +1,13 @@
+[sections:coap_resource_desc]
+entries:
+    .coap_resource_desc+
+
+[scheme:coap_resource_desc_default]
+entries:
+    coap_resource_desc -> flash_rodata
+
+[mapping:coap_resource_desc]
+archive: *
+entries:
+    * (coap_resource_desc_default);
+        coap_resource_desc -> flash_rodata KEEP() SORT(name) ALIGN(4) SURROUND(coap_resources)

@@ -1,0 +1,52 @@
+{
+    "MPN": [
+        false,
+        "base 0805 NTC"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        ""
+    ],
+    "entity": "a33a405c-dad8-414c-8030-c56e5fc16baf",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        ""
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "package": "a894abc1-5b1c-4a52-90fc-5eb2e462b101",
+    "pad_map": {
+        "57416c85-ca47-45fe-a850-612e3405e61f": {
+            "gate": "a0f16cc4-b717-4088-acf0-c2c5fdc01bd1",
+            "pin": "0b13abf9-1e1c-4b2e-ba99-119727950a3d"
+        },
+        "b43013b4-017c-4242-8852-0ec05a2374d1": {
+            "gate": "a0f16cc4-b717-4088-acf0-c2c5fdc01bd1",
+            "pin": "98b4f2a6-2cd4-47a2-914d-7f176a1a558a"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "ntc",
+        "resistor",
+        "smd",
+        "smt"
+    ],
+    "type": "part",
+    "uuid": "5e97bf03-a457-415b-af78-35876c9d2bbb",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}

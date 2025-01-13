@@ -1,0 +1,25 @@
+name: Borneo Firmware CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build LyFi firmware in Docker
+      run: |
+        docker run -t -v "${GITHUB_WORKSPACE}:/app/${{ github.repository }}" -w "/app/${{ github.repository }}/fw/lyfi" espressif/idf:v5.3.1 /bin/bash -c 'git config --global --add safe.directory "*" && idf.py build'
+
+    - name: Build Doser firmware in Docker
+      run: |
+        docker run -t -v "${GITHUB_WORKSPACE}:/app/${{ github.repository }}" -w "/app/${{ github.repository }}/fw/doser" espressif/idf:v5.3.1 /bin/bash -c 'git config --global --add safe.directory "*" && idf.py build'

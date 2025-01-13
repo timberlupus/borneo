@@ -1,0 +1,20 @@
+{
+    "manufacturer": "",
+    "name": "Two-terminal polyfuse",
+    "pins": {
+        "6a44037c-65e2-4876-9359-42890048841d": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "A",
+            "swap_group": 1
+        },
+        "dda0ec99-5d70-4fbe-a8db-897542e7554e": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "B",
+            "swap_group": 1
+        }
+    },
+    "type": "unit",
+    "uuid": "ab8a594c-7820-46d8-a09e-fcd329c69628"
+}

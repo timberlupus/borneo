@@ -1,0 +1,35 @@
+{
+    "MPN": [
+        false,
+        "PT4115E"
+    ],
+    "base": "2afe7d4a-e34a-4650-b953-d649fdfe6177",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "50V/1.5A step-down LED driver"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        "PowTech"
+    ],
+    "model": "7c09e3db-53f4-4daf-b3da-a9d408d4e9a6",
+    "orderable_MPNs": {
+        "c1e05f24-e19e-4de5-aa0d-842b73d03c05": "C126161"
+    },
+    "parametric": {},
+    "tags": [
+        "jlc-smt-extended"
+    ],
+    "type": "part",
+    "uuid": "6d5ae814-78d9-41a8-8e80-639d721b7e7c",
+    "value": [
+        false,
+        ""
+    ]
+}

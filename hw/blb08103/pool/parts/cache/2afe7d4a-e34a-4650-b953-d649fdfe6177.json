@@ -1,0 +1,63 @@
+{
+    "MPN": [
+        false,
+        "Base PT4115"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "Step-down LED driver"
+    ],
+    "entity": "00e5607c-34da-4bb7-814c-a5f74268bc50",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "PowTech"
+    ],
+    "model": "7c09e3db-53f4-4daf-b3da-a9d408d4e9a6",
+    "package": "f51b850e-6cb2-4531-96b8-1079b0dfe150",
+    "pad_map": {
+        "3a0263f8-f9f3-43e8-8061-49a3c6e6d7ce": {
+            "gate": "5cacab72-c521-4582-9f44-df82188fe56d",
+            "pin": "af528809-637e-45e5-8a11-a51cb12b8a7c"
+        },
+        "788bfb46-88be-4c96-a37f-cf264b5aa0dc": {
+            "gate": "5cacab72-c521-4582-9f44-df82188fe56d",
+            "pin": "0d3e29c8-0721-4276-a2b2-ea96e5a668d4"
+        },
+        "813368e3-6eb4-41b3-9fa9-504c2332bdb5": {
+            "gate": "5cacab72-c521-4582-9f44-df82188fe56d",
+            "pin": "cd2fde63-751f-4e04-8367-724bb7f9dc07"
+        },
+        "b1ca44da-c648-4c53-a745-7b76b74de7e9": {
+            "gate": "5cacab72-c521-4582-9f44-df82188fe56d",
+            "pin": "74906c1d-5e7c-4aac-b4f7-88c4c76b8b87"
+        },
+        "f1f4dd01-3dd4-4d8a-9cd6-853e12cd09bb": {
+            "gate": "5cacab72-c521-4582-9f44-df82188fe56d",
+            "pin": "1adacfe7-bf0c-44a4-b3b6-9c37310b9672"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "buck",
+        "led-driver",
+        "regulator"
+    ],
+    "type": "part",
+    "uuid": "2afe7d4a-e34a-4650-b953-d649fdfe6177",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}

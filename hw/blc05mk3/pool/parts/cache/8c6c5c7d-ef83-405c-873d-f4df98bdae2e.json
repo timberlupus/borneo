@@ -1,0 +1,41 @@
+{
+    "MPN": [
+        false,
+        "CL05A105KA5NQNC"
+    ],
+    "base": "29043bfd-c944-47cb-ae49-8dc6e1cf7257",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "1uF ±10% 25V"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "Samsung"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "858a47d3-ab60-426c-b716-721b5fd0f0ca": "C52923"
+    },
+    "parametric": {
+        "table": "capacitors",
+        "tolerance": "10",
+        "type": "X5R",
+        "value": "1e-06",
+        "wvdc": "25"
+    },
+    "tags": [
+        "jlc-smt-base"
+    ],
+    "type": "part",
+    "uuid": "8c6c5c7d-ef83-405c-873d-f4df98bdae2e",
+    "value": [
+        false,
+        "1µ"
+    ]
+}

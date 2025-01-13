@@ -1,0 +1,46 @@
+menu "Borneo Core"
+
+    config BORNEO_BOARD_ID
+        string "Borneo board ID"
+        default "$BORNEO_BOARD"
+
+    config BORNEO_BOARD_NAME
+        string "Borneo board name"
+
+    config BORNEO_DEVICE_NAME_DEFAULT
+        string "Borneo device's default name"
+
+    config BORNEO_DEVICE_COMPATIBLE
+        string "Borneo device compatible string"
+
+    config BORNEO_DEVICE_CATEGORY
+        string "Borneo Device Category"
+
+    config BORNEO_HW_VER
+        string "Borneo hardware version"
+
+    config BORNEO_NTC_ENABLED
+        bool "NTC enabled"
+        default n
+
+    config BORNEO_NTC_ADC_UNIT
+        int "NTC ADC unit"
+        default 1
+        depends on BORNEO_NTC_ENABLED
+
+    config BORNEO_NTC_ADC_CHANNEL
+        int "NTC ADC channel"
+        depends on BORNEO_NTC_ENABLED
+
+    config BORNEO_INDICATOR_ENABLED
+        bool "WiFi indicator enabled"
+        default y
+
+    config BORNEO_INDICATOR_GPIO
+        int "WiFi indicator pin"
+        depends on BORNEO_INDICATOR_ENABLED
+
+    config BORNEO_OTA_FIRMWARE_UPGRADE_URL
+        string "OTA firmware upgrade URL"
+
+endmenu

@@ -1,0 +1,41 @@
+{
+    "MPN": [
+        false,
+        "CL05B104KB54PNC"
+    ],
+    "base": "29043bfd-c944-47cb-ae49-8dc6e1cf7257",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "100nF (104) ±10% 50V"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "Samsung"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "c0c6094a-0f78-4854-9319-76dcb2d9c92c": "C307331"
+    },
+    "parametric": {
+        "table": "capacitors",
+        "tolerance": "10",
+        "type": "X7R",
+        "value": "1e-07",
+        "wvdc": "50"
+    },
+    "tags": [
+        "jlc-smt-base"
+    ],
+    "type": "part",
+    "uuid": "54959893-2a34-46bb-b613-1fd95e2a7095",
+    "value": [
+        false,
+        "100n"
+    ]
+}

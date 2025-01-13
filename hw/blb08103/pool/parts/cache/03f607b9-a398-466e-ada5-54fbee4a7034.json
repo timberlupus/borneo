@@ -1,0 +1,53 @@
+{
+    "MPN": [
+        false,
+        "HoLRT1206-1W-200mR-1%"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "200mΩ/1%/1W/50ppm"
+    ],
+    "entity": "3ce770af-7be0-4f72-b2af-2c8010911aaf",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Milliohm"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "b62efb1d-eabe-4a95-81ec-80977a71d665": "C5127778"
+    },
+    "package": "5faa2cfe-7821-4e27-a737-3c2a4cd1fa30",
+    "pad_map": {
+        "31bf6875-df70-456c-9768-ee32981ecfc9": {
+            "gate": "48af78e5-730e-44eb-977a-cf188e4fcb39",
+            "pin": "dda0ec99-5d70-4fbe-a8db-897542e7554e"
+        },
+        "5a22d8b8-c7e5-4b1f-bb0c-9a36affb1043": {
+            "gate": "48af78e5-730e-44eb-977a-cf188e4fcb39",
+            "pin": "6a44037c-65e2-4876-9359-42890048841d"
+        }
+    },
+    "parametric": {
+        "pmax": "1",
+        "table": "resistors",
+        "tolerance": "1",
+        "value": "0.2"
+    },
+    "tags": [
+        "jlc-smt-extended",
+        "resistor",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "03f607b9-a398-466e-ada5-54fbee4a7034",
+    "value": [
+        false,
+        "0R2/1%"
+    ]
+}

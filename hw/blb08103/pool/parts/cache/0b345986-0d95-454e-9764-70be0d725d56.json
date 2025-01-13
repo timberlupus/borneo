@@ -1,0 +1,47 @@
+{
+    "MPN": [
+        false,
+        "Base SLF10145"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "SLF10145 Series"
+    ],
+    "entity": "1d534e1d-704a-4d44-a6e6-c6106a2827ab",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        ""
+    ],
+    "model": "3f8c7836-6004-4ba9-99b1-457039c06df3",
+    "package": "291bbe04-e863-4591-8afb-6ab269659e85",
+    "pad_map": {
+        "0dcbb75c-6465-4e6a-956e-e9e3abc04604": {
+            "gate": "48af78e5-730e-44eb-977a-cf188e4fcb39",
+            "pin": "dda0ec99-5d70-4fbe-a8db-897542e7554e"
+        },
+        "d85de355-04c3-4d4d-8c25-24a6873badb9": {
+            "gate": "48af78e5-730e-44eb-977a-cf188e4fcb39",
+            "pin": "6a44037c-65e2-4876-9359-42890048841d"
+        }
+    },
+    "parametric": {},
+    "tags": [],
+    "type": "part",
+    "uuid": "0b345986-0d95-454e-9764-70be0d725d56",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}

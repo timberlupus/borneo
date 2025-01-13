@@ -1,0 +1,4 @@
+enum HeartbeatMethod {
+  poll,
+  push,
+}

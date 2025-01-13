@@ -1,0 +1,38 @@
+{
+    "MPN": [
+        false,
+        "0603WAF1000T5E"
+    ],
+    "base": "cbeda48c-7fb0-4cfb-a4de-d9672e8cc190",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "100Ω (1000) ±1%"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "UniOhm"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "override_prefix": "inherit",
+    "parametric": {
+        "pmax": "0",
+        "table": "resistors",
+        "tolerance": "1",
+        "value": "100"
+    },
+    "prefix": "",
+    "tags": [],
+    "type": "part",
+    "uuid": "d1e5d6f6-1842-4c12-ac51-de375403bee6",
+    "value": [
+        false,
+        "100R/1%"
+    ],
+    "version": 2
+}

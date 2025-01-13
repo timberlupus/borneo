@@ -1,0 +1,89 @@
+{
+    "MPN": [
+        false,
+        "BLC05MK3-SMD-H"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "BLC05MK3-SMD-H"
+    ],
+    "entity": "752a0520-520e-4cd3-8d10-28c618edd027",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Borneo IoT"
+    ],
+    "model": "63ea8064-be4b-4f4b-af96-323b1d1530ca",
+    "package": "dcadf880-2bb0-4b4b-bc0b-8421d584413b",
+    "pad_map": {
+        "2547e34d-f599-48e4-b080-9416065f3902": {
+            "gate": "6725aa98-60de-4ff7-8b47-922d75e35290",
+            "pin": "8dfc95a7-6f31-4053-902b-0b5d6cbb23eb"
+        },
+        "2963dd6f-11c5-403c-92d0-2355fc4ec6d4": {
+            "gate": "6725aa98-60de-4ff7-8b47-922d75e35290",
+            "pin": "1b74fcf0-b72a-478d-b009-0fcc40357473"
+        },
+        "33667e8c-cd75-4efb-ba2e-461942f894ed": {
+            "gate": "6725aa98-60de-4ff7-8b47-922d75e35290",
+            "pin": "3f4681bc-7b4d-4c20-9fd4-1aefc6026d9b"
+        },
+        "36410c87-6c15-4d99-bcb2-62fe81cd2875": {
+            "gate": "6725aa98-60de-4ff7-8b47-922d75e35290",
+            "pin": "dc2a6a8a-f4d2-480f-ba48-816c6f09be03"
+        },
+        "393782e0-a726-4cbe-9c04-435b20814f4e": {
+            "gate": "6725aa98-60de-4ff7-8b47-922d75e35290",
+            "pin": "cad4f8f2-97fc-4e02-84ec-d484b9e54f61"
+        },
+        "39eb81a4-84ba-44f3-9f5b-ad2cf83d5922": {
+            "gate": "6725aa98-60de-4ff7-8b47-922d75e35290",
+            "pin": "fe9ffdec-952e-419a-95b6-da78233abea9"
+        },
+        "4060dea9-ba97-4dae-8ae6-9fd867a40f0a": {
+            "gate": "6725aa98-60de-4ff7-8b47-922d75e35290",
+            "pin": "a29ff583-4cdc-4b11-9213-6edf1017b243"
+        },
+        "4cd4c930-fc49-4156-a3fe-438fa8df5f75": {
+            "gate": "6725aa98-60de-4ff7-8b47-922d75e35290",
+            "pin": "58996413-1e0e-4c72-8683-a6c7d0753c69"
+        },
+        "916dde34-c91d-437c-9423-104ef1ad79ef": {
+            "gate": "6725aa98-60de-4ff7-8b47-922d75e35290",
+            "pin": "2cac2e5b-f709-42fe-b7a1-bea1ed3f6818"
+        },
+        "a03539fc-5f46-4221-88ee-c23518d90683": {
+            "gate": "6725aa98-60de-4ff7-8b47-922d75e35290",
+            "pin": "7194c2fa-625e-4987-9e68-225f806988d0"
+        },
+        "a55456f5-44bc-4a35-ad14-0a2ebc19269f": {
+            "gate": "6725aa98-60de-4ff7-8b47-922d75e35290",
+            "pin": "c1d44f21-13a6-477d-8a47-bce185fe99aa"
+        },
+        "bc93d891-e4fd-4f68-94ca-21b28e034b32": {
+            "gate": "6725aa98-60de-4ff7-8b47-922d75e35290",
+            "pin": "3d82dd56-5c18-4649-8fb9-169ec4788c1d"
+        },
+        "d3e694c0-69fe-44de-9f57-60e8b8727472": {
+            "gate": "6725aa98-60de-4ff7-8b47-922d75e35290",
+            "pin": "d64ff168-5971-45c6-90f1-35637d019616"
+        },
+        "dbd2f582-90f9-4f8e-a75d-07a3717f4f23": {
+            "gate": "6725aa98-60de-4ff7-8b47-922d75e35290",
+            "pin": "319a5059-0112-42ab-af83-211971e1d4b0"
+        }
+    },
+    "parametric": {},
+    "tags": [],
+    "type": "part",
+    "uuid": "f7c62ce3-90f0-4b1b-81de-0d3c00788280",
+    "value": [
+        false,
+        ""
+    ]
+}

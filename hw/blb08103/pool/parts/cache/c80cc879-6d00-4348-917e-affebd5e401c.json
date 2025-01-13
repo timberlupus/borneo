@@ -1,0 +1,52 @@
+{
+    "MPN": [
+        false,
+        "Base 1210 Polyfuse"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "Base 1210 Polyfuse"
+    ],
+    "entity": "460ab169-1c1d-464a-a1aa-d5cd2bf1e3d6",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": false,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        ""
+    ],
+    "model": "917998ea-29a9-4e7c-8dca-b10870d09296",
+    "package": "06dbf5b1-a3ea-430b-ae1d-c321794d0662",
+    "pad_map": {
+        "af633f04-39de-4605-b33a-2010e8795070": {
+            "gate": "5cfc013c-ded0-4aeb-aba7-5ac3ee5f3ded",
+            "pin": "6a44037c-65e2-4876-9359-42890048841d"
+        },
+        "dea5a138-9f86-4a13-a99d-2c1253f285f2": {
+            "gate": "5cfc013c-ded0-4aeb-aba7-5ac3ee5f3ded",
+            "pin": "dda0ec99-5d70-4fbe-a8db-897542e7554e"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "1210",
+        "fuse",
+        "polyfuse",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "c80cc879-6d00-4348-917e-affebd5e401c",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}

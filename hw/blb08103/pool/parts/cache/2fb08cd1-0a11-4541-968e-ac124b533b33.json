@@ -1,0 +1,41 @@
+{
+    "MPN": [
+        false,
+        "0603WAF1002T5E"
+    ],
+    "base": "cbeda48c-7fb0-4cfb-a4de-d9672e8cc190",
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "10k 1% 0603"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "UniOhm"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "override_prefix": "inherit",
+    "parametric": {
+        "pmax": "0.1",
+        "table": "resistors",
+        "tolerance": "1",
+        "value": "10000"
+    },
+    "prefix": "",
+    "tags": [
+        "jlc-smt-base",
+        "resistor"
+    ],
+    "type": "part",
+    "uuid": "2fb08cd1-0a11-4541-968e-ac124b533b33",
+    "value": [
+        false,
+        "10k"
+    ],
+    "version": 2
+}

@@ -1,0 +1,20 @@
+{
+    "gates": {
+        "d12ec370-db2d-467e-b29e-e50e0ac33820": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "6e587463-7c48-449e-bfa2-5447307e366b"
+        }
+    },
+    "manufacturer": "HiChips",
+    "name": "Hi7001",
+    "prefix": "U",
+    "tags": [
+        "buck",
+        "led-driver",
+        "regulator"
+    ],
+    "type": "entity",
+    "uuid": "a6cfa077-0524-497e-83a0-2fd604526b98"
+}

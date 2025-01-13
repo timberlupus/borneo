@@ -1,0 +1,33 @@
+{
+    "MPN": [
+        false,
+        "RBG-06MR280FT"
+    ],
+    "base": "69d9d487-801a-40ab-a821-5a7a6ee8c623",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "280mΩ/0.5W/1%"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "FengHua"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "dd5ee657-c599-4c5a-a86d-2b693ef0dfb3": "C4354881"
+    },
+    "parametric": {},
+    "tags": [],
+    "type": "part",
+    "uuid": "911a2cca-fb93-4a0c-8a74-aeda5c8ae256",
+    "value": [
+        false,
+        "280/1%"
+    ]
+}

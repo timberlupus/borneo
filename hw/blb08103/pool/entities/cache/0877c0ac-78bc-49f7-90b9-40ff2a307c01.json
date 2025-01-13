@@ -1,0 +1,19 @@
+{
+    "gates": {
+        "e77368ab-06b6-4e84-ad6a-6ccbd38bded7": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "4e04c8ad-bc23-45a6-990c-fbff9a990c2e"
+        }
+    },
+    "manufacturer": "Macroblock",
+    "name": "MBI6658",
+    "prefix": "U",
+    "tags": [
+        "driver",
+        "led-driver"
+    ],
+    "type": "entity",
+    "uuid": "0877c0ac-78bc-49f7-90b9-40ff2a307c01"
+}

@@ -1,0 +1,18 @@
+{
+    "gates": {
+        "f7f7e4f1-4693-4e86-945e-99be5ca0a437": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "aee8fa4f-7dce-4cb9-80f0-3697d48dd2fa"
+        }
+    },
+    "manufacturer": "",
+    "name": "High-Side Measurement Current Shunt Monito",
+    "prefix": "U",
+    "tags": [
+        "opamp"
+    ],
+    "type": "entity",
+    "uuid": "2afe6de1-0d7e-4eb7-b179-882bf12a5558"
+}

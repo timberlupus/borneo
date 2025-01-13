@@ -1,0 +1,38 @@
+{
+    "MPN": [
+        false,
+        "KT-0603W"
+    ],
+    "base": "86ca09b4-ea0c-45a7-81d2-f9129d94a122",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "LED White 0603"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "Kento"
+    ],
+    "model": "bb3da64d-20c6-408b-bff1-a83e492a3f7f",
+    "orderable_MPNs": {
+        "988362df-273f-47d9-ad61-551302928c12": "C2290"
+    },
+    "override_prefix": "inherit",
+    "parametric": {},
+    "prefix": "",
+    "tags": [
+        "jlc-smt-base"
+    ],
+    "type": "part",
+    "uuid": "f4c4c129-7a9a-4778-b9c1-27ba04078663",
+    "value": [
+        false,
+        "White"
+    ],
+    "version": 2
+}

@@ -1,0 +1,40 @@
+{
+    "MPN": [
+        false,
+        "0402WGF1501TCE"
+    ],
+    "base": "44fe0594-19d5-403e-9ae8-7c4c59c3668f",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "1.5kΩ ±1% 62.5mW"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "UniOhm"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "396dd05b-64c2-4962-a9a1-fa2426fecebb": "C25867"
+    },
+    "parametric": {
+        "pmax": "0.0625",
+        "table": "resistors",
+        "tolerance": "1",
+        "value": "1500"
+    },
+    "tags": [
+        "jlc-smt-base"
+    ],
+    "type": "part",
+    "uuid": "d0a87e63-ac9e-47f5-9282-dcfa5a51f1e1",
+    "value": [
+        false,
+        "1.5k/1%"
+    ]
+}

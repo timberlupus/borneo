@@ -1,0 +1,35 @@
+{
+    "MPN": [
+        false,
+        "JW5026"
+    ],
+    "base": "3a154489-b4c1-4a94-863a-0b18972b0b89",
+    "datasheet": [
+        false,
+        "https://www.joulwatt.com/index1.html?re=product4&id=9857"
+    ],
+    "description": [
+        false,
+        "40V/1A, 1.1MHz Synchronous Step-Down Converter"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "Joulwatt"
+    ],
+    "model": "eb54e7ca-dcad-4e09-bd45-d2e32cddaa2a",
+    "parametric": {},
+    "tags": [
+        "buck",
+        "dcdc",
+        "jlc-smt-extended",
+        "regulator"
+    ],
+    "type": "part",
+    "uuid": "147983c9-a4d2-4bce-a8c0-a22351caa0de",
+    "value": [
+        false,
+        ""
+    ]
+}

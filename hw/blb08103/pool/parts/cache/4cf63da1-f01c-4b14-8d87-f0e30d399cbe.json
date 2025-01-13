@@ -1,0 +1,44 @@
+{
+    "MPN": [
+        false,
+        "JK-SMD1210-110-16"
+    ],
+    "base": "c80cc879-6d00-4348-917e-affebd5e401c",
+    "datasheet": [
+        false,
+        "https://item.szlcsc.com/764100.html"
+    ],
+    "description": [
+        false,
+        "1.1A 16V 1210"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "JK"
+    ],
+    "model": "917998ea-29a9-4e7c-8dca-b10870d09296",
+    "orderable_MPNs": {
+        "f180d978-5cea-4226-b9ed-04340a608cc0": "C720080"
+    },
+    "override_prefix": "inherit",
+    "parametric": {
+        "hold_current": "1.1",
+        "maximum_voltage_rating_dc": "16",
+        "maxmium_fault_current": "100",
+        "table": "polyfuses"
+    },
+    "prefix": "",
+    "tags": [
+        "fuse",
+        "polyfuse"
+    ],
+    "type": "part",
+    "uuid": "4cf63da1-f01c-4b14-8d87-f0e30d399cbe",
+    "value": [
+        false,
+        "1.1A/16V"
+    ],
+    "version": 2
+}

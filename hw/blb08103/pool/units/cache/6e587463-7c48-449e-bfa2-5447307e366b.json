@@ -1,0 +1,44 @@
+{
+    "manufacturer": "",
+    "name": "Hi7001",
+    "pins": {
+        "4766a978-9072-410d-b722-2af35ee77334": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "LD",
+            "swap_group": 0
+        },
+        "553a79e3-36e0-4e5d-8731-8673b72a3fd8": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "VDD",
+            "swap_group": 0
+        },
+        "5a8e28ed-e477-4491-b5b9-9d4221bab04f": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "GND",
+            "swap_group": 0
+        },
+        "5bb4b835-b22f-49ef-a740-deb9a1af7503": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "CS",
+            "swap_group": 0
+        },
+        "da76454c-cbd0-4571-92c2-25da9a1e66c5": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "D",
+            "swap_group": 0
+        },
+        "ef231a71-5740-42be-baf9-c5dcf9797a58": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "PWM",
+            "swap_group": 0
+        }
+    },
+    "type": "unit",
+    "uuid": "6e587463-7c48-449e-bfa2-5447307e366b"
+}

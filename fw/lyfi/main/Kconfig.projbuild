@@ -1,0 +1,305 @@
+menu "Borneo LyFi"
+
+    menu "Power measursment"
+        config LYFI_POWER_MEAS_ENABLED
+            bool "LED Power measurement anbaled"
+            default n
+
+        config LYFI_POWER_MEAS_VOLTAGE_ENABLED
+            bool "LED Power measurement anbaled"
+            depends on LYFI_POWER_MEAS_ENABLED
+            default n
+
+        config LYFI_POWER_MEAS_VOLTAGE_ENABLED
+            bool "LED Power voltage measurement anbaled"
+            depends on LYFI_POWER_MEAS_ENABLED
+            default y if LYFI_POWER_MEAS_ENABLED
+            default n
+
+        config LYFI_POWER_MEAS_CURRENT_ENABLED
+            bool "LED Power current measurement anbaled"
+            depends on LYFI_POWER_MEAS_ENABLED
+            default y if LYFI_POWER_MEAS_ENABLED
+            default n
+
+        config LYFI_POWER_MEAS_ADC_UNIT
+            int "LED Power measurement ADC unit" if LYFI_POWER_MEAS_ENABLED
+            depends on LYFI_POWER_MEAS_ENABLED
+
+        config LYFI_POWER_MEAS_ADC_CHANNEL
+            int "LED Power measurement ADC channel" if LYFI_POWER_MEAS_ENABLED
+            depends on LYFI_POWER_MEAS_ENABLED
+    endmenu
+
+    menu "LED channels"
+
+        config LYFI_LED_CH0_ENABLED
+            bool "LED channel 0 enabled"
+            default n
+
+        config LYFI_LED_CH1_ENABLED
+            bool "LED channel 1 enabled"
+            default n
+
+        config LYFI_LED_CH2_ENABLED
+            bool "LED channel 2 enabled"
+            default n
+
+        config LYFI_LED_CH3_ENABLED
+            bool "LED channel 3 enabled"
+            default n
+
+        config LYFI_LED_CH4_ENABLED
+            bool "LED channel 4 enabled"
+            default n
+
+        config LYFI_LED_CH5_ENABLED
+            bool "LED channel 5 enabled"
+            default n
+
+        config LYFI_LED_CH6_ENABLED
+            bool "LED channel 6 enabled"
+            default n
+
+        config LYFI_LED_CH7_ENABLED
+            bool "LED channel 7 enabled"
+            default n
+
+        config LYFI_LED_CH8_ENABLED
+            bool "LED channel 8 enabled"
+            default n
+
+        config LYFI_LED_CH9_ENABLED
+            bool "LED channel 9 enabled"
+            default n
+
+        config LYFI_LED_CHANNEL_COUNT
+            int
+            default 10 if LYFI_LED_CH9_ENABLED
+            default 9 if LYFI_LED_CH8_ENABLED
+            default 8 if LYFI_LED_CH7_ENABLED
+            default 7 if LYFI_LED_CH6_ENABLED
+            default 6 if LYFI_LED_CH5_ENABLED
+            default 5 if LYFI_LED_CH4_ENABLED
+            default 4 if LYFI_LED_CH3_ENABLED
+            default 3 if LYFI_LED_CH2_ENABLED
+            default 2 if LYFI_LED_CH1_ENABLED
+            default 1 if LYFI_LED_CH0_ENABLED
+            default 0
+            depends on LYFI_LED_CH9_ENABLED || LYFI_LED_CH8_ENABLED || LYFI_LED_CH7_ENABLED || LYFI_LED_CH6_ENABLED || LYFI_LED_CH5_ENABLED || LYFI_LED_CH4_ENABLED || LYFI_LED_CH3_ENABLED || LYFI_LED_CH2_ENABLED || LYFI_LED_CH1_ENABLED || LYFI_LED_CH0_ENABLED
+
+        config LYFI_LED_CH0_GPIO
+            int "GPIO for LED channel 0"
+            depends on LYFI_LED_CH0_ENABLED
+
+        config LYFI_LED_CH1_GPIO
+            int "GPIO for LED channel 1"
+            depends on LYFI_LED_CH1_ENABLED
+
+        config LYFI_LED_CH2_GPIO
+            int "GPIO for LED channel 2"
+            depends on LYFI_LED_CH2_ENABLED
+
+        config LYFI_LED_CH3_GPIO
+            int "GPIO for LED channel 3"
+            depends on LYFI_LED_CH3_ENABLED
+
+        config LYFI_LED_CH4_GPIO
+            int "GPIO for LED channel 4"
+            depends on LYFI_LED_CH4_ENABLED
+
+        config LYFI_LED_CH5_GPIO
+            int "GPIO for LED channel 5"
+            depends on LYFI_LED_CH5_ENABLED
+
+        config LYFI_LED_CH6_GPIO
+            int "GPIO for LED channel 6"
+            depends on LYFI_LED_CH6_ENABLED
+
+        config LYFI_LED_CH7_GPIO
+            int "GPIO for LED channel 7"
+            depends on LYFI_LED_CH7_ENABLED
+
+        config LYFI_LED_CH8_GPIO
+            int "GPIO for LED channel 8"
+            depends on LYFI_LED_CH8_ENABLED
+
+        config LYFI_LED_CH9_GPIO
+            int "GPIO for LED channel 9"
+            depends on LYFI_LED_CH9_ENABLED
+
+        config LYFI_LED_CH0_NAME
+            string "Name for LED channel 0"
+            default "CH0"
+            depends on LYFI_LED_CH0_ENABLED
+
+        config LYFI_LED_CH1_NAME
+            string "Name for LED channel 1"
+            default "CH1"
+            depends on LYFI_LED_CH1_ENABLED
+
+        config LYFI_LED_CH2_NAME
+            string "Name for LED channel 2"
+            default "CH2"
+            depends on LYFI_LED_CH2_ENABLED
+
+        config LYFI_LED_CH3_NAME
+            string "Name for LED channel 3"
+            default "CH3"
+            depends on LYFI_LED_CH3_ENABLED
+
+        config LYFI_LED_CH4_NAME
+            string "Name for LED channel 4"
+            default "CH4"
+            depends on LYFI_LED_CH4_ENABLED
+
+        config LYFI_LED_CH5_NAME
+            string "Name for LED channel 5"
+            default "CH5"
+            depends on LYFI_LED_CH5_ENABLED
+
+        config LYFI_LED_CH6_NAME
+            string "Name for LED channel 6"
+            default "CH6"
+            depends on LYFI_LED_CH6_ENABLED
+
+        config LYFI_LED_CH7_NAME
+            string "Name for LED channel 7"
+            default "CH7"
+            depends on LYFI_LED_CH7_ENABLED
+
+        config LYFI_LED_CH8_NAME
+            string "Name for LED channel 8"
+            default "CH8"
+            depends on LYFI_LED_CH8_ENABLED
+
+        config LYFI_LED_CH9_NAME
+            string "Name for LED channel 9"
+            default "CH9"
+            depends on LYFI_LED_CH9_ENABLED
+
+
+        config LYFI_LED_CH0_COLOR
+            string "Color for LED channel 0"
+            depends on LYFI_LED_CH0_ENABLED
+
+        config LYFI_LED_CH1_COLOR
+            string "Color for LED channel 1"
+            depends on LYFI_LED_CH1_ENABLED
+
+        config LYFI_LED_CH2_COLOR
+            string "Color for LED channel 2"
+            depends on LYFI_LED_CH2_ENABLED
+
+        config LYFI_LED_CH3_COLOR
+            string "Color for LED channel 3"
+            depends on LYFI_LED_CH3_ENABLED
+
+        config LYFI_LED_CH4_COLOR
+            string "Color for LED channel 4"
+            depends on LYFI_LED_CH4_ENABLED
+
+        config LYFI_LED_CH5_COLOR
+            string "Color for LED channel 5"
+            depends on LYFI_LED_CH5_ENABLED
+
+        config LYFI_LED_CH6_COLOR
+            string "Color for LED channel 6"
+            depends on LYFI_LED_CH6_ENABLED
+
+        config LYFI_LED_CH7_COLOR
+            string "Color for LED channel 7"
+            depends on LYFI_LED_CH7_ENABLED
+
+        config LYFI_LED_CH8_COLOR
+            string "Color for LED channel 8"
+            depends on LYFI_LED_CH8_ENABLED
+
+        config LYFI_LED_CH9_COLOR
+            string "Color for LED channel 9"
+            depends on LYFI_LED_CH9_ENABLED
+
+
+        config LYFI_LED_CH0_POWER_RATIO
+            int "Power ratio for LED channel 0"
+            default 100
+            depends on LYFI_LED_CH0_ENABLED
+
+        config LYFI_LED_CH1_POWER_RATIO
+            int "Power ratio for LED channel 1"
+            default 100
+            depends on LYFI_LED_CH1_ENABLED
+
+        config LYFI_LED_CH2_POWER_RATIO
+            int "Power ratio for LED channel 2"
+            default 100
+            depends on LYFI_LED_CH2_ENABLED
+
+        config LYFI_LED_CH3_POWER_RATIO
+            int "Power ratio for LED channel 3"
+            default 100
+            depends on LYFI_LED_CH3_ENABLED
+
+        config LYFI_LED_CH4_POWER_RATIO
+            int "Power ratio for LED channel 4"
+            default 100
+            depends on LYFI_LED_CH4_ENABLED
+
+        config LYFI_LED_CH5_POWER_RATIO
+            int "Power ratio for LED channel 5"
+            default 100
+            depends on LYFI_LED_CH5_ENABLED
+
+        config LYFI_LED_CH6_POWER_RATIO
+            int "Power ratio for LED channel 6"
+            default 100
+            depends on LYFI_LED_CH6_ENABLED
+
+        config LYFI_LED_CH7_POWER_RATIO
+            int "Power ratio for LED channel 7"
+            default 100
+            depends on LYFI_LED_CH7_ENABLED
+
+        config LYFI_LED_CH8_POWER_RATIO
+            int "Power ratio for LED channel 8"
+            default 100
+            depends on LYFI_LED_CH8_ENABLED
+
+        config LYFI_LED_CH9_POWER_RATIO
+            int "Power ratio for LED channel 9"
+            default 100
+            depends on LYFI_LED_CH9_ENABLED
+    endmenu
+
+    menu "Fan"
+        config LYFI_FAN_CTRL_ENABLED
+            bool "The Controlling Method of Fan Speed"
+
+        config LYFI_FAN_CTRL_PWM_GPIO
+            int "The GPIO number for PWM fan"
+            depends on LYFI_FAN_CTRL_ENABLED
+
+        config LYFI_FAN_CTRL_PWMDAC_GPIO
+            int "The Output PWM-DAC GPIO for the voltage regulator"
+            depends on LYFI_FAN_CTRL_ENABLED && IDF_TARGET_ESP32C3
+
+        config LYFI_FAN_CTRL_PWM_CHANNEL
+            int "PWM Channel for PWM or PWM DAC"
+            depends on LYFI_FAN_CTRL_ENABLED
+
+        config LYFI_FAN_CTRL_DAC_CHANNEL
+            int "DAC Channel for DAC"
+            depends on LYFI_FAN_CTRL_ENABLED && (IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2)
+
+        config LYFI_FAN_CTRL_SHUTDOWN_ENABLED
+            bool "Enable The Shutdown Pin for The Power of Fan"
+            depends on LYFI_FAN_CTRL_ENABLED
+            default y
+
+        config LYFI_FAN_CTRL_SHUTDOWN_GPIO
+            int "The GPIO Number of the Shutdown Pin"
+            depends on LYFI_FAN_CTRL_SHUTDOWN_ENABLED
+    endmenu
+
+
+endmenu

@@ -1,0 +1,20 @@
+{
+    "manufacturer": "",
+    "name": "NTC Resistor",
+    "pins": {
+        "0b13abf9-1e1c-4b2e-ba99-119727950a3d": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "A",
+            "swap_group": 0
+        },
+        "98b4f2a6-2cd4-47a2-914d-7f176a1a558a": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "B",
+            "swap_group": 0
+        }
+    },
+    "type": "unit",
+    "uuid": "56e0ec70-a580-48a3-90d5-c4a380c4e799"
+}

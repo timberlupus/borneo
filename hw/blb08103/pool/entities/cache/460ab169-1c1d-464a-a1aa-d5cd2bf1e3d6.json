@@ -1,0 +1,20 @@
+{
+    "gates": {
+        "5cfc013c-ded0-4aeb-aba7-5ac3ee5f3ded": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "ab8a594c-7820-46d8-a09e-fcd329c69628"
+        }
+    },
+    "manufacturer": "",
+    "name": "Polyfuse",
+    "prefix": "F",
+    "tags": [
+        "fuse",
+        "polyfuse",
+        "ptc"
+    ],
+    "type": "entity",
+    "uuid": "460ab169-1c1d-464a-a1aa-d5cd2bf1e3d6"
+}

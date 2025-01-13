@@ -1,0 +1,38 @@
+{
+    "manufacturer": "PowTech",
+    "name": "PT4115",
+    "pins": {
+        "0d3e29c8-0721-4276-a2b2-ea96e5a668d4": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "DIM",
+            "swap_group": 0
+        },
+        "1adacfe7-bf0c-44a4-b3b6-9c37310b9672": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "VIN",
+            "swap_group": 0
+        },
+        "74906c1d-5e7c-4aac-b4f7-88c4c76b8b87": {
+            "direction": "output",
+            "names": [],
+            "primary_name": "SW",
+            "swap_group": 0
+        },
+        "af528809-637e-45e5-8a11-a51cb12b8a7c": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "GND",
+            "swap_group": 0
+        },
+        "cd2fde63-751f-4e04-8367-724bb7f9dc07": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "CSN",
+            "swap_group": 0
+        }
+    },
+    "type": "unit",
+    "uuid": "d16d8a90-4449-4fff-810a-3a06287587c6"
+}

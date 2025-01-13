@@ -1,0 +1,20 @@
+{
+    "manufacturer": "",
+    "name": "Two Terminal TVS",
+    "pins": {
+        "1b95d7ad-7680-4eb9-80bc-d5fbb8dd05b2": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "A",
+            "swap_group": 0
+        },
+        "b89682be-af77-4478-bbfe-708f08ff00c0": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "B",
+            "swap_group": 0
+        }
+    },
+    "type": "unit",
+    "uuid": "16f38845-6306-4479-be94-feceddc6af66"
+}

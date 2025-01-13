@@ -1,0 +1,56 @@
+{
+    "manufacturer": "MBI",
+    "name": "MBI6658",
+    "pins": {
+        "0faa3922-7e48-4680-965f-170c16510d85": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "VIN",
+            "swap_group": 0
+        },
+        "39988829-8d92-4291-8d89-3cba869aadfc": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "CS-",
+            "swap_group": 0
+        },
+        "6bd6b3be-1011-430c-a87c-fc501f32540c": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "CS+",
+            "swap_group": 0
+        },
+        "8be99343-e742-49ae-b8ba-63e222a322ff": {
+            "direction": "output",
+            "names": [],
+            "primary_name": "SW",
+            "swap_group": 0
+        },
+        "a84fe895-e93d-48a7-9cd0-c6d4590a1f59": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "FLAG1",
+            "swap_group": 0
+        },
+        "c9725f4e-da06-4a37-90f0-8cc0a30bf34f": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "DIM",
+            "swap_group": 0
+        },
+        "d2b66cd7-b885-4b83-9719-0c1efcb0fd73": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "FLAG2",
+            "swap_group": 0
+        },
+        "dbfe07dc-756e-40db-b473-3d6d57afdb66": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "GND",
+            "swap_group": 0
+        }
+    },
+    "type": "unit",
+    "uuid": "4e04c8ad-bc23-45a6-990c-fbff9a990c2e"
+}

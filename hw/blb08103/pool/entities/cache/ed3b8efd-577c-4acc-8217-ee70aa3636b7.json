@@ -1,0 +1,20 @@
+{
+    "gates": {
+        "4dfb48d6-b5a6-459e-bf03-8a744745d1b9": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "add6c7cf-47ce-49b9-80f3-43f19bca75d5"
+        }
+    },
+    "manufacturer": "",
+    "name": "3-State octal bus tranceiver",
+    "prefix": "U",
+    "tags": [
+        "3-state",
+        "buffer",
+        "tranceiver"
+    ],
+    "type": "entity",
+    "uuid": "ed3b8efd-577c-4acc-8217-ee70aa3636b7"
+}

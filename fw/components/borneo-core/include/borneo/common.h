@@ -1,0 +1,19 @@
+#pragma once
+
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define _DO_STRINGIFY(x) #x
+#define _STRINGIFY(s) _DO_STRINGIFY(s)
+
+#define _DO_CONCAT(x, y) x##y
+#define _CONCAT(x, y) _DO_CONCAT(x, y)
+
+#ifdef __cplusplus
+}
+#endif
