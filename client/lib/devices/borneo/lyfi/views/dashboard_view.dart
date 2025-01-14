@@ -158,7 +158,7 @@ class ScheduleRunningChart extends StatelessWidget {
       style: style,
     );
     return SideTitleWidget(
-      axisSide: meta.axisSide,
+      meta: meta,
       space: 0,
       child: text,
     );

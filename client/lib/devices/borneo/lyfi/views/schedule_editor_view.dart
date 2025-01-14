@@ -39,7 +39,7 @@ class ScheduleEditorView extends StatelessWidget {
     final duration = Duration(seconds: value.toInt());
     return SideTitleWidget(
       space: 0,
-      axisSide: meta.axisSide,
+      meta: meta,
       fitInside: SideTitleFitInsideData.fromTitleMeta(meta,
           distanceFromEdge: 0, enabled: false),
       child: Text(
@@ -53,7 +53,7 @@ class ScheduleEditorView extends StatelessWidget {
   Widget leftTitleWidgets(double value, TitleMeta meta) {
     const style = TextStyle(fontSize: 10, color: Colors.white54);
     return SideTitleWidget(
-      axisSide: meta.axisSide,
+      meta: meta,
       child: Text(
         '${value + 0.5}',
         style: style,

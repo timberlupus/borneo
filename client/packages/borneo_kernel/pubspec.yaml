@@ -5,7 +5,7 @@ publish_to: none
 # repository: https://github.com/my_org/my_repo
 
 environment:
-  sdk: ^3.5.4
+  sdk: ^3.6.0
 
 # Add regular dependencies here.
 dependencies:
@@ -14,7 +14,7 @@ dependencies:
   cancellation_token: ^2.0.1
   logger: ^2.5.0
   coap: ^9.1.0
-  cbor: ^6.3.3
+  cbor: ^6.3.0
   pub_semver: ^2.1.5
 
   # in this project

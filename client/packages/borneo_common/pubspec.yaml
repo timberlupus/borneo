@@ -5,11 +5,11 @@ publish_to: none
 homepage:
 
 environment:
-  sdk: ^3.5.4
+  sdk: ^3.6.0
 
 dependencies:
   coap: ^9.0.7
-  cbor: ^6.3.3
+  cbor: ^6.3.0
   cancellation_token: ^2.0.1
 
 
