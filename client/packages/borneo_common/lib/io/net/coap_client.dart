@@ -7,6 +7,9 @@ class CoapException extends IOException {
   final String message;
   final CoapResponse response;
   CoapException(this.message, this.response);
+
+  @override
+  String toString() => message;
 }
 
 extension CoapClientExtensions on CoapClient {
@@ -15,7 +18,7 @@ extension CoapClientExtensions on CoapClient {
     final response = await get(uri,
         accept: CoapMediaType.applicationCbor, confirmable: confirmable);
     if (!response.isSuccess) {
-      throw CoapException("Failed to request uri `{uri}`", response);
+      throw CoapException("Failed to request uri `$uri`", response);
     }
     return simple_cbor.cbor.decode(response.payload) as T;
   }
@@ -29,7 +32,7 @@ extension CoapClientExtensions on CoapClient {
         format: CoapMediaType.applicationCbor,
         confirmable: confirmable);
     if (!response.isSuccess) {
-      throw CoapException("Failed to request uri `{uri}`", response);
+      throw CoapException("Failed to request uri `$uri`", response);
     }
   }
 }
