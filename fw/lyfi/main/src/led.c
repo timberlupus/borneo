@@ -445,7 +445,7 @@ void sch_compute_current_color(led_color_t color)
     assert(_status.mode == LED_MODE_PREVIEW || _settings.scheduler_enabled);
 
     if (_settings.scheduler.item_count == 0) {
-        led_set_power(COLOR_BLANK);
+        memcpy(color, COLOR_BLANK, sizeof(led_color_t));
         return;
     }
 
