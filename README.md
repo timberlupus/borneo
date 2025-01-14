@@ -1,12 +1,12 @@
 # A Based Open Source WiFi Aquarium LED DIY Kit
 
-[![Build Status]][actions]
+[![App Build Status]][actions]
+[![Firmware Build Status]][actions]
+[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-3D3557?logo=github-actions&logoColor=white)](#)
 [![Releases](https://img.shields.io/github/release/oldrev/borneo.svg)](https://github.com/oldrev/borneo/releases)
 
 [App Build Status]: https://img.shields.io/github/actions/workflow/status/oldrev/borneo/flutter-ci.yml?branch=master
 [Firmware Build Status]: https://img.shields.io/github/actions/workflow/status/oldrev/borneo/fw-ci.yml?branch=master
-[actions]: https://github.com/oldrev/borneo/actions?query=branch%3Amaster
-
 
 ![BorneoIoT](assets/borneo-repo-banner.jpg)
 

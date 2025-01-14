@@ -1,11 +1,13 @@
 # BorneoIoT: 开源 WiFi 智能水族灯 DIY 套件
 
-[![Build Status]][actions]
+[![App Build Status]][actions]
+[![Firmware Build Status]][actions]
+[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-3D3557?logo=github-actions&logoColor=white)](#)
 [![Releases](https://img.shields.io/github/release/oldrev/borneo.svg)](https://github.com/oldrev/borneo/releases)
 
 [App Build Status]: https://img.shields.io/github/actions/workflow/status/oldrev/borneo/flutter-ci.yml?branch=master
 [Firmware Build Status]: https://img.shields.io/github/actions/workflow/status/oldrev/borneo/fw-ci.yml?branch=master
-[actions]: https://github.com/oldrev/borneo/actions?query=branch%3Amaster
+
 
 
 ![BorneoIoT Banner](assets/borneo-repo-banner.jpg)
