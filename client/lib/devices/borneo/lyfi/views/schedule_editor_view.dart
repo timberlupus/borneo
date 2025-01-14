@@ -109,6 +109,13 @@ class ScheduleEditorView extends StatelessWidget {
                   builder: (context, vm, child) => Padding(
                     padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
                     child: LineChart(
+                      transformationConfig: FlTransformationConfig(
+                        scaleAxis: FlScaleAxis.horizontal,
+                        minScale: 1.0,
+                        maxScale: 2.5,
+                        panEnabled: true,
+                        scaleEnabled: true,
+                      ),
                       duration: Duration.zero,
                       LineChartData(
                         lineTouchData: const LineTouchData(enabled: true),
