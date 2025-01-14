@@ -3,12 +3,14 @@ file(GLOB_RECURSE BORNEO_APP_SOURCES
     "src/*.cpp"
 )
 
-#set(BORNEO_INCLUDE_DIRS "./include")
+set(REQUIRES_RPO)
 
+if(BORNEO_EDITION_PRO STREQUAL "1")
+    list(APPEND REQUIRES_RPO borneo-factory borneo-ota)
+endif()
 
 idf_component_register(
     SRCS ${BORNEO_APP_SOURCES}
-    INCLUDE_DIRS ${BORNEO_INCLUDE_DIRS}
-    REQUIRES drvfx coap smf cbor coap borneo-core borneo-factory
+    REQUIRES drvfx coap borneo-core smf cbor coap ${REQUIRES_PRO}
     WHOLE_ARCHIVE
 )
