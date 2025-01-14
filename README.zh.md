@@ -151,6 +151,6 @@ https://github.com/user-attachments/assets/08cb37ea-8b35-413a-9ee4-c4d95e3cb3bf
 本项目硬件部分采用 CERN Open Hardware Licence Version 2 - Strongly Reciprocal (CERN-OHL-S-2.0) 协议授权，
 协议全文在 [LICENSE-HARDWARE](LICENSE-HARDWARE) 文件中。
 
-### 商业授权
+### 专有授权
 
-有兴趣将本项目的软硬件集成到产品中的也可以[联系我](mailto:oldrev@gmail.com)获得商用私有协议。
+有兴趣将本项目的软硬件集成到产品中的也可以[联系我](mailto:oldrev@gmail.com)获得非开源的私有协议。
