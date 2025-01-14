@@ -144,7 +144,8 @@ class LyfiViewModel extends BaseDeviceViewModel {
     try {
       await fetchDeviceStatus().asCancellable(taskQueueCancelToken);
     } on CancelledException catch (e, stackTrace) {
-      logger?.i('A periodic refresh task has been cancelled.', error: e, stackTrace: stackTrace);
+      logger?.i('A periodic refresh task has been cancelled.',
+          error: e, stackTrace: stackTrace);
     } catch (e, stackTrace) {
       notifyAppError(e.toString(), error: e, stackTrace: stackTrace);
     } finally {
