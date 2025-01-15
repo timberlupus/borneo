@@ -60,8 +60,7 @@ And much more, such as a dosing pump and pH monitor currently under development 
 
 - Youtube: TODO
 
-<iframe width="464" height="824" src="https://www.youtube.com/embed/Z78nOzLQvq0" title="DIY Open-Source Aquarium LED &amp; App #esp32 #aquarium #diy #opensourcehardware #flutter" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-
+[![YouTube](http://i.ytimg.com/vi/Z78nOzLQvq0/hqdefault.jpg)](https://www.youtube.com/watch?v=Z78nOzLQvq0)
 
 | ![BLC05MK3](assets/blc05mk3.jpg) <br/> LED Controller Module Appearance | ![BLC05MK3-SCH](assets/blc05mk3-sch.png) <br/> LED LED Controller Module Schematic |
 |------------------------------------------|------------------------------------------ |
