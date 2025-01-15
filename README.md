@@ -3,14 +3,14 @@
 ![Firmware Build Status](https://github.com/oldrev/borneo/actions/workflows/fw-ci.yml/badge.svg)
 ![App Build Status](https://github.com/oldrev/borneo/actions/workflows/flutter-ci.yml/badge.svg)
 
-![BorneoIoT](assets/borneo-repo-banner.jpg)
+[![Demo Video](https://img.youtube.com/vi/Z78nOzLQvq0/0.jpg)](https://www.youtube.com/watch?v=Z78nOzLQvq0)
 
 English | [中文](README.zh.md)
 
 ---
 
-Borneo-IoT project is a commercial-grade, highly customizable open-source smart WiFi aquarium LED PWM controller module and mobile App. 
-More than that, this project also includes a 63W 5-color channel LED product as reference design. 
+Borneo-IoT project is a commercial-grade, highly customizable open-source smart WiFi aquarium LED PWM controller module and mobile App.
+More than that, this project also includes a 63W 5-color channel LED product as reference design.
 
 
 For more information, please visit the project's website: [www.borneoiot.com](https://www.borneoiot.com).
@@ -59,8 +59,6 @@ And much more, such as a dosing pump and pH monitor currently under development 
 ## Demo Pictures & Videos
 
 - Youtube: TODO
-
-https://github.com/user-attachments/assets/08cb37ea-8b35-413a-9ee4-c4d95e3cb3bf
 
 | ![BLC05MK3](assets/blc05mk3.jpg) <br/> LED Controller Module Appearance | ![BLC05MK3-SCH](assets/blc05mk3-sch.png) <br/> LED LED Controller Module Schematic |
 |------------------------------------------|------------------------------------------ |
