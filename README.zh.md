@@ -3,11 +3,11 @@
 ![Firmware Build Status](https://github.com/oldrev/borneo/actions/workflows/fw-ci.yml/badge.svg)
 ![App Build Status](https://github.com/oldrev/borneo/actions/workflows/flutter-ci.yml/badge.svg)
 
-[![Demo Video](https://img.youtube.com/vi/Z78nOzLQvq0/0.jpg)](https://www.youtube.com/watch?v=Z78nOzLQvq0)
-
----
+![BorneoIoT Banner](assets/borneo-repo-banner.jpg)
 
 [English](README.md) | 中文
+
+---
 
 Borneo-IoT 项目是一套商业级、高度可自定义的开源智能 WiFi 水族 LED 灯具 PWM 控制器和手机 App，并且包含了一个 5 颜色通道 63W 的 LED 成品灯具作为参考设计。 
 
@@ -58,6 +58,8 @@ Borneo-IoT 项目是一套商业级、高度可自定义的开源智能 WiFi 水
 
 - Youtube: TODO
 - Bilibili: TODO
+
+https://github.com/user-attachments/assets/08cb37ea-8b35-413a-9ee4-c4d95e3cb3bf
 
 
 | ![BLC05MK3](assets/blc05mk3.jpg) <br/> LED 控制器模块外观 | ![BLC05MK3-SCH](assets/blc05mk3-sch.png) <br/> LED 控制器模块原理图 |
