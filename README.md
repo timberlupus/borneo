@@ -58,9 +58,11 @@ And much more, such as a dosing pump and pH monitor currently under development 
 
 ## Demo Pictures & Videos
 
-- Youtube: TODO
+### Demo Short Video:
 
 [![YouTube](http://i.ytimg.com/vi/Z78nOzLQvq0/hqdefault.jpg)](https://www.youtube.com/watch?v=Z78nOzLQvq0)
+
+### Pictures
 
 | ![BLC05MK3](assets/blc05mk3.jpg) <br/> LED Controller Module Appearance | ![BLC05MK3-SCH](assets/blc05mk3-sch.png) <br/> LED LED Controller Module Schematic |
 |------------------------------------------|------------------------------------------ |
