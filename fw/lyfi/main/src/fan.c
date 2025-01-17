@@ -22,10 +22,8 @@
 
 #include "fan.h"
 
-#if CONFIG_IDF_TARGET_ESP32C3
 #define NVS_FAN_NAMESPACE "fan"
 #define FAN_NVS_KEY_USE_PWM "use_pwm"
-#endif // CONFIG_IDF_TARGET_ESP32C3
 
 #define TAG "fan"
 
@@ -33,14 +31,10 @@ static struct fan_status _status = { 0 };
 static struct fan_settings _settings = { 0 };
 static ledc_channel_config_t _channel_config = { 0 };
 
-// 应该支持 DAC/PWM/PWN_DAC
-// 三种调速风扇
-
 int fan_init()
 {
     ESP_LOGI(TAG, "Initializing fan driver...");
 
-    // 初始化风扇输出开关脚
 #if CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED
     {
         uint64_t selected_gpios = 0ULL;
@@ -58,9 +52,7 @@ int fan_init()
     }
 #endif // CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED
 
-    // 初始化风扇配置
     {
-        // 读取配置
         nvs_handle_t nvs_handle;
         BO_TRY(bo_nvs_factory_open(NVS_FAN_NAMESPACE, NVS_READWRITE, &nvs_handle));
         uint8_t use_pwm_fan = 0;
@@ -69,25 +61,23 @@ int fan_init()
             _settings.use_pwm_fan = use_pwm_fan;
         }
         else {
-            // 默认不用 PWM 风扇
             _settings.use_pwm_fan = 0;
         }
         bo_nvs_close(nvs_handle);
     }
 
-    // 初始化 PWM 定时器
     {
         ESP_LOGI(TAG, "Initializing PWM timer.");
 
         ledc_timer_config_t ledc_timer = {
-            .duty_resolution = LEDC_TIMER_8_BIT, // PWM分辨率
-            .freq_hz = 25000, // 频率 25k
+            .duty_resolution = LEDC_TIMER_8_BIT,
+            .freq_hz = 25000, // 25k
 #if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3
-            .speed_mode = LEDC_LOW_SPEED_MODE, // 速度
-            .timer_num = LEDC_TIMER_2, // 选择定时器
+            .speed_mode = LEDC_LOW_SPEED_MODE,
+            .timer_num = LEDC_TIMER_2,
 #else
-            .speed_mode = LEDC_HIGH_SPEED_MODE, // 速度
-            .timer_num = LEDC_TIMER_1, // 选择定时器
+            .speed_mode = LEDC_HIGH_SPEED_MODE,
+            .timer_num = LEDC_TIMER_1,
 #endif
         };
 
@@ -96,7 +86,7 @@ int fan_init()
     }
 
     {
-        // C3 芯片只能 PWM 和 PWMDAC 选一个
+        // The ESP32-C3 chip can only choose between PWM and PWMDAC; they cannot be used simultaneously.
 #if CONFIG_IDF_TARGET_ESP32C3
         {
             uint16_t pwm_gpio
@@ -118,7 +108,8 @@ int fan_init()
         _channel_config.timer_sel = LEDC_TIMER_1;
 #endif
         // Set LED Controller with previously prepared configuration
-        _channel_config.duty = 0xFF; // 没有防倒灌二极管的话绝对不能太小，否则输出电压很高！！！
+        _channel_config.duty = 0xFF; // Without a reverse-blocking diode, the output voltage must not be set too low,
+                                     // otherwise the output voltage will be very high!!!
         _channel_config.channel = CONFIG_LYFI_FAN_CTRL_PWM_CHANNEL;
         BO_TRY(ledc_channel_config(&_channel_config));
     }
@@ -167,7 +158,7 @@ int fan_set_power(uint8_t value)
     else {
 
 #if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
-        // 有 DAC 的就用 DAC 设置
+        // Built-in DAC
         {
             // TODO FIXME
             uint8_t dac_value = 200 - (value * FAN_POWER_MAX / 80);
@@ -179,7 +170,7 @@ int fan_set_power(uint8_t value)
             ESP_LOGD(TAG, "Set fan power, method: DAC, power=%u/100, DAC-value=%hhu", value, dac_value);
         }
 #else
-        // 没有 DAC 的用 PWMDAC
+        // PWMDAC
         {
             uint8_t duty = 60 + (FAN_POWER_MAX - value);
             BO_TRY(ledc_set_duty(_channel_config.speed_mode, _channel_config.channel, duty));
