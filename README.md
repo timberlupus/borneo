@@ -126,7 +126,7 @@ We welcome your feedback! If you encounter any issues or have suggestions, pleas
 - Online documentation：[docs.borneoiot.com](https://docs.borneoiot.com)
 - GutHub Discussions: [github.com/oldrev/borneo/discussions](https://github.com/oldrev/borneo/discussions)
 - Author's e-mail: [oldrev@gmail.com](mailto:oldrev@gmail.com)
-- Borneo-IoT Discord Server: [https://discord.gg/25mK6KAc](https://discord.gg/25mK6KAc)
+- Borneo-IoT Discord Server: [discord.gg/GgH45vjX](https://discord.gg/GgH45vjX)
 
 ## License
 
