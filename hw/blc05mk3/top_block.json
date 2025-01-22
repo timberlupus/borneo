@@ -4,18 +4,32 @@
     "bom_export_settings": {
         "concrete_parts": {},
         "csv_settings": {
+            "column_names": {
+                "MPN": "MPN",
+                "QTY": "Quantity",
+                "datasheet": "LibRef",
+                "description": "Description",
+                "manufacturer": "Manufacturer",
+                "package": "Footprint",
+                "refdes": "Designator",
+                "value": "Comment"
+            },
             "columns": [
-                "QTY",
-                "MPN",
                 "value",
-                "manufacturer",
-                "refdes"
+                "description",
+                "refdes",
+                "package",
+                "datasheet",
+                "QTY",
+                "MPN"
             ],
+            "custom_column_names": true,
             "order": "asc",
             "sort_column": "refdes"
         },
+        "include_nopopulate": false,
         "orderable_MPNs": {},
-        "output_filename": ""
+        "output_filename": "./production/blc05mk3-b1_bom.csv"
     },
     "buses": {},
     "components": {
@@ -502,6 +516,7 @@
             },
             "entity": "dfe78717-3271-4b6f-a1a8-f6436f0caab8",
             "group": "00000000-0000-0000-0000-000000000000",
+            "nopopulate": true,
             "part": "e8d30996-377f-4099-a498-1569afc9e8a3",
             "pin_names": {},
             "refdes": "J2",
