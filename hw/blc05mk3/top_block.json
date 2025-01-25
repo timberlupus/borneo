@@ -29,7 +29,7 @@
         },
         "include_nopopulate": false,
         "orderable_MPNs": {},
-        "output_filename": "./production/blc05mk3-b1_bom.csv"
+        "output_filename": "_output/blc05mk3-b1_bom.csv"
     },
     "buses": {},
     "components": {

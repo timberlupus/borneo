@@ -14,7 +14,8 @@ More than that, this project also includes a 63W 5-color channel LED product as 
 
 
 For more information, please visit the project's website: [www.borneoiot.com](https://www.borneoiot.com).
-Hardware datasheets in English and Chinese are available in this repo: [hw/datasheets](hw/datasheets)
+
+PDF versions of the hardware schematics, datasheets and BoM can be found in [`hw/datasheets`](hw/datasheets).
 
 If you like this project, please don't forget to give it a star. Thank you!
 

@@ -11,7 +11,7 @@
     "name": "",
     "pdf_export_settings": {
         "min_line_width": 150000,
-        "output_filename": "c:\\tmp\\sch1.pdf"
+        "output_filename": "_output/blc05mk3_sch.pdf"
     },
     "rules": {
         "connectivity": {
