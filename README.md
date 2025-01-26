@@ -53,8 +53,8 @@ If you like this project, please don't forget to give it a star. Thank you!
         - Batch programming & QA testing
         - Product parameter configuration
 
-- **Field Validated**
-    - Proven stability in planted tank environments
+- **Field-proven**
+    - The prototype of this controller and LED driver has been running stably on my own planted tank for years
     - Extensible architecture (ongoing pump/pH monitor development)
 
 [^1]: The open-source project does not provide mass production-related fixtures and software.
