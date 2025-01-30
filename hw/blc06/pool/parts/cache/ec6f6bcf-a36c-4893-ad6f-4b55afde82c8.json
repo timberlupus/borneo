@@ -1,0 +1,40 @@
+{
+    "MPN": [
+        false,
+        "FTC252012S100MBCA"
+    ],
+    "base": "3f8fb4df-99c2-473b-9dfc-508fb3324929",
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "10uH ±20% 1.2A/1.6A"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        "Cjang"
+    ],
+    "model": "655e4cc7-1ce4-4633-8250-16f8bc5ebc5a",
+    "orderable_MPNs": {
+        "2b4d322f-4f23-4362-ab6c-95d85e4ea228": "C5832376"
+    },
+    "parametric": {
+        "dcr": "0.33",
+        "idc": "1.6",
+        "table": "inductors",
+        "value": "1e-05"
+    },
+    "tags": [
+        "jlc-smt-extended"
+    ],
+    "type": "part",
+    "uuid": "ec6f6bcf-a36c-4893-ad6f-4b55afde82c8",
+    "value": [
+        false,
+        "10μ/1.2A"
+    ]
+}

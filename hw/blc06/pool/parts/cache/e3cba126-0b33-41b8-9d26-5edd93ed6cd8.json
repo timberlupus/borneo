@@ -1,0 +1,40 @@
+{
+    "MPN": [
+        false,
+        "0402WGF4700TCE"
+    ],
+    "base": "44fe0594-19d5-403e-9ae8-7c4c59c3668f",
+    "datasheet": [
+        false,
+        "https://item.szlcsc.com/25860.html"
+    ],
+    "description": [
+        false,
+        "470Ω ±1% 62.5mW 厚膜电阻"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "UniOhm"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "c2f82971-3c8e-4ffb-a9fd-616f11b955cf": "C25117"
+    },
+    "parametric": {
+        "pmax": "0.0625",
+        "table": "resistors",
+        "tolerance": "1",
+        "value": "470"
+    },
+    "tags": [
+        "jlc-smt-base"
+    ],
+    "type": "part",
+    "uuid": "e3cba126-0b33-41b8-9d26-5edd93ed6cd8",
+    "value": [
+        false,
+        "470R"
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "gates": {
+        "665524c9-9680-4f9c-97ac-fdfb2c8dfb5c": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "8df17bd5-93e9-49a6-aa88-db0974d04ce1"
+        }
+    },
+    "manufacturer": "",
+    "name": "TL431",
+    "prefix": "U",
+    "tags": [
+        "reference",
+        "regulator",
+        "voltage-reference"
+    ],
+    "type": "entity",
+    "uuid": "25a041f4-1453-44c7-bbf5-a62333865527"
+}

@@ -1,0 +1,50 @@
+{
+    "MPN": [
+        false,
+        "FTC252012S"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "Wire wound molded SMD power inductor"
+    ],
+    "entity": "1d534e1d-704a-4d44-a6e6-c6106a2827ab",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Cjang"
+    ],
+    "model": "655e4cc7-1ce4-4633-8250-16f8bc5ebc5a",
+    "package": "b7a24018-d9ee-4751-ab4a-e8d9fde01b67",
+    "pad_map": {
+        "5ea6a9e2-94cf-409f-b820-5bdbe70baef6": {
+            "gate": "48af78e5-730e-44eb-977a-cf188e4fcb39",
+            "pin": "dda0ec99-5d70-4fbe-a8db-897542e7554e"
+        },
+        "f8b2ce8f-c471-47f5-bcbf-4b7187f6d6db": {
+            "gate": "48af78e5-730e-44eb-977a-cf188e4fcb39",
+            "pin": "6a44037c-65e2-4876-9359-42890048841d"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "inductor",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "3f8fb4df-99c2-473b-9dfc-508fb3324929",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}
