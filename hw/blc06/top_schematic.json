@@ -6921,7 +6921,7 @@
                         ]
                     },
                     "size": 2500000,
-                    "text": "*CAUTION*:\n1. `FAN_EN` should not be pulled low during power-on,\notherwise the program cannot be flashed.\n2. `~PROG~/~BTN~` should not be pulled low during power-on too.",
+                    "text": "*CAUTION*:\n1. `GPIO8` should not be pulled low during power-on,\notherwise the program cannot be flashed.\n2. `GPIO9` should not be pulled low during power-on too.",
                     "width": 250000
                 },
                 "bb7ea9e6-7fed-495b-9594-8e2fd8298f42": {
