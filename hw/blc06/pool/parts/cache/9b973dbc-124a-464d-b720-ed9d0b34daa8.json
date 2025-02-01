@@ -1,0 +1,40 @@
+{
+    "MPN": [
+        false,
+        "0402WGF330JTCE"
+    ],
+    "base": "44fe0594-19d5-403e-9ae8-7c4c59c3668f",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "33Ω ±1% 62.5mW 厚膜电阻"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "UniOhm"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "51c2b4d4-9525-4170-b731-140f974a6b67": "C25105"
+    },
+    "parametric": {
+        "pmax": "0.0625",
+        "table": "resistors",
+        "tolerance": "1",
+        "value": "33"
+    },
+    "tags": [
+        "jlc-smt-base"
+    ],
+    "type": "part",
+    "uuid": "9b973dbc-124a-464d-b720-ed9d0b34daa8",
+    "value": [
+        false,
+        "33R/1%"
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "MPN": [
+        false,
+        "CL05B224KO5NNNC"
+    ],
+    "base": "29043bfd-c944-47cb-ae49-8dc6e1cf7257",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "220nF ±10% 16V"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "Samsung"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "ffe853d3-8f50-4df0-a05c-66d11cfb7b44": "C16772"
+    },
+    "parametric": {
+        "table": "capacitors",
+        "tolerance": "10",
+        "type": "X7R",
+        "value": "2.2e-07",
+        "wvdc": "16"
+    },
+    "tags": [
+        "jlc-smt-base"
+    ],
+    "type": "part",
+    "uuid": "f92e42fa-caaa-4ea1-8610-1a2d88dc8a10",
+    "value": [
+        false,
+        "220n"
+    ]
+}

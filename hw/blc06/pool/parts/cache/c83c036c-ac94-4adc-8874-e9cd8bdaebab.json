@@ -1,0 +1,35 @@
+{
+    "MPN": [
+        false,
+        "ESP32-C3-WROOM-02-N4"
+    ],
+    "base": "ba48a8c5-4e50-49d9-bd7c-0d36571d7d70",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        true,
+        "The base part of the ESP32-C3-WROOM-02 series WiFi/BLE module"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        "Espressif"
+    ],
+    "model": "97f67a23-1d77-42e7-a9a1-3d9c7866d670",
+    "orderable_MPNs": {
+        "18a2d877-2b52-4854-91ca-703660562c03": "C2934560"
+    },
+    "parametric": {},
+    "tags": [
+        "jlc-smt-extended"
+    ],
+    "type": "part",
+    "uuid": "c83c036c-ac94-4adc-8874-e9cd8bdaebab",
+    "value": [
+        false,
+        ""
+    ]
+}

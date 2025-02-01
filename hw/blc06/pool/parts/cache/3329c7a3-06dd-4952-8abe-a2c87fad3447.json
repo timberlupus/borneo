@@ -1,0 +1,48 @@
+{
+    "MPN": [
+        false,
+        "GZ1608D601TF"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "600Ω ±25% 100MHz 200mA 450mΩ"
+    ],
+    "entity": "ac656848-2504-4c1e-9cee-c2d3a3320cca",
+    "inherit_model": false,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Sunlord"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "378df43e-13dc-4afe-8e2b-91252a65796f": "C1002"
+    },
+    "package": "94110af5-541d-4c9e-a95d-2502add03001",
+    "pad_map": {
+        "63256dd2-2eab-46fe-9201-b2e553476e98": {
+            "gate": "ab5e5821-17f1-4052-bde8-4791cb782b42",
+            "pin": "b249853f-f1b3-4128-9ff3-be7e5939dfdc"
+        },
+        "6dd73a26-6e83-43b6-8317-09836acef67d": {
+            "gate": "ab5e5821-17f1-4052-bde8-4791cb782b42",
+            "pin": "a48aebb4-3bc9-4931-aaa5-49c5dc594471"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "ferrite",
+        "jlc-smt-base",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "3329c7a3-06dd-4952-8abe-a2c87fad3447",
+    "value": [
+        false,
+        "600R@100M"
+    ]
+}
