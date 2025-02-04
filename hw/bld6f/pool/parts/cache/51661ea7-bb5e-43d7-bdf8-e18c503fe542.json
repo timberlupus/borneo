@@ -1,0 +1,71 @@
+{
+    "MPN": [
+        false,
+        "Base LGS6304XEP"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "Buck-Boost 60V LED Driver"
+    ],
+    "entity": "e4eb454b-3b6b-479c-854f-ab45f58b4378",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Legend-Si"
+    ],
+    "model": "29d0a977-9745-4b2b-92ca-07d89eac93cf",
+    "package": "8782d4cb-f9a0-494d-9870-7a9c25bb3312",
+    "pad_map": {
+        "06b8c678-e335-4141-9f64-595986b3d211": {
+            "gate": "d5a8a569-55af-4fb2-9def-8a64243648cd",
+            "pin": "209a969d-c17c-4e4a-9a59-8e94ab750a1a"
+        },
+        "73df651e-323c-4cae-8c1d-9cd177d181b0": {
+            "gate": "d5a8a569-55af-4fb2-9def-8a64243648cd",
+            "pin": "08608608-5976-4dce-a12f-10f6146e6aca"
+        },
+        "82322159-a420-4435-8dd0-d0e0cfde2e4a": {
+            "gate": "d5a8a569-55af-4fb2-9def-8a64243648cd",
+            "pin": "952728a3-3d14-4c2a-9eb5-42d37bb11135"
+        },
+        "b2bfde16-637f-4144-9b27-3576d833a34c": {
+            "gate": "d5a8a569-55af-4fb2-9def-8a64243648cd",
+            "pin": "5249afe2-74df-452e-bcd7-7048ebb4fc15"
+        },
+        "b88c06ad-00c1-4199-b441-12eacf70a0ff": {
+            "gate": "d5a8a569-55af-4fb2-9def-8a64243648cd",
+            "pin": "08608608-5976-4dce-a12f-10f6146e6aca"
+        },
+        "c9ee25e9-bfef-406d-911d-c4b9657947e6": {
+            "gate": "d5a8a569-55af-4fb2-9def-8a64243648cd",
+            "pin": "06e9352b-47fb-40d6-89d3-b0dab910bebf"
+        },
+        "f543a578-654b-46bc-a9eb-1598f6b6214f": {
+            "gate": "d5a8a569-55af-4fb2-9def-8a64243648cd",
+            "pin": "d122e710-3e38-41d5-8d84-488402e1b553"
+        },
+        "fd556f00-4c70-4421-9a18-e5847961becd": {
+            "gate": "d5a8a569-55af-4fb2-9def-8a64243648cd",
+            "pin": "209a969d-c17c-4e4a-9a59-8e94ab750a1a"
+        }
+    },
+    "parametric": {},
+    "tags": [],
+    "type": "part",
+    "uuid": "51661ea7-bb5e-43d7-bdf8-e18c503fe542",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}

@@ -1,0 +1,30 @@
+{
+    "MPN": [
+        false,
+        "Generic 6070 1W/3W SMD LED"
+    ],
+    "base": "1c866320-34bd-4345-9caa-0f6302787e7c",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "Generic 6070 1W/3W SMD LED"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        ""
+    ],
+    "model": "b39f1698-4929-4390-8d79-d664a2382f48",
+    "parametric": {},
+    "tags": [],
+    "type": "part",
+    "uuid": "7eb76cc6-4215-46f4-8975-652df84fb382",
+    "value": [
+        false,
+        "LED6070"
+    ]
+}

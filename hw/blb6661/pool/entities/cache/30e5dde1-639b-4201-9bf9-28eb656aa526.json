@@ -1,0 +1,19 @@
+{
+    "gates": {
+        "b24563fc-1f50-4a97-bb21-0368707ca8d8": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "2749bd83-66d2-4063-90b5-81ef44c16bb0"
+        }
+    },
+    "manufacturer": "",
+    "name": "LED (6-Terminal RGB)",
+    "prefix": "D",
+    "tags": [
+        "led",
+        "rgb"
+    ],
+    "type": "entity",
+    "uuid": "30e5dde1-639b-4201-9bf9-28eb656aa526"
+}

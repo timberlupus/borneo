@@ -1,0 +1,167 @@
+{
+    "arcs": {
+        "4581870e-8a63-4cea-9079-5d843fe6abd4": {
+            "center": "1783088c-7d3b-4b3d-be7b-7cd54f43d12e",
+            "from": "d5784752-efb2-46c6-ab5f-d0de8f4e27a4",
+            "layer": 20,
+            "to": "ae77fa96-e867-43c5-b807-31c28fabf8eb",
+            "width": 150000
+        },
+        "ac745da4-8e2a-452d-8bdc-6c7d168464fb": {
+            "center": "0a9f0886-f851-4530-9693-817bc245d250",
+            "from": "e8daeb9f-9644-444f-9d3d-368d12f38081",
+            "layer": 20,
+            "to": "683908f3-fb08-4712-a3c3-a716dcc00fad",
+            "width": 150000
+        },
+        "e0cb531a-7a2f-4fdb-96b4-84a992d085ef": {
+            "center": "0a9f0886-f851-4530-9693-817bc245d250",
+            "from": "683908f3-fb08-4712-a3c3-a716dcc00fad",
+            "layer": 20,
+            "to": "e8daeb9f-9644-444f-9d3d-368d12f38081",
+            "width": 150000
+        },
+        "e75ea174-9586-45a3-af4c-ab69675564ee": {
+            "center": "1783088c-7d3b-4b3d-be7b-7cd54f43d12e",
+            "from": "ae77fa96-e867-43c5-b807-31c28fabf8eb",
+            "layer": 20,
+            "to": "d5784752-efb2-46c6-ab5f-d0de8f4e27a4",
+            "width": 150000
+        }
+    },
+    "junctions": {
+        "085ccfba-522c-4984-863a-64b8f5caea79": {
+            "position": [
+                10145000,
+                -10145000
+            ]
+        },
+        "0a9f0886-f851-4530-9693-817bc245d250": {
+            "position": [
+                10145000,
+                -10145000
+            ]
+        },
+        "1783088c-7d3b-4b3d-be7b-7cd54f43d12e": {
+            "position": [
+                -10145000,
+                10145000
+            ]
+        },
+        "26f0a0df-0e62-4137-8a22-81a0ebfcf8c9": {
+            "position": [
+                -12500000,
+                -12500000
+            ]
+        },
+        "2b7a7364-b781-4a6b-8236-7470c604d352": {
+            "position": [
+                12500000,
+                12500000
+            ]
+        },
+        "683908f3-fb08-4712-a3c3-a716dcc00fad": {
+            "position": [
+                8895000,
+                -10145000
+            ]
+        },
+        "83c67f92-38a8-437d-971d-20357c6315e4": {
+            "position": [
+                -10145000,
+                10145000
+            ]
+        },
+        "96b243dc-e3b7-40c3-8df9-202ed83456dc": {
+            "position": [
+                -10145000,
+                10145000
+            ]
+        },
+        "ae77fa96-e867-43c5-b807-31c28fabf8eb": {
+            "position": [
+                -8895000,
+                10145000
+            ]
+        },
+        "b5a9cf2b-a133-44d3-abf8-d176ee4943bf": {
+            "position": [
+                10145000,
+                -10145000
+            ]
+        },
+        "c4e45899-49e1-453c-b789-7bf61bf2ab67": {
+            "position": [
+                12500000,
+                -12500000
+            ]
+        },
+        "cda77f0b-3c1b-4e30-9234-9976900fea32": {
+            "position": [
+                -12500000,
+                12500000
+            ]
+        },
+        "d5784752-efb2-46c6-ab5f-d0de8f4e27a4": {
+            "position": [
+                -11395000,
+                10145000
+            ]
+        },
+        "e8daeb9f-9644-444f-9d3d-368d12f38081": {
+            "position": [
+                11395000,
+                -10145000
+            ]
+        }
+    },
+    "lines": {
+        "357a3063-0045-42e7-8659-ded760fddcd9": {
+            "from": "c4e45899-49e1-453c-b789-7bf61bf2ab67",
+            "layer": 20,
+            "to": "26f0a0df-0e62-4137-8a22-81a0ebfcf8c9",
+            "width": 150000
+        },
+        "d4525b79-77cf-4d47-8f15-911b31b9f9d7": {
+            "from": "26f0a0df-0e62-4137-8a22-81a0ebfcf8c9",
+            "layer": 20,
+            "to": "cda77f0b-3c1b-4e30-9234-9976900fea32",
+            "width": 150000
+        },
+        "d85df7b1-9411-4111-be51-c6062392c699": {
+            "from": "2b7a7364-b781-4a6b-8236-7470c604d352",
+            "layer": 20,
+            "to": "c4e45899-49e1-453c-b789-7bf61bf2ab67",
+            "width": 150000
+        },
+        "e8e118cb-3f1c-43aa-a82d-850fdf4b659b": {
+            "from": "cda77f0b-3c1b-4e30-9234-9976900fea32",
+            "layer": 20,
+            "to": "2b7a7364-b781-4a6b-8236-7470c604d352",
+            "width": 150000
+        }
+    },
+    "name": "Heatsink 25x25mm",
+    "polygons": {},
+    "texts": {
+        "2e55a53a-b5a0-4a8d-8568-2d9332907502": {
+            "font": "simplex",
+            "from_smash": false,
+            "layer": 50,
+            "origin": "center",
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    -5000000,
+                    0
+                ]
+            },
+            "size": 1500000,
+            "text": "HEATSINK",
+            "width": 0
+        }
+    },
+    "type": "decal",
+    "uuid": "783d47f0-7e23-4ad5-9580-f97b246dc42b"
+}

@@ -1,0 +1,63 @@
+{
+    "MPN": [
+        false,
+        "INA1x9"
+    ],
+    "datasheet": [
+        false,
+        "https://www.ti.com/lit/ds/symlink/ina139.pdf"
+    ],
+    "description": [
+        false,
+        "INA1x9 High-Side Measurement Current Shunt Monitor"
+    ],
+    "entity": "2afe6de1-0d7e-4eb7-b179-882bf12a5558",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Texas Instruments"
+    ],
+    "model": "eb54e7ca-dcad-4e09-bd45-d2e32cddaa2a",
+    "package": "70c65846-2ee7-4d11-9d38-fe0fa84dc963",
+    "pad_map": {
+        "531c3759-a1b6-40c6-9474-5554dc94bcec": {
+            "gate": "f7f7e4f1-4693-4e86-945e-99be5ca0a437",
+            "pin": "09e27cf6-2882-4a32-9619-c6fa3f0e699e"
+        },
+        "9fe9b6c3-f887-4523-976a-6aa050235658": {
+            "gate": "f7f7e4f1-4693-4e86-945e-99be5ca0a437",
+            "pin": "e85bde6b-2c0d-4598-b00e-d99580ecf804"
+        },
+        "bb9bbbd8-9aa2-49aa-98fd-b508ded56028": {
+            "gate": "f7f7e4f1-4693-4e86-945e-99be5ca0a437",
+            "pin": "b1278c57-9890-45bc-b8cb-77c15e504a9c"
+        },
+        "be802fd1-5220-4258-a11f-c1529e6187e0": {
+            "gate": "f7f7e4f1-4693-4e86-945e-99be5ca0a437",
+            "pin": "079fa80a-bfa0-4fd1-a9e9-5fb1467d950b"
+        },
+        "f827f54d-8a25-45ce-a5c6-aa1cdc05418a": {
+            "gate": "f7f7e4f1-4693-4e86-945e-99be5ca0a437",
+            "pin": "90b5d22e-c54d-4c95-9adc-120c35c18af2"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "current-sensor",
+        "ina",
+        "opamp"
+    ],
+    "type": "part",
+    "uuid": "78479652-b347-4bd3-a84c-d37e327cec94",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}

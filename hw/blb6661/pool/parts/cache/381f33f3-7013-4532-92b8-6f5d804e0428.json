@@ -1,0 +1,63 @@
+{
+    "MPN": [
+        false,
+        "Base SMD 6070 RGB LED (6-Terminal)"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        ""
+    ],
+    "entity": "30e5dde1-639b-4201-9bf9-28eb656aa526",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        ""
+    ],
+    "model": "28d554b9-0034-4b10-856c-61f5dbf2561c",
+    "package": "d4204b91-86c8-4d31-ba3a-116e3f7fa962",
+    "pad_map": {
+        "010ab2bc-f6a0-484f-b370-b076dfd8aab8": {
+            "gate": "b24563fc-1f50-4a97-bb21-0368707ca8d8",
+            "pin": "40471436-ff9e-405d-9080-28ec54f07aac"
+        },
+        "197bd0a9-7eac-493a-b6a7-c91b60e3af93": {
+            "gate": "b24563fc-1f50-4a97-bb21-0368707ca8d8",
+            "pin": "a8365feb-42ae-43c8-b909-07210c3701e4"
+        },
+        "5e2822d9-a096-4938-b4ad-59db4646409a": {
+            "gate": "b24563fc-1f50-4a97-bb21-0368707ca8d8",
+            "pin": "0558e550-b106-4152-9146-afde3e3d07d6"
+        },
+        "65e8a0ca-d0f1-4181-8c1b-b28f594744fc": {
+            "gate": "b24563fc-1f50-4a97-bb21-0368707ca8d8",
+            "pin": "c100ac32-582f-4f75-b0bf-b17edcf5e3f4"
+        },
+        "d07ac667-8826-4f82-8e74-44e8ce0a9e3b": {
+            "gate": "b24563fc-1f50-4a97-bb21-0368707ca8d8",
+            "pin": "044f4cff-dd95-4495-a4b1-0039a425a7fb"
+        },
+        "e14bb871-d7bb-453b-8347-31b953c99e15": {
+            "gate": "b24563fc-1f50-4a97-bb21-0368707ca8d8",
+            "pin": "05e70ef8-354c-4a26-a8e9-e0cf83d5e212"
+        }
+    },
+    "parametric": {},
+    "tags": [],
+    "type": "part",
+    "uuid": "381f33f3-7013-4532-92b8-6f5d804e0428",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}

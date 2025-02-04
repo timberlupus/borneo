@@ -1,0 +1,40 @@
+{
+    "MPN": [
+        false,
+        "RT0402BRD0710KL"
+    ],
+    "base": "44fe0594-19d5-403e-9ae8-7c4c59c3668f",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "C190095"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "Yageo"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "b8def8bf-b860-47ea-8807-5540aa8f4c60": "C190095"
+    },
+    "parametric": {
+        "pmax": "0.0625",
+        "table": "resistors",
+        "tolerance": "0.1",
+        "value": "10000"
+    },
+    "tags": [
+        "jlc-smt-extended"
+    ],
+    "type": "part",
+    "uuid": "6d874c19-71fd-454a-a74e-586d6c59b30e",
+    "value": [
+        false,
+        "10k/0.1"
+    ]
+}

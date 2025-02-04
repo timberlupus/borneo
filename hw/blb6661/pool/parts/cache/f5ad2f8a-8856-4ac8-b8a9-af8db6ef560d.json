@@ -1,0 +1,57 @@
+{
+    "MPN": [
+        false,
+        "TS34031"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "50A/M3"
+    ],
+    "entity": "267343bf-e6bf-42f4-b256-381dd96f011d",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "XFCN"
+    ],
+    "model": "00000000-0000-0000-0000-000000000000",
+    "orderable_MPNs": {
+        "d6e33636-f2c0-4aff-9fd9-453d2e66a8b1": "C481441"
+    },
+    "package": "bfd06361-cfd5-429e-bfc7-ce7d6ced4bcc",
+    "pad_map": {
+        "4f107342-f251-4aae-8456-5c81b2c0762f": {
+            "gate": "26c95be6-8813-4f4b-a0e6-574ae9a6ae48",
+            "pin": "ad3f20fe-d1ca-40c1-9148-71c107694c90"
+        },
+        "6adace1f-7c2b-4961-a752-d6668b1ae75e": {
+            "gate": "26c95be6-8813-4f4b-a0e6-574ae9a6ae48",
+            "pin": "ad3f20fe-d1ca-40c1-9148-71c107694c90"
+        },
+        "a7a3e9d3-aac5-4103-85ab-7a230b6b222d": {
+            "gate": "26c95be6-8813-4f4b-a0e6-574ae9a6ae48",
+            "pin": "ad3f20fe-d1ca-40c1-9148-71c107694c90"
+        },
+        "cbf112c6-82f7-403a-8bae-881bcbbd9bbb": {
+            "gate": "26c95be6-8813-4f4b-a0e6-574ae9a6ae48",
+            "pin": "ad3f20fe-d1ca-40c1-9148-71c107694c90"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "connector",
+        "jlc-smt-extended",
+        "smd",
+        "terminal-block"
+    ],
+    "type": "part",
+    "uuid": "f5ad2f8a-8856-4ac8-b8a9-af8db6ef560d",
+    "value": [
+        false,
+        ""
+    ]
+}

@@ -1,0 +1,35 @@
+{
+    "MPN": [
+        false,
+        "QM82-D"
+    ],
+    "base": "888e7624-c3a3-47d6-bf3f-717e3a8dfb57",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "0R0/12A"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        ""
+    ],
+    "model": "4c6d2077-26e8-43dc-a93c-224c9668f669",
+    "parametric": {
+        "pmax": "0",
+        "table": "resistors",
+        "tolerance": "0",
+        "value": "0"
+    },
+    "tags": [],
+    "type": "part",
+    "uuid": "be244602-c9b6-439d-8211-190c2422b05a",
+    "value": [
+        true,
+        "0R0"
+    ]
+}

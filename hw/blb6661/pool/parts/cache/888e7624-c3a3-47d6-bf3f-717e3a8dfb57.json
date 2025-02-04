@@ -1,0 +1,55 @@
+{
+    "MPN": [
+        false,
+        "Base QM82"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "SMD Jump QM82 Series"
+    ],
+    "entity": "3ce770af-7be0-4f72-b2af-2c8010911aaf",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        ""
+    ],
+    "model": "4c6d2077-26e8-43dc-a93c-224c9668f669",
+    "package": "9f150b9e-7ea9-4aeb-93d6-2497385b11f7",
+    "pad_map": {
+        "0cc2d176-f14c-4066-bfbd-a1573c7ec23a": {
+            "gate": "48af78e5-730e-44eb-977a-cf188e4fcb39",
+            "pin": "6a44037c-65e2-4876-9359-42890048841d"
+        },
+        "9e491aee-57e2-4b4d-bb2d-5f36dbc9bdec": {
+            "gate": "48af78e5-730e-44eb-977a-cf188e4fcb39",
+            "pin": "dda0ec99-5d70-4fbe-a8db-897542e7554e"
+        }
+    },
+    "parametric": {
+        "pmax": "3000",
+        "table": "resistors",
+        "tolerance": "0",
+        "value": "0"
+    },
+    "tags": [
+        "jump",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "888e7624-c3a3-47d6-bf3f-717e3a8dfb57",
+    "value": [
+        false,
+        "0R0"
+    ],
+    "version": 1
+}

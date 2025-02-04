@@ -1,0 +1,20 @@
+{
+    "gates": {
+        "fcfc554e-849c-4404-bd55-29c3ae59b82b": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "16f38845-6306-4479-be94-feceddc6af66"
+        }
+    },
+    "manufacturer": "",
+    "name": "Two-Terminal TVS",
+    "prefix": "D",
+    "tags": [
+        "diode",
+        "single",
+        "tvs"
+    ],
+    "type": "entity",
+    "uuid": "59aa6a7a-4c55-4086-9a72-294974daed3a"
+}

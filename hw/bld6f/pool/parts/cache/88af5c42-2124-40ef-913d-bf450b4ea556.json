@@ -1,0 +1,40 @@
+{
+    "MPN": [
+        false,
+        "1206W4F1200T5E"
+    ],
+    "base": "69d9d487-801a-40ab-a821-5a7a6ee8c623",
+    "datasheet": [
+        false,
+        "https://item.szlcsc.com/18597.html"
+    ],
+    "description": [
+        false,
+        "120Ω ±1% 250mW 厚膜电阻"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "UniOhm"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "77921b9b-0a3f-416d-a5de-1b680ae8296a": "C17909"
+    },
+    "parametric": {
+        "pmax": "0.25",
+        "table": "resistors",
+        "tolerance": "1",
+        "value": "120"
+    },
+    "tags": [
+        "jlc-smt-base"
+    ],
+    "type": "part",
+    "uuid": "88af5c42-2124-40ef-913d-bf450b4ea556",
+    "value": [
+        false,
+        "120R"
+    ]
+}

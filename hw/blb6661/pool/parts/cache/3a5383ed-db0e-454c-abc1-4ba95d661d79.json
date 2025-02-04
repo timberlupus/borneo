@@ -1,0 +1,40 @@
+{
+    "MPN": [
+        false,
+        "RT1206BRD0710RL"
+    ],
+    "base": "69d9d487-801a-40ab-a821-5a7a6ee8c623",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "10Ω ±0.1% 250mW ±25ppm/℃"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "Yageo"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "db2aaf7e-5e75-49b3-bedf-3e68823e4516": "C309661"
+    },
+    "parametric": {
+        "pmax": "0.25",
+        "table": "resistors",
+        "tolerance": "0.1",
+        "value": "10"
+    },
+    "tags": [
+        "jlc-smt-extended"
+    ],
+    "type": "part",
+    "uuid": "3a5383ed-db0e-454c-abc1-4ba95d661d79",
+    "value": [
+        false,
+        "10R/0.1%"
+    ]
+}

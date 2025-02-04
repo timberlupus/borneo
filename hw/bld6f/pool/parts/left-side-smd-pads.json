@@ -1,0 +1,73 @@
+{
+    "MPN": [
+        false,
+        "Left  Side SMD Pads"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "Left  Side SMD Pads"
+    ],
+    "entity": "3163122e-5414-47a0-aa58-449d007268d4",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        ""
+    ],
+    "model": "00000000-0000-0000-0000-000000000000",
+    "package": "23fa07c0-b59d-4324-8527-48f4fce6f8f7",
+    "pad_map": {
+        "163618d0-2e52-46ca-9d5a-29a43203f09e": {
+            "gate": "5abc16ba-5d27-46bc-8b0f-7b7685a3d36b",
+            "pin": "a52796ce-980b-44da-b500-0e16047002e7"
+        },
+        "519026d1-d0b6-4719-81f4-791c70d20c62": {
+            "gate": "5abc16ba-5d27-46bc-8b0f-7b7685a3d36b",
+            "pin": "b2f80675-5fe9-4e98-bcdc-31ea9a03298b"
+        },
+        "5f03e6dd-1fda-4bb5-aa33-c4899812c532": {
+            "gate": "5abc16ba-5d27-46bc-8b0f-7b7685a3d36b",
+            "pin": "ab526400-99a9-42e4-a5d2-1581085f6494"
+        },
+        "73e0629a-5a66-4cd3-bd3e-deaf5cd75d66": {
+            "gate": "5abc16ba-5d27-46bc-8b0f-7b7685a3d36b",
+            "pin": "14621993-a769-4155-a79f-3d6baec8bfab"
+        },
+        "773761bd-af44-42fe-a473-864939b647f9": {
+            "gate": "5abc16ba-5d27-46bc-8b0f-7b7685a3d36b",
+            "pin": "330b9d38-3926-4721-acef-c9aa1ab6e4bd"
+        },
+        "943ce317-f9ca-44b2-bdc1-de5cff5c4314": {
+            "gate": "5abc16ba-5d27-46bc-8b0f-7b7685a3d36b",
+            "pin": "b5dfa031-2240-4c92-bc28-efe9bcca12e9"
+        },
+        "9981b432-16a0-464a-b7fe-3b60c404c127": {
+            "gate": "5abc16ba-5d27-46bc-8b0f-7b7685a3d36b",
+            "pin": "914b4eaf-67d5-4e01-a13c-0a4ba5a97ead"
+        },
+        "c29b8398-9ce3-4a09-864f-7173eab4808c": {
+            "gate": "5abc16ba-5d27-46bc-8b0f-7b7685a3d36b",
+            "pin": "b5dfa031-2240-4c92-bc28-efe9bcca12e9"
+        },
+        "ef5b664f-0cd4-4b88-83b3-9fda2ce3196e": {
+            "gate": "5abc16ba-5d27-46bc-8b0f-7b7685a3d36b",
+            "pin": "b5dfa031-2240-4c92-bc28-efe9bcca12e9"
+        },
+        "f43c4b7c-8068-48b8-8da3-b0b406531295": {
+            "gate": "5abc16ba-5d27-46bc-8b0f-7b7685a3d36b",
+            "pin": "b5dfa031-2240-4c92-bc28-efe9bcca12e9"
+        }
+    },
+    "parametric": {},
+    "tags": [],
+    "type": "part",
+    "uuid": "2b24d2db-c452-4781-a220-12f6f8759cd3",
+    "value": [
+        false,
+        ""
+    ]
+}

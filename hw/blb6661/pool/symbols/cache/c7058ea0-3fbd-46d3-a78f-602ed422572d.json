@@ -1,0 +1,185 @@
+{
+    "arcs": {},
+    "can_expand": false,
+    "junctions": {
+        "13f7c510-e67d-4c53-9276-965eaf95b734": {
+            "position": [
+                -10000000,
+                7500000
+            ]
+        },
+        "55ab14cd-9c0f-42cf-9ebc-615db8f14180": {
+            "position": [
+                10000000,
+                -7500000
+            ]
+        },
+        "5fb069b6-be92-4be7-9d4f-073b9150775a": {
+            "position": [
+                -10000000,
+                -7500000
+            ]
+        },
+        "8628be8e-b6a8-4a78-917e-5cebf90fd91e": {
+            "position": [
+                10000000,
+                7500000
+            ]
+        }
+    },
+    "lines": {
+        "5cb1a9a6-a221-4cc6-a35a-4ba1e9895218": {
+            "from": "8628be8e-b6a8-4a78-917e-5cebf90fd91e",
+            "layer": 0,
+            "to": "55ab14cd-9c0f-42cf-9ebc-615db8f14180",
+            "width": 0
+        },
+        "8c74ef7d-32ea-469e-807d-4d1ef53b8f91": {
+            "from": "55ab14cd-9c0f-42cf-9ebc-615db8f14180",
+            "layer": 0,
+            "to": "5fb069b6-be92-4be7-9d4f-073b9150775a",
+            "width": 0
+        },
+        "ebb2443a-62a1-40c6-bad5-7862cb353d47": {
+            "from": "5fb069b6-be92-4be7-9d4f-073b9150775a",
+            "layer": 0,
+            "to": "13f7c510-e67d-4c53-9276-965eaf95b734",
+            "width": 0
+        },
+        "fc8c0c20-d056-4568-bfae-ededcb161b78": {
+            "from": "13f7c510-e67d-4c53-9276-965eaf95b734",
+            "layer": 0,
+            "to": "8628be8e-b6a8-4a78-917e-5cebf90fd91e",
+            "width": 0
+        }
+    },
+    "name": "High-Side Measurement Current Shunt Monitor",
+    "pins": {
+        "079fa80a-bfa0-4fd1-a9e9-5fb1467d950b": {
+            "decoration": {
+                "clock": false,
+                "dot": false,
+                "driver": "default",
+                "schmitt": false
+            },
+            "length": 2500000,
+            "name_orientation": "in_line",
+            "name_visible": true,
+            "orientation": "left",
+            "pad_visible": true,
+            "position": [
+                -12500000,
+                0
+            ]
+        },
+        "09e27cf6-2882-4a32-9619-c6fa3f0e699e": {
+            "decoration": {
+                "clock": false,
+                "dot": false,
+                "driver": "default",
+                "schmitt": false
+            },
+            "length": 2500000,
+            "name_orientation": "in_line",
+            "name_visible": true,
+            "orientation": "down",
+            "pad_visible": true,
+            "position": [
+                0,
+                -10000000
+            ]
+        },
+        "90b5d22e-c54d-4c95-9adc-120c35c18af2": {
+            "decoration": {
+                "clock": false,
+                "dot": false,
+                "driver": "default",
+                "schmitt": false
+            },
+            "length": 2500000,
+            "name_orientation": "in_line",
+            "name_visible": true,
+            "orientation": "up",
+            "pad_visible": true,
+            "position": [
+                -2500000,
+                10000000
+            ]
+        },
+        "b1278c57-9890-45bc-b8cb-77c15e504a9c": {
+            "decoration": {
+                "clock": false,
+                "dot": false,
+                "driver": "default",
+                "schmitt": false
+            },
+            "length": 2500000,
+            "name_orientation": "in_line",
+            "name_visible": true,
+            "orientation": "right",
+            "pad_visible": true,
+            "position": [
+                12500000,
+                0
+            ]
+        },
+        "e85bde6b-2c0d-4598-b00e-d99580ecf804": {
+            "decoration": {
+                "clock": false,
+                "dot": false,
+                "driver": "default",
+                "schmitt": false
+            },
+            "length": 2500000,
+            "name_orientation": "in_line",
+            "name_visible": true,
+            "orientation": "up",
+            "pad_visible": true,
+            "position": [
+                2500000,
+                10000000
+            ]
+        }
+    },
+    "polygons": {},
+    "text_placements": {},
+    "texts": {
+        "b85d1504-31aa-414e-be9c-1ec3a73af5fa": {
+            "font": "simplex",
+            "from_smash": false,
+            "layer": 0,
+            "origin": "center",
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    -10000000,
+                    -8750000
+                ]
+            },
+            "size": 1500000,
+            "text": "$VALUE",
+            "width": 0
+        },
+        "d635df97-6c5c-4e19-8214-affa17e935d9": {
+            "font": "simplex",
+            "from_smash": false,
+            "layer": 0,
+            "origin": "center",
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    -10000000,
+                    8750000
+                ]
+            },
+            "size": 1500000,
+            "text": "$REFDES",
+            "width": 0
+        }
+    },
+    "type": "symbol",
+    "unit": "aee8fa4f-7dce-4cb9-80f0-3697d48dd2fa",
+    "uuid": "c7058ea0-3fbd-46d3-a78f-602ed422572d"
+}

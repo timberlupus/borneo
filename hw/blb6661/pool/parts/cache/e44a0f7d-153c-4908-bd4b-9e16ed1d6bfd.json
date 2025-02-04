@@ -1,0 +1,38 @@
+{
+    "MPN": [
+        false,
+        "LGS63042EP"
+    ],
+    "base": "51661ea7-bb5e-43d7-bdf8-e18c503fe542",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        true,
+        "Buck-Boost 60V LED Driver"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        "Legend-Si"
+    ],
+    "model": "29d0a977-9745-4b2b-92ca-07d89eac93cf",
+    "orderable_MPNs": {
+        "d501ff02-4f00-4217-97d0-90976fee1aba": "C5280696"
+    },
+    "parametric": {},
+    "tags": [
+        "jlc-smt-extended",
+        "led-driver",
+        "smd",
+        "soic-8"
+    ],
+    "type": "part",
+    "uuid": "e44a0f7d-153c-4908-bd4b-9e16ed1d6bfd",
+    "value": [
+        false,
+        ""
+    ]
+}

@@ -1,0 +1,47 @@
+{
+    "MPN": [
+        false,
+        "SMAJ40CA"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "40V/6.2A"
+    ],
+    "entity": "59aa6a7a-4c55-4086-9a72-294974daed3a",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "MDD"
+    ],
+    "model": "9191c081-b934-4c52-be70-c15d3f276956",
+    "orderable_MPNs": {
+        "b8f381fb-edbb-4529-ae6a-486a4cdb5840": "C113970"
+    },
+    "package": "cbc12b97-236c-437e-84ef-a99dc1058811",
+    "pad_map": {
+        "4b55fc62-3250-4b00-a3dd-162820af3522": {
+            "gate": "fcfc554e-849c-4404-bd55-29c3ae59b82b",
+            "pin": "b89682be-af77-4478-bbfe-708f08ff00c0"
+        },
+        "65da24be-03af-42af-86c1-729b248ed1a0": {
+            "gate": "fcfc554e-849c-4404-bd55-29c3ae59b82b",
+            "pin": "1b95d7ad-7680-4eb9-80bc-d5fbb8dd05b2"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "jlc-smt-extended",
+        "tvs"
+    ],
+    "type": "part",
+    "uuid": "f3d56337-f432-4764-b150-9c66433b5166",
+    "value": [
+        false,
+        "40V/6.2A"
+    ]
+}

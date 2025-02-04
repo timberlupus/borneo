@@ -1,0 +1,48 @@
+{
+    "MPN": [
+        false,
+        "01550900M"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "Fuse Block, Cartridge, OMNI-BLOK Series, 125V, 10A, J-Lead | Littelfuse 01550900M"
+    ],
+    "entity": "9c8a3c80-4380-4a27-812d-0091453858c8",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Littlefuse"
+    ],
+    "model": "4286765a-33e5-4e04-8cc3-a05119dbce7d",
+    "orderable_MPNs": {
+        "02f84f10-c69c-4b28-acca-5a5125eb64a1": "C108518"
+    },
+    "package": "d9f6deac-84df-48d6-8017-f8af7f692e46",
+    "pad_map": {
+        "81ef7db8-527c-4657-9bdb-84617ad7f55b": {
+            "gate": "2d506fb9-7efb-4f40-bf74-a438d9f1d5fd",
+            "pin": "1a542ef8-6259-4b4e-a4a9-3a8af6039ed0"
+        },
+        "a3c7ed7e-cfaa-4aeb-abce-59cd86ea52ff": {
+            "gate": "2d506fb9-7efb-4f40-bf74-a438d9f1d5fd",
+            "pin": "df0900ed-f3c8-4296-a321-aa5c2257ce74"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "fuse-holder",
+        "jlc-smt-extended",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "c00024f1-d9f0-447a-8a9b-d099f5432ccc",
+    "value": [
+        false,
+        ""
+    ]
+}

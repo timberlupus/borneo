@@ -1,0 +1,109 @@
+{
+    "arcs": {},
+    "default_model": "1d5d0b43-2b4d-4b0c-aae5-c18c1d5f5d30",
+    "dimensions": {},
+    "grid_settings": {
+        "current": {
+            "mode": "square",
+            "name": "",
+            "origin": [
+                0,
+                0
+            ],
+            "spacing_rect": [
+                1000000,
+                1000000
+            ],
+            "spacing_square": 1000000
+        },
+        "grids": {}
+    },
+    "junctions": {},
+    "keepouts": {},
+    "lines": {},
+    "manufacturer": "Krhro",
+    "models": {
+        "1d5d0b43-2b4d-4b0c-aae5-c18c1d5f5d30": {
+            "filename": "3d_models/cache/8eeaf956-e4a0-4db5-95bb-b90e600e8069/3d_models/mechanical/switch/krhro/K2-1109SE-I4SW-04.step",
+            "pitch": 0,
+            "roll": 0,
+            "x": -140000,
+            "y": 0,
+            "yaw": 49152,
+            "z": 2550000
+        }
+    },
+    "name": "K2-1109SE-I4SW-04",
+    "pads": {
+        "1cb0f50f-e62f-49c0-81af-b714292dce40": {
+            "name": "1",
+            "padstack": "3846f4bf-7acf-403a-bc36-771ec675eac9",
+            "parameter_set": {
+                "pad_height": 900000,
+                "pad_width": 2100000
+            },
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    0,
+                    1500000
+                ]
+            }
+        },
+        "d4dd13a1-fce0-4552-abe1-443bf4550e5a": {
+            "name": "2",
+            "padstack": "3846f4bf-7acf-403a-bc36-771ec675eac9",
+            "parameter_set": {
+                "pad_height": 900000,
+                "pad_width": 2100000
+            },
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    0,
+                    -1500000
+                ]
+            }
+        },
+        "fa099c57-fc05-4644-bb81-e588f771d3ab": {
+            "name": "HOLE",
+            "padstack": "762c84c2-187d-454a-af81-d3381bec5257",
+            "parameter_set": {
+                "hole_diameter": 600000
+            },
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    2550000,
+                    0
+                ]
+            }
+        }
+    },
+    "parameter_program": "",
+    "parameter_set": {},
+    "polygons": {},
+    "rules": {
+        "clearance_package": {
+            "clearance_silkscreen_cu": 200000,
+            "clearance_silkscreen_pkg": 200000,
+            "enabled": true,
+            "order": -1
+        },
+        "package_checks": {
+            "enabled": true,
+            "order": -1
+        }
+    },
+    "tags": [
+        "button",
+        "smd",
+        "switch"
+    ],
+    "texts": {},
+    "type": "package",
+    "uuid": "defa5c88-6f86-4f3f-a686-0185e7fcb415"
+}

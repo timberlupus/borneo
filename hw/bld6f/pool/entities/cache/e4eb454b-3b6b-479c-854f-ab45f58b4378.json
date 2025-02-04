@@ -1,0 +1,18 @@
+{
+    "gates": {
+        "d5a8a569-55af-4fb2-9def-8a64243648cd": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "4f7a5892-0725-4d1d-8d61-f2ad8ad0a0a3"
+        }
+    },
+    "manufacturer": "Legend-Si",
+    "name": "LGS6304X",
+    "prefix": "U",
+    "tags": [
+        "led-driver"
+    ],
+    "type": "entity",
+    "uuid": "e4eb454b-3b6b-479c-854f-ab45f58b4378"
+}

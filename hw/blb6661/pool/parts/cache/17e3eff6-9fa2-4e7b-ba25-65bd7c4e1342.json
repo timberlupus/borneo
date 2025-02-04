@@ -1,0 +1,35 @@
+{
+    "MPN": [
+        false,
+        "SDNT2012X103F3950FTF"
+    ],
+    "base": "5e97bf03-a457-415b-af78-35876c9d2bbb",
+    "datasheet": [
+        false,
+        "https://item.szlcsc.com/97172.html"
+    ],
+    "description": [
+        false,
+        "10kΩ 电阻精度:±1% 3950K"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "Sunlord"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "99fc35be-26f0-422e-b7e1-a9c4af9c6d56": "C95968"
+    },
+    "parametric": {},
+    "tags": [
+        "jlc-smt-extended"
+    ],
+    "type": "part",
+    "uuid": "17e3eff6-9fa2-4e7b-ba25-65bd7c4e1342",
+    "value": [
+        false,
+        "10k/3950K/1%"
+    ]
+}

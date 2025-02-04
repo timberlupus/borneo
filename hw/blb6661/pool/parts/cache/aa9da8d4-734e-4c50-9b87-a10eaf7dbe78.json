@@ -1,0 +1,42 @@
+{
+    "MPN": [
+        false,
+        "FNR4030S100MT"
+    ],
+    "base": "b5afd7b6-b68b-4fcd-a504-a161b77057b4",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "10uH ±20% 2.4A"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        "Cjang"
+    ],
+    "model": "f07e411e-80ad-4a35-938e-bbceba8b1e26",
+    "orderable_MPNs": {
+        "82cf4560-b0bb-4aba-b7ea-258ae6ce6826": "C167879"
+    },
+    "parametric": {
+        "dcr": "0.13",
+        "idc": "2.4",
+        "table": "inductors",
+        "value": "1e-05"
+    },
+    "tags": [
+        "inductor",
+        "jlc-smt-extended",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "aa9da8d4-734e-4c50-9b87-a10eaf7dbe78",
+    "value": [
+        false,
+        ""
+    ]
+}

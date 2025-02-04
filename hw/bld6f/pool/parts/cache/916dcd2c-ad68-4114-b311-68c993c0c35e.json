@@ -1,0 +1,51 @@
+{
+    "MPN": [
+        false,
+        "CC0603KRX7R9BB104"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "100nF (104) ±10% 50V X7R"
+    ],
+    "entity": "ca83a84f-6183-4088-84b6-5d79b2a119d4",
+    "inherit_model": false,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Yageo"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "package": "0c6f5ea3-c601-4b00-b985-6db23ce77246",
+    "pad_map": {
+        "5eb3d31f-6cc4-43f5-a1e0-6ff6d5834e89": {
+            "gate": "9bfcf213-2a7e-444e-8312-ce57209fc9ec",
+            "pin": "29995253-b4b1-4c7c-a049-b6db2713ca7c"
+        },
+        "dbd0c5ca-3d47-4dc1-9012-bed19d601c53": {
+            "gate": "9bfcf213-2a7e-444e-8312-ce57209fc9ec",
+            "pin": "852f1fe6-06dc-4661-8a14-61a9a6ebb26a"
+        }
+    },
+    "parametric": {
+        "table": "capacitors",
+        "tolerance": "10",
+        "type": "X5R",
+        "value": "1e-07",
+        "wvdc": "50"
+    },
+    "tags": [
+        "capacitor",
+        "jlc-smt-base",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "916dcd2c-ad68-4114-b311-68c993c0c35e",
+    "value": [
+        false,
+        "100n/50V"
+    ]
+}

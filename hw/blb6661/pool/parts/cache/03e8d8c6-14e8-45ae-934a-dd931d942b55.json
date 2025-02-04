@@ -1,0 +1,30 @@
+{
+    "MPN": [
+        false,
+        "Generic SMD 6070 RGB LED (6-Terminal)"
+    ],
+    "base": "381f33f3-7013-4532-92b8-6f5d804e0428",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        true,
+        ""
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        ""
+    ],
+    "model": "28d554b9-0034-4b10-856c-61f5dbf2561c",
+    "parametric": {},
+    "tags": [],
+    "type": "part",
+    "uuid": "03e8d8c6-14e8-45ae-934a-dd931d942b55",
+    "value": [
+        false,
+        "LED RGB"
+    ]
+}

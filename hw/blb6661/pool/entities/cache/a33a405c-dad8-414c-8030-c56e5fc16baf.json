@@ -1,0 +1,18 @@
+{
+    "gates": {
+        "a0f16cc4-b717-4088-acf0-c2c5fdc01bd1": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "56e0ec70-a580-48a3-90d5-c4a380c4e799"
+        }
+    },
+    "manufacturer": "",
+    "name": "NTC Resistor",
+    "prefix": "R",
+    "tags": [
+        "ntc"
+    ],
+    "type": "entity",
+    "uuid": "a33a405c-dad8-414c-8030-c56e5fc16baf"
+}

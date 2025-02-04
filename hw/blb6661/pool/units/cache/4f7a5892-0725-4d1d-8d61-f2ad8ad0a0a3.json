@@ -1,0 +1,44 @@
+{
+    "manufacturer": "Legend-Si",
+    "name": "LGS6304X",
+    "pins": {
+        "06e9352b-47fb-40d6-89d3-b0dab910bebf": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "OVP",
+            "swap_group": 0
+        },
+        "08608608-5976-4dce-a12f-10f6146e6aca": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "GND",
+            "swap_group": 0
+        },
+        "209a969d-c17c-4e4a-9a59-8e94ab750a1a": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "SW",
+            "swap_group": 0
+        },
+        "5249afe2-74df-452e-bcd7-7048ebb4fc15": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "CSN",
+            "swap_group": 0
+        },
+        "952728a3-3d14-4c2a-9eb5-42d37bb11135": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "EN",
+            "swap_group": 0
+        },
+        "d122e710-3e38-41d5-8d84-488402e1b553": {
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "VIN",
+            "swap_group": 0
+        }
+    },
+    "type": "unit",
+    "uuid": "4f7a5892-0725-4d1d-8d61-f2ad8ad0a0a3"
+}

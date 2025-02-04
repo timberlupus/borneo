@@ -1,0 +1,38 @@
+{
+    "manufacturer": "",
+    "name": "High-Side Measurement Current Shunt Monitor",
+    "pins": {
+        "079fa80a-bfa0-4fd1-a9e9-5fb1467d950b": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "VDD",
+            "swap_group": 0
+        },
+        "09e27cf6-2882-4a32-9619-c6fa3f0e699e": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "GND",
+            "swap_group": 0
+        },
+        "90b5d22e-c54d-4c95-9adc-120c35c18af2": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "VIN+",
+            "swap_group": 0
+        },
+        "b1278c57-9890-45bc-b8cb-77c15e504a9c": {
+            "direction": "output",
+            "names": [],
+            "primary_name": "OUT",
+            "swap_group": 0
+        },
+        "e85bde6b-2c0d-4598-b00e-d99580ecf804": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "VIN-",
+            "swap_group": 0
+        }
+    },
+    "type": "unit",
+    "uuid": "aee8fa4f-7dce-4cb9-80f0-3697d48dd2fa"
+}

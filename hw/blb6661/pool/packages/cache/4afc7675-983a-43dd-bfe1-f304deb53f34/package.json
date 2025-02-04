@@ -1,0 +1,292 @@
+{
+    "arcs": {},
+    "default_model": "f07e411e-80ad-4a35-938e-bbceba8b1e26",
+    "dimensions": {},
+    "grid_settings": {
+        "current": {
+            "mode": "square",
+            "name": "",
+            "origin": [
+                0,
+                0
+            ],
+            "spacing_rect": [
+                1000000,
+                1000000
+            ],
+            "spacing_square": 1000000
+        },
+        "grids": {}
+    },
+    "junctions": {
+        "1bf2398a-8f36-4fe7-a146-054b7ce8a4e3": {
+            "position": [
+                -2260000,
+                2260000
+            ]
+        },
+        "4c6da779-8b9b-414c-acc3-900768525711": {
+            "position": [
+                -2260000,
+                -2110000
+            ]
+        },
+        "4e96705b-9de2-4c61-b306-9f4073fe53d9": {
+            "position": [
+                -2260000,
+                2110000
+            ]
+        },
+        "5b2f578f-54ea-409e-a509-62a55502ef15": {
+            "position": [
+                2260000,
+                2260000
+            ]
+        },
+        "7267d717-c4c4-4afd-bdd3-cfac921e231c": {
+            "position": [
+                2260000,
+                2110000
+            ]
+        },
+        "af5bc8da-71d8-4138-978a-f8cfbaa0d00f": {
+            "position": [
+                2260000,
+                -2260000
+            ]
+        },
+        "b0c481eb-bfa9-4751-a58b-c70fbac13fc4": {
+            "position": [
+                2260000,
+                -2110000
+            ]
+        },
+        "cc5611cb-9430-45fc-9ecf-07ddd7b0cb20": {
+            "position": [
+                -2260000,
+                -2260000
+            ]
+        }
+    },
+    "keepouts": {},
+    "lines": {
+        "0adc7bab-d508-4df5-87f6-b854c1697518": {
+            "from": "cc5611cb-9430-45fc-9ecf-07ddd7b0cb20",
+            "layer": 20,
+            "to": "4c6da779-8b9b-414c-acc3-900768525711",
+            "width": 150000
+        },
+        "4e9815a1-8da1-427b-9e0b-0c2297fed7c7": {
+            "from": "1bf2398a-8f36-4fe7-a146-054b7ce8a4e3",
+            "layer": 20,
+            "to": "4e96705b-9de2-4c61-b306-9f4073fe53d9",
+            "width": 150000
+        },
+        "5f10c15f-bc63-4881-8f24-55b223e5ffe8": {
+            "from": "5b2f578f-54ea-409e-a509-62a55502ef15",
+            "layer": 20,
+            "to": "7267d717-c4c4-4afd-bdd3-cfac921e231c",
+            "width": 150000
+        },
+        "78b734d3-f1c9-4207-bdf8-9b6700c3f317": {
+            "from": "af5bc8da-71d8-4138-978a-f8cfbaa0d00f",
+            "layer": 20,
+            "to": "b0c481eb-bfa9-4751-a58b-c70fbac13fc4",
+            "width": 150000
+        },
+        "9507bb2a-7f41-4187-8440-a4b1c05db6db": {
+            "from": "cc5611cb-9430-45fc-9ecf-07ddd7b0cb20",
+            "layer": 20,
+            "to": "af5bc8da-71d8-4138-978a-f8cfbaa0d00f",
+            "width": 150000
+        },
+        "a0d36c95-541d-4a71-bc40-12158d480484": {
+            "from": "1bf2398a-8f36-4fe7-a146-054b7ce8a4e3",
+            "layer": 20,
+            "to": "5b2f578f-54ea-409e-a509-62a55502ef15",
+            "width": 150000
+        }
+    },
+    "manufacturer": "Cjang",
+    "models": {
+        "f07e411e-80ad-4a35-938e-bbceba8b1e26": {
+            "filename": "3d_models/cache/8eeaf956-e4a0-4db5-95bb-b90e600e8069/3d_models/passive/inductor/cjang/L_Changjiang_FNR4030S.step",
+            "pitch": 0,
+            "roll": 0,
+            "x": 0,
+            "y": 0,
+            "yaw": 0,
+            "z": 0
+        }
+    },
+    "name": "FNR4030S",
+    "pads": {
+        "39b20285-d3f2-4b84-bd35-b4f9c6a98225": {
+            "name": "2",
+            "padstack": "3846f4bf-7acf-403a-bc36-771ec675eac9",
+            "parameter_set": {
+                "pad_height": 3700000,
+                "pad_width": 1100000
+            },
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    1500000,
+                    0
+                ]
+            }
+        },
+        "eaae036a-34c6-40f8-90b2-cc2bb17372a1": {
+            "name": "1",
+            "padstack": "3846f4bf-7acf-403a-bc36-771ec675eac9",
+            "parameter_set": {
+                "pad_height": 3700000,
+                "pad_width": 1100000
+            },
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    -1500000,
+                    0
+                ]
+            }
+        }
+    },
+    "parameter_program": "4.000mm 4.000mm\nget-parameter [ courtyard_expansion ]\n2 * +xy\nset-polygon [ courtyard rectangle 0.000mm 0.000mm ]",
+    "parameter_set": {
+        "courtyard_expansion": 200000
+    },
+    "polygons": {
+        "736a72f6-fe02-44f7-abf4-a250d4fd9a76": {
+            "layer": 50,
+            "parameter_class": "",
+            "vertices": [
+                {
+                    "arc_center": [
+                        0,
+                        0
+                    ],
+                    "arc_reverse": false,
+                    "position": [
+                        2000000,
+                        -2000000
+                    ],
+                    "type": "line"
+                },
+                {
+                    "arc_center": [
+                        0,
+                        0
+                    ],
+                    "arc_reverse": false,
+                    "position": [
+                        2000000,
+                        2000000
+                    ],
+                    "type": "line"
+                },
+                {
+                    "arc_center": [
+                        0,
+                        0
+                    ],
+                    "arc_reverse": false,
+                    "position": [
+                        -2000000,
+                        2000000
+                    ],
+                    "type": "line"
+                },
+                {
+                    "arc_center": [
+                        0,
+                        0
+                    ],
+                    "arc_reverse": false,
+                    "position": [
+                        -2000000,
+                        -2000000
+                    ],
+                    "type": "line"
+                }
+            ]
+        },
+        "df946138-e423-4778-8e5a-25ce660feab5": {
+            "layer": 60,
+            "parameter_class": "courtyard",
+            "vertices": [
+                {
+                    "arc_center": [
+                        0,
+                        0
+                    ],
+                    "arc_reverse": false,
+                    "position": [
+                        -2200000,
+                        -2200000
+                    ],
+                    "type": "line"
+                },
+                {
+                    "arc_center": [
+                        0,
+                        0
+                    ],
+                    "arc_reverse": false,
+                    "position": [
+                        -2200000,
+                        2200000
+                    ],
+                    "type": "line"
+                },
+                {
+                    "arc_center": [
+                        0,
+                        0
+                    ],
+                    "arc_reverse": false,
+                    "position": [
+                        2200000,
+                        2200000
+                    ],
+                    "type": "line"
+                },
+                {
+                    "arc_center": [
+                        0,
+                        0
+                    ],
+                    "arc_reverse": false,
+                    "position": [
+                        2200000,
+                        -2200000
+                    ],
+                    "type": "line"
+                }
+            ]
+        }
+    },
+    "rules": {
+        "clearance_package": {
+            "clearance_silkscreen_cu": 200000,
+            "clearance_silkscreen_pkg": 200000,
+            "enabled": true,
+            "order": -1
+        },
+        "package_checks": {
+            "enabled": true,
+            "order": -1
+        }
+    },
+    "tags": [
+        "inductor",
+        "power",
+        "shielded",
+        "wirewound"
+    ],
+    "texts": {},
+    "type": "package",
+    "uuid": "4afc7675-983a-43dd-bfe1-f304deb53f34"
+}

@@ -1,0 +1,44 @@
+{
+    "manufacturer": "",
+    "name": "RGB LED (6-Terminal)",
+    "pins": {
+        "044f4cff-dd95-4495-a4b1-0039a425a7fb": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "R+",
+            "swap_group": 0
+        },
+        "0558e550-b106-4152-9146-afde3e3d07d6": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "R-",
+            "swap_group": 0
+        },
+        "05e70ef8-354c-4a26-a8e9-e0cf83d5e212": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "G+",
+            "swap_group": 0
+        },
+        "40471436-ff9e-405d-9080-28ec54f07aac": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "B+",
+            "swap_group": 0
+        },
+        "a8365feb-42ae-43c8-b909-07210c3701e4": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "G-",
+            "swap_group": 0
+        },
+        "c100ac32-582f-4f75-b0bf-b17edcf5e3f4": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "B-",
+            "swap_group": 0
+        }
+    },
+    "type": "unit",
+    "uuid": "2749bd83-66d2-4063-90b5-81ef44c16bb0"
+}

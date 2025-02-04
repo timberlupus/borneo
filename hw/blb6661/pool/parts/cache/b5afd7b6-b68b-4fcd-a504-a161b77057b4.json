@@ -1,0 +1,49 @@
+{
+    "MPN": [
+        false,
+        "FNR4030S"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "Wire wound SMD power inductor"
+    ],
+    "entity": "1d534e1d-704a-4d44-a6e6-c6106a2827ab",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Cjang"
+    ],
+    "model": "f07e411e-80ad-4a35-938e-bbceba8b1e26",
+    "package": "4afc7675-983a-43dd-bfe1-f304deb53f34",
+    "pad_map": {
+        "39b20285-d3f2-4b84-bd35-b4f9c6a98225": {
+            "gate": "48af78e5-730e-44eb-977a-cf188e4fcb39",
+            "pin": "dda0ec99-5d70-4fbe-a8db-897542e7554e"
+        },
+        "eaae036a-34c6-40f8-90b2-cc2bb17372a1": {
+            "gate": "48af78e5-730e-44eb-977a-cf188e4fcb39",
+            "pin": "6a44037c-65e2-4876-9359-42890048841d"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "inductor"
+    ],
+    "type": "part",
+    "uuid": "b5afd7b6-b68b-4fcd-a504-a161b77057b4",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}

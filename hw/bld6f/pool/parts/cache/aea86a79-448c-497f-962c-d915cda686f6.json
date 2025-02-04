@@ -1,0 +1,37 @@
+{
+    "MPN": [
+        false,
+        "INA139NA/3K"
+    ],
+    "base": "78479652-b347-4bd3-a84c-d37e327cec94",
+    "datasheet": [
+        true,
+        "https://www.ti.com/lit/ds/symlink/ina139.pdf"
+    ],
+    "description": [
+        true,
+        "INA1x9 High-Side Measurement Current Shunt Monitor"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        "Texas Instruments"
+    ],
+    "model": "eb54e7ca-dcad-4e09-bd45-d2e32cddaa2a",
+    "orderable_MPNs": {
+        "959d27dd-0cf2-4f64-ac1a-a189b690035a": "C129947"
+    },
+    "parametric": {},
+    "tags": [
+        "current-sensor",
+        "ic",
+        "jlc-smt-extended"
+    ],
+    "type": "part",
+    "uuid": "aea86a79-448c-497f-962c-d915cda686f6",
+    "value": [
+        false,
+        "INA139"
+    ]
+}
