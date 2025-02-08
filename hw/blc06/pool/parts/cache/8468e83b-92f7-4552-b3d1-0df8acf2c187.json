@@ -19,6 +19,9 @@
         "UniOhm"
     ],
     "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "e31e2deb-006d-4bd1-86f5-62e64bf56c8b": "C25890"
+    },
     "parametric": {
         "pmax": "0",
         "table": "resistors",

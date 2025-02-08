@@ -19,6 +19,9 @@
         "Murata"
     ],
     "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "f220eee4-dd73-4c4a-8220-5d2f4cd5ebe5": "C440198"
+    },
     "parametric": {
         "table": "capacitors",
         "tolerance": "10",

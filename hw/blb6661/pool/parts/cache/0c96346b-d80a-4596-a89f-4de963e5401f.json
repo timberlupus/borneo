@@ -1,0 +1,54 @@
+{
+    "MPN": [
+        false,
+        "HoTCu-10.2D-0R"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "0R0 Jumper/20A"
+    ],
+    "entity": "3ce770af-7be0-4f72-b2af-2c8010911aaf",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Milliohm"
+    ],
+    "model": "b6b715e9-ab8e-4a1d-baad-8ac9a5071c7c",
+    "orderable_MPNs": {
+        "e1ba0e6e-f698-40b2-b899-e9a8eb2984b8": "C5127898"
+    },
+    "package": "11dab3d8-6cf1-4893-974d-fe29c5c796d0",
+    "pad_map": {
+        "2e3158fc-8f1a-4795-8309-ae71fe8b49f5": {
+            "gate": "48af78e5-730e-44eb-977a-cf188e4fcb39",
+            "pin": "6a44037c-65e2-4876-9359-42890048841d"
+        },
+        "ec66cc87-8fc1-4109-95b6-8c1bf481b56b": {
+            "gate": "48af78e5-730e-44eb-977a-cf188e4fcb39",
+            "pin": "dda0ec99-5d70-4fbe-a8db-897542e7554e"
+        }
+    },
+    "parametric": {
+        "pmax": "0",
+        "table": "resistors",
+        "tolerance": "0",
+        "value": "0"
+    },
+    "tags": [
+        "jlc-smt-extended",
+        "jumper",
+        "resistor",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "0c96346b-d80a-4596-a89f-4de963e5401f",
+    "value": [
+        false,
+        "0R0"
+    ]
+}

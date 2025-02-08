@@ -1,0 +1,40 @@
+{
+    "MPN": [
+        false,
+        "HoJLR1206-1W-10mR-1%"
+    ],
+    "base": "da4112f8-5bf0-464b-b882-2fe7d78d314d",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        true,
+        "HoJLR1206 series base"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        "Milliohm"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "4be60157-c461-48d5-9593-828f187b9436": "C2903499"
+    },
+    "parametric": {
+        "pmax": "1",
+        "table": "resistors",
+        "tolerance": "1",
+        "value": "0.01"
+    },
+    "tags": [
+        "jlc-smt-extended"
+    ],
+    "type": "part",
+    "uuid": "04d55a72-2e30-418f-b27d-7f219f58d4b6",
+    "value": [
+        false,
+        "10mΩ/±1%/1W"
+    ]
+}

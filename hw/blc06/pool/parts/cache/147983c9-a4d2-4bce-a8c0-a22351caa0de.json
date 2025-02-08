@@ -19,6 +19,9 @@
         "Joulwatt"
     ],
     "model": "eb54e7ca-dcad-4e09-bd45-d2e32cddaa2a",
+    "orderable_MPNs": {
+        "5c090a2a-5813-4d26-9378-6da72d040c2a": "C185109"
+    },
     "parametric": {},
     "tags": [
         "buck",

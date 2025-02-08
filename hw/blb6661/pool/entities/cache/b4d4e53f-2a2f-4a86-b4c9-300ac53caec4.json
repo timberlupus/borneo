@@ -1,0 +1,20 @@
+{
+    "gates": {
+        "62f4ee57-7200-4c23-901f-189cf7832883": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "2ca96c71-738e-4941-8e37-77cf65bdf58a"
+        }
+    },
+    "manufacturer": "Borneo IoT",
+    "name": "Six channel LED driver with current sensor",
+    "prefix": "U",
+    "tags": [
+        "borneo",
+        "led-driver",
+        "module"
+    ],
+    "type": "entity",
+    "uuid": "b4d4e53f-2a2f-4a86-b4c9-300ac53caec4"
+}

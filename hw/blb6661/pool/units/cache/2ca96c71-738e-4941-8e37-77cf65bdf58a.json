@@ -1,0 +1,134 @@
+{
+    "manufacturer": "Borneo IoT",
+    "name": "Six-channel LED driver with current sensor",
+    "pins": {
+        "213aff38-4e75-49fd-a56d-b42f45649ec2": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "PWM5",
+            "swap_group": 0
+        },
+        "24bb3eb1-e2ba-42a9-8646-ed1791472b6b": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "PWM1",
+            "swap_group": 0
+        },
+        "34a92c37-d31e-4bc1-b036-e0e702e07ed8": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "VIN",
+            "swap_group": 0
+        },
+        "361b7789-957b-495c-b351-818f3b9112f4": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "LED5+",
+            "swap_group": 0
+        },
+        "69044953-fe11-4a98-84ee-474569e50204": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "LED2+",
+            "swap_group": 0
+        },
+        "6bd22228-5492-4e36-a469-53714e699edf": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "LED3+",
+            "swap_group": 0
+        },
+        "6eedbd1c-4c38-42dc-8790-4e25459ce9f3": {
+            "direction": "output",
+            "names": [],
+            "primary_name": "CSOUT",
+            "swap_group": 0
+        },
+        "77a530b4-cc6a-486b-ae46-6b8771c136e6": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "PWM0",
+            "swap_group": 0
+        },
+        "87f5a887-8ee3-4b5d-b728-56f6351a4386": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "LED1-",
+            "swap_group": 0
+        },
+        "8eeaae1d-d0a4-4849-9d23-14a8b4b243dc": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "LED0+",
+            "swap_group": 0
+        },
+        "a3ce4a68-64bd-47ea-95d8-db13d2dbe10f": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "PWM4",
+            "swap_group": 0
+        },
+        "cf8872eb-f4b1-44fe-921b-d25bf13a5369": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "LED3-",
+            "swap_group": 0
+        },
+        "d346de0c-f969-40e0-85de-09792c6242d7": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "LED1+",
+            "swap_group": 0
+        },
+        "d9fd7ecb-0077-4bf0-afce-a84557f9ca47": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "LED5-",
+            "swap_group": 0
+        },
+        "dd1c0a71-a705-4dd8-84e2-5b0d70dcbe3d": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "LED4-",
+            "swap_group": 0
+        },
+        "dddc7a57-9aa4-47b0-b37f-d459a838878e": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "LED4+",
+            "swap_group": 0
+        },
+        "e27e9a70-f2d6-4537-866e-f8d56ca64bed": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "LED2-",
+            "swap_group": 0
+        },
+        "e6ae4233-4191-4a33-a69a-1fbdd9c529da": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "PWM3",
+            "swap_group": 0
+        },
+        "e91fc502-d674-4493-9290-35f778a8ea1d": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "LED0-",
+            "swap_group": 0
+        },
+        "f542260c-d89f-468d-a81c-f347e79d1638": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "PWM2",
+            "swap_group": 0
+        },
+        "fc93e938-072a-45d0-b1dd-caf9c1adb022": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "GND",
+            "swap_group": 0
+        }
+    },
+    "type": "unit",
+    "uuid": "2ca96c71-738e-4941-8e37-77cf65bdf58a"
+}

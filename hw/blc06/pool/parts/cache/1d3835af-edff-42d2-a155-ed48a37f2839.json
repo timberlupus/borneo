@@ -19,6 +19,9 @@
         "Samsung"
     ],
     "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "950665ba-48f1-4876-9a0f-6ffce5d5f68a": "C96446"
+    },
     "package": "0c6f5ea3-c601-4b00-b985-6db23ce77246",
     "pad_map": {
         "5eb3d31f-6cc4-43f5-a1e0-6ff6d5834e89": {

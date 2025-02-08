@@ -3,3 +3,5 @@ pool/*.db-*
 *.imp_meta
 *.autosave
 *.bak
+production/
+_output/

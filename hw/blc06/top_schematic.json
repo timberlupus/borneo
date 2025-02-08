@@ -10,8 +10,8 @@
     "group_tag_visible": false,
     "name": "",
     "pdf_export_settings": {
-        "min_line_width": 150000,
-        "output_filename": "_output/blc06mk1_sch.pdf"
+        "min_line_width": 250000,
+        "output_filename": "_output/blc06mk1r4_sch.pdf"
     },
     "rules": {
         "connectivity": {
@@ -61,7 +61,7 @@
                 },
                 "0ac31a1c-0f05-46a8-bd8f-8fc674061a17": {
                     "position": [
-                        147500000,
+                        145000000,
                         112500000
                     ]
                 },
@@ -73,7 +73,7 @@
                 },
                 "103cd931-9121-4063-9e11-d26a92e6623a": {
                     "position": [
-                        147500000,
+                        145000000,
                         122500000
                     ]
                 },
@@ -93,6 +93,12 @@
                     "position": [
                         217500000,
                         78750000
+                    ]
+                },
+                "13f4d2c2-b62a-48a6-9be3-443de93d7a13": {
+                    "position": [
+                        208750000,
+                        127500000
                     ]
                 },
                 "14930d97-c863-48db-9b9b-7bef3b32a84c": {
@@ -121,8 +127,8 @@
                 },
                 "1fd865c9-135e-4d4b-a77c-762a2e8a6991": {
                     "position": [
-                        203750000,
-                        128750000
+                        208750000,
+                        130000000
                     ]
                 },
                 "20e02b96-28b3-4018-a6cf-85ff9f0b384f": {
@@ -205,7 +211,7 @@
                 },
                 "34fd0338-8fe1-4237-ae68-794e3752a6a7": {
                     "position": [
-                        138750000,
+                        136250000,
                         112500000
                     ]
                 },
@@ -279,6 +285,12 @@
                     "position": [
                         122500000,
                         188750000
+                    ]
+                },
+                "49586abb-7591-41d7-868e-d607cdba6c95": {
+                    "position": [
+                        208750000,
+                        117500000
                     ]
                 },
                 "4aa7345d-2f29-4497-adba-c8fd71b8b318": {
@@ -355,7 +367,7 @@
                 },
                 "57d246c8-1c56-4153-b003-5e5eb20cc56d": {
                     "position": [
-                        158750000,
+                        163750000,
                         112500000
                     ]
                 },
@@ -461,12 +473,6 @@
                         66250000
                     ]
                 },
-                "72f9d1eb-f4ee-4732-8b26-35267a8ab831": {
-                    "position": [
-                        203750000,
-                        127500000
-                    ]
-                },
                 "741d4797-a1a6-42ec-bb57-467027ca4b1c": {
                     "position": [
                         57500000,
@@ -547,7 +553,7 @@
                 },
                 "85ccc317-80d3-4055-9280-8b2ce39c3aa8": {
                     "position": [
-                        147500000,
+                        145000000,
                         102500000
                     ]
                 },
@@ -571,7 +577,7 @@
                 },
                 "8e5c057b-7d2a-4c83-951b-35475b932aad": {
                     "position": [
-                        158750000,
+                        163750000,
                         107500000
                     ]
                 },
@@ -2221,7 +2227,7 @@
                 "248ce517-0685-4661-ad16-9f23807e34e2": {
                     "from": {
                         "bus_ripper": null,
-                        "junc": "72f9d1eb-f4ee-4732-8b26-35267a8ab831",
+                        "junc": "13f4d2c2-b62a-48a6-9be3-443de93d7a13",
                         "pin": null,
                         "port": null
                     },
@@ -2396,6 +2402,20 @@
                     "to": {
                         "bus_ripper": null,
                         "junc": "8c2b6b42-fb29-41ed-a1aa-2eee83dba3f3",
+                        "pin": null,
+                        "port": null
+                    }
+                },
+                "3310e76a-ce7c-4fb0-af92-77a1e1fc882e": {
+                    "from": {
+                        "bus_ripper": null,
+                        "junc": null,
+                        "pin": "00c0305e-71fd-466b-be3f-841aad3e702b/852f1fe6-06dc-4661-8a14-61a9a6ebb26a",
+                        "port": null
+                    },
+                    "to": {
+                        "bus_ripper": null,
+                        "junc": "13f4d2c2-b62a-48a6-9be3-443de93d7a13",
                         "pin": null,
                         "port": null
                     }
@@ -3254,6 +3274,20 @@
                         "port": null
                     }
                 },
+                "791c4189-d6e8-43b3-b77c-a689a6c6d4a3": {
+                    "from": {
+                        "bus_ripper": null,
+                        "junc": "13f4d2c2-b62a-48a6-9be3-443de93d7a13",
+                        "pin": null,
+                        "port": null
+                    },
+                    "to": {
+                        "bus_ripper": null,
+                        "junc": "6374f063-cb52-461c-aab0-f361f8f0326d",
+                        "pin": null,
+                        "port": null
+                    }
+                },
                 "79304faa-a477-4d1b-bf5b-c845072976e7": {
                     "from": {
                         "bus_ripper": null,
@@ -4052,6 +4086,20 @@
                         "port": null
                     }
                 },
+                "d868cbbc-2fcf-4a80-b20d-a466f6d2208f": {
+                    "from": {
+                        "bus_ripper": null,
+                        "junc": null,
+                        "pin": "00c0305e-71fd-466b-be3f-841aad3e702b/29995253-b4b1-4c7c-a049-b6db2713ca7c",
+                        "port": null
+                    },
+                    "to": {
+                        "bus_ripper": null,
+                        "junc": "49586abb-7591-41d7-868e-d607cdba6c95",
+                        "pin": null,
+                        "port": null
+                    }
+                },
                 "d9986266-3412-4292-9ba2-7da6ce9fb5c3": {
                     "from": {
                         "bus_ripper": null,
@@ -4090,20 +4138,6 @@
                     "to": {
                         "bus_ripper": null,
                         "junc": "4ccad1e5-511d-4180-a17f-3a6dcd737d4f",
-                        "pin": null,
-                        "port": null
-                    }
-                },
-                "e0c39acf-ef2d-4466-ae22-3988d0671d75": {
-                    "from": {
-                        "bus_ripper": null,
-                        "junc": "72f9d1eb-f4ee-4732-8b26-35267a8ab831",
-                        "pin": null,
-                        "port": null
-                    },
-                    "to": {
-                        "bus_ripper": null,
-                        "junc": "6374f063-cb52-461c-aab0-f361f8f0326d",
                         "pin": null,
                         "port": null
                     }
@@ -4392,6 +4426,12 @@
                     "net": "d4568af4-51b8-4b44-ad36-e7602fee2c85",
                     "orientation": "down"
                 },
+                "5ee35de3-7996-4756-b70a-6508aa8fcc3f": {
+                    "junction": "49586abb-7591-41d7-868e-d607cdba6c95",
+                    "mirror": false,
+                    "net": "d4568af4-51b8-4b44-ad36-e7602fee2c85",
+                    "orientation": "down"
+                },
                 "60317ce6-984c-4f26-a518-65ffc05ec75b": {
                     "junction": "f618821e-fae3-480e-95e0-12cfcd307e8b",
                     "mirror": false,
@@ -4532,9 +4572,29 @@
                 }
             },
             "symbols": {
+                "00c0305e-71fd-466b-be3f-841aad3e702b": {
+                    "component": "40f794da-cec7-47f7-a32e-8afb8ac14c8f",
+                    "custom_value": "100n",
+                    "display_all_pads": false,
+                    "display_directions": false,
+                    "expand": 0,
+                    "gate": "9bfcf213-2a7e-444e-8312-ce57209fc9ec",
+                    "pin_display_mode": "selected_only",
+                    "placement": {
+                        "angle": 0,
+                        "mirror": false,
+                        "shift": [
+                            208750000,
+                            122500000
+                        ]
+                    },
+                    "smashed": false,
+                    "symbol": "1f176305-dbe6-4349-a3c0-fe0927faaec4",
+                    "texts": []
+                },
                 "018fb336-fb8c-4cda-986c-757ac66d8b2e": {
                     "component": "affcd90e-0bff-4889-968b-f2031ab410e6",
-                    "custom_value": "Burn Header",
+                    "custom_value": "Programming Header",
                     "display_all_pads": false,
                     "display_directions": false,
                     "expand": 0,
@@ -4548,9 +4608,12 @@
                             21250000
                         ]
                     },
-                    "smashed": false,
+                    "smashed": true,
                     "symbol": "1a5ed450-6d04-4666-a3c7-fef06a355373",
-                    "texts": []
+                    "texts": [
+                        "c35a1ee6-dbdb-4a0e-bc29-f30ae13e1425",
+                        "d5dc0fb7-bfd6-455d-98dc-2a03d4a92020"
+                    ]
                 },
                 "02c7449c-c104-44af-8fba-099fffca5ea1": {
                     "component": "20ad0bef-e53a-4f9d-a19e-b2f6a7838052",
@@ -4923,7 +4986,7 @@
                         "angle": 49152,
                         "mirror": false,
                         "shift": [
-                            147500000,
+                            145000000,
                             117500000
                         ]
                     },
@@ -5069,7 +5132,6 @@
                 },
                 "a0aa6cce-f0ce-468b-9491-e56317e2f4e1": {
                     "component": "55ff751a-46a2-4266-a771-7c776f9a3c55",
-                    "custom_value": "100n/50V",
                     "display_all_pads": false,
                     "display_directions": false,
                     "expand": 0,
@@ -5484,7 +5546,7 @@
                         "angle": 0,
                         "mirror": true,
                         "shift": [
-                            147500000,
+                            145000000,
                             107500000
                         ]
                     },
@@ -5555,7 +5617,6 @@
                 },
                 "ec3f6d33-2c1b-4237-acb0-1c0096bd5db9": {
                     "component": "d0fc3764-6268-4858-855f-4e832ca0d2cc",
-                    "custom_value": "100n/50V",
                     "display_all_pads": false,
                     "display_directions": false,
                     "expand": 0,
@@ -5737,7 +5798,7 @@
                         ]
                     },
                     "size": 1500000,
-                    "text": "JW5026 alternatives:\n- RY8411",
+                    "text": "JW5026 alternatives:\n- RY8411 (38V/1.2A/800kHz)\n- LGS5148 (48V/0.6A/900kHz)",
                     "width": 250000
                 },
                 "30b9d157-ab32-4695-a997-56c2580a3176": {
@@ -5953,12 +6014,12 @@
                         "angle": 0,
                         "mirror": false,
                         "shift": [
-                            111250000,
-                            161250000
+                            40000000,
+                            201250000
                         ]
                     },
                     "size": 1500000,
-                    "text": "JW5026 alternatives:\n- RY8411",
+                    "text": "JW5026 alternatives:\n- RY8411 (38V/1.2A/800kHz)\n- LGS5148 (48V/0.6A/900kHz)",
                     "width": 250000
                 },
                 "9b0033cc-35f8-4950-984d-2584ae122591": {
@@ -6046,6 +6107,23 @@
                     "text": "2.5V Reference",
                     "width": 250000
                 },
+                "c35a1ee6-dbdb-4a0e-bc29-f30ae13e1425": {
+                    "font": "simplex",
+                    "from_smash": true,
+                    "layer": 0,
+                    "origin": "center",
+                    "placement": {
+                        "angle": 0,
+                        "mirror": true,
+                        "shift": [
+                            37500000,
+                            31250000
+                        ]
+                    },
+                    "size": 1500000,
+                    "text": "$REFDES",
+                    "width": 0
+                },
                 "c6524543-51db-4ffe-ac37-9a1f6a302545": {
                     "font": "simplex",
                     "from_smash": true,
@@ -6097,6 +6175,23 @@
                     "text": "$REFDES",
                     "width": 0
                 },
+                "d5dc0fb7-bfd6-455d-98dc-2a03d4a92020": {
+                    "font": "simplex",
+                    "from_smash": true,
+                    "layer": 0,
+                    "origin": "center",
+                    "placement": {
+                        "angle": 32768,
+                        "mirror": true,
+                        "shift": [
+                            23750000,
+                            11250000
+                        ]
+                    },
+                    "size": 1500000,
+                    "text": "$VALUE",
+                    "width": 0
+                },
                 "d88fb992-d979-4b56-9211-a23fd8fabb01": {
                     "font": "complex",
                     "from_smash": false,
@@ -6142,7 +6237,7 @@
         "model": "BLC06-MK1",
         "project_name": "blc06mk1",
         "project_title": "BLC06-MK1",
-        "rev": "2"
+        "rev": "4"
     },
     "type": "schematic_block",
     "uuid": "cdebe05a-f63f-4aee-aebe-e5ea15051429",

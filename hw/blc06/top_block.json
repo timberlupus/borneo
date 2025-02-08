@@ -5,7 +5,7 @@
         "concrete_parts": {},
         "csv_settings": {
             "column_names": {
-                "MPN": "MPN",
+                "MPN": "编号",
                 "QTY": "Quantity",
                 "datasheet": "LibRef",
                 "description": "Description",
@@ -19,7 +19,6 @@
                 "description",
                 "refdes",
                 "package",
-                "datasheet",
                 "QTY",
                 "MPN"
             ],
@@ -28,8 +27,27 @@
             "sort_column": "refdes"
         },
         "include_nopopulate": false,
-        "orderable_MPNs": {},
-        "output_filename": "_output/blc05mk3-b1_bom.csv"
+        "orderable_MPNs": {
+            "147983c9-a4d2-4bce-a8c0-a22351caa0de": "5c090a2a-5813-4d26-9378-6da72d040c2a",
+            "17afcaa3-888f-4155-91eb-972071fb362c": "f220eee4-dd73-4c4a-8220-5d2f4cd5ebe5",
+            "1d3835af-edff-42d2-a155-ed48a37f2839": "950665ba-48f1-4876-9a0f-6ffce5d5f68a",
+            "22124f75-d4f4-409f-9784-ee82398c624a": "8725d28b-204e-4ca1-a17d-42922883a695",
+            "3329c7a3-06dd-4952-8abe-a2c87fad3447": "378df43e-13dc-4afe-8e2b-91252a65796f",
+            "374e4b8b-8ce8-4459-a0f3-0a718bfe7946": "aee5b402-57e5-432a-8827-0d5522f12181",
+            "50d02835-8898-4bfd-bb38-181daf4805f7": "2898860a-e35a-4b32-a6cb-7d7fb40a6541",
+            "54959893-2a34-46bb-b613-1fd95e2a7095": "c0c6094a-0f78-4854-9319-76dcb2d9c92c",
+            "8468e83b-92f7-4552-b3d1-0df8acf2c187": "e31e2deb-006d-4bd1-86f5-62e64bf56c8b",
+            "8c6c5c7d-ef83-405c-873d-f4df98bdae2e": "858a47d3-ab60-426c-b716-721b5fd0f0ca",
+            "b9accebc-ba68-46fd-a18b-15dd2e4c4a12": "f9e270d1-9645-4993-aa82-faf4f5eb1024",
+            "c83c036c-ac94-4adc-8874-e9cd8bdaebab": "18a2d877-2b52-4854-91ca-703660562c03",
+            "d7172cc1-c1b3-4477-8391-121c24b299ca": "64e7ac3e-5534-4c80-9b64-904364d2aa56",
+            "dec125aa-0101-4af3-b533-323d7dff5093": "cf722215-737d-4cad-a62b-507ef6e42ac8",
+            "dfe71f0e-ceb0-44cc-8dca-88cefbb8849c": "4cb24564-5d59-4aae-afe3-03e625d0f73e",
+            "e3cba126-0b33-41b8-9d26-5edd93ed6cd8": "c2f82971-3c8e-4ffb-a9fd-616f11b955cf",
+            "ec6f6bcf-a36c-4893-ad6f-4b55afde82c8": "2b4d322f-4f23-4362-ab6c-95d85e4ea228",
+            "f4c4c129-7a9a-4778-b9c1-27ba04078663": "988362df-273f-47d9-ad61-551302928c12"
+        },
+        "output_filename": "production/blc06mk1r3-bom.csv"
     },
     "buses": {},
     "components": {
@@ -47,7 +65,7 @@
             "group": "00000000-0000-0000-0000-000000000000",
             "part": "b9accebc-ba68-46fd-a18b-15dd2e4c4a12",
             "pin_names": {},
-            "refdes": "C15",
+            "refdes": "C16",
             "tag": "779c7cb7-48cf-48ab-809f-7117f5a80f7b",
             "value": ""
         },
@@ -329,7 +347,7 @@
             "group": "00000000-0000-0000-0000-000000000000",
             "part": "b9accebc-ba68-46fd-a18b-15dd2e4c4a12",
             "pin_names": {},
-            "refdes": "C14",
+            "refdes": "C15",
             "tag": "779c7cb7-48cf-48ab-809f-7117f5a80f7b",
             "value": ""
         },
@@ -388,6 +406,24 @@
             "pin_names": {},
             "refdes": "U3",
             "tag": "b304ae01-2327-4305-9d52-3f63927d6a78",
+            "value": ""
+        },
+        "40f794da-cec7-47f7-a32e-8afb8ac14c8f": {
+            "alt_pins": {},
+            "connections": {
+                "9bfcf213-2a7e-444e-8312-ce57209fc9ec/29995253-b4b1-4c7c-a049-b6db2713ca7c": {
+                    "net": "d4568af4-51b8-4b44-ad36-e7602fee2c85"
+                },
+                "9bfcf213-2a7e-444e-8312-ce57209fc9ec/852f1fe6-06dc-4661-8a14-61a9a6ebb26a": {
+                    "net": "f503f350-f53a-4302-bc22-bfdae0ed4e2b"
+                }
+            },
+            "entity": "ca83a84f-6183-4088-84b6-5d79b2a119d4",
+            "group": "00000000-0000-0000-0000-000000000000",
+            "part": "b9accebc-ba68-46fd-a18b-15dd2e4c4a12",
+            "pin_names": {},
+            "refdes": "C14",
+            "tag": "779c7cb7-48cf-48ab-809f-7117f5a80f7b",
             "value": ""
         },
         "41f8a036-6270-4a9e-a4e7-aba41961a16e": {
@@ -474,7 +510,7 @@
             },
             "entity": "ca83a84f-6183-4088-84b6-5d79b2a119d4",
             "group": "00000000-0000-0000-0000-000000000000",
-            "part": "54959893-2a34-46bb-b613-1fd95e2a7095",
+            "part": "b9accebc-ba68-46fd-a18b-15dd2e4c4a12",
             "pin_names": {},
             "refdes": "C1",
             "tag": "d3c50bb2-cbd9-41df-a52e-d5872dea409b",
@@ -1051,7 +1087,7 @@
             },
             "entity": "ca83a84f-6183-4088-84b6-5d79b2a119d4",
             "group": "00000000-0000-0000-0000-000000000000",
-            "part": "54959893-2a34-46bb-b613-1fd95e2a7095",
+            "part": "b9accebc-ba68-46fd-a18b-15dd2e4c4a12",
             "pin_names": {},
             "refdes": "C2",
             "tag": "62450979-4e5e-4577-ac7c-2232165d1a69",
@@ -1159,7 +1195,7 @@
             },
             "entity": "c44a773c-cdf5-4193-b5be-ab54952f3f28",
             "group": "00000000-0000-0000-0000-000000000000",
-            "part": "b73aa387-1d93-40ff-a1c5-1a36a02161d8",
+            "part": "d7172cc1-c1b3-4477-8391-121c24b299ca",
             "pin_names": {},
             "refdes": "D1",
             "tag": "f3c3d3bb-7ffb-41d3-9c6a-a1ef0103cf8a",
@@ -1564,7 +1600,7 @@
         "model": "BLC06-MK1",
         "project_name": "blc06mk1",
         "project_title": "BLC06-MK1",
-        "rev": "2"
+        "rev": "4"
     },
     "tag_names": {
         "1950d0de-3935-459f-8675-9440a5a19dce": "9",

@@ -1,0 +1,43 @@
+{
+    "MPN": [
+        false,
+        "MWSA0402S-100MT"
+    ],
+    "base": "c7cce35e-2fb7-4cf0-8ef2-fcbe3b94c6a4",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "10uH/±20%/1.6A/2A"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        "Sunlord"
+    ],
+    "model": "e35c1d34-c50b-4b7c-9a1d-93c3b83c1030",
+    "orderable_MPNs": {
+        "cf9bb943-3f97-4241-8e7f-af2b75fe53be": "C408339"
+    },
+    "parametric": {
+        "dcr": "0.282",
+        "idc": "1.6",
+        "table": "inductors",
+        "value": "1e-05"
+    },
+    "tags": [
+        "inductor",
+        "jlc-smt-extended",
+        "passive",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "742b38a3-ac58-4082-a1a2-bb16eea51c26",
+    "value": [
+        false,
+        "10uh/1.6A"
+    ]
+}
