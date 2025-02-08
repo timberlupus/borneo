@@ -1,0 +1,99 @@
+{
+    "manufacturer": "Borneo IoT",
+    "name": "BLC06MK1",
+    "pins": {
+        "1b74fcf0-b72a-478d-b009-0fcc40357473": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "FAN_OUT",
+            "swap_group": 0
+        },
+        "2cac2e5b-f709-42fe-b7a1-bea1ed3f6818": {
+            "direction": "power_output",
+            "names": [],
+            "primary_name": "3V3",
+            "swap_group": 0
+        },
+        "319a5059-0112-42ab-af83-211971e1d4b0": {
+            "direction": "output",
+            "names": [],
+            "primary_name": "LED_PWM0",
+            "swap_group": 0
+        },
+        "3d82dd56-5c18-4649-8fb9-169ec4788c1d": {
+            "direction": "output",
+            "names": [],
+            "primary_name": "LED_PWM1",
+            "swap_group": 0
+        },
+        "3f4681bc-7b4d-4c20-9fd4-1aefc6026d9b": {
+            "direction": "output",
+            "names": [],
+            "primary_name": "FAN_PWM",
+            "swap_group": 0
+        },
+        "58996413-1e0e-4c72-8683-a6c7d0753c69": {
+            "alt_names": {
+                "e873d854-6102-43d9-8aaf-8e1ca1bf8919": {
+                    "direction": "input",
+                    "name": "~PROG~"
+                }
+            },
+            "direction": "input",
+            "names": [],
+            "primary_name": "~BTN~",
+            "swap_group": 0
+        },
+        "7194c2fa-625e-4987-9e68-225f806988d0": {
+            "direction": "passive",
+            "names": [],
+            "primary_name": "GND",
+            "swap_group": 0
+        },
+        "8dfc95a7-6f31-4053-902b-0b5d6cbb23eb": {
+            "direction": "output",
+            "names": [],
+            "primary_name": "LED_PWM3",
+            "swap_group": 0
+        },
+        "a29ff583-4cdc-4b11-9213-6edf1017b243": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "VDD",
+            "swap_group": 0
+        },
+        "c1d44f21-13a6-477d-8a47-bce185fe99aa": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "NTC+",
+            "swap_group": 0
+        },
+        "d64ff168-5971-45c6-90f1-35637d019616": {
+            "direction": "output",
+            "names": [],
+            "primary_name": "LED_PWM2",
+            "swap_group": 0
+        },
+        "dc2a6a8a-f4d2-480f-ba48-816c6f09be03": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "CSIN",
+            "swap_group": 0
+        },
+        "e22a51fa-afb2-47d7-8e8c-27c6ec311fcb": {
+            "direction": "output",
+            "names": [],
+            "primary_name": "LED_PWM5",
+            "swap_group": 0
+        },
+        "fe9ffdec-952e-419a-95b6-da78233abea9": {
+            "direction": "output",
+            "names": [],
+            "primary_name": "LED_PWM4",
+            "swap_group": 0
+        }
+    },
+    "type": "unit",
+    "uuid": "df4aebd3-ca48-44f5-9e47-b0b8405c7398",
+    "version": 1
+}

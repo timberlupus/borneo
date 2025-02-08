@@ -1,0 +1,64 @@
+{
+    "MPN": [
+        false,
+        "X2510WRS-04-9TSN"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "Pin socket, 1X4P, P=2.54, SMD Horizontal"
+    ],
+    "entity": "91900053-d618-435a-bb79-8654e2996d06",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "XKB Connectivity"
+    ],
+    "model": "1930381a-d8c8-4d60-aa21-95bc4942367c",
+    "orderable_MPNs": {
+        "91b764a9-810f-481e-ad39-5b397f665756": "C908468"
+    },
+    "package": "a9ce4eff-c1c5-43c2-8802-126264a28f88",
+    "pad_map": {
+        "008e929a-1cfe-472a-ad36-6c7608738fd0": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "9c153b03-fb7b-4f99-a5ed-ca45d3ae512e"
+        },
+        "29882ad5-3ceb-42ac-802b-e1ec3d66bde0": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "6e4c6134-93b5-49b1-95dd-830ea0cd1475"
+        },
+        "9def7adc-1dd3-4099-8ae3-104836e71636": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "aab503ca-26da-43ff-a268-cf0db0698910"
+        },
+        "b70c995c-9213-43bb-a209-3ee93914fd2f": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "423d0d6c-4330-417f-a6f0-267741d4c770"
+        },
+        "dff396aa-6845-40da-89b1-c68cb6c766ec": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "6e4c6134-93b5-49b1-95dd-830ea0cd1475"
+        },
+        "e7ad0832-4211-4ad6-b21f-d6568da899e0": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "4b3e1234-17b7-41dc-af26-90574ec82303"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "connector",
+        "jlc-smt-extended",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "85ec5a96-05a4-4be8-acea-311d9829903d",
+    "value": [
+        false,
+        ""
+    ]
+}

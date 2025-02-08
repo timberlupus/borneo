@@ -10,7 +10,7 @@ English | [中文](README.zh.md)
 ---
 
 Borneo-IoT project is a commercial-grade, highly customizable open-source smart WiFi aquarium LED PWM controller module and mobile App.
-More than that, this project also includes a 63W 5-color channel LED product as reference design.
+More than that, this project also includes a 57W 6-color channel LED product as reference design.
 
 
 For more information, please visit the project's website: [www.borneoiot.com](https://www.borneoiot.com).
@@ -22,7 +22,7 @@ If you like this project, please don't forget to give it a star. Thank you!
 ## Features
 
 - **Full Stack Open Source**
-    - Core board & 5-channel 63W lamp reference design (Schematic/PCB) using [Horizon EDA](https://horizon-eda.org)
+    - Core board & 6-channel 57W LED lamp reference design (Schematic/PCB) using [Horizon EDA](https://horizon-eda.org)
     - Complete firmware based on [ESP-IDF](https://idf.espressif.com/) framework
     - Flutter mobile app with full source code
 
@@ -36,7 +36,7 @@ If you like this project, please don't forget to give it a star. Thank you!
     - CoAP + CBOR protocol stack for multi-device support (lamps, pumps, sensors)
 
 - **Rich Functionality**
-    - 5-channel PWM controller with zero peripheral components
+    - 6-channel PWM controller with zero peripheral components
     - Graphical sunrise/sunset dimming with soft-start
     - SNTP time sync & PID-controlled cooling
     - Python API client & demo scripts

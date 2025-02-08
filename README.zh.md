@@ -9,7 +9,7 @@
 
 ---
 
-Borneo-IoT 项目是一套商业级、高度可自定义的开源智能 WiFi 水族 LED 灯具 PWM 控制器和手机 App，并且包含了一个 5 颜色通道 63W 的 LED 成品灯具作为参考设计。 
+Borneo-IoT 项目是一套商业级、高度可自定义的开源智能 WiFi 水族 LED 灯具 PWM 控制器和手机 App，并且包含了一个 6 颜色通道 57W 的 LED 成品灯具作为参考设计。
 
 详情和文档请参阅本项目网站：[www.borneoiot.com](https://www.borneoiot.com).
 中英文硬件规格书已包括在此仓库中：[hw/datasheets](hw/datasheets)
@@ -20,7 +20,7 @@ Borneo-IoT 项目是一套商业级、高度可自定义的开源智能 WiFi 水
 
 - **全栈开源**
     - WiFi LED 控制器模块（核心板）的原理图、PCB 的 [Horizon EDA](https://horizon-eda.org) 设计源文件
-    - 一个 5 通道 63W 灯具参考设计的原理图、PCB 的 Horizon EDA 设计源文件
+    - 一个 6 通道 63W 灯具参考设计的原理图、PCB 的 Horizon EDA 设计源文件
     - 使用[乐鑫 ESP-IDF](https://idf.espressif.com/) 框架开发的全套固件源代码
     - 使用的 Flutter 开发的移动端 App 全套源代码
 - **高度可自定义的模块化设计**
@@ -38,7 +38,7 @@ Borneo-IoT 项目是一套商业级、高度可自定义的开源智能 WiFi 水
     - 提供设备通信的 Python 客户端库和演示脚本
     - 可选的外围 INA139 电流监测
 - **预算友好**
-    - 主控单片机采用流行的低成本 ESP32-C3（5 通道版）或者 ESP32 (10 通道版)，不需要特殊定制任何元件
+    - 主控单片机采用流行的低成本 ESP32-C3（6 通道版）或者 ESP32 (10 通道版)，不需要特殊定制任何元件
     - 通过内建调压电路可直接驱动最便宜的两线散热风扇，当然也能够支持 PWM 调速风扇
     - 核心板默认采用排针连接方便 DIY 爱好者
 - **可量产**[^1]

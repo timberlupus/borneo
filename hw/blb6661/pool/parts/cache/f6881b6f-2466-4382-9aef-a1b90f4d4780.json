@@ -1,0 +1,49 @@
+{
+    "MPN": [
+        false,
+        "A2501WR-S-2P"
+    ],
+    "datasheet": [
+        false,
+        "https://cjt.com/up/A2501WR-S-XP_dwg.pdf"
+    ],
+    "description": [
+        false,
+        "2.5mm/2P/SMD Horizontal"
+    ],
+    "entity": "29f544a1-a789-4fe6-a1ef-29da5ba3d371",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "CJT"
+    ],
+    "model": "00000000-0000-0000-0000-000000000000",
+    "orderable_MPNs": {
+        "d8236674-4b3b-4021-af2b-6fc4539dd27d": "C273220"
+    },
+    "package": "c99dbe1a-c29f-4775-8d99-2531bc500103",
+    "pad_map": {
+        "19a347cf-d564-4d06-8305-0ba34abd0259": {
+            "gate": "eb7f68b1-6fba-4a35-a470-2cecb23fe087",
+            "pin": "b3cef4f5-fe6c-45b5-b063-1618f997168f"
+        },
+        "82e116e7-cc2b-46fd-8465-a57e660c0b21": {
+            "gate": "eb7f68b1-6fba-4a35-a470-2cecb23fe087",
+            "pin": "588536f1-9e96-4500-bcbb-4ba48082b643"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "connector",
+        "jlc-smt-extended",
+        "smd",
+        "socket"
+    ],
+    "type": "part",
+    "uuid": "f6881b6f-2466-4382-9aef-a1b90f4d4780",
+    "value": [
+        false,
+        ""
+    ]
+}
