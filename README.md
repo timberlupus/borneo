@@ -67,7 +67,7 @@ If you like this project, please don't forget to give it a star. Thank you!
 
 ### Pictures
 
-| ![BLC05MK3](assets/blc05mk3.jpg) <br/> LED Controller Module Appearance | ![BLC05MK3-SCH](assets/blc05mk3-sch.png) <br/> LED LED Controller Module Schematic |
+| ![BLC06MK1](assets/blc06mk1-shot1.jpg) <br/> LED Controller Module Appearance | ![BLC05MK3-SCH](assets/blc05mk3-sch.png) <br/> LED LED Controller Module Schematic |
 |------------------------------------------|------------------------------------------ |
 | ![BLB08103 Board](assets/blc05mk3-old-prototype.jpg) <br/> LED Controller - Old Prototype | ![BLB08103 Old Board](assets/blb08103-old-prototype.jpg) <br/> Aluminum PCB - Old Prototype |
 | ![BLB08103 Board](assets/blb08103.jpg) <br/> Aluminum PCB Appearance | ![BLB08103 Case](assets/blb08103-case.jpg) <br/> Reference Design Lamp Appearance[^2] |

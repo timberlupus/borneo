@@ -62,7 +62,7 @@ Borneo-IoT 项目是一套商业级、高度可自定义的开源智能 WiFi 水
 https://github.com/user-attachments/assets/08cb37ea-8b35-413a-9ee4-c4d95e3cb3bf
 
 
-| ![BLC05MK3](assets/blc05mk3.jpg) <br/> LED 控制器模块外观 | ![BLC05MK3-SCH](assets/blc05mk3-sch.png) <br/> LED 控制器模块原理图 |
+| ![BLC06MK1](assets/blc06mk1-shot1.jpg) <br/> LED 控制器模块外观 | ![BLC05MK3-SCH](assets/blc05mk3-sch.png) <br/> LED 控制器模块原理图 |
 |------------------------------------------|------------------------------------------ |
 | ![BLB08103 Board](assets/blc05mk3-old-prototype.jpg) <br/> 老版 LED 控制器原型外观 | ![BLB08103 Old Board](assets/blb08103-old-prototype.jpg) <br/> 老版原型铝基板外观 |
 | ![BLB08103 Board](assets/blb08103.jpg) <br/> 参考设计灯具铝基板外观 | ![BLB08103 Case](assets/blb08103-case.jpg) <br/> 参考设计灯具外观[^2] |

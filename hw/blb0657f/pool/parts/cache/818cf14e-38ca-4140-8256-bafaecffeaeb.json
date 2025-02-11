@@ -1,0 +1,49 @@
+{
+    "MPN": [
+        false,
+        "WAFER-PH2.0-2PWB"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "1×2Pin, Pinch 2.0mm, SMD"
+    ],
+    "entity": "29f544a1-a789-4fe6-a1ef-29da5ba3d371",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "XunPu"
+    ],
+    "model": "eb84aaee-1555-4eb5-a63a-c32911330367",
+    "orderable_MPNs": {
+        "15e4543d-a0b6-4795-a5ba-e89d60efb33c": "C3029440"
+    },
+    "package": "4348c101-47c7-41bd-b5a4-d15790e507df",
+    "pad_map": {
+        "8328e8b9-ff4d-40fa-9d01-2185374108d1": {
+            "gate": "eb7f68b1-6fba-4a35-a470-2cecb23fe087",
+            "pin": "588536f1-9e96-4500-bcbb-4ba48082b643"
+        },
+        "f8303761-fb06-4e8a-af0e-71332e8f075e": {
+            "gate": "eb7f68b1-6fba-4a35-a470-2cecb23fe087",
+            "pin": "b3cef4f5-fe6c-45b5-b063-1618f997168f"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "connector",
+        "jlc-smt-extended",
+        "ph",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "818cf14e-38ca-4140-8256-bafaecffeaeb",
+    "value": [
+        false,
+        ""
+    ]
+}

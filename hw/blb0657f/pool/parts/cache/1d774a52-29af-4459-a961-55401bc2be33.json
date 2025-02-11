@@ -1,0 +1,56 @@
+{
+    "MPN": [
+        false,
+        "2060-452/998-404"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "SMD PCB terminal block; push-button; 0.75 mm²; Pin spacing 4 mm; 2-pole;"
+    ],
+    "entity": "29f544a1-a789-4fe6-a1ef-29da5ba3d371",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Wago"
+    ],
+    "model": "68e5e14d-a705-4681-8cd3-e9e033afbb6a",
+    "orderable_MPNs": {
+        "981cb89e-3a47-44cd-8115-7d634de4ca75": "C2765055"
+    },
+    "package": "ee4c0680-3fc4-4ee3-bd5e-62f099d38d76",
+    "pad_map": {
+        "12a018e7-22ad-4e41-84db-65a72398a5da": {
+            "gate": "eb7f68b1-6fba-4a35-a470-2cecb23fe087",
+            "pin": "588536f1-9e96-4500-bcbb-4ba48082b643"
+        },
+        "9c5842b0-6ece-4b2a-9fe2-5fc04e42b88d": {
+            "gate": "eb7f68b1-6fba-4a35-a470-2cecb23fe087",
+            "pin": "b3cef4f5-fe6c-45b5-b063-1618f997168f"
+        },
+        "b76b1d18-a862-4120-b83c-be0bc7178b79": {
+            "gate": "eb7f68b1-6fba-4a35-a470-2cecb23fe087",
+            "pin": "b3cef4f5-fe6c-45b5-b063-1618f997168f"
+        },
+        "e2683c71-917f-49f4-a71b-d1355cff7d33": {
+            "gate": "eb7f68b1-6fba-4a35-a470-2cecb23fe087",
+            "pin": "588536f1-9e96-4500-bcbb-4ba48082b643"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "jlc-smt-extended",
+        "smd",
+        "terminal-block"
+    ],
+    "type": "part",
+    "uuid": "1d774a52-29af-4459-a961-55401bc2be33",
+    "value": [
+        false,
+        ""
+    ]
+}

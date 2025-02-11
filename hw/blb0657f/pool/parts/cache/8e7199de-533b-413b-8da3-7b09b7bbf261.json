@@ -1,0 +1,38 @@
+{
+    "MPN": [
+        false,
+        "SMAJ36A-13-F"
+    ],
+    "base": "30e430f6-e02b-4c3a-bb1d-ca41a20bd97c",
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "36V TVS"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "Diodes Incorporated"
+    ],
+    "model": "9191c081-b934-4c52-be70-c15d3f276956",
+    "orderable_MPNs": {
+        "37b7ff58-0293-4551-921d-614589008c38": "C134983"
+    },
+    "parametric": {},
+    "tags": [
+        "diode",
+        "sma",
+        "smd",
+        "tvs"
+    ],
+    "type": "part",
+    "uuid": "8e7199de-533b-413b-8da3-7b09b7bbf261",
+    "value": [
+        true,
+        "Base SMAJ series TVS diode"
+    ]
+}

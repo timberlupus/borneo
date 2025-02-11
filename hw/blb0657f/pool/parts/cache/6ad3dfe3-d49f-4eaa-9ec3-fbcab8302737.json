@@ -1,0 +1,57 @@
+{
+    "MPN": [
+        false,
+        "ZX-PH2.0-WT4P"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "4-Pin board to wire socket, Pinch 2.0mm, SMD"
+    ],
+    "entity": "64ffe153-20d8-4902-9321-1f18027cb84d",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Megastar"
+    ],
+    "model": "8d73f992-0685-4715-aaaf-90e88f4df224",
+    "orderable_MPNs": {
+        "e68dfff2-0eaa-4e42-a07c-c5a554f784d3": "C7429691"
+    },
+    "package": "d0267036-d8f9-44f1-9f78-1f9683f15468",
+    "pad_map": {
+        "0d9085ef-aa72-4a3a-a257-d26e972f598b": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "423d0d6c-4330-417f-a6f0-267741d4c770"
+        },
+        "360943db-c7af-44b5-818f-0b27bad548cd": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "aab503ca-26da-43ff-a268-cf0db0698910"
+        },
+        "5b035bd8-a86e-40e5-9c53-e06e66f5237d": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "9c153b03-fb7b-4f99-a5ed-ca45d3ae512e"
+        },
+        "812a58c3-34b6-47e8-aa55-ef357b4c7493": {
+            "gate": "a96a662e-2077-467f-9853-a01865f76ad6",
+            "pin": "4b3e1234-17b7-41dc-af26-90574ec82303"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "connector",
+        "jlc-smt-extended",
+        "jst",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "6ad3dfe3-d49f-4eaa-9ec3-fbcab8302737",
+    "value": [
+        false,
+        ""
+    ]
+}
