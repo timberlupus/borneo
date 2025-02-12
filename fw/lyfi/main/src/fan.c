@@ -20,6 +20,7 @@
 #include <borneo/system.h>
 #include <borneo/nvs.h>
 
+#include "rmtpwm.h"
 #include "fan.h"
 
 #define NVS_FAN_NAMESPACE "fan"
@@ -71,7 +72,7 @@ int fan_init()
 
         ledc_timer_config_t ledc_timer = {
             .duty_resolution = LEDC_TIMER_8_BIT,
-            .freq_hz = 25000, // 25k
+            .freq_hz = 24000, // 24k
 #if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3
             .speed_mode = LEDC_LOW_SPEED_MODE,
             .timer_num = LEDC_TIMER_2,
@@ -85,8 +86,8 @@ int fan_init()
         ESP_LOGI(TAG, "PWM timer initialized.");
     }
 
+/*
     {
-        // The ESP32-C3 chip can only choose between PWM and PWMDAC; they cannot be used simultaneously.
 #if CONFIG_IDF_TARGET_ESP32C3
         {
             uint16_t pwm_gpio
@@ -99,6 +100,7 @@ int fan_init()
                  CONFIG_LYFI_FAN_CTRL_PWM_CHANNEL);
         _channel_config.gpio_num = CONFIG_LYFI_FAN_CTRL_PWM_GPIO;
 #endif // CONFIG_IDF_TARGET_ESP32C3
+
         _channel_config.hpoint = 0;
 #if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3
         _channel_config.speed_mode = LEDC_LOW_SPEED_MODE;
@@ -113,6 +115,7 @@ int fan_init()
         _channel_config.channel = CONFIG_LYFI_FAN_CTRL_PWM_CHANNEL;
         BO_TRY(ledc_channel_config(&_channel_config));
     }
+*/
 
 #if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
     if (!_settings.use_pwm_fan) {
@@ -120,6 +123,8 @@ int fan_init()
         BO_TRY(dac_output_enable(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL));
     }
 #endif
+
+    BO_TRY(rmtpwm_init());
 
     BO_TRY(fan_set_power(FAN_POWER_MAX));
 

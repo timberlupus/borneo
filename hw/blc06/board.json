@@ -40,11 +40,11 @@
                 "angle": 0,
                 "mirror": true,
                 "shift": [
-                    2032000,
-                    -2032000
+                    2159000,
+                    -2159000
                 ]
             },
-            "scale": 0.2
+            "scale": 0.24
         },
         "627bbdb4-072d-4957-85a2-dbfaba62132d": {
             "decal": "ac0f18ca-0a10-4e70-937b-50fc936a4f48",
@@ -282,7 +282,7 @@
                 1000000,
                 1000000
             ],
-            "spacing_square": 127000
+            "spacing_square": 500000
         },
         "grids": {}
     },
@@ -2875,6 +2875,7 @@
             "texts": []
         },
         "5c2b6b6b-51f8-4256-b530-1f1e2f76e030": {
+            "alternate_package": "48683d02-13e2-446f-ae32-85d1ec4d9242",
             "component": "8faf457e-7424-4429-bf3f-04a3d0d58470",
             "fixed": false,
             "flip": true,
@@ -4707,27 +4708,39 @@
             "vertices": [
                 {
                     "arc_center": [
+                        21000000,
+                        -22500000
+                    ],
+                    "arc_reverse": true,
+                    "position": [
+                        22000000,
+                        -22500000
+                    ],
+                    "type": "arc"
+                },
+                {
+                    "arc_center": [
                         0,
                         0
                     ],
                     "arc_reverse": false,
                     "position": [
-                        22000000,
+                        21000000,
                         -23500000
                     ],
                     "type": "line"
                 },
                 {
                     "arc_center": [
-                        0,
-                        0
+                        999999,
+                        -22500000
                     ],
-                    "arc_reverse": false,
+                    "arc_reverse": true,
                     "position": [
-                        0,
+                        999999,
                         -23500000
                     ],
-                    "type": "line"
+                    "type": "arc"
                 },
                 {
                     "arc_center": [
@@ -4737,9 +4750,45 @@
                     "arc_reverse": false,
                     "position": [
                         0,
+                        -22500000
+                    ],
+                    "type": "line"
+                },
+                {
+                    "arc_center": [
+                        999999,
+                        -999999
+                    ],
+                    "arc_reverse": true,
+                    "position": [
+                        0,
+                        -999999
+                    ],
+                    "type": "arc"
+                },
+                {
+                    "arc_center": [
+                        0,
+                        0
+                    ],
+                    "arc_reverse": false,
+                    "position": [
+                        999999,
                         0
                     ],
                     "type": "line"
+                },
+                {
+                    "arc_center": [
+                        21000000,
+                        -999999
+                    ],
+                    "arc_reverse": true,
+                    "position": [
+                        21000000,
+                        0
+                    ],
+                    "type": "arc"
                 },
                 {
                     "arc_center": [
@@ -4749,7 +4798,7 @@
                     "arc_reverse": false,
                     "position": [
                         22000000,
-                        0
+                        -999999
                     ],
                     "type": "line"
                 }
@@ -7058,6 +7107,23 @@
             "text": "RX",
             "width": 150000
         },
+        "0a0f209b-7980-417a-961c-abb799cf8bee": {
+            "font": "simplex",
+            "from_smash": false,
+            "layer": -120,
+            "origin": "center",
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    7366000,
+                    -21463000
+                ]
+            },
+            "size": 500000,
+            "text": "FPWM\nPWM0",
+            "width": 100000
+        },
         "11187d19-3e59-4083-9f33-3034248a6936": {
             "font": "simplex",
             "from_smash": false,
@@ -7091,6 +7157,23 @@
             "size": 800000,
             "text": "3V",
             "width": 150000
+        },
+        "23398f72-4706-4cf4-8d23-fef178a28cf0": {
+            "font": "simplex",
+            "from_smash": false,
+            "layer": -120,
+            "origin": "center",
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    12573000,
+                    -21336000
+                ]
+            },
+            "size": 500000,
+            "text": "PWM3\nPWM4",
+            "width": 100000
         },
         "2943fada-c97b-4442-b149-f981069d9ae1": {
             "font": "simplex",
@@ -7192,6 +7275,23 @@
             },
             "size": 500000,
             "text": "+",
+            "width": 100000
+        },
+        "5cc58682-aaa1-4295-b2ba-3ab2cab62d72": {
+            "font": "simplex",
+            "from_smash": false,
+            "layer": -120,
+            "origin": "center",
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    4953000,
+                    -21463000
+                ]
+            },
+            "size": 500000,
+            "text": "FOUT\n~BTN~",
             "width": 100000
         },
         "6eed5e90-85bf-4da8-b33c-9e80def8539f": {
@@ -7313,6 +7413,23 @@
             "text": "GND",
             "width": 100000
         },
+        "9496dd6c-6acf-4a13-bd67-9db1778c73f4": {
+            "font": "simplex",
+            "from_smash": false,
+            "layer": -120,
+            "origin": "center",
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    14986000,
+                    -21336000
+                ]
+            },
+            "size": 500000,
+            "text": "PWM5\nNTC+",
+            "width": 100000
+        },
         "94d5d122-b310-4916-b096-533ea94237a6": {
             "font": "simplex",
             "from_smash": false,
@@ -7327,7 +7444,7 @@
                 ]
             },
             "size": 500000,
-            "text": "V36",
+            "text": "VIN",
             "width": 100000
         },
         "9eef1e83-618f-4d8d-ad32-50b9300c0293": {
@@ -7356,12 +7473,29 @@
                 "angle": 0,
                 "mirror": false,
                 "shift": [
-                    4826000,
-                    -21336000
+                    7493000,
+                    -14986000
                 ]
             },
             "size": 500000,
             "text": "FPWM",
+            "width": 100000
+        },
+        "adda34b7-8780-4eae-badf-8717fd9e6e68": {
+            "font": "simplex",
+            "from_smash": false,
+            "layer": -120,
+            "origin": "center",
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    17780000,
+                    -21336000
+                ]
+            },
+            "size": 500000,
+            "text": "3V3\nCSIN",
             "width": 100000
         },
         "b007312d-df57-43de-a1dd-fb3cca827823": {
@@ -7373,8 +7507,8 @@
                 "angle": 0,
                 "mirror": false,
                 "shift": [
-                    7874000,
-                    -14986000
+                    5207000,
+                    -21336000
                 ]
             },
             "size": 500000,
@@ -7415,6 +7549,23 @@
             "text": "Borneo-IoT_${model}/R${rev}",
             "width": 150000
         },
+        "ba26790e-892d-4cfb-b02c-6b643fdfe92e": {
+            "font": "simplex",
+            "from_smash": false,
+            "layer": -120,
+            "origin": "center",
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    9906000,
+                    -21336000
+                ]
+            },
+            "size": 500000,
+            "text": "PWM1\nPWM2",
+            "width": 100000
+        },
         "c805738a-abb5-48cb-931c-eaf254180d04": {
             "font": "simplex",
             "from_smash": false,
@@ -7447,6 +7598,23 @@
             },
             "size": 500000,
             "text": "PWM0",
+            "width": 100000
+        },
+        "d302c790-1eea-4433-a068-cc21717f2b09": {
+            "font": "simplex",
+            "from_smash": false,
+            "layer": -120,
+            "origin": "center",
+            "placement": {
+                "angle": 0,
+                "mirror": false,
+                "shift": [
+                    2159000,
+                    -21463000
+                ]
+            },
+            "size": 500000,
+            "text": "VIN\nGND",
             "width": 100000
         },
         "d7c96d02-6cee-4bc9-8071-016597a4f011": {

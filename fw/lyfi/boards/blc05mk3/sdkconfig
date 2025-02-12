@@ -29,7 +29,6 @@ CONFIG_BT_ENABLED=n
 
 ################## NTC #########################
 CONFIG_BORNEO_NTC_ENABLED=y
-CONFIG_BORNEO_NTC_ADC_UNIT=0
 CONFIG_BORNEO_NTC_ADC_CHANNEL=2
 
 ################## Indicator #########################

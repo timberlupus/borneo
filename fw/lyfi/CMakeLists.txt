@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 if(NOT BORNEO_BOARD)
-    set(BORNEO_BOARD "blc05emk1")
+    set(BORNEO_BOARD "blc06mk1")
 endif()
 
 set(SDKCONFIG "${CMAKE_BINARY_DIR}/sdkconfig")

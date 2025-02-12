@@ -199,7 +199,7 @@ int led_init()
 
     ledc_timer_config_t ledc_timer = {
         .duty_resolution = LEDC_TIMER_8_BIT,
-        .freq_hz = 4000, // the frequency
+        .freq_hz = 24000, // the frequency 24kHz
 #if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3
         .speed_mode = LEDC_LOW_SPEED_MODE,
         .timer_num = LEDC_TIMER_1,
@@ -237,9 +237,10 @@ int led_init()
             _ledc_channel[ch].timer_sel = LEDC_TIMER_1;
         }
 #endif
-        ESP_LOGI(TAG, "Configure GPIO [%d] as PWM Channel [%d]", _ledc_channel[ch].gpio_num, ch);
         _ledc_channel[ch].duty = 0;
         _ledc_channel[ch].channel = (uint8_t)ch % 8;
+        ESP_LOGI(TAG, "Configure GPIO [%u] as PWM Channel [%u]", _ledc_channel[ch].gpio_num, _ledc_channel[ch].channel);
+        BO_TRY(gpio_reset_pin(LED_GPIOS[ch]));
         BO_TRY(ledc_channel_config(&_ledc_channel[ch]));
         BO_TRY(ledc_stop(_ledc_channel[ch].speed_mode, _ledc_channel[ch].channel,
                          0)); // During initialization, set the channels to low level.

@@ -17,6 +17,8 @@
 #include <esp_adc/adc_cali_scheme.h>
 
 #include <borneo/system.h>
+#include <borneo/algo/filters.h>
+#include <borneo/devices/adc.h>
 #include <borneo/ntc.h>
 
 #if CONFIG_BORNEO_NTC_ENABLED
@@ -24,15 +26,33 @@
 #define TAG "NTC"
 
 static int8_t ntc_table_lookup(int r);
-static int ntc_adc_cali(adc_unit_t unit, adc_atten_t atten, adc_cali_handle_t* out_handle);
 
 #define NTC_SAMPLING_TIMES 8
 #define NTC_TEMP_BUF_SIZE 16
 #define NTC_ADC_MAX_VALUE 1023
+#define ADC_WINDOW_SIZE 5
 
-// 0~105 度的 ADC 电压（mV）温度映射表
 // clang-format off
-// 0~150 度
+
+// 0~105 ℃
+
+#if CONFIG_BORNEO_NTC_PU_4K7
+    // VRef=2.5V, 4.7kΩ Pull-up
+const uint16_t NTC_MAPPING_TABLE[] = {
+    2193, 2179, 2164, 2149, 2133, 2116, 2100, 2082, 2064, 2046,
+    2028, 2009, 1989, 1969, 1949, 1928, 1907, 1885, 1863, 1841,
+    1818, 1795, 1772, 1749, 1725, 1701, 1676, 1652, 1627, 1602,
+    1578, 1552, 1527, 1502, 1477, 1451, 1426, 1401, 1376, 1350,
+    1325, 1300, 1275, 1250, 1226, 1201, 1177, 1153, 1129, 1106,
+    1082, 1059, 1036, 1014, 992, 970, 948, 927, 906, 885,
+    865, 845, 825, 806, 787, 769, 750, 733, 715, 698,
+    681, 665, 649, 633, 617, 602, 588, 573, 559, 545,
+    532, 519, 506, 494, 481, 469, 458, 447, 436, 425,
+    414, 404, 394, 384, 375, 366, 357, 348, 339, 331,
+    323, 315, 308, 300, 293, 286,
+};
+#elif CONFIG_BORNEO_NTC_PU_10K
+    // VRef=3.3V, 10kΩ Pull-up
 const uint16_t NTC_MAPPING_TABLE[] = {
     2549, 2518, 2486, 2453, 2420, 2386, 2352, 2318, 2283, 2247,
     2211, 2175, 2138, 2101, 2064, 2027, 1990, 1952, 1915, 1877,
@@ -44,41 +64,23 @@ const uint16_t NTC_MAPPING_TABLE[] = {
     495, 481, 467, 454, 442, 429, 417, 406, 394, 383,
     373, 362, 352, 343, 333, 324, 315, 307, 298, 290,
     282, 275, 267, 260, 253, 246, 240, 234, 227, 221,
-    216, 210, 205, 199, 194, 189
+    216, 210, 205, 199, 194, 189,
 };
+#else
+#error "Unknown NTC pull-up resistor"
+#endif
+
 // clang-format on
 
 enum {
     NTC_MAPPING_TABLE_SIZE = sizeof(NTC_MAPPING_TABLE) / sizeof(NTC_MAPPING_TABLE[0]),
 };
 
-// static esp_adc_cal_characteristics_t* adc_chars;
-static volatile int _last_temp = NTC_BAD_TEMPERATURE;
-static adc_oneshot_unit_handle_t _adc_handle = NULL;
-static adc_cali_handle_t _adc_cali_handle;
-
 int ntc_init()
 {
-    ESP_LOGI(TAG, "Initializing NTC ADC...");
+    ESP_LOGI(TAG, "Initializing NTC...");
 
-    adc_oneshot_unit_init_cfg_t init_config1 = { 0 };
-    init_config1.unit_id = CONFIG_BORNEO_NTC_ADC_UNIT;
-    BO_TRY(adc_oneshot_new_unit(&init_config1, &_adc_handle));
-
-    if (_adc_handle == NULL) {
-        ESP_LOGE(TAG, "Failed to call `adc_oneshot_new_unit()`");
-        return ESP_ERR_INVALID_ARG;
-    }
-
-    adc_oneshot_chan_cfg_t adc_config = {
-        .bitwidth = ADC_BITWIDTH_12,
-        .atten = ADC_ATTEN_DB_12,
-    };
-    BO_TRY(adc_oneshot_config_channel(_adc_handle, CONFIG_BORNEO_NTC_ADC_CHANNEL, &adc_config));
-
-    BO_TRY(ntc_adc_cali(CONFIG_BORNEO_NTC_ADC_UNIT, ADC_ATTEN_DB_12, &_adc_cali_handle));
-
-    // 初始化 NTC
+    BO_TRY(bo_adc_channel_config(CONFIG_BORNEO_NTC_ADC_CHANNEL));
     return 0;
 }
 
@@ -87,39 +89,32 @@ int ntc_init()
  */
 int ntc_read_temp(int* temp)
 {
-    int adc_value = 0;
-
-    esp_err_t error = adc_oneshot_read(_adc_handle, CONFIG_BORNEO_NTC_ADC_CHANNEL, &adc_value);
-    if (error) {
-        *temp = _last_temp;
-        return NTC_BAD_TEMPERATURE;
-    }
-
-    if (adc_value == 0 || adc_value == 4095) {
-        ESP_LOGE(TAG, "No NTC connected! sample_avg=%d", adc_value);
-        return -EIO;
-    }
-    // uint32_t adc_mv = esp_adc_cal_raw_to_voltage(sample_avg, &_adc_chars);
+    uint16_t adc_window[ADC_WINDOW_SIZE];
     int adc_mv;
-    error = adc_cali_raw_to_voltage(_adc_cali_handle, adc_value, &adc_mv);
-    if (error != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to convert ADC value!");
-        return error;
+    for (size_t i = 0; i < ADC_WINDOW_SIZE; i++) {
+        int error = bo_adc_read_mv(CONFIG_BORNEO_NTC_ADC_CHANNEL, &adc_mv);
+        if (error != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to convert ADC value!");
+            return error;
+        }
+        if (adc_mv == 0 || adc_mv == 4095) {
+            ESP_LOGE(TAG, "No NTC connected! sample_avg=%d", adc_mv);
+            return -EIO;
+        }
+        adc_window[i] = (uint16_t)adc_mv;
     }
+    adc_mv = median_filter_u16(adc_window, ADC_WINDOW_SIZE);
+
     int value = ntc_table_lookup(adc_mv);
     if (value == NTC_BAD_TEMPERATURE) {
         ESP_LOGE(TAG, "Bad temperature!");
         return -EIO;
     }
     *temp = value;
-    _last_temp = value;
     return 0;
 }
 
-/** @brief 查找 NTC 电阻到温度的映射表
- *
- */
-static int8_t ntc_table_lookup(int value) // 表中数据从大到小
+static int8_t ntc_table_lookup(int value)
 {
 
     int left = 0;
@@ -148,56 +143,6 @@ static int8_t ntc_table_lookup(int value) // 表中数据从大到小
     }
 
     return closest_index;
-}
-
-static int ntc_adc_cali(adc_unit_t unit, adc_atten_t atten, adc_cali_handle_t* out_handle)
-{
-    adc_cali_handle_t handle = NULL;
-    esp_err_t ret = ESP_FAIL;
-    bool calibrated = false;
-
-#if ADC_CALI_SCHEME_CURVE_FITTING_SUPPORTED
-    if (!calibrated) {
-        ESP_LOGI(TAG, "calibration scheme version is %s", "Curve Fitting");
-        adc_cali_curve_fitting_config_t cali_config = {
-            .unit_id = unit,
-            .atten = atten,
-            .bitwidth = ADC_BITWIDTH_DEFAULT,
-        };
-        ret = adc_cali_create_scheme_curve_fitting(&cali_config, &handle);
-        if (ret == ESP_OK) {
-            calibrated = true;
-        }
-    }
-#endif
-
-#if ADC_CALI_SCHEME_LINE_FITTING_SUPPORTED
-    if (!calibrated) {
-        ESP_LOGI(TAG, "Calibration scheme version is %s", "Line Fitting");
-        adc_cali_line_fitting_config_t cali_config = {
-            .unit_id = unit,
-            .atten = atten,
-            .bitwidth = ADC_BITWIDTH_DEFAULT,
-        };
-        ret = adc_cali_create_scheme_line_fitting(&cali_config, &handle);
-        if (ret == ESP_OK) {
-            calibrated = true;
-        }
-    }
-#endif
-
-    *out_handle = handle;
-    if (ret == ESP_OK) {
-        ESP_LOGI(TAG, "Calibration Success");
-    }
-    else if (ret == ESP_ERR_NOT_SUPPORTED || !calibrated) {
-        ESP_LOGW(TAG, "eFuse not burnt, skip software calibration");
-    }
-    else {
-        ESP_LOGE(TAG, "Invalid arg or no memory");
-    }
-
-    return ret;
 }
 
 #endif // CONFIG_BORNEO_NTC_ENABLED

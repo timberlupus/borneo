@@ -38,13 +38,23 @@
 
 #define TAG "bo-init"
 
-static int _borneo_core_init(const struct drvfx_device* dev)
+static int _borneo_early_init(const struct drvfx_device* dev)
 {
-    ESP_LOGI(TAG, "Initializing Borneo Core...");
+    ESP_LOGI(TAG, "Initializing early stuff...");
 
     // Initialize NVS
     BO_TRY(bo_nvs_init());
     BO_TRY(esp_event_loop_create_default());
+    ESP_LOGI(TAG, "Early stuff has been initialized successfully.");
+    return 0;
+}
+
+
+
+static int _borneo_core_init(const struct drvfx_device* dev)
+{
+    ESP_LOGI(TAG, "Initializing Borneo Core...");
+
     BO_TRY(bo_indicator_init());
     BO_TRY(bo_system_init());
     BO_TRY(bo_power_init());
@@ -69,5 +79,6 @@ static int _borneo_net_init(const struct drvfx_device* dev)
     return 0;
 }
 
+DRVFX_SYS_INIT(_borneo_early_init, EARLY, DRVFX_INIT_KERNEL_DEFAULT_PRIORITY);
 DRVFX_SYS_INIT(_borneo_core_init, APPLICATION, DRVFX_INIT_APP_HIGHEST_PRIORITY);
 DRVFX_SYS_INIT(_borneo_net_init, APPLICATION, DRVFX_INIT_APP_HIGH_PRIORITY);
