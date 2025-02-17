@@ -1,0 +1,33 @@
+{
+    "MPN": [
+        false,
+        "ESP32-C3-WROOM-02U-N4"
+    ],
+    "base": "59bd717d-c199-4d4e-9db0-d146966e3279",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "ESP32-C3 Module, 4MB Flash, IPX antenna socket"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        "Espressif"
+    ],
+    "model": "97f67a23-1d77-42e7-a9a1-3d9c7866d670",
+    "orderable_MPNs": {
+        "cf9ba488-f08c-4a97-8ff5-1a19f68e3ed8": "C2926676"
+    },
+    "parametric": {},
+    "tags": [],
+    "type": "part",
+    "uuid": "85415677-3342-42a6-b33e-bb85e434f327",
+    "value": [
+        false,
+        ""
+    ]
+}

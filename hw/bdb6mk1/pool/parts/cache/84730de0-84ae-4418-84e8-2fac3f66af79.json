@@ -1,0 +1,42 @@
+{
+    "MPN": [
+        false,
+        "0603WAF4700T5E"
+    ],
+    "base": "cbeda48c-7fb0-4cfb-a4de-d9672e8cc190",
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "470Ω (4700) ±1%"
+    ],
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "UniOhm"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "override_prefix": "inherit",
+    "parametric": {
+        "pmax": "0",
+        "table": "resistors",
+        "tolerance": "1",
+        "value": "470"
+    },
+    "prefix": "",
+    "tags": [
+        "jlc-smt-base",
+        "resistor",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "84730de0-84ae-4418-84e8-2fac3f66af79",
+    "value": [
+        false,
+        "470R/1%"
+    ],
+    "version": 2
+}

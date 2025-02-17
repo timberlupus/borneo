@@ -1,0 +1,69 @@
+{
+    "MPN": [
+        false,
+        "PCF8563T/5,518"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "Real-time clock/calendar I2C interface"
+    ],
+    "entity": "21fd9090-cda0-4c36-9629-f1dbd3fd34d4",
+    "inherit_model": false,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "nxp"
+    ],
+    "model": "b99785a3-c0da-4658-969d-6287cec3be05",
+    "package": "0932e22e-0cf7-46dc-b09c-4cc761a67608",
+    "pad_map": {
+        "17341892-a120-44e2-97ea-6e4f8e3d7da5": {
+            "gate": "dcfbc407-3bfd-411b-ba65-25df67074373",
+            "pin": "64868115-d068-47d0-b58e-0f212dcc2fcb"
+        },
+        "29f18ab8-6cea-44fc-9bf5-4fb888f5245b": {
+            "gate": "dcfbc407-3bfd-411b-ba65-25df67074373",
+            "pin": "725c913d-7b50-4709-92ae-98011418639a"
+        },
+        "3d725e25-0d60-46cb-a21f-82462d3ce156": {
+            "gate": "dcfbc407-3bfd-411b-ba65-25df67074373",
+            "pin": "bf7a34b5-6419-4d1f-add0-ed3b48ebef94"
+        },
+        "51d7c05f-acae-46d5-9c26-2ea9d17bf7a8": {
+            "gate": "dcfbc407-3bfd-411b-ba65-25df67074373",
+            "pin": "b389aa73-60ee-4081-a3af-72393439ec94"
+        },
+        "68b17b6f-ab52-4c2b-9389-c36d3c06eeef": {
+            "gate": "dcfbc407-3bfd-411b-ba65-25df67074373",
+            "pin": "1bb4261a-bc09-483b-86db-ce3477648f43"
+        },
+        "6f82c7c4-9578-4cb0-a92c-8b09534d5dc9": {
+            "gate": "dcfbc407-3bfd-411b-ba65-25df67074373",
+            "pin": "7ee87069-3dde-4d24-a5d4-8d8f3ec193e6"
+        },
+        "82d773fb-4473-4bd9-a879-a6ca2756055c": {
+            "gate": "dcfbc407-3bfd-411b-ba65-25df67074373",
+            "pin": "ba16b8cd-6e13-43b6-85d3-c0e7889062e8"
+        },
+        "b9ad4acf-f78d-438d-8b7b-e83ee0f9cc19": {
+            "gate": "dcfbc407-3bfd-411b-ba65-25df67074373",
+            "pin": "99c562d5-fdc7-43dc-8541-d716849b2037"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "jlc-smt-base",
+        "rtc",
+        "smt"
+    ],
+    "type": "part",
+    "uuid": "63b12fa8-5db6-4a0b-ad7c-fb00c38c0935",
+    "value": [
+        false,
+        "PCF8563"
+    ]
+}

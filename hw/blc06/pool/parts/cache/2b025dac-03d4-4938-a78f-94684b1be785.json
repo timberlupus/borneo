@@ -1,0 +1,35 @@
+{
+    "MPN": [
+        false,
+        "SZYY0402W"
+    ],
+    "base": "fe69d7d1-477b-43d0-901d-e896d78d8256",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "White, 0402 SMD, 5mA"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "YongYu"
+    ],
+    "model": "1ef2cc04-ddc7-4e67-b048-fc31f81a76c6",
+    "orderable_MPNs": {
+        "5e0bc25e-971a-4d21-9039-fe9f44941bbe": "C434448"
+    },
+    "parametric": {},
+    "tags": [
+        "jlc-smt-extended"
+    ],
+    "type": "part",
+    "uuid": "2b025dac-03d4-4938-a78f-94684b1be785",
+    "value": [
+        false,
+        ""
+    ]
+}

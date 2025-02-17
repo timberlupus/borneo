@@ -1,0 +1,149 @@
+{
+    "manufacturer": "Espressif",
+    "name": "ESP32-C3-WROOM-02x",
+    "pins": {
+        "1037d967-bf4e-4c67-a380-31803fb5aa4b": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "GND",
+            "swap_group": 0
+        },
+        "10729b6c-101f-4ecc-9234-d2baa94c7dcc": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "3V3",
+            "swap_group": 0
+        },
+        "14c52dc8-f900-42f9-9074-d3d0ac6d186b": {
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "IO9",
+            "swap_group": 0
+        },
+        "1a3054f5-6241-4ff3-bb52-bba91c854b1a": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "EN",
+            "swap_group": 0
+        },
+        "1ab0781b-8584-4972-aeb2-a85efa0337b6": {
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "IO3",
+            "swap_group": 0
+        },
+        "33dd0306-2325-48f3-bb36-874548456771": {
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "IO1",
+            "swap_group": 0
+        },
+        "3b29e611-b27a-4dd4-8677-61831c16f52b": {
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "IO0",
+            "swap_group": 0
+        },
+        "5a1e92ad-8fb4-4f0f-9e92-e6fb09ab0344": {
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "IO10",
+            "swap_group": 0
+        },
+        "649b4285-d4f6-45d6-b0a1-a33703b54730": {
+            "alt_names": {
+                "9251d5a5-6c95-552f-b241-a22c61860edf": {
+                    "direction": "bidirectional",
+                    "name": "IO20"
+                },
+                "bb4bb488-8cd0-5079-9672-764ea34a5f1a": {
+                    "direction": "bidirectional",
+                    "name": "U0RXD"
+                }
+            },
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "RXD0",
+            "swap_group": 0
+        },
+        "6af188e5-6dae-4b1c-9464-f85c66507ca3": {
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "IO6",
+            "swap_group": 0
+        },
+        "7054e48a-ba18-405d-8430-a2d5294ee8a4": {
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "IO8",
+            "swap_group": 0
+        },
+        "9008e2d5-a347-4acf-8212-e8afdba9d424": {
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "IO5",
+            "swap_group": 0
+        },
+        "9641e002-6281-4ea3-8c54-a1a7a3202654": {
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "IO7",
+            "swap_group": 0
+        },
+        "96d58b87-c52b-4218-84fb-c5ea765eed61": {
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "IO4",
+            "swap_group": 0
+        },
+        "a3d06835-9845-41d2-b2b6-34512df72c52": {
+            "alt_names": {
+                "9251d5a5-6c95-552f-b241-a22c61860edf": {
+                    "direction": "bidirectional",
+                    "name": "USB_D-"
+                }
+            },
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "IO18",
+            "swap_group": 0
+        },
+        "bf04b932-7f6b-48a0-8080-074676767a6a": {
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "IO2",
+            "swap_group": 0
+        },
+        "c99b0270-7fde-4d14-b069-4d95643e249d": {
+            "alt_names": {
+                "9251d5a5-6c95-552f-b241-a22c61860edf": {
+                    "direction": "bidirectional",
+                    "name": "IO21"
+                },
+                "bb4bb488-8cd0-5079-9672-764ea34a5f1a": {
+                    "direction": "bidirectional",
+                    "name": "U0TXD"
+                }
+            },
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "TXD0",
+            "swap_group": 0
+        },
+        "e37d5a3f-db79-410c-a219-9455d39162b7": {
+            "alt_names": {
+                "9251d5a5-6c95-552f-b241-a22c61860edf": {
+                    "direction": "bidirectional",
+                    "name": "USB_D+"
+                }
+            },
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "IO19",
+            "swap_group": 0
+        }
+    },
+    "type": "unit",
+    "uuid": "edb07013-efa0-4deb-9f35-64dcdfceb0b8",
+    "version": 1
+}

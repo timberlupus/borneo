@@ -1,0 +1,55 @@
+{
+    "MPN": [
+        false,
+        "Base 5.5mm DC Jack (switched)"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "Base 5.5mm DC Jack (switched)"
+    ],
+    "entity": "9aa74f6f-fd1c-44ea-9705-c018b1cadba6",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        ""
+    ],
+    "model": "35b2d7fd-d544-4780-aa7f-fe46a01e144d",
+    "package": "c8e2e6ee-047e-431b-9bfc-33dc616a856c",
+    "pad_map": {
+        "0a6ba410-e83b-4a1c-aef8-f5fe0d114bfd": {
+            "gate": "ec39ef8d-eca8-4998-97eb-d3a365fbc56f",
+            "pin": "46451353-6937-4679-9520-f05c9440b452"
+        },
+        "11ee8313-2f7a-43e2-96f9-9d96e6ce5d0e": {
+            "gate": "ec39ef8d-eca8-4998-97eb-d3a365fbc56f",
+            "pin": "fecf8669-7878-4ef2-ac58-4e62b5ea5cda"
+        },
+        "cd8ceb81-bb27-4c89-ad60-c879f615af75": {
+            "gate": "ec39ef8d-eca8-4998-97eb-d3a365fbc56f",
+            "pin": "62af8d4e-8474-4210-9087-ecb78becac2b"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "jack",
+        "power-switch",
+        "tht"
+    ],
+    "type": "part",
+    "uuid": "5e246db6-c2fb-4147-8bfc-8543ce9dd21e",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}

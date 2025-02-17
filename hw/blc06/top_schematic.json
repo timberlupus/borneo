@@ -5639,6 +5639,7 @@
                 },
                 "f3163c1c-c55f-48e9-8367-d7708f497cce": {
                     "component": "1fe6324b-3dbd-48ac-8423-14f8606535a0",
+                    "custom_value": "1k",
                     "display_all_pads": false,
                     "display_directions": false,
                     "expand": 0,

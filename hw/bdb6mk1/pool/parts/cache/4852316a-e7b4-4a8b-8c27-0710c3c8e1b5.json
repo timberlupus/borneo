@@ -1,0 +1,70 @@
+{
+    "MPN": [
+        false,
+        "TPS543x"
+    ],
+    "datasheet": [
+        false,
+        "http://www.ti.com/cn/lit/gpn/tps5430"
+    ],
+    "description": [
+        false,
+        "3-A, Wide Input Range, Step-Down Converter"
+    ],
+    "entity": "0f4721e1-bdac-4255-b184-f7922180d9c2",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": false,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Texas Instruments"
+    ],
+    "model": "fa65f251-cbda-4bc3-b45b-69542f503374",
+    "package": "af4253b3-fd46-492b-88af-cf090d073337",
+    "pad_map": {
+        "50c6ca80-29e7-4c53-a51c-295439459f07": {
+            "gate": "f8ad4100-7b31-4f8e-bb28-37ed0bdb21c9",
+            "pin": "86c55891-24d8-45b1-8afb-148c4a164aea"
+        },
+        "6bc42629-406a-42ea-afcb-faf9419250e5": {
+            "gate": "f8ad4100-7b31-4f8e-bb28-37ed0bdb21c9",
+            "pin": "d9c6b3c3-9e1c-4be0-9fe5-add753e24993"
+        },
+        "9b9fe240-d13e-409c-9266-6da31e761197": {
+            "gate": "f8ad4100-7b31-4f8e-bb28-37ed0bdb21c9",
+            "pin": "e4a96538-dab3-4f01-90d4-7b55a8ff31b7"
+        },
+        "b83b13bb-ac49-4a5c-83d9-dcfd214a6420": {
+            "gate": "f8ad4100-7b31-4f8e-bb28-37ed0bdb21c9",
+            "pin": "e4a96538-dab3-4f01-90d4-7b55a8ff31b7"
+        },
+        "ce0dde6f-8ece-4722-bbf5-d323df45d468": {
+            "gate": "f8ad4100-7b31-4f8e-bb28-37ed0bdb21c9",
+            "pin": "49e86401-9d63-4d40-9276-9ebd613885de"
+        },
+        "ee30a7a1-6719-4cfc-b627-44975aee84bf": {
+            "gate": "f8ad4100-7b31-4f8e-bb28-37ed0bdb21c9",
+            "pin": "42b23866-edfd-4648-b117-7e56faf88898"
+        },
+        "f44bdd8a-6d68-4ea5-b140-3193ca779eec": {
+            "gate": "f8ad4100-7b31-4f8e-bb28-37ed0bdb21c9",
+            "pin": "7c2e2fc3-37da-4301-86d7-1305eb599864"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "buck",
+        "regulator"
+    ],
+    "type": "part",
+    "uuid": "4852316a-e7b4-4a8b-8c27-0710c3c8e1b5",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}

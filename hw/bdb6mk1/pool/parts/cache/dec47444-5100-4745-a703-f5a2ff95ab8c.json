@@ -1,0 +1,48 @@
+{
+    "MPN": [
+        false,
+        "CR1220-2"
+    ],
+    "datasheet": [
+        false,
+        "https://item.szlcsc.com/71476.html"
+    ],
+    "description": [
+        false,
+        "CR1220 电池座"
+    ],
+    "entity": "cc74cd32-a7da-494d-a91c-27b70f9450f4",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "szqjbattery.com"
+    ],
+    "model": "f4617350-795e-40e8-b3ae-b31b1e131f71",
+    "orderable_MPNs": {
+        "14e8a31e-c0fa-4a2d-a230-00629cdf7533": "C70381"
+    },
+    "package": "67cdadcd-5a5f-4a7c-be0f-d5af7d34c64c",
+    "pad_map": {
+        "5c96b1fd-e74b-4a1f-9ff7-238a8d463644": {
+            "gate": "eeaa4f0e-5ec8-41e9-bd98-985a4a48234f",
+            "pin": "c7dd1271-5537-4db1-ac39-2664fdaf7af2"
+        },
+        "acd12619-8882-475a-baf9-bd2196e1b539": {
+            "gate": "eeaa4f0e-5ec8-41e9-bd98-985a4a48234f",
+            "pin": "8d400332-04db-4d9d-b3c2-1f398b577fcd"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "battery",
+        "cr1220",
+        "jlc-smt-extended"
+    ],
+    "type": "part",
+    "uuid": "dec47444-5100-4745-a703-f5a2ff95ab8c",
+    "value": [
+        false,
+        "CR1220"
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "MPN": [
+        false,
+        "0402CG220J500NT"
+    ],
+    "base": "29043bfd-c944-47cb-ae49-8dc6e1cf7257",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "容值：22pF 精度：±5% 额定电压：50V 温度系数：C0G 材质:C0G"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "FengHua"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "44a122cf-9031-48a7-94d7-1790c3e94e6c": "C1555"
+    },
+    "parametric": {
+        "table": "capacitors",
+        "tolerance": "5",
+        "type": "C0G/NP0",
+        "value": "2.2e-11",
+        "wvdc": "50"
+    },
+    "tags": [
+        "jlc-smt-base"
+    ],
+    "type": "part",
+    "uuid": "33d43e3b-6232-48fd-ab32-bbe2208a8e1b",
+    "value": [
+        false,
+        "22p/50V"
+    ]
+}

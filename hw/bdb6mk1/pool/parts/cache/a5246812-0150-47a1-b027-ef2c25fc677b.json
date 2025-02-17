@@ -1,0 +1,34 @@
+{
+    "MPN": [
+        false,
+        "AO3400A"
+    ],
+    "base": "9ea6e97a-897a-42b8-893f-cf6cfeb5cb50",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "30V N-Channel MOSFET"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "AOS"
+    ],
+    "model": "1ebac498-5423-42dc-90a6-7ad333585f6a",
+    "parametric": {},
+    "tags": [
+        "jlc-smt-base",
+        "mosfet",
+        "n-channel"
+    ],
+    "type": "part",
+    "uuid": "a5246812-0150-47a1-b027-ef2c25fc677b",
+    "value": [
+        false,
+        ""
+    ]
+}

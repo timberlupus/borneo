@@ -1,0 +1,75 @@
+{
+    "MPN": [
+        false,
+        "XL1509 Series Base"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "2A 150KHz 40V Buck DC to DC Converter"
+    ],
+    "entity": "19a945e7-7eff-480b-bd56-85b8a821ab51",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": false,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "XLSEMI"
+    ],
+    "model": "b99785a3-c0da-4658-969d-6287cec3be05",
+    "package": "0932e22e-0cf7-46dc-b09c-4cc761a67608",
+    "pad_map": {
+        "17341892-a120-44e2-97ea-6e4f8e3d7da5": {
+            "gate": "3e0f21a9-6cb1-4cdb-8253-63da994ecea8",
+            "pin": "3224ac96-9c80-44c1-b5d3-68cccba86587"
+        },
+        "29f18ab8-6cea-44fc-9bf5-4fb888f5245b": {
+            "gate": "3e0f21a9-6cb1-4cdb-8253-63da994ecea8",
+            "pin": "ecc52d7c-9ce8-476a-96ef-dfd24b1951f9"
+        },
+        "3d725e25-0d60-46cb-a21f-82462d3ce156": {
+            "gate": "3e0f21a9-6cb1-4cdb-8253-63da994ecea8",
+            "pin": "507ecbe5-855d-4f2d-b1b4-76c3cfeb34b0"
+        },
+        "51d7c05f-acae-46d5-9c26-2ea9d17bf7a8": {
+            "gate": "3e0f21a9-6cb1-4cdb-8253-63da994ecea8",
+            "pin": "d36a617d-c2ac-4112-b44b-2ff8e3ba19c7"
+        },
+        "68b17b6f-ab52-4c2b-9389-c36d3c06eeef": {
+            "gate": "3e0f21a9-6cb1-4cdb-8253-63da994ecea8",
+            "pin": "75ccfda7-82c9-48c5-b419-4151a4090408"
+        },
+        "6f82c7c4-9578-4cb0-a92c-8b09534d5dc9": {
+            "gate": "3e0f21a9-6cb1-4cdb-8253-63da994ecea8",
+            "pin": "507ecbe5-855d-4f2d-b1b4-76c3cfeb34b0"
+        },
+        "82d773fb-4473-4bd9-a879-a6ca2756055c": {
+            "gate": "3e0f21a9-6cb1-4cdb-8253-63da994ecea8",
+            "pin": "507ecbe5-855d-4f2d-b1b4-76c3cfeb34b0"
+        },
+        "b9ad4acf-f78d-438d-8b7b-e83ee0f9cc19": {
+            "gate": "3e0f21a9-6cb1-4cdb-8253-63da994ecea8",
+            "pin": "507ecbe5-855d-4f2d-b1b4-76c3cfeb34b0"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "buck",
+        "dcdc",
+        "regulator"
+    ],
+    "type": "part",
+    "uuid": "a043fab5-5327-4b1f-8266-1862e181bfc4",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}

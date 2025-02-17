@@ -1,0 +1,35 @@
+{
+    "MPN": [
+        false,
+        "TPS5430DDAR"
+    ],
+    "base": "4852316a-e7b4-4a8b-8c27-0710c3c8e1b5",
+    "datasheet": [
+        true,
+        "http://www.ti.com/cn/lit/gpn/tps5430"
+    ],
+    "description": [
+        false,
+        "3A, 5.5V to 36V Input Range, Step-Down Converter"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        "Texas Instruments"
+    ],
+    "model": "fa65f251-cbda-4bc3-b45b-69542f503374",
+    "orderable_MPNs": {
+        "7a1b6fdb-a69a-4fd7-80f4-9228fb0a343e": "C9864"
+    },
+    "parametric": {},
+    "tags": [
+        "jlc-smt-base"
+    ],
+    "type": "part",
+    "uuid": "3ec3edd8-e57e-46f2-ba8a-9f10d5a704ce",
+    "value": [
+        false,
+        "TPS5430"
+    ]
+}

@@ -1,0 +1,215 @@
+{
+    "block_instance_mappings": {},
+    "block_instances": {},
+    "bom_export_settings": {
+        "concrete_parts": {},
+        "csv_settings": {
+            "columns": [
+                "QTY",
+                "MPN",
+                "value",
+                "manufacturer",
+                "refdes"
+            ],
+            "order": "asc",
+            "sort_column": "refdes"
+        },
+        "orderable_MPNs": {},
+        "output_filename": ""
+    },
+    "buses": {},
+    "components": {
+        "0d02dfb6-3d70-452e-9db7-383b582ab5dd": {
+            "alt_pins": {},
+            "connections": {
+                "48af78e5-730e-44eb-977a-cf188e4fcb39/6a44037c-65e2-4876-9359-42890048841d": {
+                    "net": "c678d4b7-d522-42ad-ab40-a28660ecc15e"
+                },
+                "48af78e5-730e-44eb-977a-cf188e4fcb39/dda0ec99-5d70-4fbe-a8db-897542e7554e": {
+                    "net": "9f40174c-1fee-4212-8cb5-a241696a8411"
+                }
+            },
+            "entity": "3ce770af-7be0-4f72-b2af-2c8010911aaf",
+            "group": "00000000-0000-0000-0000-000000000000",
+            "part": "84730de0-84ae-4418-84e8-2fac3f66af79",
+            "pin_names": {},
+            "refdes": "R?",
+            "tag": "3cc82ab0-24c9-4b20-8c88-f79f96e483ae",
+            "value": ""
+        },
+        "10797624-cd6d-4995-8789-a09f27639c83": {
+            "alt_pins": {},
+            "connections": {
+                "9bfcf213-2a7e-444e-8312-ce57209fc9ec/29995253-b4b1-4c7c-a049-b6db2713ca7c": {
+                    "net": "92de863c-9e30-460e-8bf8-dd264154472b"
+                },
+                "9bfcf213-2a7e-444e-8312-ce57209fc9ec/852f1fe6-06dc-4661-8a14-61a9a6ebb26a": {
+                    "net": "ba418d1e-a67c-47c3-8108-a22e72898cab"
+                }
+            },
+            "entity": "ca83a84f-6183-4088-84b6-5d79b2a119d4",
+            "group": "00000000-0000-0000-0000-000000000000",
+            "part": "6997f18c-7458-404d-a76e-23dff115a4d8",
+            "pin_names": {},
+            "refdes": "C?",
+            "tag": "75ec809a-6d4d-4d34-829b-8338d7f6e6fe",
+            "value": ""
+        },
+        "8b618099-454f-4e03-9c3b-d57de9498ab2": {
+            "alt_pins": {},
+            "connections": {
+                "e5da453c-ba97-4fa0-8e05-5f6b4e026f87/16ee5a5c-8eea-4447-ad48-04d973776e3a": {
+                    "net": "ba418d1e-a67c-47c3-8108-a22e72898cab"
+                },
+                "e5da453c-ba97-4fa0-8e05-5f6b4e026f87/b57ca2a1-1bbf-43f0-b0a0-bf953094a8de": {
+                    "net": "92de863c-9e30-460e-8bf8-dd264154472b"
+                }
+            },
+            "entity": "c44a773c-cdf5-4193-b5be-ab54952f3f28",
+            "group": "00000000-0000-0000-0000-000000000000",
+            "part": "70f85149-304d-40bc-a156-9ff1443fb36c",
+            "pin_names": {},
+            "refdes": "D?",
+            "tag": "9fa3ae3f-d552-42fe-8a84-ed698086f9d7",
+            "value": ""
+        },
+        "8e84313c-df88-4584-be66-27ade2671a12": {
+            "alt_pins": {},
+            "connections": {
+                "48af78e5-730e-44eb-977a-cf188e4fcb39/6a44037c-65e2-4876-9359-42890048841d": {
+                    "net": "9f40174c-1fee-4212-8cb5-a241696a8411"
+                },
+                "48af78e5-730e-44eb-977a-cf188e4fcb39/dda0ec99-5d70-4fbe-a8db-897542e7554e": {
+                    "net": "f3e614c8-3601-4906-9d3d-a91b2879fe42"
+                }
+            },
+            "entity": "3ce770af-7be0-4f72-b2af-2c8010911aaf",
+            "group": "00000000-0000-0000-0000-000000000000",
+            "part": "2fb08cd1-0a11-4541-968e-ac124b533b33",
+            "pin_names": {},
+            "refdes": "R?",
+            "tag": "f0cbb83c-d327-4685-a64f-4e93b0e59087",
+            "value": ""
+        },
+        "dba08f9c-1c3c-4f35-a6b4-9c3225e17863": {
+            "alt_pins": {},
+            "connections": {
+                "6dce85e8-6b70-44ac-8ae8-d17152c3707a/074c3718-08fd-4f94-88fc-2bb43174b245": {
+                    "net": "9f40174c-1fee-4212-8cb5-a241696a8411"
+                },
+                "6dce85e8-6b70-44ac-8ae8-d17152c3707a/4887ef47-94f0-4fd1-b552-c424bd37a3e7": {
+                    "net": "92de863c-9e30-460e-8bf8-dd264154472b"
+                },
+                "6dce85e8-6b70-44ac-8ae8-d17152c3707a/eb63ac9a-5d7e-42e2-92ea-a140a97f47d0": {
+                    "net": "f3e614c8-3601-4906-9d3d-a91b2879fe42"
+                }
+            },
+            "entity": "c135130c-0663-4575-9083-3b328ac00c90",
+            "group": "00000000-0000-0000-0000-000000000000",
+            "part": "a5246812-0150-47a1-b027-ef2c25fc677b",
+            "pin_names": {},
+            "refdes": "Q?",
+            "tag": "942cffa0-1a70-4e24-9ddf-c40b762eda82",
+            "value": ""
+        }
+    },
+    "group_names": {},
+    "name": "Driver Channel",
+    "net_class_default": "57c805b9-5a0f-481c-87d2-a315635ba06b",
+    "net_classes": {
+        "57c805b9-5a0f-481c-87d2-a315635ba06b": {
+            "name": "default"
+        }
+    },
+    "nets": {
+        "0fb69d5e-10c9-41f0-b2c5-bcafd5951cf7": {
+            "is_port": false,
+            "is_power": true,
+            "name": "+3V3",
+            "net_class": "57c805b9-5a0f-481c-87d2-a315635ba06b",
+            "port_direction": "bidirectional",
+            "power_symbol_name_visible": true,
+            "power_symbol_style": "dot"
+        },
+        "2ad6ecab-acb4-4fc6-9d30-53916692c2a5": {
+            "is_port": false,
+            "is_power": true,
+            "name": "PGND",
+            "net_class": "57c805b9-5a0f-481c-87d2-a315635ba06b",
+            "port_direction": "bidirectional",
+            "power_symbol_name_visible": true,
+            "power_symbol_style": "earth"
+        },
+        "92de863c-9e30-460e-8bf8-dd264154472b": {
+            "is_port": true,
+            "is_power": false,
+            "name": "MOTOR-",
+            "net_class": "57c805b9-5a0f-481c-87d2-a315635ba06b",
+            "port_direction": "bidirectional",
+            "power_symbol_name_visible": true,
+            "power_symbol_style": "gnd"
+        },
+        "93950a44-f571-4cb5-9db0-c732884cf801": {
+            "is_port": false,
+            "is_power": true,
+            "name": "VBAT",
+            "net_class": "57c805b9-5a0f-481c-87d2-a315635ba06b",
+            "port_direction": "bidirectional",
+            "power_symbol_name_visible": true,
+            "power_symbol_style": "dot"
+        },
+        "9f40174c-1fee-4212-8cb5-a241696a8411": {
+            "is_port": false,
+            "is_power": false,
+            "name": "",
+            "net_class": "57c805b9-5a0f-481c-87d2-a315635ba06b",
+            "port_direction": "bidirectional",
+            "power_symbol_name_visible": true,
+            "power_symbol_style": "gnd"
+        },
+        "ba418d1e-a67c-47c3-8108-a22e72898cab": {
+            "is_port": false,
+            "is_power": true,
+            "name": "+12V",
+            "net_class": "57c805b9-5a0f-481c-87d2-a315635ba06b",
+            "port_direction": "bidirectional",
+            "power_symbol_name_visible": true,
+            "power_symbol_style": "dot"
+        },
+        "c678d4b7-d522-42ad-ab40-a28660ecc15e": {
+            "is_port": true,
+            "is_power": false,
+            "name": "ON/OFF",
+            "net_class": "57c805b9-5a0f-481c-87d2-a315635ba06b",
+            "port_direction": "input",
+            "power_symbol_name_visible": true,
+            "power_symbol_style": "gnd"
+        },
+        "f3e614c8-3601-4906-9d3d-a91b2879fe42": {
+            "is_port": false,
+            "is_power": true,
+            "name": "GND",
+            "net_class": "57c805b9-5a0f-481c-87d2-a315635ba06b",
+            "port_direction": "bidirectional",
+            "power_symbol_name_visible": true,
+            "power_symbol_style": "gnd"
+        }
+    },
+    "project_meta": {
+        "author": "Li Wei",
+        "date": "2025-02-13",
+        "license": "",
+        "model": "BDB6-MK1",
+        "project_name": "bdb6mk1",
+        "project_title": "BDB6-MK1",
+        "rev": "1"
+    },
+    "tag_names": {
+        "3cc82ab0-24c9-4b20-8c88-f79f96e483ae": "6",
+        "75ec809a-6d4d-4d34-829b-8338d7f6e6fe": "5",
+        "942cffa0-1a70-4e24-9ddf-c40b762eda82": "1",
+        "9fa3ae3f-d552-42fe-8a84-ed698086f9d7": "7",
+        "f0cbb83c-d327-4685-a64f-4e93b0e59087": "5"
+    },
+    "uuid": "9a25a7f2-99d8-454a-bde7-2788e920d4bb"
+}

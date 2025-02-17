@@ -1,0 +1,33 @@
+{
+    "MPN": [
+        false,
+        "DC-005-2.5A-2.0"
+    ],
+    "base": "5e246db6-c2fb-4147-8bfc-8543ce9dd21e",
+    "datasheet": [
+        false,
+        "https://item.szlcsc.com/300191.html"
+    ],
+    "description": [
+        true,
+        "Base 5.5mm DC Jack (switched)"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "XKB Connectivity"
+    ],
+    "model": "35b2d7fd-d544-4780-aa7f-fe46a01e144d",
+    "orderable_MPNs": {
+        "6c73ddfb-5164-4836-ae83-5b10b5f609ae": "C319099"
+    },
+    "parametric": {},
+    "tags": [],
+    "type": "part",
+    "uuid": "ed9801c1-23ac-4133-8ec8-3df9bf2ac3fe",
+    "value": [
+        false,
+        "5.5mm DC Jack/2.5A"
+    ]
+}

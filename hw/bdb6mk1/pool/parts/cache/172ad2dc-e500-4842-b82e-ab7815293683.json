@@ -1,0 +1,68 @@
+{
+    "MPN": [
+        false,
+        "base WJ15EDGRM-3.81-6P compatible"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        ""
+    ],
+    "entity": "c92588a0-86ac-4b1c-aa07-b591777d2617",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Kangnex"
+    ],
+    "model": "4849310a-124a-4095-8841-523462ca3eca",
+    "package": "072ca20d-5359-497e-a65a-e05cc4328df1",
+    "pad_map": {
+        "195b8127-2cff-410d-b37f-378fb64344ff": {
+            "gate": "d5f74729-19b9-4eba-87f9-f789bd6babf8",
+            "pin": "c3b4ba45-ad58-43eb-9709-a71e815d9012"
+        },
+        "2c72e070-51dd-408e-83c9-6d8eca9b7b70": {
+            "gate": "d5f74729-19b9-4eba-87f9-f789bd6babf8",
+            "pin": "d5465e9d-439d-4a9c-b2a6-9ff92edf1f63"
+        },
+        "6166a348-9968-4335-8306-36932c59a106": {
+            "gate": "d5f74729-19b9-4eba-87f9-f789bd6babf8",
+            "pin": "203bb8a2-729f-4d85-9078-2023b941401f"
+        },
+        "739852b5-6c8c-49ac-8eb1-36cf0f4f7529": {
+            "gate": "d5f74729-19b9-4eba-87f9-f789bd6babf8",
+            "pin": "b8924622-e129-4d44-a4ec-46cccc6fbcaf"
+        },
+        "79750bc0-dba0-4308-9386-27fa49974f5d": {
+            "gate": "d5f74729-19b9-4eba-87f9-f789bd6babf8",
+            "pin": "dd9ef2c9-0256-4f19-b1a9-2a4dffd82261"
+        },
+        "caa8ed6d-8230-419b-8458-800984e998d8": {
+            "gate": "d5f74729-19b9-4eba-87f9-f789bd6babf8",
+            "pin": "4b24441b-cbeb-49bc-9a30-277a9a11c2b6"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "connector",
+        "terminal-block",
+        "th",
+        "tht"
+    ],
+    "type": "part",
+    "uuid": "172ad2dc-e500-4842-b82e-ab7815293683",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}

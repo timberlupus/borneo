@@ -1,0 +1,103 @@
+{
+    "MPN": [
+        false,
+        "CH340G"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "USB to TTL"
+    ],
+    "entity": "96b3e7e6-994d-4cc5-a5d5-ffd4c6577f82",
+    "inherit_model": false,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "WCH"
+    ],
+    "model": "75dbfc84-4be0-46b8-bb2e-ae0561a72e70",
+    "package": "ae1c4d81-1bcd-4e4b-9ec7-8f5c988c6918",
+    "pad_map": {
+        "30f8122d-7d8e-42d3-81ba-2810010f68af": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "4f8cd9d8-1c77-40cb-81ec-0caed015cbe4"
+        },
+        "39bd833d-f173-4a2f-b2ac-075a1cf55c5f": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "bf91cea2-1e14-404d-84ce-0d1c4eedc3d8"
+        },
+        "475d8484-b588-4b09-bcea-ca424b9f68c2": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "e6c4e88e-0621-4468-b4e7-1f0d6159b764"
+        },
+        "60fde3c2-1439-4ad5-b47c-adebebd8572d": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "68bbaecd-fea2-4fed-840c-d420832ef36d"
+        },
+        "6a5dce07-8ca2-43e5-9c90-11e4de6e4743": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "4102c5ed-8ee2-4107-b82e-41befe6a008b"
+        },
+        "738b6a48-76db-495d-9cd4-56c60405baee": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "81cec77d-2133-44de-a776-0b3a5358f19c"
+        },
+        "83be96de-42cc-46c2-9623-1886a7f9ea21": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "c7767c0f-3cda-428a-9040-fec332ca88e4"
+        },
+        "9146767b-b74f-46d3-9d8c-db867a360310": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "ae601064-40f2-4185-a301-a8145173aac9"
+        },
+        "938efe2d-061b-4e76-9cf8-4c26ded569c6": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "0ca18010-0ec4-4750-8b89-1a2c97ffb4f3"
+        },
+        "96f905fc-becf-49f8-a191-7da8f6c8bfc6": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "a48c7c9d-5837-4f8a-8617-b55c010e2170"
+        },
+        "970b5075-962e-4dba-9983-081c36d8cdf3": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "a5bdb2c3-02af-4c08-ad71-7dfaa078ae88"
+        },
+        "9789ffe4-5d75-4593-bd63-6740298d2b44": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "1d3ecf8b-8cb4-4da9-910a-59ef47f37e74"
+        },
+        "98042a02-862f-4a70-9d74-9dcb0fd66b95": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "8c3493fb-7ab8-4a67-954d-09dba74e9972"
+        },
+        "ee8d4951-9ef4-433f-a1b0-6dadc3119d76": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "16fce054-c68a-46df-b646-ce10120d605b"
+        },
+        "f5922877-ad80-43b4-aef3-bd5dde1111e4": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "dae1b1a0-3e0c-414d-bd54-3eba1a6cd1c2"
+        },
+        "f97fc701-9187-43e7-b0d9-39807f470f81": {
+            "gate": "04a6bdf0-61b1-49fd-88d5-8e02c212791f",
+            "pin": "ef875968-10f9-4c41-96c6-1d8404d80b11"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "interface",
+        "jlc-smt-extended",
+        "smd",
+        "soic-16",
+        "usb"
+    ],
+    "type": "part",
+    "uuid": "07396ea7-969a-4271-b9cd-f8f9eb617b45",
+    "value": [
+        false,
+        ""
+    ]
+}

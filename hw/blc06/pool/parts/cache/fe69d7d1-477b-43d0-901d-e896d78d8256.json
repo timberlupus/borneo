@@ -1,0 +1,50 @@
+{
+    "MPN": [
+        false,
+        "base 0402 LED"
+    ],
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "0402 SMD LED"
+    ],
+    "entity": "f061691a-7954-4797-9529-dba6527d8f4f",
+    "flags": {
+        "base_part": "set",
+        "exclude_bom": "clear",
+        "exclude_pnp": "clear"
+    },
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        ""
+    ],
+    "model": "1ef2cc04-ddc7-4e67-b048-fc31f81a76c6",
+    "package": "cda5a5fd-0183-47aa-a211-9c3b5019ef51",
+    "pad_map": {
+        "852c8244-c614-4a02-98c2-5c105d0328e4": {
+            "gate": "c8168f99-a1ca-4d98-bbb7-066f8cad2346",
+            "pin": "3c305ca9-14d3-40b4-a365-8938959c043e"
+        },
+        "8bd76d77-965a-4901-b1b3-9739710c06ab": {
+            "gate": "c8168f99-a1ca-4d98-bbb7-066f8cad2346",
+            "pin": "f3a0ce45-6d5e-453b-9649-33baf57cc7b7"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "led",
+        "smd"
+    ],
+    "type": "part",
+    "uuid": "fe69d7d1-477b-43d0-901d-e896d78d8256",
+    "value": [
+        false,
+        ""
+    ],
+    "version": 1
+}

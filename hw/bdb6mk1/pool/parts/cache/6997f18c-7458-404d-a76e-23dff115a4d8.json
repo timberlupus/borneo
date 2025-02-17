@@ -1,0 +1,36 @@
+{
+    "MPN": [
+        false,
+        "CL05B103KB5NNNC"
+    ],
+    "base": "29043bfd-c944-47cb-ae49-8dc6e1cf7257",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "10nF (103) ±10% 50V X7R"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "Samsung"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "parametric": {
+        "table": "capacitors",
+        "tolerance": "10",
+        "type": "X7R",
+        "value": "1e-08",
+        "wvdc": "50"
+    },
+    "tags": [],
+    "type": "part",
+    "uuid": "6997f18c-7458-404d-a76e-23dff115a4d8",
+    "value": [
+        false,
+        "10n/50V"
+    ]
+}

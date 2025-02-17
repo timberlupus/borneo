@@ -1,0 +1,16 @@
+{
+    "blocks": {
+        "7f67278d-1e6c-4309-b760-778b3dba2826": {
+            "block_filename": "top_block.json",
+            "schematic_filename": "top_schematic.json",
+            "symbol_filename": ""
+        },
+        "9a25a7f2-99d8-454a-bde7-2788e920d4bb": {
+            "block_filename": "blocks\\9a25a7f2-99d8-454a-bde7-2788e920d4bb\\block.json",
+            "schematic_filename": "blocks\\9a25a7f2-99d8-454a-bde7-2788e920d4bb\\schematic.json",
+            "symbol_filename": "blocks\\9a25a7f2-99d8-454a-bde7-2788e920d4bb\\symbol.json"
+        }
+    },
+    "top_block": "7f67278d-1e6c-4309-b760-778b3dba2826",
+    "type": "blocks"
+}

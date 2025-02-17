@@ -1,0 +1,21 @@
+{
+    "gates": {
+        "50387a27-18e9-496e-83f2-94da70424112": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "9ae0b854-f1cf-4b6f-8b80-4f37c6f407b0"
+        }
+    },
+    "manufacturer": "",
+    "name": "Dual Schottky Diode (Common Cathode)",
+    "prefix": "D",
+    "tags": [
+        "diode",
+        "dual",
+        "generic",
+        "schottky"
+    ],
+    "type": "entity",
+    "uuid": "eadb3d42-0b00-45d0-a635-5d7549986eb3"
+}

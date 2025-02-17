@@ -1,0 +1,32 @@
+{
+    "MPN": [
+        false,
+        "WJ15EDGRM-3.81-6P"
+    ],
+    "base": "172ad2dc-e500-4842-b82e-ab7815293683",
+    "datasheet": [
+        false,
+        "https://item.szlcsc.com/171506.html"
+    ],
+    "description": [
+        false,
+        "3.81mm 1x6P 排数:1 每排P数:6 螺丝固定"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        "Kangnex"
+    ],
+    "model": "4849310a-124a-4095-8841-523462ca3eca",
+    "parametric": {},
+    "tags": [
+        "jlc-smt-extended"
+    ],
+    "type": "part",
+    "uuid": "0f32d5bd-e8d0-4562-9aae-83feb9454c45",
+    "value": [
+        false,
+        ""
+    ]
+}

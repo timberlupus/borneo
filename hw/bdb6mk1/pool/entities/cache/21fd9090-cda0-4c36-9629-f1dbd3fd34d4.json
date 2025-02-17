@@ -1,0 +1,20 @@
+{
+    "gates": {
+        "dcfbc407-3bfd-411b-ba65-25df67074373": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "053635b1-9aeb-4c12-93cd-0824b7db2b90"
+        }
+    },
+    "manufacturer": "nxp",
+    "name": "PCF8563",
+    "prefix": "U",
+    "tags": [
+        "ic",
+        "nxp",
+        "rtc"
+    ],
+    "type": "entity",
+    "uuid": "21fd9090-cda0-4c36-9629-f1dbd3fd34d4"
+}

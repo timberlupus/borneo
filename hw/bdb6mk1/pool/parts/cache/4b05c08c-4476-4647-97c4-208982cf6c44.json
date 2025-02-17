@@ -1,0 +1,49 @@
+{
+    "MPN": [
+        false,
+        "K2-1109SE-I4SW-04"
+    ],
+    "datasheet": [
+        false,
+        "https://item.szlcsc.com/3185981.html"
+    ],
+    "description": [
+        false,
+        "4.5x4.5x7.5 SMD push switch"
+    ],
+    "entity": "09952b1f-1221-48ad-896c-4481914e3af2",
+    "inherit_model": true,
+    "inherit_tags": false,
+    "manufacturer": [
+        false,
+        "Krhro"
+    ],
+    "model": "1d5d0b43-2b4d-4b0c-aae5-c18c1d5f5d30",
+    "orderable_MPNs": {
+        "1c7e7e7b-5957-4b2e-90ba-f5bda1d2f014": "C2909216"
+    },
+    "package": "defa5c88-6f86-4f3f-a686-0185e7fcb415",
+    "pad_map": {
+        "1cb0f50f-e62f-49c0-81af-b714292dce40": {
+            "gate": "1926ff13-c95b-49f9-937c-35ac08ba9efb",
+            "pin": "97955848-10f4-4667-b838-46f6bb8fe085"
+        },
+        "d4dd13a1-fce0-4552-abe1-443bf4550e5a": {
+            "gate": "1926ff13-c95b-49f9-937c-35ac08ba9efb",
+            "pin": "831b482b-82af-40ba-8cc0-5e272f25cc2c"
+        }
+    },
+    "parametric": {},
+    "tags": [
+        "button",
+        "jlc-smt-extended",
+        "smd",
+        "swtich"
+    ],
+    "type": "part",
+    "uuid": "4b05c08c-4476-4647-97c4-208982cf6c44",
+    "value": [
+        false,
+        ""
+    ]
+}

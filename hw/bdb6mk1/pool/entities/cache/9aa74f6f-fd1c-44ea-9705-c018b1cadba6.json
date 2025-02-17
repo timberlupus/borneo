@@ -1,0 +1,22 @@
+{
+    "gates": {
+        "ec39ef8d-eca8-4998-97eb-d3a365fbc56f": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "a229c0cb-0312-4c0b-83f7-0f357bc3e1f7"
+        }
+    },
+    "manufacturer": "",
+    "name": "Barrel Jack (switched)",
+    "prefix": "J",
+    "tags": [
+        "barrel-jack",
+        "connector",
+        "jack",
+        "power-switch",
+        "switched"
+    ],
+    "type": "entity",
+    "uuid": "9aa74f6f-fd1c-44ea-9705-c018b1cadba6"
+}

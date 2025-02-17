@@ -1,0 +1,56 @@
+{
+    "manufacturer": "nxp",
+    "name": "PCF8563",
+    "pins": {
+        "1bb4261a-bc09-483b-86db-ce3477648f43": {
+            "direction": "output",
+            "names": [],
+            "primary_name": "~INT",
+            "swap_group": 0
+        },
+        "64868115-d068-47d0-b58e-0f212dcc2fcb": {
+            "direction": "output",
+            "names": [],
+            "primary_name": "OSCO",
+            "swap_group": 0
+        },
+        "725c913d-7b50-4709-92ae-98011418639a": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "VSS",
+            "swap_group": 0
+        },
+        "7ee87069-3dde-4d24-a5d4-8d8f3ec193e6": {
+            "direction": "bidirectional",
+            "names": [],
+            "primary_name": "SDA",
+            "swap_group": 0
+        },
+        "99c562d5-fdc7-43dc-8541-d716849b2037": {
+            "direction": "power_input",
+            "names": [],
+            "primary_name": "VDD",
+            "swap_group": 0
+        },
+        "b389aa73-60ee-4081-a3af-72393439ec94": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "OSCI",
+            "swap_group": 0
+        },
+        "ba16b8cd-6e13-43b6-85d3-c0e7889062e8": {
+            "direction": "input",
+            "names": [],
+            "primary_name": "SCL",
+            "swap_group": 0
+        },
+        "bf7a34b5-6419-4d1f-add0-ed3b48ebef94": {
+            "direction": "output",
+            "names": [],
+            "primary_name": "CLKOUT",
+            "swap_group": 0
+        }
+    },
+    "type": "unit",
+    "uuid": "053635b1-9aeb-4c12-93cd-0824b7db2b90"
+}

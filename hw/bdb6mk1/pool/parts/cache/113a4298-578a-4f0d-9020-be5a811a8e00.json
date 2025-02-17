@@ -1,0 +1,35 @@
+{
+    "MPN": [
+        false,
+        "XL1509-5.0E1"
+    ],
+    "base": "a043fab5-5327-4b1f-8266-1862e181bfc4",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "2A 150KHz 40V Buck DC to DC Converter, 5V"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        "XLSEMI"
+    ],
+    "model": "b99785a3-c0da-4658-969d-6287cec3be05",
+    "orderable_MPNs": {
+        "4d12482a-f138-4404-b3be-2f1ea4137406": "C61063"
+    },
+    "parametric": {},
+    "tags": [
+        "jlc-smt-base"
+    ],
+    "type": "part",
+    "uuid": "113a4298-578a-4f0d-9020-be5a811a8e00",
+    "value": [
+        false,
+        ""
+    ]
+}

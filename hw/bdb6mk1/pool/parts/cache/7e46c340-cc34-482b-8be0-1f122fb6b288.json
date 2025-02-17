@@ -1,0 +1,40 @@
+{
+    "MPN": [
+        false,
+        "1206W4F1003T5E"
+    ],
+    "base": "69d9d487-801a-40ab-a821-5a7a6ee8c623",
+    "datasheet": [
+        false,
+        "https://item.szlcsc.com/18588.html"
+    ],
+    "description": [
+        false,
+        "100kΩ ±1% 250mW 厚膜电阻"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "UniOhm"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "3c5f0172-490f-46d0-8e71-ac3565de7257": "C17900"
+    },
+    "parametric": {
+        "pmax": "0.25",
+        "table": "resistors",
+        "tolerance": "1",
+        "value": "100000"
+    },
+    "tags": [
+        "jlc-smt-base"
+    ],
+    "type": "part",
+    "uuid": "7e46c340-cc34-482b-8be0-1f122fb6b288",
+    "value": [
+        false,
+        "100k"
+    ]
+}

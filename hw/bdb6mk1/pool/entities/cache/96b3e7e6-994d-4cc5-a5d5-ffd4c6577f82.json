@@ -1,0 +1,19 @@
+{
+    "gates": {
+        "04a6bdf0-61b1-49fd-88d5-8e02c212791f": {
+            "name": "Main",
+            "suffix": "",
+            "swap_group": 0,
+            "unit": "74f03df0-399b-41ff-944b-f347c1b21fb5"
+        }
+    },
+    "manufacturer": "WCH",
+    "name": "CH340G",
+    "prefix": "U",
+    "tags": [
+        "interface",
+        "usb"
+    ],
+    "type": "entity",
+    "uuid": "96b3e7e6-994d-4cc5-a5d5-ffd4c6577f82"
+}

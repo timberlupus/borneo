@@ -1,0 +1,38 @@
+{
+    "MPN": [
+        false,
+        "0402WGF1004TCE"
+    ],
+    "base": "44fe0594-19d5-403e-9ae8-7c4c59c3668f",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "阻值: 1MΩ,精度: ±1%,功率: 1/16W,最大工作电压: 50V,温度系数: ±100ppm/℃"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "UniOhm"
+    ],
+    "model": "96c366ee-a963-41a0-9cc8-54c646979695",
+    "orderable_MPNs": {
+        "62960f97-85d6-4c55-9165-2016b09a5447": "C26083"
+    },
+    "parametric": {
+        "pmax": "0.0625",
+        "table": "resistors",
+        "tolerance": "1",
+        "value": "1e+06"
+    },
+    "tags": [],
+    "type": "part",
+    "uuid": "f0cb0c93-2fd5-4dc3-bf78-4fa0a0c4bacf",
+    "value": [
+        false,
+        "1M"
+    ]
+}
