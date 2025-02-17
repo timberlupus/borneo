@@ -75,6 +75,7 @@ ledc_channel_config_t _ledc_channel[LYFI_LED_CHANNEL_COUNT];
 #define LED_NVS_KEY_CIE1931_ENABLED "cie1931"
 
 #define LED_MAX_DUTY 1023
+#define LED_DUTY_RES LEDC_TIMER_10_BIT
 #define SECS_PER_DAY 172800
 
 #define FADE_PERIOD_SECONDS 5
@@ -82,12 +83,21 @@ ledc_channel_config_t _ledc_channel[LYFI_LED_CHANNEL_COUNT];
 static uint32_t channel_power_to_duty(uint8_t power);
 
 /// CIE1931 correction table
-static const uint8_t CIE1931_TABLE[101] = {
-    0,   0,   0,   0,   1,   1,   1,   2,   2,   2,   2,   3,   3,   3,   4,   4,   5,   5,   6,   7,   7,
-    8,   8,   9,   10,  11,  12,  12,  13,  14,  15,  16,  18,  19,  20,  21,  22,  24,  25,  27,  28,  30,
-    31,  33,  35,  37,  38,  40,  42,  44,  46,  49,  51,  53,  56,  58,  60,  63,  66,  68,  71,  74,  77,
-    80,  83,  86,  90,  93,  96,  100, 103, 107, 111, 115, 119, 123, 127, 131, 135, 140, 144, 149, 153, 158,
-    163, 168, 173, 178, 183, 189, 194, 200, 205, 211, 217, 223, 229, 235, 242, 248, 255,
+static const uint16_t CIE1931_TABLE[101] = {
+    0,   1,   2,   3,   5,   6,   7,   8,   8,   9,   11,  12,  13,  15,  16,  18,  20,   22,  24,  26,  28,
+    31,  33,  36,  39,  42,  45,  48,  52,  55,  59,  63,  67,  71,  76,  81,  85,  90,   96,  101, 107, 112,
+    118, 125, 131, 138, 145, 152, 159, 167, 175, 183, 191, 199, 208, 217, 227, 236, 246,  256, 266, 277, 288,
+    299, 311, 323, 335, 347, 360, 373, 386, 400, 414, 428, 443, 457, 473, 488, 504, 520,  537, 554, 571, 589,
+    607, 625, 644, 663, 683, 703, 723, 744, 765, 786, 808, 830, 853, 876, 899, 923, 1023,
+};
+
+static const uint16_t LOG_TABLE[101] = {
+    0,   9,   28,  51,  73,  96,  118, 139, 160, 180, 199, 218, 236,  253,  270,  286,  302,  318, 333, 347, 362,
+    376, 389, 403, 416, 428, 441, 453, 465, 477, 489, 500, 511, 522,  533,  543,  554,  564,  574, 584, 594, 604,
+    613, 623, 632, 641, 650, 659, 668, 677, 685, 694, 702, 711, 719,  727,  735,  743,  751,  758, 766, 774, 781,
+    789, 796, 803, 811, 818, 825, 832, 839, 846, 852, 859, 866, 873,  879,  886,  892,  899,  905, 911, 918, 924,
+    930, 936, 942, 948, 954, 960, 966, 972, 978, 984, 989, 995, 1001, 1006, 1012, 1017, 1023,
+
 };
 
 ESP_EVENT_DEFINE_BASE(LYFI_LEDC_EVENTS);
@@ -144,34 +154,34 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     .manual_color = {
 // From kconfig
 #if CONFIG_LYFI_LED_CH0_ENABLED
-        50,
+        10,
 #endif
 #if CONFIG_LYFI_LED_CH1_ENABLED
-        50,
+        10,
 #endif
 #if CONFIG_LYFI_LED_CH2_ENABLED
-        50,
+        10,
 #endif
 #if CONFIG_LYFI_LED_CH3_ENABLED
-        50,
+        10,
 #endif
 #if CONFIG_LYFI_LED_CH4_ENABLED
-        50,
+        10,
 #endif
 #if CONFIG_LYFI_LED_CH5_ENABLED
-        50,
+        10,
 #endif
 #if CONFIG_LYFI_LED_CH6_ENABLED
-        50,
+        10,
 #endif
 #if CONFIG_LYFI_LED_CH7_ENABLED
-        50,
+        10,
 #endif
 #if CONFIG_LYFI_LED_CH8_ENABLED
-        50,
+        10,
 #endif
 #if CONFIG_LYFI_LED_CH9_ENABLED
-        50,
+        10,
 #endif
     },
     .scheduler = { 0 },
@@ -312,14 +322,14 @@ uint8_t led_get_channel_power(uint8_t ch)
 
 static inline uint32_t channel_power_to_duty(uint8_t power)
 {
+    if (power > 100) {
+        power = 100;
+    }
     if (_settings.cie1931_enabled) {
-        if (power > 100) {
-            power = 100;
-        }
         return CIE1931_TABLE[power];
     }
     else {
-        return (uint32_t)power * LED_MAX_DUTY / 100;
+        return LOG_TABLE[power];
     }
 }
 
@@ -329,8 +339,22 @@ int led_set_channel_power(uint8_t ch, uint8_t power)
         return -1;
     }
     _status.color[ch] = power;
-    int duty = channel_power_to_duty(power); // CIE_TABLE[value]
-    BO_TRY(ledc_set_duty_and_update(_ledc_channel[ch].speed_mode, _ledc_channel[ch].channel, duty, _ledc_channel[ch].hpoint));
+
+    // Update the hpoint for all channels
+    uint32_t current_hpoint = 0;
+    for (size_t ich = 0; ich < LYFI_LED_CHANNEL_COUNT; ich++) {
+        // ledc_set_hpoint(LEDC_MODE, LEDC_CHANNEL0 + ch, current_hpoint);
+        uint32_t duty = channel_power_to_duty(_status.color[ich]);
+        current_hpoint = (current_hpoint + duty) % (1 << LED_DUTY_RES);
+        _ledc_channel[ich].hpoint = current_hpoint;
+        BO_TRY(ledc_set_duty_and_update(_ledc_channel[ich].speed_mode, _ledc_channel[ich].channel, duty,
+                                        _ledc_channel[ich].hpoint));
+    }
+
+    /*
+    BO_TRY(ledc_set_duty_and_update(_ledc_channel[ch].speed_mode, _ledc_channel[ch].channel, duty,
+                                    _ledc_channel[ch].hpoint));
+    */
     return 0;
 }
 
