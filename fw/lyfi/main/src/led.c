@@ -74,11 +74,12 @@ ledc_channel_config_t _ledc_channel[LYFI_LED_CHANNEL_COUNT];
 #define LED_NVS_KEY_NIGHTLIGHT_DURATION "nld"
 #define LED_NVS_KEY_CIE1931_ENABLED "cie1931"
 
+#define LED_MAX_DUTY 1023
 #define SECS_PER_DAY 172800
 
 #define FADE_PERIOD_SECONDS 5
 
-static int channel_power_to_duty(uint8_t power);
+static uint32_t channel_power_to_duty(uint8_t power);
 
 /// CIE1931 correction table
 static const uint8_t CIE1931_TABLE[101] = {
@@ -198,7 +199,7 @@ int led_init()
     // Initialize the first timer
 
     ledc_timer_config_t ledc_timer = {
-        .duty_resolution = LEDC_TIMER_8_BIT,
+        .duty_resolution = LEDC_TIMER_10_BIT,
         .freq_hz = 24000, // the frequency 24kHz
 #if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3
         .speed_mode = LEDC_LOW_SPEED_MODE,
@@ -223,7 +224,7 @@ int led_init()
     // Initialize all channels
     for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
         _ledc_channel[ch].gpio_num = LED_GPIOS[ch];
-        _ledc_channel[ch].hpoint = 0;
+        _ledc_channel[ch].hpoint = (ch * LED_MAX_DUTY) / LYFI_LED_CHANNEL_COUNT;
 #if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3
         _ledc_channel[ch].speed_mode = LEDC_LOW_SPEED_MODE;
         _ledc_channel[ch].timer_sel = LEDC_TIMER_1;
@@ -239,7 +240,8 @@ int led_init()
 #endif
         _ledc_channel[ch].duty = 0;
         _ledc_channel[ch].channel = (uint8_t)ch % 8;
-        ESP_LOGI(TAG, "Configure GPIO [%u] as PWM Channel [%u]", _ledc_channel[ch].gpio_num, _ledc_channel[ch].channel);
+        ESP_LOGI(TAG, "Configure GPIO [%u] as PWM Channel [%u], hpoint=[%u]", _ledc_channel[ch].gpio_num,
+                 _ledc_channel[ch].channel, _ledc_channel[ch].hpoint);
         BO_TRY(gpio_reset_pin(LED_GPIOS[ch]));
         BO_TRY(ledc_channel_config(&_ledc_channel[ch]));
         BO_TRY(ledc_stop(_ledc_channel[ch].speed_mode, _ledc_channel[ch].channel,
@@ -308,7 +310,7 @@ uint8_t led_get_channel_power(uint8_t ch)
     return _status.color[ch];
 }
 
-static inline int channel_power_to_duty(uint8_t power)
+static inline uint32_t channel_power_to_duty(uint8_t power)
 {
     if (_settings.cie1931_enabled) {
         if (power > 100) {
@@ -317,7 +319,7 @@ static inline int channel_power_to_duty(uint8_t power)
         return CIE1931_TABLE[power];
     }
     else {
-        return (int)power * 256 / 100;
+        return (uint32_t)power * LED_MAX_DUTY / 100;
     }
 }
 
@@ -328,7 +330,7 @@ int led_set_channel_power(uint8_t ch, uint8_t power)
     }
     _status.color[ch] = power;
     int duty = channel_power_to_duty(power); // CIE_TABLE[value]
-    BO_TRY(ledc_set_duty_and_update(_ledc_channel[ch].speed_mode, _ledc_channel[ch].channel, duty, 0));
+    BO_TRY(ledc_set_duty_and_update(_ledc_channel[ch].speed_mode, _ledc_channel[ch].channel, duty, _ledc_channel[ch].hpoint));
     return 0;
 }
 

@@ -13,8 +13,6 @@
 #include <esp_system.h>
 #include <driver/gpio.h>
 #include <esp_adc/adc_oneshot.h>
-#include <esp_adc/adc_cali.h>
-#include <esp_adc/adc_cali_scheme.h>
 
 #include <borneo/system.h>
 #include <borneo/algo/filters.h>

@@ -38,7 +38,7 @@ int bo_adc_channel_config(adc_channel_t channel)
         .bitwidth = ADC_BITWIDTH_12,
         .atten = ADC_ATTEN_DB_12,
     };
-    return adc_oneshot_config_channel(s_adc_handle, CONFIG_BORNEO_NTC_ADC_CHANNEL, &adc_config);
+    return adc_oneshot_config_channel(s_adc_handle, channel, &adc_config);
 }
 
 int bo_adc_read_mv(adc_channel_t channel, int* value_mv)

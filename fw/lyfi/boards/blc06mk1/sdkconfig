@@ -17,6 +17,11 @@ CONFIG_BORNEO_OTA_FIRMWARE_UPGRADE_URL="https://borneo-device-upgrade.borneoiot.
 #################### Core Stuff #########################
 CONFIG_BORNEO_ADC_ENABLED=y
 
+################################# Power Supply Measurement ###############################
+CONFIG_BORNEO_MEAS_VOLTAGE_ENABLED=y
+CONFIG_BORNEO_MEAS_VOLTAGE_ADC_CHANNEL=0
+CONFIG_BORNEO_MEAS_CURRENT_ENABLED=y
+CONFIG_BORNEO_MEAS_CURRENT_ADC_CHANNEL=1
 
 ################## BLE #################################
 CONFIG_BT_ENABLED=n

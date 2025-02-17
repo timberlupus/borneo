@@ -40,12 +40,10 @@ menu "Borneo Core"
         # 定义第一个选项
         config BORNEO_NTC_PU_10K
             bool "10k pull-up resistor with 3.3V"
-            default n
 
         # 定义第二个选项
         config BORNEO_NTC_PU_4K7
             bool "4.7k pull-up resistor with 2.5V"
-            default n
     endchoice
 
 
@@ -59,5 +57,21 @@ menu "Borneo Core"
 
     config BORNEO_OTA_FIRMWARE_UPGRADE_URL
         string "OTA firmware upgrade URL"
+
+    config BORNEO_MEAS_VOLTAGE_ENABLED
+        bool "Power supply voltage measurement enabled"
+        default n
+
+    config BORNEO_MEAS_VOLTAGE_ADC_CHANNEL
+        int "Power supply voltage ADC channel"
+        depends on BORNEO_MEAS_VOLTAGE_ENABLED
+
+    config BORNEO_MEAS_CURRENT_ENABLED
+        bool "Power supply current measurement enabled"
+        default n
+
+    config BORNEO_MEAS_CURRENT_ADC_CHANNEL
+        int "Power supply current ADC channel"
+        depends on BORNEO_MEAS_CURRENT_ENABLED
 
 endmenu
