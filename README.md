@@ -97,7 +97,7 @@ Checkout the [milestones](https://github.com/oldrev/borneo/milestones) to get a 
     - `lyfi`: LED controller firmware-related source code
     - `doser`: Dosing pump firmware-related source code (under development)
 - `hw/`: Circuit design source files
-    - `blc06`: 6-channel LED controller core board design
+    - `blc06`: The core board design of Buce, the 6-channel LED controller module
     - `blb0657f`: 6-channel 57W LED lamp aluminum PCB design
     - `bld6f`: 6-channel LED driver PCB design
     - `blc05mk3`: 5-channel LED driver PCB design (*Obsoleted*)
