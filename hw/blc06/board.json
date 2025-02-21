@@ -8,9 +8,9 @@
             "r": 1.0
         },
         "solder_mask": {
-            "b": 0.0,
-            "g": 0.5,
-            "r": 0.0
+            "b": 0.06666667014360428,
+            "g": 0.06666667014360428,
+            "r": 0.06666667014360428
         },
         "substrate": {
             "b": 0.0,
@@ -827,6 +827,12 @@
                 -13462000
             ]
         },
+        "4413f02a-63f8-4c03-a3ae-3d176957517d": {
+            "position": [
+                1016000,
+                -14986000
+            ]
+        },
         "4594aa92-470e-459c-a2c7-d161c44dd808": {
             "position": [
                 2380454,
@@ -957,6 +963,12 @@
             "position": [
                 21082000,
                 -6350000
+            ]
+        },
+        "5829db12-0577-4246-a20a-8c3b15502dba": {
+            "position": [
+                2032000,
+                -14732000
             ]
         },
         "58a78775-2a1f-41fb-bcf1-4a71e9055884": {
@@ -1979,6 +1991,12 @@
                 -4826000
             ]
         },
+        "c91e3fad-6838-4d85-ae15-217afa221f73": {
+            "position": [
+                2032000,
+                -15240000
+            ]
+        },
         "cb1540fb-9734-41af-80b5-79eae29e554b": {
             "position": [
                 1836000,
@@ -2103,6 +2121,18 @@
             "position": [
                 14986000,
                 -10985500
+            ]
+        },
+        "de1f1955-cb25-44ec-8d8b-4a50f2729c34": {
+            "position": [
+                1016000,
+                -15494000
+            ]
+        },
+        "de838294-6614-4513-bf58-1370b049c358": {
+            "position": [
+                2286000,
+                -14986000
             ]
         },
         "dead02fb-b1bc-43e7-bd61-021e9a8f452b": {
@@ -2327,6 +2357,12 @@
                 -13462000
             ]
         },
+        "fcf00f8e-47e9-4630-8063-0d9b2b77c74c": {
+            "position": [
+                1651000,
+                -18542000
+            ]
+        },
         "fdd57e67-8ba0-4357-aa6c-7fa44199479e": {
             "position": [
                 17807439,
@@ -2383,16 +2419,46 @@
             "to": "33dcf40c-fe4b-496b-a1ec-f0dd69f66ff1",
             "width": 150000
         },
+        "23aa7f58-00b2-40ae-b8b7-60944db3a112": {
+            "from": "5829db12-0577-4246-a20a-8c3b15502dba",
+            "layer": 20,
+            "to": "5829db12-0577-4246-a20a-8c3b15502dba",
+            "width": 150000
+        },
         "31ce4a53-64b4-4245-a889-d7f20d476c55": {
             "from": "926cc2ba-481f-4535-8341-244297818c1d",
             "layer": 20,
             "to": "7feb8680-563d-4e1f-abbb-0398a5cc3ba5",
             "width": 150000
         },
+        "57c7d467-b7ad-4b41-9fdb-3cbcc70c5710": {
+            "from": "de838294-6614-4513-bf58-1370b049c358",
+            "layer": 20,
+            "to": "c91e3fad-6838-4d85-ae15-217afa221f73",
+            "width": 150000
+        },
+        "5d96be47-cfe4-45fa-b646-f8290a1f5f72": {
+            "from": "c91e3fad-6838-4d85-ae15-217afa221f73",
+            "layer": 20,
+            "to": "c91e3fad-6838-4d85-ae15-217afa221f73",
+            "width": 150000
+        },
+        "69afb45f-6737-47d5-8a0d-2aa5f3331f04": {
+            "from": "4413f02a-63f8-4c03-a3ae-3d176957517d",
+            "layer": 20,
+            "to": "de1f1955-cb25-44ec-8d8b-4a50f2729c34",
+            "width": 150000
+        },
         "6bbd53dd-e46a-4528-af6f-b7447893ccbd": {
             "from": "03f32a8c-ee3d-4c62-9e3c-4010c3b82437",
             "layer": 20,
             "to": "926cc2ba-481f-4535-8341-244297818c1d",
+            "width": 150000
+        },
+        "6e59d9ca-0ccc-496f-b650-b692cecf8590": {
+            "from": "de838294-6614-4513-bf58-1370b049c358",
+            "layer": 20,
+            "to": "5829db12-0577-4246-a20a-8c3b15502dba",
             "width": 150000
         },
         "6f5d5b81-8c05-4b55-884e-ddbdfc2d2abb": {
@@ -2423,6 +2489,18 @@
             "from": "926cc2ba-481f-4535-8341-244297818c1d",
             "layer": -120,
             "to": "7feb8680-563d-4e1f-abbb-0398a5cc3ba5",
+            "width": 150000
+        },
+        "e5254d19-195c-4a8c-a3ef-a88fbec5bce5": {
+            "from": "de838294-6614-4513-bf58-1370b049c358",
+            "layer": 20,
+            "to": "4413f02a-63f8-4c03-a3ae-3d176957517d",
+            "width": 150000
+        },
+        "f02d2366-152c-4357-be7c-d16d489cc969": {
+            "from": "de1f1955-cb25-44ec-8d8b-4a50f2729c34",
+            "layer": 20,
+            "to": "de1f1955-cb25-44ec-8d8b-4a50f2729c34",
             "width": 150000
         },
         "f156da27-606d-454e-bd6a-308a297231a6": {
@@ -7173,8 +7251,8 @@
                 "angle": 0,
                 "mirror": false,
                 "shift": [
-                    7366000,
-                    -21463000
+                    7467600,
+                    -21336000
                 ]
             },
             "size": 500000,
@@ -7343,8 +7421,8 @@
                 "angle": 0,
                 "mirror": false,
                 "shift": [
-                    4953000,
-                    -21463000
+                    5080000,
+                    -21336000
                 ]
             },
             "size": 500000,
@@ -7479,7 +7557,7 @@
                 "angle": 0,
                 "mirror": false,
                 "shift": [
-                    14986000,
+                    15113000,
                     -21336000
                 ]
             },
@@ -7547,7 +7625,7 @@
                 "angle": 0,
                 "mirror": false,
                 "shift": [
-                    17780000,
+                    17907000,
                     -21336000
                 ]
             },
@@ -7589,6 +7667,23 @@
             "text": "GND",
             "width": 150000
         },
+        "b5713824-ddfb-40b6-8cc5-8a658a858fa3": {
+            "font": "simplex",
+            "from_smash": false,
+            "layer": -120,
+            "origin": "center",
+            "placement": {
+                "angle": 16384,
+                "mirror": false,
+                "shift": [
+                    21000000,
+                    -23008000
+                ]
+            },
+            "size": 700000,
+            "text": "${model}/REV${rev}",
+            "width": 100000
+        },
         "b97cf84a-b7cf-40bc-aae3-7abcad70f0b0": {
             "font": "complex",
             "from_smash": false,
@@ -7598,12 +7693,12 @@
                 "angle": 0,
                 "mirror": false,
                 "shift": [
-                    2465000,
-                    -22500000
+                    2794000,
+                    -22606000
                 ]
             },
-            "size": 750000,
-            "text": "Borneo-IoT_${model}/REV${rev}",
+            "size": 800000,
+            "text": "Buce_6CH_WIFI_LED_PWM",
             "width": 100000
         },
         "ba26790e-892d-4cfb-b02c-6b643fdfe92e": {
@@ -7615,7 +7710,7 @@
                 "angle": 0,
                 "mirror": false,
                 "shift": [
-                    9906000,
+                    10033000,
                     -21336000
                 ]
             },
@@ -7666,8 +7761,8 @@
                 "angle": 0,
                 "mirror": false,
                 "shift": [
-                    2159000,
-                    -21463000
+                    2641600,
+                    -21336000
                 ]
             },
             "size": 500000,
@@ -12950,6 +13045,18 @@
         "42e84d3a-1bd3-4b79-ae38-b2cbfceece8b": {
             "from_rules": true,
             "junction": "60ca19a9-74be-49e6-b46a-7814e49fd249",
+            "locked": false,
+            "net_set": "d4568af4-51b8-4b44-ad36-e7602fee2c85",
+            "padstack": "8b6dee4b-af88-4c0f-b38b-c5364649e65e",
+            "parameter_set": {
+                "hole_diameter": 300000,
+                "via_diameter": 400000
+            },
+            "source": "rules"
+        },
+        "45c24a94-8c73-4e25-bd3e-884a4e05c003": {
+            "from_rules": true,
+            "junction": "fcf00f8e-47e9-4630-8063-0d9b2b77c74c",
             "locked": false,
             "net_set": "d4568af4-51b8-4b44-ad36-e7602fee2c85",
             "padstack": "8b6dee4b-af88-4c0f-b38b-c5364649e65e",
