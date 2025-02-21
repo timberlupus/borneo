@@ -847,7 +847,7 @@ int led_switch_mode(uint8_t mode)
     } break;
 
     case LED_MODE_DIMMING: {
-        // TODO 启动调光模式计时器
+        // TODO Start the timer
         if (_status.mode == LED_MODE_NORMAL || _status.mode == LED_MODE_PREVIEW) {
             _status.mode = mode;
         }
