@@ -30,7 +30,6 @@
 
 static struct fan_status _status = { 0 };
 static struct fan_settings _settings = { 0 };
-static ledc_channel_config_t _channel_config = { 0 };
 
 int fan_init()
 {
@@ -67,64 +66,20 @@ int fan_init()
         bo_nvs_close(nvs_handle);
     }
 
-    {
-        ESP_LOGI(TAG, "Initializing PWM timer.");
+    BO_TRY(rmtpwm_init());
 
-        ledc_timer_config_t ledc_timer = {
-            .duty_resolution = LEDC_TIMER_8_BIT,
-            .freq_hz = 24000, // 24k
-#if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3
-            .speed_mode = LEDC_LOW_SPEED_MODE,
-            .timer_num = LEDC_TIMER_2,
-#else
-            .speed_mode = LEDC_HIGH_SPEED_MODE,
-            .timer_num = LEDC_TIMER_1,
-#endif
-        };
-
-        BO_TRY(ledc_timer_config(&ledc_timer));
-        ESP_LOGI(TAG, "PWM timer initialized.");
-    }
-
-/*
-    {
-#if CONFIG_IDF_TARGET_ESP32C3
-        {
-            uint16_t pwm_gpio
-                = _settings.use_pwm_fan ? CONFIG_LYFI_FAN_CTRL_PWM_GPIO : CONFIG_LYFI_FAN_CTRL_PWMDAC_GPIO;
-            ESP_LOGI(TAG, "Fan driver PWM, GPIO=%u, channel=%u", pwm_gpio, CONFIG_LYFI_FAN_CTRL_PWM_CHANNEL);
-            _channel_config.gpio_num = pwm_gpio;
-        }
-#else
-        ESP_LOGI(TAG, "Fan driver PWM, GPIO=%u, channel=%u", CONFIG_LYFI_FAN_CTRL_PWM_GPIO,
-                 CONFIG_LYFI_FAN_CTRL_PWM_CHANNEL);
-        _channel_config.gpio_num = CONFIG_LYFI_FAN_CTRL_PWM_GPIO;
-#endif // CONFIG_IDF_TARGET_ESP32C3
-
-        _channel_config.hpoint = 0;
-#if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3
-        _channel_config.speed_mode = LEDC_LOW_SPEED_MODE;
-        _channel_config.timer_sel = LEDC_TIMER_2;
-#else
-        _channel_config.speed_mode = LEDC_HIGH_SPEED_MODE;
-        _channel_config.timer_sel = LEDC_TIMER_1;
-#endif
-        // Set LED Controller with previously prepared configuration
-        _channel_config.duty = 0xFF; // Without a reverse-blocking diode, the output voltage must not be set too low,
-                                     // otherwise the output voltage will be very high!!!
-        _channel_config.channel = CONFIG_LYFI_FAN_CTRL_PWM_CHANNEL;
-        BO_TRY(ledc_channel_config(&_channel_config));
-    }
-*/
+    if (!_settings.use_pwm_fan) {
 
 #if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
-    if (!_settings.use_pwm_fan) {
         ESP_LOGI(TAG, "Fan driver using DAC, channel=%u", CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL);
         BO_TRY(dac_output_enable(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL));
-    }
 #endif
-
-    BO_TRY(rmtpwm_init());
+    }
+    else {
+#if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3
+        BO_TRY(rmtpwm_set_dac_duty(0));
+#endif
+    }
 
     BO_TRY(fan_set_power(FAN_POWER_MAX));
 
@@ -154,18 +109,15 @@ int fan_set_power(uint8_t value)
 #endif // LYFI_FAN_CTRL_SHUTDOWN_ENABLED
 
     if (_settings.use_pwm_fan) {
-
-        int duty = 255 * value / FAN_POWER_MAX;
-        BO_TRY(ledc_set_duty(_channel_config.speed_mode, _channel_config.channel, duty));
-        BO_TRY(ledc_update_duty(_channel_config.speed_mode, _channel_config.channel));
-        ESP_LOGI(TAG, "Set fan power, method: PWM DAC, power=%u/100, duty=%d/255", value, duty);
+        BO_TRY(rmtpwm_set_pwm_duty(value));
+        ESP_LOGI(TAG, "Set fan power, method: PWM DAC, power=%u%%", value);
     }
     else {
 
 #if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
         // Built-in DAC
         {
-            // TODO FIXME
+            // TODO FIXME magic numbers
             uint8_t dac_value = 200 - (value * FAN_POWER_MAX / 80);
             if (value == 0) {
                 dac_value = 0xFF;
@@ -177,10 +129,10 @@ int fan_set_power(uint8_t value)
 #else
         // PWMDAC
         {
-            uint8_t duty = 60 + (FAN_POWER_MAX - value);
-            BO_TRY(ledc_set_duty(_channel_config.speed_mode, _channel_config.channel, duty));
-            BO_TRY(ledc_update_duty(_channel_config.speed_mode, _channel_config.channel));
-            ESP_LOGD(TAG, "Set fan power, method: PWM DAC, power=%hhu/100, PWM-DAC_duty=%hhu/255", value, duty);
+            // 80% ~= 3V, 30% ~= 12V
+            uint8_t duty = 80 - (value / 2);
+            BO_TRY(rmtpwm_set_dac_duty(duty));
+            ESP_LOGD(TAG, "Set fan power, method: PWM DAC, power=%d, PWM-DAC_duty=%u", value, duty);
         }
 #endif // CONFIG_IDF_TARGET_ESP32C3
     }
