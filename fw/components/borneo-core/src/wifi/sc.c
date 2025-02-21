@@ -33,12 +33,12 @@ static void sc_event_handler(void* arg, esp_event_base_t event_base, int32_t eve
 static void ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 
 /**
- * @brief 配网状态
+ * @brief Provisioning status
  */
 enum {
-    SC_STATE_STARTED, /*!< 配网中 */
-    SC_STATE_CONNECTING, /*!< 已收到 SSID/PWD，正在尝试连接 WiFi */
-    SC_STATE_DONE, /*!< 获得了IP，配网完成 */
+    SC_STATE_STARTED,
+    SC_STATE_CONNECTING,
+    SC_STATE_DONE,
 };
 
 static EventGroupHandle_t _wifi_event_group;

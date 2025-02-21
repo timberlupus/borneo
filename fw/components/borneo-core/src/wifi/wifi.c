@@ -82,7 +82,7 @@ int bo_wifi_start()
         int32_t shutdown_count = 0;
         BO_TRY(_update_nvs_early(&shutdown_count));
 
-        if (shutdown_count > 4) {
+        if (shutdown_count > 3) {
             ESP_LOGI(TAG, "Shutdown counter: %ld", shutdown_count);
             BO_TRY(_update_nvs_reset());
             BO_TRY(bo_wifi_forget());
@@ -127,18 +127,15 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 {
     switch (event_id) {
 
-    case WIFI_EVENT_STA_START: { // STA模式启动
-        /* code */
+    case WIFI_EVENT_STA_START: {
         ESP_LOGI(TAG, "WiFi station mode started.");
     } break;
 
-    case WIFI_EVENT_STA_STOP: { // STA模式关闭
-        /* code */
+    case WIFI_EVENT_STA_STOP: { 
         ESP_LOGI(TAG, "WiFi station mode stopped.");
     } break;
 
-    case WIFI_EVENT_STA_DISCONNECTED: { // STA 模式断开连接
-        // 尝试重新连接路由器
+    case WIFI_EVENT_STA_DISCONNECTED: {
         wifi_config_t wifi_config = { 0 };
         int rc = esp_wifi_get_config(ESP_IF_WIFI_STA, &wifi_config);
         if (rc == ESP_OK) {
@@ -156,7 +153,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
         }
     } break;
 
-    case WIFI_EVENT_STA_CONNECTED: // STA 模式连接到了路由器
+    case WIFI_EVENT_STA_CONNECTED: 
     {
         ESP_LOGI(TAG, "WiFi connected successfully.");
     } break;
