@@ -5,8 +5,6 @@
 
 ![BorneoIoT Banner](assets/borneo-repo-banner.jpg)
 
-English | [中文](README.zh.md)
-
 ---
 
 Borneo-IoT project is a commercial-grade, highly customizable open-source smart WiFi aquarium LED PWM controller module and mobile App.
@@ -69,7 +67,7 @@ If you like this project, please don't forget to give it a star. Thank you!
 
 | ![BLC06MK1](assets/blc06mk1-shot1.jpg) <br/> LED Controller Module Appearance | ![BLC05MK3-SCH](assets/blc05mk3-sch.png) <br/> LED LED Controller Module Schematic |
 |------------------------------------------|------------------------------------------ |
-| ![BLB08103 Board](assets/blc05mk3-old-prototype.jpg) <br/> LED Controller - Old Prototype | ![BLB08103 Old Board](assets/blb08103-old-prototype.jpg) <br/> Aluminum PCB - Old Prototype |
+| ![BLB08103 Board](assets/blc05mk3-old-prototype.jpg) <br/> LED Controller - Obsoleted Prototype | ![BLB08103 Old Board](assets/blb08103-old-prototype.jpg) <br/> Aluminum PCB - Obsoleted Prototype |
 | ![BLB08103 Board](assets/blb08103.jpg) <br/> Aluminum PCB Appearance | ![BLB08103 Case](assets/blb08103-case.jpg) <br/> Reference Design Lamp Appearance[^2] |
 
 [^2]: The enclosure was manually measured and modeled by me after purchasing it from a friend, therefore, I regret that the design cannot be made public. If there is significant interest, I can redesign it.
@@ -91,17 +89,20 @@ Checkout the [milestones](https://github.com/oldrev/borneo/milestones) to get a 
 ## Directory Structure
 
 - `client/`: Mobile app source code
+- `borneopy/`: A open-source Python client library for devices under the Borneo-IoT Project
 - `fw/`: Firmware source code
-    - `scripts`: Related Python scripts, including the device Python client library
+    - `scripts`: Related Python scripts
     - `cmake`: CMake scripts
     - `components`: Common ESP-IDF component source code
     - `lyfi`: LED controller firmware-related source code
     - `doser`: Dosing pump firmware-related source code (under development)
 - `hw/`: Circuit design source files
-    - `blc05mk3`: 5-channel LED controller core board design
-    - `blc05mk3-horizontal`: 5-channel LED controller core board with horizontal pin headers
-    - `blb08103`: 5-channel 63W LED lamp aluminum substrate design
-    - `3d-models`: Exported STEP format 3D models of the core board
+    - `blc06`: 6-channel LED controller core board design
+    - `blb0657f`: 6-channel 57W LED lamp aluminum PCB design
+    - `bld6f`: 6-channel LED driver PCB design
+    - `blc05mk3`: 5-channel LED driver PCB design (*Obsoleted*)
+    - `blb08103`: 5-channel 63W LED lamp aluminum PCB design (*Obsoleted*)
+    - `3d-models`: STEP format 3D models
     - `datasheets`: The hardware specifications in PDF format[^3]
 - `tools/`: Related scripts and tools
 
