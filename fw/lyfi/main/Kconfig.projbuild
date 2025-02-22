@@ -274,6 +274,7 @@ menu "Borneo LyFi"
     menu "Fan"
         config LYFI_FAN_CTRL_ENABLED
             bool "The Controlling Method of Fan Speed"
+            default y
 
         config LYFI_FAN_CTRL_PWM_GPIO
             int "The GPIO number for PWM fan"
@@ -294,12 +295,20 @@ menu "Borneo LyFi"
         config LYFI_FAN_CTRL_SHUTDOWN_ENABLED
             bool "Enable The Shutdown Pin for The Power of Fan"
             depends on LYFI_FAN_CTRL_ENABLED
-            default y
+            default n
 
         config LYFI_FAN_CTRL_SHUTDOWN_GPIO
             int "The GPIO Number of the Shutdown Pin"
             depends on LYFI_FAN_CTRL_SHUTDOWN_ENABLED
     endmenu
+
+    menu "Thermal Management"
+        config LYFI_THERMAL_ENABLED
+            bool "Enable The Thermal Management Sub-system"
+            default y
+            depends on LYFI_FAN_CTRL_ENABLED && BORNEO_NTC_ENABLED
+    endmenu
+
 
 
 endmenu

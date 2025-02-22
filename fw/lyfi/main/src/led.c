@@ -22,11 +22,10 @@
 #include "algo.h"
 #include "led.h"
 
-static void sch_compute_color_in_range(led_color_t color, const struct tm* now,
-                                       const struct led_scheduler_item* range_begin,
-                                       const struct led_scheduler_item* range_end);
-
-static void sch_compute_current_color(led_color_t color);
+static void sch_compute_current_duties(led_duty_t* duties);
+static void sch_compute_duties_in_range(led_duty_t* duties, const struct tm* now,
+                                        const struct led_scheduler_item* range_begin,
+                                        const struct led_scheduler_item* range_end);
 
 static void _borneo_system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id,
                                           void* event_data);
@@ -46,9 +45,6 @@ struct sch_time_pair {
 
 static int sch_find_closest_time_range(uint32_t instant, struct sch_time_pair* result);
 static void sch_drive();
-
-static int fade_to(const led_color_t new_color, bool is_blocking);
-static int fade_on(bool is_blocking);
 
 static int nightlight_mode_entry();
 static int nightlight_mode_exit();
@@ -80,12 +76,13 @@ ledc_channel_config_t _ledc_channels[LYFI_LED_CHANNEL_COUNT];
 
 #define FADE_PERIOD_SECONDS 5
 
-static uint32_t channel_power_to_duty(uint8_t power);
-static int led_set_channel_duty(uint8_t ch, uint16_t duty);
-static int led_update_hpoints();
+static led_duty_t channel_power_to_duty(uint8_t power);
+static void color_to_duties(const led_color_t color, led_duty_t* duties);
+static int led_set_channel_duty(uint8_t ch, led_duty_t duty);
+static int led_set_duties(const led_duty_t* duties);
 
 /// CIE1931 correction table
-static const uint16_t CIE1931_TABLE[101] = {
+static const led_duty_t CIE1931_TABLE[101] = {
     0,   1,   2,   3,   5,   6,   7,   8,   8,   9,   11,  12,  13,  15,  16,  18,  20,   22,  24,  26,  28,
     31,  33,  36,  39,  42,  45,  48,  52,  55,  59,  63,  67,  71,  76,  81,  85,  90,   96,  101, 107, 112,
     118, 125, 131, 138, 145, 152, 159, 167, 175, 183, 191, 199, 208, 217, 227, 236, 246,  256, 266, 277, 288,
@@ -93,7 +90,7 @@ static const uint16_t CIE1931_TABLE[101] = {
     607, 625, 644, 663, 683, 703, 723, 744, 765, 786, 808, 830, 853, 876, 899, 923, 1023,
 };
 
-static const uint16_t LOG_TABLE[101] = {
+static const led_duty_t LOG_TABLE[101] = {
     0,   9,   28,  51,  73,  96,  118, 139, 160, 180, 199, 218, 236,  253,  270,  286,  302,  318, 333, 347, 362,
     376, 389, 403, 416, 428, 441, 453, 465, 477, 489, 500, 511, 522,  533,  543,  554,  564,  574, 584, 594, 604,
     613, 623, 632, 641, 650, 659, 668, 677, 685, 694, 702, 711, 719,  727,  735,  743,  751,  758, 766, 774, 781,
@@ -323,7 +320,7 @@ uint8_t led_get_channel_power(uint8_t ch)
     return _status.color[ch];
 }
 
-inline uint32_t channel_power_to_duty(uint8_t power)
+inline led_duty_t channel_power_to_duty(uint8_t power)
 {
     if (power > 100) {
         power = 100;
@@ -336,21 +333,14 @@ inline uint32_t channel_power_to_duty(uint8_t power)
     }
 }
 
-int led_update_hpoints()
+inline void color_to_duties(const led_color_t color, led_duty_t* duties)
 {
-    // Reset hpoints
-    uint32_t current_hpoint = 0;
-    for (size_t ich = 0; ich < LYFI_LED_CHANNEL_COUNT; ich++) {
-        uint32_t duty = (uint32_t)ledc_get_duty(_ledc_channels[ich].speed_mode, _ledc_channels[ich].channel);
-        current_hpoint = (current_hpoint + duty) % (1 << LED_DUTY_RES);
-        _ledc_channels[ich].hpoint = current_hpoint;
-        BO_TRY(ledc_set_duty_and_update(_ledc_channels[ich].speed_mode, _ledc_channels[ich].channel, duty,
-                                        _ledc_channels[ich].hpoint));
+    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+        duties[ch] = channel_power_to_duty(color[ch]);
     }
-    return 0;
 }
 
-int led_set_channel_duty(uint8_t ch, uint16_t duty)
+int led_set_channel_duty(uint8_t ch, led_duty_t duty)
 {
     if (ch >= LYFI_LED_CHANNEL_COUNT || duty > LED_MAX_DUTY) {
         return -1;
@@ -360,11 +350,27 @@ int led_set_channel_duty(uint8_t ch, uint16_t duty)
         return 0;
     }
 
-    BO_TRY(
-        ledc_set_duty_and_update(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel, duty,
-                                 (uint32_t)ledc_get_hpoint(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel)));
+    uint32_t total_duty = 0;
+    for (size_t ich = 0; ich < LYFI_LED_CHANNEL_COUNT; ich++) {
+        if (ich == ch) {
+            continue;
+        }
+        total_duty += ledc_get_duty(_ledc_channels[ich].speed_mode, _ledc_channels[ich].channel);
+    }
 
-    BO_TRY(led_update_hpoints());
+    uint32_t hpoint = total_duty % (1 << LED_DUTY_RES);
+    BO_TRY(ledc_set_duty_and_update(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel, duty, hpoint));
+    return 0;
+}
+
+int led_set_duties(const led_duty_t* duties)
+{
+    uint32_t hpoint = 0;
+    for (uint8_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+        led_duty_t duty = duties[ch];
+        BO_MUST(ledc_set_duty_and_update(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel, duty, hpoint));
+        hpoint = (hpoint + duty) % (1 << LED_DUTY_RES);
+    }
     return 0;
 }
 
@@ -374,16 +380,8 @@ int led_set_channel_power(uint8_t ch, uint8_t power)
         return -1;
     }
     _status.color[ch] = power;
-
-    // Update the hpoint for all channels
-    uint32_t current_hpoint = 0;
-    for (size_t ich = 0; ich < LYFI_LED_CHANNEL_COUNT; ich++) {
-        // ledc_set_hpoint(LEDC_MODE, LEDC_CHANNEL0 + ch, current_hpoint);
-        uint32_t duty = channel_power_to_duty(_status.color[ich]);
-        current_hpoint = (current_hpoint + duty) % (1 << LED_DUTY_RES);
-        BO_TRY(
-            ledc_set_duty_and_update(_ledc_channels[ich].speed_mode, _ledc_channels[ich].channel, duty, current_hpoint));
-    }
+    led_duty_t duty = channel_power_to_duty(power);
+    BO_TRY(led_set_channel_duty(ch, duty));
     return 0;
 }
 
@@ -475,8 +473,8 @@ int sch_find_closest_time_range(uint32_t instant, struct sch_time_pair* result)
     return 0;
 }
 
-void sch_compute_color_in_range(led_color_t color, const struct tm* now, const struct led_scheduler_item* range_begin,
-                                const struct led_scheduler_item* range_end)
+void sch_compute_duties_in_range(led_duty_t* duties, const struct tm* now, const struct led_scheduler_item* range_begin,
+                                 const struct led_scheduler_item* range_end)
 {
     int32_t now_instant = (now->tm_hour * 3600) + (now->tm_min * 60) + now->tm_sec;
     if (range_begin->instant >= SECS_PER_DAY) {
@@ -484,24 +482,26 @@ void sch_compute_color_in_range(led_color_t color, const struct tm* now, const s
     }
 
     for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        int32_t value = linear_interpolate_i32(range_begin->instant, range_begin->color[ch], range_end->instant,
-                                               range_end->color[ch], now_instant);
+        led_duty_t begin_duty = channel_power_to_duty(range_begin->color[ch]);
+        led_duty_t end_duty = channel_power_to_duty(range_end->color[ch]);
+        int32_t value
+            = linear_interpolate_i32(range_begin->instant, begin_duty, range_end->instant, end_duty, now_instant);
         if (value < 0) {
             value = 0;
         }
-        else if (value > 100) {
-            value = 100;
+        else if (value > LED_MAX_DUTY) {
+            value = LED_MAX_DUTY;
         }
-        color[ch] = (uint8_t)value;
+        duties[ch] = (led_duty_t)value;
     }
 }
 
-void sch_compute_current_color(led_color_t color)
+void sch_compute_current_duties(led_duty_t* duties)
 {
     assert(_status.mode == LED_MODE_PREVIEW || _settings.scheduler_enabled);
 
     if (_settings.scheduler.item_count == 0) {
-        memcpy(color, COLOR_BLANK, sizeof(led_color_t));
+        memset(duties, 0, sizeof(led_duties_t));
         return;
     }
 
@@ -522,19 +522,19 @@ void sch_compute_current_color(led_color_t color)
     if (rc && rc != -ENOENT) {
         // we got an error
         ESP_LOGE(TAG, "Failed to find scheduler item with instant(%lu), errno=%d", local_instant, rc);
-        memcpy(color, COLOR_BLANK, sizeof(led_color_t));
+        memset(duties, 0, sizeof(led_duties_t));
         return;
     }
 
     // Open range
     if (pair.begin != NULL && pair.end == NULL) {
-        memcpy(color, pair.begin->color, sizeof(led_color_t));
+        color_to_duties(pair.begin->color, duties);
         return;
     }
 
     // Between two instants
     if (pair.begin != NULL && pair.end != NULL) {
-        sch_compute_color_in_range(color, &local_now, pair.begin, pair.end);
+        sch_compute_duties_in_range(duties, &local_now, pair.begin, pair.end);
     }
 }
 
@@ -542,10 +542,10 @@ static void sch_drive()
 {
     assert(_status.mode == LED_MODE_PREVIEW || _settings.scheduler_enabled);
 
-    led_color_t color_to_set;
-    sch_compute_current_color(color_to_set);
+    led_duties_t duties;
+    sch_compute_current_duties(duties);
 
-    BO_MUST(led_set_power(color_to_set));
+    BO_MUST(led_set_duties(duties));
 }
 
 bool led_is_blank()
@@ -574,11 +574,9 @@ static void _borneo_system_events_handler(void* handler_args, esp_event_base_t b
         if (_status.mode != LED_MODE_NORMAL) {
             BO_MUST(led_switch_mode(LED_MODE_NORMAL));
         }
-        fade_to(COLOR_BLANK, false);
     } break;
 
     case BO_EVENT_POWER_ON: {
-        BO_MUST(fade_on(false));
         normal_mode_entry();
     } break;
 
@@ -727,7 +725,7 @@ int nightlight_mode_entry()
     _status.nightlight_off_time = now + _settings.nightlight_duration + FADE_PERIOD_SECONDS;
     _status.mode = LED_MODE_NIGHTLIGHT;
 
-    BO_TRY(fade_to(_settings.manual_color, false));
+    // BO_TRY(fade_to(_settings.manual_color, false));
     return 0;
 }
 
@@ -740,7 +738,7 @@ static int nightlight_mode_exit()
     _status.nightlight_on_time = 0;
     _status.nightlight_off_time = 0;
 
-    BO_TRY(fade_on(false));
+    // BO_TRY(fade_on(false));
 
     return 0;
 }
@@ -760,31 +758,6 @@ static void nightlight_mode_drive()
     else if (now >= _status.nightlight_off_time) {
         nightlight_mode_exit();
     }
-}
-
-int fade_on(bool is_blocking)
-{
-    if (_settings.scheduler_enabled) {
-        led_color_t color;
-        sch_compute_current_color(color);
-        BO_MUST(fade_to(color, is_blocking));
-    }
-    else {
-        BO_MUST(fade_to(_settings.manual_color, is_blocking));
-    }
-    return 0;
-}
-
-int fade_to(const led_color_t new_color, bool is_blocking)
-{
-    uint32_t duration = FADE_PERIOD_SECONDS * 1000;
-
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        BO_TRY(ledc_set_fade_time_and_start(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel,
-                                            channel_power_to_duty(new_color[ch]), duration,
-                                            is_blocking ? LEDC_FADE_WAIT_DONE : LEDC_FADE_NO_WAIT));
-    }
-    return 0;
 }
 
 static void led_drive()
@@ -814,7 +787,7 @@ static void led_drive()
 void led_proc()
 {
     if (bo_power_is_on()) {
-        BO_MUST(fade_on(false));
+        // BO_MUST(fade_on(false));
     }
 
     BO_MUST(normal_mode_entry());

@@ -18,9 +18,14 @@
 
 static int _lyfi_init(const struct drvfx_device* dev)
 {
-    BO_TRY(fan_init());
 
+#if CONFIG_LYFI_FAN_CTRL_ENABLED
+    BO_TRY(fan_init());
+#endif
+
+#if CONFIG_LYFI_THERMAL_ENABLED
     BO_TRY(thermal_init());
+#endif
 
     BO_TRY(led_init());
 

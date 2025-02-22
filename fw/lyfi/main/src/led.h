@@ -8,8 +8,9 @@ extern "C" {
 
 #define LYFI_LED_CHANNEL_COUNT CONFIG_LYFI_LED_CHANNEL_COUNT
 
+typedef uint16_t led_duty_t;
 typedef uint8_t led_color_t[LYFI_LED_CHANNEL_COUNT];
-typedef uint16_t led_duties_t[LYFI_LED_CHANNEL_COUNT];
+typedef led_duty_t led_duties_t[LYFI_LED_CHANNEL_COUNT];
 
 enum led_mode {
     LED_MODE_NORMAL = 0,
