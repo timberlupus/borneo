@@ -4,6 +4,7 @@
 extern "C" {
 #endif
 
+#define LYFI_LED_MAX_POWER 100
 #define LYFI_LEDC_SCHEDULER_ITEMS_CAPACITY 48
 
 #define LYFI_LED_CHANNEL_COUNT CONFIG_LYFI_LED_CHANNEL_COUNT
@@ -42,13 +43,15 @@ struct led_user_settings {
 struct led_status {
     uint8_t mode; ///< Current mode
     led_color_t color; ///< Current hardware LED power percentage for each channel
-    int64_t nightlight_on_time; ///< Time point when temporary lighting mode finishes fading in
     int64_t nightlight_off_time; ///< Time point after temporary lighting mode to turn off, this time point is when
                                  ///< fading out starts
     time_t preview_mode_clock; ///< Clock for preview mode
     led_color_t color_to_resume; ///< Color to be resumed
-    bool is_fading;
-    led_color_t fade_color; ///< Target Color to fade
+
+    led_color_t fade_start_color;
+    led_color_t fade_end_color;
+    int64_t fade_start_time_ms; ///< Time point of fading started
+    uint32_t fade_duration_ms; ///< The duration of fading
 };
 
 int led_init();
@@ -60,6 +63,8 @@ void led_blank();
 int led_set_color(const uint8_t* color);
 
 int led_get_color(uint8_t* color);
+
+int led_get_duties(led_duty_t* duties);
 
 uint8_t led_get_channel_power(uint8_t ch);
 
