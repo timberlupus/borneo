@@ -63,7 +63,7 @@ static void led_drive();
 static int load_settings();
 static int save_settings();
 
-ledc_channel_config_t _ledc_channel[LYFI_LED_CHANNEL_COUNT];
+ledc_channel_config_t _ledc_channels[LYFI_LED_CHANNEL_COUNT];
 
 #define TAG "lyfi-ledc"
 
@@ -81,6 +81,8 @@ ledc_channel_config_t _ledc_channel[LYFI_LED_CHANNEL_COUNT];
 #define FADE_PERIOD_SECONDS 5
 
 static uint32_t channel_power_to_duty(uint8_t power);
+static int led_set_channel_duty(uint8_t ch, uint16_t duty);
+static int led_update_hpoints();
 
 /// CIE1931 correction table
 static const uint16_t CIE1931_TABLE[101] = {
@@ -200,7 +202,7 @@ int led_init()
 
     memset(&_status, 0, sizeof(_status));
     memset(&_settings, 0, sizeof(_settings));
-    memset(&_ledc_channel, 0, sizeof(_ledc_channel));
+    memset(&_ledc_channels, 0, sizeof(_ledc_channels));
 
     BO_TRY(load_settings());
 
@@ -211,12 +213,13 @@ int led_init()
     ledc_timer_config_t ledc_timer = {
         .duty_resolution = LEDC_TIMER_10_BIT,
         .freq_hz = 24000, // the frequency 24kHz
-#if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3
-        .speed_mode = LEDC_LOW_SPEED_MODE,
-        .timer_num = LEDC_TIMER_1,
-#else
+
+#if SOC_LEDC_SUPPORT_HS_MODE
         .speed_mode = LEDC_HIGH_SPEED_MODE,
         .timer_num = LEDC_TIMER_0,
+#else
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .timer_num = LEDC_TIMER_1,
 #endif
     };
 
@@ -233,28 +236,28 @@ int led_init()
 
     // Initialize all channels
     for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        _ledc_channel[ch].gpio_num = LED_GPIOS[ch];
-        _ledc_channel[ch].hpoint = (ch * LED_MAX_DUTY) / LYFI_LED_CHANNEL_COUNT;
-#if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3
-        _ledc_channel[ch].speed_mode = LEDC_LOW_SPEED_MODE;
-        _ledc_channel[ch].timer_sel = LEDC_TIMER_1;
-#else
+        _ledc_channels[ch].gpio_num = LED_GPIOS[ch];
+        _ledc_channels[ch].hpoint = (ch * LED_MAX_DUTY) / LYFI_LED_CHANNEL_COUNT;
+#if SOC_LEDC_SUPPORT_HS_MODE
         if (ch <= 7) { // the next timer
-            _ledc_channel[ch].speed_mode = LEDC_HIGH_SPEED_MODE;
-            _ledc_channel[ch].timer_sel = LEDC_TIMER_0;
+            _ledc_channels[ch].speed_mode = LEDC_HIGH_SPEED_MODE;
+            _ledc_channels[ch].timer_sel = LEDC_TIMER_0;
         }
         else {
-            _ledc_channel[ch].speed_mode = LEDC_LOW_SPEED_MODE;
-            _ledc_channel[ch].timer_sel = LEDC_TIMER_1;
+            _ledc_channels[ch].speed_mode = LEDC_LOW_SPEED_MODE;
+            _ledc_channels[ch].timer_sel = LEDC_TIMER_1;
         }
+#else
+        _ledc_channels[ch].speed_mode = LEDC_LOW_SPEED_MODE;
+        _ledc_channels[ch].timer_sel = LEDC_TIMER_1;
 #endif
-        _ledc_channel[ch].duty = 0;
-        _ledc_channel[ch].channel = (uint8_t)ch % 8;
-        ESP_LOGI(TAG, "Configure GPIO [%u] as PWM Channel [%u], hpoint=[%u]", _ledc_channel[ch].gpio_num,
-                 _ledc_channel[ch].channel, _ledc_channel[ch].hpoint);
+        _ledc_channels[ch].duty = 0;
+        _ledc_channels[ch].channel = (uint8_t)ch % 8;
+        ESP_LOGI(TAG, "Configure GPIO [%u] as PWM Channel [%u], hpoint=[%u]", _ledc_channels[ch].gpio_num,
+                 _ledc_channels[ch].channel, _ledc_channels[ch].hpoint);
         BO_TRY(gpio_reset_pin(LED_GPIOS[ch]));
-        BO_TRY(ledc_channel_config(&_ledc_channel[ch]));
-        BO_TRY(ledc_stop(_ledc_channel[ch].speed_mode, _ledc_channel[ch].channel,
+        BO_TRY(ledc_channel_config(&_ledc_channels[ch]));
+        BO_TRY(ledc_stop(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel,
                          0)); // During initialization, set the channels to low level.
     }
 
@@ -320,7 +323,7 @@ uint8_t led_get_channel_power(uint8_t ch)
     return _status.color[ch];
 }
 
-static inline uint32_t channel_power_to_duty(uint8_t power)
+inline uint32_t channel_power_to_duty(uint8_t power)
 {
     if (power > 100) {
         power = 100;
@@ -331,6 +334,38 @@ static inline uint32_t channel_power_to_duty(uint8_t power)
     else {
         return LOG_TABLE[power];
     }
+}
+
+int led_update_hpoints()
+{
+    // Reset hpoints
+    uint32_t current_hpoint = 0;
+    for (size_t ich = 0; ich < LYFI_LED_CHANNEL_COUNT; ich++) {
+        uint32_t duty = (uint32_t)ledc_get_duty(_ledc_channels[ich].speed_mode, _ledc_channels[ich].channel);
+        current_hpoint = (current_hpoint + duty) % (1 << LED_DUTY_RES);
+        _ledc_channels[ich].hpoint = current_hpoint;
+        BO_TRY(ledc_set_duty_and_update(_ledc_channels[ich].speed_mode, _ledc_channels[ich].channel, duty,
+                                        _ledc_channels[ich].hpoint));
+    }
+    return 0;
+}
+
+int led_set_channel_duty(uint8_t ch, uint16_t duty)
+{
+    if (ch >= LYFI_LED_CHANNEL_COUNT || duty > LED_MAX_DUTY) {
+        return -1;
+    }
+
+    if (ledc_get_duty(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel) == (uint32_t)duty) {
+        return 0;
+    }
+
+    BO_TRY(
+        ledc_set_duty_and_update(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel, duty,
+                                 (uint32_t)ledc_get_hpoint(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel)));
+
+    BO_TRY(led_update_hpoints());
+    return 0;
 }
 
 int led_set_channel_power(uint8_t ch, uint8_t power)
@@ -346,15 +381,9 @@ int led_set_channel_power(uint8_t ch, uint8_t power)
         // ledc_set_hpoint(LEDC_MODE, LEDC_CHANNEL0 + ch, current_hpoint);
         uint32_t duty = channel_power_to_duty(_status.color[ich]);
         current_hpoint = (current_hpoint + duty) % (1 << LED_DUTY_RES);
-        _ledc_channel[ich].hpoint = current_hpoint;
-        BO_TRY(ledc_set_duty_and_update(_ledc_channel[ich].speed_mode, _ledc_channel[ich].channel, duty,
-                                        _ledc_channel[ich].hpoint));
+        BO_TRY(
+            ledc_set_duty_and_update(_ledc_channels[ich].speed_mode, _ledc_channels[ich].channel, duty, current_hpoint));
     }
-
-    /*
-    BO_TRY(ledc_set_duty_and_update(_ledc_channel[ch].speed_mode, _ledc_channel[ch].channel, duty,
-                                    _ledc_channel[ch].hpoint));
-    */
     return 0;
 }
 
@@ -751,7 +780,7 @@ int fade_to(const led_color_t new_color, bool is_blocking)
     uint32_t duration = FADE_PERIOD_SECONDS * 1000;
 
     for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        BO_TRY(ledc_set_fade_time_and_start(_ledc_channel[ch].speed_mode, _ledc_channel[ch].channel,
+        BO_TRY(ledc_set_fade_time_and_start(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel,
                                             channel_power_to_duty(new_color[ch]), duration,
                                             is_blocking ? LEDC_FADE_WAIT_DONE : LEDC_FADE_NO_WAIT));
     }

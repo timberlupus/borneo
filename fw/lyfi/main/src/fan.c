@@ -13,7 +13,7 @@
 #include <nvs_flash.h>
 #include <driver/gpio.h>
 
-#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
+#if SOC_DAC_SUPPORTED
 #include <driver/dac.h>
 #endif
 
@@ -69,14 +69,14 @@ int fan_init()
     BO_TRY(rmtpwm_init());
 
     if (!_settings.use_pwm_fan) {
-
-#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
+#if SOC_DAC_SUPPORTED
         ESP_LOGI(TAG, "Fan driver using DAC, channel=%u", CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL);
         BO_TRY(dac_output_enable(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL));
 #endif
     }
+
     else {
-#if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3
+#if !SOC_DAC_SUPPORTED
         BO_TRY(rmtpwm_set_dac_duty(0));
 #endif
     }
@@ -114,7 +114,7 @@ int fan_set_power(uint8_t value)
     }
     else {
 
-#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
+#if SOC_DAC_SUPPORTED
         // Built-in DAC
         {
             // TODO FIXME magic numbers

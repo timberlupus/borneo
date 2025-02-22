@@ -46,6 +46,8 @@ struct led_status {
                                  ///< fading out starts
     time_t preview_mode_clock; ///< Clock for preview mode
     led_color_t color_to_resume; ///< Color to be resumed
+    bool is_fading;
+    led_color_t fade_color; ///< Target Color to fade
 };
 
 int led_init();
