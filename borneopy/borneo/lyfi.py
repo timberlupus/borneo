@@ -2,12 +2,19 @@ import logging
 import asyncio
 import struct
 from cbor2 import dumps, loads
-from borneo_device import AbstractBorneoDeviceCoapClient, BorneoError
+from borneo.device import AbstractBorneoDeviceCoapClient, BorneoError
 
 from aiocoap import *
 
 logging.basicConfig(level=logging.INFO)
 
+from enum import Enum
+
+class LedMode(Enum):
+    NORMAL = 0
+    DIMMING = 1
+    NIGHTLIGHT = 2
+    PREVIEW = 3
 
 class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
 

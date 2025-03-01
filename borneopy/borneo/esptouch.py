@@ -180,4 +180,3 @@ if __name__ == "__main__":
 
     smart_config = EspTouch(args.ssid, args.password, args.broadcast, args.ip, args.bssid)
     asyncio.run(smart_config.send_data())
-
