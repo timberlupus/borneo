@@ -446,7 +446,7 @@
                 "6db186b1-ba32-4783-8ae7-1425c282f758": {
                     "position": [
                         227500000,
-                        196250000
+                        198750000
                     ]
                 },
                 "717c9f31-f96a-4d9d-b529-a8b739dcfe0f": {
@@ -794,7 +794,7 @@
                 "d3d7a576-aa87-4e12-abd2-fed2c2965c36": {
                     "position": [
                         106250000,
-                        195000000
+                        197500000
                     ]
                 },
                 "d4685019-83f0-49f6-82b3-1cfb0b9769ff": {
@@ -860,7 +860,7 @@
                 "dd926a8c-161a-4add-bf2a-5cc1844b57ca": {
                     "position": [
                         225000000,
-                        196250000
+                        198750000
                     ]
                 },
                 "de2fd2ca-d0c5-4e7e-8935-e676aa1e67cb": {
@@ -974,7 +974,7 @@
                 "f7bc021e-e7bf-4e42-8e37-41f064ec0b8b": {
                     "position": [
                         108750000,
-                        195000000
+                        197500000
                     ]
                 },
                 "fa883594-88bf-488f-92c3-5dd4102820e1": {
@@ -4810,9 +4810,12 @@
                             188750000
                         ]
                     },
-                    "smashed": false,
+                    "smashed": true,
                     "symbol": "61e31e03-dd8f-4190-84aa-4403d7a80e2f",
-                    "texts": []
+                    "texts": [
+                        "90c662ad-44bd-4bd9-96f0-7502bab60907",
+                        "77775343-18f4-47d7-85ad-45114c3b8825"
+                    ]
                 },
                 "3fc7375c-53e7-49b7-bedb-b70ce1e18ad9": {
                     "component": "232f596f-5ab0-4147-8b3b-d8595f480eae",
@@ -5379,9 +5382,12 @@
                             190000000
                         ]
                     },
-                    "smashed": false,
+                    "smashed": true,
                     "symbol": "61e31e03-dd8f-4190-84aa-4403d7a80e2f",
-                    "texts": []
+                    "texts": [
+                        "34ca4e20-ab26-42fc-a0f3-80cbaff0a4f8",
+                        "c37a37b9-08c1-4fad-9a35-cb5fd9848493"
+                    ]
                 },
                 "cb2d1360-3df7-419f-aa06-d807ff8421fa": {
                     "component": "0ebca9d9-ebcd-49ec-99af-0b8059675930",
@@ -5811,8 +5817,8 @@
                         "angle": 32768,
                         "mirror": false,
                         "shift": [
-                            267500000,
-                            192500000
+                            277500000,
+                            193750000
                         ]
                     },
                     "size": 1500000,
@@ -5834,6 +5840,23 @@
                     },
                     "size": 1500000,
                     "text": "$REFDES",
+                    "width": 0
+                },
+                "34ca4e20-ab26-42fc-a0f3-80cbaff0a4f8": {
+                    "font": "simplex",
+                    "from_smash": true,
+                    "layer": 0,
+                    "origin": "center",
+                    "placement": {
+                        "angle": 0,
+                        "mirror": false,
+                        "shift": [
+                            227500000,
+                            192500000
+                        ]
+                    },
+                    "size": 1500000,
+                    "text": "$VALUE",
                     "width": 0
                 },
                 "3ce7865c-348c-467c-beb3-e7bbee54a8f1": {
@@ -5938,6 +5961,23 @@
                     "text": "The TL431 and CJ431\nhave different pinout!",
                     "width": 250000
                 },
+                "77775343-18f4-47d7-85ad-45114c3b8825": {
+                    "font": "simplex",
+                    "from_smash": true,
+                    "layer": 0,
+                    "origin": "center",
+                    "placement": {
+                        "angle": 0,
+                        "mirror": false,
+                        "shift": [
+                            108750000,
+                            193750000
+                        ]
+                    },
+                    "size": 1500000,
+                    "text": "$REFDES",
+                    "width": 0
+                },
                 "85380e5d-b7bd-43d5-a534-2a32c3167de1": {
                     "font": "complex",
                     "from_smash": false,
@@ -5970,6 +6010,23 @@
                     },
                     "size": 1500000,
                     "text": "$REFDES",
+                    "width": 0
+                },
+                "90c662ad-44bd-4bd9-96f0-7502bab60907": {
+                    "font": "simplex",
+                    "from_smash": true,
+                    "layer": 0,
+                    "origin": "center",
+                    "placement": {
+                        "angle": 0,
+                        "mirror": false,
+                        "shift": [
+                            108750000,
+                            191250000
+                        ]
+                    },
+                    "size": 1500000,
+                    "text": "$VALUE",
                     "width": 0
                 },
                 "9311a2d2-449c-483e-8b88-4ab5c73407e4": {
@@ -6119,6 +6176,23 @@
                         "shift": [
                             37500000,
                             31250000
+                        ]
+                    },
+                    "size": 1500000,
+                    "text": "$REFDES",
+                    "width": 0
+                },
+                "c37a37b9-08c1-4fad-9a35-cb5fd9848493": {
+                    "font": "simplex",
+                    "from_smash": true,
+                    "layer": 0,
+                    "origin": "center",
+                    "placement": {
+                        "angle": 0,
+                        "mirror": false,
+                        "shift": [
+                            227500000,
+                            195000000
                         ]
                     },
                     "size": 1500000,

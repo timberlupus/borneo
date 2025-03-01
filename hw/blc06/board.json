@@ -269,7 +269,7 @@
                 1000000,
                 1000000
             ],
-            "spacing_square": 254000
+            "spacing_square": 127000
         },
         "grids": {}
     },
@@ -2940,6 +2940,7 @@
             "texts": []
         },
         "5c2b6b6b-51f8-4256-b530-1f1e2f76e030": {
+            "alternate_package": "48683d02-13e2-446f-ae32-85d1ec4d9242",
             "component": "8faf457e-7424-4429-bf3f-04a3d0d58470",
             "fixed": false,
             "flip": true,

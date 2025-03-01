@@ -1,0 +1,40 @@
+{
+    "MPN": [
+        false,
+        "FTC252010S220MBCA"
+    ],
+    "base": "3f8fb4df-99c2-473b-9dfc-508fb3324929",
+    "datasheet": [
+        true,
+        ""
+    ],
+    "description": [
+        false,
+        "22u/0.85A"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        true,
+        "Cjang"
+    ],
+    "model": "655e4cc7-1ce4-4633-8250-16f8bc5ebc5a",
+    "orderable_MPNs": {
+        "3f4c01e4-8415-487a-89c5-29b7f291a074": "C5832391"
+    },
+    "parametric": {
+        "dcr": "1.1",
+        "idc": "0.85",
+        "table": "inductors",
+        "value": "2.2e-05"
+    },
+    "tags": [
+        "jlc-smt-extended"
+    ],
+    "type": "part",
+    "uuid": "705e3d1b-8ea3-4511-ae81-3cac76420824",
+    "value": [
+        true,
+        "FTC252012S"
+    ]
+}
