@@ -54,15 +54,21 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
-    async def get_current_mode(self) -> int:
+    async def enable_scheduler(self, is_enabled: bool):
+        uri = self.address + '/borneo/lyfi/scheduler-enbaled'
+        payload = dumps(is_enabled)
+        request = Message(code=PUT, payload=payload, uri=uri)
+        await self._context.request(request).response
+
+    async def get_current_mode(self) -> LedMode:
         uri = self.address + '/borneo/lyfi/mode'
         request = Message(code=GET, uri=uri)
         response = await self._context.request(request).response
-        return loads(response.payload)
+        return LedMode(loads(response.payload))
 
-    async def set_current_mode(self, mode: int):
+    async def set_current_mode(self, mode: LedMode):
         uri = self.address + '/borneo/lyfi/mode'
-        payload = dumps(mode)
+        payload = dumps(mode.value)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 

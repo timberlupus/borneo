@@ -35,6 +35,18 @@ class AbstractBorneoDeviceCoapClient:
         response = await self._context.request(request).response
         return response.payload
 
+    async def get_on_off(self):
+        uri = self.address + '/borneo/power'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def set_on_off(self, on_off: bool):
+        uri = self.address + '/borneo/power'
+        payload = dumps(on_off)
+        msg = Message(code=PUT, payload=payload, uri=uri)
+        await self._context.request(msg).response
+
     async def factory_reset(self):
         uri = self.address + '/borneo/factory/reset'
         msg = Message(code=POST, uri=uri, mtype=NON, no_response=26)
@@ -43,18 +55,6 @@ class AbstractBorneoDeviceCoapClient:
     async def factory_set_name(self, name: str):
         uri = self.address + '/borneo/factory/name'
         payload = dumps(name)
-        msg = Message(code=PUT, payload=payload, uri=uri)
-        await self._context.request(msg).response
-
-    async def factory_set_model(self, model: str):
-        uri = self.address + '/borneo/factory/name'
-        payload = dumps(model)
-        msg = Message(code=PUT, payload=payload, uri=uri)
-        await self._context.request(msg).response
-
-    async def factory_set_manuf(self, manuf: str):
-        uri = self.address + '/borneo/factory/name'
-        payload = dumps(manuf)
         msg = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(msg).response
 

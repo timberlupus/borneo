@@ -1,8 +1,16 @@
 import asyncio
 import argparse
 import json
+from pprint import pprint
 
-from borneo import LyfiCoapClient
+from borneo import LyfiCoapClient, LedMode
+
+def pretty_print(response: dict):
+    def bytes_serializer(obj: object):
+        if isinstance(obj, bytes):
+            return obj.hex().upper()
+        raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
+    print(json.dumps(response, indent=4, default=bytes_serializer))
 
 async def main(address):
 
@@ -10,31 +18,62 @@ async def main(address):
 
         response = await client.get_wellknown_core()
         print(">>>>>>>>>>>>>>>>>>>>>>>>>> Wellknown-core:")
-        print(response)
+        pprint(response, indent=4)
 
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>> Device information:")
-        print(await client.get_info())
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>> Borneo-IoT device general information:")
+        device_info = await client.get_info()
+        pprint(device_info, indent=4)
 
         print(">>>>>>>>>>>>>>>>>>>>>>>>>> Get current time zone:")
-        print(await client.get_timezone())
+        tz = await client.get_timezone()
+        pprint(tz)
 
-        print(await client.get_info())
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>> LyFi device information:")
+        lyfi_info = await client.get_lyfi_info()
+        pprint(lyfi_info, indent=4)
 
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>> LyFi information:")
-        print(await client.get_lyfi_info())
-
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>> Current status:")
-        print(await client.get_status())
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>> Current general status:")
+        status = await client.get_status()
+        pprint(status, indent=4)
 
         print(">>>>>>>>>>>>>>>>>>>>>>>>>> Current LyFi status:")
-        print(await client.get_lyfi_status())
+        status = await client.get_lyfi_status()
+        pprint(status, indent=4)
+
+        # Make sure the device is powered on
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>> LED Powered on:")
+        powered_on = await client.get_on_off()
+        pprint(powered_on, indent=4)
+
+        if not powered_on:
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>> Turning the power on...")
+            await client.set_on_off(True)
+
 
         print(">>>>>>>>>>>>>>>>>>>>>>>>>> LED controller schedule:")
-        print(await client.get_schedule())
+        sch = await client.get_schedule()
+        pprint(sch, indent=4)
 
         print(">>>>>>>>>>>>>>>>>>>>>>>>>> LED controller manual color:")
-        print(await client.get_color())
-        print("All done.")
+        color = await client.get_color()
+        pprint(color, indent=4)
+
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>> Dimming demo:")
+        mode = await client.get_current_mode()
+        print(f"Current mode: { mode }")
+
+        print(f"Switching the device to the dimming mode...")
+        mode = await client.set_current_mode(LedMode.DIMMING)
+
+        if device_info['modelID'] == 1: # BLC06MK1
+            await client.set_color([10, 15, 10, 20, 15, 10])
+
+        await asyncio.sleep(3)
+
+        print(f"Switching the device to the normal mode...")
+        mode = await client.set_current_mode(LedMode.NORMAL)
+
+        print("\nAll done.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Hello Buce Example")
