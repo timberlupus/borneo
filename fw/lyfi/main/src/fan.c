@@ -133,7 +133,7 @@ int fan_set_power(uint8_t value)
         // PWMDAC
         {
             // 80% ~= 3V, 30% ~= 12V
-            uint8_t duty = (FAN_POWER_MAX - value) * FAN_POWER_MAX / (PWMDAC_FAN_MAX_DUTY - PWMDAC_FAN_MIN_DUTY);
+            uint8_t duty = (FAN_POWER_MAX - value) * (PWMDAC_FAN_MAX_DUTY - PWMDAC_FAN_MIN_DUTY) / FAN_POWER_MAX;
             if(duty <= PWMDAC_FAN_MIN_DUTY) {
                 duty = 0;
             }
