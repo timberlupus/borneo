@@ -31,6 +31,9 @@
 static struct fan_status _status = { 0 };
 static struct fan_settings _settings = { 0 };
 
+#define PWMDAC_FAN_MIN_DUTY 30 ///< About ~3.5V
+#define PWMDAC_FAN_MAX_DUTY 80 ///< About ~12V
+
 int fan_init()
 {
     ESP_LOGI(TAG, "Initializing fan driver...");
@@ -130,7 +133,13 @@ int fan_set_power(uint8_t value)
         // PWMDAC
         {
             // 80% ~= 3V, 30% ~= 12V
-            uint8_t duty = 80 - (value / 2);
+            uint8_t duty = (FAN_POWER_MAX - value) * FAN_POWER_MAX / (PWMDAC_FAN_MAX_DUTY - PWMDAC_FAN_MIN_DUTY);
+            if(duty <= PWMDAC_FAN_MIN_DUTY) {
+                duty = 0;
+            }
+            if(duty >= PWMDAC_FAN_MAX_DUTY) {
+                duty = FAN_POWER_MAX;
+            }
             BO_TRY(rmtpwm_set_dac_duty(duty));
             ESP_LOGD(TAG, "Set fan power, method: PWM DAC, power=%d, PWM-DAC_duty=%u", value, duty);
         }

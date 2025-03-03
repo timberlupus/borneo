@@ -82,8 +82,8 @@ int ntc_init()
     return 0;
 }
 
-/** @brief 读取温度
- *  @retval 温度信息
+/** @brief Read the temperature
+ *  @retval Temperature in celsius
  */
 int ntc_read_temp(int* temp)
 {

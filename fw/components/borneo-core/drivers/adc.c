@@ -18,7 +18,7 @@ static int bo_adc_cali(adc_cali_handle_t* out_handle);
 #define TAG "adc"
 
 #if CONFIG_IDF_TARGET_ESP32C3
-#define AVAILABLE_ADC_UNIT 0
+#define AVAILABLE_ADC_UNIT ADC_UNIT_1
 #else
 #error("Not implemented!")
 #endif

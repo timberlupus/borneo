@@ -91,6 +91,8 @@ class GeneralBorneoDeviceStatus {
   final int shutdownReason;
   final DateTime? shutdownTimestamp;
   final int? temperature;
+  final double? powerVoltage;
+  final double? powerCurrent;
 
   // 构造函数
   const GeneralBorneoDeviceStatus({
@@ -105,6 +107,8 @@ class GeneralBorneoDeviceStatus {
     this.shutdownReason = 0,
     this.shutdownTimestamp,
     this.temperature,
+    this.powerVoltage,
+    this.powerCurrent,
   });
 
   factory GeneralBorneoDeviceStatus.fromMap(CborMap cborMap) {
@@ -122,6 +126,8 @@ class GeneralBorneoDeviceStatus {
           ? DateTime.fromMillisecondsSinceEpoch(map['shutdownTimestamp'] * 1000)
           : null,
       temperature: map['temperature'],
+      powerVoltage: map['powerVoltage'] / 1000.0,
+      powerCurrent: map['powerCurrent'] / 1000.0,
     );
   }
 }

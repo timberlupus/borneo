@@ -566,8 +566,8 @@ class DashboardView extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              vm.channels.isNotEmpty
-                                  ? '${(vm.overallBrightness / vm.maxOverallBrightness * 100).toStringAsFixed(0)}W'
+                              vm.channels.isNotEmpty && vm.borneoDeviceStatus?.powerVoltage != null && vm.borneoDeviceStatus?.powerCurrent != null
+                                  ? '${(vm.borneoDeviceStatus!.powerVoltage! * vm.borneoDeviceStatus!.powerCurrent!).toStringAsFixed(0)}W'
                                   : "N/A",
                               style: Theme.of(context)
                                   .textTheme
@@ -578,7 +578,9 @@ class DashboardView extends StatelessWidget {
                                           .tertiary),
                             ),
                             Text(
-                              vm.channels.isNotEmpty ? '00.0V/0.0A' : "N/A",
+                              vm.channels.isNotEmpty
+                                  ? '${vm.borneoDeviceStatus?.powerVoltage?.toStringAsFixed(1) ?? ''}V/${vm.borneoDeviceStatus?.powerCurrent?.toStringAsFixed(1) ?? ''}A'
+                                  : "N/A",
                               style: Theme.of(context)
                                   .textTheme
                                   .labelSmall

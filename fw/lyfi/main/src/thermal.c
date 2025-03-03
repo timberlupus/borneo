@@ -51,6 +51,8 @@ static uint8_t thermal_pid_step(int32_t current_temp);
 #define THERMAL_NVS_KEY_KD "kd"
 #define THERMAL_NVS_KEY_KEEP_TEMP "ktemp"
 #define THERMAL_NVS_KEY_OVERHEATED_TEMP "ohtemp"
+#define THERMAL_NVS_KEY_FAN_MODE "fmode"
+#define THERMAL_NVS_KEY_FAN_MANUAL_POWER "fanmanpwr"
 
 #define PID_Q 100
 #define PID_PERIOD (3000)
@@ -68,6 +70,8 @@ const struct thermal_settings THERMAL_DEFAULT_SETTINGS = {
     .kd = 100,
     .keep_temp = 45,
     .overheated_temp = 65,
+    .fan_mode = THERMAL_FAN_MODE_PID,
+    .fan_manual_power = 75,
 };
 
 static struct thermal_settings _settings;
@@ -75,9 +79,11 @@ static struct thermal_state _thermal = { 0 };
 
 static int thermal_reinit()
 {
-    _thermal.pid.integral = 0;
-    _thermal.pid.prev_error = 0;
-    thermal_timer_callback(NULL);
+    if (THERMAL_FAN_MODE_PID == _settings.fan_mode) {
+        _thermal.pid.integral = 0;
+        _thermal.pid.prev_error = 0;
+        thermal_timer_callback(NULL);
+    }
     return 0;
 }
 
@@ -88,22 +94,29 @@ int thermal_init()
     BO_TRY(load_factory_settings());
 
     if (ntc_init() != 0) {
-        fan_set_power(OUTPUT_MAX);
+        if (_settings.fan_mode != THERMAL_FAN_MODE_DISABLED) {
+            fan_set_power(OUTPUT_MAX);
+        }
         return -1;
+    }
+
+    if (_settings.fan_mode != THERMAL_FAN_MODE_DISABLED) {
+        fan_set_power(0);
     }
 
     BO_TRY(thermal_reinit());
 
-    const esp_timer_create_args_t timer_args = {
-        .callback = &thermal_timer_callback,
-        .name = "thermal_timer",
-    };
-    BO_TRY(esp_timer_create(&timer_args, &_thermal.timer));
-    BO_TRY(esp_timer_start_periodic(_thermal.timer, (uint64_t)PID_PERIOD * 1000));
+    if (THERMAL_FAN_MODE_PID == _settings.fan_mode) {
+        const esp_timer_create_args_t timer_args = {
+            .callback = &thermal_timer_callback,
+            .name = "thermal_timer",
+        };
+        BO_TRY(esp_timer_create(&timer_args, &_thermal.timer));
+        BO_TRY(esp_timer_start_periodic(_thermal.timer, (uint64_t)PID_PERIOD * 1000));
+    }
     ESP_LOGI(TAG, "Thermal management module has been initialized successfully.");
 
-    //
-    return ESP_OK;
+    return 0;
 }
 
 int thermal_get_current_temp() { return _thermal.current_temp; }
@@ -156,6 +169,24 @@ int load_factory_settings()
     rc = nvs_get_u8(handle, THERMAL_NVS_KEY_OVERHEATED_TEMP, &_settings.overheated_temp);
     if (rc == ESP_ERR_NVS_NOT_FOUND) {
         _settings.overheated_temp = THERMAL_DEFAULT_SETTINGS.overheated_temp;
+        rc = 0;
+    }
+    if (rc) {
+        goto _EXIT_CLOSE;
+    }
+
+    rc = nvs_get_u8(handle, THERMAL_NVS_KEY_FAN_MODE, &_settings.fan_mode);
+    if (rc == ESP_ERR_NVS_NOT_FOUND) {
+        _settings.fan_mode = THERMAL_DEFAULT_SETTINGS.fan_mode;
+        rc = 0;
+    }
+    if (rc) {
+        goto _EXIT_CLOSE;
+    }
+
+    rc = nvs_get_u8(handle, THERMAL_NVS_KEY_FAN_MANUAL_POWER, &_settings.fan_manual_power);
+    if (rc == ESP_ERR_NVS_NOT_FOUND) {
+        _settings.fan_manual_power = THERMAL_DEFAULT_SETTINGS.fan_manual_power;
         rc = 0;
     }
     if (rc) {

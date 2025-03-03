@@ -18,6 +18,7 @@
 #include <borneo/system.h>
 #include <borneo/power.h>
 #include <borneo/nvs.h>
+#include <borneo/power-meas.h>
 
 #define TAG "borneo-core-coap"
 
@@ -208,6 +209,35 @@ static void coap_hnd_borneo_status_get(coap_resource_t* resource, coap_session_t
         }
     }
 #endif // CONFIG_BORNEO_NTC_ENABLED
+
+#if CONFIG_BORNEO_MEAS_VOLTAGE_ENABLED
+   {
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "powerVoltage"));
+        int mv;
+        int rc = bo_power_volt_read(&mv);
+        if (rc != 0) {
+            BO_COAP_TRY_ENCODE_CBOR(cbor_encode_null(&root_map));
+        }
+        else {
+            BO_COAP_TRY_ENCODE_CBOR(cbor_encode_int(&root_map, mv));
+        }
+    }
+#endif // CONFIG_BORNEO_MEAS_VOLTAGE_ENABLED
+
+#if CONFIG_BORNEO_MEAS_CURRENT_ENABLED
+   {
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "powerCurrent"));
+        int ma;
+        int rc = bo_power_current_read(&ma);
+        if (rc != 0) {
+            BO_COAP_TRY_ENCODE_CBOR(cbor_encode_null(&root_map));
+        }
+        else {
+            BO_COAP_TRY_ENCODE_CBOR(cbor_encode_int(&root_map, ma));
+        }
+    }
+#endif // CONFIG_BORNEO_MEAS_CURRENT_ENABLED
+
 
     BO_COAP_TRY_ENCODE_CBOR(cbor_encoder_close_container(&encoder, &root_map));
 
