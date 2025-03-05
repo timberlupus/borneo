@@ -7,8 +7,7 @@
 
 ---
 
-Borneo-IoT project is a commercial-grade, highly customizable open-source smart WiFi aquarium LED PWM controller module and mobile App.
-More than that, this project also includes a 57W 6-color channel LED product as reference design.
+The Borneo-IoT Project offers cutting-edge, open-source, modular, and affordable hardware and software solutions for hobbyists and professionals to create aquarium LEDs and other smart aquatic devices.
 
 
 For more information, please visit the project's website: [www.borneoiot.com](https://www.borneoiot.com).
@@ -17,15 +16,19 @@ PDF versions of the hardware schematics, datasheets and BoM can be found in [`hw
 
 If you like this project, please don't forget to give it a star. Thank you!
 
+The Buce (Model BLC06MK1) LED PWM dimmer in this project is an [OSHWA (Open Source Hardware Association)](https://www.oshwa.org) certificated open-hardware:
+
+[![BLC06MK1](assets/buce-oshwa.png)](https://certification.oshwa.org/cn000017.html)
+
 ## Features
 
 - **Full Stack Open Source**
-    - Core board & 6-channel 57W LED lamp reference design (Schematic/PCB) using [Horizon EDA](https://horizon-eda.org)
-    - Complete firmware based on [ESP-IDF](https://idf.espressif.com/) framework
-    - Flutter mobile app with full source code
+    - PCB design (schematic and board layout) using [Horizon EDA](https://horizon-eda.org)
+    - Firmware based on [ESP-IDF](https://idf.espressif.com/) framework
+    - Flutter mobile app
 
 - **Modular Hardware Design**
-    - Compact core board (2×3.5cm) for easy integration
+    - Compact core board (22×30mm) for easy integration
     - Reference schematics for custom PCB implementations
 
 - **Component-based Firmware**
@@ -34,7 +37,7 @@ If you like this project, please don't forget to give it a star. Thank you!
     - CoAP + CBOR protocol stack for multi-device support (lamps, pumps, sensors)
 
 - **Rich Functionality**
-    - 6-channel PWM controller with zero peripheral components
+    - 6-channel PWM dimmer with zero peripheral components
     - Graphical sunrise/sunset dimming with soft-start
     - SNTP time sync & PID-controlled cooling
     - Python API client & demo scripts
@@ -52,7 +55,7 @@ If you like this project, please don't forget to give it a star. Thank you!
         - Product parameter configuration
 
 - **Field-proven**
-    - The prototype of this controller and LED driver has been running stably on my own planted tank for years
+    - The prototype of this dimmer and LED driver has been running stably on my own planted tank for years
     - Extensible architecture (ongoing pump/pH monitor development)
 
 [^1]: The open-source project does not provide mass production-related fixtures and software.
@@ -65,10 +68,11 @@ If you like this project, please don't forget to give it a star. Thank you!
 
 ### Pictures
 
-| ![BLC06MK1](assets/blc06mk1-shot1.jpg) <br/> LED Controller Module Appearance | ![BLC05MK3-SCH](assets/blc05mk3-sch.png) <br/> LED LED Controller Module Schematic |
+| ![BLC06MK1](assets/blc06mk1-shot1.jpg) <br/> LED Dimmer Module Appearance | ![BLC05MK3-SCH](assets/blc05mk3-sch.png) <br/> LED LED Dimmer Module Schematic |
 |------------------------------------------|------------------------------------------ |
-| ![BLB08103 Board](assets/blc05mk3-old-prototype.jpg) <br/> LED Controller - Obsoleted Prototype | ![BLB08103 Old Board](assets/blb08103-old-prototype.jpg) <br/> Aluminum PCB - Obsoleted Prototype |
+| ![BLB08103 Board](assets/blc05mk3-old-prototype.jpg) <br/> 5-Channel LED Dimmer - Obsoleted Prototype | ![BLB08103 Old Board](assets/blb08103-old-prototype.jpg) <br/> Aluminum PCB - Obsoleted Prototype |
 | ![BLB08103 Board](assets/blb08103.jpg) <br/> Aluminum PCB Appearance | ![BLB08103 Case](assets/blb08103-case.jpg) <br/> Reference Design Lamp Appearance[^2] |
+
 
 [^2]: The enclosure was manually measured and modeled by me after purchasing it from a friend, therefore, I regret that the design cannot be made public. If there is significant interest, I can redesign it.
 
@@ -89,15 +93,15 @@ Checkout the [milestones](https://github.com/oldrev/borneo/milestones) to get a 
 ## Directory Structure
 
 - `client/`: Mobile app source code
-- `borneopy/`: A open-source Python client library for devices under the Borneo-IoT Project
+- `borneopy/`: A open-source Python client library for the devices under the Borneo-IoT Project
 - `fw/`: Firmware source code
     - `scripts`: Related Python scripts
     - `cmake`: CMake scripts
     - `components`: Common ESP-IDF component source code
-    - `lyfi`: LED controller firmware-related source code
+    - `lyfi`: LED dimmer firmware-related source code
     - `doser`: Dosing pump firmware-related source code (under development)
 - `hw/`: Circuit design source files
-    - `blc06`: The core board design of Buce, the 6-channel LED controller module
+    - `blc06`: The board design of Buce, the 6-channel WiFi LED PWM dimmer
     - `blb0657f`: 6-channel 57W LED lamp aluminum PCB design
     - `bld6f`: 6-channel LED driver PCB design
     - `blc05mk3`: 5-channel LED driver PCB design (*Obsoleted*)
@@ -133,6 +137,7 @@ We welcome your feedback! If you encounter any issues or have suggestions, pleas
 - Borneo-IoT Discord Server: [discord.gg/EFJTm7PpEs](https://discord.gg/EFJTm7PpEs)
 
 ## License
+
 
 ### Software & Firmware
 
