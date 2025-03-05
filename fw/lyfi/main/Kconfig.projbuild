@@ -309,6 +309,17 @@ menu "Borneo LyFi"
             depends on LYFI_FAN_CTRL_ENABLED && BORNEO_NTC_ENABLED
     endmenu
 
+    menu "Press Button"
+        config LYFI_PRESS_BUTTON_ENABLED
+            bool "Enable the press button support"
+            default n
+        config LYFI_PRESS_BUTTON_GPIO
+            int "Press button GPIO number"
+            depends on LYFI_PRESS_BUTTON_ENABLED
+            default 9
+    endmenu
+
+
 
 
 endmenu

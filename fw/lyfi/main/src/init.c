@@ -13,6 +13,7 @@
 #include "led.h"
 #include "fan.h"
 #include "thermal.h"
+#include "button.h"
 
 #define TAG "lyfi_init"
 
@@ -28,6 +29,10 @@ static int _lyfi_init(const struct drvfx_device* dev)
 #endif
 
     BO_TRY(led_init());
+
+#if CONFIG_LYFI_PRESS_BUTTON_ENABLED
+    BO_TRY(button_init());
+#endif
 
     ESP_LOGI(TAG, "Borneo LyFi has been initialized successfully.");
     return 0;

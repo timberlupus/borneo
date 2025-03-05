@@ -720,7 +720,21 @@ static void _borneo_system_events_handler(void* handler_args, esp_event_base_t b
 
 static void led_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data)
 {
-    // TODO
+    switch (event_id) {
+
+    case LYFI_LEDC_NOTIFY_NIGHTLIGHT_MODE: {
+        assert(bo_power_is_on());
+        if (_status.mode == LED_MODE_NORMAL && _settings.scheduler_enabled) {
+            led_switch_mode(LED_MODE_NIGHTLIGHT);
+        }
+        else if (_status.mode == LED_MODE_NIGHTLIGHT) {
+            BO_MUST(led_switch_mode(LED_MODE_NORMAL));
+        }
+    } break;
+
+    default:
+        break;
+    }
 }
 
 int led_set_scheduler_enabled(bool enabled)

@@ -1,4 +1,18 @@
 dependencies:
+  espressif/button:
+    component_hash: a405a99689f636e84cd67da34a85a88d0d3a1aa514a28f60d18bd370c1378e0b
+    dependencies:
+    - name: espressif/cmake_utilities
+      registry_url: https://components.espressif.com/
+      require: private
+      version: 0.*
+    - name: idf
+      require: private
+      version: '>=4.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 4.0.0
   espressif/cbor:
     component_hash: 440f4ee4504841cc9b4f3a8ef755776a612ac9dace355514c68b999868f990ff
     dependencies:
@@ -10,6 +24,17 @@ dependencies:
       registry_url: https://components.espressif.com/
       type: service
     version: 0.6.0~1
+  espressif/cmake_utilities:
+    component_hash: 351350613ceafba240b761b4ea991e0f231ac7a9f59a9ee901f751bddc0bb18f
+    dependencies:
+    - name: idf
+      registry_url: https://components.espressif.com
+      require: private
+      version: '>=4.1'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 0.5.3
   espressif/coap:
     component_hash: 041beed0026e0b9f461ffea422bcb579b41fc58df1c1286648b749aceaed2e9b
     dependencies:
@@ -36,10 +61,11 @@ dependencies:
       type: idf
     version: 5.3.1
 direct_dependencies:
+- espressif/button
 - espressif/cbor
 - espressif/coap
 - espressif/mdns
 - idf
-manifest_hash: cc2b8e64041e083839b2a1f27256a99b3f60cf8a4ffc27006008ff5f7f694de2
+manifest_hash: 3e43f0649b5b0d0ed7a364f9459c7329446c226af519585648490fed281f670d
 target: esp32c3
 version: 2.0.0

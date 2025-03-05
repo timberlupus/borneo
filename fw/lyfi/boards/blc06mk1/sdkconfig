@@ -88,3 +88,8 @@ CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED=n
 
 ############################# THERMAL MANAGEMENT ##############################
 CONFIG_LYFI_THERMAL_ENABLED=y
+
+
+############################### Button ###################################
+CONFIG_LYFI_PRESS_BUTTON_ENABLED=y
+CONFIG_LYFI_PRESS_BUTTON_GPIO=9
