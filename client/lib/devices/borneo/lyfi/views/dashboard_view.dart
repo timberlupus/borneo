@@ -566,7 +566,11 @@ class DashboardView extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              vm.channels.isNotEmpty && vm.borneoDeviceStatus?.powerVoltage != null && vm.borneoDeviceStatus?.powerCurrent != null
+                              vm.channels.isNotEmpty &&
+                                      vm.borneoDeviceStatus?.powerVoltage !=
+                                          null &&
+                                      vm.borneoDeviceStatus?.powerCurrent !=
+                                          null
                                   ? '${(vm.borneoDeviceStatus!.powerVoltage! * vm.borneoDeviceStatus!.powerCurrent!).toStringAsFixed(0)}W'
                                   : "N/A",
                               style: Theme.of(context)
