@@ -54,7 +54,7 @@ int button_init()
 
     iot_button_register_cb(s_button, BUTTON_SINGLE_CLICK, NULL, button_single_click_cb, NULL);
 
-    iot_button_register_cb(s_button, BUTTON_LONG_PRESS_START, NULL, button_long_press_cb, NULL);
+    iot_button_register_cb(s_button, BUTTON_LONG_PRESS_UP, NULL, button_long_press_cb, NULL);
 
     return 0;
 }
