@@ -15,7 +15,7 @@ Thank you for considering contributing to Borneo-IoT Project! We welcome contrib
 
 ## Code of Conduct
 
-By participating in this project, you are expected to uphold our [Code of Conduct](CODE_OF_CONDUCT.md). Please report unacceptable behavior to [oldrev@gmail.com](mailto:oldrev@gmail.com).
+By participating in this project, you are expected to uphold our [Code of Conduct](.github/CODE_OF_CONDUCT.md). Please report unacceptable behavior to [oldrev@gmail.com](mailto:oldrev@gmail.com).
 
 ## How Can I Contribute?
 
