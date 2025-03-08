@@ -31,7 +31,17 @@ menu "Borneo LyFi"
             depends on LYFI_POWER_MEAS_ENABLED
     endmenu
 
+    menu "LED PWM settings"
+
+        config LYFI_DEFAULT_PWM_FREQ
+            int "LED PWM frequency"
+            default 24000
+            range 1000 24000
+
+    endmenu
+
     menu "LED channels"
+
 
         config LYFI_LED_CH0_ENABLED
             bool "LED channel 0 enabled"

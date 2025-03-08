@@ -32,12 +32,16 @@ struct led_scheduler {
     struct led_scheduler_item items[LYFI_LEDC_SCHEDULER_ITEMS_CAPACITY];
 };
 
+struct led_factory_settings {
+    uint16_t pwm_freq; ///< The frequency of PWM signals
+};
+
 struct led_user_settings {
     uint8_t scheduler_enabled; ///< Whether the scheduling mode is enabled
     uint16_t nightlight_duration; ///< Night lighting mode duration (in seconds)
-    uint8_t cie1931_enabled; ///< Whether the CIE1931 correction is enabled
     struct led_scheduler scheduler; ///< Scheduling scheduler for scheduled mode
     led_color_t manual_color; ///< Manual dimming power settings for each channel
+    uint8_t cie1931_enabled; ///< Whether the CIE1931 correction is enabled
 };
 
 struct led_status {

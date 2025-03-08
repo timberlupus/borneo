@@ -59,8 +59,10 @@ static void preview_mode_drive();
 
 static void led_drive();
 
-static int load_settings();
-static int save_settings();
+static int load_factory_settings(struct led_factory_settings* factory_settings);
+
+static int load_user_settings();
+static int save_user_settings();
 
 ledc_channel_config_t _ledc_channels[LYFI_LED_CHANNEL_COUNT];
 
@@ -72,6 +74,7 @@ ledc_channel_config_t _ledc_channels[LYFI_LED_CHANNEL_COUNT];
 #define LED_NVS_KEY_SCHEDULER "sch"
 #define LED_NVS_KEY_NIGHTLIGHT_DURATION "nld"
 #define LED_NVS_KEY_CIE1931_ENABLED "cie1931"
+#define LED_NVS_KEY_PWM_FREQ "pwmfreq"
 
 #define LED_MAX_DUTY 1023
 #define LED_DUTY_RES LEDC_TIMER_10_BIT
@@ -159,7 +162,6 @@ static const led_color_t COLOR_BLANK = { 0 };
 static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     .scheduler_enabled = 0,
     .nightlight_duration = 60 * 20,
-    .cie1931_enabled = 0,
     .manual_color = {
 // From kconfig
 #if CONFIG_LYFI_LED_CH0_ENABLED
@@ -211,15 +213,18 @@ int led_init()
     memset(&_settings, 0, sizeof(_settings));
     memset(&_ledc_channels, 0, sizeof(_ledc_channels));
 
-    BO_TRY(load_settings());
+    struct led_factory_settings factory_settings;
+    BO_TRY(load_factory_settings(&factory_settings));
+
+    BO_TRY(load_user_settings());
 
     ESP_LOGI(TAG, "Initializing PWM timer for LEDC....");
 
     // Initialize the first timer
-
+    // TODO allow set the freq in product definition
     ledc_timer_config_t ledc_timer = {
         .duty_resolution = LEDC_TIMER_10_BIT,
-        .freq_hz = 24000, // the frequency 24kHz
+        .freq_hz = factory_settings.pwm_freq,
 
 #if SOC_LEDC_SUPPORT_HS_MODE
         .speed_mode = LEDC_HIGH_SPEED_MODE,
@@ -788,7 +793,7 @@ static int normal_mode_entry()
 
     if (prev_mode == LED_MODE_DIMMING || prev_mode == LED_MODE_PREVIEW) {
         ESP_LOGI(TAG, "Saving dimming settings...");
-        BO_TRY(save_settings());
+        BO_TRY(save_user_settings());
         ESP_LOGI(TAG, "Dimming settings updated.");
     }
     return 0;
@@ -1034,7 +1039,31 @@ int led_switch_mode(uint8_t mode)
 
 /////////////////////////////////// Settings stuff /////////////////////////////////////////////
 
-int load_settings()
+int load_factory_settings(struct led_factory_settings* factory_settings)
+{
+    int rc;
+    nvs_handle_t handle;
+    rc = bo_nvs_factory_open(LED_NVS_NS, NVS_READWRITE, &handle);
+    if (rc) {
+        goto _EXIT_WITHOUT_CLOSE;
+    }
+
+    rc = nvs_get_u16(handle, LED_NVS_KEY_PWM_FREQ, &factory_settings->pwm_freq);
+    if (rc == ESP_ERR_NVS_NOT_FOUND) {
+        factory_settings->pwm_freq = CONFIG_LYFI_DEFAULT_PWM_FREQ;
+        rc = 0;
+    }
+    if (rc) {
+        goto _EXIT_CLOSE;
+    }
+
+_EXIT_CLOSE:
+    bo_nvs_close(handle);
+_EXIT_WITHOUT_CLOSE:
+    return rc;
+}
+
+int load_user_settings()
 {
     int rc;
     nvs_handle_t handle;
@@ -1055,15 +1084,6 @@ int load_settings()
     rc = nvs_get_u16(handle, LED_NVS_KEY_NIGHTLIGHT_DURATION, &_settings.nightlight_duration);
     if (rc == ESP_ERR_NVS_NOT_FOUND) {
         _settings.nightlight_duration = LED_DEFAULT_SETTINGS.nightlight_duration;
-        rc = 0;
-    }
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_get_u8(handle, LED_NVS_KEY_CIE1931_ENABLED, &_settings.cie1931_enabled);
-    if (rc == ESP_ERR_NVS_NOT_FOUND) {
-        _settings.cie1931_enabled = LED_DEFAULT_SETTINGS.cie1931_enabled;
         rc = 0;
     }
     if (rc) {
@@ -1091,13 +1111,22 @@ int load_settings()
         goto _EXIT_CLOSE;
     }
 
+    rc = nvs_get_u8(handle, LED_NVS_KEY_CIE1931_ENABLED, &_settings.cie1931_enabled);
+    if (rc == ESP_ERR_NVS_NOT_FOUND) {
+        _settings.cie1931_enabled = 0;
+        rc = 0;
+    }
+    if (rc) {
+        goto _EXIT_CLOSE;
+    }
+
 _EXIT_CLOSE:
     bo_nvs_close(handle);
 _EXIT_WITHOUT_CLOSE:
     return rc;
 }
 
-int save_settings()
+int save_user_settings()
 {
     int rc;
     nvs_handle_t handle;
