@@ -43,12 +43,12 @@ dependencies:
 
   http: ^1.2.2
   coap: ^9.1.0
-  cbor: ^6.3.0
+  cbor: ^6.3.5
   path_provider: ^2.1.5
   nsd: ^4.0.3
   fluttertoast: ^8.2.8
   sembast: ^3.7.5
-  fl_chart: ^0.70.1
+  fl_chart: ^0.70.2
   percent_indicator: ^4.2.3
   esp_smartconfig: ^2.0.4
   permission_handler: ^11.3.1
@@ -67,7 +67,7 @@ dependencies:
   image_cropper: ^8.0.2
   flutter_svg: ^2.0.16
   wifi_scan: ^0.4.1+1
-  shared_preferences: ^2.3.3
+  shared_preferences: ^2.5.2
   datetime_picker_formfield_new: ^2.1.0
   flutter_skeleton_ui: ^0.0.6
   flutter_gettext: ^2.0.1
