@@ -52,7 +52,6 @@ int bo_wifi_init()
     BO_TRY(esp_wifi_set_ps(WIFI_PS_NONE));
     BO_TRY(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL));
 
-
     return bo_wifi_start();
 }
 
@@ -76,7 +75,6 @@ int bo_wifi_start()
 #endif
     }
     else {
-        ESP_LOGI(TAG, "We have saved SSID: %s", saved_ssid);
         BO_TRY(esp_wifi_connect());
 
         int32_t shutdown_count = 0;
@@ -106,6 +104,7 @@ int bo_wifi_start()
 int bo_wifi_forget()
 {
     ESP_LOGI(TAG, "Start to restore WiFi config...");
+
     int error = esp_wifi_restore();
     if (error == ESP_ERR_WIFI_NOT_INIT) {
         wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -131,7 +130,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
         ESP_LOGI(TAG, "WiFi station mode started.");
     } break;
 
-    case WIFI_EVENT_STA_STOP: { 
+    case WIFI_EVENT_STA_STOP: {
         ESP_LOGI(TAG, "WiFi station mode stopped.");
     } break;
 
@@ -143,7 +142,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
             if (strnlen(saved_ssid, MAX_SSID_LEN) > 0) {
                 int rc = esp_wifi_connect();
                 if (rc != ESP_OK) {
-                    ESP_LOGE(TAG, "Failed to connect WiFi. errno=%d", rc);
+                    ESP_LOGE(TAG, "Failed to connect WiFi AP(SSID=%s). errno=%d", saved_ssid, rc);
                     vTaskDelay(pdMS_TO_TICKS(WIFI_RECONNECTING_INTERVAL_MS));
                 }
             }
@@ -153,8 +152,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
         }
     } break;
 
-    case WIFI_EVENT_STA_CONNECTED: 
-    {
+    case WIFI_EVENT_STA_CONNECTED: {
         ESP_LOGI(TAG, "WiFi connected successfully.");
     } break;
 
@@ -181,7 +179,6 @@ int _update_nvs_early(int32_t* shutdown_count)
         goto EXIT_AND_CLOSE;
     }
 
-    // 没有就写一个进去
     if (err == ESP_ERR_NVS_NOT_FOUND) {
         err = nvs_set_i32(nvs_handle, NVS_COUNT_KEY, counter);
         if (err) {
@@ -189,7 +186,7 @@ int _update_nvs_early(int32_t* shutdown_count)
         }
     }
     else {
-        // 更新启动次数
+        // Update booting times
         counter++;
         err = nvs_set_i32(nvs_handle, NVS_COUNT_KEY, counter);
         if (err) {

@@ -20,6 +20,7 @@
 
 #include <iot_button.h>
 #include <button_gpio.h>
+#include <borneo/wifi.h>
 
 #include "lyfi-events.h"
 
@@ -72,8 +73,11 @@ static void button_single_click_cb(void* arg, void* usr_data)
 
 static void button_long_press_cb(void* arg, void* usr_data)
 {
-    // TODO FIXME
-    BO_MUST(esp_event_post(LYFI_LEDC_EVENTS, LYFI_LEDC_NOTIFY_NIGHTLIGHT_MODE, NULL, 0, portMAX_DELAY));
+    int rc = bo_wifi_forget();
+    if(rc) {
+        ESP_LOGE(TAG, "Failed to forget WiFi configuration!");
+    }
+    bo_system_reboot_later(1000);
 }
 
 #endif // CONFIG_LYFI_PRESS_BUTTON_ENABLED
