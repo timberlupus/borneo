@@ -117,7 +117,7 @@ class GeneralBorneoDeviceStatus {
       power: map['power'],
       timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] * 1000),
       bootDuration: Duration(milliseconds: map['bootDuration']),
-      timezone: map['timezone'],
+      timezone: map['timezone'] ?? '',
       wifiStatus: map['wifiStatus'],
       serverStatus: map['serverStatus'],
       error: map['error'],

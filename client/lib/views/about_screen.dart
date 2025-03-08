@@ -1,5 +1,4 @@
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
-import 'package:flutter_skeleton_ui/flutter_skeleton_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
