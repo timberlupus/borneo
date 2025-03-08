@@ -44,7 +44,7 @@ dependencies:
   http: ^1.2.2
   coap: ^9.1.0
   cbor: ^6.3.0
-  path_provider: ^2.1.4
+  path_provider: ^2.1.5
   nsd: ^4.0.3
   fluttertoast: ^8.2.8
   sembast: ^3.7.5
