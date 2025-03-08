@@ -27,14 +27,17 @@
 #define NVS_NS "borneo.wifi"
 #define NVS_COUNT_KEY "shutdown-count"
 #define TAG "wifi"
-#define WIFI_RECONNECTING_INTERVAL_MS 30000
+#define WIFI_RECONNECT_INTERVAL_MS 5000
 
 static int bo_wifi_start();
 static int _update_nvs_early(int32_t* shutdown_count);
 static int _update_nvs_reset();
 static void _timer_callback(void* args);
+static void _wifi_reconnect_callback(void* arg);
 
-static esp_timer_handle_t _shutdown_checking_timer;
+static esp_timer_handle_t _wifi_reconnect_timer = NULL;
+static esp_timer_handle_t _shutdown_checking_timer = NULL;
+static bool _has_ssid();
 
 static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 
@@ -60,10 +63,7 @@ int bo_wifi_start()
     BO_TRY(esp_wifi_start());
 
     // Try to connect the AP
-    wifi_config_t wifi_config = { 0 };
-    BO_TRY(esp_wifi_get_config(ESP_IF_WIFI_STA, &wifi_config));
-    const char* saved_ssid = (const char*)wifi_config.sta.ssid;
-    if (strnlen(saved_ssid, SSID_MAX_LEN) == 0) {
+    if (_has_ssid()) {
         ESP_LOGI(TAG, "There is no saved WiFi configuration.");
 
 #if CONFIG_BT_BLE_BLUFI_ENABLE
@@ -142,8 +142,18 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
             if (strnlen(saved_ssid, MAX_SSID_LEN) > 0) {
                 int rc = esp_wifi_connect();
                 if (rc != ESP_OK) {
-                    ESP_LOGE(TAG, "Failed to connect WiFi AP(SSID=%s). errno=%d", saved_ssid, rc);
-                    vTaskDelay(pdMS_TO_TICKS(WIFI_RECONNECTING_INTERVAL_MS));
+                    ESP_LOGE(TAG, "Failed to connect WiFi AP(SSID=%s). errno=%d. Attempting to reconnect...",
+                             saved_ssid, rc);
+                    // Start the reconnect timer
+                    if (_wifi_reconnect_timer == NULL) {
+                        esp_timer_create_args_t timer_args = {
+                            .callback = &_wifi_reconnect_callback,
+                            .arg = NULL,
+                            .name = "wifi_reconnect",
+                        };
+                        BO_MUST(esp_timer_create(&timer_args, &_wifi_reconnect_timer));
+                        BO_MUST(esp_timer_start_once(_wifi_reconnect_timer, WIFI_RECONNECT_INTERVAL_MS * 1000));
+                    }
                 }
             }
             else {
@@ -153,6 +163,11 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
     } break;
 
     case WIFI_EVENT_STA_CONNECTED: {
+        if (_wifi_reconnect_timer != NULL) {
+            BO_MUST(esp_timer_stop(_wifi_reconnect_timer));
+            BO_MUST(esp_timer_delete(_wifi_reconnect_timer));
+            _wifi_reconnect_timer = NULL;
+        }
         ESP_LOGI(TAG, "WiFi connected successfully.");
     } break;
 
@@ -217,4 +232,32 @@ int _update_nvs_reset()
 EXIT_AND_CLOSE:
     nvs_close(nvs_handle);
     return err;
+}
+
+void _wifi_reconnect_callback(void* arg)
+{
+    ESP_LOGI(TAG, "Checking Wi-Fi connection...");
+    if (_has_ssid()) {
+        ESP_LOGI(TAG, "Not connected to AP. Reconnecting...");
+        int rc = esp_wifi_connect();
+        if (rc) {
+            ESP_LOGE(TAG, "Failed to connect to AP.");
+        }
+    }
+    else {
+        ESP_LOGI(TAG, "SSID is invalid or already connected to AP.");
+    }
+}
+
+bool _has_ssid()
+{
+    wifi_config_t wifi_config = { 0 };
+    int rc = esp_wifi_get_config(ESP_IF_WIFI_STA, &wifi_config);
+    if (rc == ESP_OK) {
+        const char* saved_ssid = (const char*)wifi_config.sta.ssid;
+        return (strnlen(saved_ssid, MAX_SSID_LEN) > 0);
+    }
+    else {
+        return false;
+    }
 }

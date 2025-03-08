@@ -30,7 +30,7 @@
 #include <borneo/rtc.h>
 
 #define TAG "bo-sntp"
-#define MAX_RETRY_COUNT 5
+#define MAX_RETRY_COUNT 3
 
 ESP_EVENT_DEFINE_BASE(BO_SNTP_EVENTS);
 
@@ -164,20 +164,21 @@ static int bo_try_sync_time()
 {
     int rc = 0;
     _is_syncing = true;
-    int retry = 0;
+    int retry = 1;
 
     ESP_LOGI(TAG, "Starting SNTP...");
 
     unsigned long seconds = 0, fractional = 0;
-    while (bo_sntp(SNTP_SERVER_0, 123, &seconds, &fractional) != 0 && ++retry < MAX_RETRY_COUNT) {
+    while (bo_sntp(SNTP_SERVER_0, 123, &seconds, &fractional) != 0) {
         ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, MAX_RETRY_COUNT);
-        vTaskDelay(pdMS_TO_TICKS(retry * retry * 1000));
-    }
 
-    if (retry > MAX_RETRY_COUNT) {
-        ESP_LOGE(TAG, "Failed to do SNTP");
-        rc = -1;
-        goto _EXIT;
+        if (retry >= MAX_RETRY_COUNT) {
+            ESP_LOGE(TAG, "Failed to do SNTP");
+            rc = -1;
+            goto _EXIT;
+        }
+        retry++;
+        vTaskDelay(pdMS_TO_TICKS(retry * retry * 1000));
     }
 
     time_t ts = seconds;

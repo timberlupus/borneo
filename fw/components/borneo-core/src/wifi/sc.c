@@ -119,8 +119,11 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
     switch (event_id) {
 
     case WIFI_EVENT_STA_DISCONNECTED: {
-        ESP_LOGI(TAG, "WiFi disconnected. Clearing 'CONNECTED_BIT' bit.");
-        xEventGroupClearBits(_wifi_event_group, CONNECTED_BIT);
+        EventBits_t ux_bits = xEventGroupGetBits(_wifi_event_group);
+        if (ux_bits & CONNECTED_BIT) {
+            ESP_LOGI(TAG, "WiFi disconnected. Clearing 'CONNECTED_BIT' bit.");
+            xEventGroupClearBits(_wifi_event_group, CONNECTED_BIT);
+        }
     } break;
 
     default:
