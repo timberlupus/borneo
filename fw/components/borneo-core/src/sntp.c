@@ -259,7 +259,7 @@ int bo_sntp_init()
         ESP_LOGI(TAG, "Current time zone: %s", tz);
     }
 
-    xTaskCreate(bo_sntp_task, "sntp_task", 2 * 1024, NULL, tskIDLE_PRIORITY + 2, NULL);
+    xTaskCreate(bo_sntp_task, "sntp_task", 2 * 1024, NULL, tskIDLE_PRIORITY + 1, NULL);
 
     BO_TRY(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &ip_event_handler, NULL));
 

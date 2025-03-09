@@ -88,8 +88,8 @@ static void sc_event_handler(void* arg, esp_event_base_t event_base, int32_t eve
         if (evt->type == SC_TYPE_ESPTOUCH_V2) {
             uint8_t rvd_data[RVD_MAX_LEN] = { 0 };
             BO_MUST(esp_smartconfig_get_rvd_data(rvd_data, sizeof(rvd_data)));
-            ESP_LOGI(TAG, "Got `RVD_DATA`");
             /*
+            ESP_LOGI(TAG, "Got `RVD_DATA`");
             for (int i = 0; i < 33; i++) {
                 printf("%02x ", rvd_data[i]);
             }
@@ -97,10 +97,10 @@ static void sc_event_handler(void* arg, esp_event_base_t event_base, int32_t eve
             */
         }
 
-        esp_wifi_disconnect();
-        esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config);
+        BO_MUST(esp_wifi_disconnect());
+        BO_MUST(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
         _sc_state = SC_STATE_CONNECTING;
-        esp_wifi_connect();
+        BO_MUST(esp_wifi_connect());
     } break;
 
     default: {

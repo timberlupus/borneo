@@ -13,7 +13,7 @@
 
 static const char* TAG = "rmtpwm";
 
-#define RMTPWM_FREQ_HZ 10000 // 10 kHz PWM
+#define RMTPWM_FREQ_HZ 24000 // 24 kHz PWM
 #define RMT_PWM_RESOLUTION_HZ 1000000 // 1MHz resolution
 
 typedef struct {
@@ -105,7 +105,8 @@ int rmtpwm_init()
     return 0;
 }
 
-int rmtpwm_set_pwm_duty(uint8_t duty) {
+int rmtpwm_set_pwm_duty(uint8_t duty)
+{
     //
     return rmtpwm_set_duty_internal(&s_pwm_channel, duty);
 }
@@ -120,7 +121,7 @@ int rmtpwm_set_dac_duty(uint8_t duty)
 
 int rmtpwm_set_duty_internal(struct rmtpwm_channel* channel, uint8_t duty)
 {
-    if(duty > 100) {
+    if (duty > 100) {
         return -EINVAL;
     }
 
@@ -131,7 +132,8 @@ int rmtpwm_set_duty_internal(struct rmtpwm_channel* channel, uint8_t duty)
         };
         ESP_ERROR_CHECK(rmt_disable(channel->rmt_channel));
         ESP_ERROR_CHECK(rmt_enable(channel->rmt_channel));
-        ESP_ERROR_CHECK(rmt_transmit(channel->rmt_channel, s_pwm_encoder, &channel->duty, sizeof(channel->duty), &tx_config));
+        ESP_ERROR_CHECK(
+            rmt_transmit(channel->rmt_channel, s_pwm_encoder, &channel->duty, sizeof(channel->duty), &tx_config));
         xSemaphoreGive(channel->mutex);
     }
     else {

@@ -23,7 +23,7 @@
 #endif
 
 #define SSID_MAX_LEN 32
-#define SHORT_SHUTDOWN_PERIOD 100
+#define SHORT_SHUTDOWN_PERIOD 30
 #define NVS_NS "borneo.wifi"
 #define NVS_COUNT_KEY "shutdown-count"
 #define TAG "wifi"
@@ -63,7 +63,7 @@ int bo_wifi_start()
     BO_TRY(esp_wifi_start());
 
     // Try to connect the AP
-    if (_has_ssid()) {
+    if (!_has_ssid()) {
         ESP_LOGI(TAG, "There is no saved WiFi configuration.");
 
 #if CONFIG_BT_BLE_BLUFI_ENABLE
@@ -181,7 +181,10 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
     } // switch
 }
 
-void _timer_callback(void* args) { _update_nvs_reset(); }
+void _timer_callback(void* args)
+{
+    _update_nvs_reset();
+}
 
 int _update_nvs_early(int32_t* shutdown_count)
 {
