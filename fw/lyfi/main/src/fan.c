@@ -113,7 +113,7 @@ int fan_set_power(uint8_t value)
 
     if (_settings.use_pwm_fan) {
         BO_TRY(rmtpwm_set_pwm_duty(value));
-        ESP_LOGI(TAG, "Set fan power, method: PWM DAC, power=%u%%", value);
+        ESP_LOGI(TAG, "Set fan power, method: PWM, power=%u%%", value);
     }
     else {
 
@@ -127,21 +127,23 @@ int fan_set_power(uint8_t value)
             }
             int dac_value = value;
             BO_TRY(dac_output_voltage(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL, dac_value));
-            ESP_LOGD(TAG, "Set fan power, method: DAC, power=%u/100, DAC-value=%hhu", value, dac_value);
+            ESP_LOGI(TAG, "Set fan power, method: DAC, power=%u/100, DAC-value=%hhu", value, dac_value);
         }
 #else
         // PWMDAC
         {
             // 80% ~= 3V, 30% ~= 12V
-            uint8_t duty = (FAN_POWER_MAX - value) * (PWMDAC_FAN_MAX_DUTY - PWMDAC_FAN_MIN_DUTY) / FAN_POWER_MAX;
-            if(duty <= PWMDAC_FAN_MIN_DUTY) {
-                duty = 0;
+            int duty = (int)FAN_POWER_MAX - (int)value;
+            duty = PWMDAC_FAN_MIN_DUTY + duty * (PWMDAC_FAN_MAX_DUTY - PWMDAC_FAN_MIN_DUTY) / FAN_POWER_MAX;
+
+            if (duty <= PWMDAC_FAN_MIN_DUTY) {
+                duty = FAN_POWER_MIN;
             }
-            if(duty >= PWMDAC_FAN_MAX_DUTY) {
+            if (duty >= PWMDAC_FAN_MAX_DUTY) {
                 duty = FAN_POWER_MAX;
             }
-            BO_TRY(rmtpwm_set_dac_duty(duty));
-            ESP_LOGD(TAG, "Set fan power, method: PWM DAC, power=%d, PWM-DAC_duty=%u", value, duty);
+            BO_TRY(rmtpwm_set_dac_duty((uint8_t)duty));
+            ESP_LOGI(TAG, "Set fan power, method: PWM DAC, power=%d, PWM-DAC_duty=%d", value, duty);
         }
 #endif // CONFIG_IDF_TARGET_ESP32C3
     }

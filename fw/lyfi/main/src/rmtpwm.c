@@ -54,9 +54,9 @@ static rmt_encoder_handle_t s_pwm_encoder = NULL;
 
 static struct rmtpwm_channel s_pwm_channel = { 0 };
 
-#if CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6
+#if !SOC_DAC_SUPPORTED
 static struct rmtpwm_channel s_dac_channel = { 0 };
-#endif // CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32C6
+#endif // !SOC_DAC_SUPPORTED
 
 int rmtpwm_init()
 {
@@ -86,7 +86,7 @@ int rmtpwm_init()
     BO_TRY(rmt_transmit(s_pwm_channel.rmt_channel, s_pwm_encoder, &s_pwm_channel.duty, sizeof(s_pwm_channel.duty),
                         &tx_config));
 
-#if CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6
+#if !SOC_DAC_SUPPORTED
     ESP_LOGI(TAG, "Create RMT TX channel for FAN PWM DAC...");
     s_dac_channel.mutex = xSemaphoreCreateMutexStatic(&s_dac_channel.mutex_buffer);
     rmt_tx_channel_config_t fan_dac_tx_chan_config = {
@@ -100,7 +100,7 @@ int rmtpwm_init()
     BO_TRY(rmt_enable(s_dac_channel.rmt_channel));
     BO_TRY(rmt_transmit(s_dac_channel.rmt_channel, s_pwm_encoder, &s_dac_channel.duty, sizeof(s_dac_channel.duty),
                         &tx_config));
-#endif // CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6
+#endif // !SOC_DAC_SUPPORTED
 
     return 0;
 }
@@ -111,13 +111,13 @@ int rmtpwm_set_pwm_duty(uint8_t duty)
     return rmtpwm_set_duty_internal(&s_pwm_channel, duty);
 }
 
-#if CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6
+#if !SOC_DAC_SUPPORTED
 int rmtpwm_set_dac_duty(uint8_t duty)
 {
     //
     return rmtpwm_set_duty_internal(&s_dac_channel, duty);
 }
-#endif // CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6
+#endif // SOC_DAC_SUPPORTED
 
 int rmtpwm_set_duty_internal(struct rmtpwm_channel* channel, uint8_t duty)
 {
@@ -125,15 +125,18 @@ int rmtpwm_set_duty_internal(struct rmtpwm_channel* channel, uint8_t duty)
         return -EINVAL;
     }
 
+    if(duty == channel->duty) {
+        return 0;
+    }
+
     if (xSemaphoreTake(channel->mutex, portMAX_DELAY) == pdTRUE) {
         channel->duty = duty;
         rmt_transmit_config_t tx_config = {
             .loop_count = -1,
         };
-        ESP_ERROR_CHECK(rmt_disable(channel->rmt_channel));
-        ESP_ERROR_CHECK(rmt_enable(channel->rmt_channel));
-        ESP_ERROR_CHECK(
-            rmt_transmit(channel->rmt_channel, s_pwm_encoder, &channel->duty, sizeof(channel->duty), &tx_config));
+        BO_TRY(rmt_disable(channel->rmt_channel));
+        BO_TRY(rmt_enable(channel->rmt_channel));
+        BO_TRY(rmt_transmit(channel->rmt_channel, s_pwm_encoder, &channel->duty, sizeof(channel->duty), &tx_config));
         xSemaphoreGive(channel->mutex);
     }
     else {
