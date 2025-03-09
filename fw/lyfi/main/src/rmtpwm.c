@@ -14,7 +14,7 @@
 static const char* TAG = "rmtpwm";
 
 #define RMTPWM_FREQ_HZ 24000 // 24 kHz PWM
-#define RMT_PWM_RESOLUTION_HZ 1000000 // 1MHz resolution
+#define RMT_PWM_RESOLUTION_HZ 10000000 // 10MHz resolution
 
 typedef struct {
     rmt_encoder_t base;
