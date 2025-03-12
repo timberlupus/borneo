@@ -1,6 +1,6 @@
 {
     "arcs": {},
-    "default_model": "97f67a23-1d77-42e7-a9a1-3d9c7866d670",
+    "default_model": "89616453-9122-49b2-a82b-00b67812b376",
     "dimensions": {
         "3ea8215e-2954-42df-90f7-317a6dc11941": {
             "label_distance": 14040000,
@@ -160,14 +160,14 @@
     },
     "manufacturer": "",
     "models": {
-        "97f67a23-1d77-42e7-a9a1-3d9c7866d670": {
-            "filename": "3d_models/cache/8eeaf956-e4a0-4db5-95bb-b90e600e8069/3d_models/module/rf/espressif/ESP32-C3-WROOM-02.STEP",
+        "89616453-9122-49b2-a82b-00b67812b376": {
+            "filename": "3d_models/cache/8eeaf956-e4a0-4db5-95bb-b90e600e8069/3d_models/module/rf/espressif/ESP32-C3-WROOM-02.stp",
             "pitch": 0,
-            "roll": 0,
+            "roll": 49152,
             "x": 0,
-            "y": 0,
+            "y": 3100000,
             "yaw": 0,
-            "z": 0
+            "z": 1600000
         }
     },
     "name": "ESP32-C3-WROOM-02",

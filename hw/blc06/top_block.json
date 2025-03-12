@@ -672,6 +672,7 @@
             },
             "entity": "dfe78717-3271-4b6f-a1a8-f6436f0caab8",
             "group": "00000000-0000-0000-0000-000000000000",
+            "nopopulate": true,
             "part": "e8d30996-377f-4099-a498-1569afc9e8a3",
             "pin_names": {},
             "refdes": "J1",
@@ -1105,7 +1106,7 @@
             },
             "entity": "f061691a-7954-4797-9529-dba6527d8f4f",
             "group": "00000000-0000-0000-0000-000000000000",
-            "part": "2b025dac-03d4-4938-a78f-94684b1be785",
+            "part": "f4c4c129-7a9a-4778-b9c1-27ba04078663",
             "pin_names": {},
             "refdes": "D2",
             "tag": "38572cf4-0b58-469a-b9f3-664c07cdc65b",
@@ -1600,7 +1601,7 @@
         "model": "BLC06MK1",
         "project_name": "blc06mk1",
         "project_title": "BLC06-MK1",
-        "rev": "4"
+        "rev": "5"
     },
     "tag_names": {
         "1950d0de-3935-459f-8675-9440a5a19dce": "9",
