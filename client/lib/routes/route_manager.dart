@@ -35,12 +35,16 @@ class RouteManager {
       return MaterialPageRoute(builder: builder, settings: settings);
     } else {
       return MaterialPageRoute(
-          builder: (_) => const DevicesScreen(), settings: settings);
+        builder: (_) => const DevicesScreen(),
+        settings: settings,
+      );
     }
   }
 
   Widget _makeDeviceDetailsScreenBuilder(
-      BuildContext context, DeviceModuleMetadata meta) {
+    BuildContext context,
+    DeviceModuleMetadata meta,
+  ) {
     return meta.detailsScreenBuilder(context);
   }
 }

@@ -91,12 +91,13 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
       _parent.boundDevice!.driver as ILyfiDeviceApi;
 
   ScheduleEditorViewModel(this._parent)
-      : _channels = List.generate(
-            _parent.lyfiDeviceInfo.channelCount,
-            growable: false,
-            (index) => ValueNotifier(0)),
-        easySetupViewModel = EasySetupViewModel(),
-        blackColor = List.filled(_parent.lyfiDeviceInfo.channelCount, 0);
+    : _channels = List.generate(
+        _parent.lyfiDeviceInfo.channelCount,
+        growable: false,
+        (index) => ValueNotifier(0),
+      ),
+      easySetupViewModel = EasySetupViewModel(),
+      blackColor = List.filled(_parent.lyfiDeviceInfo.channelCount, 0);
 
   @override
   Future<void> initialize() async {
@@ -125,9 +126,11 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
   void _setCurrentEntry(int? index) {
     if (index != null) {
       _currentEntryIndex = index;
-      for (int channelIndex = 0;
-          channelIndex < _channels.length;
-          channelIndex++) {
+      for (
+        int channelIndex = 0;
+        channelIndex < _channels.length;
+        channelIndex++
+      ) {
         channels[channelIndex].value = currentEntry!.channels[channelIndex];
       }
     } else {
@@ -225,10 +228,16 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
 
     if (_currentEntryIndex != null) {
       _insertInstant(
-          insertPos, instant, _entries[_currentEntryIndex!].channels);
+        insertPos,
+        instant,
+        _entries[_currentEntryIndex!].channels,
+      );
     } else {
-      _insertInstant(insertPos, instant,
-          List<int>.filled(deviceInfo.channelCount, 0, growable: false));
+      _insertInstant(
+        insertPos,
+        instant,
+        List<int>.filled(deviceInfo.channelCount, 0, growable: false),
+      );
     }
     await setCurrentEntryAndSyncDimmingColor(insertPos);
   }
@@ -244,27 +253,21 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
   }
 
   ScheduleEntryViewModel _insertInstant(
-      int insertPos, Duration instant, List<int> channels) {
+    int insertPos,
+    Duration instant,
+    List<int> channels,
+  ) {
     final entry = ScheduleEntryViewModel(
-      ScheduledInstant(
-        instant: instant,
-        color: channels,
-      ),
+      ScheduledInstant(instant: instant, color: channels),
     );
-    _entries.insert(
-      insertPos,
-      entry,
-    );
+    _entries.insert(insertPos, entry);
     _isChanged = true;
     return entry;
   }
 
   ScheduleEntryViewModel _appendInstant(Duration instant, List<int> channels) {
     final entry = ScheduleEntryViewModel(
-      ScheduledInstant(
-        instant: instant,
-        color: channels,
-      ),
+      ScheduledInstant(instant: instant, color: channels),
     );
 
     _entries.add(entry);
@@ -291,8 +294,9 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
   Future<void> _syncDimmingColor(bool isLimited) async {
     final color = _channels.map((x) => x.value).toList();
     if (isLimited) {
-      _colorChangeRateLimiter
-          .add(() => _deviceApi.setColor(_parent.boundDevice!.device, color));
+      _colorChangeRateLimiter.add(
+        () => _deviceApi.setColor(_parent.boundDevice!.device, color),
+      );
     } else {
       await _deviceApi.setColor(_parent.boundDevice!.device, color);
     }

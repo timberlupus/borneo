@@ -10,7 +10,7 @@ abstract class DeviceModuleMetadata {
   final DriverDescriptor driverDescriptor;
   final Widget Function(BuildContext context) detailsScreenBuilder;
   final BaseDeviceViewModel Function(BuildContext context, String deviceID)
-      detailsViewModelBuilder;
+  detailsViewModelBuilder;
   final Widget Function(BuildContext context) deviceIconBuilder;
 
   const DeviceModuleMetadata({

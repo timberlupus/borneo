@@ -12,23 +12,25 @@ class SettingsScreen extends StatelessWidget {
     final items = _buildSettingItems(context);
     return ChangeNotifierProvider.value(
       value: vm,
-      builder: (context, child) => Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: AppBar(
-            title: Text('Settings'),
+      builder:
+          (context, child) => Scaffold(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            appBar: AppBar(title: Text('Settings')),
+            body: ListView.separated(
+              shrinkWrap: true,
+              itemBuilder: (context, index) => items[index],
+              itemCount: items.length,
+              separatorBuilder: (context, index) => SizedBox(height: 1),
+            ),
           ),
-          body: ListView.separated(
-            shrinkWrap: true,
-            itemBuilder: (context, index) => items[index],
-            itemCount: items.length,
-            separatorBuilder: (context, index) => SizedBox(height: 1),
-          )),
     );
   }
 
   List<Widget> _buildSettingItems(BuildContext context) {
-    final rightChevron =
-        Icon(Icons.chevron_right_outlined, color: Theme.of(context).hintColor);
+    final rightChevron = Icon(
+      Icons.chevron_right_outlined,
+      color: Theme.of(context).hintColor,
+    );
     final tileColor = Theme.of(context).colorScheme.surfaceContainer;
     return <Widget>[
       ListTile(title: const Text('DEVICE INFORMATION')),
@@ -63,19 +65,23 @@ class SettingsScreen extends StatelessWidget {
         leading: Icon(Icons.info_outline),
         title: Text('Address'),
         subtitle: Text(vm.deviceEntity.address.toString()),
-        trailing: vm.isOnline
-            ? Icon(Icons.wifi)
-            : Icon(Icons.wifi_off_outlined,
-                color: Theme.of(context).colorScheme.error),
+        trailing:
+            vm.isOnline
+                ? Icon(Icons.wifi)
+                : Icon(
+                  Icons.wifi_off_outlined,
+                  color: Theme.of(context).colorScheme.error,
+                ),
       ),
       ListTile(title: Text('DEVICE STATUS')),
       ListTile(
         tileColor: tileColor,
         leading: Icon(Icons.access_time_outlined),
         title: Text('Device time'),
-        subtitle: vm.isOnline
-            ? Text(vm.borneoDeviceStatus?.timestamp.toString() ?? '')
-            : null,
+        subtitle:
+            vm.isOnline
+                ? Text(vm.borneoDeviceStatus?.timestamp.toString() ?? '')
+                : null,
         trailing: rightChevron,
       ),
       ListTile(
@@ -93,17 +99,20 @@ class SettingsScreen extends StatelessWidget {
         trailing: DropdownButton<int>(
           items: [
             DropdownMenuItem<int>(
-                value: 0,
-                child:
-                    Text("On", style: Theme.of(context).textTheme.bodySmall)),
+              value: 0,
+              child: Text("On", style: Theme.of(context).textTheme.bodySmall),
+            ),
             DropdownMenuItem<int>(
-                value: 1,
-                child:
-                    Text("Off", style: Theme.of(context).textTheme.bodySmall)),
+              value: 1,
+              child: Text("Off", style: Theme.of(context).textTheme.bodySmall),
+            ),
             DropdownMenuItem<int>(
-                value: 2,
-                child: Text("Maintain last",
-                    style: Theme.of(context).textTheme.bodySmall)),
+              value: 2,
+              child: Text(
+                "Maintain last",
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
           ],
           onChanged: (value) {},
         ),
@@ -118,8 +127,9 @@ class SettingsScreen extends StatelessWidget {
         tileColor: tileColor,
         leading: Icon(Icons.emergency_outlined),
         title: Text('Last emergency shutdown'),
-        trailing:
-            Text(vm.borneoDeviceStatus?.shutdownTimestamp?.toString() ?? 'N/A'),
+        trailing: Text(
+          vm.borneoDeviceStatus?.shutdownTimestamp?.toString() ?? 'N/A',
+        ),
         subtitle: Text("Reason: ${vm.borneoDeviceStatus?.shutdownReason}"),
       ),
 
@@ -152,13 +162,18 @@ class SettingsScreen extends StatelessWidget {
       ),
       */
       ListTile(
-          title: Text('DANGER ZONE',
-              style: TextStyle(color: Theme.of(context).colorScheme.error))),
+        title: Text(
+          'DANGER ZONE',
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
+        ),
+      ),
       ListTile(
         leading: Icon(Icons.restore_outlined),
         tileColor: tileColor,
-        title: Text('Restore to factory settings',
-            style: TextStyle(color: Theme.of(context).colorScheme.error)),
+        title: Text(
+          'Restore to factory settings',
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
+        ),
         subtitle: Text('Your device will lose all custom settings.'),
         trailing: Icon(Icons.warning),
       ),

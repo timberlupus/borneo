@@ -70,7 +70,8 @@ abstract class BaseDeviceViewModel extends BaseViewModel
       _timer = Timer.periodic(
         timerDuration,
         (_) => enqueueJob(
-            () => periodicRefreshTask().asCancellable(taskQueueCancelToken)),
+          () => periodicRefreshTask().asCancellable(taskQueueCancelToken),
+        ),
       );
       _isTimerRunning = true;
     }
@@ -86,14 +87,20 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     }
   }
 
-  void enqueueJob(Future<void> Function() job,
-      {int retryTime = 1, bool reportError = true}) {
+  void enqueueJob(
+    Future<void> Function() job, {
+    int retryTime = 1,
+    bool reportError = true,
+  }) {
     super.taskQueue.addJob(retryTime: retryTime, (args) async {
       try {
         await job().asCancellable(taskQueueCancelToken);
       } on CancelledException catch (e, stackTrace) {
-        logger?.w('A job has been cancelled.',
-            error: e, stackTrace: stackTrace);
+        logger?.w(
+          'A job has been cancelled.',
+          error: e,
+          stackTrace: stackTrace,
+        );
       } catch (e, stackTrace) {
         if (reportError) {
           notifyAppError(e.toString(), error: e, stackTrace: stackTrace);
@@ -104,8 +111,11 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     });
   }
 
-  void enqueueUIJob(Future<void> Function() job,
-      {int retryTime = 1, bool notify = true}) {
+  void enqueueUIJob(
+    Future<void> Function() job, {
+    int retryTime = 1,
+    bool notify = true,
+  }) {
     super.taskQueue.addJob((args) async {
       if (isBusy) {
         return;

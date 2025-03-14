@@ -15,23 +15,28 @@ class ManualEditorView extends StatelessWidget {
   const ManualEditorView({super.key});
 
   Widget buildSliders(BuildContext context) {
-    return Consumer<ManualEditorViewModel>(builder: (context, vm, _) {
-      if (vm.isInitialized) {
-        return Selector<ManualEditorViewModel, bool>(
-          selector: (_, editor) => editor.canChangeColor,
-          builder: (_, canChangeColor, __) => BrightnessSliderList(
-            context.read<ManualEditorViewModel>(),
-            disabled: !canChangeColor,
-          ),
-        );
-      } else {
-        return Container();
-      }
-    });
+    return Consumer<ManualEditorViewModel>(
+      builder: (context, vm, _) {
+        if (vm.isInitialized) {
+          return Selector<ManualEditorViewModel, bool>(
+            selector: (_, editor) => editor.canChangeColor,
+            builder:
+                (_, canChangeColor, __) => BrightnessSliderList(
+                  context.read<ManualEditorViewModel>(),
+                  disabled: !canChangeColor,
+                ),
+          );
+        } else {
+          return Container();
+        }
+      },
+    );
   }
 
   List<BarChartGroupData> buildGroupDataItems(
-      BuildContext context, ManualEditorViewModel vm) {
+    BuildContext context,
+    ManualEditorViewModel vm,
+  ) {
     int index = 0;
     if (vm.isInitialized) {
       return vm.deviceInfo.channels.map((ch) {
@@ -46,7 +51,11 @@ class ManualEditorView extends StatelessWidget {
   }
 
   BarChartGroupData makeGroupData(
-      BuildContext context, LyfiChannelInfo ch, int x, double y) {
+    BuildContext context,
+    LyfiChannelInfo ch,
+    int x,
+    double y,
+  ) {
     return BarChartGroupData(
       x: x,
       barRods: [
@@ -56,35 +65,42 @@ class ManualEditorView extends StatelessWidget {
           color: HexColor.fromHex(ch.color),
           width: 16,
           backDrawRodData: BackgroundBarChartRodData(
-              show: true,
-              fromY: 0,
-              toY: ch.powerRatio.toDouble(),
-              color: Theme.of(context).colorScheme.surface),
+            show: true,
+            fromY: 0,
+            toY: ch.powerRatio.toDouble(),
+            color: Theme.of(context).colorScheme.surface,
+          ),
         ),
       ],
     );
   }
 
   Widget buildTitles(
-      BuildContext context, ManualEditorViewModel vm, double value) {
+    BuildContext context,
+    ManualEditorViewModel vm,
+    double value,
+  ) {
     if (vm.isInitialized) {
       final index = value.toInt();
       final ch = vm.deviceInfo.channels[index];
-      return Text(ch.name,
-          style: Theme.of(context)
-              .textTheme
-              .labelSmall
-              ?.copyWith(color: Theme.of(context).hintColor));
+      return Text(
+        ch.name,
+        style: Theme.of(
+          context,
+        ).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
+      );
     } else {
       return Text("N/A");
     }
   }
 
   Widget buildGraph(BuildContext context) {
-    return Consumer<ManualEditorViewModel>(builder: (context, vm, _) {
-      return MultiValueListenableBuilder<int>(
+    return Consumer<ManualEditorViewModel>(
+      builder: (context, vm, _) {
+        return MultiValueListenableBuilder<int>(
           valueNotifiers: vm.channels,
-          builder: (context, values, _) => LyfiColorChart(
+          builder:
+              (context, values, _) => LyfiColorChart(
                 BarChartData(
                   barGroups: buildGroupDataItems(context, vm),
                   titlesData: FlTitlesData(
@@ -94,25 +110,28 @@ class ManualEditorView extends StatelessWidget {
                       sideTitles: SideTitles(
                         reservedSize: 24,
                         showTitles: true,
-                        getTitlesWidget: (value, _) =>
-                            buildTitles(context, vm, value),
+                        getTitlesWidget:
+                            (value, _) => buildTitles(context, vm, value),
                       ),
                     ),
                     leftTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false)),
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
                     topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false)),
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
                     rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false)),
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
                   ),
                   borderData: FlBorderData(show: false),
-                  barTouchData: BarTouchData(
-                    enabled: true,
-                  ),
+                  barTouchData: BarTouchData(enabled: true),
                   gridData: FlGridData(show: false),
                 ),
-              ));
-    });
+              ),
+        );
+      },
+    );
   }
 
   @override
@@ -120,17 +139,21 @@ class ManualEditorView extends StatelessWidget {
     return ChangeNotifierProvider.value(
       value:
           context.read<LyfiViewModel>().currentEditor! as ManualEditorViewModel,
-      builder: (context, child) => Column(spacing: 16, children: [
-        Container(
-          color: Theme.of(context).colorScheme.surfaceContainer,
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: AspectRatio(
-            aspectRatio: 2.75,
-            child: buildGraph(context),
+      builder:
+          (context, child) => Column(
+            spacing: 16,
+            children: [
+              Container(
+                color: Theme.of(context).colorScheme.surfaceContainer,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: AspectRatio(
+                  aspectRatio: 2.75,
+                  child: buildGraph(context),
+                ),
+              ),
+              Expanded(child: buildSliders(context)),
+            ],
           ),
-        ),
-        Expanded(child: buildSliders(context))
-      ]),
     );
   }
 }

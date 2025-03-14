@@ -66,8 +66,11 @@ class GroupEditViewModel extends AbstractScreenViewModel
     try {
       await _groupManager.delete(id!);
     } catch (e, stackTrace) {
-      notifyAppError('Failed to delete group `$name`',
-          error: e, stackTrace: stackTrace);
+      notifyAppError(
+        'Failed to delete group `$name`',
+        error: e,
+        stackTrace: stackTrace,
+      );
     } finally {
       setBusy(false, notify: false);
     }

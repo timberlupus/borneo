@@ -5,11 +5,12 @@ class ConfirmationSheet extends StatelessWidget {
   final VoidCallback okPressed;
   final VoidCallback? cancelPressed;
 
-  const ConfirmationSheet(
-      {super.key,
-      required this.message,
-      required this.okPressed,
-      this.cancelPressed});
+  const ConfirmationSheet({
+    super.key,
+    required this.message,
+    required this.okPressed,
+    this.cancelPressed,
+  });
 
   static void show(
     BuildContext context, {
@@ -70,14 +71,14 @@ class AsyncConfirmationSheet extends StatelessWidget {
 
   const AsyncConfirmationSheet({super.key, required this.message});
 
-  static Future<bool> show(BuildContext context,
-      {required String message}) async {
+  static Future<bool> show(
+    BuildContext context, {
+    required String message,
+  }) async {
     return await showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return AsyncConfirmationSheet(
-          message: message,
-        );
+        return AsyncConfirmationSheet(message: message);
       },
     );
   }

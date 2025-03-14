@@ -22,25 +22,29 @@ class SceneCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: scene,
-      builder: (context, child) => Card(
-        margin: EdgeInsets.all(0),
-        borderOnForeground: true,
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-        child: AspectRatio(
-          aspectRatio: 16.0 / 9.0,
-          child: Consumer<SceneSummaryViewModel>(
-            builder: (context, vm, child) => InkWell(
-              onTap: scene.isSelected
-                  ? null
-                  : () async {
-                      final scenesVM = context.read<ScenesViewModel>();
-                      await scenesVM.switchCurrentScene(scene.id);
-                    },
-              child: Ink(
-                /*
+      builder:
+          (context, child) => Card(
+            margin: EdgeInsets.all(0),
+            borderOnForeground: true,
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            child: AspectRatio(
+              aspectRatio: 16.0 / 9.0,
+              child: Consumer<SceneSummaryViewModel>(
+                builder:
+                    (context, vm, child) => InkWell(
+                      onTap:
+                          scene.isSelected
+                              ? null
+                              : () async {
+                                final scenesVM =
+                                    context.read<ScenesViewModel>();
+                                await scenesVM.switchCurrentScene(scene.id);
+                              },
+                      child: Ink(
+                        /*
               decoration: BoxDecoration(
                 border: Border.all(
                   color: Theme.of(context).colorScheme.primary,
@@ -52,140 +56,157 @@ class SceneCard extends StatelessWidget {
                 //borderRadius: BorderRadius.circular(16.0),
               ),
                 */
-                //padding: EdgeInsets.all(16),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Stack(alignment: Alignment.topRight, children: [
-                    if (scene.isSelected && vm.model.imagePath == null)
-                      Image.asset(
-                        'assets/images/scenes/scene-default-noimage.jpg',
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
-                    if (!scene.isSelected && vm.model.imagePath == null)
-                      ColorFiltered(
-                        colorFilter: ColorFilter.mode(
-                          Colors.black.withAlpha(128),
-                          BlendMode.srcATop,
-                        ),
-                        child: Image.asset(
-                          'assets/images/scenes/scene-default-noimage.jpg',
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                        ),
-                      ),
-                    if (scene.isSelected && vm.model.imagePath != null)
-                      Image.file(
-                        File(vm.model.imagePath!),
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
-                    if (!scene.isSelected && vm.model.imagePath != null)
-                      ColorFiltered(
-                        colorFilter: ColorFilter.mode(
-                          Colors.black.withAlpha(97),
-                          BlendMode.srcATop,
-                        ),
-                        child: Image.file(
-                          File(vm.model.imagePath!),
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                        ),
-                      ),
-                    Positioned(
-                      left: 16,
-                      bottom: 16,
-                      child: Row(children: [
-                        Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        //padding: EdgeInsets.all(16),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Stack(
+                            alignment: Alignment.topRight,
                             children: [
-                              Text(
-                                scene.name,
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                  fontSize: 26,
-                                  color: Colors.white,
-                                  shadows: [
-                                    Shadow(
-                                      offset: Offset(2.0, 2.0),
-                                      blurRadius: 4.0,
-                                      color: Colors.black.withAlpha(97),
+                              if (scene.isSelected &&
+                                  vm.model.imagePath == null)
+                                Image.asset(
+                                  'assets/images/scenes/scene-default-noimage.jpg',
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                ),
+                              if (!scene.isSelected &&
+                                  vm.model.imagePath == null)
+                                ColorFiltered(
+                                  colorFilter: ColorFilter.mode(
+                                    Colors.black.withAlpha(128),
+                                    BlendMode.srcATop,
+                                  ),
+                                  child: Image.asset(
+                                    'assets/images/scenes/scene-default-noimage.jpg',
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                  ),
+                                ),
+                              if (scene.isSelected &&
+                                  vm.model.imagePath != null)
+                                Image.file(
+                                  File(vm.model.imagePath!),
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                ),
+                              if (!scene.isSelected &&
+                                  vm.model.imagePath != null)
+                                ColorFiltered(
+                                  colorFilter: ColorFilter.mode(
+                                    Colors.black.withAlpha(97),
+                                    BlendMode.srcATop,
+                                  ),
+                                  child: Image.file(
+                                    File(vm.model.imagePath!),
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                  ),
+                                ),
+                              Positioned(
+                                left: 16,
+                                bottom: 16,
+                                child: Row(
+                                  children: [
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          scene.name,
+                                          textAlign: TextAlign.start,
+                                          style: TextStyle(
+                                            fontSize: 26,
+                                            color: Colors.white,
+                                            shadows: [
+                                              Shadow(
+                                                offset: Offset(2.0, 2.0),
+                                                blurRadius: 4.0,
+                                                color: Colors.black.withAlpha(
+                                                  97,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              '${scene.totalDeviceCount} devices',
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.white,
+                                                shadows: const [_smallShadow],
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Icon(
+                                              Icons.circle,
+                                              size: 4,
+                                              color: Colors.white,
+                                              shadows: const [_smallShadow],
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              '${scene.activeDeviceCount} active',
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.white,
+                                                shadows: const [_smallShadow],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              Row(children: [
-                                Text(
-                                  '${scene.totalDeviceCount} devices',
-                                  textAlign: TextAlign.start,
-                                  style: TextStyle(
-                                    fontSize: 14,
+                              if (scene.isSelected)
+                                Positioned.fill(
+                                  child: ShaderMask(
+                                    shaderCallback: (Rect bounds) {
+                                      return RadialGradient(
+                                        center: Alignment.center,
+                                        radius: 0.5,
+                                        colors: [
+                                          Colors.white.withAlpha(200),
+                                          Colors.white,
+                                        ],
+                                        stops: [0.0, 1.0],
+                                        tileMode: TileMode.clamp,
+                                      ).createShader(bounds);
+                                    },
+                                    blendMode: BlendMode.srcATop,
+                                    child: Container(color: Colors.transparent),
+                                  ),
+                                ),
+                              Positioned(
+                                top: 8.0,
+                                right: 8.0,
+                                child: IconButton(
+                                  onPressed: () {
+                                    _showEditSceneScreen(context);
+                                  },
+                                  icon: Icon(
+                                    Icons.edit_outlined,
                                     color: Colors.white,
                                     shadows: const [_smallShadow],
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                Icon(
-                                  Icons.circle,
-                                  size: 4,
-                                  color: Colors.white,
-                                  shadows: const [_smallShadow],
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '${scene.activeDeviceCount} active',
-                                  textAlign: TextAlign.start,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                    shadows: const [_smallShadow],
-                                  ),
-                                ),
-                              ])
-                            ]),
-                      ]),
-                    ),
-                    if (scene.isSelected)
-                      Positioned.fill(
-                        child: ShaderMask(
-                          shaderCallback: (Rect bounds) {
-                            return RadialGradient(
-                              center: Alignment.center,
-                              radius: 0.5,
-                              colors: [
-                                Colors.white.withAlpha(200),
-                                Colors.white,
-                              ],
-                              stops: [0.0, 1.0],
-                              tileMode: TileMode.clamp,
-                            ).createShader(bounds);
-                          },
-                          blendMode: BlendMode.srcATop,
-                          child: Container(
-                            color: Colors.transparent,
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    Positioned(
-                      top: 8.0,
-                      right: 8.0,
-                      child: IconButton(
-                        onPressed: () {
-                          _showEditSceneScreen(context);
-                        },
-                        icon: Icon(Icons.edit_outlined,
-                            color: Colors.white, shadows: const [_smallShadow]),
-                      ),
                     ),
-                  ]),
-                ),
               ),
             ),
           ),
-        ),
-      ),
     );
   }
 
@@ -194,8 +215,10 @@ class SceneCard extends StatelessWidget {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SceneEditScreen(
-            args: SceneEditArguments(isCreation: false, model: vm.model)),
+        builder:
+            (context) => SceneEditScreen(
+              args: SceneEditArguments(isCreation: false, model: vm.model),
+            ),
       ),
     );
   }

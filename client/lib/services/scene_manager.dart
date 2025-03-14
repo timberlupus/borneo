@@ -35,11 +35,18 @@ class SceneManager {
   SceneEntity? _located;
   SceneEntity? get located => _located;
 
-  SceneManager(this._gt, this._db, this._globalEventBus, this._blobManager,
-      {this.logger});
+  SceneManager(
+    this._gt,
+    this._db,
+    this._globalEventBus,
+    this._blobManager, {
+    this.logger,
+  });
 
   Future<void> initialize(
-      GroupManager groupManager, DeviceManager deviceManager) async {
+    GroupManager groupManager,
+    DeviceManager deviceManager,
+  ) async {
     _groupManager = groupManager;
     _deviceManager = deviceManager;
     return await _db.transaction((tx) async {
@@ -53,8 +60,9 @@ class SceneManager {
     final store = stringMapStoreFactory.store(StoreNames.scenes);
     // Check and add internal scenes
     if (await _isEmpty(tx: tx)) {
-      final homeImageID = await _blobManager
-          .create(await rootBundle.load(AssetsPath.kHomeSceneImagePath));
+      final homeImageID = await _blobManager.create(
+        await rootBundle.load(AssetsPath.kHomeSceneImagePath),
+      );
 
       final homeScene = SceneEntity.newDefault().copyWith(
         name: _gt.translate('My Home'),
@@ -63,8 +71,9 @@ class SceneManager {
       );
       await store.record(homeScene.id).put(tx, homeScene.toMap());
 
-      final officeImageID = await _blobManager
-          .create(await rootBundle.load(AssetsPath.kOfficeSceneImagePath));
+      final officeImageID = await _blobManager.create(
+        await rootBundle.load(AssetsPath.kOfficeSceneImagePath),
+      );
       final officeScene = SceneEntity(
         id: BaseEntity.generateID(),
         name: _gt.translate('My Office'),
@@ -122,9 +131,10 @@ class SceneManager {
     } else {
       final store = stringMapStoreFactory.store(StoreNames.scenes);
       final records = await store.find(tx);
-      final scenes = records
-          .map((record) => SceneEntity.fromMap(record.key, record.value))
-          .toList();
+      final scenes =
+          records
+              .map((record) => SceneEntity.fromMap(record.key, record.value))
+              .toList();
       return scenes;
     }
   }
@@ -140,8 +150,10 @@ class SceneManager {
         }
       }
       final deviceStore = stringMapStoreFactory.store(StoreNames.devices);
-      final totlaDeviceCount = await deviceStore.count(tx,
-          filter: Filter.equals(DeviceEntity.kSceneIDFieldName, sceneID));
+      final totlaDeviceCount = await deviceStore.count(
+        tx,
+        filter: Filter.equals(DeviceEntity.kSceneIDFieldName, sceneID),
+      );
       return DeviceStatistics(totlaDeviceCount, activeDevice);
     });
   }
@@ -150,7 +162,9 @@ class SceneManager {
     assert(isInitialized);
     if (newSceneID == current.id) {
       throw ArgumentError(
-          'Failed to change current scene, they are the same.', 'newSceneID');
+        'Failed to change current scene, they are the same.',
+        'newSceneID',
+      );
     }
 
     final store = stringMapStoreFactory.store(StoreNames.scenes);
@@ -169,7 +183,8 @@ class SceneManager {
       final newCurrentRecord = await store.record(newSceneID).get(tx);
       if (newCurrentRecord == null) {
         throw KeyNotFoundException(
-            'Failed to found current scene ID `$newSceneID`');
+          'Failed to found current scene ID `$newSceneID`',
+        );
       }
       final fromScene = _current;
       final toScene = SceneEntity.fromMap(newSceneID, newCurrentRecord);
@@ -179,8 +194,10 @@ class SceneManager {
     });
   }
 
-  Future<SceneEntity> create(
-      {required String name, required String notes}) async {
+  Future<SceneEntity> create({
+    required String name,
+    required String notes,
+  }) async {
     final store = stringMapStoreFactory.store(StoreNames.scenes);
     return await _db.transaction((tx) async {
       // TODO make it current
@@ -197,18 +214,22 @@ class SceneManager {
     });
   }
 
-  Future<SceneEntity> update(
-      {required String id,
-      required String name,
-      required String notes,
-      Transaction? tx}) async {
+  Future<SceneEntity> update({
+    required String id,
+    required String name,
+    required String notes,
+    Transaction? tx,
+  }) async {
     if (tx == null) {
       return await _db.transaction(
-          (tx) => update(id: id, name: name, notes: notes, tx: tx));
+        (tx) => update(id: id, name: name, notes: notes, tx: tx),
+      );
     } else {
       final store = stringMapStoreFactory.store(StoreNames.scenes);
-      final record = await store.record(id).update(tx,
-          {SceneEntity.kNameField: name, SceneEntity.kNotesFieldName: notes});
+      final record = await store.record(id).update(tx, {
+        SceneEntity.kNameField: name,
+        SceneEntity.kNotesFieldName: notes,
+      });
       if (record == null) {
         throw InvalidOperationException(message: 'Failed to update record');
       }
@@ -225,18 +246,24 @@ class SceneManager {
       logger?.i('Begin deleting the scene id=`$id`');
 
       final deviceStore = stringMapStoreFactory.store(StoreNames.devices);
-      final deviceRecordsToDelete = await deviceStore.find(tx,
-          finder: Finder(
-              filter: Filter.equals(DeviceEntity.kSceneIDFieldName, id)));
+      final deviceRecordsToDelete = await deviceStore.find(
+        tx,
+        finder: Finder(
+          filter: Filter.equals(DeviceEntity.kSceneIDFieldName, id),
+        ),
+      );
 
       for (final deviceRecord in deviceRecordsToDelete) {
         await _deviceManager.delete(deviceRecord.key, tx: tx);
       }
 
       final groupStore = stringMapStoreFactory.store(StoreNames.groups);
-      final groupRecordsToDelete = await groupStore.find(tx,
-          finder: Finder(
-              filter: Filter.equals(DeviceGroupEntity.kSceneIDFieldName, id)));
+      final groupRecordsToDelete = await groupStore.find(
+        tx,
+        finder: Finder(
+          filter: Filter.equals(DeviceGroupEntity.kSceneIDFieldName, id),
+        ),
+      );
 
       for (final groupRecord in groupRecordsToDelete) {
         await _groupManager.delete(groupRecord.key, tx: tx);
@@ -248,7 +275,8 @@ class SceneManager {
       // Delete image
       if (sceneRecordToDelete?[SceneEntity.kImageIDFieldName] != null) {
         await _blobManager.delete(
-            sceneRecordToDelete![SceneEntity.kImageIDFieldName] as String);
+          sceneRecordToDelete![SceneEntity.kImageIDFieldName] as String,
+        );
       }
 
       // Delete the group record

@@ -45,28 +45,27 @@ Future<void> main() async {
       providers: [
         // Logger
         Provider<Logger>(
-            create: (_) => createLogger(),
-            lazy: false,
-            dispose: (_, logger) {
-              logger.close();
-            }),
+          create: (_) => createLogger(),
+          lazy: false,
+          dispose: (_, logger) {
+            logger.close();
+          },
+        ),
 
         // IClock
         Provider<IClock>(create: (_) => DefaultClock()),
 
         // DB
         Provider<Database>(
-            create: (_) => db,
-            lazy: false,
-            dispose: (_, db) {
-              db.close();
-            }),
+          create: (_) => db,
+          lazy: false,
+          dispose: (_, db) {
+            db.close();
+          },
+        ),
 
         // mDns provider
-        Provider<IMdnsProvider>(
-          create: (_) => NsdMdnsProvider(),
-          lazy: false,
-        ),
+        Provider<IMdnsProvider>(create: (_) => NsdMdnsProvider(), lazy: false),
 
         // IDeviceModuleRegistry
         Provider<IDeviceModuleRegistry>(
@@ -88,8 +87,9 @@ Future<void> main() async {
 
         // IKernel
         ProxyProvider3<Logger, IDriverRegistry, IMdnsProvider, IKernel>(
-          update: (_, logger, driverReg, nsdMdns, __) =>
-              DefaultKernel(logger, driverReg, mdnsProvider: nsdMdns),
+          update:
+              (_, logger, driverReg, nsdMdns, __) =>
+                  DefaultKernel(logger, driverReg, mdnsProvider: nsdMdns),
           dispose: (context, kernel) => kernel.dispose(),
           lazy: true,
         ),

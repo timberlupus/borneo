@@ -1,6 +1,1 @@
-enum DeviceState {
-  operational,
-  powerOff,
-  offline,
-  connecting,
-}
+enum DeviceState { operational, powerOff, offline, connecting }

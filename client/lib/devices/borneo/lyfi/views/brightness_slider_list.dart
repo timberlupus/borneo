@@ -16,21 +16,24 @@ class BrightnessSliderList<TEditor extends IEditor> extends StatelessWidget {
       final channelInfo = editor.deviceInfo.channels.elementAt(index);
       final slider = ValueListenableBuilder<int>(
         valueListenable: editor.channels[index],
-        builder: (context, channelValue, child) => BrightnessSliderListTile(
-          channelName: channelInfo.name,
-          max: 100,
-          min: 0,
-          value: channelValue,
-          color: HexColor.fromHex(channelInfo.color),
-          disabled: this.disabled,
-          trailing: Text('${channelValue.toString().padLeft(3, '\u2007')}%',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontFeatures: [FontFeature.tabularFigures()],
-              )),
-          onChanged: (newValue) {
-            editor.updateChannelValue(index, newValue);
-          },
-        ),
+        builder:
+            (context, channelValue, child) => BrightnessSliderListTile(
+              channelName: channelInfo.name,
+              max: 100,
+              min: 0,
+              value: channelValue,
+              color: HexColor.fromHex(channelInfo.color),
+              disabled: this.disabled,
+              trailing: Text(
+                '${channelValue.toString().padLeft(3, '\u2007')}%',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
+              ),
+              onChanged: (newValue) {
+                editor.updateChannelValue(index, newValue);
+              },
+            ),
       );
       sliders.add(slider);
     }
@@ -40,8 +43,11 @@ class BrightnessSliderList<TEditor extends IEditor> extends StatelessWidget {
         shrinkWrap: true,
         itemCount: editor.availableChannelCount,
         itemBuilder: (context, index) => sliders[index],
-        separatorBuilder: (context, index) =>
-            Divider(height: 1, color: Theme.of(context).colorScheme.surface),
+        separatorBuilder:
+            (context, index) => Divider(
+              height: 1,
+              color: Theme.of(context).colorScheme.surface,
+            ),
       ),
     );
   }

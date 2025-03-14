@@ -12,18 +12,19 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/metadata.dart';
 
 class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
   LyfiDeviceModuleMetadata()
-      : super(
-          id: kLyfiDriverID,
-          name: kLyfiDriverName,
-          driverDescriptor: borneoLyfiDriverDescriptor,
-          detailsScreenBuilder: (_) => LyfiScreen(),
-          detailsViewModelBuilder: (context, deviceID) => LyfiViewModel(
-            deviceID,
-            context.read<DeviceManager>(),
-            globalEventBus: context.read<EventBus>(),
-            logger: context.read<Logger>(),
-          ),
-          deviceIconBuilder: (BuildContext context) =>
-              Icon(Icons.lightbulb_outline),
-        );
+    : super(
+        id: kLyfiDriverID,
+        name: kLyfiDriverName,
+        driverDescriptor: borneoLyfiDriverDescriptor,
+        detailsScreenBuilder: (_) => LyfiScreen(),
+        detailsViewModelBuilder:
+            (context, deviceID) => LyfiViewModel(
+              deviceID,
+              context.read<DeviceManager>(),
+              globalEventBus: context.read<EventBus>(),
+              logger: context.read<Logger>(),
+            ),
+        deviceIconBuilder:
+            (BuildContext context) => Icon(Icons.lightbulb_outline),
+      );
 }

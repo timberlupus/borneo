@@ -10,11 +10,7 @@ import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 
-enum TabIndices {
-  scenes,
-  devices,
-  my,
-}
+enum TabIndices { scenes, devices, my }
 
 class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
   static final Duration kStartupScanningDuration = Duration(seconds: 5);
@@ -28,9 +24,9 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
 
   late final StreamSubscription<AppErrorEvent> _appErrorEventSub;
   late final StreamSubscription<DeviceDiscoveringStartedEvent>
-      _deviceDiscoveringStartedEventSub;
+  _deviceDiscoveringStartedEventSub;
   late final StreamSubscription<DeviceDiscoveringStoppedEvent>
-      _deviceDiscoveringStoppedEventSub;
+  _deviceDiscoveringStoppedEventSub;
 
   final List<AppErrorEvent> _errorsStack = [];
 
@@ -42,9 +38,10 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
 
   bool get isInitialized => _isInitialized;
 
-  String get currentSceneName => _isInitialized && _sceneManager.isInitialized
-      ? _sceneManager.current.name
-      : 'N/A';
+  String get currentSceneName =>
+      _isInitialized && _sceneManager.isInitialized
+          ? _sceneManager.current.name
+          : 'N/A';
 
   bool get isScanningDevices => _deviceManager.isDiscoverying;
 
@@ -77,8 +74,9 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
       await _groupManager.initialize();
       await _deviceManager.initialize();
       logger?.i('MainViewModel initialized.');
-      await _deviceManager.kernel
-          .startDevicesScanning(timeout: kStartupScanningDuration);
+      await _deviceManager.kernel.startDevicesScanning(
+        timeout: kStartupScanningDuration,
+      );
     } finally {
       _isInitialized = true;
     }
@@ -113,8 +111,11 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
       _errorsStack.add(event);
       notifyListeners();
     }
-    logger?.e('APP_ERROR: ${event.message}',
-        error: event.error, stackTrace: event.stackTrace);
+    logger?.e(
+      'APP_ERROR: ${event.message}',
+      error: event.error,
+      stackTrace: event.stackTrace,
+    );
   }
 
   void _onDeviceDiscoveringStarted(DeviceDiscoveringStartedEvent event) {

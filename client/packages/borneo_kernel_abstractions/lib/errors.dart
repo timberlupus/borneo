@@ -56,3 +56,13 @@ class DeviceNotFoundError extends DeviceError {
     return result;
   }
 }
+
+class DeviceNotBoundError extends IOException {
+  final String message;
+  final String deviceID;
+
+  DeviceNotBoundError(this.message, this.deviceID);
+
+  @override
+  String toString() => message;
+}

@@ -31,16 +31,18 @@ class ManualEditorViewModel extends ChangeNotifier implements IEditor {
   LyfiDeviceInfo get deviceInfo => _parent.lyfiDeviceInfo;
 
   ManualEditorViewModel(this._parent)
-      : _channels = List.generate(
-            _parent.lyfiDeviceInfo.channelCount,
-            growable: false,
-            (index) => ValueNotifier(0));
+    : _channels = List.generate(
+        _parent.lyfiDeviceInfo.channelCount,
+        growable: false,
+        (index) => ValueNotifier(0),
+      );
 
   @override
   Future<void> initialize() async {
     _parent.enqueueJob(() async {
-      final lyfiStatus =
-          await _deviceApi.getLyfiStatus(_parent.boundDevice!.device);
+      final lyfiStatus = await _deviceApi.getLyfiStatus(
+        _parent.boundDevice!.device,
+      );
       for (int i = 0; i < _parent.lyfiDeviceInfo.channels.length; i++) {
         _channels[i].value = lyfiStatus.manualColor[i];
       }
@@ -63,8 +65,9 @@ class ManualEditorViewModel extends ChangeNotifier implements IEditor {
         value != _channels[index].value) {
       _channels[index].value = value;
       final color = _channels.map((x) => x.value).toList();
-      _colorChangeRateLimiter
-          .add(() => _deviceApi.setColor(_parent.boundDevice!.device, color));
+      _colorChangeRateLimiter.add(
+        () => _deviceApi.setColor(_parent.boundDevice!.device, color),
+      );
       _isChanged = true;
     }
   }

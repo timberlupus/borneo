@@ -9,10 +9,6 @@ class User with BaseEntity {
 
   // 从 JSON 映射到 User 实例
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-    );
+    return User(id: json['id'], name: json['name'], email: json['email']);
   }
 }

@@ -56,15 +56,14 @@ class SceneEditViewModel extends AbstractScreenViewModel
       if (isCreation) {
         await _sceneManager.create(name: name, notes: notes);
       } else {
-        await _sceneManager.update(
-          id: id!,
-          name: name,
-          notes: notes,
-        );
+        await _sceneManager.update(id: id!, name: name, notes: notes);
       }
     } catch (e, stackTrace) {
-      notifyAppError('Failed to update scene `$name`',
-          error: e, stackTrace: stackTrace);
+      notifyAppError(
+        'Failed to update scene `$name`',
+        error: e,
+        stackTrace: stackTrace,
+      );
     } finally {
       setBusy(false);
     }
@@ -76,8 +75,11 @@ class SceneEditViewModel extends AbstractScreenViewModel
     try {
       await _sceneManager.delete(id!);
     } catch (e, stackTrace) {
-      notifyAppError('Failed to delete scene `$name`',
-          error: e, stackTrace: stackTrace);
+      notifyAppError(
+        'Failed to delete scene `$name`',
+        error: e,
+        stackTrace: stackTrace,
+      );
     } finally {
       setBusy(false, notify: false);
     }

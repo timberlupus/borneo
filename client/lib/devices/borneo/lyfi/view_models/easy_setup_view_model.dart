@@ -15,9 +15,10 @@ class EasySetupViewModel extends ChangeNotifier {
   final ValueNotifier<Duration> _endTime = ValueNotifier(defaultEndTime);
   ValueNotifier<Duration> get endTime => _endTime;
 
-  Duration get duration => _endTime.value > _startTime.value
-      ? _endTime.value - _startTime.value
-      : const Duration(hours: 24) - _startTime.value + _endTime.value;
+  Duration get duration =>
+      _endTime.value > _startTime.value
+          ? _endTime.value - _startTime.value
+          : const Duration(hours: 24) - _startTime.value + _endTime.value;
 
   EasySetupViewModel();
 
@@ -26,11 +27,13 @@ class EasySetupViewModel extends ChangeNotifier {
     return <ScheduledInstant>[
       ScheduledInstant(instant: _startTime.value, color: blackColor.toList()),
       ScheduledInstant(
-          instant: _startTime.value + fadingDuration,
-          color: editor.channels.map((x) => x.value).toList()),
+        instant: _startTime.value + fadingDuration,
+        color: editor.channels.map((x) => x.value).toList(),
+      ),
       ScheduledInstant(
-          instant: _endTime.value - fadingDuration,
-          color: editor.channels.map((x) => x.value).toList()),
+        instant: _endTime.value - fadingDuration,
+        color: editor.channels.map((x) => x.value).toList(),
+      ),
       ScheduledInstant(instant: _endTime.value, color: blackColor.toList()),
     ];
   }

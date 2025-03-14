@@ -17,18 +17,19 @@ class SceneList extends StatelessWidget {
     double screenHeight = MediaQuery.of(context).size.height;
     return SliverToBoxAdapter(
       child: Consumer<ScenesViewModel>(
-        builder: (context, vm, child) => Container(
-          padding: EdgeInsets.all(16),
-          height: screenHeight / 4.0,
-          child: ListView.separated(
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
-            scrollDirection: Axis.horizontal,
-            itemCount: vm.scenes.length,
-            itemBuilder: (context, index) {
-              return SceneCard(vm.scenes[index]);
-            },
-          ),
-        ),
+        builder:
+            (context, vm, child) => Container(
+              padding: EdgeInsets.all(16),
+              height: screenHeight / 4.0,
+              child: ListView.separated(
+                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                scrollDirection: Axis.horizontal,
+                itemCount: vm.scenes.length,
+                itemBuilder: (context, index) {
+                  return SceneCard(vm.scenes[index]);
+                },
+              ),
+            ),
       ),
     );
   }
@@ -50,25 +51,30 @@ class ScenesScreen extends StatelessWidget {
           return Scaffold(
             body: Center(
               child: Text(
-                context.translate('Error: {errMsg}',
-                    nArgs: {'errMsg': snapshot.error.toString()}),
+                context.translate(
+                  'Error: {errMsg}',
+                  nArgs: {'errMsg': snapshot.error.toString()},
+                ),
               ),
             ),
           );
         } else {
           return Scaffold(
-            body: CustomScrollView(slivers: [
-              SliverAppBar(
-                title: Text(context.translate('Scenes')),
-                actions: [
-                  IconButton(
+            body: CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  title: Text(context.translate('Scenes')),
+                  actions: [
+                    IconButton(
                       icon: Icon(Icons.add_outlined),
-                      onPressed: () => _showNewSceneScreen(context)),
-                ],
-              ),
-              SceneList(),
-              RoutineList(),
-            ]),
+                      onPressed: () => _showNewSceneScreen(context),
+                    ),
+                  ],
+                ),
+                SceneList(),
+                RoutineList(),
+              ],
+            ),
           );
         }
       },
@@ -79,9 +85,10 @@ class ScenesScreen extends StatelessWidget {
     await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => SceneEditScreen(
-                args: SceneEditArguments(isCreation: true),
-              )),
+        builder:
+            (context) =>
+                SceneEditScreen(args: SceneEditArguments(isCreation: true)),
+      ),
     );
   }
 }

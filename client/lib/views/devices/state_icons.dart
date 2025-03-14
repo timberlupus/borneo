@@ -21,10 +21,8 @@ class _FlashingIconState extends State<FlashingIcon>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    )..repeat(reverse: true);
+    _controller = AnimationController(duration: widget.duration, vsync: this)
+      ..repeat(reverse: true);
 
     _animation = CurvedAnimation(
       parent: _controller,
@@ -43,10 +41,7 @@ class _FlashingIconState extends State<FlashingIcon>
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
-        return Opacity(
-          opacity: _animation.value,
-          child: widget.icon,
-        );
+        return Opacity(opacity: _animation.value, child: widget.icon);
       },
     );
   }

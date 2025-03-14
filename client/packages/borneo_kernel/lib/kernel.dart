@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:borneo_kernel_abstractions/errors.dart';
 import 'package:borneo_kernel_abstractions/models/heartbeat_method.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:logger/logger.dart';
@@ -68,7 +69,7 @@ final class DefaultKernel implements IKernel {
     _foundDeviceEventSub =
         _events.on<FoundDeviceEvent>().listen(_onDeviceFound);
 
-    _startTimer();
+    //_startTimer();
   }
 
   @override
@@ -102,8 +103,8 @@ final class DefaultKernel implements IKernel {
     }
     final bound = _boundDevices[deviceID];
     if (bound == null) {
-      throw KeyNotFoundException(
-          'Cannot found the bound device(id=`$deviceID`)');
+      throw DeviceNotBoundError(
+          'Cannot found the bound device(id=`$deviceID`)', deviceID);
     }
     return bound;
   }

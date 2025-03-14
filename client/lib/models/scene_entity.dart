@@ -40,11 +40,11 @@ class SceneEntity with BaseEntity, EntityWithLastAccessTime {
   }
 
   factory SceneEntity.newDefault({String name = 'Home'}) => SceneEntity(
-        id: BaseEntity.generateID(),
-        name: name,
-        isCurrent: true,
-        lastAccessTime: DateTime.now(),
-      );
+    id: BaseEntity.generateID(),
+    name: name,
+    isCurrent: true,
+    lastAccessTime: DateTime.now(),
+  );
 
   Map<String, dynamic> toMap() {
     return {

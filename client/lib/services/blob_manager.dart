@@ -88,8 +88,10 @@ class FlutterAppBlobManager implements IBlobManager {
       path.join(_blobsDir, blobID.hashCode.toRadixString(16).padLeft(2, '0'));
 
   Future<void> _deleteFilesInDirectory(Directory directory) async {
-    Stream<FileSystemEntity> entities =
-        directory.list(recursive: true, followLinks: false);
+    Stream<FileSystemEntity> entities = directory.list(
+      recursive: true,
+      followLinks: false,
+    );
 
     await for (FileSystemEntity entity in entities) {
       if (entity is File) {

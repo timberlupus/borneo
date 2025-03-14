@@ -20,10 +20,9 @@ class GroupEditScreen extends StatelessWidget {
         initialValue: vm.name,
         decoration: InputDecoration(
           labelText: context.translate('Name'),
-          hintStyle: Theme.of(context)
-              .textTheme
-              .labelSmall
-              ?.copyWith(color: Theme.of(context).hintColor),
+          hintStyle: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
           hintText: context.translate('Enter the required scene name'),
         ),
         validator: (value) {
@@ -42,12 +41,12 @@ class GroupEditScreen extends StatelessWidget {
         maxLines: null,
         keyboardType: TextInputType.multiline,
         decoration: InputDecoration(
-          hintStyle: Theme.of(context)
-              .textTheme
-              .labelSmall
-              ?.copyWith(color: Theme.of(context).hintColor),
-          hintText:
-              context.translate('Enter the optional notes for this scene'),
+          hintStyle: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
+          hintText: context.translate(
+            'Enter the optional notes for this scene',
+          ),
           labelText: context.translate('Notes'),
         ),
         onSaved: (value) {
@@ -56,9 +55,10 @@ class GroupEditScreen extends StatelessWidget {
       ),
       SizedBox(height: 24),
       ElevatedButton(
-          onPressed: vm.isBusy
-              ? null
-              : () async {
+        onPressed:
+            vm.isBusy
+                ? null
+                : () async {
                   if (_formKey.currentState?.validate() ?? false) {
                     _formKey.currentState!.save();
                     await vm.submit();
@@ -67,7 +67,8 @@ class GroupEditScreen extends StatelessWidget {
                     }
                   }
                 },
-          child: Text(context.translate('Submit'))),
+        child: Text(context.translate('Submit')),
+      ),
     ];
   }
 
@@ -83,19 +84,21 @@ class GroupEditScreen extends StatelessWidget {
   FutureBuilder buildBody(BuildContext context) {
     final vm = Provider.of<GroupEditViewModel>(context, listen: false);
     return FutureBuilder(
-        future: vm.isInitialized ? null : vm.initialize(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            return Container(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                padding: EdgeInsets.fromLTRB(16, 24, 16, 24),
-                child: Form(key: _formKey, child: buildList(context)));
-          }
-        });
+      future: vm.isInitialized ? null : vm.initialize(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          return Container(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            padding: EdgeInsets.fromLTRB(16, 24, 16, 24),
+            child: Form(key: _formKey, child: buildList(context)),
+          );
+        }
+      },
+    );
   }
 
   List<Widget> buildActions(BuildContext context, GroupEditArguments args) {
@@ -109,7 +112,8 @@ class GroupEditScreen extends StatelessWidget {
               builder: (BuildContext context) {
                 return ConfirmationSheet(
                   message: context.translate(
-                      'Are you sure you want to delete this device group? The devices within this group will not be deleted but will be moved to the "Ungrouped" group.'),
+                    'Are you sure you want to delete this device group? The devices within this group will not be deleted but will be moved to the "Ungrouped" group.',
+                  ),
                   okPressed: () async {
                     await vm.delete();
                     if (context.mounted) {
@@ -131,24 +135,28 @@ class GroupEditScreen extends StatelessWidget {
         ModalRoute.of(context)!.settings.arguments as GroupEditArguments;
 
     return ChangeNotifierProvider<GroupEditViewModel>(
-      create: (context) => GroupEditViewModel(
-          context.read<EventBus>(), context.read<GroupManager>(),
-          isCreation: args.isCreation,
-          model: args.model,
-          logger: context.read<Logger>()),
-      builder: (context, child) => Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          title: Text(
-            args.isCreation
-                ? context.translate('New Device Group')
-                : context.translate('Edit Device Group'),
+      create:
+          (context) => GroupEditViewModel(
+            context.read<EventBus>(),
+            context.read<GroupManager>(),
+            isCreation: args.isCreation,
+            model: args.model,
+            logger: context.read<Logger>(),
           ),
-          actions: buildActions(context, args),
-        ),
-        body: buildBody(context),
-      ),
+      builder:
+          (context, child) => Scaffold(
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+            appBar: AppBar(
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              title: Text(
+                args.isCreation
+                    ? context.translate('New Device Group')
+                    : context.translate('Edit Device Group'),
+              ),
+              actions: buildActions(context, args),
+            ),
+            body: buildBody(context),
+          ),
     );
   }
 }

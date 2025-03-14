@@ -26,23 +26,25 @@ class HeroPanel extends StatelessWidget {
               margin: const EdgeInsets.all(0),
               color: Theme.of(context).colorScheme.surface,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Column(
                   children: [
                     Selector<DeviceDiscoveryViewModel, int>(
-                        selector: (_, vm) => vm.discoveredCount,
-                        builder: (context, value, child) => Text(
-                              value.toString(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineLarge
-                                  ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary),
-                              textAlign: TextAlign.center,
-                            )),
+                      selector: (_, vm) => vm.discoveredCount,
+                      builder:
+                          (context, value, child) => Text(
+                            value.toString(),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.headlineLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                    ),
                     Text(
                       'Responding Devices',
                       style: Theme.of(context).textTheme.labelSmall,
@@ -60,17 +62,17 @@ class HeroPanel extends StatelessWidget {
                 child: Column(
                   children: [
                     Consumer<DeviceDiscoveryViewModel>(
-                        builder: (context, vm, child) => Text(
-                              vm.newDeviceCount.toString(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineLarge
-                                  ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondary),
-                              textAlign: TextAlign.center,
-                            )),
+                      builder:
+                          (context, vm, child) => Text(
+                            vm.newDeviceCount.toString(),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.headlineLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                    ),
                     Text(
                       'New Devices',
                       style: Theme.of(context).textTheme.labelSmall,
@@ -99,21 +101,26 @@ class StartStopButton extends StatelessWidget {
               (!vm.isBusy && (!vm.isSmartConfigEnabled || vm.isFormValid))
                   ? vm.startStopDiscovery
                   : null,
-          child: vm.isDiscovering
-              ? Row(mainAxisSize: MainAxisSize.min, children: [
-                  if (vm.isDiscovering)
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Theme.of(context).colorScheme.inversePrimary),
-                      ),
-                    ),
-                  SizedBox(width: 16),
-                  Text('Stop'),
-                ])
-              : Text('Start'),
+          child:
+              vm.isDiscovering
+                  ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (vm.isDiscovering)
+                        SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Theme.of(context).colorScheme.inversePrimary,
+                            ),
+                          ),
+                        ),
+                      SizedBox(width: 16),
+                      Text('Stop'),
+                    ],
+                  )
+                  : Text('Start'),
         );
       },
     );
@@ -152,92 +159,120 @@ class _SmartConfigFormPanelState extends State<SmartConfigFormPanel> {
       child: Column(
         children: <Widget>[
           Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: Theme.of(context).scaffoldBackgroundColor,
-              alignment: Alignment.topLeft,
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Text('Provisioning',
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Consumer<DeviceDiscoveryViewModel>(
-                      builder: (context, vm, child) => Switch(
-                            value: vm.isSmartConfigEnabled,
-                            onChanged: !vm.isDiscovering && !vm.isBusy
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            color: Theme.of(context).scaffoldBackgroundColor,
+            alignment: Alignment.topLeft,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Provisioning',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                Consumer<DeviceDiscoveryViewModel>(
+                  builder:
+                      (context, vm, child) => Switch(
+                        value: vm.isSmartConfigEnabled,
+                        onChanged:
+                            !vm.isDiscovering && !vm.isBusy
                                 ? vm.toggleSmartConfigSwitch
                                 : null,
-                          )),
-                ],
-              )),
+                      ),
+                ),
+              ],
+            ),
+          ),
           Container(
             alignment: Alignment.topLeft,
             padding: const EdgeInsets.all(0),
             child: Column(
               children: <Widget>[
-                Column(children: <Widget>[
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Consumer<DeviceDiscoveryViewModel>(
-                      builder: (context, vm, child) {
-                        _ssidController.text = vm.ssid;
-                        return TextField(
-                          controller: _ssidController,
-                          onChanged: (value) {
-                            vm.ssid = value;
-                          },
-                          enabled: !vm.isDiscovering &&
-                              !vm.isBusy &&
-                              vm.isSmartConfigEnabled,
-                          decoration: InputDecoration(
-                            labelText: "2.4G WiFi Name (SSID)",
-                            border: InputBorder.none,
-                            icon: Icon(Icons.wifi,
-                                color: !vm.isSmartConfigEnabled
-                                    ? Theme.of(context).disabledColor
-                                    : Theme.of(context).colorScheme.onSurface),
-                          ),
-                        );
-                      },
+                Column(
+                  children: <Widget>[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Consumer<DeviceDiscoveryViewModel>(
+                        builder: (context, vm, child) {
+                          _ssidController.text = vm.ssid;
+                          return TextField(
+                            controller: _ssidController,
+                            onChanged: (value) {
+                              vm.ssid = value;
+                            },
+                            enabled:
+                                !vm.isDiscovering &&
+                                !vm.isBusy &&
+                                vm.isSmartConfigEnabled,
+                            decoration: InputDecoration(
+                              labelText: "2.4G WiFi Name (SSID)",
+                              border: InputBorder.none,
+                              icon: Icon(
+                                Icons.wifi,
+                                color:
+                                    !vm.isSmartConfigEnabled
+                                        ? Theme.of(context).disabledColor
+                                        : Theme.of(
+                                          context,
+                                        ).colorScheme.onSurface,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.only(left: 16, right: 16, bottom: 8.0),
-                    child: const Divider(height: 1, thickness: 1),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Consumer<DeviceDiscoveryViewModel>(
-                        builder: (context, vm, child) => TextField(
+                    Container(
+                      padding: const EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                        bottom: 8.0,
+                      ),
+                      child: const Divider(height: 1, thickness: 1),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Consumer<DeviceDiscoveryViewModel>(
+                        builder:
+                            (context, vm, child) => TextField(
                               controller: _passwordController,
                               onChanged: (value) {
                                 vm.password = value;
                               },
-                              enabled: !vm.isDiscovering &&
+                              enabled:
+                                  !vm.isDiscovering &&
                                   !vm.isBusy &&
                                   vm.isSmartConfigEnabled,
                               decoration: InputDecoration(
-                                  labelText: "2.4G WiFi Password",
-                                  border: InputBorder.none,
-                                  icon: Icon(Icons.lock,
-                                      color: !vm.isSmartConfigEnabled
+                                labelText: "2.4G WiFi Password",
+                                border: InputBorder.none,
+                                icon: Icon(
+                                  Icons.lock,
+                                  color:
+                                      !vm.isSmartConfigEnabled
                                           ? Theme.of(context).disabledColor
-                                          : Theme.of(context)
-                                              .colorScheme
-                                              .onSurface)),
-                            )),
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.only(left: 16, right: 16, bottom: 8.0),
-                    child: const Divider(height: 1, thickness: 1),
-                  ),
-                  const SizedBox(height: 8),
-                ])
+                                          : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                ),
+                              ),
+                            ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                        bottom: 8.0,
+                      ),
+                      child: const Divider(height: 1, thickness: 1),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -262,12 +297,13 @@ class NewDeviceAddedSnackBarListener extends StatelessWidget {
                     duration: Duration(seconds: 3),
                     content: Text(
                       context.translate(
-                          'New device "{deviceName}" has been added.',
-                          nArgs: {'deviceName': lastestAdded.name}),
+                        'New device "{deviceName}" has been added.',
+                        nArgs: {'deviceName': lastestAdded.name},
+                      ),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onTertiaryContainer),
+                        color:
+                            Theme.of(context).colorScheme.onTertiaryContainer,
+                      ),
                     ),
                     backgroundColor:
                         Theme.of(context).colorScheme.tertiaryContainer,
@@ -275,10 +311,10 @@ class NewDeviceAddedSnackBarListener extends StatelessWidget {
                 )
                 .closed
                 .then((_) {
-              if (!vm.isDisposed) {
-                vm.clearAddedDevice();
-              }
-            });
+                  if (!vm.isDisposed) {
+                    vm.clearAddedDevice();
+                  }
+                });
           });
         }
         return child!;
@@ -303,26 +339,32 @@ class DeviceDiscoveryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<DeviceDiscoveryViewModel>(
       create: createViewModel,
-      builder: (context, child) => FutureBuilder(
-        future: context.read<DeviceDiscoveryViewModel>().isInitialized
-            ? null
-            : context.read<DeviceDiscoveryViewModel>().initialize(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Scaffold(body: Center(child: CircularProgressIndicator()));
-          } else if (snapshot.hasError) {
-            return Scaffold(
-                body: Center(child: Text('Error: ${snapshot.error}')));
-          } else {
-            return Scaffold(
-              appBar: AppBar(
-                  title: Text('Add new device'),
-                  backgroundColor: Theme.of(context).colorScheme.surface),
-              body: buildBody(context),
-            );
-          }
-        },
-      ),
+      builder:
+          (context, child) => FutureBuilder(
+            future:
+                context.read<DeviceDiscoveryViewModel>().isInitialized
+                    ? null
+                    : context.read<DeviceDiscoveryViewModel>().initialize(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              } else if (snapshot.hasError) {
+                return Scaffold(
+                  body: Center(child: Text('Error: ${snapshot.error}')),
+                );
+              } else {
+                return Scaffold(
+                  appBar: AppBar(
+                    title: Text('Add new device'),
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                  ),
+                  body: buildBody(context),
+                );
+              }
+            },
+          ),
     );
   }
 
@@ -340,89 +382,111 @@ class DeviceDiscoveryScreen extends StatelessWidget {
         }
       },
       child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Container(
-              color: Theme.of(context).colorScheme.surface,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Input Fields
-                    SmartConfigFormPanel(),
-                    SizedBox(height: 8),
-                    // Start/Stop Button
-                    Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        width: double.infinity,
-                        child: StartStopButton()),
-                    SizedBox(height: 16),
-                  ]),
-            ),
-            ValueListenableBuilder<List<SupportedDeviceDescriptor>>(
-              valueListenable: vm.discoveredDevices,
-              builder: (context, devices, child) =>
-                  devices.isNotEmpty ? child! : const SizedBox(height: 0),
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: Text(context.translate('Discovered Devices:'),
-                    style: Theme.of(context).textTheme.titleMedium),
-              ),
-            ),
-            Expanded(
-              child: ValueListenableBuilder<List<SupportedDeviceDescriptor>>(
-                valueListenable: vm.discoveredDevices,
-                builder: (context, value, child) => ListView.separated(
-                  separatorBuilder: (BuildContext context, int index) =>
-                      DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainer,
-                    ),
-                    child: Divider(
-                        height: 1,
-                        indent: 16,
-                        color: Theme.of(context).colorScheme.surface),
-                  ),
-                  itemCount: vm.discoveredDevices.value.length,
-                  itemBuilder: (context, index) {
-                    final user = vm.discoveredDevices.value[index];
-                    return ListTile(
-                      tileColor: Theme.of(context).colorScheme.surfaceContainer,
-                      title: Text(user.name,
-                          style: Theme.of(context).textTheme.bodyLarge),
-                      subtitle: Text(user.address.toString(),
-                          style: Theme.of(context).textTheme.bodySmall),
-                      trailing: Consumer<DeviceDiscoveryViewModel>(
-                        builder: (context, vm, child) => IconButton.filledTonal(
-                          onPressed: vm.isBusy || vm.isDiscovering
-                              ? null
-                              : () => _showAddDeviceSheet(context, vm,
-                                  vm.discoveredDevices.value[index]),
-                          icon: child as Icon,
-                        ),
-                        child: Icon(Icons.add_outlined),
-                      ),
-                    );
-                  },
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Container(
+            color: Theme.of(context).colorScheme.surface,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Input Fields
+                SmartConfigFormPanel(),
+                SizedBox(height: 8),
+                // Start/Stop Button
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  width: double.infinity,
+                  child: StartStopButton(),
                 ),
+                SizedBox(height: 16),
+              ],
+            ),
+          ),
+          ValueListenableBuilder<List<SupportedDeviceDescriptor>>(
+            valueListenable: vm.discoveredDevices,
+            builder:
+                (context, devices, child) =>
+                    devices.isNotEmpty ? child! : const SizedBox(height: 0),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(
+                context.translate('Discovered Devices:'),
+                style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
-            NewDeviceAddedSnackBarListener(child: SizedBox()),
-          ]),
+          ),
+          Expanded(
+            child: ValueListenableBuilder<List<SupportedDeviceDescriptor>>(
+              valueListenable: vm.discoveredDevices,
+              builder:
+                  (context, value, child) => ListView.separated(
+                    separatorBuilder:
+                        (BuildContext context, int index) => DecoratedBox(
+                          decoration: BoxDecoration(
+                            color:
+                                Theme.of(context).colorScheme.surfaceContainer,
+                          ),
+                          child: Divider(
+                            height: 1,
+                            indent: 16,
+                            color: Theme.of(context).colorScheme.surface,
+                          ),
+                        ),
+                    itemCount: vm.discoveredDevices.value.length,
+                    itemBuilder: (context, index) {
+                      final user = vm.discoveredDevices.value[index];
+                      return ListTile(
+                        tileColor:
+                            Theme.of(context).colorScheme.surfaceContainer,
+                        title: Text(
+                          user.name,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        subtitle: Text(
+                          user.address.toString(),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        trailing: Consumer<DeviceDiscoveryViewModel>(
+                          builder:
+                              (context, vm, child) => IconButton.filledTonal(
+                                onPressed:
+                                    vm.isBusy || vm.isDiscovering
+                                        ? null
+                                        : () => _showAddDeviceSheet(
+                                          context,
+                                          vm,
+                                          vm.discoveredDevices.value[index],
+                                        ),
+                                icon: child as Icon,
+                              ),
+                          child: Icon(Icons.add_outlined),
+                        ),
+                      );
+                    },
+                  ),
+            ),
+          ),
+          NewDeviceAddedSnackBarListener(child: SizedBox()),
+        ],
+      ),
     );
   }
 
-  void _showAddDeviceSheet(BuildContext context, DeviceDiscoveryViewModel vm,
-      SupportedDeviceDescriptor deviceInfo) {
+  void _showAddDeviceSheet(
+    BuildContext context,
+    DeviceDiscoveryViewModel vm,
+    SupportedDeviceDescriptor deviceInfo,
+  ) {
     showModalBottomSheet(
       context: context,
-      builder: (BuildContext context) => DeviceGroupSelectionSheet(
-        availableGroups: vm.availableGroups,
-        onTapGroup: (g) => vm.addNewDevice(deviceInfo, g),
-        title: 'Registry "${deviceInfo.name}"',
-        subtitle: 'Select the group to which the new device belongs:',
-      ),
+      builder:
+          (BuildContext context) => DeviceGroupSelectionSheet(
+            availableGroups: vm.availableGroups,
+            onTapGroup: (g) => vm.addNewDevice(deviceInfo, g),
+            title: 'Registry "${deviceInfo.name}"',
+            subtitle: 'Select the group to which the new device belongs:',
+          ),
     );
   }
 }

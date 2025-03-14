@@ -96,8 +96,9 @@ class LyfiViewModel extends BaseDeviceViewModel {
     try {
       await super.initialize();
 
-      scheduledInstants
-          .addAll(await _deviceApi.getSchedule(boundDevice!.device));
+      scheduledInstants.addAll(
+        await _deviceApi.getSchedule(boundDevice!.device),
+      );
 
       for (int i = 0; i < lyfiDeviceInfo.channels.length; i++) {
         _channels.add(ValueNotifier(0));
@@ -111,8 +112,11 @@ class LyfiViewModel extends BaseDeviceViewModel {
         _toggleEditor(schedulerEnabled);
       }
     } catch (e, stackTrace) {
-      logger?.e('Failed to initialize device(${super.deviceEntity}): $e',
-          error: e, stackTrace: stackTrace);
+      logger?.e(
+        'Failed to initialize device(${super.deviceEntity}): $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
       super.notifyAppError('Failed to initialize device: $e');
     } finally {
       super.startTimer();
@@ -129,8 +133,11 @@ class LyfiViewModel extends BaseDeviceViewModel {
           _isLocked = true;
         });
       } catch (e, stackTrace) {
-        logger?.e('Failed to setMode of the device(${super.deviceEntity})',
-            error: e, stackTrace: stackTrace);
+        logger?.e(
+          'Failed to setMode of the device(${super.deviceEntity})',
+          error: e,
+          stackTrace: stackTrace,
+        );
       }
     }
     super.dispose();
@@ -144,8 +151,11 @@ class LyfiViewModel extends BaseDeviceViewModel {
     try {
       await fetchDeviceStatus().asCancellable(taskQueueCancelToken);
     } on CancelledException catch (e, stackTrace) {
-      logger?.i('A periodic refresh task has been cancelled.',
-          error: e, stackTrace: stackTrace);
+      logger?.i(
+        'A periodic refresh task has been cancelled.',
+        error: e,
+        stackTrace: stackTrace,
+      );
     } catch (e, stackTrace) {
       notifyAppError(e.toString(), error: e, stackTrace: stackTrace);
     } finally {
@@ -157,10 +167,12 @@ class LyfiViewModel extends BaseDeviceViewModel {
     if (!isOnline) {
       return;
     }
-    _borneoDeviceStatus =
-        await _deviceApi.getGeneralDeviceStatus(super.boundDevice!.device);
-    _lyfiDeviceStatus =
-        await _deviceApi.getLyfiStatus(super.boundDevice!.device);
+    _borneoDeviceStatus = await _deviceApi.getGeneralDeviceStatus(
+      super.boundDevice!.device,
+    );
+    _lyfiDeviceStatus = await _deviceApi.getLyfiStatus(
+      super.boundDevice!.device,
+    );
 
     _isOn = borneoDeviceStatus!.power;
     if (_lyfiDeviceStatus != null) {
@@ -223,8 +235,9 @@ class LyfiViewModel extends BaseDeviceViewModel {
         await currentEditor!.save();
         if (currentEditor is ScheduleEditorViewModel) {
           scheduledInstants.clear();
-          scheduledInstants
-              .addAll(await _deviceApi.getSchedule(boundDevice!.device));
+          scheduledInstants.addAll(
+            await _deviceApi.getSchedule(boundDevice!.device),
+          );
         }
       }
     }

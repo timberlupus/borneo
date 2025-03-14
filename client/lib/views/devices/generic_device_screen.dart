@@ -15,20 +15,22 @@ class GenericDeviceScreen<TDeviceViewModel extends BaseDeviceViewModel>
     final deviceModuleReg = context.read<IDeviceModuleRegistry>();
     final module = deviceModuleReg.metaModules[device.driverID]!;
     return ChangeNotifierProvider(
-        create: (context) => module.detailsViewModelBuilder(context, device.id),
-        builder: (context, child) {
-          final vm = context.read<TDeviceViewModel>();
-          return FutureBuilder(
-              future: vm.initialize(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else {
-                  return module.detailsScreenBuilder(context);
-                }
-              });
-        });
+      create: (context) => module.detailsViewModelBuilder(context, device.id),
+      builder: (context, child) {
+        final vm = context.read<TDeviceViewModel>();
+        return FutureBuilder(
+          future: vm.initialize(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else {
+              return module.detailsScreenBuilder(context);
+            }
+          },
+        );
+      },
+    );
   }
 }

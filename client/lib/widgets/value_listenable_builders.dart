@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 class MultiValueListenableBuilder<T> extends StatefulWidget {
   final List<ValueNotifier<T>> valueNotifiers;
   final Widget Function(BuildContext context, List<T> values, Widget? child)
-      builder;
+  builder;
   final Widget? child;
 
   const MultiValueListenableBuilder({

@@ -4,20 +4,17 @@ class SlideTransitionPageRoute extends PageRouteBuilder {
   final Widget page;
 
   SlideTransitionPageRoute({required this.page})
-      : super(
-          pageBuilder: (context, animation, secondaryAnimation) => page,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            var begin = Offset(1.0, 0.0);
-            var end = Offset.zero;
-            var tween = Tween(begin: begin, end: end);
-            var offsetAnimation = animation.drive(tween);
+    : super(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          var begin = Offset(1.0, 0.0);
+          var end = Offset.zero;
+          var tween = Tween(begin: begin, end: end);
+          var offsetAnimation = animation.drive(tween);
 
-            return SlideTransition(
-              position: offsetAnimation,
-              child: child,
-            );
-          },
-        );
+          return SlideTransition(position: offsetAnimation, child: child);
+        },
+      );
 }
 
 class BorneoTheme {
@@ -356,51 +353,46 @@ class BorneoTheme {
   }
 
   ThemeData theme(ColorScheme colorScheme) => ThemeData(
-        useMaterial3: true,
-        brightness: colorScheme.brightness,
-        colorScheme: colorScheme,
-        textTheme: textTheme.apply(
-          bodyColor: colorScheme.onSurface,
-          displayColor: colorScheme.onSurface,
-        ),
-        scaffoldBackgroundColor: colorScheme.surface,
-        disabledColor: colorScheme.onPrimaryContainer.withAlpha(97),
-        canvasColor: colorScheme.surface,
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: colorScheme.surfaceContainerHighest,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: colorScheme.primary,
-          unselectedItemColor: colorScheme.outline,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          elevation: 8.0,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
-            disabledForegroundColor:
-                colorScheme.onPrimaryContainer.withAlpha(97),
-          ),
-        ),
-        cardColor: colorScheme.surfaceContainer,
-        cardTheme: CardTheme(
-          color: colorScheme.surfaceContainer,
-        ),
-        dividerColor: colorScheme.onInverseSurface,
-        dividerTheme: DividerThemeData(color: colorScheme.outlineVariant),
-        listTileTheme: ListTileThemeData(
-          tileColor: colorScheme.surfaceContainer,
-        ),
+    useMaterial3: true,
+    brightness: colorScheme.brightness,
+    colorScheme: colorScheme,
+    textTheme: textTheme.apply(
+      bodyColor: colorScheme.onSurface,
+      displayColor: colorScheme.onSurface,
+    ),
+    scaffoldBackgroundColor: colorScheme.surface,
+    disabledColor: colorScheme.onPrimaryContainer.withAlpha(97),
+    canvasColor: colorScheme.surface,
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: colorScheme.surfaceContainerHighest,
+      type: BottomNavigationBarType.fixed,
+      selectedItemColor: colorScheme.primary,
+      unselectedItemColor: colorScheme.outline,
+      showSelectedLabels: true,
+      showUnselectedLabels: true,
+      elevation: 8.0,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+        disabledForegroundColor: colorScheme.onPrimaryContainer.withAlpha(97),
+      ),
+    ),
+    cardColor: colorScheme.surfaceContainer,
+    cardTheme: CardTheme(color: colorScheme.surfaceContainer),
+    dividerColor: colorScheme.onInverseSurface,
+    dividerTheme: DividerThemeData(color: colorScheme.outlineVariant),
+    listTileTheme: ListTileThemeData(tileColor: colorScheme.surfaceContainer),
 
-        // Material page transition is childish
-        pageTransitionsTheme: PageTransitionsTheme(
-          builders: {
-            for (var platform in TargetPlatform.values)
-              platform: const CupertinoPageTransitionsBuilder(),
-          },
-        ),
-      );
+    // Material page transition is childish
+    pageTransitionsTheme: PageTransitionsTheme(
+      builders: {
+        for (var platform in TargetPlatform.values)
+          platform: const CupertinoPageTransitionsBuilder(),
+      },
+    ),
+  );
 
   List<ExtendedColor> get extendedColors => [];
 }

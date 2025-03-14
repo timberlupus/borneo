@@ -4,14 +4,16 @@ import 'package:borneo_app/services/device_manager.dart';
 
 final class PowerOffAllRoutine extends AbstractBuiltinRoutine {
   PowerOffAllRoutine()
-      : super(
-            name: 'Power off all',
-            iconAssetPath: 'assets/images/routines/icons/power-off.svg');
+    : super(
+        name: 'Power off all',
+        iconAssetPath: 'assets/images/routines/icons/power-off.svg',
+      );
 
   @override
   bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices
-        .any((d) => d.api() is IPowerOnOffCapability);
+    return deviceManager.boundDevices.any(
+      (d) => d.api() is IPowerOnOffCapability,
+    );
   }
 
   @override
@@ -25,16 +27,18 @@ final class PowerOffAllRoutine extends AbstractBuiltinRoutine {
 
 final class FeedModeRoutine extends AbstractBuiltinRoutine {
   FeedModeRoutine()
-      : super(
-            name: 'Feed mode',
-            iconAssetPath: 'assets/images/routines/icons/feed.svg');
+    : super(
+        name: 'Feed mode',
+        iconAssetPath: 'assets/images/routines/icons/feed.svg',
+      );
 
   @override
   bool checkAvailable(DeviceManager deviceManager) {
     // Feed mode operations:
     // * Power off all pumps
-    return deviceManager.boundDevices
-        .any((d) => d.api() is IPowerOnOffCapability);
+    return deviceManager.boundDevices.any(
+      (d) => d.api() is IPowerOnOffCapability,
+    );
   }
 
   @override
@@ -48,14 +52,16 @@ final class FeedModeRoutine extends AbstractBuiltinRoutine {
 
 final class WaterChangeModeRoutine extends AbstractBuiltinRoutine {
   WaterChangeModeRoutine()
-      : super(
-            name: 'Water change mode',
-            iconAssetPath: 'assets/images/routines/icons/water-change.svg');
+    : super(
+        name: 'Water change mode',
+        iconAssetPath: 'assets/images/routines/icons/water-change.svg',
+      );
 
   @override
   bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices
-        .any((d) => d.api() is IPowerOnOffCapability);
+    return deviceManager.boundDevices.any(
+      (d) => d.api() is IPowerOnOffCapability,
+    );
   }
 
   @override
@@ -72,14 +78,16 @@ final class WaterChangeModeRoutine extends AbstractBuiltinRoutine {
 
 final class DryScapeModeRoutine extends AbstractBuiltinRoutine {
   DryScapeModeRoutine()
-      : super(
-            name: 'Dry scape mode',
-            iconAssetPath: 'assets/images/routines/icons/dry-scape.svg');
+    : super(
+        name: 'Dry scape mode',
+        iconAssetPath: 'assets/images/routines/icons/dry-scape.svg',
+      );
 
   @override
   bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices
-        .any((d) => d.api() is IPowerOnOffCapability);
+    return deviceManager.boundDevices.any(
+      (d) => d.api() is IPowerOnOffCapability,
+    );
   }
 
   @override

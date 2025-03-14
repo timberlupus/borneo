@@ -44,7 +44,8 @@ mixin ViewModelEventBusMixin on BaseViewModel {
   late final EventBus globalEventBus;
 
   void notifyAppError(String message, {Object? error, StackTrace? stackTrace}) {
-    globalEventBus
-        .fire(AppErrorEvent(message, error: error, stackTrace: stackTrace));
+    globalEventBus.fire(
+      AppErrorEvent(message, error: error, stackTrace: stackTrace),
+    );
   }
 }

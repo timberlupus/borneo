@@ -17,10 +17,7 @@ import 'services/routine_manager.dart';
 import 'services/scene_manager.dart';
 import 'theme/app_theme.dart';
 
-const _kSupportedLocales = [
-  Locale('en'),
-  Locale('zh', 'CN'),
-];
+const _kSupportedLocales = [Locale('en'), Locale('zh', 'CN')];
 
 class BorneoApp extends StatelessWidget {
   final EventBus _globalEventBus = EventBus();
@@ -29,56 +26,60 @@ class BorneoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MultiProvider(
-        providers: [
-          // Global event bus
-          Provider<EventBus>(create: (_) => _globalEventBus),
+    providers: [
+      // Global event bus
+      Provider<EventBus>(create: (_) => _globalEventBus),
 
-          // BlobManager
-          Provider<IBlobManager>(create: (_) => FlutterAppBlobManager()),
-        ],
+      // BlobManager
+      Provider<IBlobManager>(create: (_) => FlutterAppBlobManager()),
+    ],
 
-        // Main screen
-        child: MaterialApp(
-          title: 'Borneo IoT',
-          theme: BorneoTheme(Theme.of(context).textTheme).light(),
-          darkTheme: BorneoTheme(Theme.of(context).textTheme).dark(),
-          themeMode: ThemeMode.system,
-          onGenerateRoute: context.read<RouteManager>().onGenerateRoute,
-          supportedLocales: _kSupportedLocales,
-          localizationsDelegates: [
-            GettextLocalizationsDelegate(),
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          builder: (context, child) {
-            final gt = GettextLocalizations.of(context);
-            return MultiProvider(
-              providers: [
-                // Here >>> register all providers that need to access the gettext interface <<<
-                // SceneManager
-                Provider<SceneManager>(
-                  create: (context) => SceneManager(
+    // Main screen
+    child: MaterialApp(
+      title: 'Borneo-IoT',
+      theme: BorneoTheme(Theme.of(context).textTheme).light(),
+      darkTheme: BorneoTheme(Theme.of(context).textTheme).dark(),
+      themeMode: ThemeMode.system,
+      onGenerateRoute: context.read<RouteManager>().onGenerateRoute,
+      supportedLocales: _kSupportedLocales,
+      localizationsDelegates: [
+        GettextLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      builder: (context, child) {
+        final gt = GettextLocalizations.of(context);
+        return MultiProvider(
+          providers: [
+            // Here >>> register all providers that need to access the gettext interface <<<
+            // SceneManager
+            Provider<SceneManager>(
+              create:
+                  (context) => SceneManager(
                     gt,
                     context.read<Database>(),
                     context.read<EventBus>(),
                     context.read<IBlobManager>(),
                     logger: context.read<Logger>(),
                   ),
-                ),
+            ),
 
-                // GroupManager
-                Provider<GroupManager>(
-                  create: (context) => GroupManager(
-                      context.read<Logger>(),
-                      context.read<EventBus>(),
-                      context.read<Database>(),
-                      context.read<SceneManager>()),
-                ),
+            // GroupManager
+            Provider<GroupManager>(
+              create:
+                  (context) => GroupManager(
+                    context.read<Logger>(),
+                    context.read<EventBus>(),
+                    context.read<Database>(),
+                    context.read<SceneManager>(),
+                  ),
+            ),
 
-                // DeviceManager
-                Provider<DeviceManager>(
-                  create: (context) => DeviceManager(
+            // DeviceManager
+            Provider<DeviceManager>(
+              create:
+                  (context) => DeviceManager(
                     context.read<Logger>(),
                     context.read<Database>(),
                     context.read<IKernel>(),
@@ -86,24 +87,25 @@ class BorneoApp extends StatelessWidget {
                     context.read<SceneManager>(),
                     context.read<GroupManager>(),
                   ),
-                  dispose: (context, dm) => dm.dispose(),
-                ),
+              dispose: (context, dm) => dm.dispose(),
+            ),
 
-                // RoutineManager
-                Provider<RoutineManager>(
-                  create: (context) => RoutineManager(
+            // RoutineManager
+            Provider<RoutineManager>(
+              create:
+                  (context) => RoutineManager(
                     context.read<EventBus>(),
                     context.read<Database>(),
                     context.read<DeviceManager>(),
                     logger: context.read<Logger>(),
                   ),
-                  dispose: (context, dm) => dm.dispose(),
-                ),
-              ],
-              child: child,
-            );
-          },
-          home: MainScreen(),
-        ),
-      );
+              dispose: (context, dm) => dm.dispose(),
+            ),
+          ],
+          child: child,
+        );
+      },
+      home: MainScreen(),
+    ),
+  );
 }

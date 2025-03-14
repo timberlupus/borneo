@@ -14,14 +14,42 @@ class DeviceTile extends StatelessWidget {
   const DeviceTile(this.isLast, {super.key});
 
   void openDevicePage(BuildContext context, DeviceEntity device) {
+    var vm = context.read<DeviceSummaryViewModel>();
+
     Future.delayed(Duration(milliseconds: 200)).then((_) async {
+      if (!vm.isOnline) {
+        showDialog(
+          context: context,
+          barrierDismissible: false, // 用户无法通过点击对话框外部关闭它
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Row(
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(width: 15),
+                  Text("Connecting..."),
+                ],
+              ),
+            );
+          },
+        );
+
+        try {
+          bool isConnected = await vm.tryConnect();
+          if (!isConnected) {
+            vm.notifyAppError("Failed to connect device");
+            return;
+          }
+        } finally {
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+      }
       if (context.mounted) {
-        await Navigator.of(context)
-            .pushNamed(
-              AppRoutes.makeDeviceScreenRoute(device.driverID),
-              arguments: device,
-            )
-            .then((results) {});
+        await Navigator.of(context).pushNamed(
+          AppRoutes.makeDeviceScreenRoute(device.driverID),
+          arguments: device,
+        );
+        //.then((results) {});
       }
     });
     // TODO FIXME
@@ -32,58 +60,65 @@ class DeviceTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<DeviceSummaryViewModel>(
-      builder: (context, vm, child) => Column(children: [
-        ListTile(
-          dense: false,
-          tileColor: Theme.of(context).colorScheme.surfaceContainer,
-          onTap:
-              vm.isBusy ? null : () => openDevicePage(context, vm.deviceEntity),
-          onLongPress: () => _showDevicePopMenu(context),
-          leading: Container(
-            height: 48,
-            width: 48,
-            decoration: ShapeDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5.0),
-                side: BorderSide(
-                  width: 1.5,
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                ),
-              ),
-            ),
-            child: Icon(
-              Icons.light_outlined,
-              color: vm.isOnline
-                  ? Theme.of(context).colorScheme.onPrimaryContainer
-                  : Theme.of(context).disabledColor,
-              size: 40,
-            ),
-          ),
-          title: Text(vm.deviceEntity.name),
-          subtitle: Text(vm.deviceEntity.model,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: Theme.of(context).hintColor)),
-          trailing: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
+      builder:
+          (context, vm, child) => Column(
             children: [
-              vm.isOnline
-                  ? Icon(Icons.line_axis_outlined, size: 24)
-                  : FlashingIcon(
-                      icon: Icon(
-                        Icons.wifi_off_outlined,
-                        size: 24,
-                        color: Theme.of(context).colorScheme.error,
+              ListTile(
+                dense: false,
+                tileColor: Theme.of(context).colorScheme.surfaceContainer,
+                onTap:
+                    vm.isBusy
+                        ? null
+                        : () => openDevicePage(context, vm.deviceEntity),
+                onLongPress: () => _showDevicePopMenu(context),
+                leading: Container(
+                  height: 48,
+                  width: 48,
+                  decoration: ShapeDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                      side: BorderSide(
+                        width: 1.5,
+                        color: Theme.of(context).colorScheme.primaryContainer,
                       ),
                     ),
+                  ),
+                  child: Icon(
+                    Icons.light_outlined,
+                    color:
+                        vm.isOnline
+                            ? Theme.of(context).colorScheme.onPrimaryContainer
+                            : Theme.of(context).disabledColor,
+                    size: 40,
+                  ),
+                ),
+                title: Text(vm.deviceEntity.name),
+                subtitle: Text(
+                  vm.deviceEntity.model,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).hintColor,
+                  ),
+                ),
+                trailing: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    vm.isOnline
+                        ? Icon(Icons.line_axis_outlined, size: 24)
+                        : FlashingIcon(
+                          icon: Icon(
+                            Icons.wifi_off_outlined,
+                            size: 24,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                  ],
+                ),
+              ),
+              if (!isLast) const Divider(height: 1, indent: 72),
             ],
           ),
-        ),
-        if (!isLast) const Divider(height: 1, indent: 72),
-      ]),
     );
   }
 
@@ -101,15 +136,14 @@ class DeviceTile extends StatelessWidget {
     if (rect != null) {
       showMenu(
         context: context,
-        position: RelativeRect.fromRect(
-          rect,
-          Offset.zero & overlay.size,
-        ),
+        position: RelativeRect.fromRect(rect, Offset.zero & overlay.size),
         items: <PopupMenuEntry<String>>[
           PopupMenuItem<String>(value: 'reconnect', child: Text('Reconnect')),
           PopupMenuDivider(),
           PopupMenuItem<String>(
-              value: 'change-group', child: Text('Change group...')),
+            value: 'change-group',
+            child: Text('Change group...'),
+          ),
           PopupMenuItem<String>(value: 'delete', child: Text('Delete...')),
         ],
       ).then((value) {
@@ -122,32 +156,38 @@ class DeviceTile extends StatelessWidget {
               case 'delete':
                 {
                   if (context.mounted) {
-                    ConfirmationSheet.show(context,
-                        message:
-                            'Are you sure to delete the device "${selectedDeviceVM.name}" ?',
-                        okPressed: () {
-                      parentVM.deleteDevice(selectedDeviceVM.id);
-                    });
+                    ConfirmationSheet.show(
+                      context,
+                      message:
+                          'Are you sure to delete the device "${selectedDeviceVM.name}" ?',
+                      okPressed: () {
+                        parentVM.deleteDevice(selectedDeviceVM.id);
+                      },
+                    );
                   }
                   break;
                 }
               case 'change-group':
                 {
-                  final groupEntites = parentVM.groups
-                      .where((gvm) => !gvm.isDummy)
-                      .map((gvm) => gvm.model)
-                      .toList();
+                  final groupEntites =
+                      parentVM.groups
+                          .where((gvm) => !gvm.isDummy)
+                          .map((gvm) => gvm.model)
+                          .toList();
                   showModalBottomSheet(
                     context: context,
-                    builder: (BuildContext context) =>
-                        DeviceGroupSelectionSheet(
-                      availableGroups: groupEntites,
-                      onTapGroup: (g) => parentVM.changeDeviceGroup(
-                          selectedDeviceVM.deviceEntity, g?.id),
-                      title: 'Change Device Group',
-                      subtitle:
-                          'Select the group to which device "${selectedDeviceVM.name}" belongs:',
-                    ),
+                    builder:
+                        (BuildContext context) => DeviceGroupSelectionSheet(
+                          availableGroups: groupEntites,
+                          onTapGroup:
+                              (g) => parentVM.changeDeviceGroup(
+                                selectedDeviceVM.deviceEntity,
+                                g?.id,
+                              ),
+                          title: 'Change Device Group',
+                          subtitle:
+                              'Select the group to which device "${selectedDeviceVM.name}" belongs:',
+                        ),
                   );
 
                   break;

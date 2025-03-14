@@ -28,32 +28,39 @@ class SceneSummaryViewModel extends BaseViewModel {
   String get name => model.name;
 
   late final StreamSubscription<CurrentSceneChangedEvent>
-      _currentSceneChangedEventSub;
+  _currentSceneChangedEventSub;
   late final StreamSubscription<SceneUpdatedEvent> _sceneUpdatedEventSub;
 
   late final StreamSubscription<DeviceBoundEvent> _deviceBoundEventSub;
   late final StreamSubscription<DeviceRemovedEvent> _deviceRemovedEventSub;
 
-/*
+  /*
   late final StreamSubscription<DeviceRemovedEvent> _removedEventSub;
   */
 
-  SceneSummaryViewModel(this._model, EventBus globalEventBus,
-      this._sceneManager, DeviceManager dm, DeviceStatistics stat)
-      : _totalDeviceCount = stat.totalDeviceCount,
-        _activeDeviceCount = stat.activeDeviceCount {
+  SceneSummaryViewModel(
+    this._model,
+    EventBus globalEventBus,
+    this._sceneManager,
+    DeviceManager dm,
+    DeviceStatistics stat,
+  ) : _totalDeviceCount = stat.totalDeviceCount,
+      _activeDeviceCount = stat.activeDeviceCount {
     //subscribe all events
     _currentSceneChangedEventSub = globalEventBus
         .on<CurrentSceneChangedEvent>()
         .listen(_onCurrentSceneChanged);
 
-    _sceneUpdatedEventSub =
-        globalEventBus.on<SceneUpdatedEvent>().listen(_onSceneUpdated);
+    _sceneUpdatedEventSub = globalEventBus.on<SceneUpdatedEvent>().listen(
+      _onSceneUpdated,
+    );
 
-    _deviceBoundEventSub =
-        dm.deviceEvents.on<DeviceBoundEvent>().listen(_onDeviceBound);
-    _deviceRemovedEventSub =
-        dm.deviceEvents.on<DeviceRemovedEvent>().listen(_onDeviceRemoved);
+    _deviceBoundEventSub = dm.deviceEvents.on<DeviceBoundEvent>().listen(
+      _onDeviceBound,
+    );
+    _deviceRemovedEventSub = dm.deviceEvents.on<DeviceRemovedEvent>().listen(
+      _onDeviceRemoved,
+    );
   }
 
   @override
@@ -67,7 +74,7 @@ class SceneSummaryViewModel extends BaseViewModel {
     super.dispose();
   }
 
-/*
+  /*
   void _onBound(DeviceBoundEvent event) {
     if (event.device.id == id) {
       _isOnline = true;

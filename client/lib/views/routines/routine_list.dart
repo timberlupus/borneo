@@ -15,34 +15,38 @@ class RoutineList extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.fromLTRB(16, 16, 16, 24),
         child: Column(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(context.translate('Routines'),
-                  style: Theme.of(context).textTheme.titleMedium),
-              SizedBox(height: 16),
-              ValueListenableBuilder(
-                valueListenable: vm.routines,
-                builder: (context, scenes, child) => GridView.builder(
-                  shrinkWrap: true,
-                  primary: true,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16.0,
-                    mainAxisSpacing: 16.0,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              context.translate('Routines'),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            SizedBox(height: 16),
+            ValueListenableBuilder(
+              valueListenable: vm.routines,
+              builder:
+                  (context, scenes, child) => GridView.builder(
+                    shrinkWrap: true,
+                    primary: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16.0,
+                      mainAxisSpacing: 16.0,
+                    ),
+                    padding: EdgeInsets.all(0.0),
+                    itemCount: vm.routines.value.length,
+                    itemBuilder: (context, index) {
+                      if (index < vm.routines.value.length) {
+                        return RoutineCard(vm.routines.value[index]);
+                      } else {
+                        return _buildAddItem(context);
+                      }
+                    },
                   ),
-                  padding: EdgeInsets.all(0.0),
-                  itemCount: vm.routines.value.length,
-                  itemBuilder: (context, index) {
-                    if (index < vm.routines.value.length) {
-                      return RoutineCard(vm.routines.value[index]);
-                    } else {
-                      return _buildAddItem(context);
-                    }
-                  },
-                ),
-              ),
-            ]),
+            ),
+          ],
+        ),
       ),
     );
   }

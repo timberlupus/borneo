@@ -76,7 +76,11 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel
   int get discoveredCount => _discoveredCount;
 
   DeviceDiscoveryViewModel(
-      this._logger, EventBus bus, this._groupManager, this._deviceManager) {
+    this._logger,
+    EventBus bus,
+    this._groupManager,
+    this._deviceManager,
+  ) {
     super.globalEventBus = bus;
     _deviceAddedEventSub = _deviceManager.deviceEvents
         .on<NewDeviceEntityAddedEvent>()
@@ -90,8 +94,9 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel
   @override
   Future<void> onInitialize() async {
     try {
-      _availableGroups
-          .addAll(await _groupManager.fetchAllGroupsInCurrentScene());
+      _availableGroups.addAll(
+        await _groupManager.fetchAllGroupsInCurrentScene(),
+      );
     } finally {}
   }
 
@@ -158,17 +163,25 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel
       await _deviceManager.startDiscovery();
 
       if (isSmartConfigEnabled) {
-        await _provisioner.start(ProvisioningRequest.fromStrings(
-          ssid: ssid,
-          password: password.isEmpty ? null : password,
-          reservedData: "borneo-hello",
-        ));
+        await _provisioner.start(
+          ProvisioningRequest.fromStrings(
+            ssid: ssid,
+            password: password.isEmpty ? null : password,
+            reservedData: "borneo-hello",
+          ),
+        );
       }
     } catch (e, stackTrace) {
-      super.notifyAppError('Error occurred while discovering devices: $e',
-          error: e, stackTrace: stackTrace);
-      _logger.e('Failed to discovering devices',
-          error: e, stackTrace: stackTrace);
+      super.notifyAppError(
+        'Error occurred while discovering devices: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      _logger.e(
+        'Failed to discovering devices',
+        error: e,
+        stackTrace: stackTrace,
+      );
     } finally {
       notifyListeners();
     }
@@ -185,8 +198,11 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel
       }
       await _deviceManager.stopDiscovery();
     } catch (e, stackTrace) {
-      super.notifyAppError('Error occurred while stopping discovery: $e',
-          error: e, stackTrace: stackTrace);
+      super.notifyAppError(
+        'Error occurred while stopping discovery: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
     } finally {
       notifyListeners();
     }
@@ -210,20 +226,24 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel
       }
     } else {
       throw PermissionDeniedException(
-          'The program requires permission to access WiFi network information; otherwise, the WiFi name needs to be manually entered.');
+        'The program requires permission to access WiFi network information; otherwise, the WiFi name needs to be manually entered.',
+      );
     }
   }
 
   Future<void> addNewDevice(
-      SupportedDeviceDescriptor deviceInfo, DeviceGroupEntity? group) async {
+    SupportedDeviceDescriptor deviceInfo,
+    DeviceGroupEntity? group,
+  ) async {
     await _deviceManager.addNewDevice(deviceInfo, groupID: group?.id);
   }
 
   Future<void> _onNewDeviceEntityAdded(NewDeviceEntityAddedEvent event) async {
     // TODO show a toast or snackbar
     try {
-      _discoveredDevices.value
-          .removeWhere((x) => x.fingerprint == event.device.fingerprint);
+      _discoveredDevices.value.removeWhere(
+        (x) => x.fingerprint == event.device.fingerprint,
+      );
       _discoveredDevices.value = List.from(_discoveredDevices.value);
       _lastestAddedDevice = event.device;
     } finally {
