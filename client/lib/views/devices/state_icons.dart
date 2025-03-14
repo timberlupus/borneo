@@ -3,31 +3,22 @@ import 'package:flutter/material.dart';
 class FlashingIcon extends StatefulWidget {
   final Widget icon;
   final Duration duration;
-  const FlashingIcon({
-    required this.icon,
-    this.duration = const Duration(milliseconds: 1000),
-    super.key,
-  });
+  const FlashingIcon({required this.icon, this.duration = const Duration(milliseconds: 1000), super.key});
 
   @override
   State<FlashingIcon> createState() => _FlashingIconState();
 }
 
-class _FlashingIconState extends State<FlashingIcon>
-    with SingleTickerProviderStateMixin {
+class _FlashingIconState extends State<FlashingIcon> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: widget.duration, vsync: this)
-      ..repeat(reverse: true);
+    _controller = AnimationController(duration: widget.duration, vsync: this)..repeat(reverse: true);
 
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.fastEaseInToSlowEaseOut,
-    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.fastEaseInToSlowEaseOut);
   }
 
   @override

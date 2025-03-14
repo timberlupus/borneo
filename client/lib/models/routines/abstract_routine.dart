@@ -7,17 +7,12 @@ abstract class AbstractRoutine with BaseEntity {
   final String name;
   final String iconAssetPath;
 
-  const AbstractRoutine({
-    required this.id,
-    required this.name,
-    required this.iconAssetPath,
-  });
+  const AbstractRoutine({required this.id, required this.name, required this.iconAssetPath});
 
   bool checkAvailable(DeviceManager deviceManager);
   Future<void> execute(DeviceManager deviceManager);
 }
 
 abstract class AbstractBuiltinRoutine extends AbstractRoutine {
-  AbstractBuiltinRoutine({required super.name, required super.iconAssetPath})
-    : super(id: BaseEntity.generateID());
+  AbstractBuiltinRoutine({required super.name, required super.iconAssetPath}) : super(id: BaseEntity.generateID());
 }

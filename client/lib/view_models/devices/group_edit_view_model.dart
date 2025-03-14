@@ -13,8 +13,7 @@ final class GroupEditArguments {
   const GroupEditArguments({required this.isCreation, this.model});
 }
 
-class GroupEditViewModel extends AbstractScreenViewModel
-    with ViewModelEventBusMixin {
+class GroupEditViewModel extends AbstractScreenViewModel with ViewModelEventBusMixin {
   final Logger? logger;
   final GroupManager _groupManager;
   final bool isCreation;
@@ -66,11 +65,7 @@ class GroupEditViewModel extends AbstractScreenViewModel
     try {
       await _groupManager.delete(id!);
     } catch (e, stackTrace) {
-      notifyAppError(
-        'Failed to delete group `$name`',
-        error: e,
-        stackTrace: stackTrace,
-      );
+      notifyAppError('Failed to delete group `$name`', error: e, stackTrace: stackTrace);
     } finally {
       setBusy(false, notify: false);
     }

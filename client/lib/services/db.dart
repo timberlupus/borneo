@@ -50,6 +50,5 @@ class DBProvider {
 }
 
 extension DatabaseExtension on Database {
-  StoreRef<String, dynamic> makeAppStatusStore() =>
-      StoreRef<String, dynamic>(StoreNames.appStatus);
+  StoreRef<String, dynamic> makeAppStatusStore() => StoreRef<String, dynamic>(StoreNames.appStatus);
 }

@@ -59,15 +59,8 @@ class NsdMdnsDiscovery implements IMdnsDiscovery {
 
 class NsdMdnsProvider implements IMdnsProvider {
   @override
-  Future<IMdnsDiscovery> startDiscovery(
-    String serviceType,
-    EventBus eventBus,
-  ) async {
-    final nsdDiscovery = await nsd.startDiscovery(
-      serviceType,
-      autoResolve: true,
-      ipLookupType: nsd.IpLookupType.any,
-    );
+  Future<IMdnsDiscovery> startDiscovery(String serviceType, EventBus eventBus) async {
+    final nsdDiscovery = await nsd.startDiscovery(serviceType, autoResolve: true, ipLookupType: nsd.IpLookupType.any);
     final discovery = NsdMdnsDiscovery(nsdDiscovery, serviceType, eventBus);
     return discovery;
   }

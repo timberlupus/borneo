@@ -24,7 +24,6 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
               globalEventBus: context.read<EventBus>(),
               logger: context.read<Logger>(),
             ),
-        deviceIconBuilder:
-            (BuildContext context) => Icon(Icons.lightbulb_outline),
+        deviceIconBuilder: (BuildContext context) => Icon(Icons.lightbulb_outline),
       );
 }

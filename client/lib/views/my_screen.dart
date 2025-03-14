@@ -15,15 +15,10 @@ class MyScreen extends StatelessWidget {
       ListTile(
         title: Text(context.translate('Settings')),
         leading: Icon(Icons.settings_outlined),
-        trailing: Icon(
-          Icons.chevron_right_outlined,
-          color: Theme.of(context).hintColor,
-        ),
+        trailing: Icon(Icons.chevron_right_outlined, color: Theme.of(context).hintColor),
         tileColor: Theme.of(context).colorScheme.surfaceContainer,
         onTap: () {
-          final route = MaterialPageRoute(
-            builder: (context) => AppSettingsScreen(),
-          );
+          final route = MaterialPageRoute(builder: (context) => AppSettingsScreen());
           Navigator.push(context, route);
         },
       ),
@@ -32,16 +27,11 @@ class MyScreen extends StatelessWidget {
       ListTile(
         title: Text(context.translate('About')),
         leading: Icon(Icons.info_outline),
-        trailing: Icon(
-          Icons.chevron_right_outlined,
-          color: Theme.of(context).hintColor,
-        ),
+        trailing: Icon(Icons.chevron_right_outlined, color: Theme.of(context).hintColor),
         tileColor: Theme.of(context).colorScheme.surfaceContainer,
         onTap: () {
           Future.delayed(Duration(milliseconds: 300), () {
-            final route = MaterialPageRoute(
-              builder: (context) => AboutScreen(),
-            );
+            final route = MaterialPageRoute(builder: (context) => AboutScreen());
             if (context.mounted) {
               Navigator.push(context, route);
             }
@@ -70,10 +60,7 @@ class MyScreen extends StatelessWidget {
             title: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset('assets/images/main-logo.png', height: 80),
-                const SizedBox(height: 8),
-              ],
+              children: [Image.asset('assets/images/main-logo.png', height: 80), const SizedBox(height: 8)],
             ),
             centerTitle: true,
           ),
@@ -82,10 +69,7 @@ class MyScreen extends StatelessWidget {
           itemCount: items.length,
           itemBuilder: (context, index) => items[index],
           separatorBuilder: (context, index) {
-            return Divider(
-              height: 1,
-              color: Theme.of(context).scaffoldBackgroundColor,
-            );
+            return Divider(height: 1, color: Theme.of(context).scaffoldBackgroundColor);
           },
         ),
       ],

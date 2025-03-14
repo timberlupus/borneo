@@ -26,9 +26,7 @@ class BrightnessSliderList<TEditor extends IEditor> extends StatelessWidget {
               disabled: this.disabled,
               trailing: Text(
                 '${channelValue.toString().padLeft(3, '\u2007')}%',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontFeatures: [FontFeature.tabularFigures()],
-                ),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(fontFeatures: [FontFeature.tabularFigures()]),
               ),
               onChanged: (newValue) {
                 editor.updateChannelValue(index, newValue);
@@ -43,11 +41,7 @@ class BrightnessSliderList<TEditor extends IEditor> extends StatelessWidget {
         shrinkWrap: true,
         itemCount: editor.availableChannelCount,
         itemBuilder: (context, index) => sliders[index],
-        separatorBuilder:
-            (context, index) => Divider(
-              height: 1,
-              color: Theme.of(context).colorScheme.surface,
-            ),
+        separatorBuilder: (context, index) => Divider(height: 1, color: Theme.of(context).colorScheme.surface),
       ),
     );
   }

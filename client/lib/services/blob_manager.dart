@@ -63,10 +63,7 @@ class FlutterAppBlobManager implements IBlobManager {
   Future<String> create(ByteData bytes) async {
     final id = BaseEntity.generateID();
     final file = await open(id);
-    final bytesList = bytes.buffer.asUint8List(
-      bytes.offsetInBytes,
-      bytes.lengthInBytes,
-    );
+    final bytesList = bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes);
     await file.writeAsBytes(bytesList);
     return id;
   }
@@ -84,14 +81,10 @@ class FlutterAppBlobManager implements IBlobManager {
     _deleteFilesInDirectory(Directory(_blobsDir));
   }
 
-  String _makeHashDirName(String blobID) =>
-      path.join(_blobsDir, blobID.hashCode.toRadixString(16).padLeft(2, '0'));
+  String _makeHashDirName(String blobID) => path.join(_blobsDir, blobID.hashCode.toRadixString(16).padLeft(2, '0'));
 
   Future<void> _deleteFilesInDirectory(Directory directory) async {
-    Stream<FileSystemEntity> entities = directory.list(
-      recursive: true,
-      followLinks: false,
-    );
+    Stream<FileSystemEntity> entities = directory.list(recursive: true, followLinks: false);
 
     await for (FileSystemEntity entity in entities) {
       if (entity is File) {

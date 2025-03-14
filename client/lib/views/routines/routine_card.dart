@@ -25,18 +25,11 @@ class RoutineCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: LayoutBuilder(
-                      builder: (
-                        BuildContext context,
-                        BoxConstraints constraints,
-                      ) {
+                      builder: (BuildContext context, BoxConstraints constraints) {
                         final iconSize = constraints.maxHeight - 16.0;
                         return Align(
                           alignment: Alignment.centerLeft,
-                          child: SvgPicture.asset(
-                            viewModel.iconAssetPath,
-                            height: iconSize,
-                            width: iconSize,
-                          ),
+                          child: SvgPicture.asset(viewModel.iconAssetPath, height: iconSize, width: iconSize),
                         );
                       },
                     ),
@@ -44,11 +37,8 @@ class RoutineCard extends StatelessWidget {
                   Selector<RoutineSummaryViewModel, String>(
                     selector: (context, vm) => vm.name,
                     builder:
-                        (_, routineName, child) => Text(
-                          routineName,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 14.0),
-                        ),
+                        (_, routineName, child) =>
+                            Text(routineName, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14.0)),
                   ),
                   Divider(height: 16, thickness: 1),
                   Row(
@@ -57,18 +47,12 @@ class RoutineCard extends StatelessWidget {
                       if (viewModel.isActive)
                         Text(
                           context.translate('ACTIVE'),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).hintColor,
-                          ),
+                          style: TextStyle(fontSize: 12, color: Theme.of(context).hintColor),
                         ),
                       if (!viewModel.isActive)
                         Text(
                           context.translate('INACTIVE'),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).hintColor,
-                          ),
+                          style: TextStyle(fontSize: 12, color: Theme.of(context).hintColor),
                         ),
                       Spacer(),
                       Switch(

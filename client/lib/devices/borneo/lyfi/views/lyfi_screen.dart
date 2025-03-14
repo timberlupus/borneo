@@ -38,10 +38,7 @@ class CircleButton extends StatelessWidget {
             width: 48,
             height: 48,
             child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.0),
-                color: backgroundColor,
-              ),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(10.0), color: backgroundColor),
               child: IconButton(
                 onPressed: onPressed,
                 padding: EdgeInsets.all(8),
@@ -51,10 +48,7 @@ class CircleButton extends StatelessWidget {
                   shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(
-                        color: Theme.of(context).colorScheme.outline,
-                        width: 1.0,
-                      ),
+                      side: BorderSide(color: Theme.of(context).colorScheme.outline, width: 1.0),
                     ),
                   ),
                 ),
@@ -73,11 +67,7 @@ class HeroVerticalDivider extends StatelessWidget {
   final double width;
   final Color color;
 
-  const HeroVerticalDivider({
-    super.key,
-    this.width = 8,
-    this.color = Colors.grey,
-  });
+  const HeroVerticalDivider({super.key, this.width = 8, this.color = Colors.grey});
 
   @override
   Widget build(BuildContext context) {
@@ -124,10 +114,7 @@ class HeroProgressIndicator extends StatelessWidget {
           linearGradient: linearGradient,
           arcBackgroundColor: Theme.of(context).colorScheme.outlineVariant,
         ),
-        if (icon != null)
-          Positioned.fill(
-            child: Align(alignment: Alignment.bottomCenter, child: icon!),
-          ),
+        if (icon != null) Positioned.fill(child: Align(alignment: Alignment.bottomCenter, child: icon!)),
       ],
     );
   }
@@ -152,16 +139,8 @@ class HeroPanel extends StatelessWidget {
                   showSelectedIcon: false,
                   selected: <bool>{vm.schedulerEnabled},
                   segments: [
-                    ButtonSegment<bool>(
-                      value: true,
-                      label: Text('Sched.'),
-                      icon: Icon(Icons.line_axis_outlined),
-                    ),
-                    ButtonSegment<bool>(
-                      value: false,
-                      label: Text('Manual'),
-                      icon: Icon(Icons.bar_chart_outlined),
-                    ),
+                    ButtonSegment<bool>(value: true, label: Text('Sched.'), icon: Icon(Icons.line_axis_outlined)),
+                    ButtonSegment<bool>(value: false, label: Text('Manual'), icon: Icon(Icons.bar_chart_outlined)),
                   ],
                   onSelectionChanged:
                       vm.isOn && !vm.isBusy && !vm.isLocked
@@ -179,11 +158,7 @@ class HeroPanel extends StatelessWidget {
               builder:
                   (context, vm, child) => HeroProgressIndicator(
                     percent: vm.currentTempRatio,
-                    icon: Icon(
-                      Icons.thermostat_outlined,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
+                    icon: Icon(Icons.thermostat_outlined, size: 16, color: Theme.of(context).colorScheme.outline),
                     center: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -191,9 +166,7 @@ class HeroPanel extends StatelessWidget {
                           vm.currentTemp != null ? '${vm.currentTemp}℃' : "N/A",
                           style: Theme.of(
                             context,
-                          ).textTheme.bodyMedium?.copyWith(
-                            fontFeatures: [FontFeature.tabularFigures()],
-                          ),
+                          ).textTheme.bodyMedium?.copyWith(fontFeatures: [FontFeature.tabularFigures()]),
                         ),
                       ],
                     ),
@@ -209,18 +182,12 @@ class HeroPanel extends StatelessWidget {
               builder:
                   (context, fanPowerRatio, child) => HeroProgressIndicator(
                     percent: fanPowerRatio != null ? fanPowerRatio / 100.0 : 0,
-                    icon: Icon(
-                      Icons.air_outlined,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
+                    icon: Icon(Icons.air_outlined, size: 16, color: Theme.of(context).colorScheme.outline),
                     center: Text(
-                      fanPowerRatio != null
-                          ? "${fanPowerRatio.toStringAsFixed(0)}%"
-                          : "N/A",
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontFeatures: [FontFeature.tabularFigures()],
-                      ),
+                      fanPowerRatio != null ? "${fanPowerRatio.toStringAsFixed(0)}%" : "N/A",
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(fontFeatures: [FontFeature.tabularFigures()]),
                     ),
                   ),
             ),
@@ -244,29 +211,18 @@ class DimmingView extends StatelessWidget {
       children: [
         HeroPanel(),
         Expanded(
-          child:
-              Selector<LyfiViewModel, ({bool isLocked, bool schedulerEnabled})>(
-                selector:
-                    (context, vm) => (
-                      isLocked: vm.isLocked,
-                      schedulerEnabled: vm.schedulerEnabled,
-                    ),
-                builder: (context, vm, child) {
-                  return AnimatedSwitcher(
-                    duration: Duration(milliseconds: 300),
-                    transitionBuilder: (
-                      Widget child,
-                      Animation<double> animation,
-                    ) {
-                      return FadeTransition(opacity: animation, child: child);
-                    },
-                    child:
-                        vm.schedulerEnabled
-                            ? ScheduleEditorView()
-                            : ManualEditorView(),
-                  );
+          child: Selector<LyfiViewModel, ({bool isLocked, bool schedulerEnabled})>(
+            selector: (context, vm) => (isLocked: vm.isLocked, schedulerEnabled: vm.schedulerEnabled),
+            builder: (context, vm, child) {
+              return AnimatedSwitcher(
+                duration: Duration(milliseconds: 300),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(opacity: animation, child: child);
                 },
-              ),
+                child: vm.schedulerEnabled ? ScheduleEditorView() : ManualEditorView(),
+              );
+            },
+          ),
         ),
       ],
     );
@@ -325,18 +281,14 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                 height: 16,
                 width: 16,
                 child: Selector<LyfiViewModel, ({bool isBusy, bool isOnline})>(
-                  selector:
-                      (_, vm) => (isBusy: vm.isBusy, isOnline: vm.isOnline),
+                  selector: (_, vm) => (isBusy: vm.isBusy, isOnline: vm.isOnline),
                   builder:
                       (context, vm, _) => Container(
                         child:
                             vm.isBusy
                                 ? CircularProgressIndicator()
                                 : !vm.isOnline
-                                ? Icon(
-                                  Icons.wifi_off_outlined,
-                                  color: Theme.of(context).colorScheme.error,
-                                )
+                                ? Icon(Icons.wifi_off_outlined, color: Theme.of(context).colorScheme.error)
                                 : null,
                       ),
                 ),
@@ -365,9 +317,7 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
               onPressed: () async {
                 final vm = context.read<LyfiViewModel>();
                 await Future.delayed(Duration(milliseconds: 200));
-                final route = MaterialPageRoute(
-                  builder: (context) => SettingsScreen(vm),
-                );
+                final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
                 if (context.mounted) {
                   Navigator.push(context, route);
                 }
@@ -398,12 +348,7 @@ class LyfiScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = ModalRoute.of(context)!.settings.arguments as DeviceEntity;
     return ChangeNotifierProvider(
-      create:
-          (cb) => LyfiViewModel(
-            device.id,
-            cb.read<DeviceManager>(),
-            globalEventBus: cb.read<EventBus>(),
-          ),
+      create: (cb) => LyfiViewModel(device.id, cb.read<DeviceManager>(), globalEventBus: cb.read<EventBus>()),
       builder: (context, child) {
         final vm = context.read<LyfiViewModel>();
         return FutureBuilder(
@@ -412,9 +357,7 @@ class LyfiScreen extends StatelessWidget {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Scaffold(body: Center(child: CircularProgressIndicator()));
             } else if (snapshot.hasError) {
-              return Scaffold(
-                body: Center(child: Text('Error: ${snapshot.error}')),
-              );
+              return Scaffold(body: Center(child: Text('Error: ${snapshot.error}')));
             } else {
               return _LyfiDeviceDetailsScreen();
             }

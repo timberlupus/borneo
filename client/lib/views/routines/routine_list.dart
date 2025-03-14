@@ -18,10 +18,7 @@ class RoutineList extends StatelessWidget {
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              context.translate('Routines'),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text(context.translate('Routines'), style: Theme.of(context).textTheme.titleMedium),
             SizedBox(height: 16),
             ValueListenableBuilder(
               valueListenable: vm.routines,
@@ -68,10 +65,7 @@ class RoutineList extends StatelessWidget {
           children: [
             Icon(Icons.add_outlined, size: 64.0),
             SizedBox(width: 8.0),
-            Text(
-              context.translate('New Routine'),
-              style: TextStyle(fontSize: 12.0),
-            ),
+            Text(context.translate('New Routine'), style: TextStyle(fontSize: 12.0)),
           ],
         ),
       ),

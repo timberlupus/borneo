@@ -13,8 +13,7 @@ class DeviceModuleRegistry implements IDeviceModuleRegistry {
   late final UnmodifiableMapView<String, DeviceModuleMetadata> _metaModules;
 
   @override
-  UnmodifiableMapView<String, DeviceModuleMetadata> get metaModules =>
-      _metaModules;
+  UnmodifiableMapView<String, DeviceModuleMetadata> get metaModules => _metaModules;
 
   DeviceModuleRegistry(IDeviceModuleHarvester harvester, {this.logger}) {
     logger?.i('Loading device modules...');

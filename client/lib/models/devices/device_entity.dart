@@ -56,6 +56,5 @@ class DeviceEntity extends Device with BaseEntity {
   }
 
   @override
-  String toString() =>
-      'Device(id: `$id`, name: `$name`, model: `$model`, uri: `$address`)';
+  String toString() => 'Device(id: `$id`, name: `$name`, model: `$model`, uri: `$address`)';
 }

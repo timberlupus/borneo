@@ -26,16 +26,10 @@ class InGroupDeviceListView extends StatelessWidget {
         final List<Widget> devices =
             gvm.devices
                 .map(
-                  (dvm) => ChangeNotifierProvider.value(
-                    value: dvm,
-                    child: DeviceTile(index == gvm.devices.length - 1),
-                  ),
+                  (dvm) => ChangeNotifierProvider.value(value: dvm, child: DeviceTile(index == gvm.devices.length - 1)),
                 )
                 .toList();
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: devices,
-        );
+        return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: devices);
       },
     );
   }
@@ -56,12 +50,8 @@ class NoDataHintView extends StatelessWidget {
             children: [
               const Spacer(),
               Text(
-                context.translate(
-                  'There are no devices or device groups in the current scene.',
-                ),
-                style: DefaultTextStyle.of(
-                  context,
-                ).style.copyWith(color: Theme.of(context).hintColor),
+                context.translate('There are no devices or device groups in the current scene.'),
+                style: DefaultTextStyle.of(context).style.copyWith(color: Theme.of(context).hintColor),
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
@@ -156,11 +146,7 @@ class GroupedDevicesListView extends StatelessWidget {
 class DevicesScreen extends StatelessWidget {
   const DevicesScreen({super.key});
 
-  static const _smallShadow = Shadow(
-    offset: Offset(1.0, 1.0),
-    blurRadius: 2.0,
-    color: Color.fromARGB(128, 0, 0, 0),
-  );
+  static const _smallShadow = Shadow(offset: Offset(1.0, 1.0), blurRadius: 2.0, color: Color.fromARGB(128, 0, 0, 0));
 
   Future<void> _showDiscoveryPage(BuildContext context) async {
     await Navigator.of(context).pushNamed(AppRoutes.kDeviceDiscovery);
@@ -171,9 +157,7 @@ class DevicesScreen extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => GroupEditScreen(),
-        settings: RouteSettings(
-          arguments: GroupEditArguments(isCreation: true),
-        ),
+        settings: RouteSettings(arguments: GroupEditArguments(isCreation: true)),
       ),
     );
   }
@@ -189,12 +173,7 @@ class DevicesScreen extends StatelessWidget {
         } else if (snapshot.hasError) {
           return Scaffold(
             body: Center(
-              child: Text(
-                context.translate(
-                  'Error: {errMsg}',
-                  nArgs: {'errMsg': snapshot.error.toString()},
-                ),
-              ),
+              child: Text(context.translate('Error: {errMsg}', nArgs: {'errMsg': snapshot.error.toString()})),
             ),
           );
         } else {
@@ -225,11 +204,7 @@ class DevicesScreen extends StatelessWidget {
 
   PopupMenuButton _buildAddButtons(BuildContext context) {
     return PopupMenuButton<PlusMenuIndexes>(
-      icon: Icon(
-        Icons.add_outlined,
-        color: Colors.white,
-        shadows: [_smallShadow],
-      ),
+      icon: Icon(Icons.add_outlined, color: Colors.white, shadows: [_smallShadow]),
       onSelected: (value) {
         switch (value) {
           case PlusMenuIndexes.addDevice:
@@ -267,20 +242,11 @@ class DevicesScreen extends StatelessWidget {
       title: Text(
         context.translate(
           'Devices in {currentScene}',
-          nArgs: {
-            'currentScene':
-                context.read<GroupedDevicesViewModel>().currentScene.name,
-          },
+          nArgs: {'currentScene': context.read<GroupedDevicesViewModel>().currentScene.name},
         ),
         style: Theme.of(context).appBarTheme.titleTextStyle?.copyWith(
           color: Colors.white,
-          shadows: [
-            const Shadow(
-              blurRadius: 4.0,
-              color: Colors.black,
-              offset: Offset(2.0, 2.0),
-            ),
-          ],
+          shadows: [const Shadow(blurRadius: 4.0, color: Colors.black, offset: Offset(2.0, 2.0))],
         ),
       ),
       actions: [_buildAddButtons(context)],
@@ -305,18 +271,9 @@ class DevicesScreen extends StatelessWidget {
           child: ImageFiltered(
             imageFilter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
             child:
-                context
-                            .read<GroupedDevicesViewModel>()
-                            .currentScene
-                            .imagePath !=
-                        null
+                context.read<GroupedDevicesViewModel>().currentScene.imagePath != null
                     ? Image.file(
-                      File(
-                        context
-                            .read<GroupedDevicesViewModel>()
-                            .currentScene
-                            .imagePath!,
-                      ),
+                      File(context.read<GroupedDevicesViewModel>().currentScene.imagePath!),
                       fit: BoxFit.cover,
                       height: double.infinity,
                       width: double.infinity,
@@ -355,25 +312,14 @@ class DevicesScreen extends StatelessWidget {
                       height: 32,
                       child: Row(
                         children: [
-                          Text(
-                            gvm.name,
-                            textAlign: TextAlign.start,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
+                          Text(gvm.name, textAlign: TextAlign.start, style: Theme.of(context).textTheme.titleMedium),
                           const Spacer(),
                           if (!gvm.isDummy)
                             IconButton(
                               icon: Icon(Icons.more_horiz_outlined, size: 24),
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 0,
-                              ),
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                               constraints: null,
-                              onPressed:
-                                  gvm.isDummy || gvm.isBusy
-                                      ? null
-                                      : () =>
-                                          _showEditGroupPage(context, g.model),
+                              onPressed: gvm.isDummy || gvm.isBusy ? null : () => _showEditGroupPage(context, g.model),
                             ),
                         ],
                       ),
@@ -392,9 +338,7 @@ class DevicesScreen extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => GroupEditScreen(),
-        settings: RouteSettings(
-          arguments: GroupEditArguments(isCreation: false, model: group),
-        ),
+        settings: RouteSettings(arguments: GroupEditArguments(isCreation: false, model: group)),
       ),
     );
   }

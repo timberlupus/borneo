@@ -34,8 +34,7 @@ final class DeviceManager {
   final GroupManager _groupManager;
 
   // event subscriptions
-  late final StreamSubscription<UnboundDeviceDiscoveredEvent>
-  _unboundDeviceDiscoveredEventSub;
+  late final StreamSubscription<UnboundDeviceDiscoveredEvent> _unboundDeviceDiscoveredEventSub;
 
   bool get isInitialized => _isInitialized;
   EventBus get deviceEvents => _kernel.events;
@@ -45,17 +44,10 @@ final class DeviceManager {
 
   Iterable<BoundDevice> get boundDevices => _kernel.boundDevices;
 
-  DeviceManager(
-    this._logger,
-    this._db,
-    this._kernel,
-    this._globalBus,
-    this._sceneManager,
-    this._groupManager,
-  ) {
-    _unboundDeviceDiscoveredEventSub = deviceEvents
-        .on<UnboundDeviceDiscoveredEvent>()
-        .listen(_onUnboundDeviceDiscovered);
+  DeviceManager(this._logger, this._db, this._kernel, this._globalBus, this._sceneManager, this._groupManager) {
+    _unboundDeviceDiscoveredEventSub = deviceEvents.on<UnboundDeviceDiscoveredEvent>().listen(
+      _onUnboundDeviceDiscovered,
+    );
   }
 
   Future<void> initialize() async {
@@ -80,8 +72,7 @@ final class DeviceManager {
 
   bool isBound(String deviceID) => _kernel.isBound(deviceID);
 
-  BoundDevice getBoundDevice(String deviceID) =>
-      _kernel.getBoundDevice(deviceID);
+  BoundDevice getBoundDevice(String deviceID) => _kernel.getBoundDevice(deviceID);
 
   Future<void> rebindAll() async {
     await _kernel.unbindAll();
@@ -93,11 +84,9 @@ final class DeviceManager {
     await Future.wait(futures);
   }
 
-  Future<bool> tryBind(DeviceEntity device) async =>
-      _kernel.tryBind(device, device.driverID);
+  Future<bool> tryBind(DeviceEntity device) async => _kernel.tryBind(device, device.driverID);
 
-  Future<void> bind(DeviceEntity device) =>
-      _kernel.bind(device, device.driverID);
+  Future<void> bind(DeviceEntity device) => _kernel.bind(device, device.driverID);
 
   Future<void> unbind(String deviceID) => _kernel.unbind(deviceID);
 
@@ -116,27 +105,15 @@ final class DeviceManager {
     }
   }
 
-  Future<void> update(
-    String id, {
-    Transaction? tx,
-    String? name,
-    String? groupID,
-  }) async {
+  Future<void> update(String id, {Transaction? tx, String? name, String? groupID}) async {
     if (tx == null) {
-      return await _db.transaction(
-        (tx) => _update(id, tx: tx, name: name, groupID: groupID),
-      );
+      return await _db.transaction((tx) => _update(id, tx: tx, name: name, groupID: groupID));
     } else {
       await _update(id, tx: tx, name: name, groupID: groupID);
     }
   }
 
-  Future<void> _update(
-    String id, {
-    required Transaction tx,
-    String? name,
-    String? groupID,
-  }) async {
+  Future<void> _update(String id, {required Transaction tx, String? name, String? groupID}) async {
     final store = stringMapStoreFactory.store(StoreNames.devices);
     final originalRecord = await store.record(id).get(tx);
     if (originalRecord == null) {
@@ -144,10 +121,8 @@ final class DeviceManager {
     }
     final oldEntity = DeviceEntity.fromMap(id, originalRecord);
     final fieldsToUpdate = {
-      DeviceEntity.kNameFieldName:
-          originalRecord[DeviceEntity.kNameFieldName] ?? name,
-      DeviceEntity.kGroupIDFieldName:
-          originalRecord[DeviceEntity.kGroupIDFieldName] ?? groupID,
+      DeviceEntity.kNameFieldName: originalRecord[DeviceEntity.kNameFieldName] ?? name,
+      DeviceEntity.kGroupIDFieldName: originalRecord[DeviceEntity.kGroupIDFieldName] ?? groupID,
     };
     final updatedRecord = await store.record(id).update(tx, fieldsToUpdate);
     final updatedEntity = DeviceEntity.fromMap(id, updatedRecord!);
@@ -161,38 +136,25 @@ final class DeviceManager {
     });
   }
 
-  Future<bool> isNewDevice(
-    SupportedDeviceDescriptor matched, {
-    Transaction? tx,
-  }) async {
+  Future<bool> isNewDevice(SupportedDeviceDescriptor matched, {Transaction? tx}) async {
     if (tx == null) {
       return await _db.transaction((tx) => isNewDevice(matched, tx: tx));
     } else {
       final store = stringMapStoreFactory.store(StoreNames.devices);
-      final filter = Filter.equals(
-        DeviceEntity.kFngerprintFieldName,
-        matched.fingerprint,
-      );
+      final filter = Filter.equals(DeviceEntity.kFngerprintFieldName, matched.fingerprint);
       final n = await store.count(tx, filter: filter);
       return n == 0;
     }
   }
 
-  Future<DeviceEntity?> singleOrDefaultByFingerprint(
-    String fingerprint, {
-    Transaction? tx,
-  }) async {
+  Future<DeviceEntity?> singleOrDefaultByFingerprint(String fingerprint, {Transaction? tx}) async {
     if (tx == null) {
-      return await _db.transaction(
-        (tx) => singleOrDefaultByFingerprint(fingerprint, tx: tx),
-      );
+      return await _db.transaction((tx) => singleOrDefaultByFingerprint(fingerprint, tx: tx));
     } else {
       final store = stringMapStoreFactory.store(StoreNames.devices);
       final record = await store.findFirst(
         tx,
-        finder: Finder(
-          filter: Filter.equals(DeviceEntity.kFngerprintFieldName, fingerprint),
-        ),
+        finder: Finder(filter: Filter.equals(DeviceEntity.kFngerprintFieldName, fingerprint)),
       );
       if (record == null) {
         return null;
@@ -207,9 +169,7 @@ final class DeviceManager {
       final bound = _kernel.getBoundDevice(deviceID);
       if (bound.driver is IReadOnlyPowerOnOffCapability) {
         // TODO adding lastValue to avoid async
-        final isOn = await bound.api<IReadOnlyPowerOnOffCapability>().getOnOff(
-          bound.device,
-        );
+        final isOn = await bound.api<IReadOnlyPowerOnOffCapability>().getOnOff(bound.device);
         return isOn ? DeviceState.operational : DeviceState.powerOff;
       } else {
         return DeviceState.powerOff;
@@ -219,11 +179,7 @@ final class DeviceManager {
     }
   }
 
-  Future<DeviceEntity> addNewDevice(
-    SupportedDeviceDescriptor discovered, {
-    String? groupID,
-    Transaction? tx,
-  }) async {
+  Future<DeviceEntity> addNewDevice(SupportedDeviceDescriptor discovered, {String? groupID, Transaction? tx}) async {
     assert(isInitialized);
     if (tx == null) {
       return await _db.transaction((tx) async {
@@ -269,17 +225,9 @@ final class DeviceManager {
   Future<List<DeviceEntity>> fetchAllDevicesInScene({String? sceneID}) async {
     return await _db.transaction((tx) async {
       final store = stringMapStoreFactory.store(StoreNames.devices);
-      final finder = Finder(
-        filter: Filter.equals(
-          DeviceEntity.kSceneIDFieldName,
-          sceneID ?? _sceneManager.current.id,
-        ),
-      );
+      final finder = Finder(filter: Filter.equals(DeviceEntity.kSceneIDFieldName, sceneID ?? _sceneManager.current.id));
       final records = await store.find(tx, finder: finder);
-      final devices =
-          records
-              .map((record) => DeviceEntity.fromMap(record.key, record.value))
-              .toList();
+      final devices = records.map((record) => DeviceEntity.fromMap(record.key, record.value)).toList();
       return devices;
     });
   }
@@ -296,24 +244,17 @@ final class DeviceManager {
     await _kernel.stopDevicesScanning();
   }
 
-  Future<void> _onUnboundDeviceDiscovered(
-    UnboundDeviceDiscoveredEvent event,
-  ) async {
+  Future<void> _onUnboundDeviceDiscovered(UnboundDeviceDiscoveredEvent event) async {
     _logger.i('Device discovered: ${event.matched}');
     assert(isInitialized);
     return await _db.transaction((tx) async {
-      final existed = await singleOrDefaultByFingerprint(
-        event.matched.fingerprint,
-        tx: tx,
-      );
+      final existed = await singleOrDefaultByFingerprint(event.matched.fingerprint, tx: tx);
       if (existed != null) {
         if (event.matched.address != existed.address) {
           // Otherwise we should update the `address` field
           final store = stringMapStoreFactory.store(StoreNames.devices);
           final record = store.record(existed.id);
-          await record.update(tx, {
-            DeviceEntity.kAddressFieldName: event.matched.address.toString(),
-          });
+          await record.update(tx, {DeviceEntity.kAddressFieldName: event.matched.address.toString()});
         }
       } else {
         deviceEvents.fire(NewDeviceFoundEvent(event.matched));

@@ -21,10 +21,8 @@ class ManualEditorView extends StatelessWidget {
           return Selector<ManualEditorViewModel, bool>(
             selector: (_, editor) => editor.canChangeColor,
             builder:
-                (_, canChangeColor, __) => BrightnessSliderList(
-                  context.read<ManualEditorViewModel>(),
-                  disabled: !canChangeColor,
-                ),
+                (_, canChangeColor, __) =>
+                    BrightnessSliderList(context.read<ManualEditorViewModel>(), disabled: !canChangeColor),
           );
         } else {
           return Container();
@@ -33,10 +31,7 @@ class ManualEditorView extends StatelessWidget {
     );
   }
 
-  List<BarChartGroupData> buildGroupDataItems(
-    BuildContext context,
-    ManualEditorViewModel vm,
-  ) {
+  List<BarChartGroupData> buildGroupDataItems(BuildContext context, ManualEditorViewModel vm) {
     int index = 0;
     if (vm.isInitialized) {
       return vm.deviceInfo.channels.map((ch) {
@@ -50,12 +45,7 @@ class ManualEditorView extends StatelessWidget {
     }
   }
 
-  BarChartGroupData makeGroupData(
-    BuildContext context,
-    LyfiChannelInfo ch,
-    int x,
-    double y,
-  ) {
+  BarChartGroupData makeGroupData(BuildContext context, LyfiChannelInfo ch, int x, double y) {
     return BarChartGroupData(
       x: x,
       barRods: [
@@ -75,20 +65,11 @@ class ManualEditorView extends StatelessWidget {
     );
   }
 
-  Widget buildTitles(
-    BuildContext context,
-    ManualEditorViewModel vm,
-    double value,
-  ) {
+  Widget buildTitles(BuildContext context, ManualEditorViewModel vm, double value) {
     if (vm.isInitialized) {
       final index = value.toInt();
       final ch = vm.deviceInfo.channels[index];
-      return Text(
-        ch.name,
-        style: Theme.of(
-          context,
-        ).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
-      );
+      return Text(ch.name, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor));
     } else {
       return Text("N/A");
     }
@@ -110,19 +91,12 @@ class ManualEditorView extends StatelessWidget {
                       sideTitles: SideTitles(
                         reservedSize: 24,
                         showTitles: true,
-                        getTitlesWidget:
-                            (value, _) => buildTitles(context, vm, value),
+                        getTitlesWidget: (value, _) => buildTitles(context, vm, value),
                       ),
                     ),
-                    leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
+                    leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   ),
                   borderData: FlBorderData(show: false),
                   barTouchData: BarTouchData(enabled: true),
@@ -137,8 +111,7 @@ class ManualEditorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
-      value:
-          context.read<LyfiViewModel>().currentEditor! as ManualEditorViewModel,
+      value: context.read<LyfiViewModel>().currentEditor! as ManualEditorViewModel,
       builder:
           (context, child) => Column(
             spacing: 16,
@@ -146,10 +119,7 @@ class ManualEditorView extends StatelessWidget {
               Container(
                 color: Theme.of(context).colorScheme.surfaceContainer,
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: AspectRatio(
-                  aspectRatio: 2.75,
-                  child: buildGraph(context),
-                ),
+                child: AspectRatio(aspectRatio: 2.75, child: buildGraph(context)),
               ),
               Expanded(child: buildSliders(context)),
             ],

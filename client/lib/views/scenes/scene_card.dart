@@ -10,11 +10,7 @@ import 'scene_edit_screen.dart';
 
 class SceneCard extends StatelessWidget {
   final SceneSummaryViewModel scene;
-  static const _smallShadow = Shadow(
-    offset: Offset(1.0, 1.0),
-    blurRadius: 2.0,
-    color: Color.fromARGB(128, 0, 0, 0),
-  );
+  static const _smallShadow = Shadow(offset: Offset(1.0, 1.0), blurRadius: 2.0, color: Color.fromARGB(128, 0, 0, 0));
 
   const SceneCard(this.scene, {super.key});
 
@@ -27,9 +23,7 @@ class SceneCard extends StatelessWidget {
             margin: EdgeInsets.all(0),
             borderOnForeground: true,
             elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.0),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
             child: AspectRatio(
               aspectRatio: 16.0 / 9.0,
               child: Consumer<SceneSummaryViewModel>(
@@ -39,8 +33,7 @@ class SceneCard extends StatelessWidget {
                           scene.isSelected
                               ? null
                               : () async {
-                                final scenesVM =
-                                    context.read<ScenesViewModel>();
+                                final scenesVM = context.read<ScenesViewModel>();
                                 await scenesVM.switchCurrentScene(scene.id);
                               },
                       child: Ink(
@@ -62,40 +55,26 @@ class SceneCard extends StatelessWidget {
                           child: Stack(
                             alignment: Alignment.topRight,
                             children: [
-                              if (scene.isSelected &&
-                                  vm.model.imagePath == null)
+                              if (scene.isSelected && vm.model.imagePath == null)
                                 Image.asset(
                                   'assets/images/scenes/scene-default-noimage.jpg',
                                   fit: BoxFit.cover,
                                   width: double.infinity,
                                 ),
-                              if (!scene.isSelected &&
-                                  vm.model.imagePath == null)
+                              if (!scene.isSelected && vm.model.imagePath == null)
                                 ColorFiltered(
-                                  colorFilter: ColorFilter.mode(
-                                    Colors.black.withAlpha(128),
-                                    BlendMode.srcATop,
-                                  ),
+                                  colorFilter: ColorFilter.mode(Colors.black.withAlpha(128), BlendMode.srcATop),
                                   child: Image.asset(
                                     'assets/images/scenes/scene-default-noimage.jpg',
                                     fit: BoxFit.cover,
                                     width: double.infinity,
                                   ),
                                 ),
-                              if (scene.isSelected &&
-                                  vm.model.imagePath != null)
-                                Image.file(
-                                  File(vm.model.imagePath!),
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                ),
-                              if (!scene.isSelected &&
-                                  vm.model.imagePath != null)
+                              if (scene.isSelected && vm.model.imagePath != null)
+                                Image.file(File(vm.model.imagePath!), fit: BoxFit.cover, width: double.infinity),
+                              if (!scene.isSelected && vm.model.imagePath != null)
                                 ColorFiltered(
-                                  colorFilter: ColorFilter.mode(
-                                    Colors.black.withAlpha(97),
-                                    BlendMode.srcATop,
-                                  ),
+                                  colorFilter: ColorFilter.mode(Colors.black.withAlpha(97), BlendMode.srcATop),
                                   child: Image.file(
                                     File(vm.model.imagePath!),
                                     fit: BoxFit.cover,
@@ -108,10 +87,8 @@ class SceneCard extends StatelessWidget {
                                 child: Row(
                                   children: [
                                     Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           scene.name,
@@ -123,9 +100,7 @@ class SceneCard extends StatelessWidget {
                                               Shadow(
                                                 offset: Offset(2.0, 2.0),
                                                 blurRadius: 4.0,
-                                                color: Colors.black.withAlpha(
-                                                  97,
-                                                ),
+                                                color: Colors.black.withAlpha(97),
                                               ),
                                             ],
                                           ),
@@ -173,10 +148,7 @@ class SceneCard extends StatelessWidget {
                                       return RadialGradient(
                                         center: Alignment.center,
                                         radius: 0.5,
-                                        colors: [
-                                          Colors.white.withAlpha(200),
-                                          Colors.white,
-                                        ],
+                                        colors: [Colors.white.withAlpha(200), Colors.white],
                                         stops: [0.0, 1.0],
                                         tileMode: TileMode.clamp,
                                       ).createShader(bounds);
@@ -192,11 +164,7 @@ class SceneCard extends StatelessWidget {
                                   onPressed: () {
                                     _showEditSceneScreen(context);
                                   },
-                                  icon: Icon(
-                                    Icons.edit_outlined,
-                                    color: Colors.white,
-                                    shadows: const [_smallShadow],
-                                  ),
+                                  icon: Icon(Icons.edit_outlined, color: Colors.white, shadows: const [_smallShadow]),
                                 ),
                               ),
                             ],
@@ -215,10 +183,7 @@ class SceneCard extends StatelessWidget {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder:
-            (context) => SceneEditScreen(
-              args: SceneEditArguments(isCreation: false, model: vm.model),
-            ),
+        builder: (context) => SceneEditScreen(args: SceneEditArguments(isCreation: false, model: vm.model)),
       ),
     );
   }

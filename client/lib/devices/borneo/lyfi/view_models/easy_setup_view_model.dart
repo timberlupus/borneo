@@ -26,14 +26,8 @@ class EasySetupViewModel extends ChangeNotifier {
     final blackColor = List<int>.filled(editor.availableChannelCount, 0);
     return <ScheduledInstant>[
       ScheduledInstant(instant: _startTime.value, color: blackColor.toList()),
-      ScheduledInstant(
-        instant: _startTime.value + fadingDuration,
-        color: editor.channels.map((x) => x.value).toList(),
-      ),
-      ScheduledInstant(
-        instant: _endTime.value - fadingDuration,
-        color: editor.channels.map((x) => x.value).toList(),
-      ),
+      ScheduledInstant(instant: _startTime.value + fadingDuration, color: editor.channels.map((x) => x.value).toList()),
+      ScheduledInstant(instant: _endTime.value - fadingDuration, color: editor.channels.map((x) => x.value).toList()),
       ScheduledInstant(instant: _endTime.value, color: blackColor.toList()),
     ];
   }

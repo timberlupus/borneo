@@ -13,12 +13,7 @@ class DeviceGroupEntity with BaseEntity {
 
   bool get isDummy => id == '';
 
-  DeviceGroupEntity({
-    required this.id,
-    required this.sceneID,
-    required this.name,
-    this.notes = '',
-  });
+  DeviceGroupEntity({required this.id, required this.sceneID, required this.name, this.notes = ''});
 
   factory DeviceGroupEntity.fromMap(String id, Map<String, dynamic> map) {
     return DeviceGroupEntity(
@@ -30,10 +25,6 @@ class DeviceGroupEntity with BaseEntity {
   }
 
   Map<String, dynamic> toMap() {
-    return {
-      kSceneIDFieldName: sceneID,
-      kNameField: name,
-      kNotesFieldName: notes,
-    };
+    return {kSceneIDFieldName: sceneID, kNameField: name, kNotesFieldName: notes};
   }
 }

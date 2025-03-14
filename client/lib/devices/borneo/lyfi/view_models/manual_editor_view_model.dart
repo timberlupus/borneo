@@ -9,12 +9,10 @@ class ManualEditorViewModel extends ChangeNotifier implements IEditor {
 
   bool _isChanged = false;
   bool _isInitialized = false;
-  ILyfiDeviceApi get _deviceApi =>
-      _parent.boundDevice!.driver as ILyfiDeviceApi;
+  ILyfiDeviceApi get _deviceApi => _parent.boundDevice!.driver as ILyfiDeviceApi;
   final LyfiViewModel _parent;
 
-  final AsyncRateLimiter<Future Function()> _colorChangeRateLimiter =
-      AsyncRateLimiter(interval: _dimmingInterval);
+  final AsyncRateLimiter<Future Function()> _colorChangeRateLimiter = AsyncRateLimiter(interval: _dimmingInterval);
 
   final List<ValueNotifier<int>> _channels;
 
@@ -22,8 +20,7 @@ class ManualEditorViewModel extends ChangeNotifier implements IEditor {
   bool get isBusy => _parent.isBusy;
 
   @override
-  bool get canEdit =>
-      !isBusy && _parent.isOnline && _parent.isOn && !_parent.isLocked;
+  bool get canEdit => !isBusy && _parent.isOnline && _parent.isOn && !_parent.isLocked;
 
   bool get canChangeColor => canEdit;
 
@@ -31,18 +28,12 @@ class ManualEditorViewModel extends ChangeNotifier implements IEditor {
   LyfiDeviceInfo get deviceInfo => _parent.lyfiDeviceInfo;
 
   ManualEditorViewModel(this._parent)
-    : _channels = List.generate(
-        _parent.lyfiDeviceInfo.channelCount,
-        growable: false,
-        (index) => ValueNotifier(0),
-      );
+    : _channels = List.generate(_parent.lyfiDeviceInfo.channelCount, growable: false, (index) => ValueNotifier(0));
 
   @override
   Future<void> initialize() async {
     _parent.enqueueJob(() async {
-      final lyfiStatus = await _deviceApi.getLyfiStatus(
-        _parent.boundDevice!.device,
-      );
+      final lyfiStatus = await _deviceApi.getLyfiStatus(_parent.boundDevice!.device);
       for (int i = 0; i < _parent.lyfiDeviceInfo.channels.length; i++) {
         _channels[i].value = lyfiStatus.manualColor[i];
       }
@@ -60,14 +51,10 @@ class ManualEditorViewModel extends ChangeNotifier implements IEditor {
 
   @override
   Future<void> updateChannelValue(int index, int value) async {
-    if (index >= 0 &&
-        index < _channels.length &&
-        value != _channels[index].value) {
+    if (index >= 0 && index < _channels.length && value != _channels[index].value) {
       _channels[index].value = value;
       final color = _channels.map((x) => x.value).toList();
-      _colorChangeRateLimiter.add(
-        () => _deviceApi.setColor(_parent.boundDevice!.device, color),
-      );
+      _colorChangeRateLimiter.add(() => _deviceApi.setColor(_parent.boundDevice!.device, color));
       _isChanged = true;
     }
   }

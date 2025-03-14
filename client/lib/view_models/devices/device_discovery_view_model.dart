@@ -16,8 +16,7 @@ import '/view_models/base_view_model.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_app/services/device_manager.dart';
 
-class DeviceDiscoveryViewModel extends AbstractScreenViewModel
-    with ViewModelEventBusMixin {
+class DeviceDiscoveryViewModel extends AbstractScreenViewModel with ViewModelEventBusMixin {
   // TODO move this to device manager
   final Logger _logger;
   final _provisioner = Provisioner.espTouch();
@@ -39,10 +38,8 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel
   // Getter for loading state
   bool get isDiscovering => _isDiscovering;
 
-  final ValueNotifier<List<SupportedDeviceDescriptor>> _discoveredDevices =
-      ValueNotifier([]);
-  ValueNotifier<List<SupportedDeviceDescriptor>> get discoveredDevices =>
-      _discoveredDevices;
+  final ValueNotifier<List<SupportedDeviceDescriptor>> _discoveredDevices = ValueNotifier([]);
+  ValueNotifier<List<SupportedDeviceDescriptor>> get discoveredDevices => _discoveredDevices;
 
   DeviceEntity? _lastestAddedDevice;
   DeviceEntity? get lastestAddedDevice => _lastestAddedDevice;
@@ -75,28 +72,21 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel
   int get newDeviceCount => _newDeviceCount;
   int get discoveredCount => _discoveredCount;
 
-  DeviceDiscoveryViewModel(
-    this._logger,
-    EventBus bus,
-    this._groupManager,
-    this._deviceManager,
-  ) {
+  DeviceDiscoveryViewModel(this._logger, EventBus bus, this._groupManager, this._deviceManager) {
     super.globalEventBus = bus;
-    _deviceAddedEventSub = _deviceManager.deviceEvents
-        .on<NewDeviceEntityAddedEvent>()
-        .listen((event) => _onNewDeviceEntityAdded(event));
+    _deviceAddedEventSub = _deviceManager.deviceEvents.on<NewDeviceEntityAddedEvent>().listen(
+      (event) => _onNewDeviceEntityAdded(event),
+    );
 
-    _newDeviceFoundEventSub = _deviceManager.deviceEvents
-        .on<NewDeviceFoundEvent>()
-        .listen((event) => _onNewDeviceFound(event));
+    _newDeviceFoundEventSub = _deviceManager.deviceEvents.on<NewDeviceFoundEvent>().listen(
+      (event) => _onNewDeviceFound(event),
+    );
   }
 
   @override
   Future<void> onInitialize() async {
     try {
-      _availableGroups.addAll(
-        await _groupManager.fetchAllGroupsInCurrentScene(),
-      );
+      _availableGroups.addAll(await _groupManager.fetchAllGroupsInCurrentScene());
     } finally {}
   }
 
@@ -134,8 +124,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel
   }
 
   void _validateForm() {
-    _isFormValid =
-        !_isSmartConfigEnabled || (_ssid.isNotEmpty && _password.isNotEmpty);
+    _isFormValid = !_isSmartConfigEnabled || (_ssid.isNotEmpty && _password.isNotEmpty);
     notifyListeners();
   }
 
@@ -148,9 +137,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel
   }
 
   Future<void> startDiscovery() async {
-    if (!(!isSmartConfigEnabled || isFormValid) ||
-        isDiscovering ||
-        super.isBusy) {
+    if (!(!isSmartConfigEnabled || isFormValid) || isDiscovering || super.isBusy) {
       return;
     }
 
@@ -172,16 +159,8 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel
         );
       }
     } catch (e, stackTrace) {
-      super.notifyAppError(
-        'Error occurred while discovering devices: $e',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      _logger.e(
-        'Failed to discovering devices',
-        error: e,
-        stackTrace: stackTrace,
-      );
+      super.notifyAppError('Error occurred while discovering devices: $e', error: e, stackTrace: stackTrace);
+      _logger.e('Failed to discovering devices', error: e, stackTrace: stackTrace);
     } finally {
       notifyListeners();
     }
@@ -198,11 +177,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel
       }
       await _deviceManager.stopDiscovery();
     } catch (e, stackTrace) {
-      super.notifyAppError(
-        'Error occurred while stopping discovery: $e',
-        error: e,
-        stackTrace: stackTrace,
-      );
+      super.notifyAppError('Error occurred while stopping discovery: $e', error: e, stackTrace: stackTrace);
     } finally {
       notifyListeners();
     }
@@ -231,19 +206,14 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel
     }
   }
 
-  Future<void> addNewDevice(
-    SupportedDeviceDescriptor deviceInfo,
-    DeviceGroupEntity? group,
-  ) async {
+  Future<void> addNewDevice(SupportedDeviceDescriptor deviceInfo, DeviceGroupEntity? group) async {
     await _deviceManager.addNewDevice(deviceInfo, groupID: group?.id);
   }
 
   Future<void> _onNewDeviceEntityAdded(NewDeviceEntityAddedEvent event) async {
     // TODO show a toast or snackbar
     try {
-      _discoveredDevices.value.removeWhere(
-        (x) => x.fingerprint == event.device.fingerprint,
-      );
+      _discoveredDevices.value.removeWhere((x) => x.fingerprint == event.device.fingerprint);
       _discoveredDevices.value = List.from(_discoveredDevices.value);
       _lastestAddedDevice = event.device;
     } finally {

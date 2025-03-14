@@ -20,9 +20,7 @@ class GroupEditScreen extends StatelessWidget {
         initialValue: vm.name,
         decoration: InputDecoration(
           labelText: context.translate('Name'),
-          hintStyle: Theme.of(
-            context,
-          ).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
+          hintStyle: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
           hintText: context.translate('Enter the required scene name'),
         ),
         validator: (value) {
@@ -41,12 +39,8 @@ class GroupEditScreen extends StatelessWidget {
         maxLines: null,
         keyboardType: TextInputType.multiline,
         decoration: InputDecoration(
-          hintStyle: Theme.of(
-            context,
-          ).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
-          hintText: context.translate(
-            'Enter the optional notes for this scene',
-          ),
+          hintStyle: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
+          hintText: context.translate('Enter the optional notes for this scene'),
           labelText: context.translate('Notes'),
         ),
         onSaved: (value) {
@@ -131,8 +125,7 @@ class GroupEditScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GroupEditArguments args =
-        ModalRoute.of(context)!.settings.arguments as GroupEditArguments;
+    final GroupEditArguments args = ModalRoute.of(context)!.settings.arguments as GroupEditArguments;
 
     return ChangeNotifierProvider<GroupEditViewModel>(
       create:
@@ -149,9 +142,7 @@ class GroupEditScreen extends StatelessWidget {
             appBar: AppBar(
               backgroundColor: Theme.of(context).colorScheme.surface,
               title: Text(
-                args.isCreation
-                    ? context.translate('New Device Group')
-                    : context.translate('Edit Device Group'),
+                args.isCreation ? context.translate('New Device Group') : context.translate('Edit Device Group'),
               ),
               actions: buildActions(context, args),
             ),

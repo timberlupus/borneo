@@ -39,8 +39,7 @@ class ScheduleEntryViewModel extends ChangeNotifier {
     _channels.addAll(model.color);
   }
 
-  ScheduledInstant toModel() =>
-      ScheduledInstant(instant: _instant, color: _channels);
+  ScheduledInstant toModel() => ScheduledInstant(instant: _instant, color: _channels);
 }
 
 class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
@@ -55,8 +54,7 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
 
   int? _currentEntryIndex;
 
-  final AsyncRateLimiter<Future Function()> _colorChangeRateLimiter =
-      AsyncRateLimiter(interval: _dimmingInterval);
+  final AsyncRateLimiter<Future Function()> _colorChangeRateLimiter = AsyncRateLimiter(interval: _dimmingInterval);
 
   final List<ScheduleEntryViewModel> _entries = [];
 
@@ -79,23 +77,16 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
   List<ValueNotifier<int>> get channels => _channels;
 
   @override
-  bool get canEdit =>
-      !isBusy && _parent.isOnline && _parent.isOn && !_parent.isLocked;
+  bool get canEdit => !isBusy && _parent.isOnline && _parent.isOn && !_parent.isLocked;
 
   bool get canChangeColor => canEdit && currentEntry != null;
 
-  ScheduleEntryViewModel? get currentEntry =>
-      _currentEntryIndex != null ? _entries[_currentEntryIndex!] : null;
+  ScheduleEntryViewModel? get currentEntry => _currentEntryIndex != null ? _entries[_currentEntryIndex!] : null;
 
-  ILyfiDeviceApi get _deviceApi =>
-      _parent.boundDevice!.driver as ILyfiDeviceApi;
+  ILyfiDeviceApi get _deviceApi => _parent.boundDevice!.driver as ILyfiDeviceApi;
 
   ScheduleEditorViewModel(this._parent)
-    : _channels = List.generate(
-        _parent.lyfiDeviceInfo.channelCount,
-        growable: false,
-        (index) => ValueNotifier(0),
-      ),
+    : _channels = List.generate(_parent.lyfiDeviceInfo.channelCount, growable: false, (index) => ValueNotifier(0)),
       easySetupViewModel = EasySetupViewModel(),
       blackColor = List.filled(_parent.lyfiDeviceInfo.channelCount, 0);
 
@@ -126,11 +117,7 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
   void _setCurrentEntry(int? index) {
     if (index != null) {
       _currentEntryIndex = index;
-      for (
-        int channelIndex = 0;
-        channelIndex < _channels.length;
-        channelIndex++
-      ) {
+      for (int channelIndex = 0; channelIndex < _channels.length; channelIndex++) {
         channels[channelIndex].value = currentEntry!.channels[channelIndex];
       }
     } else {
@@ -148,11 +135,7 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
   }
 
   bool get canPrevInstant =>
-      isInitialized &&
-      !isPreviewMode &&
-      _entries.length > 1 &&
-      _currentEntryIndex != null &&
-      _currentEntryIndex! > 0;
+      isInitialized && !isPreviewMode && _entries.length > 1 && _currentEntryIndex != null && _currentEntryIndex! > 0;
 
   Future<void> prevInstant() async {
     if (_currentEntryIndex == null) {
@@ -181,8 +164,7 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
     }
   }
 
-  bool get canRemoveCurrentInstant =>
-      isInitialized && _entries.isNotEmpty && _currentEntryIndex != null;
+  bool get canRemoveCurrentInstant => isInitialized && _entries.isNotEmpty && _currentEntryIndex != null;
 
   void removeCurrentInstant() {
     if (_currentEntryIndex == null) {
@@ -227,17 +209,9 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
     int insertPos = _findInstantInsertPosition(instant);
 
     if (_currentEntryIndex != null) {
-      _insertInstant(
-        insertPos,
-        instant,
-        _entries[_currentEntryIndex!].channels,
-      );
+      _insertInstant(insertPos, instant, _entries[_currentEntryIndex!].channels);
     } else {
-      _insertInstant(
-        insertPos,
-        instant,
-        List<int>.filled(deviceInfo.channelCount, 0, growable: false),
-      );
+      _insertInstant(insertPos, instant, List<int>.filled(deviceInfo.channelCount, 0, growable: false));
     }
     await setCurrentEntryAndSyncDimmingColor(insertPos);
   }
@@ -252,23 +226,15 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
     return insertPos;
   }
 
-  ScheduleEntryViewModel _insertInstant(
-    int insertPos,
-    Duration instant,
-    List<int> channels,
-  ) {
-    final entry = ScheduleEntryViewModel(
-      ScheduledInstant(instant: instant, color: channels),
-    );
+  ScheduleEntryViewModel _insertInstant(int insertPos, Duration instant, List<int> channels) {
+    final entry = ScheduleEntryViewModel(ScheduledInstant(instant: instant, color: channels));
     _entries.insert(insertPos, entry);
     _isChanged = true;
     return entry;
   }
 
   ScheduleEntryViewModel _appendInstant(Duration instant, List<int> channels) {
-    final entry = ScheduleEntryViewModel(
-      ScheduledInstant(instant: instant, color: channels),
-    );
+    final entry = ScheduleEntryViewModel(ScheduledInstant(instant: instant, color: channels));
 
     _entries.add(entry);
     _isChanged = true;
@@ -280,9 +246,7 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
 
   @override
   Future<void> updateChannelValue(int index, int value) async {
-    if (index >= 0 &&
-        index < _channels.length &&
-        value != _channels[index].value) {
+    if (index >= 0 && index < _channels.length && value != _channels[index].value) {
       _channels[index].value = value;
       currentEntry?.channels[index] = value;
       await _syncDimmingColor(true);
@@ -294,9 +258,7 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
   Future<void> _syncDimmingColor(bool isLimited) async {
     final color = _channels.map((x) => x.value).toList();
     if (isLimited) {
-      _colorChangeRateLimiter.add(
-        () => _deviceApi.setColor(_parent.boundDevice!.device, color),
-      );
+      _colorChangeRateLimiter.add(() => _deviceApi.setColor(_parent.boundDevice!.device, color));
     } else {
       await _deviceApi.setColor(_parent.boundDevice!.device, color);
     }

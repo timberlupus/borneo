@@ -11,9 +11,5 @@ class StaticModularDriverRegistry implements IDriverRegistry {
   UnmodifiableMapView<String, DriverDescriptor> get metaDrivers => _metaDrivers;
 
   StaticModularDriverRegistry(IDeviceModuleRegistry staticModules)
-    : _metaDrivers = UnmodifiableMapView(
-        staticModules.metaModules.map(
-          (k, v) => MapEntry(k, v.driverDescriptor),
-        ),
-      );
+    : _metaDrivers = UnmodifiableMapView(staticModules.metaModules.map((k, v) => MapEntry(k, v.driverDescriptor)));
 }

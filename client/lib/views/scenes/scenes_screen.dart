@@ -50,12 +50,7 @@ class ScenesScreen extends StatelessWidget {
         } else if (snapshot.hasError) {
           return Scaffold(
             body: Center(
-              child: Text(
-                context.translate(
-                  'Error: {errMsg}',
-                  nArgs: {'errMsg': snapshot.error.toString()},
-                ),
-              ),
+              child: Text(context.translate('Error: {errMsg}', nArgs: {'errMsg': snapshot.error.toString()})),
             ),
           );
         } else {
@@ -64,12 +59,7 @@ class ScenesScreen extends StatelessWidget {
               slivers: [
                 SliverAppBar(
                   title: Text(context.translate('Scenes')),
-                  actions: [
-                    IconButton(
-                      icon: Icon(Icons.add_outlined),
-                      onPressed: () => _showNewSceneScreen(context),
-                    ),
-                  ],
+                  actions: [IconButton(icon: Icon(Icons.add_outlined), onPressed: () => _showNewSceneScreen(context))],
                 ),
                 SceneList(),
                 RoutineList(),
@@ -84,11 +74,7 @@ class ScenesScreen extends StatelessWidget {
   Future<void> _showNewSceneScreen(BuildContext context) async {
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder:
-            (context) =>
-                SceneEditScreen(args: SceneEditArguments(isCreation: true)),
-      ),
+      MaterialPageRoute(builder: (context) => SceneEditScreen(args: SceneEditArguments(isCreation: true))),
     );
   }
 }

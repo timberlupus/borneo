@@ -15,29 +15,20 @@ import 'brightness_slider_list.dart';
 class ScheduleEditorView extends StatelessWidget {
   const ScheduleEditorView({super.key});
 
-  Future<Duration?> showNewInstantDialog(
-    BuildContext context,
-    TimeOfDay initialTime,
-  ) async {
+  Future<Duration?> showNewInstantDialog(BuildContext context, TimeOfDay initialTime) async {
     bool isNextDay = false;
     final selectedTime = await showTimePicker(
       initialTime: initialTime,
       context: context,
       confirmText: 'Add time point',
       builder:
-          (context, child) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-            child: child!,
-          ),
+          (context, child) =>
+              MediaQuery(data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true), child: child!),
     );
     return selectedTime?.toDuration();
   }
 
-  Widget bottomTitleWidgets(
-    BuildContext context,
-    double value,
-    TitleMeta meta,
-  ) {
+  Widget bottomTitleWidgets(BuildContext context, double value, TitleMeta meta) {
     final style = Theme.of(context).textTheme.labelSmall?.copyWith(
       fontFeatures: [FontFeature.tabularFigures()],
       color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(97),
@@ -47,30 +38,19 @@ class ScheduleEditorView extends StatelessWidget {
     return SideTitleWidget(
       space: 0,
       meta: meta,
-      fitInside: SideTitleFitInsideData.fromTitleMeta(
-        meta,
-        distanceFromEdge: 0,
-        enabled: false,
-      ),
+      fitInside: SideTitleFitInsideData.fromTitleMeta(meta, distanceFromEdge: 0, enabled: false),
       child: Text(duration.toHH(), style: style, textAlign: TextAlign.right),
     );
   }
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
     const style = TextStyle(fontSize: 10, color: Colors.white54);
-    return SideTitleWidget(
-      meta: meta,
-      child: Text('${value + 0.5}', style: style),
-    );
+    return SideTitleWidget(meta: meta, child: Text('${value + 0.5}', style: style));
   }
 
   List<LineChartBarData> buildLineDatas(ScheduleEditorViewModel vm) {
     final series = <LineChartBarData>[];
-    for (
-      int channelIndex = 0;
-      channelIndex < vm.channels.length;
-      channelIndex++
-    ) {
+    for (int channelIndex = 0; channelIndex < vm.channels.length; channelIndex++) {
       final spots = <FlSpot>[];
       //final sortedEntries = vm.entries.toList();
       //sortedEntries.sort((a, b) => a.instant.compareTo(b.instant));
@@ -81,9 +61,7 @@ class ScheduleEditorView extends StatelessWidget {
         spots.add(spot);
       }
       // Skip empty channel
-      final channelColor = HexColor.fromHex(
-        vm.deviceInfo.channels[channelIndex].color,
-      );
+      final channelColor = HexColor.fromHex(vm.deviceInfo.channels[channelIndex].color);
       series.add(
         LineChartBarData(
           isCurved: false,
@@ -100,9 +78,7 @@ class ScheduleEditorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
-      value:
-          context.read<LyfiViewModel>().currentEditor!
-              as ScheduleEditorViewModel,
+      value: context.read<LyfiViewModel>().currentEditor! as ScheduleEditorViewModel,
       builder: (context, child) {
         final vm = context.read<ScheduleEditorViewModel>();
         return Column(
@@ -132,48 +108,28 @@ class ScheduleEditorView extends StatelessWidget {
                             lineBarsData: buildLineDatas(vm),
                             // minX: 0,
                             // maxX: 24 * 3600,
-                            minX:
-                                vm.entries.isNotEmpty
-                                    ? vm.entries.first.instant.inHours
-                                            .toDouble() *
-                                        3600.0
-                                    : 0.0,
+                            minX: vm.entries.isNotEmpty ? vm.entries.first.instant.inHours.toDouble() * 3600.0 : 0.0,
                             maxX:
                                 vm.entries.isNotEmpty
-                                    ? (vm.entries.last.instant.inSeconds
-                                                    .toDouble() /
-                                                3600.0)
-                                            .ceilToDouble() *
-                                        3600
+                                    ? (vm.entries.last.instant.inSeconds.toDouble() / 3600.0).ceilToDouble() * 3600
                                     : 24 * 3600,
                             minY: 0,
                             maxY: 100,
-                            backgroundColor:
-                                Theme.of(context).colorScheme.surfaceContainer,
+                            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
                             borderData: FlBorderData(
                               show: true,
-                              border: Border.all(
-                                color: Theme.of(context).colorScheme.surface,
-                              ),
+                              border: Border.all(color: Theme.of(context).colorScheme.surface),
                             ),
                             titlesData: FlTitlesData(
-                              leftTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-                              topTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-                              rightTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
+                              leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                               bottomTitles: AxisTitles(
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   interval: 3600 * 3,
                                   reservedSize: 16,
-                                  getTitlesWidget:
-                                      (v, m) =>
-                                          bottomTitleWidgets(context, v, m),
+                                  getTitlesWidget: (v, m) => bottomTitleWidgets(context, v, m),
                                 ),
                               ),
                             ),
@@ -183,24 +139,11 @@ class ScheduleEditorView extends StatelessWidget {
                               drawHorizontalLine: true,
                               horizontalInterval: 25.0,
                               verticalInterval: 3600 * 3,
-                              checkToShowVerticalLine:
-                                  (value) => value.toInt() % 1800 == 0,
+                              checkToShowVerticalLine: (value) => value.toInt() % 1800 == 0,
                               getDrawingHorizontalLine:
-                                  (value) => FlLine(
-                                    color:
-                                        Theme.of(
-                                          context,
-                                        ).scaffoldBackgroundColor,
-                                    strokeWidth: 1.5,
-                                  ),
+                                  (value) => FlLine(color: Theme.of(context).scaffoldBackgroundColor, strokeWidth: 1.5),
                               getDrawingVerticalLine:
-                                  (value) => FlLine(
-                                    color:
-                                        Theme.of(
-                                          context,
-                                        ).scaffoldBackgroundColor,
-                                    strokeWidth: 1.5,
-                                  ),
+                                  (value) => FlLine(color: Theme.of(context).scaffoldBackgroundColor, strokeWidth: 1.5),
                             ),
                             extraLinesData:
                                 vm.currentEntry == null
@@ -209,46 +152,26 @@ class ScheduleEditorView extends StatelessWidget {
                                       extraLinesOnTop: false,
                                       verticalLines: [
                                         VerticalLine(
-                                          x:
-                                              vm.currentEntry!.instant.inSeconds
-                                                  .toDouble(),
+                                          x: vm.currentEntry!.instant.inSeconds.toDouble(),
                                           gradient: LinearGradient(
                                             begin: Alignment.topCenter,
                                             end: Alignment.bottomCenter,
                                             colors: [
-                                              Theme.of(context)
-                                                  .colorScheme
-                                                  .primary
-                                                  .withValues(alpha: 0.75),
-                                              Theme.of(context)
-                                                  .colorScheme
-                                                  .surfaceContainer
-                                                  .withValues(alpha: 0.75),
+                                              Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
+                                              Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.75),
                                             ],
                                           ),
                                           strokeWidth: 8,
                                           label: VerticalLineLabel(
                                             show: true,
                                             padding: const EdgeInsets.all(0),
-                                            direction:
-                                                LabelDirection.horizontal,
+                                            direction: LabelDirection.horizontal,
                                             alignment: Alignment(0, -1.5),
-                                            style: Theme.of(
-                                              context,
-                                            ).textTheme.labelMedium?.copyWith(
-                                              fontFeatures: [
-                                                FontFeature.tabularFigures(),
-                                              ],
-                                              color:
-                                                  Theme.of(
-                                                    context,
-                                                  ).colorScheme.primary,
+                                            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                              fontFeatures: [FontFeature.tabularFigures()],
+                                              color: Theme.of(context).colorScheme.primary,
                                             ),
-                                            labelResolver:
-                                                (line) =>
-                                                    Duration(
-                                                      seconds: line.x.toInt(),
-                                                    ).toHHMM(),
+                                            labelResolver: (line) => Duration(seconds: line.x.toInt()).toHHMM(),
                                           ),
                                         ),
                                       ],
@@ -265,10 +188,8 @@ class ScheduleEditorView extends StatelessWidget {
               child: Selector<ScheduleEditorViewModel, bool>(
                 selector: (_, editor) => editor.canChangeColor,
                 builder:
-                    (_, canChangeColor, __) => BrightnessSliderList(
-                      context.read<ScheduleEditorViewModel>(),
-                      disabled: !canChangeColor,
-                    ),
+                    (_, canChangeColor, __) =>
+                        BrightnessSliderList(context.read<ScheduleEditorViewModel>(), disabled: !canChangeColor),
               ),
             ),
 
@@ -284,8 +205,7 @@ class ScheduleEditorView extends StatelessWidget {
                       children: [
                         IconButton(
                           icon: const Icon(Icons.auto_fix_high_outlined),
-                          color:
-                              Theme.of(context).colorScheme.onPrimaryContainer,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
                           tooltip: 'Easy setup',
                           onPressed: () async {
                             if (context.mounted) {
@@ -299,9 +219,7 @@ class ScheduleEditorView extends StatelessWidget {
                               }
                               if (proceed && context.mounted) {
                                 await vm.easySetupEnter();
-                                final route = MaterialPageRoute(
-                                  builder: (context) => EasySetupScreen(vm),
-                                );
+                                final route = MaterialPageRoute(builder: (context) => EasySetupScreen(vm));
                                 if (context.mounted) {
                                   await Navigator.push(context, route);
                                   await vm.easySetupFinish();
@@ -312,26 +230,17 @@ class ScheduleEditorView extends StatelessWidget {
                         ),
                         IconButton(
                           icon: Icon(Icons.play_arrow),
-                          color:
-                              Theme.of(context).colorScheme.onPrimaryContainer,
-                          onPressed:
-                              vm.isOnline && !vm.isPreviewMode
-                                  ? vm.togglePreviewMode
-                                  : null,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          onPressed: vm.isOnline && !vm.isPreviewMode ? vm.togglePreviewMode : null,
                         ),
                         IconButton(
                           icon: const Icon(Icons.add_outlined),
-                          color:
-                              Theme.of(context).colorScheme.onPrimaryContainer,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
                           onPressed: () async {
                             final initialTime =
-                                (vm.currentEntry?.instant ??
-                                    Duration(hours: 6, minutes: 30)) +
+                                (vm.currentEntry?.instant ?? Duration(hours: 6, minutes: 30)) +
                                 ScheduleEditorViewModel.defaultInstantSpan;
-                            final selectedTime = await showNewInstantDialog(
-                              context,
-                              initialTime.toTimeOfDay(),
-                            );
+                            final selectedTime = await showNewInstantDialog(context, initialTime.toTimeOfDay());
                             if (selectedTime != null) {
                               vm.addInstant(selectedTime);
                             }
@@ -339,33 +248,23 @@ class ScheduleEditorView extends StatelessWidget {
                         ),
                         IconButton(
                           icon: const Icon(Icons.remove_outlined),
-                          color:
-                              Theme.of(context).colorScheme.onPrimaryContainer,
-                          onPressed:
-                              vm.canRemoveCurrentInstant
-                                  ? vm.removeCurrentInstant
-                                  : null,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          onPressed: vm.canRemoveCurrentInstant ? vm.removeCurrentInstant : null,
                         ),
                         IconButton(
                           icon: const Icon(Icons.clear_outlined),
-                          color:
-                              Theme.of(context).colorScheme.onPrimaryContainer,
-                          onPressed:
-                              vm.canClearInstants
-                                  ? () => _confirmClearEntries(context, vm)
-                                  : null,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          onPressed: vm.canClearInstants ? () => _confirmClearEntries(context, vm) : null,
                         ),
                         IconButton(
                           icon: const Icon(Icons.skip_previous_outlined),
                           onPressed: vm.canPrevInstant ? vm.prevInstant : null,
-                          color:
-                              Theme.of(context).colorScheme.onPrimaryContainer,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
                         ),
                         IconButton(
                           icon: const Icon(Icons.skip_next_outlined),
                           onPressed: vm.canNextInstant ? vm.nextInstant : null,
-                          color:
-                              Theme.of(context).colorScheme.onPrimaryContainer,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
                         ),
                       ],
                     ),
@@ -386,10 +285,7 @@ class ScheduleEditorView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text(
-                'Confirmation',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              Text('Confirmation', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               SizedBox(height: 16),
               Text('Are you sure you want to remove all schedule entries?'),
               SizedBox(height: 16),

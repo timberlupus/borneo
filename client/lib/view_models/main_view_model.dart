@@ -23,10 +23,8 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
   bool _isInitialized = false;
 
   late final StreamSubscription<AppErrorEvent> _appErrorEventSub;
-  late final StreamSubscription<DeviceDiscoveringStartedEvent>
-  _deviceDiscoveringStartedEventSub;
-  late final StreamSubscription<DeviceDiscoveringStoppedEvent>
-  _deviceDiscoveringStoppedEventSub;
+  late final StreamSubscription<DeviceDiscoveringStartedEvent> _deviceDiscoveringStartedEventSub;
+  late final StreamSubscription<DeviceDiscoveringStoppedEvent> _deviceDiscoveringStoppedEventSub;
 
   final List<AppErrorEvent> _errorsStack = [];
 
@@ -38,10 +36,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
 
   bool get isInitialized => _isInitialized;
 
-  String get currentSceneName =>
-      _isInitialized && _sceneManager.isInitialized
-          ? _sceneManager.current.name
-          : 'N/A';
+  String get currentSceneName => _isInitialized && _sceneManager.isInitialized ? _sceneManager.current.name : 'N/A';
 
   bool get isScanningDevices => _deviceManager.isDiscoverying;
 
@@ -55,12 +50,12 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
   }) {
     this.globalEventBus = globalEventBus;
     _appErrorEventSub = globalEventBus.on<AppErrorEvent>().listen(_onAppError);
-    _deviceDiscoveringStartedEventSub = _deviceManager.deviceEvents
-        .on<DeviceDiscoveringStartedEvent>()
-        .listen(_onDeviceDiscoveringStarted);
-    _deviceDiscoveringStoppedEventSub = _deviceManager.deviceEvents
-        .on<DeviceDiscoveringStoppedEvent>()
-        .listen(_onDeviceDiscoveringStopped);
+    _deviceDiscoveringStartedEventSub = _deviceManager.deviceEvents.on<DeviceDiscoveringStartedEvent>().listen(
+      _onDeviceDiscoveringStarted,
+    );
+    _deviceDiscoveringStoppedEventSub = _deviceManager.deviceEvents.on<DeviceDiscoveringStoppedEvent>().listen(
+      _onDeviceDiscoveringStopped,
+    );
   }
 
   Future<void> initialize() async {
@@ -74,9 +69,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
       await _groupManager.initialize();
       await _deviceManager.initialize();
       logger?.i('MainViewModel initialized.');
-      await _deviceManager.kernel.startDevicesScanning(
-        timeout: kStartupScanningDuration,
-      );
+      await _deviceManager.kernel.startDevicesScanning(timeout: kStartupScanningDuration);
     } finally {
       _isInitialized = true;
     }
@@ -106,16 +99,11 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
   }
 
   void _onAppError(AppErrorEvent event) {
-    if (_errorsStack.isEmpty ||
-        _errorsStack.last.error.runtimeType != event.error.runtimeType) {
+    if (_errorsStack.isEmpty || _errorsStack.last.error.runtimeType != event.error.runtimeType) {
       _errorsStack.add(event);
       notifyListeners();
     }
-    logger?.e(
-      'APP_ERROR: ${event.message}',
-      error: event.error,
-      stackTrace: event.stackTrace,
-    );
+    logger?.e('APP_ERROR: ${event.message}', error: event.error, stackTrace: event.stackTrace);
   }
 
   void _onDeviceDiscoveringStarted(DeviceDiscoveringStartedEvent event) {

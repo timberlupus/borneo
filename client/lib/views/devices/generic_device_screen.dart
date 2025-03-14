@@ -5,8 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:borneo_app/models/devices/device_entity.dart';
 import 'package:borneo_app/view_models/devices/base_device_view_model.dart';
 
-class GenericDeviceScreen<TDeviceViewModel extends BaseDeviceViewModel>
-    extends StatelessWidget {
+class GenericDeviceScreen<TDeviceViewModel extends BaseDeviceViewModel> extends StatelessWidget {
   const GenericDeviceScreen({super.key});
 
   @override

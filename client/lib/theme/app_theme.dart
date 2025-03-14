@@ -356,10 +356,7 @@ class BorneoTheme {
     useMaterial3: true,
     brightness: colorScheme.brightness,
     colorScheme: colorScheme,
-    textTheme: textTheme.apply(
-      bodyColor: colorScheme.onSurface,
-      displayColor: colorScheme.onSurface,
-    ),
+    textTheme: textTheme.apply(bodyColor: colorScheme.onSurface, displayColor: colorScheme.onSurface),
     scaffoldBackgroundColor: colorScheme.surface,
     disabledColor: colorScheme.onPrimaryContainer.withAlpha(97),
     canvasColor: colorScheme.surface,
@@ -387,10 +384,7 @@ class BorneoTheme {
 
     // Material page transition is childish
     pageTransitionsTheme: PageTransitionsTheme(
-      builders: {
-        for (var platform in TargetPlatform.values)
-          platform: const CupertinoPageTransitionsBuilder(),
-      },
+      builders: {for (var platform in TargetPlatform.values) platform: const CupertinoPageTransitionsBuilder()},
     ),
   );
 

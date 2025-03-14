@@ -17,8 +17,7 @@ class GroupManager {
   final SceneManager _scenes;
   bool isInitialized = false;
 
-  GroupManager(this._logger, this._globalBus, this._db, this._scenes)
-    : isInitialized = false;
+  GroupManager(this._logger, this._globalBus, this._db, this._scenes) : isInitialized = false;
 
   Future<void> initialize() async {
     return await _db.transaction((tx) async {
@@ -53,11 +52,7 @@ class GroupManager {
   }
   */
 
-  Future<void> create({
-    required String name,
-    String notes = '',
-    Transaction? tx,
-  }) async {
+  Future<void> create({required String name, String notes = '', Transaction? tx}) async {
     if (tx == null) {
       await _db.transaction((tx) async {
         await create(name: name, tx: tx);
@@ -75,16 +70,9 @@ class GroupManager {
     }
   }
 
-  Future<void> update(
-    String id, {
-    required String name,
-    String notes = '',
-    Transaction? tx,
-  }) async {
+  Future<void> update(String id, {required String name, String notes = '', Transaction? tx}) async {
     if (tx == null) {
-      await _db.transaction(
-        (tx) => update(id, name: name, notes: notes, tx: tx),
-      );
+      await _db.transaction((tx) => update(id, name: name, notes: notes, tx: tx));
     } else {
       final store = stringMapStoreFactory.store(StoreNames.groups);
       final record = await store.record(id).update(tx, {
@@ -105,13 +93,9 @@ class GroupManager {
     } else {
       // Set the `groupID` all the devices to null
       final deviceStore = stringMapStoreFactory.store(StoreNames.devices);
-      await deviceStore.update(
-        tx,
-        {DeviceEntity.kGroupIDFieldName: null},
-        finder: Finder(
-          filter: Filter.equals(DeviceEntity.kGroupIDFieldName, id),
-        ),
-      );
+      await deviceStore.update(tx, {
+        DeviceEntity.kGroupIDFieldName: null,
+      }, finder: Finder(filter: Filter.equals(DeviceEntity.kGroupIDFieldName, id)));
       // Delete the group record
       final groupStore = stringMapStoreFactory.store(StoreNames.groups);
       await groupStore.record(id).delete(tx);
@@ -119,31 +103,17 @@ class GroupManager {
     }
   }
 
-  Future<List<DeviceGroupEntity>> fetchAllGroupsInCurrentScene({
-    Transaction? tx,
-  }) async {
+  Future<List<DeviceGroupEntity>> fetchAllGroupsInCurrentScene({Transaction? tx}) async {
     assert(isInitialized);
     if (tx == null) {
-      return await _db.transaction(
-        (tx) => fetchAllGroupsInCurrentScene(tx: tx),
-      );
+      return await _db.transaction((tx) => fetchAllGroupsInCurrentScene(tx: tx));
     } else {
       final store = stringMapStoreFactory.store(StoreNames.groups);
       final records = await store.find(
         tx,
-        finder: Finder(
-          filter: Filter.equals(
-            DeviceGroupEntity.kSceneIDFieldName,
-            _scenes.current.id,
-          ),
-        ),
+        finder: Finder(filter: Filter.equals(DeviceGroupEntity.kSceneIDFieldName, _scenes.current.id)),
       );
-      final groups =
-          records
-              .map(
-                (record) => DeviceGroupEntity.fromMap(record.key, record.value),
-              )
-              .toList();
+      final groups = records.map((record) => DeviceGroupEntity.fromMap(record.key, record.value)).toList();
       return groups;
     }
   }

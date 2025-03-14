@@ -1,7 +1,6 @@
 import 'package:borneo_app/view_models/base_view_model.dart';
 
-abstract class AbstractScreenViewModel extends BaseViewModel
-    with ViewModelEventBusMixin {
+abstract class AbstractScreenViewModel extends BaseViewModel with ViewModelEventBusMixin {
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 

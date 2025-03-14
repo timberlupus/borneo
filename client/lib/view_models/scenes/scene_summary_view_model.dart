@@ -27,8 +27,7 @@ class SceneSummaryViewModel extends BaseViewModel {
   String get id => model.id;
   String get name => model.name;
 
-  late final StreamSubscription<CurrentSceneChangedEvent>
-  _currentSceneChangedEventSub;
+  late final StreamSubscription<CurrentSceneChangedEvent> _currentSceneChangedEventSub;
   late final StreamSubscription<SceneUpdatedEvent> _sceneUpdatedEventSub;
 
   late final StreamSubscription<DeviceBoundEvent> _deviceBoundEventSub;
@@ -47,20 +46,12 @@ class SceneSummaryViewModel extends BaseViewModel {
   ) : _totalDeviceCount = stat.totalDeviceCount,
       _activeDeviceCount = stat.activeDeviceCount {
     //subscribe all events
-    _currentSceneChangedEventSub = globalEventBus
-        .on<CurrentSceneChangedEvent>()
-        .listen(_onCurrentSceneChanged);
+    _currentSceneChangedEventSub = globalEventBus.on<CurrentSceneChangedEvent>().listen(_onCurrentSceneChanged);
 
-    _sceneUpdatedEventSub = globalEventBus.on<SceneUpdatedEvent>().listen(
-      _onSceneUpdated,
-    );
+    _sceneUpdatedEventSub = globalEventBus.on<SceneUpdatedEvent>().listen(_onSceneUpdated);
 
-    _deviceBoundEventSub = dm.deviceEvents.on<DeviceBoundEvent>().listen(
-      _onDeviceBound,
-    );
-    _deviceRemovedEventSub = dm.deviceEvents.on<DeviceRemovedEvent>().listen(
-      _onDeviceRemoved,
-    );
+    _deviceBoundEventSub = dm.deviceEvents.on<DeviceBoundEvent>().listen(_onDeviceBound);
+    _deviceRemovedEventSub = dm.deviceEvents.on<DeviceRemovedEvent>().listen(_onDeviceRemoved);
   }
 
   @override

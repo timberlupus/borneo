@@ -43,28 +43,21 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(title, textAlign: TextAlign.center),
-        ),
+        Container(padding: EdgeInsets.fromLTRB(16, 16, 16, 8), child: Text(title, textAlign: TextAlign.center)),
         if (subtitle != null)
           Container(
             padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: Text(
               subtitle!,
               textAlign: TextAlign.start,
-              style: DefaultTextStyle.of(
-                context,
-              ).style.copyWith(color: Theme.of(context).hintColor),
+              style: DefaultTextStyle.of(context).style.copyWith(color: Theme.of(context).hintColor),
             ),
           ),
         const SizedBox(height: 16),
         ListView.separated(
           shrinkWrap: true,
           itemBuilder: (BuildContext context, int index) => tiles[index],
-          separatorBuilder:
-              (BuildContext context, int index) =>
-                  Divider(indent: 16, height: 16, thickness: 1),
+          separatorBuilder: (BuildContext context, int index) => Divider(indent: 16, height: 16, thickness: 1),
           itemCount: tiles.length,
         ),
       ],

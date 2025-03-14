@@ -31,10 +31,7 @@ class EasySetupScreen extends StatelessWidget {
       builder: (context, child) {
         return Scaffold(
           appBar: AppBar(title: Text('Easy Setup')),
-          body: Container(
-            color: Theme.of(context).colorScheme.surface,
-            child: child,
-          ),
+          body: Container(color: Theme.of(context).colorScheme.surface, child: child),
         );
       },
       child: buildBody(context),
@@ -67,30 +64,20 @@ class EasySetupScreen extends StatelessWidget {
             pickerBaseCirclePadding: 0,
             sweepDecoration: TimePickerSweepDecoration(
               pickerStrokeWidth: 48.0,
-              pickerColor: Theme.of(
-                context,
-              ).colorScheme.primaryContainer.withValues(alpha: 0.5),
+              pickerColor: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.5),
               showConnector: false,
             ),
             initHandlerDecoration: TimePickerHandlerDecoration(
               color: Theme.of(context).colorScheme.inverseSurface,
               shape: BoxShape.circle,
               radius: 20.0,
-              icon: Icon(
-                Icons.wb_sunny_outlined,
-                size: 24.0,
-                color: Theme.of(context).colorScheme.onInverseSurface,
-              ),
+              icon: Icon(Icons.wb_sunny_outlined, size: 24.0, color: Theme.of(context).colorScheme.onInverseSurface),
             ),
             endHandlerDecoration: TimePickerHandlerDecoration(
               color: Theme.of(context).colorScheme.inverseSurface,
               shape: BoxShape.circle,
               radius: 20.0,
-              icon: Icon(
-                Icons.mode_night_outlined,
-                size: 24.0,
-                color: Theme.of(context).colorScheme.onInverseSurface,
-              ),
+              icon: Icon(Icons.mode_night_outlined, size: 24.0, color: Theme.of(context).colorScheme.onInverseSurface),
             ),
             primarySectorsDecoration: TimePickerSectorDecoration(
               color: Theme.of(context).colorScheme.onSurface,
@@ -116,24 +103,12 @@ class EasySetupScreen extends StatelessWidget {
           initTime: editor.easySetupViewModel.startTime.value.toPickedTime(),
           endTime: editor.easySetupViewModel.endTime.value.toPickedTime(),
           onSelectionChange: (start, end, isDisableRange) {
-            editor.easySetupViewModel.startTime.value = Duration(
-              hours: start.h,
-              minutes: start.m,
-            );
-            editor.easySetupViewModel.endTime.value = Duration(
-              hours: end.h,
-              minutes: end.m,
-            );
+            editor.easySetupViewModel.startTime.value = Duration(hours: start.h, minutes: start.m);
+            editor.easySetupViewModel.endTime.value = Duration(hours: end.h, minutes: end.m);
           },
           onSelectionEnd: (start, end, isDisableRange) async {
-            editor.easySetupViewModel.startTime.value = Duration(
-              hours: start.h,
-              minutes: start.m,
-            );
-            editor.easySetupViewModel.endTime.value = Duration(
-              hours: end.h,
-              minutes: end.m,
-            );
+            editor.easySetupViewModel.startTime.value = Duration(hours: start.h, minutes: start.m);
+            editor.easySetupViewModel.endTime.value = Duration(hours: end.h, minutes: end.m);
           },
           child: Column(
             spacing: 8,
@@ -148,12 +123,8 @@ class EasySetupScreen extends StatelessWidget {
                     animation: listenableDuration,
                     builder:
                         (context, child) => Text(
-                          (editor.easySetupViewModel.duration.inMinutes ~/ 60)
-                              .toString()
-                              .padLeft(2, '0'),
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleLarge?.copyWith(
+                          (editor.easySetupViewModel.duration.inMinutes ~/ 60).toString().padLeft(2, '0'),
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontFeatures: [FontFeature.tabularFigures()],
                             color: Theme.of(context).colorScheme.primary,
                           ),
@@ -161,21 +132,17 @@ class EasySetupScreen extends StatelessWidget {
                   ),
                   Text(
                     "Hrs",
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.outline),
                   ),
                   SizedBox(width: 4),
                   AnimatedBuilder(
                     animation: listenableDuration,
                     builder:
                         (context, child) => Text(
-                          (editor.easySetupViewModel.duration.inMinutes % 60)
-                              .toString()
-                              .padLeft(2, '0'),
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleLarge?.copyWith(
+                          (editor.easySetupViewModel.duration.inMinutes % 60).toString().padLeft(2, '0'),
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontFeatures: [FontFeature.tabularFigures()],
                             color: Theme.of(context).colorScheme.primary,
                           ),
@@ -183,9 +150,9 @@ class EasySetupScreen extends StatelessWidget {
                   ),
                   Text(
                     "Mins",
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.outline),
                   ),
                 ],
               ),
@@ -207,11 +174,7 @@ class EasySetupScreen extends StatelessWidget {
                     },
                   ),
                   const SizedBox(width: 2),
-                  Icon(
-                    Icons.arrow_right_alt_outlined,
-                    size: 24,
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                  Icon(Icons.arrow_right_alt_outlined, size: 24, color: Theme.of(context).colorScheme.outline),
                   const SizedBox(width: 2),
                   ValueListenableBuilder<Duration>(
                     valueListenable: editor.easySetupViewModel.endTime,
@@ -244,9 +207,7 @@ class EasySetupScreen extends StatelessWidget {
       Expanded(
         child: Selector<ScheduleEditorViewModel, bool>(
           selector: (_, editor) => editor.canEdit,
-          builder:
-              (_, canEdit, __) =>
-                  BrightnessSliderList(editor, disabled: !canEdit),
+          builder: (_, canEdit, __) => BrightnessSliderList(editor, disabled: !canEdit),
         ),
       ),
     ];

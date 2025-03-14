@@ -13,8 +13,7 @@ final class SceneEditArguments {
   const SceneEditArguments({required this.isCreation, this.model});
 }
 
-class SceneEditViewModel extends AbstractScreenViewModel
-    with ViewModelEventBusMixin {
+class SceneEditViewModel extends AbstractScreenViewModel with ViewModelEventBusMixin {
   final Logger? logger;
   final SceneManager _sceneManager;
   final bool isCreation;
@@ -59,11 +58,7 @@ class SceneEditViewModel extends AbstractScreenViewModel
         await _sceneManager.update(id: id!, name: name, notes: notes);
       }
     } catch (e, stackTrace) {
-      notifyAppError(
-        'Failed to update scene `$name`',
-        error: e,
-        stackTrace: stackTrace,
-      );
+      notifyAppError('Failed to update scene `$name`', error: e, stackTrace: stackTrace);
     } finally {
       setBusy(false);
     }
@@ -75,11 +70,7 @@ class SceneEditViewModel extends AbstractScreenViewModel
     try {
       await _sceneManager.delete(id!);
     } catch (e, stackTrace) {
-      notifyAppError(
-        'Failed to delete scene `$name`',
-        error: e,
-        stackTrace: stackTrace,
-      );
+      notifyAppError('Failed to delete scene `$name`', error: e, stackTrace: stackTrace);
     } finally {
       setBusy(false, notify: false);
     }

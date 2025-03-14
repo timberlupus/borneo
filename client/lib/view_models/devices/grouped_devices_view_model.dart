@@ -18,8 +18,7 @@ import 'package:borneo_app/view_models/base_view_model.dart';
 
 import '../../models/events.dart';
 
-class GroupedDevicesViewModel extends BaseViewModel
-    with ViewModelEventBusMixin {
+class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin {
   final Logger? logger;
   final SceneManager _sceneManager;
   final GroupManager _groupManager;
@@ -42,18 +41,13 @@ class GroupedDevicesViewModel extends BaseViewModel
   SceneEntity get currentScene => _sceneManager.current;
 
   late final StreamSubscription<NewDeviceEntityAddedEvent> _deviceAddedEventSub;
-  late final StreamSubscription<DeviceEntityDeletedEvent>
-  _deviceDeletedEventSub;
-  late final StreamSubscription<CurrentSceneChangedEvent>
-  _currentSceneChangedEventSub;
+  late final StreamSubscription<DeviceEntityDeletedEvent> _deviceDeletedEventSub;
+  late final StreamSubscription<CurrentSceneChangedEvent> _currentSceneChangedEventSub;
 
   // Device group event subscriptions
-  late final StreamSubscription<DeviceGroupCreatedEvent>
-  _deviceGroupCreatedEventSub;
-  late final StreamSubscription<DeviceGroupDeletedEvent>
-  _deviceGroupDeletedEventSub;
-  late final StreamSubscription<DeviceGroupUpdatedEvent>
-  _deviceGroupUpdatedEventSub;
+  late final StreamSubscription<DeviceGroupCreatedEvent> _deviceGroupCreatedEventSub;
+  late final StreamSubscription<DeviceGroupDeletedEvent> _deviceGroupDeletedEventSub;
+  late final StreamSubscription<DeviceGroupUpdatedEvent> _deviceGroupUpdatedEventSub;
 
   GroupedDevicesViewModel(
     EventBus globalEventBus,
@@ -63,27 +57,19 @@ class GroupedDevicesViewModel extends BaseViewModel
     this.logger,
   }) {
     super.globalEventBus = globalEventBus;
-    _deviceAddedEventSub = _deviceManager.deviceEvents
-        .on<NewDeviceEntityAddedEvent>()
-        .listen((event) => _onNewDeviceEntityAdded(event));
-    _deviceDeletedEventSub = _deviceManager.deviceEvents
-        .on<DeviceEntityDeletedEvent>()
-        .listen((event) => _onDeviceDeleted(event));
-    _currentSceneChangedEventSub = super.globalEventBus
-        .on<CurrentSceneChangedEvent>()
-        .listen(_onCurrentSceneChanged);
+    _deviceAddedEventSub = _deviceManager.deviceEvents.on<NewDeviceEntityAddedEvent>().listen(
+      (event) => _onNewDeviceEntityAdded(event),
+    );
+    _deviceDeletedEventSub = _deviceManager.deviceEvents.on<DeviceEntityDeletedEvent>().listen(
+      (event) => _onDeviceDeleted(event),
+    );
+    _currentSceneChangedEventSub = super.globalEventBus.on<CurrentSceneChangedEvent>().listen(_onCurrentSceneChanged);
 
-    _deviceGroupCreatedEventSub = super.globalEventBus
-        .on<DeviceGroupCreatedEvent>()
-        .listen(_onDeviceGroupCreated);
+    _deviceGroupCreatedEventSub = super.globalEventBus.on<DeviceGroupCreatedEvent>().listen(_onDeviceGroupCreated);
 
-    _deviceGroupDeletedEventSub = super.globalEventBus
-        .on<DeviceGroupDeletedEvent>()
-        .listen(_onDeviceGroupDeleted);
+    _deviceGroupDeletedEventSub = super.globalEventBus.on<DeviceGroupDeletedEvent>().listen(_onDeviceGroupDeleted);
 
-    _deviceGroupUpdatedEventSub = super.globalEventBus
-        .on<DeviceGroupUpdatedEvent>()
-        .listen(_onDeviceGroupUpdated);
+    _deviceGroupUpdatedEventSub = super.globalEventBus.on<DeviceGroupUpdatedEvent>().listen(_onDeviceGroupUpdated);
   }
 
   Future<void> initialize() async {
@@ -144,27 +130,17 @@ class GroupedDevicesViewModel extends BaseViewModel
   }
 
   Future<void> _reloadAll() async {
-    final groupEntities = await _groupManager
-        .fetchAllGroupsInCurrentScene()
-        .asCancellable(_cancellationToken);
+    final groupEntities = await _groupManager.fetchAllGroupsInCurrentScene().asCancellable(_cancellationToken);
 
     _clearAllItems();
 
     final dummyGroup = GroupViewModel(
-      DeviceGroupEntity(
-        id: '',
-        sceneID: _sceneManager.current.id,
-        name: 'Ungrouped devices',
-      ),
+      DeviceGroupEntity(id: '', sceneID: _sceneManager.current.id, name: 'Ungrouped devices'),
     );
 
-    _groups.addAll(
-      groupEntities.map((g) => GroupViewModel(g)).followedBy([dummyGroup]),
-    );
+    _groups.addAll(groupEntities.map((g) => GroupViewModel(g)).followedBy([dummyGroup]));
 
-    final deviceEntities = await _deviceManager
-        .fetchAllDevicesInScene()
-        .asCancellable(_cancellationToken);
+    final deviceEntities = await _deviceManager.fetchAllDevicesInScene().asCancellable(_cancellationToken);
     for (final deviceEntity in deviceEntities) {
       final deviceVM = DeviceSummaryViewModel(
         deviceEntity,
@@ -181,20 +157,10 @@ class GroupedDevicesViewModel extends BaseViewModel
     }
   }
 
-  Future<void> changeDeviceGroup(
-    DeviceEntity device,
-    String? newGroupID,
-  ) async {
-    final originalGroupVM = _groups.singleWhere(
-      (g) => g.devices.any((d) => d.id == device.id),
-    );
-    final newGroupVM =
-        newGroupID != null
-            ? _groups.singleWhere((g) => g.id == newGroupID)
-            : dummyGroup;
-    final deviceVM = originalGroupVM.devices.singleWhere(
-      (d) => d.id == device.id,
-    );
+  Future<void> changeDeviceGroup(DeviceEntity device, String? newGroupID) async {
+    final originalGroupVM = _groups.singleWhere((g) => g.devices.any((d) => d.id == device.id));
+    final newGroupVM = newGroupID != null ? _groups.singleWhere((g) => g.id == newGroupID) : dummyGroup;
+    final deviceVM = originalGroupVM.devices.singleWhere((d) => d.id == device.id);
 
     if (identical(originalGroupVM, newGroupVM)) {
       return;
@@ -204,11 +170,7 @@ class GroupedDevicesViewModel extends BaseViewModel
       newGroupVM.devices.insert(0, deviceVM);
       originalGroupVM.devices.removeWhere((d) => d.id == device.id);
     } catch (e, stackTrace) {
-      notifyAppError(
-        'Failed to change the group for device "${device.name}"',
-        error: e,
-        stackTrace: stackTrace,
-      );
+      notifyAppError('Failed to change the group for device "${device.name}"', error: e, stackTrace: stackTrace);
     } finally {
       newGroupVM.notifyListeners();
       originalGroupVM.notifyListeners();
@@ -222,15 +184,11 @@ class GroupedDevicesViewModel extends BaseViewModel
   }
 
   Future<void> _onDeviceDeleted(DeviceEntityDeletedEvent event) async {
-    final int changedGroupIndex = _groups.indexWhere(
-      (g) => g.devices.any((d) => d.id == event.id),
-    );
+    final int changedGroupIndex = _groups.indexWhere((g) => g.devices.any((d) => d.id == event.id));
     // Remove the deleted device from UI
     if (changedGroupIndex != -1) {
       final changedGroup = _groups[changedGroupIndex];
-      final deviceIndexToRemove = changedGroup.devices.indexWhere(
-        (d) => d.id == event.id,
-      );
+      final deviceIndexToRemove = changedGroup.devices.indexWhere((d) => d.id == event.id);
       final deviceToRemove = changedGroup.devices[deviceIndexToRemove];
       deviceToRemove.dispose();
       changedGroup.devices.removeAt(deviceIndexToRemove);
@@ -247,11 +205,7 @@ class GroupedDevicesViewModel extends BaseViewModel
     try {
       await _deviceManager.delete(id);
     } catch (e, stackTrace) {
-      notifyAppError(
-        'Failed to delete device',
-        error: e,
-        stackTrace: stackTrace,
-      );
+      notifyAppError('Failed to delete device', error: e, stackTrace: stackTrace);
     } finally {
       setBusy(false, notify: false);
     }

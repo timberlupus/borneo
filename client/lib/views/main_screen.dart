@@ -38,9 +38,9 @@ class ErrorSnackBarListener extends StatelessWidget {
               SnackBar(
                 content: Text(
                   vm.errorMessage,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onErrorContainer,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onErrorContainer),
                 ),
                 backgroundColor: Theme.of(context).colorScheme.errorContainer,
                 action: SnackBarAction(
@@ -84,9 +84,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
       context,
       MaterialPageRoute(
         builder: (context) => GroupEditScreen(),
-        settings: RouteSettings(
-          arguments: GroupEditArguments(isCreation: true),
-        ),
+        settings: RouteSettings(arguments: GroupEditArguments(isCreation: true)),
       ),
     );
   }
@@ -94,11 +92,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   Future<void> showNewSceneScreen(BuildContext context) async {
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder:
-            (context) =>
-                SceneEditScreen(args: SceneEditArguments(isCreation: true)),
-      ),
+      MaterialPageRoute(builder: (context) => SceneEditScreen(args: SceneEditArguments(isCreation: true))),
     );
   }
 
@@ -132,10 +126,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: Text(context.translate('Add New Devices')),
           ),
           PopupMenuDivider(),
-          PopupMenuItem<PlusMenuIndexes>(
-            value: PlusMenuIndexes.addScene,
-            child: Text(context.translate('Add Scene')),
-          ),
+          PopupMenuItem<PlusMenuIndexes>(value: PlusMenuIndexes.addScene, child: Text(context.translate('Add Scene'))),
           PopupMenuItem<PlusMenuIndexes>(
             value: PlusMenuIndexes.addGroup,
             child: Text(context.translate('Add Devices Group')),
@@ -160,24 +151,13 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
         */
       title: Column(children: [Text(_getTitle(context, vm))]),
       actions: [
-        Selector<
-          MainViewModel,
-          ({bool isInit, bool isScanningDevices, TabIndices index})
-        >(
+        Selector<MainViewModel, ({bool isInit, bool isScanningDevices, TabIndices index})>(
           selector:
-              (_, vm) => (
-                isInit: vm.isInitialized,
-                isScanningDevices: vm.isScanningDevices,
-                index: vm.currentTabIndex,
-              ),
+              (_, vm) => (isInit: vm.isInitialized, isScanningDevices: vm.isScanningDevices, index: vm.currentTabIndex),
           builder:
               (_, vm, __) =>
                   !vm.isInit || vm.isScanningDevices
-                      ? SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(),
-                      )
+                      ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator())
                       : buildAddButtons(context),
         ),
       ],
@@ -229,18 +209,9 @@ class MainScreen extends StatelessWidget {
                     }
                   },
                   items: [
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.house_outlined),
-                      label: context.translate('Scenes'),
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.device_hub),
-                      label: context.translate('Devices'),
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.person),
-                      label: context.translate('My'),
-                    ),
+                    BottomNavigationBarItem(icon: Icon(Icons.house_outlined), label: context.translate('Scenes')),
+                    BottomNavigationBarItem(icon: Icon(Icons.device_hub), label: context.translate('Devices')),
+                    BottomNavigationBarItem(icon: Icon(Icons.person), label: context.translate('My')),
                   ],
                 );
               },
@@ -258,13 +229,7 @@ class MainScreen extends StatelessWidget {
         return PopScope(
           canPop: false,
           child: AlertDialog(
-            content: Row(
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(width: 20),
-                Text('Loading...'),
-              ],
-            ),
+            content: Row(children: [CircularProgressIndicator(), SizedBox(width: 20), Text('Loading...')]),
             actions: [
               TextButton(
                 onPressed: () {
@@ -288,14 +253,7 @@ class MainScreen extends StatelessWidget {
         final sm = context.read<SceneManager>();
         final gm = context.read<GroupManager>();
         final dm = context.read<DeviceManager>();
-        final vm = MainViewModel(
-          bus,
-          bm,
-          sm,
-          gm,
-          dm,
-          logger: context.read<Logger>(),
-        );
+        final vm = MainViewModel(bus, bm, sm, gm, dm, logger: context.read<Logger>());
         return vm;
       },
       lazy: false,
@@ -303,19 +261,12 @@ class MainScreen extends StatelessWidget {
         selector: (context, vm) => vm.isInitialized,
         builder: (context, viewModel, child) {
           return FutureBuilder(
-            future:
-                context.read<MainViewModel>().isInitialized
-                    ? null
-                    : context.read<MainViewModel>().initialize(),
+            future: context.read<MainViewModel>().isInitialized ? null : context.read<MainViewModel>().initialize(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
-                );
+                return Scaffold(body: Center(child: CircularProgressIndicator()));
               } else if (snapshot.hasError) {
-                return Scaffold(
-                  body: Center(child: Text('Error: ${snapshot.error}')),
-                );
+                return Scaffold(body: Center(child: Text('Error: ${snapshot.error}')));
               } else {
                 return MultiProvider(
                   providers: [
@@ -330,10 +281,7 @@ class MainScreen extends StatelessWidget {
                       lazy: true,
                     ),
 
-                    ChangeNotifierProvider(
-                      create: (_) => MyViewModel(),
-                      lazy: true,
-                    ),
+                    ChangeNotifierProvider(create: (_) => MyViewModel(), lazy: true),
 
                     // Device-related pages
                     ChangeNotifierProvider(
@@ -343,13 +291,7 @@ class MainScreen extends StatelessWidget {
                         final sm = context.read<SceneManager>();
                         final gm = context.read<GroupManager>();
                         final dm = context.read<DeviceManager>();
-                        return GroupedDevicesViewModel(
-                          globalEventBus,
-                          sm,
-                          gm,
-                          dm,
-                          logger: logger,
-                        );
+                        return GroupedDevicesViewModel(globalEventBus, sm, gm, dm, logger: logger);
                       },
                       lazy: true,
                     ),

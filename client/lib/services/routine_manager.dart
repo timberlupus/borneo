@@ -19,18 +19,8 @@ class RoutineManager implements IDisposable {
 
   final List<AbstractRoutine> allRoutines = [];
 
-  RoutineManager(
-    this._globalBus,
-    this._db,
-    this._deviceManager, {
-    this.logger,
-  }) {
-    allRoutines.addAll([
-      PowerOffAllRoutine(),
-      FeedModeRoutine(),
-      WaterChangeModeRoutine(),
-      DryScapeModeRoutine(),
-    ]);
+  RoutineManager(this._globalBus, this._db, this._deviceManager, {this.logger}) {
+    allRoutines.addAll([PowerOffAllRoutine(), FeedModeRoutine(), WaterChangeModeRoutine(), DryScapeModeRoutine()]);
   }
 
   List<AbstractRoutine> getAvailableRoutines() {
@@ -44,9 +34,7 @@ class RoutineManager implements IDisposable {
   }
 
   Future<void> executeRoutine(String routineID) async {
-    await allRoutines
-        .singleWhere((r) => r.id == routineID)
-        .execute(_deviceManager);
+    await allRoutines.singleWhere((r) => r.id == routineID).execute(_deviceManager);
   }
 
   @override

@@ -24,8 +24,7 @@ class RouteManager {
 
   RouteManager(this._modules) {
     for (final x in _modules.metaModules.entries) {
-      _routes[AppRoutes.makeDeviceScreenRoute(x.key)] =
-          (context) => _makeDeviceDetailsScreenBuilder(context, x.value);
+      _routes[AppRoutes.makeDeviceScreenRoute(x.key)] = (context) => _makeDeviceDetailsScreenBuilder(context, x.value);
     }
   }
 
@@ -34,17 +33,11 @@ class RouteManager {
     if (builder != null) {
       return MaterialPageRoute(builder: builder, settings: settings);
     } else {
-      return MaterialPageRoute(
-        builder: (_) => const DevicesScreen(),
-        settings: settings,
-      );
+      return MaterialPageRoute(builder: (_) => const DevicesScreen(), settings: settings);
     }
   }
 
-  Widget _makeDeviceDetailsScreenBuilder(
-    BuildContext context,
-    DeviceModuleMetadata meta,
-  ) {
+  Widget _makeDeviceDetailsScreenBuilder(BuildContext context, DeviceModuleMetadata meta) {
     return meta.detailsScreenBuilder(context);
   }
 }

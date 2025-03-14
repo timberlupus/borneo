@@ -56,8 +56,7 @@ class AboutScreen extends StatelessWidget {
                             vm.isInitialized
                                 ? Text(
                                   vm.packageInfo.appName,
-                                  style: Theme.of(context).textTheme.titleLarge
-                                      ?.copyWith(color: Colors.white),
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
                                 )
                                 : Container(),
                   ),
@@ -69,14 +68,11 @@ class AboutScreen extends StatelessWidget {
                                   context.translate(
                                     'Version: {verText} Build: {buildNumberText}',
                                     nArgs: {
-                                      'verText':
-                                          vm.packageInfo.version.toString(),
-                                      'buildNumberText':
-                                          vm.packageInfo.buildNumber.toString(),
+                                      'verText': vm.packageInfo.version.toString(),
+                                      'buildNumberText': vm.packageInfo.buildNumber.toString(),
                                     },
                                   ),
-                                  style: Theme.of(context).textTheme.titleSmall
-                                      ?.copyWith(color: Colors.white30),
+                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white30),
                                 )
                                 : Container(),
                   ),
@@ -109,10 +105,7 @@ class AboutScreen extends StatelessWidget {
                 child: Center(
                   child: Column(
                     children: [
-                      Text(
-                        context.translate('Website'),
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
+                      Text(context.translate('Website'), style: Theme.of(context).textTheme.titleSmall),
                       InkWell(
                         onTap: () async {
                           // TODO move to viewmodel
@@ -146,10 +139,7 @@ class AboutScreen extends StatelessWidget {
                 child: Center(
                   child: Column(
                     children: [
-                      Text(
-                        context.translate('Documentation'),
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
+                      Text(context.translate('Documentation'), style: Theme.of(context).textTheme.titleSmall),
                       InkWell(
                         onTap: () async {
                           if (await canLaunchUrl(_docsUrl)) {

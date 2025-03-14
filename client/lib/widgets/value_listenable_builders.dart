@@ -2,24 +2,16 @@ import 'package:flutter/widgets.dart';
 
 class MultiValueListenableBuilder<T> extends StatefulWidget {
   final List<ValueNotifier<T>> valueNotifiers;
-  final Widget Function(BuildContext context, List<T> values, Widget? child)
-  builder;
+  final Widget Function(BuildContext context, List<T> values, Widget? child) builder;
   final Widget? child;
 
-  const MultiValueListenableBuilder({
-    super.key,
-    required this.valueNotifiers,
-    required this.builder,
-    this.child,
-  });
+  const MultiValueListenableBuilder({super.key, required this.valueNotifiers, required this.builder, this.child});
 
   @override
-  MultiValueListenableBuilderState<T> createState() =>
-      MultiValueListenableBuilderState<T>();
+  MultiValueListenableBuilderState<T> createState() => MultiValueListenableBuilderState<T>();
 }
 
-class MultiValueListenableBuilderState<T>
-    extends State<MultiValueListenableBuilder<T>> {
+class MultiValueListenableBuilderState<T> extends State<MultiValueListenableBuilder<T>> {
   late final Listenable mergedListenable;
 
   @override
@@ -39,8 +31,7 @@ class MultiValueListenableBuilderState<T>
 
   @override
   Widget build(BuildContext context) {
-    final values =
-        widget.valueNotifiers.map((notifier) => notifier.value).toList();
+    final values = widget.valueNotifiers.map((notifier) => notifier.value).toList();
     return widget.builder(context, values, widget.child);
   }
 }

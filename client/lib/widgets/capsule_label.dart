@@ -24,26 +24,13 @@ class CapsuleLabel extends StatelessWidget {
     final borderRadius = padding * 2;
     return Container(
       padding: EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(borderRadius),
-      ),
+      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(borderRadius)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null)
-            Padding(
-              padding: const EdgeInsets.only(right: 4.0),
-              child: Icon(icon, color: iconColor, size: 16.0),
-            ),
-          Text(
-            label,
-            style: TextStyle(
-              color: textColor,
-              fontSize: 14.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+            Padding(padding: const EdgeInsets.only(right: 4.0), child: Icon(icon, color: iconColor, size: 16.0)),
+          Text(label, style: TextStyle(color: textColor, fontSize: 14.0, fontWeight: FontWeight.bold)),
         ],
       ),
     );

@@ -68,16 +68,10 @@ Future<void> main() async {
         Provider<IMdnsProvider>(create: (_) => NsdMdnsProvider(), lazy: false),
 
         // IDeviceModuleRegistry
-        Provider<IDeviceModuleRegistry>(
-          create: (_) => DeviceModuleRegistry(StaticDeviceModuleHarvester()),
-          lazy: true,
-        ),
+        Provider<IDeviceModuleRegistry>(create: (_) => DeviceModuleRegistry(StaticDeviceModuleHarvester()), lazy: true),
 
         // RouteManager
-        ProxyProvider<IDeviceModuleRegistry, RouteManager>(
-          update: (_, reg, __) => RouteManager(reg),
-          lazy: true,
-        ),
+        ProxyProvider<IDeviceModuleRegistry, RouteManager>(update: (_, reg, __) => RouteManager(reg), lazy: true),
 
         // IDriverRegistry
         ProxyProvider<IDeviceModuleRegistry, IDriverRegistry>(
@@ -87,9 +81,7 @@ Future<void> main() async {
 
         // IKernel
         ProxyProvider3<Logger, IDriverRegistry, IMdnsProvider, IKernel>(
-          update:
-              (_, logger, driverReg, nsdMdns, __) =>
-                  DefaultKernel(logger, driverReg, mdnsProvider: nsdMdns),
+          update: (_, logger, driverReg, nsdMdns, __) => DefaultKernel(logger, driverReg, mdnsProvider: nsdMdns),
           dispose: (context, kernel) => kernel.dispose(),
           lazy: true,
         ),

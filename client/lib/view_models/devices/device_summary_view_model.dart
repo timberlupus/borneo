@@ -25,20 +25,12 @@ class DeviceSummaryViewModel extends BaseViewModel with ViewModelEventBusMixin {
   late final StreamSubscription<DeviceBoundEvent> _boundEventSub;
   late final StreamSubscription<DeviceRemovedEvent> _removedEventSub;
 
-  DeviceSummaryViewModel(
-    this.deviceEntity,
-    DeviceState initialState,
-    this._deviceManager,
-    EventBus globalEventBus,
-  ) : _isOnline = _deviceManager.isBound(deviceEntity.id),
+  DeviceSummaryViewModel(this.deviceEntity, DeviceState initialState, this._deviceManager, EventBus globalEventBus)
+    : _isOnline = _deviceManager.isBound(deviceEntity.id),
       _state = initialState {
     super.globalEventBus = globalEventBus;
-    _boundEventSub = _deviceManager.deviceEvents.on<DeviceBoundEvent>().listen(
-      _onBound,
-    );
-    _removedEventSub = _deviceManager.deviceEvents
-        .on<DeviceRemovedEvent>()
-        .listen(_onRemoved);
+    _boundEventSub = _deviceManager.deviceEvents.on<DeviceBoundEvent>().listen(_onBound);
+    _removedEventSub = _deviceManager.deviceEvents.on<DeviceRemovedEvent>().listen(_onRemoved);
   }
 
   @override

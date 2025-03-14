@@ -15,45 +15,33 @@ class SceneEditScreen extends StatelessWidget {
   SceneEditScreen({required this.args, super.key});
 
   @override
-  Widget build(BuildContext context) =>
-      ChangeNotifierProvider<SceneEditViewModel>(
-        create: createViewModel,
-        builder:
-            (context, child) => FutureBuilder(
-              future:
-                  context.read<SceneEditViewModel>().isInitialized
-                      ? null
-                      : context.read<SceneEditViewModel>().initialize(),
-              builder: (context, snapshot) {
-                final vm = context.read<SceneEditViewModel>();
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      context.translate(
-                        'Error: {errMsg}',
-                        nArgs: {'errMsg': snapshot.error.toString()},
-                      ),
-                    ),
-                  );
-                } else {
-                  return Scaffold(
-                    appBar: AppBar(
-                      title: Text(
-                        vm.isCreation
-                            ? context.translate('New Scene')
-                            : context.translate('Edit Scene'),
-                      ),
-                      backgroundColor: Theme.of(context).colorScheme.surface,
-                      actions: buildActions(context, args),
-                    ),
-                    body: buildBody(context),
-                  );
-                }
-              },
-            ),
-      );
+  Widget build(BuildContext context) => ChangeNotifierProvider<SceneEditViewModel>(
+    create: createViewModel,
+    builder:
+        (context, child) => FutureBuilder(
+          future:
+              context.read<SceneEditViewModel>().isInitialized ? null : context.read<SceneEditViewModel>().initialize(),
+          builder: (context, snapshot) {
+            final vm = context.read<SceneEditViewModel>();
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text(context.translate('Error: {errMsg}', nArgs: {'errMsg': snapshot.error.toString()})),
+              );
+            } else {
+              return Scaffold(
+                appBar: AppBar(
+                  title: Text(vm.isCreation ? context.translate('New Scene') : context.translate('Edit Scene')),
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                  actions: buildActions(context, args),
+                ),
+                body: buildBody(context),
+              );
+            }
+          },
+        ),
+  );
 
   SceneEditViewModel createViewModel(BuildContext context) {
     return SceneEditViewModel(
@@ -72,9 +60,7 @@ class SceneEditScreen extends StatelessWidget {
         initialValue: vm.name,
         decoration: InputDecoration(
           labelText: context.translate('Name'),
-          hintStyle: Theme.of(
-            context,
-          ).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
+          hintStyle: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
           hintText: context.translate('Enter the required scene name'),
         ),
         validator: (value) {
@@ -93,12 +79,8 @@ class SceneEditScreen extends StatelessWidget {
         maxLines: null,
         keyboardType: TextInputType.multiline,
         decoration: InputDecoration(
-          hintStyle: Theme.of(
-            context,
-          ).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
-          hintText: context.translate(
-            'Enter the optional notes for this scene',
-          ),
+          hintStyle: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
+          hintText: context.translate('Enter the optional notes for this scene'),
           labelText: context.translate('Notes'),
         ),
         onSaved: (value) {

@@ -19,40 +19,25 @@ class ScenesViewModel extends BaseViewModel with ViewModelEventBusMixin {
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
-  late final StreamSubscription<CurrentSceneChangedEvent>
-  _currentSceneChangedEventSub;
+  late final StreamSubscription<CurrentSceneChangedEvent> _currentSceneChangedEventSub;
   late final StreamSubscription<SceneCreatedEvent> _sceneCreatedEventSub;
   late final StreamSubscription<SceneDeletedEvent> _sceneDeletedEventSub;
   late final StreamSubscription<SceneUpdatedEvent> _sceneUpdatedEventSub;
 
   List<SceneSummaryViewModel> get scenes => _scenes;
 
-  final ValueNotifier<List<RoutineSummaryViewModel>> _routines =
-      ValueNotifier<List<RoutineSummaryViewModel>>([]);
+  final ValueNotifier<List<RoutineSummaryViewModel>> _routines = ValueNotifier<List<RoutineSummaryViewModel>>([]);
   ValueNotifier<List<RoutineSummaryViewModel>> get routines => _routines;
 
-  ScenesViewModel(
-    EventBus globalEventBus,
-    this._sceneManager,
-    this._deviceManager,
-    this._routineManager,
-  ) {
+  ScenesViewModel(EventBus globalEventBus, this._sceneManager, this._deviceManager, this._routineManager) {
     super.globalEventBus = globalEventBus;
 
     //event subscriptions
-    _currentSceneChangedEventSub = super.globalEventBus
-        .on<CurrentSceneChangedEvent>()
-        .listen(_onCurrentSceneChanged);
+    _currentSceneChangedEventSub = super.globalEventBus.on<CurrentSceneChangedEvent>().listen(_onCurrentSceneChanged);
 
-    _sceneCreatedEventSub = super.globalEventBus.on<SceneCreatedEvent>().listen(
-      _onSceneCreated,
-    );
-    _sceneDeletedEventSub = super.globalEventBus.on<SceneDeletedEvent>().listen(
-      _onSceneDeleted,
-    );
-    _sceneUpdatedEventSub = super.globalEventBus.on<SceneUpdatedEvent>().listen(
-      _onSceneUpdated,
-    );
+    _sceneCreatedEventSub = super.globalEventBus.on<SceneCreatedEvent>().listen(_onSceneCreated);
+    _sceneDeletedEventSub = super.globalEventBus.on<SceneDeletedEvent>().listen(_onSceneDeleted);
+    _sceneUpdatedEventSub = super.globalEventBus.on<SceneUpdatedEvent>().listen(_onSceneUpdated);
   }
 
   Future<void> initialize() async {
@@ -88,16 +73,8 @@ class ScenesViewModel extends BaseViewModel with ViewModelEventBusMixin {
     final sceneViewModels = <SceneSummaryViewModel>[];
 
     for (final scene in scenes) {
-      final deviceStat = await _sceneManager.getDeviceStatistics(
-        _sceneManager.current.id,
-      );
-      final vm = SceneSummaryViewModel(
-        scene,
-        globalEventBus,
-        _sceneManager,
-        _deviceManager,
-        deviceStat,
-      );
+      final deviceStat = await _sceneManager.getDeviceStatistics(_sceneManager.current.id);
+      final vm = SceneSummaryViewModel(scene, globalEventBus, _sceneManager, _deviceManager, deviceStat);
       sceneViewModels.add(vm);
 
       _reloadRoutines();
