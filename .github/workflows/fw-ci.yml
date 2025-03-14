@@ -20,8 +20,8 @@ jobs:
 
     - name: Build LyFi firmware in Docker
       run: |
-        docker run -t -v "${GITHUB_WORKSPACE}:/app/${{ github.repository }}" -w "/app/${{ github.repository }}/fw/lyfi" espressif/idf:v5.3.1 /bin/bash -c 'git config --global --add safe.directory "*" && idf.py build'
+        docker run -t -v "${GITHUB_WORKSPACE}:/app/${{ github.repository }}" -w "/app/${{ github.repository }}/fw/lyfi" espressif/idf:v5.4 /bin/bash -c 'git config --global --add safe.directory "*" && idf.py build'
 
 #    - name: Build Doser firmware in Docker
 #      run: |
-#        docker run -t -v "${GITHUB_WORKSPACE}:/app/${{ github.repository }}" -w "/app/${{ github.repository }}/fw/doser" espressif/idf:v5.3.1 /bin/bash -c 'git config --global --add safe.directory "*" && idf.py build'
+#        docker run -t -v "${GITHUB_WORKSPACE}:/app/${{ github.repository }}" -w "/app/${{ github.repository }}/fw/doser" espressif/idf:v5.4 /bin/bash -c 'git config --global --add safe.directory "*" && idf.py build'
