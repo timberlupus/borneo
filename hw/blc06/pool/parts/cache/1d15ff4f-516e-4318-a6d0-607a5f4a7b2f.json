@@ -1,0 +1,38 @@
+{
+    "MPN": [
+        false,
+        "SY8301ABC"
+    ],
+    "base": "3a154489-b4c1-4a94-863a-0b18972b0b89",
+    "datasheet": [
+        false,
+        ""
+    ],
+    "description": [
+        false,
+        "40V/1A, 2MHz Synchronous Step-Down Converter"
+    ],
+    "inherit_model": true,
+    "inherit_tags": true,
+    "manufacturer": [
+        false,
+        "Silergy"
+    ],
+    "model": "eb54e7ca-dcad-4e09-bd45-d2e32cddaa2a",
+    "orderable_MPNs": {
+        "5c090a2a-5813-4d26-9378-6da72d040c2a": "C2927130"
+    },
+    "parametric": {},
+    "tags": [
+        "buck",
+        "dcdc",
+        "jlc-smt-extended",
+        "regulator"
+    ],
+    "type": "part",
+    "uuid": "1d15ff4f-516e-4318-a6d0-607a5f4a7b2f",
+    "value": [
+        false,
+        "SY8301"
+    ]
+}

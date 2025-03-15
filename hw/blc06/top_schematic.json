@@ -5791,23 +5791,6 @@
                     "text": "$REFDES",
                     "width": 0
                 },
-                "2abb2c48-609f-47b3-92ea-15988e66e994": {
-                    "font": "complex",
-                    "from_smash": false,
-                    "layer": 0,
-                    "origin": "center",
-                    "placement": {
-                        "angle": 0,
-                        "mirror": false,
-                        "shift": [
-                            207500000,
-                            156250000
-                        ]
-                    },
-                    "size": 1500000,
-                    "text": "JW5026 alternatives:\n- RY8411 (38V/1.2A/800kHz)\n- LGS5148 (48V/0.6A/900kHz)",
-                    "width": 250000
-                },
                 "30b9d157-ab32-4695-a997-56c2580a3176": {
                     "font": "complex",
                     "from_smash": false,
@@ -5926,6 +5909,23 @@
                     "size": 1500000,
                     "text": "$VALUE",
                     "width": 0
+                },
+                "62b14f92-5a77-4fb3-a9c4-90ee2c0b2c5b": {
+                    "font": "complex",
+                    "from_smash": false,
+                    "layer": 0,
+                    "origin": "center",
+                    "placement": {
+                        "angle": 0,
+                        "mirror": false,
+                        "shift": [
+                            208750000,
+                            156250000
+                        ]
+                    },
+                    "size": 1500000,
+                    "text": "SY8301 alternatives:\n- RY8411 (38V/1.2A/800kHz)\n- LGS5148 (48V/0.6A/900kHz)\n- JW5026 (40V/1.2A/1MHz)",
+                    "width": 250000
                 },
                 "6c7c3a12-fc31-47a9-9bfe-6d368c28d313": {
                     "font": "simplex",
@@ -6077,7 +6077,7 @@
                         ]
                     },
                     "size": 1500000,
-                    "text": "JW5026 alternatives:\n- RY8411 (38V/1.2A/800kHz)\n- LGS5148 (48V/0.6A/900kHz)",
+                    "text": "SY8301 alternatives:\n- RY8411 (38V/1.2A/800kHz)\n- LGS5148 (48V/0.6A/900kHz)\n- JW5026 (40V/1.2A/1MHz)",
                     "width": 250000
                 },
                 "9b0033cc-35f8-4950-984d-2584ae122591": {
