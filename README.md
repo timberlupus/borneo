@@ -5,6 +5,14 @@
 
 ![BorneoIoT Banner](assets/borneo-repo-banner.jpg)
 
+<p align="center">
+    <a href="https://www.borneoiot.com"><b>Website</b></a> •
+    <a href="https://docs.borneoiot.com"><b>Documentation</b></a> •
+    <a href="https://github.com/oldrev/borneo/discussions"><b>Forum</b></a> •
+    <a href="https://discord.gg/EFJTm7PpEs"><b>Discord</b></a>
+</p>
+
+
 ---
 
 The Borneo-IoT Project offers cutting-edge, open-source, modular, and affordable hardware and software solutions for hobbyists and professionals to create aquarium LEDs and other smart aquatic devices.
