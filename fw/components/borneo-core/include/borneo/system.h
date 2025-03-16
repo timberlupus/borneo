@@ -51,6 +51,9 @@ extern "C" {
         }                                                                                                              \
     })
 
+#define BO_SEM_AUTO_RELEASE(sem_expr)                                                                                  \
+    __attribute__((cleanup(bo_sem_release))) SemaphoreHandle_t sem##_##__LINE__ = sem_expr
+
 ESP_EVENT_DECLARE_BASE(BO_SYSTEM_EVENTS);
 
 enum {
@@ -104,6 +107,7 @@ int bo_system_set_manuf(const char* manuf);
 
 void bo_system_set_shutdown_reason(uint32_t reason);
 
+void bo_sem_release(SemaphoreHandle_t* sem);
 
 #ifdef __cplusplus
 }

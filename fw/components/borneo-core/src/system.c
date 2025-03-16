@@ -262,3 +262,12 @@ int load_factory_settings()
     bo_nvs_close(nvs_handle);
     return 0;
 }
+
+void bo_sem_release(SemaphoreHandle_t* sem)
+{
+    if (*sem) {
+        xSemaphoreGive(*sem);
+        *sem = NULL;
+    }
+}
+

@@ -125,19 +125,21 @@ int rmtpwm_set_duty_internal(struct rmtpwm_channel* channel, uint8_t duty)
         return -EINVAL;
     }
 
-    if(duty == channel->duty) {
+    if (duty == channel->duty) {
         return 0;
     }
 
     if (xSemaphoreTake(channel->mutex, portMAX_DELAY) == pdTRUE) {
+        BO_SEM_AUTO_RELEASE(channel->mutex);
+
         channel->duty = duty;
         rmt_transmit_config_t tx_config = {
             .loop_count = -1,
         };
+
         BO_TRY(rmt_disable(channel->rmt_channel));
         BO_TRY(rmt_enable(channel->rmt_channel));
         BO_TRY(rmt_transmit(channel->rmt_channel, s_pwm_encoder, &channel->duty, sizeof(channel->duty), &tx_config));
-        xSemaphoreGive(channel->mutex);
     }
     else {
         return -EBUSY;

@@ -185,9 +185,6 @@ static int bo_try_sync_time()
     struct timeval tv_now = { .tv_sec = ts };
     settimeofday(&tv_now, NULL);
 
-    // TODO FIXME
-    bo_rtc_set_tz("CST-8");
-
     time_t now = 0;
     time(&now);
     struct tm timeinfo = { 0 };

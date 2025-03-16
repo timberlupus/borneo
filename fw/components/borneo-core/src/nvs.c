@@ -71,3 +71,11 @@ esp_err_t bo_nvs_user_reset()
     //
     return nvs_flash_erase_partition(NVS_DEFAULT_PART_NAME);
 }
+
+void bo_nvs_auto_close(nvs_handle_t* handle)
+{
+    if (*handle != 0) {
+        nvs_close(*handle);
+        *handle = 0;
+    }
+}

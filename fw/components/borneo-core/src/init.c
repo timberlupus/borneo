@@ -34,8 +34,7 @@
 #include "borneo/mdns.h"
 #include "borneo/system.h"
 #include "borneo/power-meas.h"
-
-#include "drvfx/drvfx.h"
+#include "borneo/rtc.h"
 
 #define TAG "bo-init"
 
@@ -50,8 +49,6 @@ static int _borneo_early_init(const struct drvfx_device* dev)
     return 0;
 }
 
-
-
 static int _borneo_core_init(const struct drvfx_device* dev)
 {
     ESP_LOGI(TAG, "Initializing Borneo Core...");
@@ -59,6 +56,7 @@ static int _borneo_core_init(const struct drvfx_device* dev)
     BO_TRY(bo_indicator_init());
     BO_TRY(bo_system_init());
     BO_TRY(bo_power_init());
+    BO_TRY(bo_rtc_init());
 
     BO_TRY(bo_power_meas_init());
 
