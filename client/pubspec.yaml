@@ -64,7 +64,7 @@ dependencies:
   url_launcher: ^6.3.1
   package_info_plus: ^8.1.1
   image_picker: ^1.1.2
-  image_cropper: ^8.0.2
+  image_cropper: ^9.0.0
   flutter_svg: ^2.0.16
   wifi_scan: ^0.4.1+1
   shared_preferences: ^2.5.2
