@@ -48,6 +48,7 @@
         <key>UIStatusBarHidden</key>
         <true/>
         <key>UIViewControllerBasedStatusBarAppearance</key>
+        <false/>
         <key>NSLocationWhenInUseUsageDescription</key>
         <string>We need access to your location to scan for WiFi networks.</string>
         <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
@@ -56,6 +57,5 @@
         <array>
             <string>location</string>
         </array>
-        <false/>
     </dict>
 </plist>
