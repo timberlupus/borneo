@@ -38,6 +38,7 @@ Future<Database> openDatabase() async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   final db = await openDatabase();
   // debugRepaintRainbowEnabled = true;
   runApp(

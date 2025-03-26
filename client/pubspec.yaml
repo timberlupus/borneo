@@ -72,7 +72,6 @@ dependencies:
   flutter_skeleton_ui: ^0.0.6
   flutter_gettext: ^2.0.1
   progressive_time_picker: ^1.0.3
-  timezone: ^0.10.0
 
 
   # My libraries

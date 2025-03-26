@@ -12,6 +12,5 @@ dependencies:
   cbor: ^6.3.0
   cancellation_token: ^2.0.1
 
-
 dev_dependencies:
   test: ^1.25.0
