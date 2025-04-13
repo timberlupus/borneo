@@ -1,3 +1,5 @@
+import 'package:borneo_common/io/net/rssi.dart';
+import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
 import 'package:flutter/material.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
@@ -24,6 +26,20 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
     );
+  }
+
+  Icon _buildWifiRssiIcon(BuildContext bc) {
+    var rssi = vm.borneoDeviceStatus?.wifiRssi;
+    if (rssi != null) {
+      return switch (RssiLevelExtension.fromRssi(rssi)) {
+        RssiLevel.poor => Icon(Icons.network_wifi_1_bar_rounded),
+        RssiLevel.fair => Icon(Icons.network_wifi_2_bar_rounded),
+        RssiLevel.good => Icon(Icons.network_wifi_3_bar_rounded),
+        RssiLevel.excellent => Icon(Icons.network_wifi_3_bar_rounded),
+      };
+    } else {
+      return Icon(Icons.wifi_off_outlined, color: Theme.of(bc).colorScheme.error);
+    }
   }
 
   List<Widget> _buildSettingItems(BuildContext context) {
@@ -63,7 +79,9 @@ class SettingsScreen extends StatelessWidget {
         title: Text('Address'),
         subtitle: Text(vm.deviceEntity.address.toString()),
         trailing:
-            vm.isOnline ? Icon(Icons.wifi) : Icon(Icons.wifi_off_outlined, color: Theme.of(context).colorScheme.error),
+            vm.isOnline
+                ? _buildWifiRssiIcon(context)
+                : Icon(Icons.wifi_off_outlined, color: Theme.of(context).colorScheme.error),
       ),
       ListTile(title: Text('DEVICE STATUS')),
       ListTile(
@@ -84,11 +102,20 @@ class SettingsScreen extends StatelessWidget {
         leading: Icon(Icons.settings_power_outlined),
         tileColor: tileColor,
         title: Text('Power status at startup'),
-        trailing: DropdownButton<int>(
+        trailing: DropdownButton<PowerBehavior>(
           items: [
-            DropdownMenuItem<int>(value: 0, child: Text("On", style: Theme.of(context).textTheme.bodySmall)),
-            DropdownMenuItem<int>(value: 1, child: Text("Off", style: Theme.of(context).textTheme.bodySmall)),
-            DropdownMenuItem<int>(value: 2, child: Text("Maintain last", style: Theme.of(context).textTheme.bodySmall)),
+            DropdownMenuItem<PowerBehavior>(
+              value: PowerBehavior.autoPowerOn,
+              child: Text("On", style: Theme.of(context).textTheme.bodySmall),
+            ),
+            DropdownMenuItem<PowerBehavior>(
+              value: PowerBehavior.maintainPowerOff,
+              child: Text("Off", style: Theme.of(context).textTheme.bodySmall),
+            ),
+            DropdownMenuItem<PowerBehavior>(
+              value: PowerBehavior.lastPowerState,
+              child: Text("Maintain last", style: Theme.of(context).textTheme.bodySmall),
+            ),
           ],
           onChanged: (value) {},
         ),

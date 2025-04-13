@@ -508,7 +508,7 @@ class DashboardView extends StatelessWidget {
                             backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
                             arcColor: Theme.of(context).colorScheme.outlineVariant,
                             progressColor: Theme.of(context).colorScheme.tertiary,
-                            value: vm.channels.isNotEmpty ? vm.overallBrightness / vm.maxOverallBrightness : 0,
+                            value: vm.currentWatts,
                             center: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [

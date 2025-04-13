@@ -68,8 +68,9 @@ static void coap_hnd_borneo_power_put(coap_resource_t* resource, coap_session_t*
     coap_pdu_set_code(response, COAP_RESPONSE_CODE(204));
 }
 
-static void coap_hnd_borneo_power_behavior_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
-                                      const coap_string_t* query, coap_pdu_t* response)
+static void coap_hnd_borneo_power_behavior_get(coap_resource_t* resource, coap_session_t* session,
+                                               const coap_pdu_t* request, const coap_string_t* query,
+                                               coap_pdu_t* response)
 {
     CborEncoder encoder;
     size_t encoded_size = 0;
@@ -85,8 +86,9 @@ static void coap_hnd_borneo_power_behavior_get(coap_resource_t* resource, coap_s
     return;
 }
 
-static void coap_hnd_borneo_power_behavior_put(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
-                                      const coap_string_t* query, coap_pdu_t* response)
+static void coap_hnd_borneo_power_behavior_put(coap_resource_t* resource, coap_session_t* session,
+                                               const coap_pdu_t* request, const coap_string_t* query,
+                                               coap_pdu_t* response)
 {
     coap_resource_notify_observers(resource, NULL);
 
@@ -111,7 +113,6 @@ static void coap_hnd_borneo_power_behavior_put(coap_resource_t* resource, coap_s
     coap_pdu_set_code(response, COAP_RESPONSE_CODE(204));
 }
 
-
-
 COAP_RESOURCE_DEFINE("borneo/power", false, coap_hnd_borneo_power_get, NULL, coap_hnd_borneo_power_put, NULL);
-COAP_RESOURCE_DEFINE("borneo/power/behavior", false, coap_hnd_borneo_power_behavior_get, NULL, coap_hnd_borneo_power_behavior_put, NULL);
+COAP_RESOURCE_DEFINE("borneo/power/behavior", false, coap_hnd_borneo_power_behavior_get, NULL,
+                     coap_hnd_borneo_power_behavior_put, NULL);

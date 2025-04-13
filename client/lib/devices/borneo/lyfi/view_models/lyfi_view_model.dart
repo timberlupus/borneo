@@ -1,23 +1,22 @@
+import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
-import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/view_models/manual_editor_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/schedule_editor_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
-import 'package:borneo_app/view_models/devices/base_device_view_model.dart';
 
 import 'ieditor.dart';
 
-class LyfiViewModel extends BaseDeviceViewModel {
+class LyfiViewModel extends BaseBorneoDeviceViewModel {
   static const initializationTimeout = Duration(seconds: 5);
   static const int tempMax = 105;
   static final int tempSetpoint = 45;
 
   static final DateFormat deviceDateFormat = DateFormat('yyyy-MM-dd HH:mm');
 
-  ILyfiDeviceApi get _deviceApi => super.boundDevice!.driver as ILyfiDeviceApi;
+  ILyfiDeviceApi get _deviceApi => super.borneoDeviceApi as ILyfiDeviceApi;
 
   bool _isOn = false;
   bool _schedulerEnabled = true;
@@ -29,6 +28,8 @@ class LyfiViewModel extends BaseDeviceViewModel {
 
   LedMode? _mode;
   LedMode? get mode => _mode;
+
+  double get currentWatts => (borneoDeviceStatus?.powerCurrent ?? 0) * (borneoDeviceStatus?.powerVoltage ?? 0);
 
   Duration _nightlightRemaining = Duration.zero;
   Duration get nightlightRemaining => _nightlightRemaining;
@@ -43,9 +44,6 @@ class LyfiViewModel extends BaseDeviceViewModel {
 
   // Borneo device general status and info
   GeneralBorneoDeviceInfo get borneoDeviceInfo => _deviceApi.getGeneralDeviceInfo(super.boundDevice!.device);
-
-  GeneralBorneoDeviceStatus? _borneoDeviceStatus;
-  GeneralBorneoDeviceStatus? get borneoDeviceStatus => _borneoDeviceStatus;
 
   LyfiDeviceStatus? _lyfiDeviceStatus;
   LyfiDeviceStatus? get lyfiDeviceStatus => _lyfiDeviceStatus;
@@ -84,29 +82,17 @@ class LyfiViewModel extends BaseDeviceViewModel {
   }
 
   @override
-  Future<void> initialize() async {
-    try {
-      await super.initialize();
+  Future<void> onInitialize() async {
+    scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
 
-      scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
+    for (int i = 0; i < lyfiDeviceInfo.channels.length; i++) {
+      _channels.add(ValueNotifier(0));
+    }
 
-      for (int i = 0; i < lyfiDeviceInfo.channels.length; i++) {
-        _channels.add(ValueNotifier(0));
-      }
-
-      await fetchDeviceStatus();
-
-      // Update schedule
-      // final schedule = await _deviceApi.getSchedule(boundDevice.device);
-      if (!_isLocked) {
-        _toggleEditor(schedulerEnabled);
-      }
-    } catch (e, stackTrace) {
-      logger?.e('Failed to initialize device(${super.deviceEntity}): $e', error: e, stackTrace: stackTrace);
-      super.notifyAppError('Failed to initialize device: $e');
-    } finally {
-      super.startTimer();
-      super.isInitialized = true;
+    // Update schedule
+    // final schedule = await _deviceApi.getSchedule(boundDevice.device);
+    if (!_isLocked) {
+      _toggleEditor(schedulerEnabled);
     }
   }
 
@@ -126,26 +112,16 @@ class LyfiViewModel extends BaseDeviceViewModel {
   }
 
   @override
-  Future<void> periodicRefreshTask() async {
-    if (!hasListeners || isBusy) {
-      return;
-    }
-    try {
-      await fetchDeviceStatus().asCancellable(taskQueueCancelToken);
-    } on CancelledException catch (e, stackTrace) {
-      logger?.i('A periodic refresh task has been cancelled.', error: e, stackTrace: stackTrace);
-    } catch (e, stackTrace) {
-      notifyAppError(e.toString(), error: e, stackTrace: stackTrace);
-    } finally {
-      notifyListeners();
-    }
+  Future<void> refreshStatus() async {
+    await super.refreshStatus();
+    await _fetchDeviceStatus();
   }
 
-  Future<void> fetchDeviceStatus() async {
+  Future<void> _fetchDeviceStatus() async {
     if (!isOnline) {
       return;
     }
-    _borneoDeviceStatus = await _deviceApi.getGeneralDeviceStatus(super.boundDevice!.device);
+
     _lyfiDeviceStatus = await _deviceApi.getLyfiStatus(super.boundDevice!.device);
 
     _isOn = borneoDeviceStatus!.power;
@@ -169,7 +145,7 @@ class LyfiViewModel extends BaseDeviceViewModel {
 
   Future<void> _switchPowerOnOff(bool onOff) async {
     _deviceApi.setOnOff(super.boundDevice!.device, onOff);
-    await fetchDeviceStatus();
+    await refreshStatus();
     _isOn = onOff;
   }
 

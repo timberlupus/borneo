@@ -3,6 +3,7 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/widgets.dart';
 
+import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 import 'package:borneo_app/models/devices/device_entity.dart';
 import 'package:borneo_app/services/device_manager.dart';
@@ -20,6 +21,8 @@ abstract class BaseDeviceViewModel extends BaseViewModel with WidgetsBindingObse
 
   bool isInitialized = false;
   bool _isLoaded = false;
+
+  RssiLevel? get rssiLevel;
 
   bool get isLoaded => _isLoaded;
 
@@ -40,9 +43,21 @@ abstract class BaseDeviceViewModel extends BaseViewModel with WidgetsBindingObse
   }
 
   Future<void> initialize() async {
-    deviceEntity = await deviceManager.getDevice(deviceID);
-    _isLoaded = true;
+    try {
+      deviceEntity = await deviceManager.getDevice(deviceID);
+      _isLoaded = true;
+      await onInitialize();
+      await refreshStatus();
+    } catch (e, stackTrace) {
+      logger?.e('Failed to initialize device($deviceEntity): $e', error: e, stackTrace: stackTrace);
+      super.notifyAppError('Failed to initialize device: $e');
+    } finally {
+      startTimer();
+      isInitialized = true;
+    }
   }
+
+  Future<void> onInitialize();
 
   @override
   void dispose() {
@@ -55,7 +70,22 @@ abstract class BaseDeviceViewModel extends BaseViewModel with WidgetsBindingObse
     super.dispose();
   }
 
-  Future<void> periodicRefreshTask();
+  Future<void> refreshStatus();
+
+  Future<void> _periodicRefreshTask() async {
+    if (!hasListeners || isBusy || !isOnline) {
+      return;
+    }
+    try {
+      await refreshStatus().asCancellable(taskQueueCancelToken);
+    } on CancelledException catch (e, stackTrace) {
+      logger?.i('A periodic refresh task has been cancelled.', error: e, stackTrace: stackTrace);
+    } catch (e, stackTrace) {
+      notifyAppError(e.toString(), error: e, stackTrace: stackTrace);
+    } finally {
+      notifyListeners();
+    }
+  }
 
   void startTimer() {
     assert(!isDisposed);
@@ -63,7 +93,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel with WidgetsBindingObse
     if (!_isTimerRunning) {
       _timer = Timer.periodic(
         timerDuration,
-        (_) => enqueueJob(() => periodicRefreshTask().asCancellable(taskQueueCancelToken)),
+        (_) => enqueueJob(() => _periodicRefreshTask().asCancellable(taskQueueCancelToken)),
       );
       _isTimerRunning = true;
     }
