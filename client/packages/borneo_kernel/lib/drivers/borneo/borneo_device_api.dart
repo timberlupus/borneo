@@ -128,8 +128,8 @@ class GeneralBorneoDeviceStatus {
           ? DateTime.fromMillisecondsSinceEpoch(map['shutdownTimestamp'] * 1000)
           : null,
       temperature: map['temperature'],
-      powerVoltage: map['powerVoltage'] / 1000.0,
-      powerCurrent: map['powerCurrent'] / 1000.0,
+      powerVoltage: map['powerVoltage']?.toDouble() / 1000.0,
+      powerCurrent: map['powerCurrent']?.toDouble() / 1000.0,
     );
   }
 }
