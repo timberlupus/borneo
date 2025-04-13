@@ -174,8 +174,21 @@ static void coap_hnd_borneo_status_get(coap_resource_t* resource, coap_session_t
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, tz_name));
     }
 
+    // TODO FIXME
     BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "wifiStatus"));
     BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, 0));
+
+    // WiFi RSSI
+    {
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "wifiRssi"));
+        int wifi_rssi;
+        if (bo_wifi_get_rssi(&wifi_rssi) == 0) {
+            BO_COAP_TRY_ENCODE_CBOR(cbor_encode_int(&root_map, wifi_rssi));
+        }
+        else {
+            BO_COAP_TRY_ENCODE_CBOR(cbor_encode_null(&root_map));
+        }
+    }
 
 #if CONFIG_BT_BLE_ENABLED
     // TODO FIXME

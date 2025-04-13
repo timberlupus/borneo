@@ -85,6 +85,7 @@ class GeneralBorneoDeviceStatus {
   final Duration bootDuration;
   final String timezone;
   final int wifiStatus;
+  final int? wifiRssi;
   final int btStatus;
   final int serverStatus;
   final int error;
@@ -94,13 +95,13 @@ class GeneralBorneoDeviceStatus {
   final double? powerVoltage;
   final double? powerCurrent;
 
-  // 构造函数
   const GeneralBorneoDeviceStatus({
     this.power = false,
     required this.timestamp,
     required this.bootDuration,
     this.timezone = '',
     this.wifiStatus = 0,
+    this.wifiRssi,
     this.btStatus = 0,
     this.serverStatus = 0,
     this.error = 0,
@@ -119,6 +120,7 @@ class GeneralBorneoDeviceStatus {
       bootDuration: Duration(milliseconds: map['bootDuration']),
       timezone: map['timezone'] ?? '',
       wifiStatus: map['wifiStatus'],
+      wifiRssi: map['wifiRssi'],
       serverStatus: map['serverStatus'],
       error: map['error'],
       shutdownReason: map['shutdownReason'],

@@ -1,3 +1,7 @@
+#include <stdlib.h>
+#include <string.h>
+
+#include <sys/errno.h>
 
 #include <esp_event.h>
 #include <esp_log.h>
@@ -9,8 +13,6 @@
 #include <freertos/task.h>
 #include <nvs_flash.h>
 #include <esp_netif.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include <borneo/common.h>
 #include <borneo/system.h>
@@ -181,10 +183,16 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
     } // switch
 }
 
-void _timer_callback(void* args)
+int bo_wifi_get_rssi(int* rssi)
 {
-    _update_nvs_reset();
+    if (rssi == NULL) {
+        return -EINVAL;
+    }
+    BO_TRY(esp_wifi_sta_get_rssi(rssi));
+    return 0;
 }
+
+void _timer_callback(void* args) { _update_nvs_reset(); }
 
 int _update_nvs_early(int32_t* shutdown_count)
 {
