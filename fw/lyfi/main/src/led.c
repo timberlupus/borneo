@@ -211,7 +211,7 @@ int led_init()
 
     memset(&_status, 0, sizeof(_status));
     memset(&_settings, 0, sizeof(_settings));
-    memset(&_ledc_channels, 0, sizeof(_ledc_channels));
+    memset(_ledc_channels, 0, sizeof(_ledc_channels));
 
     struct led_factory_settings factory_settings;
     BO_TRY(load_factory_settings(&factory_settings));
@@ -249,6 +249,7 @@ int led_init()
     // Initialize all channels
     for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
         _ledc_channels[ch].gpio_num = LED_GPIOS[ch];
+        _ledc_channels[ch].intr_type = LEDC_INTR_DISABLE;
         _ledc_channels[ch].hpoint = (ch * LED_MAX_DUTY) / LYFI_LED_CHANNEL_COUNT;
 #if SOC_LEDC_SUPPORT_HS_MODE
         if (ch <= 7) { // the next timer
@@ -267,10 +268,7 @@ int led_init()
         _ledc_channels[ch].channel = (uint8_t)ch % 8;
         ESP_LOGI(TAG, "Configure GPIO [%u] as PWM Channel [%u], hpoint=[%u]", _ledc_channels[ch].gpio_num,
                  _ledc_channels[ch].channel, _ledc_channels[ch].hpoint);
-        BO_TRY(gpio_reset_pin(LED_GPIOS[ch]));
         BO_TRY(ledc_channel_config(&_ledc_channels[ch]));
-        BO_TRY(ledc_stop(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel,
-                         0)); // During initialization, set the channels to low level.
     }
 
     // Initialize fade service.
