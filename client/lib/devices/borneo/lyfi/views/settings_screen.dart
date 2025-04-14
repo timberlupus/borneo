@@ -32,10 +32,9 @@ class SettingsScreen extends StatelessWidget {
     var rssi = vm.borneoDeviceStatus?.wifiRssi;
     if (rssi != null) {
       return switch (RssiLevelExtension.fromRssi(rssi)) {
-        RssiLevel.poor => Icon(Icons.network_wifi_1_bar_rounded),
-        RssiLevel.fair => Icon(Icons.network_wifi_2_bar_rounded),
-        RssiLevel.good => Icon(Icons.network_wifi_3_bar_rounded),
-        RssiLevel.excellent => Icon(Icons.network_wifi_3_bar_rounded),
+        RssiLevel.strong => Icon(Icons.wifi),
+        RssiLevel.medium => Icon(Icons.wifi_2_bar),
+        RssiLevel.weak => Icon(Icons.wifi_1_bar),
       };
     } else {
       return Icon(Icons.wifi_off_outlined, color: Theme.of(bc).colorScheme.error);

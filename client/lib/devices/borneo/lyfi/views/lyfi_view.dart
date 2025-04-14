@@ -1,4 +1,5 @@
 import 'package:borneo_app/models/devices/device_entity.dart';
+import 'package:borneo_common/io/net/rssi.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -312,6 +313,7 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                     ),
             ),
             */
+
             IconButton(
               icon: Icon(Icons.settings_outlined, size: 24),
               onPressed: () async {
@@ -322,6 +324,17 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                   Navigator.push(context, route);
                 }
               },
+            ),
+
+            Selector<LyfiViewModel, RssiLevel?>(
+              selector: (_, vm) => vm.rssiLevel,
+              builder:
+                  (content, rssi, _) => switch (rssi) {
+                    null => Icon(Icons.signal_wifi_off_outlined, size: 24),
+                    RssiLevel.strong => Icon(Icons.wifi, size: 24),
+                    RssiLevel.medium => Icon(Icons.wifi_2_bar, size: 24),
+                    RssiLevel.weak => Icon(Icons.wifi_1_bar, size: 24),
+                  },
             ),
           ],
         ),
