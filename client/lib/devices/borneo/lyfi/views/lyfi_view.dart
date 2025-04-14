@@ -295,6 +295,7 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             /*
             Selector<LyfiViewModel, ({bool isOn, bool isLocked, bool isBusy})>(
               selector: (_, vm) =>
@@ -313,7 +314,6 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                     ),
             ),
             */
-
             IconButton(
               icon: Icon(Icons.settings_outlined, size: 24),
               onPressed: () async {
