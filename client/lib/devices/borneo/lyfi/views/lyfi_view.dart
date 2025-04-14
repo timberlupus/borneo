@@ -341,8 +341,8 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
   }
 }
 
-class LyfiScreen extends StatelessWidget {
-  const LyfiScreen({super.key});
+class LyfiView extends StatelessWidget {
+  const LyfiView({super.key});
 
   @override
   Widget build(BuildContext context) {

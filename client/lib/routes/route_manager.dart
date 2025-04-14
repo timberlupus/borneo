@@ -38,6 +38,6 @@ class RouteManager {
   }
 
   Widget _makeDeviceDetailsScreenBuilder(BuildContext context, DeviceModuleMetadata meta) {
-    return meta.detailsScreenBuilder(context);
+    return meta.detailsViewBuilder(context);
   }
 }

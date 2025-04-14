@@ -1,5 +1,5 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
-import 'package:borneo_app/devices/borneo/lyfi/views/lyfi_screen.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/lyfi_view.dart';
 import 'package:borneo_app/models/devices/device_module_metadata.dart';
 import 'package:borneo_app/services/device_manager.dart';
 import 'package:event_bus/event_bus.dart';
@@ -16,7 +16,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         id: kLyfiDriverID,
         name: kLyfiDriverName,
         driverDescriptor: borneoLyfiDriverDescriptor,
-        detailsScreenBuilder: (_) => LyfiScreen(),
+        detailsViewBuilder: (_) => LyfiView(),
         detailsViewModelBuilder:
             (context, deviceID) => LyfiViewModel(
               deviceID,

@@ -25,7 +25,7 @@ class GenericDeviceScreen<TDeviceViewModel extends BaseDeviceViewModel> extends 
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else {
-              return module.detailsScreenBuilder(context);
+              return module.detailsViewBuilder(context);
             }
           },
         );
