@@ -65,9 +65,9 @@ static uint8_t thermal_pid_step(int32_t current_temp);
 #define OUTPUT_MAX 100
 
 const struct thermal_settings THERMAL_DEFAULT_SETTINGS = {
-    .kp = 200,
-    .ki = 20,
-    .kd = 100,
+    .kp = 100,
+    .ki = 5,
+    .kd = 50,
     .keep_temp = 45,
     .overheated_temp = 65,
     .fan_mode = THERMAL_FAN_MODE_PID,
@@ -203,19 +203,16 @@ uint8_t thermal_pid_step(int32_t current_temp)
 {
     volatile struct pid* pid = &_thermal.pid;
     int32_t error = current_temp - _settings.keep_temp;
-    if (abs(error) < PID_INTEGRAL_RESET_THRESHOLD) {
-        pid->integral = 0;
-    }
-    else {
-        pid->integral += error;
-    }
 
+    int32_t p_term = _settings.kp * error;
+
+    pid->integral += (int32_t)_settings.ki * error;
     CLAMP(pid->integral, -INT32_MAX / 2, INT32_MAX / 2);
 
     int32_t derivative = error - pid->prev_error;
-    pid->prev_error = error;
+    int32_t d_term = _settings.kd * derivative;
 
-    int32_t output = (_settings.kp * error + _settings.ki * pid->integral + _settings.kd * derivative) / PID_Q;
+    int32_t output = (p_term + pid->integral + d_term) / PID_Q;
     if (output > OUTPUT_MAX) {
         output = OUTPUT_MAX;
     }
@@ -225,6 +222,8 @@ uint8_t thermal_pid_step(int32_t current_temp)
     else if (output <= OUTPUT_MIN) {
         output = OUTPUT_MIN;
     }
+
+    pid->prev_error = error;
 
     return (uint8_t)output;
 }
