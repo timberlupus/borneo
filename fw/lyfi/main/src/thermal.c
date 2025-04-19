@@ -65,7 +65,7 @@ static uint8_t thermal_pid_step(int32_t current_temp);
 #define OUTPUT_MAX 100
 
 const struct thermal_settings THERMAL_DEFAULT_SETTINGS = {
-    .kp = 300,
+    .kp = 500,
     .ki = 5,
     .kd = 50,
     .keep_temp = 45,
