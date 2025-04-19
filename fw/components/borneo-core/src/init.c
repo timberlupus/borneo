@@ -36,10 +36,18 @@
 #include "borneo/power-meas.h"
 #include "borneo/rtc.h"
 
+#if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED
+#include "soc/usb_serial_jtag_reg.h"
+#endif // CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED
+
 #define TAG "bo-init"
 
 static int _borneo_early_init(const struct drvfx_device* dev)
 {
+#if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED
+    CLEAR_PERI_REG_MASK(USB_SERIAL_JTAG_CONF0_REG, USB_SERIAL_JTAG_DP_PULLUP);
+#endif // CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED
+
     ESP_LOGI(TAG, "Initializing early stuff...");
 
     // Initialize NVS

@@ -65,7 +65,7 @@ static uint8_t thermal_pid_step(int32_t current_temp);
 #define OUTPUT_MAX 100
 
 const struct thermal_settings THERMAL_DEFAULT_SETTINGS = {
-    .kp = 100,
+    .kp = 300,
     .ki = 5,
     .kd = 50,
     .keep_temp = 45,
@@ -206,7 +206,7 @@ uint8_t thermal_pid_step(int32_t current_temp)
 
     int32_t p_term = _settings.kp * error;
 
-    pid->integral += (int32_t)_settings.ki * error;
+    pid->integral += _settings.ki * error;
     CLAMP(pid->integral, -INT32_MAX / 2, INT32_MAX / 2);
 
     int32_t derivative = error - pid->prev_error;
@@ -217,10 +217,10 @@ uint8_t thermal_pid_step(int32_t current_temp)
         output = OUTPUT_MAX;
     }
     else if (output > OUTPUT_MIN && output < FAN_POWER_MIN) {
-        output = OUTPUT_MIN;
+        output = FAN_POWER_MIN;
     }
     else if (output <= OUTPUT_MIN) {
-        output = OUTPUT_MIN;
+        output = OUTPUT_MIN; // OFF
     }
 
     pid->prev_error = error;
