@@ -57,16 +57,18 @@ static uint8_t thermal_pid_step(int32_t current_temp);
 #define PID_Q 100
 #define PID_PERIOD (3000)
 #define PID_INTEGRAL_RESET_THRESHOLD 3
+#define PID_INTEGRAL_MAX 50000
+#define PID_INTEGRAL_MIN -50000
 #define OVERHEATED_TEMP_COUNT_MAX 3
 
 #define FAN_POWER_MIN 10
 
-#define OUTPUT_MIN 0
+#define OUTPUT_MIN 10
 #define OUTPUT_MAX 100
 
 const struct thermal_settings THERMAL_DEFAULT_SETTINGS = {
-    .kp = 500,
-    .ki = 5,
+    .kp = 150,
+    .ki = 10,
     .kd = 50,
     .keep_temp = 45,
     .overheated_temp = 65,
@@ -202,28 +204,43 @@ _EXIT_WITHOUT_CLOSE:
 uint8_t thermal_pid_step(int32_t current_temp)
 {
     volatile struct pid* pid = &_thermal.pid;
+
     int32_t error = current_temp - _settings.keep_temp;
 
     int32_t p_term = _settings.kp * error;
 
     pid->integral += _settings.ki * error;
-    CLAMP(pid->integral, -INT32_MAX / 2, INT32_MAX / 2);
 
-    int32_t derivative = error - pid->prev_error;
-    int32_t d_term = _settings.kd * derivative;
+    if (pid->integral < PID_INTEGRAL_MAX && pid->integral > PID_INTEGRAL_MIN) {
+        pid->integral += _settings.ki * error;
+    }
+    else {
+        if ((pid->integral >= PID_INTEGRAL_MAX && error < 0) || (pid->integral <= PID_INTEGRAL_MIN && error > 0)) {
+            pid->integral += _settings.ki * error;
+        }
+    }
 
-    int32_t output = (p_term + pid->integral + d_term) / PID_Q;
-    if (output > OUTPUT_MAX) {
-        output = OUTPUT_MAX;
-    }
-    else if (output > OUTPUT_MIN && output < FAN_POWER_MIN) {
-        output = FAN_POWER_MIN;
-    }
-    else if (output <= OUTPUT_MIN) {
-        output = OUTPUT_MIN; // OFF
-    }
+    int32_t d_term = _settings.kd * (error - pid->prev_error);
+
+    int32_t output = p_term + pid->integral + d_term;
 
     pid->prev_error = error;
+
+    if (output > OUTPUT_MAX * PID_Q) {
+        output = OUTPUT_MAX;
+        if (error > 0) {
+            pid->integral -= _settings.ki * error;
+        }
+    }
+    else if (output < OUTPUT_MIN * PID_Q) {
+        output = 0;
+        if (error < 0) {
+            pid->integral -= _settings.ki * error;
+        }
+    }
+    else {
+        output /= PID_Q;
+    }
 
     return (uint8_t)output;
 }

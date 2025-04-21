@@ -29,13 +29,13 @@ static void _coap_hnd_thermal_pid_get(coap_resource_t* resource, coap_session_t*
     const struct thermal_settings* settings = thermal_get_settings();
 
     BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "kp"));
-    BO_COAP_VERIFY(cbor_encode_float(&root_map, settings->kp));
+    BO_COAP_VERIFY(cbor_encode_int(&root_map, settings->kp));
 
     BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "ki"));
-    BO_COAP_VERIFY(cbor_encode_float(&root_map, settings->ki));
+    BO_COAP_VERIFY(cbor_encode_int(&root_map, settings->ki));
 
     BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "kd"));
-    BO_COAP_VERIFY(cbor_encode_float(&root_map, settings->kd));
+    BO_COAP_VERIFY(cbor_encode_int(&root_map, settings->kd));
 
     BO_COAP_VERIFY(cbor_encoder_close_container(&encoder, &root_map));
 
@@ -44,6 +44,49 @@ static void _coap_hnd_thermal_pid_get(coap_resource_t* resource, coap_session_t*
     coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
 
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
+}
+
+static void _coap_hnd_thermal_pid_put(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
+                                      const coap_string_t* query, coap_pdu_t* response)
+{
+    coap_resource_notify_observers(resource, NULL);
+
+    size_t data_size;
+    const uint8_t* data;
+    coap_get_data(request, &data_size, &data);
+
+    CborParser parser;
+    CborValue iter;
+    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &iter));
+
+    CborValue array;
+    size_t array_length = 0;
+    BO_COAP_VERIFY(cbor_value_enter_container(&iter, &array));
+
+    BO_COAP_VERIFY(cbor_value_get_array_length(&iter, &array_length));
+    if (array_length != 3) {
+        coap_pdu_set_code(response, COAP_RESPONSE_CODE_BAD_REQUEST);
+        return;
+    }
+
+    int kp;
+    int ki;
+    int kd;
+
+    BO_COAP_VERIFY(cbor_value_get_int_checked(&array, &kp));
+
+    BO_COAP_VERIFY(cbor_value_advance(&array));
+    BO_COAP_VERIFY(cbor_value_get_int_checked(&array, &ki));
+
+    BO_COAP_VERIFY(cbor_value_advance(&array));
+    BO_COAP_VERIFY(cbor_value_get_int_checked(&array, &kd));
+
+    BO_COAP_VERIFY(cbor_value_advance(&array));
+    BO_COAP_VERIFY(cbor_value_leave_container(&iter, &array));
+
+    BO_COAP_TRY(thermal_set_pid(kp, ki, kd), COAP_RESPONSE_CODE_INTERNAL_ERROR);
+
+    coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
 
 static void _coap_hnd_thermal_current_temp_get(coap_resource_t* resource, coap_session_t* session,
@@ -145,7 +188,7 @@ static void _coap_hnd_thermal_settings_get(coap_resource_t* resource, coap_sessi
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
 }
 
-COAP_RESOURCE_DEFINE("borneo/lyfi/thermal/pid", false, _coap_hnd_thermal_pid_get, NULL, NULL, NULL);
+COAP_RESOURCE_DEFINE("borneo/lyfi/thermal/pid", false, _coap_hnd_thermal_pid_get, NULL, _coap_hnd_thermal_pid_put, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/thermal/temp/current", false, _coap_hnd_thermal_current_temp_get, NULL, NULL, NULL);
 

@@ -6,11 +6,6 @@ menu "Borneo LyFi"
             default n
 
         config LYFI_POWER_MEAS_VOLTAGE_ENABLED
-            bool "LED Power measurement anbaled"
-            depends on LYFI_POWER_MEAS_ENABLED
-            default n
-
-        config LYFI_POWER_MEAS_VOLTAGE_ENABLED
             bool "LED Power voltage measurement anbaled"
             depends on LYFI_POWER_MEAS_ENABLED
             default y if LYFI_POWER_MEAS_ENABLED
