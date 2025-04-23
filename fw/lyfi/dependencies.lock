@@ -1,23 +1,22 @@
 dependencies:
   espressif/button:
-    component_hash: a405a99689f636e84cd67da34a85a88d0d3a1aa514a28f60d18bd370c1378e0b
+    component_hash: f53face2ab21fa0ffaf4cf0f6e513d393f56df6586bb2ad1146120f03f19ee05
     dependencies:
     - name: espressif/cmake_utilities
-      registry_url: https://components.espressif.com/
+      registry_url: https://components.espressif.com
       require: private
-      version: 0.*
+      version: '*'
     - name: idf
       require: private
       version: '>=4.0'
     source:
       registry_url: https://components.espressif.com/
       type: service
-    version: 4.0.0
+    version: 4.1.3
   espressif/cbor:
     component_hash: 440f4ee4504841cc9b4f3a8ef755776a612ac9dace355514c68b999868f990ff
     dependencies:
     - name: idf
-      registry_url: https://components.espressif.com
       require: private
       version: '>=4.3'
     source:
@@ -25,29 +24,27 @@ dependencies:
       type: service
     version: 0.6.0~1
   espressif/cmake_utilities:
-    component_hash: 351350613ceafba240b761b4ea991e0f231ac7a9f59a9ee901f751bddc0bb18f
+    component_hash: 05165f30922b422b4b90c08845e6d449329b97370fbd06309803d8cb539d79e3
     dependencies:
     - name: idf
-      registry_url: https://components.espressif.com
       require: private
       version: '>=4.1'
     source:
-      registry_url: https://components.espressif.com/
+      registry_url: https://components.espressif.com
       type: service
-    version: 0.5.3
+    version: 1.1.1
   espressif/coap:
-    component_hash: 041beed0026e0b9f461ffea422bcb579b41fc58df1c1286648b749aceaed2e9b
+    component_hash: a5d1b781b15980d9af136b5e63315dd5f5ec00215cc755f395ad2fb4977c7668
     dependencies:
     - name: idf
-      registry_url: https://components.espressif.com
       require: private
       version: '>=4.4'
     source:
       registry_url: https://components.espressif.com/
       type: service
-    version: 4.3.5~2
+    version: 4.3.5~3
   espressif/mdns:
-    component_hash: f5267872ed0c810d1b281c41a567cace7b3a3695c0df9dff89f631e9ba426ed0
+    component_hash: 3ec0af5f6bce310512e90f482388d21cc7c0e99668172d2f895356165fc6f7c5
     dependencies:
     - name: idf
       require: private
@@ -55,7 +52,7 @@ dependencies:
     source:
       registry_url: https://components.espressif.com/
       type: service
-    version: 1.4.2
+    version: 1.8.2
   idf:
     source:
       type: idf

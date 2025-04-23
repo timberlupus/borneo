@@ -2,47 +2,36 @@
 # in this exact order for cmake to work correctly
 cmake_minimum_required(VERSION 3.5)
 
-if(NOT BORNEO_BOARD)
-    set(BORNEO_BOARD "blc06mk1")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../cmake")
+
+
+if(NOT DEFINED PRODUCT_ID)
+    message(WARNING "The variable `PRODUCT_ID` is not defined. Please set it using `-DPRODUCT_ID=value` when running `idf.py build`.")
+    set(PRODUCT_ID "bst/blc06mk1")
 endif()
 
-set(SDKCONFIG "${CMAKE_BINARY_DIR}/sdkconfig")
-
-set(BORNEO_BOARD_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/boards/${BORNEO_BOARD}")
-
-set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../components")
-
-if(CMAKE_BUILD_TYPE AND (CMAKE_BUILD_TYPE STREQUAL "Release"))
-    set(SDKCONFIG_DEFAULTS "sdkconfig.common;sdkconfig.release;${CMAKE_CURRENT_SOURCE_DIR}/boards/${BORNEO_BOARD}/sdkconfig")
-else()
-    set(SDKCONFIG_DEFAULTS "sdkconfig.common;${CMAKE_CURRENT_SOURCE_DIR}/boards/${BORNEO_BOARD}/sdkconfig")
-endif()
-
-include("${CMAKE_CURRENT_SOURCE_DIR}/boards/${BORNEO_BOARD}/board.cmake")
+include(BorneoProduct REQUIRED)
 
 #include(./cmake/ClangFormat.cmake REQUIRED)
 
-FILE(GLOB_RECURSE ALL_C_SOURCES
-    "./main/src/*.c"
-)
-
-FILE(GLOB_RECURSE ALL_CPP_SOURCES
-    "./main/src/*.cpp"
-)
-
-FILE(GLOB_RECURSE ALL_HEADERS
-    "./main/include/*.h"
-    "./main/include/*.hpp"
-)
 
 #clangformat_setup(${ALL_C_SOURCES} ${ALL_CPP_SOURCES} ${ALL_HEADERS})
 
+FILE(GLOB_RECURSE ALL_C_SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/main/src/*.c"
+)
+
+FILE(GLOB_RECURSE ALL_CPP_SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/main/src/*.cpp"
+)
+
+FILE(GLOB_RECURSE ALL_HEADERS
+    "${CMAKE_CURRENT_SOURCE_DIR}/main/include/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/main/include/*.hpp"
+)
+
+
+
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
-
-project("borneo-fw-lyfi-${BORNEO_BOARD}")
-
-set(BORNEO_BOARD_INCLUDE_DIR  ${BORNEO_BOARD_DIR})
-
-
-message(">>>>>>> Borneo LyFi Board: ${BORNEO_BOARD}")
+project("${BORNEO_PROJECT_ID}")
