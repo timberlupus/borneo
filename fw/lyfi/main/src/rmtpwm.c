@@ -72,7 +72,7 @@ int rmtpwm_init()
         .loop_count = -1,
     };
 
-    ESP_LOGI(TAG, "Create RMT TX channel for FAN PWM...");
+    ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan PWM...", CONFIG_LYFI_FAN_CTRL_PWM_GPIO);
     s_pwm_channel.mutex = xSemaphoreCreateMutexStatic(&s_pwm_channel.mutex_buffer);
     rmt_tx_channel_config_t fan_pwm_tx_chan_config = {
         .clk_src = RMT_CLK_SRC_DEFAULT, // select source clock
@@ -87,7 +87,7 @@ int rmtpwm_init()
                         &tx_config));
 
 #if !SOC_DAC_SUPPORTED
-    ESP_LOGI(TAG, "Create RMT TX channel for FAN PWM DAC...");
+    ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan PWM-DAC...", CONFIG_LYFI_FAN_CTRL_PWMDAC_GPIO);
     s_dac_channel.mutex = xSemaphoreCreateMutexStatic(&s_dac_channel.mutex_buffer);
     rmt_tx_channel_config_t fan_dac_tx_chan_config = {
         .clk_src = RMT_CLK_SRC_DEFAULT, // select source clock

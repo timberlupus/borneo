@@ -43,7 +43,7 @@ int fan_init()
         uint64_t selected_gpios = 0ULL;
         selected_gpios |= 1ULL << CONFIG_LYFI_FAN_CTRL_SHUTDOWN_GPIO;
 
-        gpio_config_t io_conf;
+        gpio_config_t io_conf = { 0 };
         io_conf.intr_type = GPIO_INTR_DISABLE;
         io_conf.mode = GPIO_MODE_OUTPUT;
         io_conf.pin_bit_mask = selected_gpios;
@@ -52,6 +52,7 @@ int fan_init()
         BO_TRY(gpio_config(&io_conf));
 
         BO_TRY(gpio_set_level(CONFIG_LYFI_FAN_CTRL_SHUTDOWN_GPIO, 0));
+        ESP_LOGI(TAG, "Fan shutdown GPIO%u initialized.", CONFIG_LYFI_FAN_CTRL_SHUTDOWN_GPIO);
     }
 #endif // CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED
 
@@ -77,7 +78,6 @@ int fan_init()
         BO_TRY(dac_output_enable(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL));
 #endif
     }
-
     else {
 #if !SOC_DAC_SUPPORTED
         BO_TRY(rmtpwm_set_dac_duty(0));
@@ -109,6 +109,7 @@ int fan_set_power(uint8_t value)
     else {
         BO_TRY(gpio_set_level(CONFIG_LYFI_FAN_CTRL_SHUTDOWN_GPIO, 1));
     }
+    ESP_LOGI(TAG, "Fan shutdown: %d", gpio_get_level(CONFIG_LYFI_FAN_CTRL_SHUTDOWN_GPIO));
 #endif // LYFI_FAN_CTRL_SHUTDOWN_ENABLED
 
     if (_settings.use_pwm_fan) {
