@@ -169,7 +169,7 @@ class ManualRunningChart extends StatelessWidget {
           backDrawRodData: BackgroundBarChartRodData(
             show: true,
             fromY: 0,
-            toY: ch.powerRatio.toDouble(),
+            toY: ch.power.toDouble(),
             color: Theme.of(context).scaffoldBackgroundColor,
           ),
         ),
@@ -642,7 +642,7 @@ class DashboardView extends StatelessWidget {
                                 ? Theme.of(context).colorScheme.onPrimaryContainer
                                 : Theme.of(context).disabledColor,
                       ),
-                      text: 'Unlock the dimming mode',
+                      text: 'Unlock dimming mode',
                     ),
               ),
             );

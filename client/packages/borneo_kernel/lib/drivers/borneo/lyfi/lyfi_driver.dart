@@ -27,34 +27,43 @@ class LyfiPaths {
 class LyfiChannelInfo {
   final String name;
   final String color;
-  final int powerRatio;
+  final double brightnessRatio;
+  final double power;
 
   const LyfiChannelInfo({
     required this.name,
     required this.color,
-    required this.powerRatio,
+    required this.brightnessRatio,
+    required this.power,
   });
 
   factory LyfiChannelInfo.fromMap(dynamic map) {
     return LyfiChannelInfo(
       name: map['name'],
       color: map['color'],
-      powerRatio: map['powerRatio'],
+      brightnessRatio: map['brightnessPercent'].toDouble() / 100.0,
+      power: map['power'].toDouble() / 1000.0,
     );
   }
 }
 
 class LyfiDeviceInfo {
+  final bool isStandaloneController;
   final int channelCount;
   final List<LyfiChannelInfo> channels;
 
-  const LyfiDeviceInfo(this.channelCount, this.channels);
+  const LyfiDeviceInfo({
+    required this.isStandaloneController,
+    required this.channelCount,
+    required this.channels,
+  });
 
   factory LyfiDeviceInfo.fromMap(CborMap cborMap) {
     final dynamic map = cborMap.toObject();
     return LyfiDeviceInfo(
-        map['channelCount'],
-        List<LyfiChannelInfo>.from(
+        isStandaloneController: map['isStandaloneController'],
+        channelCount: map['channelCount'],
+        channels: List<LyfiChannelInfo>.from(
           map['channels'].map((x) => LyfiChannelInfo.fromMap(x)),
         ));
   }

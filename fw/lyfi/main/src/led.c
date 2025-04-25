@@ -1031,6 +1031,7 @@ int load_factory_settings(struct led_factory_settings* factory_settings)
         goto _EXIT_CLOSE;
     }
 
+
 _EXIT_CLOSE:
     bo_nvs_close(handle);
 _EXIT_WITHOUT_CLOSE:
@@ -1093,6 +1094,11 @@ int load_user_settings()
     if (rc) {
         goto _EXIT_CLOSE;
     }
+
+    // TODO
+    // Loading the brightness and power settings...
+#ifdef CONFIG_LYFI_STANDALONE_CONTROLLER
+#endif // CONFIG_LYFI_STANDALONE_CONTROLLER
 
 _EXIT_CLOSE:
     bo_nvs_close(handle);

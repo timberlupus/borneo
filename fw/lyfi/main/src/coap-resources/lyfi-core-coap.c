@@ -19,7 +19,8 @@
 #define TAG "lyfi-coap"
 
 static int color_decode(CborValue* value, led_color_t color);
-static int _encode_channel_info_entry(CborEncoder* parent, const char* name, const char* color, uint32_t power_ratio);
+static int _encode_channel_info_entry(CborEncoder* parent, const char* name, const char* color,
+                                      uint32_t brightness_percent, uint32_t power);
 static int _encode_channel_info_array(CborEncoder* parent);
 
 static int color_decode(CborValue* value, led_color_t color)
@@ -181,10 +182,11 @@ static void coap_hnd_schedule_put(coap_resource_t* resource, coap_session_t* ses
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
 
-static int _encode_channel_info_entry(CborEncoder* parent, const char* name, const char* color, uint32_t power_ratio)
+static int _encode_channel_info_entry(CborEncoder* parent, const char* name, const char* color,
+                                      uint32_t brightness_percent, uint32_t power)
 {
     CborEncoder ch_map;
-    BO_TRY(cbor_encoder_create_map(parent, &ch_map, 3)); // 修改字典条目数需要改这里
+    BO_TRY(cbor_encoder_create_map(parent, &ch_map, CborIndefiniteLength)); // 修改字典条目数需要改这里
 
     BO_TRY(cbor_encode_text_stringz(&ch_map, "name"));
     BO_TRY(cbor_encode_text_stringz(&ch_map, name));
@@ -192,8 +194,11 @@ static int _encode_channel_info_entry(CborEncoder* parent, const char* name, con
     BO_TRY(cbor_encode_text_stringz(&ch_map, "color"));
     BO_TRY(cbor_encode_text_stringz(&ch_map, color));
 
-    BO_TRY(cbor_encode_text_stringz(&ch_map, "powerRatio"));
-    BO_TRY(cbor_encode_uint(&ch_map, power_ratio));
+    BO_TRY(cbor_encode_text_stringz(&ch_map, "brightnessPercent"));
+    BO_TRY(cbor_encode_uint(&ch_map, brightness_percent));
+
+    BO_TRY(cbor_encode_text_stringz(&ch_map, "power"));
+    BO_TRY(cbor_encode_uint(&ch_map, power));
 
     BO_TRY(cbor_encoder_close_container(parent, &ch_map));
 
@@ -208,67 +213,67 @@ static int _encode_channel_info_array(CborEncoder* parent)
     // Channel 0
 #if CONFIG_LYFI_LED_CH0_ENABLED
     BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH0_NAME, CONFIG_LYFI_LED_CH0_COLOR,
-                                      CONFIG_LYFI_LED_CH0_POWER_RATIO));
+                                      CONFIG_LYFI_LED_CH0_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH0_POWER));
 #endif
 
     // Channel 1
 #if CONFIG_LYFI_LED_CH1_ENABLED
     BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH1_NAME, CONFIG_LYFI_LED_CH1_COLOR,
-                                      CONFIG_LYFI_LED_CH1_POWER_RATIO));
+                                      CONFIG_LYFI_LED_CH1_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH1_POWER));
 #endif
 
     // Channel 2
 #if CONFIG_LYFI_LED_CH2_ENABLED
     BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH2_NAME, CONFIG_LYFI_LED_CH2_COLOR,
-                                      CONFIG_LYFI_LED_CH2_POWER_RATIO));
+                                      CONFIG_LYFI_LED_CH2_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH2_POWER));
 #endif
 
     // Channel 3
 #if CONFIG_LYFI_LED_CH3_ENABLED
     BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH3_NAME, CONFIG_LYFI_LED_CH3_COLOR,
-                                      CONFIG_LYFI_LED_CH3_POWER_RATIO));
+                                      CONFIG_LYFI_LED_CH3_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH3_POWER));
 #endif
 
     // Channel 4
 #if CONFIG_LYFI_LED_CH4_ENABLED
     BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH4_NAME, CONFIG_LYFI_LED_CH4_COLOR,
-                                      CONFIG_LYFI_LED_CH4_POWER_RATIO));
+                                      CONFIG_LYFI_LED_CH4_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH4_POWER));
 #endif
 
     // Channel 5
 #if CONFIG_LYFI_LED_CH5_ENABLED
     BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH5_NAME, CONFIG_LYFI_LED_CH5_COLOR,
-                                      CONFIG_LYFI_LED_CH5_POWER_RATIO));
+                                      CONFIG_LYFI_LED_CH5_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH5_POWER));
 #endif
 
     // Channel 6
 #if CONFIG_LYFI_LED_CH6_ENABLED
     BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH6_NAME, CONFIG_LYFI_LED_CH6_COLOR,
-                                      CONFIG_LYFI_LED_CH6_POWER_RATIO));
+                                      CONFIG_LYFI_LED_CH6_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH6_POWER));
 #endif
 
     // Channel 7
 #if CONFIG_LYFI_LED_CH7_ENABLED
     BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH7_NAME, CONFIG_LYFI_LED_CH7_COLOR,
-                                      CONFIG_LYFI_LED_CH7_POWER_RATIO));
+                                      CONFIG_LYFI_LED_CH7_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH7_POWER));
 #endif
 
     // Channel 8
 #if CONFIG_LYFI_LED_CH8_ENABLED
     BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH8_NAME, CONFIG_LYFI_LED_CH8_COLOR,
-                                      CONFIG_LYFI_LED_CH8_POWER_RATIO));
+                                      CONFIG_LYFI_LED_CH0_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH0_POWER));
 #endif
 
     // Channel 9
 #if CONFIG_LYFI_LED_CH9_ENABLED
     BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH9_NAME, CONFIG_LYFI_LED_CH9_COLOR,
-                                      CONFIG_LYFI_LED_CH9_POWER_RATIO));
+                                      CONFIG_LYFI_LED_CH8_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH8_POWER));
 #endif
 
     // Channel 10
 #if CONFIG_LYFI_LED_CH10_ENABLED
     BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH10_NAME, CONFIG_LYFI_LED_CH10_COLOR,
-                                      CONFIG_LYFI_LED_CH10_POWER_RATIO));
+                                      CONFIG_LYFI_LED_CH9_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH9_POWER));
 #endif
 
     BO_TRY(cbor_encoder_close_container(parent, &channels_array));
@@ -287,7 +292,15 @@ static void coap_hnd_info_get(coap_resource_t* resource, coap_session_t* session
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
 
     CborEncoder root_map;
-    BO_COAP_VERIFY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength)); // 修改字典条目数需要改这里
+    BO_COAP_VERIFY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength));
+    {
+        BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "isStandaloneController"));
+#if CONFIG_LYFI_STANDALONE_CONTROLLER
+        BO_COAP_VERIFY(cbor_encode_boolean(&root_map, true));
+#else
+        BO_COAP_VERIFY(cbor_encode_boolean(&root_map, false));
+#endif // CONFIG_LYFI_STANDALONE_CONTROLLER
+    }
 
     {
         BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "channelCount"));
