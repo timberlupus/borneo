@@ -37,45 +37,40 @@ menu "Borneo LyFi"
 
     menu "LED channels"
 
-        config LYFI_LED_CH0_ENABLED
-            bool "LED channel 0 enabled"
-            default n
+    choice
+        prompt "Select LED Channels"
+        mandatory
 
-        config LYFI_LED_CH1_ENABLED
-            bool "LED channel 1 enabled"
-            default n
+            config LYFI_LED_CH0_ENABLED
+                bool "LED channel 0 enabled"
 
-        config LYFI_LED_CH2_ENABLED
-            bool "LED channel 2 enabled"
-            default n
+            config LYFI_LED_CH1_ENABLED
+                bool "LED channel 1 enabled"
 
-        config LYFI_LED_CH3_ENABLED
-            bool "LED channel 3 enabled"
-            default n
+            config LYFI_LED_CH2_ENABLED
+                bool "LED channel 2 enabled"
 
-        config LYFI_LED_CH4_ENABLED
-            bool "LED channel 4 enabled"
-            default n
+            config LYFI_LED_CH3_ENABLED
+                bool "LED channel 3 enabled"
 
-        config LYFI_LED_CH5_ENABLED
-            bool "LED channel 5 enabled"
-            default n
+            config LYFI_LED_CH4_ENABLED
+                bool "LED channel 4 enabled"
 
-        config LYFI_LED_CH6_ENABLED
-            bool "LED channel 6 enabled"
-            default n
+            config LYFI_LED_CH5_ENABLED
+                bool "LED channel 5 enabled"
 
-        config LYFI_LED_CH7_ENABLED
-            bool "LED channel 7 enabled"
-            default n
+            config LYFI_LED_CH6_ENABLED
+                bool "LED channel 6 enabled"
 
-        config LYFI_LED_CH8_ENABLED
-            bool "LED channel 8 enabled"
-            default n
+            config LYFI_LED_CH7_ENABLED
+                bool "LED channel 7 enabled"
 
-        config LYFI_LED_CH9_ENABLED
-            bool "LED channel 9 enabled"
-            default n
+            config LYFI_LED_CH8_ENABLED
+                bool "LED channel 8 enabled"
+
+            config LYFI_LED_CH9_ENABLED
+                bool "LED channel 9 enabled"
+        endchoice
 
         config LYFI_LED_CHANNEL_COUNT
             int
