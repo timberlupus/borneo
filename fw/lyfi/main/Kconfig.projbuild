@@ -39,7 +39,6 @@ menu "Borneo LyFi"
 
     choice
         prompt "Select LED Channels"
-        mandatory
 
             config LYFI_LED_CH0_ENABLED
                 bool "LED channel 0 enabled"
