@@ -194,9 +194,9 @@ int bo_system_set_manuf(const char* manuf)
 
 void bo_system_set_shutdown_reason(uint32_t reason)
 {
-    taskENTER_CRITICAL(&_status_lock);
+    portENTER_CRITICAL(&_status_lock);
     _status.shutdown_reason = reason;
-    taskEXIT_CRITICAL(&_status_lock);
+    portEXIT_CRITICAL(&_status_lock);
 }
 
 void _reboot_callback() { esp_restart(); }
@@ -216,11 +216,11 @@ void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event
     } break;
 
     case BO_EVENT_EMERGENCY_SHUTDOWN: {
-        taskENTER_CRITICAL(&_status_lock);
+        portENTER_CRITICAL(&_status_lock);
         time_t t;
         time(&t);
         _status.shutdown_timestamp = t;
-        taskEXIT_CRITICAL(&_status_lock);
+        portEXIT_CRITICAL(&_status_lock);
     } break;
 
     case BO_EVENT_FATAL_ERROR: {
