@@ -28,6 +28,8 @@
 
 #define TAG "fan"
 
+static portMUX_TYPE _status_lock = portMUX_INITIALIZER_UNLOCKED;
+
 static struct fan_status _status = { 0 };
 static struct fan_settings _settings = { 0 };
 
@@ -96,11 +98,15 @@ int fan_set_power(uint8_t value)
         value = FAN_POWER_MAX;
     }
 
+    portENTER_CRITICAL(&_status_lock);
     if (_status.power == value) {
+        portEXIT_CRITICAL(&_status_lock);
         return 0;
     }
-
-    _status.power = value;
+    else {
+        _status.power = value;
+        portEXIT_CRITICAL(&_status_lock);
+    }
 
 #if CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED
     if (value == 0) {
@@ -152,8 +158,22 @@ int fan_set_power(uint8_t value)
     return 0;
 }
 
-uint8_t fan_get_power() { return _status.power; }
+uint8_t fan_get_power()
+{
+    uint8_t power;
+    portENTER_CRITICAL(&_status_lock);
+    power = _status.power;
+    portEXIT_CRITICAL(&_status_lock);
+    return power;
+}
 
-const struct fan_status* fan_get_status() { return &_status; }
+struct fan_status fan_get_status()
+{
+    struct fan_status status;
+    portENTER_CRITICAL(&_status_lock);
+    status = _status;
+    portEXIT_CRITICAL(&_status_lock);
+    return status;
+}
 
 const struct fan_settings* fan_get_settings() { return &_settings; }

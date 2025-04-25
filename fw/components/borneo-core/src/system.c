@@ -35,7 +35,7 @@ static int load_factory_settings();
 
 ESP_EVENT_DEFINE_BASE(BO_SYSTEM_EVENTS);
 
-portMUX_TYPE _status_lock = portMUX_INITIALIZER_UNLOCKED;
+static portMUX_TYPE _status_lock = portMUX_INITIALIZER_UNLOCKED;
 
 static struct system_info _sysinfo = { 0 };
 static struct system_status _status = { 0 };

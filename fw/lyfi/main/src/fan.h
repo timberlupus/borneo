@@ -22,7 +22,7 @@ int fan_init();
 int fan_set_power(uint8_t value);
 uint8_t fan_get_power();
 
-const struct fan_status* fan_get_status();
+struct fan_status fan_get_status();
 const struct fan_settings* fan_get_settings();
 
 #ifdef __cplusplus

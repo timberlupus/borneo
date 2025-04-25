@@ -361,9 +361,9 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
     }
 
     {
-        const struct fan_status* fs = fan_get_status();
+        const struct fan_status fs = fan_get_status();
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "fanPower"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, fs->power));
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, fs.power));
     }
 
     {

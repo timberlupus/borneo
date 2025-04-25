@@ -263,7 +263,7 @@ static void thermal_timer_callback(void* args)
 
     // If the device has been shut down and the temperature is suitable, turn off the fan.
     if (_thermal.current_temp <= _settings.keep_temp && !bo_power_is_on()) {
-        if (fan_get_status()->power > 0) {
+        if (fan_get_power() > 0) {
             fan_set_power(0);
             // pid_clear(&_pid);
             // Respond to shutdown event to clear PID.
