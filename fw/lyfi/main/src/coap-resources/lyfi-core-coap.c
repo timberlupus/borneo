@@ -18,10 +18,11 @@
 
 #define TAG "lyfi-coap"
 
+static int color_decode(CborValue* value, led_color_t color);
 static int _encode_channel_info_entry(CborEncoder* parent, const char* name, const char* color, uint32_t power_ratio);
 static int _encode_channel_info_array(CborEncoder* parent);
 
-static int color_decode(CborValue* value, uint8_t* color)
+static int color_decode(CborValue* value, led_color_t color)
 {
     CborValue array;
     size_t array_length = 0;
@@ -34,6 +35,9 @@ static int color_decode(CborValue* value, uint8_t* color)
     for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
         int ch_value = 0;
         BO_TRY(cbor_value_get_int_checked(&array, &ch_value));
+        if (ch_value < 0) {
+            return -EINVAL;
+        }
         color[ch] = ch_value;
         BO_TRY(cbor_value_advance_fixed(&array));
     }

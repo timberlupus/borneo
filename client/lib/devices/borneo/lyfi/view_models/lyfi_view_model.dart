@@ -65,7 +65,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     return sum.toDouble();
   }
 
-  double get maxOverallBrightness => _channels.length * 100.0;
+  double get maxOverallBrightness => _channels.length * 1000.0;
 
   final List<ValueNotifier<int>> _channels = [];
   List<ValueNotifier<int>> get channels => _channels;

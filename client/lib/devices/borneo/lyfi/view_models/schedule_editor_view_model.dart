@@ -1,3 +1,4 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/ieditor.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_common/async/async_rate_limiter.dart';
@@ -44,7 +45,6 @@ class ScheduleEntryViewModel extends ChangeNotifier {
 
 class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
   static const Duration defaultInstantSpan = Duration(minutes: 30);
-  static const _dimmingInterval = Duration(milliseconds: 200);
 
   final LyfiViewModel _parent;
   final EasySetupViewModel easySetupViewModel;
@@ -54,7 +54,9 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
 
   int? _currentEntryIndex;
 
-  final AsyncRateLimiter<Future Function()> _colorChangeRateLimiter = AsyncRateLimiter(interval: _dimmingInterval);
+  final AsyncRateLimiter<Future Function()> _colorChangeRateLimiter = AsyncRateLimiter(
+    interval: localDimmingTrackingInterval,
+  );
 
   final List<ScheduleEntryViewModel> _entries = [];
 

@@ -1,3 +1,4 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/easy_setup_screen.dart';
 import 'package:borneo_app/infrastructure/duration.dart';
 import 'package:borneo_app/infrastructure/time_of_day.dart';
@@ -114,7 +115,7 @@ class ScheduleEditorView extends StatelessWidget {
                                     ? (vm.entries.last.instant.inSeconds.toDouble() / 3600.0).ceilToDouble() * 3600
                                     : 24 * 3600,
                             minY: 0,
-                            maxY: 100,
+                            maxY: lyfiBrightnessMax.toDouble(),
                             backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
                             borderData: FlBorderData(
                               show: true,
@@ -137,7 +138,7 @@ class ScheduleEditorView extends StatelessWidget {
                               show: true,
                               drawVerticalLine: true,
                               drawHorizontalLine: true,
-                              horizontalInterval: 25.0,
+                              horizontalInterval: lyfiBrightnessMax.toDouble() * 0.25,
                               verticalInterval: 3600 * 3,
                               checkToShowVerticalLine: (value) => value.toInt() % 1800 == 0,
                               getDrawingHorizontalLine:
