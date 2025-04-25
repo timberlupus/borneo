@@ -1,10 +1,10 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
 
 class BrightnessSliderListTile extends StatelessWidget {
   final Color color;
   final bool disabled;
-  final int divisions;
   final int min;
   final int max;
   final int value;
@@ -18,9 +18,8 @@ class BrightnessSliderListTile extends StatelessWidget {
     required this.value,
     required this.color,
     this.disabled = false,
-    this.divisions = 100,
     this.min = 0,
-    this.max = 100,
+    this.max = lyfiBrightnessMax,
     this.trailing,
     required this.onChanged,
   });

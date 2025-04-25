@@ -1,3 +1,4 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/ieditor.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_common/async/async_rate_limiter.dart';
@@ -5,14 +6,14 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:flutter/material.dart';
 
 class ManualEditorViewModel extends ChangeNotifier implements IEditor {
-  static const _dimmingInterval = Duration(milliseconds: 200);
-
   bool _isChanged = false;
   bool _isInitialized = false;
   ILyfiDeviceApi get _deviceApi => _parent.boundDevice!.driver as ILyfiDeviceApi;
   final LyfiViewModel _parent;
 
-  final AsyncRateLimiter<Future Function()> _colorChangeRateLimiter = AsyncRateLimiter(interval: _dimmingInterval);
+  final AsyncRateLimiter<Future Function()> _colorChangeRateLimiter = AsyncRateLimiter(
+    interval: localDimmingTrackingInterval,
+  );
 
   final List<ValueNotifier<int>> _channels;
 

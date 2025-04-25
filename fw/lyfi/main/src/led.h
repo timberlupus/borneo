@@ -4,14 +4,26 @@
 extern "C" {
 #endif
 
-#define LYFI_LED_MAX_POWER 100
 #define LYFI_LEDC_SCHEDULER_ITEMS_CAPACITY 48
 
 #define LYFI_LED_CHANNEL_COUNT CONFIG_LYFI_LED_CHANNEL_COUNT
 
+
+typedef uint16_t led_brightness_t;
 typedef uint16_t led_duty_t;
-typedef uint8_t led_color_t[LYFI_LED_CHANNEL_COUNT];
+typedef led_brightness_t led_color_t[LYFI_LED_CHANNEL_COUNT];
 typedef led_duty_t led_duties_t[LYFI_LED_CHANNEL_COUNT];
+
+#define LED_BRIGHTNESS_MIN ((led_brightness_t)0)
+#define LED_BRIGHTNESS_MAX ((led_brightness_t)1000)
+
+enum led_correction_methods {
+    LED_CORRECTION_LOG = 0, ///< Default
+    LED_CORRECTION_LINEAR = 1,
+    LED_CORRECTION_CIE1931 = 2,
+
+    LED_CORRECTION_COUNT,
+};
 
 enum led_mode {
     LED_MODE_NORMAL = 0,
@@ -41,7 +53,7 @@ struct led_user_settings {
     uint16_t nightlight_duration; ///< Night lighting mode duration (in seconds)
     struct led_scheduler scheduler; ///< Scheduling scheduler for scheduled mode
     led_color_t manual_color; ///< Manual dimming power settings for each channel
-    uint8_t cie1931_enabled; ///< Whether the CIE1931 correction is enabled
+    uint8_t correction_method; ///< Correction method: Log/Linear/CIE1931
 };
 
 struct led_status {
@@ -58,23 +70,26 @@ struct led_status {
     uint32_t fade_duration_ms; ///< The duration of fading
 };
 
+extern const led_duty_t LED_CORLUT_CIE1931[LED_BRIGHTNESS_MAX + 1];
+extern const led_duty_t LED_CORLUT_LOG[LED_BRIGHTNESS_MAX + 1];
+
 int led_init();
 
-uint8_t led_channel_count();
+inline size_t led_channel_count() { return LYFI_LED_CHANNEL_COUNT; }
 
 void led_blank();
 
-int led_set_color(const uint8_t* color);
+int led_set_color(const led_color_t color);
 
-int led_get_color(uint8_t* color);
+int led_get_color(led_color_t color);
 
 int led_get_duties(led_duty_t* duties);
 
-uint8_t led_get_channel_power(uint8_t ch);
+led_brightness_t led_get_channel_power(uint8_t ch);
 
-int led_set_channel_power(uint8_t ch, uint8_t value);
+int led_set_channel_brightness(uint8_t ch, led_brightness_t value);
 
-int led_set_power(const led_color_t color);
+int led_update_color(const led_color_t color);
 
 int led_set_schedule(const struct led_scheduler_item* items, size_t count);
 const struct led_scheduler* led_get_schedule();

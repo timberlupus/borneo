@@ -73,7 +73,7 @@ ledc_channel_config_t _ledc_channels[LYFI_LED_CHANNEL_COUNT];
 #define LED_NVS_KEY_MANUAL_COLOR "mcolor"
 #define LED_NVS_KEY_SCHEDULER "sch"
 #define LED_NVS_KEY_NIGHTLIGHT_DURATION "nld"
-#define LED_NVS_KEY_CIE1931_ENABLED "cie1931"
+#define LED_NVS_KEY_CORRECTION_METHOD "corrmtd"
 #define LED_NVS_KEY_PWM_FREQ "pwmfreq"
 
 #define LED_MAX_DUTY 1023
@@ -83,7 +83,7 @@ ledc_channel_config_t _ledc_channels[LYFI_LED_CHANNEL_COUNT];
 #define FADE_PERIOD_MS 5000
 #define FADE_OFF_PERIOD_MS 3000
 
-static led_duty_t channel_power_to_duty(uint8_t power);
+static led_duty_t channel_brightness_to_duty(led_brightness_t power);
 static void color_to_duties(const led_color_t color, led_duty_t* duties);
 static int led_set_channel_duty(uint8_t ch, led_duty_t duty);
 static int led_set_duties(const led_duty_t* duties);
@@ -93,24 +93,6 @@ static int led_fade_off(uint32_t milssecs);
 static bool led_fade_inprogress();
 static int led_fade_stop();
 static void led_fade_drive();
-
-/// CIE1931 correction table
-static const led_duty_t CIE1931_TABLE[101] = {
-    0,   1,   2,   3,   5,   6,   7,   8,   8,   9,   11,  12,  13,  15,  16,  18,  20,   22,  24,  26,  28,
-    31,  33,  36,  39,  42,  45,  48,  52,  55,  59,  63,  67,  71,  76,  81,  85,  90,   96,  101, 107, 112,
-    118, 125, 131, 138, 145, 152, 159, 167, 175, 183, 191, 199, 208, 217, 227, 236, 246,  256, 266, 277, 288,
-    299, 311, 323, 335, 347, 360, 373, 386, 400, 414, 428, 443, 457, 473, 488, 504, 520,  537, 554, 571, 589,
-    607, 625, 644, 663, 683, 703, 723, 744, 765, 786, 808, 830, 853, 876, 899, 923, 1023,
-};
-
-static const led_duty_t LOG_TABLE[101] = {
-    0,   9,   28,  51,  73,  96,  118, 139, 160, 180, 199, 218, 236,  253,  270,  286,  302,  318, 333, 347, 362,
-    376, 389, 403, 416, 428, 441, 453, 465, 477, 489, 500, 511, 522,  533,  543,  554,  564,  574, 584, 594, 604,
-    613, 623, 632, 641, 650, 659, 668, 677, 685, 694, 702, 711, 719,  727,  735,  743,  751,  758, 766, 774, 781,
-    789, 796, 803, 811, 818, 825, 832, 839, 846, 852, 859, 866, 873,  879,  886,  892,  899,  905, 911, 918, 924,
-    930, 936, 942, 948, 954, 960, 966, 972, 978, 984, 989, 995, 1001, 1006, 1012, 1017, 1023,
-
-};
 
 ESP_EVENT_DEFINE_BASE(LYFI_LEDC_EVENTS);
 
@@ -286,27 +268,20 @@ int led_init()
     return 0;
 }
 
-uint8_t led_channel_count()
-{
-    //
-    return LYFI_LED_CHANNEL_COUNT;
-}
-
 void led_blank()
 {
     //
-    led_set_power(COLOR_BLANK);
+    led_update_color(COLOR_BLANK);
 }
 
-int led_set_color(const uint8_t* color)
+int led_set_color(const led_color_t color)
 {
     if (!bo_power_is_on() || _status.mode != LED_MODE_DIMMING) {
         return -EINVAL;
     }
-
     // Verify the colors
     for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        if (color[ch] > LYFI_LED_MAX_POWER) {
+        if (color[ch] > LED_BRIGHTNESS_MAX) {
             return -EINVAL;
         }
     }
@@ -315,41 +290,42 @@ int led_set_color(const uint8_t* color)
         memcpy(_settings.manual_color, color, sizeof(led_color_t));
     }
 
-    BO_TRY(led_set_power(color));
+    BO_TRY(led_update_color(color));
 
     return 0;
 }
 
-int led_get_color(uint8_t* color)
+int led_get_color(led_color_t color)
 {
     memcpy(color, _status.color, sizeof(led_color_t));
     return ESP_OK;
 }
 
-uint8_t led_get_channel_power(uint8_t ch)
+led_brightness_t led_get_channel_power(uint8_t ch)
 {
     //
     assert(ch < LYFI_LED_CHANNEL_COUNT);
     return _status.color[ch];
 }
 
-inline led_duty_t channel_power_to_duty(uint8_t power)
+inline led_duty_t channel_brightness_to_duty(led_brightness_t brightness)
 {
-    if (power > LYFI_LED_MAX_POWER) {
-        power = LYFI_LED_MAX_POWER;
-    }
-    if (_settings.cie1931_enabled) {
-        return CIE1931_TABLE[power];
-    }
-    else {
-        return LOG_TABLE[power];
+    switch (_settings.correction_method) {
+    case LED_CORRECTION_CIE1931:
+        return LED_CORLUT_CIE1931[brightness];
+
+    case LED_CORRECTION_LOG:
+        return LED_CORLUT_LOG[brightness];
+
+    default:
+        return brightness;
     }
 }
 
 inline void color_to_duties(const led_color_t color, led_duty_t* duties)
 {
     for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        duties[ch] = channel_power_to_duty(color[ch]);
+        duties[ch] = channel_brightness_to_duty(color[ch]);
     }
 }
 
@@ -378,7 +354,7 @@ int led_set_channel_duty(uint8_t ch, led_duty_t duty)
 
 int led_get_duties(led_duty_t* duties)
 {
-    for (uint8_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
         uint32_t duty = ledc_get_duty(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel);
         if (duty == LEDC_ERR_DUTY) {
             return -EIO;
@@ -391,7 +367,7 @@ int led_get_duties(led_duty_t* duties)
 int led_set_duties(const led_duty_t* duties)
 {
     uint32_t hpoint = 0;
-    for (uint8_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
         led_duty_t duty = duties[ch];
         BO_MUST(ledc_set_duty_and_update(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel, duty, hpoint));
         hpoint = (hpoint + duty) % (1 << LED_DUTY_RES);
@@ -473,25 +449,25 @@ void led_fade_drive()
 
 inline static bool led_fade_inprogress() { return _status.fade_start_time_ms > 0LL; }
 
-int led_set_channel_power(uint8_t ch, uint8_t power)
+int led_set_channel_brightness(uint8_t ch, led_brightness_t brightness)
 {
-    if (ch >= LYFI_LED_CHANNEL_COUNT || power > LYFI_LED_MAX_POWER) {
-        return -1;
+    if (ch >= LYFI_LED_CHANNEL_COUNT || brightness > LED_BRIGHTNESS_MAX) {
+        return -EINVAL;
     }
-    _status.color[ch] = power;
-    led_duty_t duty = channel_power_to_duty(power);
+    _status.color[ch] = brightness;
+    led_duty_t duty = channel_brightness_to_duty(brightness);
     BO_TRY(led_set_channel_duty(ch, duty));
     return 0;
 }
 
-int led_set_power(const led_color_t color)
+int led_update_color(const led_color_t color)
 {
     if (memcmp(color, _status.color, sizeof(led_color_t)) == 0) {
         return 0;
     }
 
-    for (uint8_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        BO_TRY(led_set_channel_power(ch, color[ch]));
+    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+        BO_TRY(led_set_channel_brightness(ch, color[ch]));
     }
     return 0;
 }
@@ -581,15 +557,15 @@ void sch_compute_color_in_range(led_color_t color, const struct tm* now, const s
     }
 
     for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        uint8_t begin_power = range_begin->color[ch];
-        uint8_t end_power = range_end->color[ch];
-        int32_t value
-            = linear_interpolate_i32(range_begin->instant, begin_power, range_end->instant, end_power, now_instant);
+        led_brightness_t begin_brightness = range_begin->color[ch];
+        led_brightness_t end_brightness = range_end->color[ch];
+        int32_t value = linear_interpolate_i32(range_begin->instant, begin_brightness, range_end->instant,
+                                               end_brightness, now_instant);
         if (value < 0) {
             value = 0;
         }
-        else if (value > LYFI_LED_MAX_POWER) {
-            value = LYFI_LED_MAX_POWER;
+        else if (value > LED_BRIGHTNESS_MAX) {
+            value = LED_BRIGHTNESS_MAX;
         }
         color[ch] = value;
     }
@@ -604,8 +580,8 @@ void sch_compute_duties_in_range(led_duty_t* duties, const struct tm* now, const
     }
 
     for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        led_duty_t begin_duty = channel_power_to_duty(range_begin->color[ch]);
-        led_duty_t end_duty = channel_power_to_duty(range_end->color[ch]);
+        led_duty_t begin_duty = channel_brightness_to_duty(range_begin->color[ch]);
+        led_duty_t end_duty = channel_brightness_to_duty(range_end->color[ch]);
         int32_t value
             = linear_interpolate_i32(range_begin->instant, begin_duty, range_end->instant, end_duty, now_instant);
         if (value < 0) {
@@ -785,7 +761,7 @@ static int normal_mode_entry()
             sch_drive();
         }
         else {
-            BO_TRY(led_set_power(_settings.manual_color));
+            BO_TRY(led_update_color(_settings.manual_color));
         }
     }
 
@@ -804,7 +780,7 @@ static void normal_mode_drive()
             sch_drive();
         }
         else {
-            BO_MUST(led_set_power(_settings.manual_color));
+            BO_MUST(led_update_color(_settings.manual_color));
         }
     }
 }
@@ -845,7 +821,7 @@ _EXIT:
 static void preview_mode_exit()
 {
     assert(_status.mode == LED_MODE_PREVIEW);
-    led_set_power(_status.color_to_resume);
+    led_update_color(_status.color_to_resume);
     ESP_LOGI(TAG, "Preview mode ended.");
 }
 
@@ -905,7 +881,7 @@ static void nightlight_mode_drive()
     }
     else {
         if (!led_fade_inprogress()) {
-            led_set_power(_settings.manual_color);
+            led_update_color(_settings.manual_color);
         }
     }
 }
@@ -1109,9 +1085,9 @@ int load_user_settings()
         goto _EXIT_CLOSE;
     }
 
-    rc = nvs_get_u8(handle, LED_NVS_KEY_CIE1931_ENABLED, &_settings.cie1931_enabled);
+    rc = nvs_get_u8(handle, LED_NVS_KEY_CORRECTION_METHOD, &_settings.correction_method);
     if (rc == ESP_ERR_NVS_NOT_FOUND) {
-        _settings.cie1931_enabled = 0;
+        _settings.correction_method = LED_DEFAULT_SETTINGS.correction_method;
         rc = 0;
     }
     if (rc) {
@@ -1143,7 +1119,7 @@ int save_user_settings()
         goto _EXIT_CLOSE;
     }
 
-    rc = nvs_set_u8(handle, LED_NVS_KEY_CIE1931_ENABLED, _settings.cie1931_enabled);
+    rc = nvs_set_u8(handle, LED_NVS_KEY_CORRECTION_METHOD, _settings.correction_method);
     if (rc) {
         goto _EXIT_CLOSE;
     }

@@ -1,3 +1,4 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:flutter/material.dart';
 
 import 'package:borneo_app/views/common/hex_color.dart';
@@ -19,13 +20,13 @@ class BrightnessSliderList<TEditor extends IEditor> extends StatelessWidget {
         builder:
             (context, channelValue, child) => BrightnessSliderListTile(
               channelName: channelInfo.name,
-              max: 100,
+              max: lyfiBrightnessMax,
               min: 0,
               value: channelValue,
               color: HexColor.fromHex(channelInfo.color),
               disabled: this.disabled,
               trailing: Text(
-                '${channelValue.toString().padLeft(3, '\u2007')}%',
+                '${(channelValue / lyfiBrightnessMax * 100.0).toStringAsFixed(1).padLeft(5, '\u2007')}%',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(fontFeatures: [FontFeature.tabularFigures()]),
               ),
               onChanged: (newValue) {

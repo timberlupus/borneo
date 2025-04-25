@@ -1,3 +1,4 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/widgets/power_switch.dart';
 import 'package:borneo_app/widgets/value_listenable_builders.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
@@ -34,7 +35,7 @@ class ScheduleRunningChart extends StatelessWidget {
         show: true,
         drawVerticalLine: false,
         drawHorizontalLine: true,
-        horizontalInterval: 25.0,
+        horizontalInterval: lyfiBrightnessMax.toDouble() * 0.25,
         verticalInterval: 3600 * 6,
         getDrawingHorizontalLine: (value) => FlLine(color: Theme.of(context).colorScheme.surface, strokeWidth: 1.5),
         getDrawingVerticalLine: (value) => FlLine(color: Theme.of(context).colorScheme.surface, strokeWidth: 1.5),
@@ -48,7 +49,7 @@ class ScheduleRunningChart extends StatelessWidget {
       minX: 0,
       maxX: 24 * 3600.0,
       minY: 0,
-      maxY: 100,
+      maxY: lyfiBrightnessMax.toDouble(),
       extraLinesData: ExtraLinesData(
         extraLinesOnTop: false,
         verticalLines: [
