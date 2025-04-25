@@ -37,61 +37,54 @@ menu "Borneo LyFi"
 
     menu "LED channels"
 
+    choice
+        prompt "Select LED Channels"
 
-        config LYFI_LED_CH0_ENABLED
-            bool "LED channel 0 enabled"
-            default n
+            config LYFI_LED_CH0_ENABLED
+                bool "LED channel 0 enabled"
 
-        config LYFI_LED_CH1_ENABLED
-            bool "LED channel 1 enabled"
-            default n
+            config LYFI_LED_CH1_ENABLED
+                bool "LED channel 1 enabled"
 
-        config LYFI_LED_CH2_ENABLED
-            bool "LED channel 2 enabled"
-            default n
+            config LYFI_LED_CH2_ENABLED
+                bool "LED channel 2 enabled"
 
-        config LYFI_LED_CH3_ENABLED
-            bool "LED channel 3 enabled"
-            default n
+            config LYFI_LED_CH3_ENABLED
+                bool "LED channel 3 enabled"
 
-        config LYFI_LED_CH4_ENABLED
-            bool "LED channel 4 enabled"
-            default n
+            config LYFI_LED_CH4_ENABLED
+                bool "LED channel 4 enabled"
 
-        config LYFI_LED_CH5_ENABLED
-            bool "LED channel 5 enabled"
-            default n
+            config LYFI_LED_CH5_ENABLED
+                bool "LED channel 5 enabled"
 
-        config LYFI_LED_CH6_ENABLED
-            bool "LED channel 6 enabled"
-            default n
+            config LYFI_LED_CH6_ENABLED
+                bool "LED channel 6 enabled"
 
-        config LYFI_LED_CH7_ENABLED
-            bool "LED channel 7 enabled"
-            default n
+            config LYFI_LED_CH7_ENABLED
+                bool "LED channel 7 enabled"
 
-        config LYFI_LED_CH8_ENABLED
-            bool "LED channel 8 enabled"
-            default n
+            config LYFI_LED_CH8_ENABLED
+                bool "LED channel 8 enabled"
 
-        config LYFI_LED_CH9_ENABLED
-            bool "LED channel 9 enabled"
-            default n
+            config LYFI_LED_CH9_ENABLED
+                bool "LED channel 9 enabled"
+        endchoice
 
         config LYFI_LED_CHANNEL_COUNT
             int
+            range 1 10
             default 10 if LYFI_LED_CH9_ENABLED
-            default 9 if LYFI_LED_CH8_ENABLED
-            default 8 if LYFI_LED_CH7_ENABLED
-            default 7 if LYFI_LED_CH6_ENABLED
-            default 6 if LYFI_LED_CH5_ENABLED
-            default 5 if LYFI_LED_CH4_ENABLED
-            default 4 if LYFI_LED_CH3_ENABLED
-            default 3 if LYFI_LED_CH2_ENABLED
-            default 2 if LYFI_LED_CH1_ENABLED
-            default 1 if LYFI_LED_CH0_ENABLED
+            default 9 if LYFI_LED_CH8_ENABLED && !LYFI_LED_CH9_ENABLED
+            default 8 if LYFI_LED_CH7_ENABLED && !LYFI_LED_CH8_ENABLED && !LYFI_LED_CH9_ENABLED
+            default 7 if LYFI_LED_CH6_ENABLED && !LYFI_LED_CH7_ENABLED && !LYFI_LED_CH8_ENABLED && !LYFI_LED_CH9_ENABLED
+            default 6 if LYFI_LED_CH5_ENABLED && !LYFI_LED_CH6_ENABLED && !LYFI_LED_CH7_ENABLED && !LYFI_LED_CH8_ENABLED && !LYFI_LED_CH9_ENABLED
+            default 5 if LYFI_LED_CH4_ENABLED && !LYFI_LED_CH5_ENABLED && !LYFI_LED_CH6_ENABLED && !LYFI_LED_CH7_ENABLED && !LYFI_LED_CH8_ENABLED && !LYFI_LED_CH9_ENABLED
+            default 4 if LYFI_LED_CH3_ENABLED && !LYFI_LED_CH4_ENABLED && !LYFI_LED_CH5_ENABLED && !LYFI_LED_CH6_ENABLED && !LYFI_LED_CH7_ENABLED && !LYFI_LED_CH8_ENABLED && !LYFI_LED_CH9_ENABLED
+            default 3 if LYFI_LED_CH2_ENABLED && !LYFI_LED_CH3_ENABLED && !LYFI_LED_CH4_ENABLED && !LYFI_LED_CH5_ENABLED && !LYFI_LED_CH6_ENABLED && !LYFI_LED_CH7_ENABLED && !LYFI_LED_CH8_ENABLED && !LYFI_LED_CH9_ENABLED
+            default 2 if LYFI_LED_CH1_ENABLED && !LYFI_LED_CH2_ENABLED && !LYFI_LED_CH3_ENABLED && !LYFI_LED_CH4_ENABLED && !LYFI_LED_CH5_ENABLED && !LYFI_LED_CH6_ENABLED && !LYFI_LED_CH7_ENABLED && !LYFI_LED_CH8_ENABLED && !LYFI_LED_CH9_ENABLED
+            default 1 if LYFI_LED_CH0_ENABLED && !LYFI_LED_CH1_ENABLED && !LYFI_LED_CH2_ENABLED && !LYFI_LED_CH3_ENABLED && !LYFI_LED_CH4_ENABLED && !LYFI_LED_CH5_ENABLED && !LYFI_LED_CH6_ENABLED && !LYFI_LED_CH7_ENABLED && !LYFI_LED_CH8_ENABLED && !LYFI_LED_CH9_ENABLED
             default 0
-            depends on LYFI_LED_CH9_ENABLED || LYFI_LED_CH8_ENABLED || LYFI_LED_CH7_ENABLED || LYFI_LED_CH6_ENABLED || LYFI_LED_CH5_ENABLED || LYFI_LED_CH4_ENABLED || LYFI_LED_CH3_ENABLED || LYFI_LED_CH2_ENABLED || LYFI_LED_CH1_ENABLED || LYFI_LED_CH0_ENABLED
 
         config LYFI_LED_CH0_GPIO
             int "GPIO for LED channel 0"
