@@ -115,7 +115,6 @@ int fan_set_power(uint8_t value)
     else {
         BO_TRY(gpio_set_level(CONFIG_LYFI_FAN_CTRL_SHUTDOWN_GPIO, 1));
     }
-    ESP_LOGI(TAG, "Fan shutdown: %d", gpio_get_level(CONFIG_LYFI_FAN_CTRL_SHUTDOWN_GPIO));
 #endif // LYFI_FAN_CTRL_SHUTDOWN_ENABLED
 
     if (_settings.use_pwm_fan) {
