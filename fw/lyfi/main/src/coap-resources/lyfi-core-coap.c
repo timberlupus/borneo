@@ -451,12 +451,12 @@ static void coap_hnd_correction_method_put(coap_resource_t* resource, coap_sessi
 
     CborParser parser;
     CborValue value;
-    // FIXME TODO
+    // FIXME TODO Check state range
     BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
-    int state;
-    BO_COAP_VERIFY(cbor_value_get_int_checked(&value, &state));
+    int correction_method;
+    BO_COAP_VERIFY(cbor_value_get_int_checked(&value, &correction_method));
 
-    BO_COAP_VERIFY(led_switch_state((uint8_t)state));
+    BO_COAP_VERIFY(led_set_correction_method((uint8_t)correction_method));
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
