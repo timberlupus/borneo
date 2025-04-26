@@ -17,7 +17,7 @@ import '../borneo_device_api.dart';
 class LyfiPaths {
   static final Uri info = Uri(path: '/borneo/lyfi/info');
   static final Uri status = Uri(path: '/borneo/lyfi/status');
-  static final Uri mode = Uri(path: '/borneo/lyfi/mode');
+  static final Uri state = Uri(path: '/borneo/lyfi/state');
   static final Uri color = Uri(path: '/borneo/lyfi/color');
   static final Uri schedule = Uri(path: '/borneo/lyfi/schedule');
   static final Uri schedulerEnabled =
@@ -69,7 +69,7 @@ class LyfiDeviceInfo {
   }
 }
 
-enum LedMode {
+enum LedState {
   normal,
   dimming,
   nightlight,
@@ -81,7 +81,7 @@ enum LedMode {
 }
 
 class LyfiDeviceStatus {
-  final LedMode currentMode;
+  final LedState state;
   final bool schedulerEnabled;
   final bool unscheduled;
   final Duration nightlightRemaining;
@@ -95,7 +95,7 @@ class LyfiDeviceStatus {
       (currentColor.length * 100.0);
 
   const LyfiDeviceStatus({
-    required this.currentMode,
+    required this.state,
     required this.schedulerEnabled,
     required this.unscheduled,
     required this.nightlightRemaining,
@@ -107,7 +107,7 @@ class LyfiDeviceStatus {
   factory LyfiDeviceStatus.fromMap(CborMap cborMap) {
     final dynamic map = cborMap.toObject();
     return LyfiDeviceStatus(
-      currentMode: LedMode.values[map['currentMode']],
+      state: LedState.values[map['state']],
       schedulerEnabled: map['schedulerEnabled'],
       unscheduled: map['unscheduled'],
       nightlightRemaining: Duration(seconds: map['nlRemain']),
@@ -142,8 +142,8 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   LyfiDeviceInfo getLyfiInfo(Device dev);
   Future<LyfiDeviceStatus> getLyfiStatus(Device dev);
 
-  Future<LedMode> getMode(Device dev);
-  Future<void> setMode(Device dev, LedMode mode);
+  Future<LedState> getState(Device dev);
+  Future<void> switchState(Device dev, LedState mode);
 
   Future<bool> getSchedulerEnabled(Device dev);
   Future<void> setSchedulerEnabled(Device dev, bool isEnabled);
@@ -304,16 +304,16 @@ class BorneoLyfiDriver
   }
 
   @override
-  Future<LedMode> getMode(Device dev) async {
+  Future<LedState> getState(Device dev) async {
     final dd = dev.driverData as LyfiDriverData;
-    final value = await dd.coap.getCbor<int>(LyfiPaths.mode);
-    return LedMode.values[value];
+    final value = await dd.coap.getCbor<int>(LyfiPaths.state);
+    return LedState.values[value];
   }
 
   @override
-  Future<void> setMode(Device dev, LedMode mode) async {
+  Future<void> switchState(Device dev, LedState mode) async {
     final dd = dev.driverData as LyfiDriverData;
-    await dd.coap.putCbor(LyfiPaths.mode, mode.index);
+    await dd.coap.putCbor(LyfiPaths.state, mode.index);
   }
 
   @override

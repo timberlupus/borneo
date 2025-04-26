@@ -334,8 +334,8 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
     const struct led_status* led_status = led_get_status();
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "currentMode"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, led_status->mode));
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "state"));
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, led_status->state));
     }
 
     {
@@ -345,7 +345,7 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
 
     {
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "unscheduled"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&root_map, led_status->mode == LED_MODE_NIGHTLIGHT));
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&root_map, led_status->state == LED_STATE_NIGHTLIGHT));
     }
 
     {
@@ -384,7 +384,7 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
 }
 
-static void coap_hnd_mode_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
+static void coap_hnd_state_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
                               const coap_string_t* query, coap_pdu_t* response)
 {
     CborEncoder encoder;
@@ -395,14 +395,14 @@ static void coap_hnd_mode_get(coap_resource_t* resource, coap_session_t* session
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&encoder, status->mode));
+    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&encoder, status->state));
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
     coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
 }
 
-static void coap_hnd_mode_put(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
+static void coap_hnd_state_put(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
                               const coap_string_t* query, coap_pdu_t* response)
 {
     coap_resource_notify_observers(resource, NULL);
@@ -414,10 +414,10 @@ static void coap_hnd_mode_put(coap_resource_t* resource, coap_session_t* session
     CborParser parser;
     CborValue value;
     BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
-    int mode;
-    BO_COAP_VERIFY(cbor_value_get_int_checked(&value, &mode));
+    int state;
+    BO_COAP_VERIFY(cbor_value_get_int_checked(&value, &state));
 
-    BO_COAP_VERIFY(led_switch_mode((uint8_t)mode));
+    BO_COAP_VERIFY(led_switch_state((uint8_t)state));
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
@@ -451,11 +451,12 @@ static void coap_hnd_correction_method_put(coap_resource_t* resource, coap_sessi
 
     CborParser parser;
     CborValue value;
+    // FIXME TODO
     BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
-    int mode;
-    BO_COAP_VERIFY(cbor_value_get_int_checked(&value, &mode));
+    int state;
+    BO_COAP_VERIFY(cbor_value_get_int_checked(&value, &state));
 
-    BO_COAP_VERIFY(led_switch_mode((uint8_t)mode));
+    BO_COAP_VERIFY(led_switch_state((uint8_t)state));
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
@@ -546,7 +547,7 @@ COAP_RESOURCE_DEFINE("borneo/lyfi/info", false, coap_hnd_info_get, NULL, NULL, N
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/status", false, coap_hnd_status_get, NULL, NULL, NULL);
 
-COAP_RESOURCE_DEFINE("borneo/lyfi/mode", false, coap_hnd_mode_get, NULL, coap_hnd_mode_put, NULL);
+COAP_RESOURCE_DEFINE("borneo/lyfi/state", false, coap_hnd_state_get, NULL, coap_hnd_state_put, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/correction_method", false, coap_hnd_correction_method_get, NULL,
                      coap_hnd_correction_method_put, NULL);

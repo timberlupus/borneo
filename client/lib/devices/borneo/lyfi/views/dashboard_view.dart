@@ -365,12 +365,12 @@ class DashboardView extends StatelessWidget {
                         Expanded(
                           child: Container(
                             padding: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
-                            child: Selector<LyfiViewModel, ({bool schedulerEnabled, LedMode? mode, bool isOn})>(
+                            child: Selector<LyfiViewModel, ({bool schedulerEnabled, LedState? state, bool isOn})>(
                               selector:
-                                  (_, vm) => (schedulerEnabled: vm.schedulerEnabled, mode: vm.mode, isOn: vm.isOn),
+                                  (_, vm) => (schedulerEnabled: vm.schedulerEnabled, state: vm.ledState, isOn: vm.isOn),
                               builder: (context, vm, _) {
                                 Widget chart;
-                                if (vm.mode == LedMode.nightlight) {
+                                if (vm.state == LedState.nightlight) {
                                   chart = ManualRunningChart();
                                 } else if (vm.schedulerEnabled) {
                                   chart = ScheduleRunningChart();
@@ -403,8 +403,8 @@ class DashboardView extends StatelessWidget {
             bool isOn,
             bool isBusy,
             bool isLocked,
-            LedMode? mode,
-            bool canSwitchNightlightMode,
+            LedState? ledState,
+            bool canSwitchNightlightState,
             Duration nightlightRemaining,
           })
         >(
@@ -414,8 +414,8 @@ class DashboardView extends StatelessWidget {
                 isOn: vm.isOn,
                 isBusy: vm.isBusy,
                 isLocked: vm.isLocked,
-                mode: vm.mode,
-                canSwitchNightlightMode: vm.canSwitchNightlightMode,
+                ledState: vm.ledState,
+                canSwitchNightlightState: vm.canSwitchNightlightState,
                 nightlightRemaining: vm.nightlightRemaining,
               ),
           builder:
@@ -440,17 +440,17 @@ class DashboardView extends StatelessWidget {
                     // Settings button
                     FilledButton.tonalIcon(
                       icon:
-                          vm.mode == LedMode.nightlight
+                          vm.ledState == LedState.nightlight
                               ? SizedBox(height: 16, width: 16, child: LinearProgressIndicator())
                               : Icon(Icons.nightlight_outlined),
                       label:
-                          vm.mode == LedMode.nightlight
+                          vm.ledState == LedState.nightlight
                               ? Text('Night light off (${vm.nightlightRemaining.inSeconds})')
                               : Text('Night light'),
                       onPressed:
-                          vm.canSwitchNightlightMode
+                          vm.canSwitchNightlightState
                               ? () {
-                                context.read<LyfiViewModel>().switchNightlightMode();
+                                context.read<LyfiViewModel>().switchNightlightState();
                               }
                               : null,
                     ),

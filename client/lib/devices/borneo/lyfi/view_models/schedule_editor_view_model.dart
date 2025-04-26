@@ -68,7 +68,7 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
   bool get isBusy => _parent.isBusy;
   List<ScheduleEntryViewModel> get entries => _entries;
   Iterable<int> get instants => _entries.map((x) => x.instant.inSeconds);
-  bool get isPreviewMode => _parent.mode == LedMode.preview;
+  bool get isPreviewMode => _parent.ledState == LedState.preview;
 
   @override
   LyfiDeviceInfo get deviceInfo => _parent.lyfiDeviceInfo;
@@ -269,9 +269,9 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
   void togglePreviewMode() {
     _parent.enqueueJob(() async {
       if (isPreviewMode) {
-        _deviceApi.setMode(_parent.boundDevice!.device, LedMode.dimming);
+        _deviceApi.switchState(_parent.boundDevice!.device, LedState.dimming);
       } else {
-        _deviceApi.setMode(_parent.boundDevice!.device, LedMode.preview);
+        _deviceApi.switchState(_parent.boundDevice!.device, LedState.preview);
       }
       notifyListeners();
     });

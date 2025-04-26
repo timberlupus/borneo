@@ -33,11 +33,11 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
 
 static void led_proc();
 
-static int normal_mode_entry();
-static void normal_mode_drive();
+static int normal_state_entry();
+static void normal_state_drive();
 
-// static int dimming_mode_entry();
-// static void dimming_mode_drive();
+// static int dimming_state_entry();
+// static void dimming_state_drive();
 struct sch_time_pair {
     const struct led_scheduler_item* begin;
     const struct led_scheduler_item* end;
@@ -46,13 +46,13 @@ struct sch_time_pair {
 static int sch_find_closest_time_range(uint32_t instant, struct sch_time_pair* result);
 static void sch_drive();
 
-static int nightlight_mode_entry();
-static int nightlight_mode_exit();
-static void nightlight_mode_drive();
+static int nightlight_state_entry();
+static int nightlight_state_exit();
+static void nightlight_state_drive();
 
-static int preview_mode_entry();
-static void preview_mode_exit();
-static void preview_mode_drive();
+static int preview_state_entry();
+static void preview_state_exit();
+static void preview_state_drive();
 
 static void led_drive();
 
@@ -91,7 +91,7 @@ static bool led_fade_inprogress();
 static int led_fade_stop();
 static void led_fade_drive();
 
-ESP_EVENT_DEFINE_BASE(LYFI_LEDC_EVENTS);
+ESP_EVENT_DEFINE_BASE(LYFI_LED_EVENTS);
 
 static const uint8_t LED_GPIOS[CONFIG_LYFI_LED_CHANNEL_COUNT] = {
 
@@ -254,7 +254,7 @@ int led_init()
     BO_TRY(ledc_fade_func_install(0));
 
     // 加载配置
-    BO_TRY(esp_event_handler_instance_register(LYFI_LEDC_EVENTS, ESP_EVENT_ANY_ID, led_events_handler, NULL, NULL));
+    BO_TRY(esp_event_handler_instance_register(LYFI_LED_EVENTS, ESP_EVENT_ANY_ID, led_events_handler, NULL, NULL));
     BO_TRY(esp_event_handler_instance_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, _borneo_system_events_handler, NULL,
                                                NULL));
 
@@ -273,7 +273,7 @@ void led_blank()
 
 int led_set_color(const led_color_t color)
 {
-    if (!bo_power_is_on() || _status.mode != LED_MODE_DIMMING) {
+    if (!bo_power_is_on() || _status.state != LED_STATE_DIMMING) {
         return -EINVAL;
     }
     // Verify the colors
@@ -380,7 +380,7 @@ int led_set_duties(const led_duty_t* duties)
 
 int led_fade_to_color(const led_color_t color, uint32_t duration_ms)
 {
-    if (_status.mode == LED_MODE_DIMMING) {
+    if (_status.state == LED_STATE_DIMMING) {
         return -EINVAL;
     }
 
@@ -406,7 +406,7 @@ static int led_fade_on(uint32_t ms)
 
 static int led_fade_off(uint32_t ms)
 {
-    if (_status.mode != LED_MODE_NORMAL && _status.mode != LED_MODE_NIGHTLIGHT) {
+    if (_status.state != LED_STATE_NORMAL && _status.state != LED_STATE_NIGHTLIGHT) {
         return -EINVAL;
     }
 
@@ -576,14 +576,14 @@ void sch_compute_color_in_range(led_color_t color, const struct tm* now, const s
 
 void sch_compute_current_color(led_color_t color)
 {
-    assert(_status.mode == LED_MODE_PREVIEW || _settings.scheduler_enabled);
+    assert(_status.state == LED_STATE_PREVIEW || _settings.scheduler_enabled);
 
     if (_settings.scheduler.item_count == 0) {
         memset(color, 0, sizeof(led_color_t));
         return;
     }
 
-    time_t utc_now = _status.mode == LED_MODE_PREVIEW ? _status.preview_mode_clock : time(NULL);
+    time_t utc_now = _status.state == LED_STATE_PREVIEW ? _status.preview_state_clock : time(NULL);
 
     struct tm local_now = { 0 };
     localtime_r(&utc_now, &local_now);
@@ -618,7 +618,7 @@ void sch_compute_current_color(led_color_t color)
 
 static void sch_drive()
 {
-    assert(_status.mode == LED_MODE_PREVIEW || _settings.scheduler_enabled);
+    assert(_status.state == LED_STATE_PREVIEW || _settings.scheduler_enabled);
 
     led_color_t color;
     sch_compute_current_color(color);
@@ -642,8 +642,8 @@ static void _borneo_system_events_handler(void* handler_args, esp_event_base_t b
     case BO_EVENT_SHUTDOWN_SCHEDULED:
     case BO_EVENT_EMERGENCY_SHUTDOWN:
     case BO_EVENT_FATAL_ERROR: {
-        if (_status.mode != LED_MODE_NORMAL) {
-            BO_MUST(led_switch_mode(LED_MODE_NORMAL));
+        if (_status.state != LED_STATE_NORMAL) {
+            BO_MUST(led_switch_state(LED_STATE_NORMAL));
         }
         if (led_fade_inprogress()) {
             BO_MUST(led_fade_stop());
@@ -652,8 +652,8 @@ static void _borneo_system_events_handler(void* handler_args, esp_event_base_t b
     } break;
 
     case BO_EVENT_POWER_OFF: {
-        if (_status.mode != LED_MODE_NORMAL) {
-            BO_MUST(led_switch_mode(LED_MODE_NORMAL));
+        if (_status.state != LED_STATE_NORMAL) {
+            BO_MUST(led_switch_state(LED_STATE_NORMAL));
         }
         if (led_fade_inprogress()) {
             BO_MUST(led_fade_stop());
@@ -663,7 +663,7 @@ static void _borneo_system_events_handler(void* handler_args, esp_event_base_t b
 
     case BO_EVENT_POWER_ON: {
         BO_MUST(led_fade_on(FADE_PERIOD_MS));
-        BO_MUST(normal_mode_entry());
+        BO_MUST(normal_state_entry());
     } break;
 
     default:
@@ -675,13 +675,13 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
 {
     switch (event_id) {
 
-    case LYFI_LEDC_NOTIFY_NIGHTLIGHT_MODE: {
+    case LYFI_LED_NOTIFY_NIGHTLIGHT_STATE: {
         assert(bo_power_is_on());
-        if (_status.mode == LED_MODE_NORMAL && _settings.scheduler_enabled) {
-            led_switch_mode(LED_MODE_NIGHTLIGHT);
+        if (_status.state == LED_STATE_NORMAL && _settings.scheduler_enabled) {
+            led_switch_state(LED_STATE_NIGHTLIGHT);
         }
-        else if (_status.mode == LED_MODE_NIGHTLIGHT) {
-            BO_MUST(led_switch_mode(LED_MODE_NORMAL));
+        else if (_status.state == LED_STATE_NIGHTLIGHT) {
+            BO_MUST(led_switch_state(LED_STATE_NORMAL));
         }
     } break;
 
@@ -693,12 +693,12 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
 int led_set_scheduler_enabled(bool enabled)
 {
 
-    if (!bo_power_is_on() || (_status.mode != LED_MODE_DIMMING && _status.mode != LED_MODE_PREVIEW)) {
+    if (!bo_power_is_on() || (_status.state != LED_STATE_DIMMING && _status.state != LED_STATE_PREVIEW)) {
         return -EINVAL;
     }
 
-    if (_status.mode == LED_MODE_PREVIEW) {
-        BO_TRY(led_switch_mode(LED_MODE_DIMMING));
+    if (_status.state == LED_STATE_PREVIEW) {
+        BO_TRY(led_switch_state(LED_STATE_DIMMING));
     }
 
     _settings.scheduler_enabled = enabled;
@@ -714,7 +714,7 @@ void led_set_nightlight_duration(uint16_t duration) { _settings.nightlight_durat
 
 int32_t led_get_nightlight_remaining()
 {
-    if (_status.mode == LED_MODE_NIGHTLIGHT) {
+    if (_status.state == LED_STATE_NIGHTLIGHT) {
         time_t now = time(NULL);
         return (int32_t)(_status.nightlight_off_time - now);
     }
@@ -725,10 +725,10 @@ int32_t led_get_nightlight_remaining()
 
 ////////////////////////////// Status switching //////////////////////////////////
 
-static int normal_mode_entry()
+static int normal_state_entry()
 {
-    uint8_t prev_mode = _status.mode;
-    _status.mode = LED_MODE_NORMAL;
+    uint8_t prev_state = _status.state;
+    _status.state = LED_STATE_NORMAL;
 
     if (!led_fade_inprogress()) {
         if (_settings.scheduler_enabled) {
@@ -739,7 +739,7 @@ static int normal_mode_entry()
         }
     }
 
-    if (prev_mode == LED_MODE_DIMMING || prev_mode == LED_MODE_PREVIEW) {
+    if (prev_state == LED_STATE_DIMMING || prev_state == LED_STATE_PREVIEW) {
         ESP_LOGI(TAG, "Saving dimming settings...");
         BO_TRY(save_user_settings());
         ESP_LOGI(TAG, "Dimming settings updated.");
@@ -747,7 +747,7 @@ static int normal_mode_entry()
     return 0;
 }
 
-static void normal_mode_drive()
+static void normal_state_drive()
 {
     if (!led_fade_inprogress()) {
         if (_settings.scheduler_enabled) {
@@ -759,11 +759,11 @@ static void normal_mode_drive()
     }
 }
 
-static int preview_mode_entry()
+static int preview_state_entry()
 {
     int rc = 0;
 
-    if (_status.mode != LED_MODE_DIMMING) {
+    if (_status.state != LED_STATE_DIMMING) {
         rc = -EINVAL;
         goto _EXIT;
     }
@@ -783,56 +783,56 @@ static int preview_mode_entry()
     local_today.tm_min = 0;
     local_today.tm_sec = 0;
 
-    _status.preview_mode_clock = mktime(&local_today) + _settings.scheduler.items[0].instant;
+    _status.preview_state_clock = mktime(&local_today) + _settings.scheduler.items[0].instant;
 
-    _status.mode = LED_MODE_PREVIEW;
-    ESP_LOGI(TAG, "Preview mode started.");
+    _status.state = LED_STATE_PREVIEW;
+    ESP_LOGI(TAG, "Preview state started.");
 
 _EXIT:
     return rc;
 }
 
-static void preview_mode_exit()
+static void preview_state_exit()
 {
-    assert(_status.mode == LED_MODE_PREVIEW);
+    assert(_status.state == LED_STATE_PREVIEW);
     led_update_color(_status.color_to_resume);
-    ESP_LOGI(TAG, "Preview mode ended.");
+    ESP_LOGI(TAG, "Preview state ended.");
 }
 
-static void preview_mode_drive()
+static void preview_state_drive()
 {
-    assert(_status.mode == LED_MODE_PREVIEW);
+    assert(_status.state == LED_STATE_PREVIEW);
     assert(_settings.scheduler.item_count > 0);
 
     time_t end_time
-        = _status.preview_mode_clock + _settings.scheduler.items[_settings.scheduler.item_count - 1].instant;
-    for (; _status.mode == LED_MODE_PREVIEW && _status.preview_mode_clock < end_time;
-         _status.preview_mode_clock += 60) {
+        = _status.preview_state_clock + _settings.scheduler.items[_settings.scheduler.item_count - 1].instant;
+    for (; _status.state == LED_STATE_PREVIEW && _status.preview_state_clock < end_time;
+         _status.preview_state_clock += 60) {
         sch_drive();
         // taskYIELD();
         vTaskDelay(pdMS_TO_TICKS(10));
     }
-    BO_MUST(led_switch_mode(LED_MODE_DIMMING));
+    BO_MUST(led_switch_state(LED_STATE_DIMMING));
 }
 
-int nightlight_mode_entry()
+int nightlight_state_entry()
 {
-    if (!_settings.scheduler_enabled || _status.mode != LED_MODE_NORMAL || !bo_power_is_on()) {
+    if (!_settings.scheduler_enabled || _status.state != LED_STATE_NORMAL || !bo_power_is_on()) {
         return -EINVAL;
     }
 
     int64_t now = esp_timer_get_time() / 1000ULL;
 
     _status.nightlight_off_time = now + (_settings.nightlight_duration * 1000) + FADE_PERIOD_MS;
-    _status.mode = LED_MODE_NIGHTLIGHT;
+    _status.state = LED_STATE_NIGHTLIGHT;
 
     BO_TRY(led_fade_to_color(_settings.manual_color, FADE_PERIOD_MS));
     return 0;
 }
 
-static int nightlight_mode_exit()
+static int nightlight_state_exit()
 {
-    if (_status.mode != LED_MODE_NIGHTLIGHT) {
+    if (_status.state != LED_STATE_NIGHTLIGHT) {
         return -1;
     }
 
@@ -842,16 +842,16 @@ static int nightlight_mode_exit()
     return 0;
 }
 
-static void nightlight_mode_drive()
+static void nightlight_state_drive()
 {
-    if (_status.mode != LED_MODE_NIGHTLIGHT) {
+    if (_status.state != LED_STATE_NIGHTLIGHT) {
         return;
     }
 
     int64_t now = esp_timer_get_time() / 1000ULL;
 
     if (now >= _status.nightlight_off_time) {
-        BO_MUST(led_switch_mode(LED_MODE_NORMAL));
+        BO_MUST(led_switch_state(LED_STATE_NORMAL));
     }
     else {
         if (!led_fade_inprogress()) {
@@ -867,21 +867,21 @@ static void led_drive()
     }
     else {
 
-        switch (_status.mode) {
+        switch (_status.state) {
 
-        case LED_MODE_NORMAL: {
-            normal_mode_drive();
+        case LED_STATE_NORMAL: {
+            normal_state_drive();
         } break;
 
-        case LED_MODE_DIMMING: {
+        case LED_STATE_DIMMING: {
         } break;
 
-        case LED_MODE_NIGHTLIGHT: {
-            nightlight_mode_drive();
+        case LED_STATE_NIGHTLIGHT: {
+            nightlight_state_drive();
         } break;
 
-        case LED_MODE_PREVIEW: {
-            preview_mode_drive();
+        case LED_STATE_PREVIEW: {
+            preview_state_drive();
         } break;
 
         default:
@@ -896,7 +896,7 @@ void led_proc()
         BO_MUST(led_fade_on(FADE_PERIOD_MS));
     }
 
-    BO_MUST(normal_mode_entry());
+    BO_MUST(normal_state_entry());
     while (true) {
         if (bo_power_is_on()) {
             led_drive();
@@ -908,19 +908,19 @@ void led_proc()
     }
 }
 
-int led_switch_mode(uint8_t mode)
+int led_switch_state(uint8_t state)
 {
-    if (_status.mode == mode) {
+    if (_status.state == state) {
         return -EINVAL;
     }
 
-    ESP_LOGI(TAG, "Switching mode from %d to %d", _status.mode, mode);
+    ESP_LOGI(TAG, "Switching state from %u to %u", _status.state, state);
 
-    if (!bo_power_is_on() || mode == _status.mode) {
+    if (!bo_power_is_on() || state == _status.state) {
         return -EINVAL;
     }
 
-    if (mode >= LED_MODE_COUNT) {
+    if (state >= LED_STATE_COUNT) {
         return -EINVAL;
     }
 
@@ -928,59 +928,59 @@ int led_switch_mode(uint8_t mode)
         BO_TRY(led_fade_stop());
     }
 
-    switch (_status.mode) {
+    switch (_status.state) {
 
-    case LED_MODE_NORMAL:
-    case LED_MODE_DIMMING:
+    case LED_STATE_NORMAL:
+    case LED_STATE_DIMMING:
         break;
 
-    case LED_MODE_NIGHTLIGHT: {
-        BO_TRY(nightlight_mode_exit());
+    case LED_STATE_NIGHTLIGHT: {
+        BO_TRY(nightlight_state_exit());
     } break;
 
-    case LED_MODE_PREVIEW: {
-        preview_mode_exit();
+    case LED_STATE_PREVIEW: {
+        preview_state_exit();
     } break;
 
     default:
         return -1;
     }
 
-    switch (mode) {
+    switch (state) {
 
-    case LED_MODE_NORMAL: {
-        if (_status.mode == LED_MODE_DIMMING || _status.mode == LED_MODE_PREVIEW
-            || _status.mode == LED_MODE_NIGHTLIGHT) {
-            BO_TRY(normal_mode_entry());
+    case LED_STATE_NORMAL: {
+        if (_status.state == LED_STATE_DIMMING || _status.state == LED_STATE_PREVIEW
+            || _status.state == LED_STATE_NIGHTLIGHT) {
+            BO_TRY(normal_state_entry());
         }
         else {
             return -EINVAL;
         }
     } break;
 
-    case LED_MODE_DIMMING: {
+    case LED_STATE_DIMMING: {
         // TODO Start the timer
-        if (_status.mode == LED_MODE_NORMAL || _status.mode == LED_MODE_PREVIEW) {
-            _status.mode = mode;
+        if (_status.state == LED_STATE_NORMAL || _status.state == LED_STATE_PREVIEW) {
+            _status.state = state;
         }
         else {
             return -EINVAL;
         }
     } break;
 
-    case LED_MODE_NIGHTLIGHT: {
-        BO_TRY(nightlight_mode_entry());
+    case LED_STATE_NIGHTLIGHT: {
+        BO_TRY(nightlight_state_entry());
     } break;
 
-    case LED_MODE_PREVIEW: {
-        BO_TRY(preview_mode_entry());
+    case LED_STATE_PREVIEW: {
+        BO_TRY(preview_state_entry());
     } break;
 
     default:
         return -1;
     }
 
-    BO_TRY(esp_event_post(LYFI_LEDC_EVENTS, LYFI_LEDC_MODE_CHANGED, NULL, 0, portMAX_DELAY));
+    BO_TRY(esp_event_post(LYFI_LED_EVENTS, LYFI_LED_STATE_CHANGED, NULL, 0, portMAX_DELAY));
 
     return 0;
 }

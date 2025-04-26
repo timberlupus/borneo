@@ -27,13 +27,13 @@ enum led_correction_methods {
     LED_CORRECTION_COUNT,
 };
 
-enum led_mode {
-    LED_MODE_NORMAL = 0,
-    LED_MODE_DIMMING = 1,
-    LED_MODE_NIGHTLIGHT = 2,
-    LED_MODE_PREVIEW = 3,
+enum led_status_enum {
+    LED_STATE_NORMAL = 0,
+    LED_STATE_DIMMING = 1,
+    LED_STATE_NIGHTLIGHT = 2,
+    LED_STATE_PREVIEW = 3,
 
-    LED_MODE_COUNT,
+    LED_STATE_COUNT,
 };
 
 struct led_scheduler_item {
@@ -51,19 +51,19 @@ struct led_factory_settings {
 };
 
 struct led_user_settings {
-    uint8_t scheduler_enabled; ///< Whether the scheduling mode is enabled
-    uint16_t nightlight_duration; ///< Night lighting mode duration (in seconds)
-    struct led_scheduler scheduler; ///< Scheduling scheduler for scheduled mode
+    uint8_t scheduler_enabled; ///< Whether the scheduling state is enabled
+    uint16_t nightlight_duration; ///< Night lighting state duration (in seconds)
+    struct led_scheduler scheduler; ///< Scheduling scheduler for scheduled state
     led_color_t manual_color; ///< Manual dimming power settings for each channel
     uint8_t correction_method; ///< Brightness correction method: Log/Exp/Linear/CIE1931
 };
 
 struct led_status {
-    uint8_t mode; ///< Current mode
+    uint8_t state; ///< Current state
     led_color_t color; ///< Current hardware LED power percentage for each channel
-    int64_t nightlight_off_time; ///< Time point after temporary lighting mode to turn off, this time point is when
+    int64_t nightlight_off_time; ///< Time point after temporary lighting state to turn off, this time point is when
                                  ///< fading out starts
-    time_t preview_mode_clock; ///< Clock for preview mode
+    time_t preview_state_clock; ///< Clock for preview state
     led_color_t color_to_resume; ///< Color to be resumed
 
     led_color_t fade_start_color;
@@ -102,7 +102,7 @@ const struct led_user_settings* led_get_settings();
 
 const struct led_status* led_get_status();
 
-int led_switch_mode(uint8_t mode);
+int led_switch_state(uint8_t state);
 
 bool led_is_blank();
 

@@ -26,8 +26,8 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   bool get schedulerEnabled => _schedulerEnabled;
   bool get isLocked => _isLocked;
 
-  LedMode? _mode;
-  LedMode? get mode => _mode;
+  LedState? _ledState;
+  LedState? get ledState => _ledState;
 
   double get currentWatts => (borneoDeviceStatus?.powerCurrent ?? 0) * (borneoDeviceStatus?.powerVoltage ?? 0);
 
@@ -101,7 +101,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     //
     if (!_isLocked && isOnline) {
       try {
-        _deviceApi.setMode(boundDevice!.device, LedMode.normal).then((_) {
+        _deviceApi.switchState(boundDevice!.device, LedState.normal).then((_) {
           _isLocked = true;
         });
       } catch (e, stackTrace) {
@@ -126,8 +126,8 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
     _isOn = borneoDeviceStatus!.power;
     if (_lyfiDeviceStatus != null) {
-      _mode = _lyfiDeviceStatus!.currentMode;
-      _isLocked = lyfiDeviceStatus!.currentMode.isLocked();
+      _ledState = _lyfiDeviceStatus!.state;
+      _isLocked = lyfiDeviceStatus!.state.isLocked();
       _fanPowerRatio = lyfiDeviceStatus!.fanPower.toDouble();
       _schedulerEnabled = lyfiDeviceStatus!.schedulerEnabled;
     }
@@ -149,24 +149,24 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     _isOn = onOff;
   }
 
-  bool get canSwitchNightlightMode =>
-      !isBusy && _isOn && schedulerEnabled && (mode == LedMode.nightlight || mode == LedMode.normal);
+  bool get canSwitchNightlightState =>
+      !isBusy && _isOn && schedulerEnabled && (ledState == LedState.nightlight || ledState == LedState.normal);
 
-  void switchNightlightMode() {
-    if (_mode == LedMode.normal || _mode == LedMode.nightlight) {
-      super.enqueueUIJob(() => _switchNightlightMode());
+  void switchNightlightState() {
+    if (_ledState == LedState.normal || _ledState == LedState.nightlight) {
+      super.enqueueUIJob(() => _switchNightlightState());
     }
   }
 
-  Future<void> _switchNightlightMode() async {
+  Future<void> _switchNightlightState() async {
     // Turn the temp mode on
-    if (_mode == LedMode.normal) {
-      _deviceApi.setMode(super.boundDevice!.device, LedMode.nightlight);
-      _mode = LedMode.nightlight;
+    if (_ledState == LedState.normal) {
+      _deviceApi.switchState(super.boundDevice!.device, LedState.nightlight);
+      _ledState = LedState.nightlight;
     } else {
       // Restore running mode
-      _deviceApi.setMode(super.boundDevice!.device, LedMode.normal);
-      _mode = LedMode.normal;
+      _deviceApi.switchState(super.boundDevice!.device, LedState.normal);
+      _ledState = LedState.normal;
     }
   }
 
@@ -187,8 +187,8 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
       }
     }
 
-    final mode = isLocked ? LedMode.normal : LedMode.dimming;
-    await _deviceApi.setMode(super.boundDevice!.device, mode);
+    final state = isLocked ? LedState.normal : LedState.dimming;
+    await _deviceApi.switchState(super.boundDevice!.device, state);
     _isLocked = isLocked;
 
     if (!isLocked) {
