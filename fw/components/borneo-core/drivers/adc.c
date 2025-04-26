@@ -1,3 +1,5 @@
+#include <errno.h>
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/event_groups.h>
@@ -7,11 +9,14 @@
 #include <esp_wifi.h>
 #include <driver/gpio.h>
 
-#include <borneo/system.h>
 
 #include <esp_adc/adc_oneshot.h>
 #include <esp_adc/adc_cali.h>
 #include <esp_adc/adc_cali_scheme.h>
+
+#include <borneo/system.h>
+#include <borneo/algo/filters.h>
+#include <borneo/devices/adc.h>
 
 static int bo_adc_cali(adc_cali_handle_t* out_handle);
 
@@ -44,6 +49,23 @@ int bo_adc_channel_config(adc_channel_t channel)
 int bo_adc_read_mv(adc_channel_t channel, int* value_mv)
 {
     return adc_oneshot_get_calibrated_result(s_adc_handle, s_adc_cali_handle, channel, value_mv);
+}
+
+int bo_adc_read_mv_filtered(adc_channel_t channel, int* value_mv)
+{
+    // TODO Add lock
+    uint16_t adc_window[BO_ADC_WINDOW_SIZE];
+    for (size_t i = 0; i < BO_ADC_WINDOW_SIZE; i++) {
+        int adc_mv;
+        BO_TRY(bo_adc_read_mv(channel, &adc_mv));
+        if (adc_mv == 0 || adc_mv == 4095) {
+            return -EIO;
+        }
+        adc_window[i] = (uint16_t)adc_mv;
+    }
+    *value_mv = median_filter_u16(adc_window, BO_ADC_WINDOW_SIZE);
+
+    return 0;
 }
 
 int bo_adc_cali(adc_cali_handle_t* out_handle)

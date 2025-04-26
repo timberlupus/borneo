@@ -87,21 +87,12 @@ int ntc_init()
  */
 int ntc_read_temp(int* temp)
 {
-    uint16_t adc_window[ADC_WINDOW_SIZE];
     int adc_mv;
-    for (size_t i = 0; i < ADC_WINDOW_SIZE; i++) {
-        int error = bo_adc_read_mv(CONFIG_BORNEO_NTC_ADC_CHANNEL, &adc_mv);
-        if (error != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to convert ADC value!");
-            return error;
-        }
-        if (adc_mv == 0 || adc_mv == 4095) {
-            ESP_LOGE(TAG, "No NTC connected! sample_avg=%d", adc_mv);
-            return -EIO;
-        }
-        adc_window[i] = (uint16_t)adc_mv;
+    BO_TRY(bo_adc_read_mv_filtered(CONFIG_BORNEO_NTC_ADC_CHANNEL, &adc_mv));
+    if (adc_mv == 0 || adc_mv == 4095) {
+        ESP_LOGE(TAG, "No NTC connected! sample_avg=%d", adc_mv);
+        return -EIO;
     }
-    adc_mv = median_filter_u16(adc_window, ADC_WINDOW_SIZE);
 
     int value = ntc_table_lookup(adc_mv);
     if (value == NTC_BAD_TEMPERATURE) {
