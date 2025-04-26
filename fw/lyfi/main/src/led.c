@@ -314,6 +314,9 @@ inline led_duty_t channel_brightness_to_duty(led_brightness_t brightness)
     case LED_CORRECTION_CIE1931:
         return LED_CORLUT_CIE1931[brightness];
 
+    case LED_CORRECTION_EXP:
+        return LED_CORLUT_EXP[brightness];
+
     case LED_CORRECTION_LOG:
         return LED_CORLUT_LOG[brightness];
 
@@ -1146,4 +1149,16 @@ _EXIT_CLOSE:
     bo_nvs_close(handle);
 _EXIT_WITHOUT_CLOSE:
     return rc;
+}
+
+int led_set_correction_method(uint8_t correction_method)
+{
+    // TODO add lock
+    if (correction_method >= LED_CORRECTION_COUNT) {
+        return -EINVAL;
+    }
+
+    _settings.correction_method = correction_method;
+    BO_TRY(save_user_settings());
+    return 0;
 }

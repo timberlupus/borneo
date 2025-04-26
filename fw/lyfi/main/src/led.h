@@ -20,7 +20,8 @@ typedef led_duty_t led_duties_t[LYFI_LED_CHANNEL_COUNT];
 enum led_correction_methods {
     LED_CORRECTION_LOG = 0, ///< Default
     LED_CORRECTION_LINEAR = 1,
-    LED_CORRECTION_CIE1931 = 2,
+    LED_CORRECTION_EXP = 2,
+    LED_CORRECTION_CIE1931 = 3,
 
     LED_CORRECTION_COUNT,
 };
@@ -53,7 +54,7 @@ struct led_user_settings {
     uint16_t nightlight_duration; ///< Night lighting mode duration (in seconds)
     struct led_scheduler scheduler; ///< Scheduling scheduler for scheduled mode
     led_color_t manual_color; ///< Manual dimming power settings for each channel
-    uint8_t correction_method; ///< Correction method: Log/Linear/CIE1931
+    uint8_t correction_method; ///< Brightness correction method: Log/Exp/Linear/CIE1931
 };
 
 struct led_status {
@@ -72,6 +73,7 @@ struct led_status {
 
 extern const led_duty_t LED_CORLUT_CIE1931[LED_BRIGHTNESS_MAX + 1];
 extern const led_duty_t LED_CORLUT_LOG[LED_BRIGHTNESS_MAX + 1];
+extern const led_duty_t LED_CORLUT_EXP[LED_BRIGHTNESS_MAX + 1];
 
 int led_init();
 
@@ -106,6 +108,8 @@ int led_set_scheduler_enabled(bool enabled);
 
 void led_set_nightlight_duration(uint16_t duration);
 int32_t led_get_nightlight_remaining();
+
+int led_set_correction_method(uint8_t correction_method);
 
 #ifdef __cplusplus
 }

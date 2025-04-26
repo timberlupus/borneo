@@ -2,6 +2,8 @@ import math
 import numpy as np
 import datetime
 
+PWM_DUTY_MAX = 1023
+
 
 def generate_cie1931_lut(size):
     """Generate CIE 1931 brightness curve lookup table"""
@@ -13,7 +15,7 @@ def generate_cie1931_lut(size):
         else:
             y = 116 * (x ** (1/3)) - 16
         y = y / 100  # Normalize to 0-1
-        lut.append(round(y * 1023))  # Scale to 0-1023
+        lut.append(round(y * PWM_DUTY_MAX))  # Scale to 0-1023
     return lut
 
 
@@ -25,14 +27,34 @@ def generate_logarithmic_lut(size):
         # Use logarithmic curve with offset to avoid log(0)
         # Divided by 2 to normalize max value to ~1
         y = math.log10(1 + x * 99) / 2
-        lut.append(round(y * 1023))  # Scale to 0-1023
+        lut.append(round(y * PWM_DUTY_MAX))  # Scale to 0-1023
     return lut
+
+def generate_exponential_lut(size):
+    # From https://github.com/orgs/borneo-iot/discussions/5
+    lut = []
+
+    # Replace 4095 by the amount of PWM steps
+    # Calculate the r variable (only needs to be done once at setup)
+    R = (PWM_DUTY_MAX * math.log10(2)) / (math.log10(size))
+
+    for i in range(size):
+        if i == 0:
+            brightness = 0
+        elif i == size-1:
+            brightness = PWM_DUTY_MAX
+        else:
+            brightness = (size * pow(2, i / R)) / size
+        lut.append(round(brightness))
+    return lut
+
 
 
 def generate_lut_header(lut_size):
     """Generate C header file containing both LUTs"""
     cie_lut = generate_cie1931_lut(lut_size)
     log_lut = generate_logarithmic_lut(lut_size)
+    exp_lut = generate_exponential_lut(lut_size)
 
     header = f"""// Auto-generated brightness lookup tables
 // Generation time: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
@@ -50,6 +72,11 @@ const led_duty_t LED_CORLUT_CIE1931[LED_BRIGHTNESS_MAX + 1] = {{
 // Logarithmic dimming curve lookup table
 const led_duty_t LED_CORLUT_LOG[LED_BRIGHTNESS_MAX + 1] = {{
     {', '.join(map(str, log_lut))},
+}};
+
+// Logarithmic dimming curve lookup table
+const led_duty_t LED_CORLUT_EXP[LED_BRIGHTNESS_MAX + 1] = {{
+    {', '.join(map(str, exp_lut))},
 }};
 
 """
