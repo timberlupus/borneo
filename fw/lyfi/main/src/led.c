@@ -22,13 +22,10 @@
 #include "algo.h"
 #include "led.h"
 
-static void sch_compute_current_duties(led_color_t color, led_duty_t* duties);
+static void sch_compute_current_color(led_color_t color);
 static void sch_compute_color_in_range(led_color_t color, const struct tm* now,
                                        const struct led_scheduler_item* range_begin,
                                        const struct led_scheduler_item* range_end);
-static void sch_compute_duties_in_range(led_duty_t* duties, const struct tm* now,
-                                        const struct led_scheduler_item* range_begin,
-                                        const struct led_scheduler_item* range_end);
 
 static void _borneo_system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id,
                                           void* event_data);
@@ -314,11 +311,14 @@ inline led_duty_t channel_brightness_to_duty(led_brightness_t brightness)
     case LED_CORRECTION_CIE1931:
         return LED_CORLUT_CIE1931[brightness];
 
-    case LED_CORRECTION_EXP:
-        return LED_CORLUT_EXP[brightness];
+    case LED_CORRECTION_GAMMA:
+        return LED_CORLUT_GAMMA[brightness];
 
     case LED_CORRECTION_LOG:
         return LED_CORLUT_LOG[brightness];
+
+    case LED_CORRECTION_EXP:
+        return LED_CORLUT_EXP[brightness];
 
     default:
         return brightness;
@@ -574,36 +574,12 @@ void sch_compute_color_in_range(led_color_t color, const struct tm* now, const s
     }
 }
 
-void sch_compute_duties_in_range(led_duty_t* duties, const struct tm* now, const struct led_scheduler_item* range_begin,
-                                 const struct led_scheduler_item* range_end)
-{
-    int32_t now_instant = (now->tm_hour * 3600) + (now->tm_min * 60) + now->tm_sec;
-    if (range_begin->instant >= SECS_PER_DAY) {
-        now_instant += SECS_PER_DAY;
-    }
-
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        led_duty_t begin_duty = channel_brightness_to_duty(range_begin->color[ch]);
-        led_duty_t end_duty = channel_brightness_to_duty(range_end->color[ch]);
-        int32_t value
-            = linear_interpolate_i32(range_begin->instant, begin_duty, range_end->instant, end_duty, now_instant);
-        if (value < 0) {
-            value = 0;
-        }
-        else if (value > LED_MAX_DUTY) {
-            value = LED_MAX_DUTY;
-        }
-        duties[ch] = (led_duty_t)value;
-    }
-}
-
-void sch_compute_current_duties(led_color_t color, led_duty_t* duties)
+void sch_compute_current_color(led_color_t color)
 {
     assert(_status.mode == LED_MODE_PREVIEW || _settings.scheduler_enabled);
 
     if (_settings.scheduler.item_count == 0) {
         memset(color, 0, sizeof(led_color_t));
-        memset(duties, 0, sizeof(led_duties_t));
         return;
     }
 
@@ -624,14 +600,12 @@ void sch_compute_current_duties(led_color_t color, led_duty_t* duties)
     if (rc && rc != -ENOENT) {
         // we got an error
         ESP_LOGE(TAG, "Failed to find scheduler item with instant(%lu), errno=%d", local_instant, rc);
-        memset(duties, 0, sizeof(led_duties_t));
         memset(color, 0, sizeof(led_color_t));
         return;
     }
 
     // Open range
     if (pair.begin != NULL && pair.end == NULL) {
-        color_to_duties(pair.begin->color, duties);
         memcpy(color, pair.begin->color, sizeof(led_color_t));
         return;
     }
@@ -639,7 +613,6 @@ void sch_compute_current_duties(led_color_t color, led_duty_t* duties)
     // Between two instants
     if (pair.begin != NULL && pair.end != NULL) {
         sch_compute_color_in_range(color, &local_now, pair.begin, pair.end);
-        sch_compute_duties_in_range(duties, &local_now, pair.begin, pair.end);
     }
 }
 
@@ -647,12 +620,10 @@ static void sch_drive()
 {
     assert(_status.mode == LED_MODE_PREVIEW || _settings.scheduler_enabled);
 
-    led_duties_t duties;
     led_color_t color;
-    sch_compute_current_duties(color, duties);
+    sch_compute_current_color(color);
 
-    memcpy(_status.color, color, sizeof(led_color_t));
-    BO_MUST(led_set_duties(duties));
+    BO_MUST(led_update_color(color));
 }
 
 bool led_is_blank()
@@ -1153,7 +1124,6 @@ _EXIT_WITHOUT_CLOSE:
 
 int led_set_correction_method(uint8_t correction_method)
 {
-    // TODO add lock
     if (correction_method >= LED_CORRECTION_COUNT) {
         return -EINVAL;
     }

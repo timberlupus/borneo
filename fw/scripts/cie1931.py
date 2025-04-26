@@ -5,7 +5,7 @@ import datetime
 PWM_DUTY_MAX = 1023
 
 
-def generate_cie1931_lut(size):
+def generate_cie1931_lut(size: int):
     """Generate CIE 1931 brightness curve lookup table"""
     lut = []
     for i in range(size):
@@ -19,18 +19,27 @@ def generate_cie1931_lut(size):
     return lut
 
 
-def generate_logarithmic_lut(size):
+def generate_logarithmic_lut(size: int, gamma: float = 2.0, min_input: float = 0.1):
     """Generate logarithmic dimming curve lookup table"""
     lut = []
-    for i in range(size):
-        x = i / (size - 1)  # Normalize to 0-1
-        # Use logarithmic curve with offset to avoid log(0)
-        # Divided by 2 to normalize max value to ~1
-        y = math.log10(1 + x * 99) / 2
-        lut.append(round(y * PWM_DUTY_MAX))  # Scale to 0-1023
+    for level in range(size):
+        if level == 0:
+            pwm = 0
+        else:
+            # 对数调光公式
+            log_value = math.log10(level / (size - 1) * 9 + 1)  # 1-10对数范围
+            pwm = int(log_value * PWM_DUTY_MAX)
+            # 确保最小值至少为1（如果需要完全关闭则为0）
+            if pwm < 1 and level > 0:
+                pwm = 1
+            elif pwm > PWM_DUTY_MAX:
+                pwm = PWM_DUTY_MAX
+        lut.append(pwm)
     return lut
 
-def generate_exponential_lut(size):
+
+
+def generate_exponential_lut(size: int):
     # From https://github.com/orgs/borneo-iot/discussions/5
     lut = []
 
@@ -48,6 +57,25 @@ def generate_exponential_lut(size):
         lut.append(round(brightness))
     return lut
 
+def generate_gamma_lut(size: int, gamma: float = 2.2):
+    """Generate gamma correction lookup table
+    Args:
+        size: number of brightness levels
+        gamma: gamma value (typical 2.2 for displays)
+    """
+    lut = []
+    for level in range(size):
+        if level == 0:
+            pwm = 0
+        else:
+            # Gamma correction formula
+            normalized = level / (size - 1)  # normalize to 0-1
+            corrected = normalized ** (1/gamma)  # apply gamma correction
+            pwm = round(corrected * PWM_DUTY_MAX)
+            # Clamp to valid range
+            pwm = max(0, min(pwm, PWM_DUTY_MAX))
+        lut.append(pwm)
+    return lut
 
 
 def generate_lut_header(lut_size):
@@ -55,6 +83,7 @@ def generate_lut_header(lut_size):
     cie_lut = generate_cie1931_lut(lut_size)
     log_lut = generate_logarithmic_lut(lut_size)
     exp_lut = generate_exponential_lut(lut_size)
+    gamma_lut = generate_gamma_lut(lut_size, gamma=2.2)  # Standard gamma 2.2
 
     header = f"""// Auto-generated brightness lookup tables
 // Generation time: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
@@ -79,8 +108,15 @@ const led_duty_t LED_CORLUT_EXP[LED_BRIGHTNESS_MAX + 1] = {{
     {', '.join(map(str, exp_lut))},
 }};
 
+// Gamma correction lookup table (GAMMA=2.2)
+const led_duty_t LED_CORLUT_GAMMA[LED_BRIGHTNESS_MAX + 1] = {{
+    {', '.join(map(str, gamma_lut))},
+}};
+
 """
     return header
+
+
 
 
 if __name__ == "__main__":

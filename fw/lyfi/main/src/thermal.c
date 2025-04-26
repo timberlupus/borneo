@@ -203,20 +203,22 @@ _EXIT_WITHOUT_CLOSE:
 
 uint8_t thermal_pid_step(int32_t current_temp)
 {
-    volatile struct pid* pid = &_thermal.pid;
+    struct pid* pid = &_thermal.pid;
 
     int32_t error = current_temp - _settings.keep_temp;
 
     int32_t p_term = _settings.kp * error;
 
-    pid->integral += _settings.ki * error;
-
-    if (pid->integral < PID_INTEGRAL_MAX && pid->integral > PID_INTEGRAL_MIN) {
-        pid->integral += _settings.ki * error;
-    }
-    else {
-        if ((pid->integral >= PID_INTEGRAL_MAX && error < 0) || (pid->integral <= PID_INTEGRAL_MIN && error > 0)) {
-            pid->integral += _settings.ki * error;
+    if (abs(error) > 1) {
+        int32_t new_integral = pid->integral + _settings.ki * error;
+        if (new_integral > PID_INTEGRAL_MAX) {
+            pid->integral = PID_INTEGRAL_MAX;
+        }
+        else if (new_integral < PID_INTEGRAL_MIN) {
+            pid->integral = PID_INTEGRAL_MIN;
+        }
+        else {
+            pid->integral = new_integral;
         }
     }
 

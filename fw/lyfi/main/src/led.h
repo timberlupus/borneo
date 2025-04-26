@@ -21,7 +21,8 @@ enum led_correction_methods {
     LED_CORRECTION_LOG = 0, ///< Default
     LED_CORRECTION_LINEAR = 1,
     LED_CORRECTION_EXP = 2,
-    LED_CORRECTION_CIE1931 = 3,
+    LED_CORRECTION_GAMMA = 3,
+    LED_CORRECTION_CIE1931 = 4,
 
     LED_CORRECTION_COUNT,
 };
@@ -73,6 +74,7 @@ struct led_status {
 
 extern const led_duty_t LED_CORLUT_CIE1931[LED_BRIGHTNESS_MAX + 1];
 extern const led_duty_t LED_CORLUT_LOG[LED_BRIGHTNESS_MAX + 1];
+extern const led_duty_t LED_CORLUT_GAMMA[LED_BRIGHTNESS_MAX + 1];
 extern const led_duty_t LED_CORLUT_EXP[LED_BRIGHTNESS_MAX + 1];
 
 int led_init();
