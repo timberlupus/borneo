@@ -169,7 +169,7 @@ class ManualRunningChart extends StatelessWidget {
           backDrawRodData: BackgroundBarChartRodData(
             show: true,
             fromY: 0,
-            toY: ch.power.toDouble(),
+            toY: lyfiBrightnessMax.toDouble(),
             color: Theme.of(context).scaffoldBackgroundColor,
           ),
         ),
