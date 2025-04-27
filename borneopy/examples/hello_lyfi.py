@@ -59,19 +59,19 @@ async def main(address):
         pprint(color, indent=4)
 
         print(">>>>>>>>>>>>>>>>>>>>>>>>>> Dimming demo:")
-        mode = await client.get_current_mode()
-        print(f"Current mode: { mode }")
+        led_state = await client.get_state()
+        print(f"Current state: { state }")
 
-        print(f"Switching the device to the dimming mode...")
-        mode = await client.set_current_mode(LedMode.DIMMING)
+        print(f"Switching the device to the dimming state...")
+        state = await client.switch_state(LedState.DIMMING)
 
-        if device_info['modelID'] == 1: # BLC06MK1
+        if device_info['channelCount'] == 5: # BLC06MK1
             await client.set_color([10, 15, 10, 20, 15, 10])
 
         await asyncio.sleep(3)
 
-        print(f"Switching the device to the normal mode...")
-        mode = await client.set_current_mode(LedMode.NORMAL)
+        print(f"Switching the device to the normal state...")
+        state = await client.switch_state(LedState.NORMAL)
 
         print("\nAll done.")
 
