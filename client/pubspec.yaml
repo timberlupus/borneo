@@ -72,6 +72,8 @@ dependencies:
   flutter_skeleton_ui: ^0.0.6
   flutter_gettext: ^2.0.1
   progressive_time_picker: ^1.0.3
+  flutter_timezone: ^4.1.0
+
 
 
   # My libraries
@@ -122,6 +124,9 @@ flutter:
     - assets/images/routines/icons/feed.svg
     - assets/images/routines/icons/power-off.svg
     - assets/images/routines/icons/water-change.svg
+    # data
+    - assets/i18n/
+    - assets/i18n/zones.json
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
