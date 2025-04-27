@@ -36,6 +36,19 @@ enum led_status_enum {
     LED_STATE_COUNT,
 };
 
+enum led_running_modes {
+    LED_MODE_MANUAL = 0,
+    LED_MODE_SCHEDULED = 1,
+    LED_MODE_SUN = 2,
+
+    LED_MODE_COUNT,
+};
+
+enum led_option_flags {
+    LED_OPTION_LUNAR_ENABLED = 1,
+    LED_OPTION_ACCLIMATION_ENABLED = 2,
+};
+
 struct led_scheduler_item {
     uint32_t instant;
     led_color_t color;
@@ -50,12 +63,19 @@ struct led_factory_settings {
     uint16_t pwm_freq; ///< The frequency of PWM signals
 };
 
+struct location {
+    double lat;
+    double lng;
+};
+
 struct led_user_settings {
     uint8_t scheduler_enabled; ///< Whether the scheduling state is enabled
     uint16_t nightlight_duration; ///< Night lighting state duration (in seconds)
     struct led_scheduler scheduler; ///< Scheduling scheduler for scheduled state
     led_color_t manual_color; ///< Manual dimming power settings for each channel
     uint8_t correction_method; ///< Brightness correction method: Log/Exp/Linear/CIE1931
+
+    struct location loc; ///< The location for Solar and Lunar simulation.
 };
 
 struct led_status {
@@ -112,6 +132,10 @@ void led_set_nightlight_duration(uint16_t duration);
 int32_t led_get_nightlight_remaining();
 
 int led_set_correction_method(uint8_t correction_method);
+
+int led_load_factory_settings(struct led_factory_settings* factory_settings);
+int led_load_user_settings(struct led_user_settings* settings);
+int led_save_user_settings(const struct led_user_settings* settings);
 
 #ifdef __cplusplus
 }

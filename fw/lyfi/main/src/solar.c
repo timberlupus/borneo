@@ -12,7 +12,6 @@
 
 #include <borneo/algo/astronomy.h>
 
-#define PI 3.14159265358979323846 /**< Pi constant */
 #define SUN_ALTITUDE -0.833 /**< Standard altitude for sunrise/set (degrees) */
 #define BEIJING_OFFSET 8.0 /**< Beijing timezone offset from UTC (hours) */
 
@@ -23,14 +22,14 @@ static void calculate_sun_position(double jd, double* declination, double* hour_
  * @param deg Angle in degrees
  * @return Angle in radians
  */
-inline static double deg2rad(double deg) { return deg * PI / 180.0; }
+inline static double deg2rad(double deg) { return deg * M_PI / 180.0; }
 
 /**
  * @brief Convert radians to degrees
  * @param rad Angle in radians
  * @return Angle in degrees
  */
-inline static double rad2deg(double rad) { return rad * 180.0 / PI; }
+inline static double rad2deg(double rad) { return rad * 180.0 / M_PI; }
 
 /**
  * @brief Calculate solar position (declination and hour angle)
@@ -79,7 +78,7 @@ void calculate_sun_position(double jd, double* declination, double* hour_angle)
  *
  * Computes approximate sunrise and sunset times in UTC for given location and date.
  */
-void sun_compute_sunrise_sunset(double latitude, double longitude, time_t t, double* sunrise, double* sunset)
+void solar_compute_sunrise_sunset(double latitude, double longitude, time_t t, double* sunrise, double* sunset)
 {
     // Convert to Julian Day
     double jd = astronomy_julian_date(t);

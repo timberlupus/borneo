@@ -14,7 +14,7 @@ extern "C" {
  *
  * Calculates approximate sunrise and sunset times in UTC for given location and date.
  */
-void sun_compute_sunrise_sunset(double latitude, double longitude, time_t t, double* sunrise, double* sunset);
+void solar_compute_sunrise_sunset(double latitude, double longitude, time_t t, double* sunrise, double* sunset);
 
 #ifdef __cplusplus
 }
