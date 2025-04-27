@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 
 from enum import Enum
 
-class LedMode(Enum):
+class LedState(Enum):
     NORMAL = 0
     DIMMING = 1
     NIGHTLIGHT = 2
@@ -60,15 +60,15 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
-    async def get_current_mode(self) -> LedMode:
-        uri = self.address + '/borneo/lyfi/mode'
+    async def get_state(self) -> LedState:
+        uri = self.address + '/borneo/lyfi/state'
         request = Message(code=GET, uri=uri)
         response = await self._context.request(request).response
-        return LedMode(loads(response.payload))
+        return LedState(loads(response.payload))
 
-    async def set_current_mode(self, mode: LedMode):
-        uri = self.address + '/borneo/lyfi/mode'
-        payload = dumps(mode.value)
+    async def switch_state(self, state: LedState):
+        uri = self.address + '/borneo/lyfi/state'
+        payload = dumps(state.value)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
