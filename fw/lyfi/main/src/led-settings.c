@@ -24,6 +24,7 @@
 #include "led.h"
 
 #define LED_NVS_NS "led"
+#define LED_NVS_KEY_RUNNING_MODE "mode"
 #define LED_NVS_KEY_SCHEDULER_ENABLED "sch_en"
 #define LED_NVS_KEY_MANUAL_COLOR "mcolor"
 #define LED_NVS_KEY_SCHEDULER "sch"
@@ -33,6 +34,7 @@
 #define LED_NVS_KEY_LOC "loc"
 
 static const struct led_user_settings LED_DEFAULT_SETTINGS = {
+    .mode = LED_MODE_MANUAL,
     .scheduler_enabled = 0,
     .nightlight_duration = 60 * 20,
     .manual_color = {
@@ -111,6 +113,17 @@ int led_load_user_settings(struct led_user_settings* settings)
     }
 
     {
+        rc = nvs_get_u8(handle, LED_NVS_KEY_RUNNING_MODE, &settings->mode);
+        if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->mode = LED_DEFAULT_SETTINGS.mode;
+            rc = 0;
+        }
+        if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
+    {
         rc = nvs_get_u8(handle, LED_NVS_KEY_SCHEDULER_ENABLED, &settings->scheduler_enabled);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
             settings->scheduler_enabled = LED_DEFAULT_SETTINGS.scheduler_enabled;
@@ -168,9 +181,8 @@ int led_load_user_settings(struct led_user_settings* settings)
     }
 
     {
-        double loc_blob[2];
-        size = sizeof(loc_blob);
-        rc = nvs_get_blob(handle, LED_NVS_KEY_LOC, loc_blob, &size);
+        size = sizeof(struct geo_location);
+        rc = nvs_get_blob(handle, LED_NVS_KEY_LOC, &settings->loc, &size);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
             settings->loc = LED_DEFAULT_SETTINGS.loc;
             rc = 0;
@@ -178,8 +190,6 @@ int led_load_user_settings(struct led_user_settings* settings)
         if (rc) {
             goto _EXIT_CLOSE;
         }
-        settings->loc.lat = loc_blob[0];
-        settings->loc.lng = loc_blob[1];
     }
 
     // TODO
@@ -200,6 +210,11 @@ int led_save_user_settings(const struct led_user_settings* settings)
     rc = bo_nvs_user_open(LED_NVS_NS, NVS_READWRITE, &handle);
     if (rc) {
         goto _EXIT_WITHOUT_CLOSE;
+    }
+
+    rc = nvs_set_u8(handle, LED_NVS_KEY_RUNNING_MODE, settings->mode);
+    if (rc) {
+        goto _EXIT_CLOSE;
     }
 
     rc = nvs_set_u8(handle, LED_NVS_KEY_SCHEDULER_ENABLED, settings->scheduler_enabled);
@@ -223,6 +238,11 @@ int led_save_user_settings(const struct led_user_settings* settings)
     }
 
     rc = nvs_set_blob(handle, LED_NVS_KEY_MANUAL_COLOR, settings->manual_color, sizeof(led_color_t));
+    if (rc) {
+        goto _EXIT_CLOSE;
+    }
+
+    rc = nvs_set_blob(handle, LED_NVS_KEY_LOC, &settings->loc, sizeof(struct geo_location));
     if (rc) {
         goto _EXIT_CLOSE;
     }

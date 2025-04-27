@@ -63,19 +63,23 @@ struct led_factory_settings {
     uint16_t pwm_freq; ///< The frequency of PWM signals
 };
 
-struct location {
+struct geo_location {
     double lat;
     double lng;
 };
 
 struct led_user_settings {
+    uint8_t mode; ///< Running mode, see `enum led_running_modes`
+
+    // TODO remove me
     uint8_t scheduler_enabled; ///< Whether the scheduling state is enabled
+
     uint16_t nightlight_duration; ///< Night lighting state duration (in seconds)
     struct led_scheduler scheduler; ///< Scheduling scheduler for scheduled state
     led_color_t manual_color; ///< Manual dimming power settings for each channel
     uint8_t correction_method; ///< Brightness correction method: Log/Exp/Linear/CIE1931
 
-    struct location loc; ///< The location for Solar and Lunar simulation.
+    struct geo_location loc; ///< The location for Solar and Lunar simulation.
 };
 
 struct led_status {
@@ -119,6 +123,9 @@ int led_set_schedule(const struct led_scheduler_item* items, size_t count);
 const struct led_scheduler* led_get_schedule();
 
 const struct led_user_settings* led_get_settings();
+
+// TODO
+// int led_switch_mode(uint8_t mode);
 
 const struct led_status* led_get_status();
 

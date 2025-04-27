@@ -75,13 +75,20 @@ enum LedState {
   nightlight,
   preview;
 
-  bool isLocked() {
-    return this == normal || this == nightlight;
-  }
+  bool get isLocked => this == normal || this == nightlight;
+}
+
+enum LedRunningMode {
+  manual,
+  scheduled,
+  sun;
+
+  bool get isSchedulerEnabled => this == scheduled;
 }
 
 class LyfiDeviceStatus {
   final LedState state;
+  final LedRunningMode mode;
   final bool schedulerEnabled;
   final bool unscheduled;
   final Duration nightlightRemaining;
@@ -96,6 +103,7 @@ class LyfiDeviceStatus {
 
   const LyfiDeviceStatus({
     required this.state,
+    required this.mode,
     required this.schedulerEnabled,
     required this.unscheduled,
     required this.nightlightRemaining,
@@ -108,6 +116,7 @@ class LyfiDeviceStatus {
     final dynamic map = cborMap.toObject();
     return LyfiDeviceStatus(
       state: LedState.values[map['state']],
+      mode: LedRunningMode.values[map['mode']],
       schedulerEnabled: map['schedulerEnabled'],
       unscheduled: map['unscheduled'],
       nightlightRemaining: Duration(seconds: map['nlRemain']),

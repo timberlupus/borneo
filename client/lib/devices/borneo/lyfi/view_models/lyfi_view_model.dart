@@ -127,7 +127,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     _isOn = borneoDeviceStatus!.power;
     if (_lyfiDeviceStatus != null) {
       _ledState = _lyfiDeviceStatus!.state;
-      _isLocked = lyfiDeviceStatus!.state.isLocked();
+      _isLocked = lyfiDeviceStatus!.state.isLocked;
       _fanPowerRatio = lyfiDeviceStatus!.fanPower.toDouble();
       _schedulerEnabled = lyfiDeviceStatus!.schedulerEnabled;
     }
