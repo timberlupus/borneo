@@ -1,5 +1,5 @@
 /**
- * @file sunrise_sunset.c
+ * @file solar.c
  * @brief Calculate sunrise and sunset times using time_t
  *
  * This program implements a simplified algorithm based on Jean Meeus's
@@ -12,90 +12,171 @@
 
 #include <borneo/algo/astronomy.h>
 
-#define SUN_ALTITUDE -0.833 /**< Standard altitude for sunrise/set (degrees) */
-#define BEIJING_OFFSET 8.0 /**< Beijing timezone offset from UTC (hours) */
+#include "solar.h"
 
-static void calculate_sun_position(double jd, double* declination, double* hour_angle);
-
-/**
- * @brief Convert degrees to radians
- * @param deg Angle in degrees
- * @return Angle in radians
- */
-inline static double deg2rad(double deg) { return deg * M_PI / 180.0; }
+static time_t solar_offset_time_by_hours(time_t base_time, double offset_hours);
 
 /**
- * @brief Convert radians to degrees
- * @param rad Angle in radians
- * @return Angle in degrees
+ * @brief Offsets a given time by a specified number of hours.
+ * @param base_time The base time to offset (in seconds since epoch).
+ * @param offset_hours The number of hours to offset (can be fractional).
+ * @return The adjusted time as a time_t value.
  */
-inline static double rad2deg(double rad) { return rad * 180.0 / M_PI; }
-
-/**
- * @brief Calculate solar position (declination and hour angle)
- * @param jd Julian Day
- * @param[out] declination Pointer to store sun's declination (radians)
- * @param[out] hour_angle Pointer to store sun's hour angle (radians)
- *
- * Calculates the sun's declination and approximate hour angle for sunrise/sunset.
- */
-void calculate_sun_position(double jd, double* declination, double* hour_angle)
+time_t solar_offset_time_by_hours(time_t base_time, double offset_hours)
 {
-    // Days since J2000.0
-    double n = jd - 2451545.0;
+    struct tm tm_time;
+    localtime_r(&base_time, &tm_time);
 
-    // Mean solar longitude (degrees)
-    double L = fmod(280.460 + 0.9856474 * n, 360.0);
-    if (L < 0)
-        L += 360.0;
+    int offset_seconds = (int)(offset_hours * 3600.0);
+    base_time += offset_seconds;
 
-    // Mean anomaly (degrees)
-    double g = fmod(357.528 + 0.9856003 * n, 360.0);
-    if (g < 0)
-        g += 360.0;
-    g = deg2rad(g);
+    // Re-normalize the time
+    localtime_r(&base_time, &tm_time);
+    return mktime(&tm_time);
+}
 
-    // Ecliptic longitude
-    double lambda = deg2rad(L + 1.915 * sin(g) + 0.020 * sin(2 * g));
+// Utility functions for angle conversions
+double deg_to_rad(double deg) { return deg * M_PI / 180.0; }
 
-    // Obliquity of the ecliptic
-    double epsilon = deg2rad(23.439 - 0.0000004 * n);
+double rad_to_deg(double rad) { return rad * 180.0 / M_PI; }
 
-    // Solar declination
-    *declination = asin(sin(epsilon) * sin(lambda));
-
-    // Hour angle for sunrise/sunset
-    *hour_angle = acos((sin(deg2rad(SUN_ALTITUDE)) - sin(*declination) * sin(0)) / (cos(*declination) * cos(0)));
+/**
+ * @brief Calculates the day of the year for a given date.
+ * @param year The year (e.g., 2025).
+ * @param month The month (1-12).
+ * @param day The day of the month (1-31).
+ * @return The day of the year (1-365 or 366 for leap years).
+ */
+int solar_day_of_year(int year, int month, int day)
+{
+    static const int days_before_month[] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+    int doy = days_before_month[month - 1] + day;
+    // Add one day for leap years after February
+    if (month > 2) {
+        if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))
+            doy += 1;
+    }
+    return doy;
 }
 
 /**
- * @brief Computes sunrise and sunset times
- * @param latitude Observer's latitude in degrees (N positive)
- * @param longitude Observer's longitude in degrees (E positive)
- * @param t Time in time_t format (only date portion used)
- * @param[out] sunrise Pointer to store sunrise time (UTC hours)
- * @param[out] sunset Pointer to store sunset time (UTC hours)
- *
- * Computes approximate sunrise and sunset times in UTC for given location and date.
+ * @brief Calculates the timezone offset in hours for a given date.
+ * @param year The year (e.g., 2025).
+ * @param month The month (1-12).
+ * @param day The day of the month (1-31).
+ * @return The timezone offset in hours.
  */
-void solar_compute_sunrise_sunset(double latitude, double longitude, time_t t, double* sunrise, double* sunset)
+double solar_calc_timezone_offset(int year, int month, int day)
 {
-    // Convert to Julian Day
-    double jd = astronomy_julian_date(t);
+    // Create a tm structure for local time at noon
+    struct tm tm_local = { 0 };
+    tm_local.tm_year = year - 1900;
+    tm_local.tm_mon = month - 1;
+    tm_local.tm_mday = day;
+    tm_local.tm_hour = 12; // Noon as reference time
+    tm_local.tm_isdst = -1; // Let system determine daylight saving time
 
-    // Get solar position
-    double declination, hour_angle;
-    calculate_sun_position(jd, &declination, &hour_angle);
+    // Convert to time_t, accounting for local timezone
+    time_t local_time = mktime(&tm_local);
 
-    // Calculate hour angle for sunrise/sunset
-    double latitude_rad = deg2rad(latitude);
-    double ha = acos((cos(deg2rad(90 - SUN_ALTITUDE)) / (cos(latitude_rad) * cos(declination))
-                      - tan(latitude_rad) * tan(declination)));
+    // Get UTC time
+    struct tm tm_utc;
+    gmtime_r(&local_time, &tm_utc);
+    time_t utc_time = mktime(&tm_utc);
 
-    // Convert to UTC time (hours)
-    double longitude_h = longitude / 15.0;
-    double t_corr = 0.0; // Equation of time correction (simplified)
+    // Calculate timezone offset in hours
+    return difftime(local_time, utc_time) / 3600.0;
+}
 
-    *sunrise = fmod(12.0 - rad2deg(ha) / 15.0 - t_corr - longitude_h + 24.0, 24.0);
-    *sunset = fmod(12.0 + rad2deg(ha) / 15.0 - t_corr - longitude_h + 24.0, 24.0);
+/**
+ * @brief Calculates sunrise and sunset times in local hours.
+ * @param latitude The latitude of the location in degrees.
+ * @param longitude The longitude of the location in degrees.
+ * @param timezone_offset The timezone offset in hours (e.g., +8 for China).
+ * @param year The year (e.g., 2025).
+ * @param month The month (1-12).
+ * @param day The day of the month (1-31).
+ * @param sunrise Pointer to store the sunrise time (in hours).
+ * @param sunset Pointer to store the sunset time (in hours).
+ */
+void solar_calculate_sunrise_sunset(double latitude, double longitude, int timezone_offset, int year, int month,
+                                    int day, double* sunrise, double* sunset)
+{
+    int doy = solar_day_of_year(year, month, day);
+
+    // Calculate solar declination angle (simplified)
+    double decl = 23.45 * sin(deg_to_rad(360.0 * (284 + doy) / 365.0));
+
+    double lat_rad = deg_to_rad(latitude);
+    double decl_rad = deg_to_rad(decl);
+
+    double cos_omega = -tan(lat_rad) * tan(decl_rad);
+    if (cos_omega > 1.0)
+        cos_omega = 1.0;
+    if (cos_omega < -1.0)
+        cos_omega = -1.0;
+    double omega = acos(cos_omega); // Solar hour angle for sunrise/sunset (radians)
+
+    // Convert omega to time (hours)
+    double daylight_hours = rad_to_deg(omega) / 15.0 * 2.0;
+
+    // Calculate true solar noon (local time)
+    double solar_noon = 12.0 + (timezone_offset * 15.0 - longitude) / 15.0;
+
+    *sunrise = solar_noon - daylight_hours / 2.0;
+    *sunset = solar_noon + daylight_hours / 2.0;
+}
+
+/**
+ * @brief Calculates the solar noon time.
+ * @param sunrise The sunrise time in hours.
+ * @param sunset The sunset time in hours.
+ * @return The solar noon time in hours.
+ */
+double solar_calculate_noon(double sunrise, double sunset) { return (sunrise + sunset) / 2.0; }
+
+/**
+ * @brief Clamps a time value to the range [0, 24].
+ * @param time The time value to clamp (in hours).
+ * @return The clamped time value.
+ */
+double solar_clamp_time(double time)
+{
+    if (time < 0)
+        return 0;
+    if (time > 24)
+        return 24;
+    return time;
+}
+
+/**
+ * @brief Generates key points for solar brightness throughout the day.
+ * @param sunrise The sunrise time in hours.
+ * @param sunset The sunset time in hours.
+ * @param keypoints Array to store the generated key points.
+ * @param max_points Maximum number of key points to generate.
+ * @return The number of key points generated.
+ */
+int solar_generate_instants(double sunrise, double sunset, struct solar_instant* keypoints)
+{
+    double noon = solar_calculate_noon(sunrise, sunset);
+    const double twilight = 0.5; // 30 minutes for civil twilight
+
+    double sunrise_twilight = solar_clamp_time(sunrise - twilight);
+    double sunrise_plus_1h = solar_clamp_time(sunrise + 1.0);
+    double noon_plus_3h = solar_clamp_time(noon + 3.0);
+    double sunset_minus_1h = solar_clamp_time(sunset - 1.0);
+    double sunset_plus_twilight = solar_clamp_time(sunset + twilight);
+
+    size_t idx = 0;
+    keypoints[idx++] = (struct solar_instant) { sunrise_twilight, 0 }; // Start of dawn
+    keypoints[idx++] = (struct solar_instant) { sunrise, 800 }; // Sunrise
+    keypoints[idx++] = (struct solar_instant) { sunrise_plus_1h, 900 }; // 1 hour after sunrise
+    keypoints[idx++] = (struct solar_instant) { noon, 1000 }; // Noon
+    keypoints[idx++] = (struct solar_instant) { noon_plus_3h, 950 }; // 3 hours after noon
+    keypoints[idx++] = (struct solar_instant) { sunset_minus_1h, 850 }; // 1 hour before sunset
+    keypoints[idx++] = (struct solar_instant) { sunset, 800 }; // Sunset
+    keypoints[idx++] = (struct solar_instant) { sunset_plus_twilight, 0 }; // End of dusk
+
+    return idx;
 }
