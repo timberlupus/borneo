@@ -47,7 +47,7 @@ struct sch_time_pair {
 static int sch_find_closest_time_range(uint32_t instant, struct sch_time_pair* result);
 static void sch_drive();
 
-static int nightlight_state_entry();
+static int nightlight_state_entry(uint8_t prev_state);
 static int nightlight_state_exit();
 static void nightlight_state_drive();
 
@@ -761,14 +761,14 @@ static void preview_state_drive()
          _status.preview_state_clock += 60) {
         sch_drive();
         // taskYIELD();
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
     BO_MUST(led_switch_state(LED_STATE_DIMMING));
 }
 
-int nightlight_state_entry()
+int nightlight_state_entry(uint8_t prev_state)
 {
-    if (!_settings.scheduler_enabled || _status.state != LED_STATE_NORMAL || !bo_power_is_on()) {
+    if (!_settings.scheduler_enabled || prev_state != LED_STATE_NORMAL || !bo_power_is_on()) {
         return -EINVAL;
     }
 
@@ -855,7 +855,8 @@ void led_proc()
         else {
             led_blank();
         }
-        taskYIELD();
+        vTaskDelay(pdMS_TO_TICKS(1));
+        //taskYIELD();
     }
 }
 
@@ -920,7 +921,7 @@ int led_switch_state(uint8_t state)
     } break;
 
     case LED_STATE_NIGHTLIGHT: {
-        BO_TRY(nightlight_state_entry());
+        BO_TRY(nightlight_state_entry(_status.state));
     } break;
 
     case LED_STATE_PREVIEW: {

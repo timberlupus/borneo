@@ -152,7 +152,7 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   Future<LyfiDeviceStatus> getLyfiStatus(Device dev);
 
   Future<LedState> getState(Device dev);
-  Future<void> switchState(Device dev, LedState mode);
+  Future<void> switchState(Device dev, LedState state);
 
   Future<bool> getSchedulerEnabled(Device dev);
   Future<void> setSchedulerEnabled(Device dev, bool isEnabled);
@@ -320,9 +320,9 @@ class BorneoLyfiDriver
   }
 
   @override
-  Future<void> switchState(Device dev, LedState mode) async {
+  Future<void> switchState(Device dev, LedState state) async {
     final dd = dev.driverData as LyfiDriverData;
-    await dd.coap.putCbor(LyfiPaths.state, mode.index);
+    await dd.coap.putCbor(LyfiPaths.state, state.index);
   }
 
   @override

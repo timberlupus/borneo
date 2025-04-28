@@ -340,7 +340,7 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
 
     {
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "mode"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&root_map, led_settings->mode));
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, led_settings->mode));
     }
 
     {
