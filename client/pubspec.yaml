@@ -125,8 +125,8 @@ flutter:
     - assets/images/routines/icons/power-off.svg
     - assets/images/routines/icons/water-change.svg
     # data
-    - assets/i18n/
-    - assets/i18n/zones.json
+    - assets/data/
+    - assets/data/zones.json
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
