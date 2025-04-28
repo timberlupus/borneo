@@ -23,11 +23,6 @@
 #include "algo.h"
 #include "led.h"
 
-static void sch_compute_color(time_t now, led_color_t color);
-static void sch_compute_color_in_range(led_color_t color, const struct tm* now,
-                                       const struct led_scheduler_item* range_begin,
-                                       const struct led_scheduler_item* range_end);
-
 static void _borneo_system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id,
                                           void* event_data);
 static void led_events_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data);
@@ -37,14 +32,6 @@ static void led_proc();
 static int normal_state_entry();
 static void normal_state_drive();
 
-// static int dimming_state_entry();
-// static void dimming_state_drive();
-struct sch_time_pair {
-    const struct led_scheduler_item* begin;
-    const struct led_scheduler_item* end;
-};
-
-static int sch_find_closest_time_range(uint32_t instant, struct sch_time_pair* result);
 static void sch_drive();
 
 static int nightlight_state_entry(uint8_t prev_state);
@@ -59,9 +46,9 @@ static void led_drive();
 
 #define TAG "lyfi-ledc"
 
+#define SECS_PER_DAY 172800
 #define LED_MAX_DUTY 1023
 #define LED_DUTY_RES LEDC_TIMER_10_BIT
-#define SECS_PER_DAY 172800
 
 #define FADE_PERIOD_MS 5000
 #define FADE_OFF_PERIOD_MS 3000
@@ -123,8 +110,7 @@ static const uint8_t LED_GPIOS[CONFIG_LYFI_LED_CHANNEL_COUNT] = {
 
 static const led_color_t LED_COLOR_BLANK = { 0 };
 
-static struct led_status _status;
-static struct led_user_settings _settings;
+static struct led_status _led;
 
 static ledc_channel_config_t _ledc_channels[LYFI_LED_CHANNEL_COUNT];
 /**
@@ -135,14 +121,13 @@ int led_init()
 {
     ESP_LOGI(TAG, "Initializing LED controller....");
 
-    memset(&_status, 0, sizeof(_status));
-    memset(&_settings, 0, sizeof(_settings));
+    memset(&_led, 0, sizeof(_led));
     memset(_ledc_channels, 0, sizeof(_ledc_channels));
 
     struct led_factory_settings factory_settings;
     BO_TRY(led_load_factory_settings(&factory_settings));
 
-    BO_TRY(led_load_user_settings(&_settings));
+    BO_TRY(led_load_user_settings(&_led.settings));
 
     ESP_LOGI(TAG, "Initializing PWM timer for LEDC....");
 
@@ -208,7 +193,7 @@ int led_init()
     ESP_LOGI(TAG, "Starting LED controller...");
 
     if (bo_power_is_on()) {
-        _status.state = LED_STATE_POWERING_ON;
+        _led.state = LED_STATE_POWERING_ON;
         BO_TRY(led_fade_powering_on());
     }
 
@@ -219,14 +204,14 @@ int led_init()
 
 void led_blank()
 {
-    if (memcmp(_status.color, LED_COLOR_BLANK, sizeof(led_color_t)) != 0) {
+    if (memcmp(_led.color, LED_COLOR_BLANK, sizeof(led_color_t)) != 0) {
         led_update_color(LED_COLOR_BLANK);
     }
 }
 
 int led_set_color(const led_color_t color)
 {
-    if (!bo_power_is_on() || _status.state != LED_STATE_DIMMING) {
+    if (!bo_power_is_on() || _led.state != LED_STATE_DIMMING) {
         return -EINVAL;
     }
     // Verify the colors
@@ -236,8 +221,8 @@ int led_set_color(const led_color_t color)
         }
     }
 
-    if (!_settings.scheduler_enabled) {
-        memcpy(_settings.manual_color, color, sizeof(led_color_t));
+    if (!_led.settings.scheduler_enabled) {
+        memcpy(_led.settings.manual_color, color, sizeof(led_color_t));
     }
 
     BO_TRY(led_update_color(color));
@@ -247,7 +232,7 @@ int led_set_color(const led_color_t color)
 
 int led_get_color(led_color_t color)
 {
-    memcpy(color, _status.color, sizeof(led_color_t));
+    memcpy(color, _led.color, sizeof(led_color_t));
     return ESP_OK;
 }
 
@@ -255,12 +240,12 @@ led_brightness_t led_get_channel_power(uint8_t ch)
 {
     //
     assert(ch < LYFI_LED_CHANNEL_COUNT);
-    return _status.color[ch];
+    return _led.color[ch];
 }
 
 inline led_duty_t channel_brightness_to_duty(led_brightness_t brightness)
 {
-    switch (_settings.correction_method) {
+    switch (_led.settings.correction_method) {
     case LED_CORRECTION_CIE1931:
         return LED_CORLUT_CIE1931[brightness];
 
@@ -333,7 +318,7 @@ int led_set_duties(const led_duty_t* duties)
 
 int led_fade_to_color(const led_color_t color, uint32_t duration_ms)
 {
-    if (_status.state == LED_STATE_DIMMING) {
+    if (_led.state == LED_STATE_DIMMING) {
         return -EINVAL;
     }
 
@@ -342,24 +327,24 @@ int led_fade_to_color(const led_color_t color, uint32_t duration_ms)
     }
 
     int64_t now = esp_timer_get_time() / 1000LL;
-    _status.fade_start_time_ms = now;
-    _status.fade_duration_ms = duration_ms;
-    BO_TRY(led_get_color(_status.fade_start_color));
-    memcpy(_status.fade_end_color, color, sizeof(led_color_t));
+    _led.fade_start_time_ms = now;
+    _led.fade_duration_ms = duration_ms;
+    BO_TRY(led_get_color(_led.fade_start_color));
+    memcpy(_led.fade_end_color, color, sizeof(led_color_t));
     return 0;
 }
 
 int led_fade_powering_on()
 {
-    if (_settings.scheduler_enabled) {
+    if (_led.settings.scheduler_enabled) {
         time_t now = time(NULL);
         now += FADE_PERIOD_MS / 1000;
         led_color_t end_color;
-        sch_compute_color(now, end_color);
+        led_sch_compute_color(&_led.settings.scheduler, now, end_color);
         BO_TRY(led_fade_to_color(end_color, FADE_PERIOD_MS));
     }
     else { // manual mode
-        BO_TRY(led_fade_to_color(_settings.manual_color, FADE_PERIOD_MS));
+        BO_TRY(led_fade_to_color(_led.settings.manual_color, FADE_PERIOD_MS));
     }
 
     return 0;
@@ -367,7 +352,7 @@ int led_fade_powering_on()
 
 int led_fade_stop()
 {
-    _status.fade_start_time_ms = 0LL;
+    _led.fade_start_time_ms = 0LL;
     return 0;
 }
 
@@ -378,16 +363,16 @@ void led_fade_drive()
     }
 
     int64_t now = esp_timer_get_time() / 1000LL;
-    if (now >= _status.fade_start_time_ms + _status.fade_duration_ms) {
+    if (now >= _led.fade_start_time_ms + _led.fade_duration_ms) {
         BO_MUST(led_fade_stop());
     }
 
-    int64_t elapsed_time_ms = now - _status.fade_start_time_ms;
+    int64_t elapsed_time_ms = now - _led.fade_start_time_ms;
     led_color_t color;
     for (size_t ich = 0; ich < LYFI_LED_CHANNEL_COUNT; ich++) {
-        int64_t delta = ((int64_t)_status.fade_end_color[ich] - (int64_t)_status.fade_start_color[ich]);
-        delta = delta * elapsed_time_ms / (int64_t)_status.fade_duration_ms;
-        color[ich] = (led_brightness_t)((int64_t)_status.fade_start_color[ich] + delta);
+        int64_t delta = ((int64_t)_led.fade_end_color[ich] - (int64_t)_led.fade_start_color[ich]);
+        delta = delta * elapsed_time_ms / (int64_t)_led.fade_duration_ms;
+        color[ich] = (led_brightness_t)((int64_t)_led.fade_start_color[ich] + delta);
         if (color[ich] > LED_BRIGHTNESS_MAX) {
             color[ich] = LED_BRIGHTNESS_MAX;
         }
@@ -395,14 +380,14 @@ void led_fade_drive()
     BO_MUST(led_update_color(color));
 }
 
-inline static bool led_fade_inprogress() { return _status.fade_start_time_ms > 0LL; }
+inline static bool led_fade_inprogress() { return _led.fade_start_time_ms > 0LL; }
 
 int led_set_channel_brightness(uint8_t ch, led_brightness_t brightness)
 {
     if (ch >= LYFI_LED_CHANNEL_COUNT || brightness > LED_BRIGHTNESS_MAX) {
         return -EINVAL;
     }
-    _status.color[ch] = brightness;
+    _led.color[ch] = brightness;
     led_duty_t duty = channel_brightness_to_duty(brightness);
     BO_TRY(led_set_channel_duty(ch, duty));
     return 0;
@@ -410,7 +395,7 @@ int led_set_channel_brightness(uint8_t ch, led_brightness_t brightness)
 
 int led_update_color(const led_color_t color)
 {
-    if (memcmp(color, _status.color, sizeof(led_color_t)) == 0) {
+    if (memcmp(color, _led.color, sizeof(led_color_t)) == 0) {
         return 0;
     }
 
@@ -443,131 +428,29 @@ int led_set_schedule(const struct led_scheduler_item* items, size_t count)
     }
 
     if (count > 0) {
-        memcpy(_settings.scheduler.items, items, sizeof(struct led_scheduler_item) * count);
-        _settings.scheduler.item_count = count;
+        memcpy(_led.settings.scheduler.items, items, sizeof(struct led_scheduler_item) * count);
+        _led.settings.scheduler.item_count = count;
     }
     else {
-        memset(&_settings.scheduler, 0, sizeof(_settings.scheduler));
+        memset(&_led.settings.scheduler, 0, sizeof(_led.settings.scheduler));
     }
 
     return 0;
 }
 
-const struct led_scheduler* led_get_schedule() { return &_settings.scheduler; }
+const struct led_scheduler* led_get_schedule() { return &_led.settings.scheduler; }
 
-const struct led_user_settings* led_get_settings() { return &_settings; }
+const struct led_user_settings* led_get_settings() { return &_led.settings; }
 
-const struct led_status* led_get_status() { return &_status; }
-
-int sch_find_closest_time_range(uint32_t instant, struct sch_time_pair* result)
-{
-    if (result == NULL) {
-        return -EINVAL;
-    }
-
-    if (_settings.scheduler.item_count == 0) {
-        return -ENOENT;
-    }
-
-    const struct led_scheduler_item* items = _settings.scheduler.items;
-    size_t size = _settings.scheduler.item_count;
-
-    result->begin = NULL;
-    result->end = NULL;
-
-    if (instant < items[0].instant) {
-        return -ENOENT;
-    }
-
-    for (size_t i = 0; i < size; i++) {
-        if (instant < items[i].instant) {
-            if (i == 0) {
-                return -ENOENT;
-            }
-            else {
-                result->begin = &items[i - 1];
-                result->end = &items[i];
-                return 0;
-            }
-        }
-    }
-    // now_instant >= all items
-    result->begin = &items[size - 1];
-    return 0;
-}
-
-void sch_compute_color_in_range(led_color_t color, const struct tm* now, const struct led_scheduler_item* range_begin,
-                                const struct led_scheduler_item* range_end)
-{
-    int32_t now_instant = (now->tm_hour * 3600) + (now->tm_min * 60) + now->tm_sec;
-    if (range_begin->instant >= SECS_PER_DAY) {
-        now_instant += SECS_PER_DAY;
-    }
-
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        led_brightness_t begin_brightness = range_begin->color[ch];
-        led_brightness_t end_brightness = range_end->color[ch];
-        int32_t value = linear_interpolate_i32(range_begin->instant, begin_brightness, range_end->instant,
-                                               end_brightness, now_instant);
-        if (value < 0) {
-            value = 0;
-        }
-        else if (value > LED_BRIGHTNESS_MAX) {
-            value = LED_BRIGHTNESS_MAX;
-        }
-        color[ch] = value;
-    }
-}
-
-void sch_compute_color(time_t now, led_color_t color)
-{
-    assert(_status.state == LED_STATE_PREVIEW || _settings.scheduler_enabled);
-
-    if (_settings.scheduler.item_count == 0) {
-        memset(color, 0, sizeof(led_color_t));
-        return;
-    }
-
-    // time_t utc_now = _status.state == LED_STATE_PREVIEW ? _status.preview_state_clock : time(NULL);
-
-    struct tm local_now = { 0 };
-    localtime_r(&now, &local_now);
-    uint32_t local_instant = (local_now.tm_hour * 3600) + (local_now.tm_min * 60) + local_now.tm_sec;
-    uint32_t local_next_day_instant = SECS_PER_DAY + local_instant;
-
-    // Find the instant range
-    struct sch_time_pair pair;
-
-    int rc = sch_find_closest_time_range(local_instant, &pair);
-    if (rc == -ENOENT) { // Try the time of next day
-        rc = sch_find_closest_time_range(local_next_day_instant, &pair);
-    }
-    if (rc && rc != -ENOENT) {
-        // we got an error
-        ESP_LOGE(TAG, "Failed to find scheduler item with instant(%lu), errno=%d", local_instant, rc);
-        memset(color, 0, sizeof(led_color_t));
-        return;
-    }
-
-    // Open range
-    if (pair.begin != NULL && pair.end == NULL) {
-        memcpy(color, pair.begin->color, sizeof(led_color_t));
-        return;
-    }
-
-    // Between two instants
-    if (pair.begin != NULL && pair.end != NULL) {
-        sch_compute_color_in_range(color, &local_now, pair.begin, pair.end);
-    }
-}
+const struct led_status* led_get_status() { return &_led; }
 
 static void sch_drive()
 {
-    assert(_status.state == LED_STATE_PREVIEW || _settings.scheduler_enabled);
+    assert(_led.state == LED_STATE_PREVIEW || _led.settings.scheduler_enabled);
 
     led_color_t color;
     time_t now = time(NULL);
-    sch_compute_color(now, color);
+    led_sch_compute_color(&_led.settings.scheduler, now, color);
 
     BO_MUST(led_update_color(color));
 }
@@ -575,7 +458,7 @@ static void sch_drive()
 bool led_is_blank()
 {
     for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        if (_status.color[ch] > 0) {
+        if (_led.color[ch] > 0) {
             return false;
         }
     }
@@ -614,10 +497,10 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
 
     case LYFI_LED_NOTIFY_NIGHTLIGHT_STATE: {
         assert(bo_power_is_on());
-        if (_status.state == LED_STATE_NORMAL && _settings.scheduler_enabled) {
+        if (_led.state == LED_STATE_NORMAL && _led.settings.scheduler_enabled) {
             led_switch_state(LED_STATE_NIGHTLIGHT);
         }
-        else if (_status.state == LED_STATE_NIGHTLIGHT) {
+        else if (_led.state == LED_STATE_NIGHTLIGHT) {
             BO_MUST(led_switch_state(LED_STATE_NORMAL));
         }
     } break;
@@ -630,30 +513,30 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
 int led_set_scheduler_enabled(bool enabled)
 {
 
-    if (!bo_power_is_on() || (_status.state != LED_STATE_DIMMING && _status.state != LED_STATE_PREVIEW)) {
+    if (!bo_power_is_on() || (_led.state != LED_STATE_DIMMING && _led.state != LED_STATE_PREVIEW)) {
         return -EINVAL;
     }
 
-    if (_status.state == LED_STATE_PREVIEW) {
+    if (_led.state == LED_STATE_PREVIEW) {
         BO_TRY(led_switch_state(LED_STATE_DIMMING));
     }
 
-    _settings.scheduler_enabled = enabled;
+    _led.settings.scheduler_enabled = enabled;
 
-    if (!_settings.scheduler_enabled) {
-        BO_TRY(led_set_color(_settings.manual_color));
+    if (!_led.settings.scheduler_enabled) {
+        BO_TRY(led_set_color(_led.settings.manual_color));
     }
 
     return 0;
 }
 
-void led_set_nightlight_duration(uint16_t duration) { _settings.nightlight_duration = duration; }
+void led_set_nightlight_duration(uint16_t duration) { _led.settings.nightlight_duration = duration; }
 
 int32_t led_get_nightlight_remaining()
 {
-    if (_status.state == LED_STATE_NIGHTLIGHT) {
+    if (_led.state == LED_STATE_NIGHTLIGHT) {
         time_t now = time(NULL);
-        return (int32_t)(_status.nightlight_off_time - now);
+        return (int32_t)(_led.nightlight_off_time - now);
     }
     else {
         return -1;
@@ -664,19 +547,19 @@ int32_t led_get_nightlight_remaining()
 
 static int normal_state_entry()
 {
-    uint8_t prev_state = _status.state;
-    _status.state = LED_STATE_NORMAL;
+    uint8_t prev_state = _led.state;
+    _led.state = LED_STATE_NORMAL;
 
-    if (_settings.scheduler_enabled) {
+    if (_led.settings.scheduler_enabled) {
         sch_drive();
     }
     else {
-        BO_TRY(led_update_color(_settings.manual_color));
+        BO_TRY(led_update_color(_led.settings.manual_color));
     }
 
     if (prev_state == LED_STATE_DIMMING || prev_state == LED_STATE_PREVIEW) {
         ESP_LOGI(TAG, "Saving dimming settings...");
-        BO_TRY(led_save_user_settings(&_settings));
+        BO_TRY(led_save_user_settings(&_led.settings));
         ESP_LOGI(TAG, "Dimming settings updated.");
     }
     return 0;
@@ -686,11 +569,11 @@ static void normal_state_drive()
 {
     if (!led_fade_inprogress()) {
         if (bo_power_is_on()) {
-            if (_settings.scheduler_enabled) {
+            if (_led.settings.scheduler_enabled) {
                 sch_drive();
             }
             else {
-                BO_MUST(led_update_color(_settings.manual_color));
+                BO_MUST(led_update_color(_led.settings.manual_color));
             }
         }
         else {
@@ -706,18 +589,18 @@ static int preview_state_entry()
 {
     int rc = 0;
 
-    if (_status.state != LED_STATE_DIMMING) {
+    if (_led.state != LED_STATE_DIMMING) {
         rc = -EINVAL;
         goto _EXIT;
     }
 
     //
-    if (_settings.scheduler.item_count <= 1) {
+    if (_led.settings.scheduler.item_count <= 1) {
         rc = -ERANGE;
         goto _EXIT;
     }
 
-    memcpy(_status.color_to_resume, _status.color, sizeof(led_color_t));
+    memcpy(_led.color_to_resume, _led.color, sizeof(led_color_t));
 
     time_t utc_now = time(NULL);
     struct tm local_today = { 0 };
@@ -726,9 +609,9 @@ static int preview_state_entry()
     local_today.tm_min = 0;
     local_today.tm_sec = 0;
 
-    _status.preview_state_clock = mktime(&local_today) + _settings.scheduler.items[0].instant;
+    _led.preview_state_clock = mktime(&local_today) + _led.settings.scheduler.items[0].instant;
 
-    _status.state = LED_STATE_PREVIEW;
+    _led.state = LED_STATE_PREVIEW;
     ESP_LOGI(TAG, "Preview state started.");
 
 _EXIT:
@@ -737,20 +620,19 @@ _EXIT:
 
 static void preview_state_exit()
 {
-    assert(_status.state == LED_STATE_PREVIEW);
-    led_update_color(_status.color_to_resume);
+    assert(_led.state == LED_STATE_PREVIEW);
+    led_update_color(_led.color_to_resume);
     ESP_LOGI(TAG, "Preview state ended.");
 }
 
 static void preview_state_drive()
 {
-    assert(_status.state == LED_STATE_PREVIEW);
-    assert(_settings.scheduler.item_count > 0);
+    assert(_led.state == LED_STATE_PREVIEW);
+    assert(_led.settings.scheduler.item_count > 0);
 
     time_t end_time
-        = _status.preview_state_clock + _settings.scheduler.items[_settings.scheduler.item_count - 1].instant;
-    for (; _status.state == LED_STATE_PREVIEW && _status.preview_state_clock < end_time;
-         _status.preview_state_clock += 60) {
+        = _led.preview_state_clock + _led.settings.scheduler.items[_led.settings.scheduler.item_count - 1].instant;
+    for (; _led.state == LED_STATE_PREVIEW && _led.preview_state_clock < end_time; _led.preview_state_clock += 60) {
         sch_drive();
         // taskYIELD();
         vTaskDelay(pdMS_TO_TICKS(10));
@@ -760,52 +642,50 @@ static void preview_state_drive()
 
 int nightlight_state_entry(uint8_t prev_state)
 {
-    if (!_settings.scheduler_enabled || prev_state != LED_STATE_NORMAL || !bo_power_is_on()) {
+    if (!_led.settings.scheduler_enabled || prev_state != LED_STATE_NORMAL || !bo_power_is_on()) {
         return -EINVAL;
     }
 
     int64_t now = esp_timer_get_time() / 1000ULL;
 
-    _status.nightlight_off_time = now + (_settings.nightlight_duration * 1000) + FADE_PERIOD_MS;
-    _status.state = LED_STATE_NIGHTLIGHT;
+    _led.nightlight_off_time = now + (_led.settings.nightlight_duration * 1000) + FADE_PERIOD_MS;
+    _led.state = LED_STATE_NIGHTLIGHT;
 
-    BO_TRY(led_fade_to_color(_settings.manual_color, FADE_PERIOD_MS));
+    BO_TRY(led_fade_to_color(_led.settings.manual_color, FADE_PERIOD_MS));
     return 0;
 }
 
 static int nightlight_state_exit()
 {
-    if (_status.state != LED_STATE_NIGHTLIGHT) {
+    if (_led.state != LED_STATE_NIGHTLIGHT) {
         return -1;
     }
 
-    _status.nightlight_off_time = 0;
-
-    BO_TRY(led_switch_state(LED_STATE_NORMAL));
+    _led.nightlight_off_time = 0;
     return 0;
 }
 
 static void nightlight_state_drive()
 {
-    if (_status.state != LED_STATE_NIGHTLIGHT) {
+    if (_led.state != LED_STATE_NIGHTLIGHT) {
         return;
     }
 
     int64_t now = esp_timer_get_time() / 1000ULL;
 
-    if (now >= _status.nightlight_off_time) {
+    if (now >= _led.nightlight_off_time) {
         BO_MUST(led_switch_state(LED_STATE_NORMAL));
     }
     else {
         if (!led_fade_inprogress()) {
-            led_update_color(_settings.manual_color);
+            led_update_color(_led.settings.manual_color);
         }
     }
 }
 
 static void led_drive()
 {
-    switch (_status.state) {
+    switch (_led.state) {
 
     case LED_STATE_NORMAL: {
         normal_state_drive();
@@ -828,7 +708,7 @@ static void led_drive()
         }
         else {
             led_blank();
-            _status.state = LED_STATE_NORMAL;
+            _led.state = LED_STATE_NORMAL;
         }
     } break;
 
@@ -857,15 +737,15 @@ void led_proc()
 
 int led_switch_state(uint8_t state)
 {
-    if (_status.state >= LED_STATE_COUNT) {
+    if (_led.state >= LED_STATE_COUNT) {
         return -EINVAL;
     }
 
-    if (_status.state == state) {
+    if (_led.state == state) {
         return 0;
     }
 
-    ESP_LOGI(TAG, "Switching state from %u to %u", _status.state, state);
+    ESP_LOGI(TAG, "Switching state from %u to %u", _led.state, state);
 
     if (state >= LED_STATE_COUNT) {
         return -EINVAL;
@@ -876,7 +756,7 @@ int led_switch_state(uint8_t state)
     }
 
     // Processing the previous state:
-    switch (_status.state) {
+    switch (_led.state) {
 
     case LED_STATE_NORMAL:
     case LED_STATE_DIMMING:
@@ -909,8 +789,8 @@ int led_switch_state(uint8_t state)
             return -EINVAL;
         }
         // TODO Start the timer
-        if (_status.state == LED_STATE_NORMAL || _status.state == LED_STATE_PREVIEW) {
-            _status.state = state;
+        if (_led.state == LED_STATE_NORMAL || _led.state == LED_STATE_PREVIEW) {
+            _led.state = state;
         }
         else {
             return -EINVAL;
@@ -921,7 +801,7 @@ int led_switch_state(uint8_t state)
         if (!bo_power_is_on()) {
             return -EINVAL;
         }
-        BO_TRY(nightlight_state_entry(_status.state));
+        BO_TRY(nightlight_state_entry(_led.state));
     } break;
 
     case LED_STATE_PREVIEW: {
@@ -932,12 +812,12 @@ int led_switch_state(uint8_t state)
     } break;
 
     case LED_STATE_POWERING_ON: {
-        _status.state = state;
+        _led.state = state;
         BO_TRY(led_fade_powering_on());
     } break;
 
     case LED_STATE_POWERING_OFF: {
-        _status.state = state;
+        _led.state = state;
         BO_TRY(led_fade_to_color(LED_COLOR_BLANK, FADE_OFF_PERIOD_MS));
     } break;
 
@@ -956,7 +836,7 @@ int led_set_correction_method(uint8_t correction_method)
         return -EINVAL;
     }
 
-    _settings.correction_method = correction_method;
-    BO_TRY(led_save_user_settings(&_settings));
+    _led.settings.correction_method = correction_method;
+    BO_TRY(led_save_user_settings(&_led.settings));
     return 0;
 }

@@ -150,7 +150,10 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   }
 
   bool get canSwitchNightlightState =>
-      !isBusy && _isOn && schedulerEnabled && (ledState == LedState.nightlight || ledState == LedState.normal);
+      !isBusy &&
+      _isOn &&
+      schedulerEnabled &&
+      (ledState == LedState.nightlight || ledState == LedState.normal || ledState == LedState.poweringOn);
 
   void switchNightlightState() {
     if (_ledState == LedState.normal || _ledState == LedState.nightlight) {

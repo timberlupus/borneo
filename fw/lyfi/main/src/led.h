@@ -8,7 +8,6 @@ extern "C" {
 
 #define LYFI_LED_CHANNEL_COUNT CONFIG_LYFI_LED_CHANNEL_COUNT
 
-
 typedef uint16_t led_brightness_t;
 typedef uint16_t led_duty_t;
 typedef led_brightness_t led_color_t[LYFI_LED_CHANNEL_COUNT];
@@ -66,11 +65,6 @@ struct led_factory_settings {
     uint16_t pwm_freq; ///< The frequency of PWM signals
 };
 
-struct geo_location {
-    double lat;
-    double lng;
-};
-
 struct led_user_settings {
     uint8_t mode; ///< Running mode, see `enum led_running_modes`
 
@@ -97,6 +91,8 @@ struct led_status {
     led_color_t fade_end_color;
     int64_t fade_start_time_ms; ///< Time point of fading started
     uint32_t fade_duration_ms; ///< The duration of fading
+
+    struct led_user_settings settings;
 };
 
 extern const led_duty_t LED_CORLUT_CIE1931[LED_BRIGHTNESS_MAX + 1];
@@ -146,6 +142,11 @@ int led_set_correction_method(uint8_t correction_method);
 int led_load_factory_settings(struct led_factory_settings* factory_settings);
 int led_load_user_settings(struct led_user_settings* settings);
 int led_save_user_settings(const struct led_user_settings* settings);
+
+void led_sch_compute_color(const struct led_scheduler* sch, time_t now, led_color_t color);
+void led_sch_compute_color_in_range(led_color_t color, const struct tm* now,
+                                    const struct led_scheduler_item* range_begin,
+                                    const struct led_scheduler_item* range_end);
 
 #ifdef __cplusplus
 }
