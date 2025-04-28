@@ -73,9 +73,11 @@ enum LedState {
   normal,
   dimming,
   nightlight,
-  preview;
+  preview,
+  poweringOn,
+  poweringOff;
 
-  bool get isLocked => this == normal || this == nightlight;
+  bool get isLocked => !(this == preview || this == dimming);
 }
 
 enum LedRunningMode {

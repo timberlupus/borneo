@@ -33,6 +33,9 @@ enum led_status_enum {
     LED_STATE_NIGHTLIGHT = 2,
     LED_STATE_PREVIEW = 3,
 
+    LED_STATE_POWERING_ON = 4,
+    LED_STATE_POWERING_OFF = 5,
+
     LED_STATE_COUNT,
 };
 
