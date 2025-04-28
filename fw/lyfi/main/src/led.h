@@ -1,5 +1,11 @@
 #pragma once
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <time.h>
+
+#include <borneo/algo/astronomy.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -68,12 +74,10 @@ struct led_factory_settings {
 struct led_user_settings {
     uint8_t mode; ///< Running mode, see `enum led_running_modes`
 
-    // TODO remove me
-    uint8_t scheduler_enabled; ///< Whether the scheduling state is enabled
-
     uint16_t nightlight_duration; ///< Night lighting state duration (in seconds)
     struct led_scheduler scheduler; ///< Scheduling scheduler for scheduled state
-    led_color_t manual_color; ///< Manual dimming power settings for each channel
+    led_color_t manual_color; ///< Manual dimming color settings.
+    led_color_t sun_color; ///< Sun simulation color settings.
     uint8_t correction_method; ///< Brightness correction method: Log/Exp/Linear/CIE1931
 
     struct geo_location loc; ///< The location for Solar and Lunar simulation.
@@ -130,9 +134,9 @@ const struct led_status* led_get_status();
 
 int led_switch_state(uint8_t state);
 
-bool led_is_blank();
+int led_switch_mode(uint8_t mode);
 
-int led_set_scheduler_enabled(bool enabled);
+bool led_is_blank();
 
 void led_set_nightlight_duration(uint16_t duration);
 int32_t led_get_nightlight_remaining();

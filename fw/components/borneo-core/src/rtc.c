@@ -97,6 +97,8 @@ int bo_rtc_set_tz(const char* tz)
         BO_NVS_AUTO_CLOSE(nvs_handle);
 
         BO_TRY(nvs_set_str(nvs_handle, NVS_RTC_TZ_KEY, tz));
+
+        // TODO Post message
     }
 
     return 0;

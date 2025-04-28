@@ -1,5 +1,7 @@
+import 'package:borneo_app/devices/borneo/lyfi/views/sun_editor_view.dart';
 import 'package:borneo_app/models/devices/device_entity.dart';
 import 'package:borneo_common/io/net/rssi.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -131,66 +133,45 @@ class HeroPanel extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Consumer<LyfiViewModel>(
               builder: (context, vm, _) {
-                return SegmentedButton<bool>(
+                return SegmentedButton<LedRunningMode>(
+                  style: ButtonStyle(
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    minimumSize: WidgetStateProperty.all(Size.zero),
+                  ),
                   showSelectedIcon: false,
-                  selected: <bool>{vm.schedulerEnabled},
+                  selected: <LedRunningMode>{vm.mode},
                   segments: [
-                    ButtonSegment<bool>(value: true, label: Text('Sched.'), icon: Icon(Icons.line_axis_outlined)),
-                    ButtonSegment<bool>(value: false, label: Text('Manual'), icon: Icon(Icons.bar_chart_outlined)),
+                    ButtonSegment<LedRunningMode>(
+                      value: LedRunningMode.manual,
+                      label: Text('Manual'),
+                      icon: Icon(Icons.bar_chart_outlined),
+                    ),
+                    ButtonSegment<LedRunningMode>(
+                      value: LedRunningMode.scheduled,
+                      label: Text('Sched.'),
+                      icon: Icon(Icons.alarm_outlined),
+                    ),
+                    ButtonSegment<LedRunningMode>(
+                      value: LedRunningMode.sun,
+                      label: Text('Sun Sim.'),
+                      icon: Icon(Icons.wb_sunny_outlined),
+                    ),
                   ],
                   onSelectionChanged:
                       vm.isOn && !vm.isBusy && !vm.isLocked
-                          ? (Set<bool> newSelection) {
-                            if (vm.schedulerEnabled != newSelection.single) {
-                              vm.switchSchedulerEnabled(newSelection.single);
+                          ? (Set<LedRunningMode> newSelection) {
+                            if (vm.mode != newSelection.single) {
+                              vm.switchMode(newSelection.single);
                             }
                           }
                           : null,
                 );
               },
-            ),
-            const Spacer(),
-            Consumer<LyfiViewModel>(
-              builder:
-                  (context, vm, child) => HeroProgressIndicator(
-                    percent: vm.currentTempRatio,
-                    icon: Icon(Icons.thermostat_outlined, size: 16, color: Theme.of(context).colorScheme.outline),
-                    center: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          vm.currentTemp != null ? '${vm.currentTemp}℃' : "N/A",
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(fontFeatures: [FontFeature.tabularFigures()]),
-                        ),
-                      ],
-                    ),
-                    /*
-                label:
-                    Text("Temp.", style: Theme.of(context).textTheme.bodySmall),
-                    */
-                  ),
-            ),
-            SizedBox(width: 16),
-            Selector<LyfiViewModel, double?>(
-              selector: (context, vm) => vm.fanPowerRatio,
-              builder:
-                  (context, fanPowerRatio, child) => HeroProgressIndicator(
-                    percent: fanPowerRatio != null ? fanPowerRatio / 100.0 : 0,
-                    icon: Icon(Icons.air_outlined, size: 16, color: Theme.of(context).colorScheme.outline),
-                    center: Text(
-                      fanPowerRatio != null ? "${fanPowerRatio.toStringAsFixed(0)}%" : "N/A",
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(fontFeatures: [FontFeature.tabularFigures()]),
-                    ),
-                  ),
             ),
           ],
         ),
@@ -212,15 +193,19 @@ class DimmingView extends StatelessWidget {
       children: [
         HeroPanel(),
         Expanded(
-          child: Selector<LyfiViewModel, ({bool isLocked, bool schedulerEnabled})>(
-            selector: (context, vm) => (isLocked: vm.isLocked, schedulerEnabled: vm.schedulerEnabled),
+          child: Selector<LyfiViewModel, ({bool isLocked, LedRunningMode mode})>(
+            selector: (context, vm) => (isLocked: vm.isLocked, mode: vm.mode),
             builder: (context, vm, child) {
               return AnimatedSwitcher(
                 duration: Duration(milliseconds: 300),
                 transitionBuilder: (Widget child, Animation<double> animation) {
                   return FadeTransition(opacity: animation, child: child);
                 },
-                child: vm.schedulerEnabled ? ScheduleEditorView() : ManualEditorView(),
+                child: switch (vm.mode) {
+                  LedRunningMode.manual => ManualEditorView(),
+                  LedRunningMode.scheduled => ScheduleEditorView(),
+                  LedRunningMode.sun => SunEditorView(),
+                },
               );
             },
           ),

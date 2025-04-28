@@ -20,8 +20,7 @@ class LyfiPaths {
   static final Uri state = Uri(path: '/borneo/lyfi/state');
   static final Uri color = Uri(path: '/borneo/lyfi/color');
   static final Uri schedule = Uri(path: '/borneo/lyfi/schedule');
-  static final Uri schedulerEnabled =
-      Uri(path: '/borneo/lyfi/scheduler-enabled');
+  static final Uri mode = Uri(path: '/borneo/lyfi/mode');
 }
 
 class LyfiChannelInfo {
@@ -91,12 +90,12 @@ enum LedRunningMode {
 class LyfiDeviceStatus {
   final LedState state;
   final LedRunningMode mode;
-  final bool schedulerEnabled;
   final bool unscheduled;
   final Duration nightlightRemaining;
   final int fanPower;
   final List<int> currentColor;
   final List<int> manualColor;
+  final List<int> sunColor;
 
   double get brightness =>
       currentColor.fold(0, (p, v) => p + v).toDouble() *
@@ -106,12 +105,12 @@ class LyfiDeviceStatus {
   const LyfiDeviceStatus({
     required this.state,
     required this.mode,
-    required this.schedulerEnabled,
     required this.unscheduled,
     required this.nightlightRemaining,
     required this.fanPower,
     required this.currentColor,
     required this.manualColor,
+    required this.sunColor,
   });
 
   factory LyfiDeviceStatus.fromMap(CborMap cborMap) {
@@ -119,12 +118,12 @@ class LyfiDeviceStatus {
     return LyfiDeviceStatus(
       state: LedState.values[map['state']],
       mode: LedRunningMode.values[map['mode']],
-      schedulerEnabled: map['schedulerEnabled'],
       unscheduled: map['unscheduled'],
       nightlightRemaining: Duration(seconds: map['nlRemain']),
       fanPower: map['fanPower'],
       currentColor: List<int>.from(map['currentColor']),
       manualColor: List<int>.from(map['manualColor']),
+      sunColor: List<int>.from(map['sunColor']),
     );
   }
 }
@@ -156,8 +155,8 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   Future<LedState> getState(Device dev);
   Future<void> switchState(Device dev, LedState state);
 
-  Future<bool> getSchedulerEnabled(Device dev);
-  Future<void> setSchedulerEnabled(Device dev, bool isEnabled);
+  Future<LedRunningMode> getMode(Device dev);
+  Future<void> switchMode(Device dev, LedRunningMode mode);
 
   Future<List<ScheduledInstant>> getSchedule(Device dev);
   Future<void> setSchedule(Device dev, Iterable<ScheduledInstant> schedule);
@@ -328,15 +327,16 @@ class BorneoLyfiDriver
   }
 
   @override
-  Future<bool> getSchedulerEnabled(Device dev) async {
+  Future<LedRunningMode> getMode(Device dev) async {
     final dd = dev.driverData as LyfiDriverData;
-    return await dd.coap.getCbor<bool>(LyfiPaths.schedulerEnabled);
+    final value = await dd.coap.getCbor<int>(LyfiPaths.mode);
+    return LedRunningMode.values[value];
   }
 
   @override
-  Future<void> setSchedulerEnabled(Device dev, bool isEnabled) async {
+  Future<void> switchMode(Device dev, LedRunningMode mode) async {
     final dd = dev.driverData as LyfiDriverData;
-    return await dd.coap.putCbor(LyfiPaths.schedulerEnabled, isEnabled);
+    return await dd.coap.putCbor(LyfiPaths.mode, mode.index);
   }
 
   @override

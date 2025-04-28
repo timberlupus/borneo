@@ -344,11 +344,6 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "schedulerEnabled"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&root_map, led_settings->scheduler_enabled));
-    }
-
-    {
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "unscheduled"));
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&root_map, led_status->state == LED_STATE_NIGHTLIGHT));
     }
@@ -380,6 +375,11 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
     {
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "manualColor"));
         BO_COAP_TRY_ENCODE_CBOR(color_encode(&root_map, led_get_settings()->manual_color));
+    }
+
+    {
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "sunColor"));
+        BO_COAP_TRY_ENCODE_CBOR(color_encode(&root_map, led_get_settings()->sun_color));
     }
 
     BO_COAP_TRY_ENCODE_CBOR(cbor_encoder_close_container(&encoder, &root_map));
@@ -466,7 +466,7 @@ static void coap_hnd_correction_method_put(coap_resource_t* resource, coap_sessi
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
 
-static void coap_hnd_scheduler_enabled_get(coap_resource_t* resource, coap_session_t* session,
+static void coap_hnd_mode_get(coap_resource_t* resource, coap_session_t* session,
                                            const coap_pdu_t* request, const coap_string_t* query, coap_pdu_t* response)
 {
     CborEncoder encoder;
@@ -476,14 +476,14 @@ static void coap_hnd_scheduler_enabled_get(coap_resource_t* resource, coap_sessi
     uint8_t buf[128];
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&encoder, settings->scheduler_enabled));
+    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&encoder, settings->mode));
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
     coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
 }
 
-static void coap_hnd_scheduler_enabled_put(coap_resource_t* resource, coap_session_t* session,
+static void coap_hnd_mode_put(coap_resource_t* resource, coap_session_t* session,
                                            const coap_pdu_t* request, const coap_string_t* query, coap_pdu_t* response)
 {
     coap_resource_notify_observers(resource, NULL);
@@ -495,10 +495,10 @@ static void coap_hnd_scheduler_enabled_put(coap_resource_t* resource, coap_sessi
     CborParser parser;
     CborValue value;
     BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
-    bool enabled;
-    BO_COAP_VERIFY(cbor_value_get_boolean(&value, &enabled));
+    uint64_t mode;
+    BO_COAP_VERIFY(cbor_value_get_uint64(&value, &mode));
 
-    BO_COAP_VERIFY(led_set_scheduler_enabled(enabled));
+    BO_COAP_VERIFY(led_switch_mode((uint8_t)mode));
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
 
@@ -557,8 +557,7 @@ COAP_RESOURCE_DEFINE("borneo/lyfi/state", false, coap_hnd_state_get, NULL, coap_
 COAP_RESOURCE_DEFINE("borneo/lyfi/correction_method", false, coap_hnd_correction_method_get, NULL,
                      coap_hnd_correction_method_put, NULL);
 
-COAP_RESOURCE_DEFINE("borneo/lyfi/scheduler-enabled", false, coap_hnd_scheduler_enabled_get, NULL,
-                     coap_hnd_scheduler_enabled_put, NULL);
+COAP_RESOURCE_DEFINE("borneo/lyfi/mode", false, coap_hnd_mode_get, NULL, coap_hnd_mode_put, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/nightlight-duration", false, coap_hnd_nightlight_duration_get, NULL,
                      coap_hnd_nightlight_duration_put, NULL);

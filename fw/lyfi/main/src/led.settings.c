@@ -25,8 +25,8 @@
 
 #define LED_NVS_NS "led"
 #define LED_NVS_KEY_RUNNING_MODE "mode"
-#define LED_NVS_KEY_SCHEDULER_ENABLED "sch_en"
 #define LED_NVS_KEY_MANUAL_COLOR "mcolor"
+#define LED_NVS_KEY_SUN_COLOR "suncolor"
 #define LED_NVS_KEY_SCHEDULER "sch"
 #define LED_NVS_KEY_NIGHTLIGHT_DURATION "nld"
 #define LED_NVS_KEY_CORRECTION_METHOD "corrmtd"
@@ -35,7 +35,6 @@
 
 static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     .mode = LED_MODE_MANUAL,
-    .scheduler_enabled = 0,
     .nightlight_duration = 60 * 20,
     .manual_color = {
 // From kconfig
@@ -70,6 +69,7 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
         10,
 #endif
     },
+    .sun_color = {0},
     .scheduler = { 0 },
 
     .loc = {
@@ -124,17 +124,6 @@ int led_load_user_settings(struct led_user_settings* settings)
     }
 
     {
-        rc = nvs_get_u8(handle, LED_NVS_KEY_SCHEDULER_ENABLED, &settings->scheduler_enabled);
-        if (rc == ESP_ERR_NVS_NOT_FOUND) {
-            settings->scheduler_enabled = LED_DEFAULT_SETTINGS.scheduler_enabled;
-            rc = 0;
-        }
-        if (rc) {
-            goto _EXIT_CLOSE;
-        }
-    }
-
-    {
         rc = nvs_get_u16(handle, LED_NVS_KEY_NIGHTLIGHT_DURATION, &settings->nightlight_duration);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
             settings->nightlight_duration = LED_DEFAULT_SETTINGS.nightlight_duration;
@@ -162,6 +151,18 @@ int led_load_user_settings(struct led_user_settings* settings)
         rc = nvs_get_blob(handle, LED_NVS_KEY_MANUAL_COLOR, &settings->manual_color, &size);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
             memcpy(&settings->manual_color, &LED_DEFAULT_SETTINGS.manual_color, sizeof(led_color_t));
+            rc = 0;
+        }
+        if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
+    {
+        size = sizeof(led_color_t);
+        rc = nvs_get_blob(handle, LED_NVS_KEY_SUN_COLOR, &settings->sun_color, &size);
+        if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            memset(settings->sun_color, 0, sizeof(led_color_t));
             rc = 0;
         }
         if (rc) {
@@ -217,11 +218,6 @@ int led_save_user_settings(const struct led_user_settings* settings)
         goto _EXIT_CLOSE;
     }
 
-    rc = nvs_set_u8(handle, LED_NVS_KEY_SCHEDULER_ENABLED, settings->scheduler_enabled);
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
     rc = nvs_set_u16(handle, LED_NVS_KEY_NIGHTLIGHT_DURATION, settings->nightlight_duration);
     if (rc) {
         goto _EXIT_CLOSE;
@@ -238,6 +234,11 @@ int led_save_user_settings(const struct led_user_settings* settings)
     }
 
     rc = nvs_set_blob(handle, LED_NVS_KEY_MANUAL_COLOR, settings->manual_color, sizeof(led_color_t));
+    if (rc) {
+        goto _EXIT_CLOSE;
+    }
+
+    rc = nvs_set_blob(handle, LED_NVS_KEY_SUN_COLOR, settings->sun_color, sizeof(led_color_t));
     if (rc) {
         goto _EXIT_CLOSE;
     }

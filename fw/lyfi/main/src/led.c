@@ -1,5 +1,4 @@
 #include <string.h>
-#include <time.h>
 #include <errno.h>
 #include <math.h>
 
@@ -18,6 +17,7 @@
 #include <borneo/system.h>
 #include <borneo/power.h>
 #include <borneo/nvs.h>
+#include <borneo/algo/astronomy.h>
 
 #include "lyfi-events.h"
 #include "algo.h"
@@ -62,6 +62,11 @@ static bool led_fade_inprogress();
 static int led_fade_stop();
 static int led_fade_powering_on();
 static void led_fade_drive();
+
+
+static int led_mode_manual_entry();
+static int led_mode_scheduled_entry();
+static int led_mode_sun_entry();
 
 ESP_EVENT_DEFINE_BASE(LYFI_LED_EVENTS);
 
@@ -221,8 +226,18 @@ int led_set_color(const led_color_t color)
         }
     }
 
-    if (!_led.settings.scheduler_enabled) {
+    switch (_led.settings.mode) {
+
+    case LED_MODE_MANUAL:
         memcpy(_led.settings.manual_color, color, sizeof(led_color_t));
+        break;
+
+    case LED_MODE_SUN:
+        memcpy(_led.settings.sun_color, color, sizeof(led_color_t));
+        break;
+
+    default:
+        break;
     }
 
     BO_TRY(led_update_color(color));
@@ -336,7 +351,7 @@ int led_fade_to_color(const led_color_t color, uint32_t duration_ms)
 
 int led_fade_powering_on()
 {
-    if (_led.settings.scheduler_enabled) {
+    if (_led.settings.mode == LED_MODE_SCHEDULED) {
         time_t now = time(NULL);
         now += FADE_PERIOD_MS / 1000;
         led_color_t end_color;
@@ -446,7 +461,8 @@ const struct led_status* led_get_status() { return &_led; }
 
 static void sch_drive()
 {
-    assert(_led.state == LED_STATE_PREVIEW || _led.settings.scheduler_enabled);
+    assert((_led.state == LED_STATE_PREVIEW || _led.state == LED_STATE_NORMAL)
+           && _led.settings.mode == LED_MODE_SCHEDULED);
 
     led_color_t color;
     time_t now = time(NULL);
@@ -497,7 +513,7 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
 
     case LYFI_LED_NOTIFY_NIGHTLIGHT_STATE: {
         assert(bo_power_is_on());
-        if (_led.state == LED_STATE_NORMAL && _led.settings.scheduler_enabled) {
+        if (_led.state == LED_STATE_NORMAL && _led.settings.mode == LED_MODE_SCHEDULED) {
             led_switch_state(LED_STATE_NIGHTLIGHT);
         }
         else if (_led.state == LED_STATE_NIGHTLIGHT) {
@@ -510,21 +526,56 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
     }
 }
 
-int led_set_scheduler_enabled(bool enabled)
+int led_mode_manual_entry()
 {
-
-    if (!bo_power_is_on() || (_led.state != LED_STATE_DIMMING && _led.state != LED_STATE_PREVIEW)) {
+    if (!bo_power_is_on()) {
         return -EINVAL;
+    }
+
+    if (_led.state != LED_STATE_DIMMING) {
+        return -EINVAL;
+    }
+
+    if (_led.settings.mode == LED_MODE_MANUAL) {
+        return 0;
+    }
+
+    return 0;
+}
+
+int led_mode_scheduled_entry()
+{
+    if (!bo_power_is_on()) {
+        return -EINVAL;
+    }
+
+    if (_led.state != LED_STATE_DIMMING && _led.state != LED_STATE_PREVIEW) {
+        return -EINVAL;
+    }
+
+    if (_led.settings.mode == LED_MODE_SCHEDULED) {
+        return 0;
     }
 
     if (_led.state == LED_STATE_PREVIEW) {
         BO_TRY(led_switch_state(LED_STATE_DIMMING));
     }
 
-    _led.settings.scheduler_enabled = enabled;
+    return 0;
+}
 
-    if (!_led.settings.scheduler_enabled) {
-        BO_TRY(led_set_color(_led.settings.manual_color));
+int led_mode_sun_entry()
+{
+    if (!bo_power_is_on()) {
+        return -EINVAL;
+    }
+
+    if (_led.state != LED_STATE_DIMMING) {
+        return -EINVAL;
+    }
+
+    if (_led.settings.mode == LED_MODE_SUN) {
+        return 0;
     }
 
     return 0;
@@ -549,13 +600,7 @@ static int normal_state_entry()
 {
     uint8_t prev_state = _led.state;
     _led.state = LED_STATE_NORMAL;
-
-    if (_led.settings.scheduler_enabled) {
-        sch_drive();
-    }
-    else {
-        BO_TRY(led_update_color(_led.settings.manual_color));
-    }
+    normal_state_drive();
 
     if (prev_state == LED_STATE_DIMMING || prev_state == LED_STATE_PREVIEW) {
         ESP_LOGI(TAG, "Saving dimming settings...");
@@ -567,21 +612,33 @@ static int normal_state_entry()
 
 static void normal_state_drive()
 {
-    if (!led_fade_inprogress()) {
-        if (bo_power_is_on()) {
-            if (_led.settings.scheduler_enabled) {
-                sch_drive();
-            }
-            else {
-                BO_MUST(led_update_color(_led.settings.manual_color));
-            }
-        }
-        else {
-            led_blank();
-        }
-    }
-    else {
+    if (led_fade_inprogress()) {
         led_fade_drive();
+        return;
+    }
+
+    if (!bo_power_is_on()) {
+        led_blank();
+        return;
+    }
+
+    switch (_led.settings.mode) {
+    case LED_MODE_MANUAL: {
+        BO_MUST(led_update_color(_led.settings.manual_color));
+    } break;
+
+    case LED_MODE_SCHEDULED: {
+        sch_drive();
+    } break;
+
+    case LED_MODE_SUN: {
+        // FIXME TODO
+        BO_MUST(led_update_color(_led.settings.sun_color));
+    } break;
+
+    default:
+        assert(false);
+        break;
     }
 }
 
@@ -642,7 +699,15 @@ static void preview_state_drive()
 
 int nightlight_state_entry(uint8_t prev_state)
 {
-    if (!_led.settings.scheduler_enabled || prev_state != LED_STATE_NORMAL || !bo_power_is_on()) {
+    if(!bo_power_is_on()) {
+        return -EINVAL;
+    }
+
+    if(prev_state != LED_STATE_NORMAL) {
+        return -EINVAL;
+    }
+
+    if(_led.settings.mode != LED_MODE_SUN && _led.settings.mode != LED_MODE_SCHEDULED) {
         return -EINVAL;
     }
 
@@ -826,6 +891,39 @@ int led_switch_state(uint8_t state)
     }
 
     BO_TRY(esp_event_post(LYFI_LED_EVENTS, LYFI_LED_STATE_CHANGED, NULL, 0, portMAX_DELAY));
+
+    return 0;
+}
+
+int led_switch_mode(uint8_t mode)
+{
+    if (mode >= LED_MODE_COUNT) {
+        return -EINVAL;
+    }
+
+    if(mode == _led.settings.mode) {
+        return 0;
+    }
+
+    switch (mode) {
+
+    case LED_MODE_MANUAL: {
+        BO_TRY(led_mode_manual_entry());
+    } break;
+
+    case LED_MODE_SCHEDULED: {
+        BO_TRY(led_mode_scheduled_entry());
+    } break;
+
+    case LED_MODE_SUN: {
+        BO_TRY(led_mode_sun_entry());
+    } break;
+
+    default:
+        return -EINVAL;
+    }
+
+    _led.settings.mode = mode;
 
     return 0;
 }

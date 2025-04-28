@@ -1,3 +1,4 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/sun_editor_view_model.dart';
 import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:flutter/foundation.dart';
@@ -19,11 +20,11 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   ILyfiDeviceApi get _deviceApi => super.borneoDeviceApi as ILyfiDeviceApi;
 
   bool _isOn = false;
-  bool _schedulerEnabled = true;
+  LedRunningMode _mode = LedRunningMode.manual;
   bool _isLocked = true;
 
   bool get isOn => _isOn;
-  bool get schedulerEnabled => _schedulerEnabled;
+  LedRunningMode get mode => _mode;
   bool get isLocked => _isLocked;
 
   LedState? _ledState;
@@ -36,8 +37,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
   bool get canLockOrUnlock => !isBusy && isOn;
   bool get canUnlock => !isBusy && isOnline && isOn && isLocked;
-  bool get canTimedOn => !isBusy && (!isOn || schedulerEnabled);
-  bool get canToggleManualMode => !isBusy && isOn && !isLocked;
+  bool get canTimedOn => !isBusy && (!isOn || _mode == LedRunningMode.scheduled);
 
   IEditor? currentEditor;
   final List<ScheduledInstant> scheduledInstants = [];
@@ -92,7 +92,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     // Update schedule
     // final schedule = await _deviceApi.getSchedule(boundDevice.device);
     if (!_isLocked) {
-      _toggleEditor(schedulerEnabled);
+      _toggleEditor(_mode);
     }
   }
 
@@ -129,7 +129,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
       _ledState = _lyfiDeviceStatus!.state;
       _isLocked = lyfiDeviceStatus!.state.isLocked;
       _fanPowerRatio = lyfiDeviceStatus!.fanPower.toDouble();
-      _schedulerEnabled = lyfiDeviceStatus!.schedulerEnabled;
+      _mode = lyfiDeviceStatus!.mode;
     }
 
     _nightlightRemaining = lyfiDeviceStatus!.nightlightRemaining;
@@ -152,7 +152,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   bool get canSwitchNightlightState =>
       !isBusy &&
       _isOn &&
-      schedulerEnabled &&
+      _mode == LedRunningMode.scheduled &&
       (ledState == LedState.nightlight || ledState == LedState.normal || ledState == LedState.poweringOn);
 
   void switchNightlightState() {
@@ -196,29 +196,37 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
     if (!isLocked) {
       //Entering edit mode
-      _toggleEditor(schedulerEnabled);
+      _toggleEditor(_mode);
     }
   }
 
-  void switchSchedulerEnabled(bool enabled) {
-    super.enqueueUIJob(() => _switchSchedulerEnabled(enabled));
+  void switchMode(LedRunningMode mode) {
+    super.enqueueUIJob(() => _switchMode(mode));
   }
 
-  Future<void> _switchSchedulerEnabled(bool enabled) async {
+  Future<void> _switchMode(LedRunningMode mode) async {
     if (isLocked) {
       return;
     }
-    await _deviceApi.setSchedulerEnabled(boundDevice!.device, enabled);
-    _toggleEditor(enabled);
-    _schedulerEnabled = enabled;
+    await _deviceApi.switchMode(boundDevice!.device, mode);
+    _toggleEditor(mode);
+    _mode = mode;
   }
 
-  Future<void> _toggleEditor(bool isSchedulerEnabled) async {
+  Future<void> _toggleEditor(LedRunningMode mode) async {
     assert(!isLocked);
-    if (isSchedulerEnabled) {
-      currentEditor = ScheduleEditorViewModel(this);
-    } else {
-      currentEditor = ManualEditorViewModel(this);
+    switch (mode) {
+      case LedRunningMode.manual:
+        currentEditor = ManualEditorViewModel(this);
+        break;
+
+      case LedRunningMode.scheduled:
+        currentEditor = ScheduleEditorViewModel(this);
+        break;
+
+      case LedRunningMode.sun:
+        currentEditor = SunEditorViewModel(this);
+        break;
     }
     await currentEditor!.initialize();
   }

@@ -365,17 +365,16 @@ class DashboardView extends StatelessWidget {
                         Expanded(
                           child: Container(
                             padding: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
-                            child: Selector<LyfiViewModel, ({bool schedulerEnabled, LedState? state, bool isOn})>(
-                              selector:
-                                  (_, vm) => (schedulerEnabled: vm.schedulerEnabled, state: vm.ledState, isOn: vm.isOn),
+                            child: Selector<LyfiViewModel, ({LedRunningMode mode, LedState? state, bool isOn})>(
+                              selector: (_, vm) => (mode: vm.mode, state: vm.ledState, isOn: vm.isOn),
                               builder: (context, vm, _) {
                                 Widget chart;
                                 if (vm.state == LedState.nightlight) {
                                   chart = ManualRunningChart();
-                                } else if (vm.schedulerEnabled) {
-                                  chart = ScheduleRunningChart();
-                                } else {
+                                } else if (vm.mode == LedRunningMode.manual) {
                                   chart = ManualRunningChart();
+                                } else {
+                                  chart = ScheduleRunningChart();
                                 }
                                 return AnimatedSwitcher(
                                   duration: Duration(milliseconds: 300),
