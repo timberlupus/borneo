@@ -119,7 +119,7 @@ int solar_calculate_sunrise_sunset(double latitude, double longitude, int timezo
 {
     // Validate input parameters
     if (latitude < -90.0 || latitude > 90.0) {
-        strcpy(error_msg, "Latitude must be between -90 and 90 degrees");
+        ESP_LOGE(TAG, "Latitude must be between -90 and 90 degrees");
         return -EINVAL;
     }
     if (longitude < -180.0 || longitude > 180.0) {
