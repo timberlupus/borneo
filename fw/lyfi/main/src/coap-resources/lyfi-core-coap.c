@@ -182,6 +182,30 @@ static void coap_hnd_schedule_put(coap_resource_t* resource, coap_session_t* ses
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
 
+static void coap_hnd_sun_schedule_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
+                                      const coap_string_t* query, coap_pdu_t* response)
+{
+    size_t encoded_size = 0;
+    uint8_t buf[1024];
+
+    // TODO lock
+    extern struct led_status _led;
+
+    CborEncoder encoder;
+    cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
+    CborEncoder root_array;
+    BO_COAP_VERIFY(cbor_encoder_create_array(&encoder, &root_array, _led.sun_scheduler.item_count));
+    for (size_t i = 0; i < _led.sun_scheduler.item_count; i++) {
+        const struct led_scheduler_item* sch_item = &_led.sun_scheduler.items[i];
+        BO_COAP_VERIFY(sch_item_encode(&root_array, sch_item));
+    }
+    BO_COAP_VERIFY(cbor_encoder_close_container(&encoder, &root_array));
+
+    encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
+
+    coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
+}
+
 static int _encode_channel_info_entry(CborEncoder* parent, const char* name, const char* color,
                                       uint32_t brightness_percent, uint32_t power)
 {
@@ -548,13 +572,15 @@ COAP_RESOURCE_DEFINE("borneo/lyfi/color", false, coap_hnd_color_get, NULL, coap_
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/schedule", false, coap_hnd_schedule_get, NULL, coap_hnd_schedule_put, NULL);
 
+COAP_RESOURCE_DEFINE("borneo/lyfi/sun-schedule", false, coap_hnd_sun_schedule_get, NULL, NULL, NULL);
+
 COAP_RESOURCE_DEFINE("borneo/lyfi/info", false, coap_hnd_info_get, NULL, NULL, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/status", false, coap_hnd_status_get, NULL, NULL, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/state", false, coap_hnd_state_get, NULL, coap_hnd_state_put, NULL);
 
-COAP_RESOURCE_DEFINE("borneo/lyfi/correction_method", false, coap_hnd_correction_method_get, NULL,
+COAP_RESOURCE_DEFINE("borneo/lyfi/correction-method", false, coap_hnd_correction_method_get, NULL,
                      coap_hnd_correction_method_put, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/mode", false, coap_hnd_mode_get, NULL, coap_hnd_mode_put, NULL);

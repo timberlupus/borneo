@@ -83,10 +83,18 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
   @override
   Future<void> onInitialize() async {
-    scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
-
     for (int i = 0; i < lyfiDeviceInfo.channels.length; i++) {
       _channels.add(ValueNotifier(0));
+    }
+
+    await refreshStatus();
+
+    if (_mode == LedRunningMode.scheduled) {
+      scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
+    } else if (_mode == LedRunningMode.sun) {
+      scheduledInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
+    } else {
+      // do nothing
     }
 
     // Update schedule

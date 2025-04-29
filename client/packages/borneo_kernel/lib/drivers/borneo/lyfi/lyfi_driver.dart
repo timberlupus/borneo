@@ -20,6 +20,7 @@ class LyfiPaths {
   static final Uri state = Uri(path: '/borneo/lyfi/state');
   static final Uri color = Uri(path: '/borneo/lyfi/color');
   static final Uri schedule = Uri(path: '/borneo/lyfi/schedule');
+  static final Uri sunSchedule = Uri(path: '/borneo/lyfi/sun-schedule');
   static final Uri mode = Uri(path: '/borneo/lyfi/mode');
 }
 
@@ -160,6 +161,8 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
 
   Future<List<ScheduledInstant>> getSchedule(Device dev);
   Future<void> setSchedule(Device dev, Iterable<ScheduledInstant> schedule);
+
+  Future<List<ScheduledInstant>> getSunSchedule(Device dev);
 
   Future<List<int>> getColor(Device dev);
   Future<void> setColor(Device dev, List<int> color);
@@ -352,5 +355,12 @@ class BorneoLyfiDriver
     final dd = dev.driverData as LyfiDriverData;
     final payload = schedule.map((x) => x.toPayload());
     return await dd.coap.putCbor(LyfiPaths.schedule, payload);
+  }
+
+  @override
+  Future<List<ScheduledInstant>> getSunSchedule(Device dev) async {
+    final dd = dev.driverData as LyfiDriverData;
+    final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.sunSchedule);
+    return items.map((x) => ScheduledInstant.fromMap(x!)).toList();
   }
 }

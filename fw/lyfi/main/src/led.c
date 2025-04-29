@@ -32,8 +32,6 @@ static void led_proc();
 static int normal_state_entry();
 static void normal_state_drive();
 
-static void sch_drive();
-
 static int nightlight_state_entry(uint8_t prev_state);
 static int nightlight_state_exit();
 static void nightlight_state_drive();
@@ -115,7 +113,7 @@ static const uint8_t LED_GPIOS[CONFIG_LYFI_LED_CHANNEL_COUNT] = {
 
 static const led_color_t LED_COLOR_BLANK = { 0 };
 
-static struct led_status _led;
+struct led_status _led;
 
 static ledc_channel_config_t _ledc_channels[LYFI_LED_CHANNEL_COUNT];
 /**
@@ -132,7 +130,7 @@ int led_init()
     struct led_factory_settings factory_settings;
     BO_TRY(led_load_factory_settings(&factory_settings));
 
-    BO_TRY(led_load_user_settings(&_led.settings));
+    BO_TRY(led_load_user_settings());
 
     ESP_LOGI(TAG, "Initializing PWM timer for LEDC....");
 
@@ -196,6 +194,10 @@ int led_init()
                                                NULL));
 
     ESP_LOGI(TAG, "Starting LED controller...");
+
+    if(_led.settings.mode == LED_MODE_SUN) {
+        BO_TRY(led_sun_init());
+    }
 
     if (bo_power_is_on()) {
         _led.state = LED_STATE_POWERING_ON;
@@ -355,7 +357,10 @@ int led_fade_powering_on()
         time_t now = time(NULL);
         now += FADE_PERIOD_MS / 1000;
         led_color_t end_color;
-        led_sch_compute_color(&_led.settings.scheduler, now, end_color);
+        struct tm local_tm = { 0 };
+        localtime_r(&now, &local_tm);
+
+        led_sch_compute_color(&_led.settings.scheduler, &local_tm, end_color);
         BO_TRY(led_fade_to_color(end_color, FADE_PERIOD_MS));
     }
     else { // manual mode
@@ -458,18 +463,6 @@ const struct led_scheduler* led_get_schedule() { return &_led.settings.scheduler
 const struct led_user_settings* led_get_settings() { return &_led.settings; }
 
 const struct led_status* led_get_status() { return &_led; }
-
-static void sch_drive()
-{
-    assert((_led.state == LED_STATE_PREVIEW || _led.state == LED_STATE_NORMAL)
-           && _led.settings.mode == LED_MODE_SCHEDULED);
-
-    led_color_t color;
-    time_t now = time(NULL);
-    led_sch_compute_color(&_led.settings.scheduler, now, color);
-
-    BO_MUST(led_update_color(color));
-}
 
 bool led_is_blank()
 {
@@ -600,11 +593,14 @@ static int normal_state_entry()
 {
     uint8_t prev_state = _led.state;
     _led.state = LED_STATE_NORMAL;
-    normal_state_drive();
+
+    if (_led.settings.mode == LED_MODE_SUN) {
+        BO_TRY(led_sun_update_scheduler());
+    }
 
     if (prev_state == LED_STATE_DIMMING || prev_state == LED_STATE_PREVIEW) {
         ESP_LOGI(TAG, "Saving dimming settings...");
-        BO_TRY(led_save_user_settings(&_led.settings));
+        BO_TRY(led_save_user_settings());
         ESP_LOGI(TAG, "Dimming settings updated.");
     }
     return 0;
@@ -624,16 +620,15 @@ static void normal_state_drive()
 
     switch (_led.settings.mode) {
     case LED_MODE_MANUAL: {
-        BO_MUST(led_update_color(_led.settings.manual_color));
+        ESP_ERROR_CHECK(led_update_color(_led.settings.manual_color));
     } break;
 
     case LED_MODE_SCHEDULED: {
-        sch_drive();
+        led_sch_drive();
     } break;
 
     case LED_MODE_SUN: {
-        // FIXME TODO
-        BO_MUST(led_update_color(_led.settings.sun_color));
+        led_sun_drive();
     } break;
 
     default:
@@ -678,6 +673,7 @@ _EXIT:
 static void preview_state_exit()
 {
     assert(_led.state == LED_STATE_PREVIEW);
+    _led.preview_state_clock = 0;
     led_update_color(_led.color_to_resume);
     ESP_LOGI(TAG, "Preview state ended.");
 }
@@ -690,7 +686,7 @@ static void preview_state_drive()
     time_t end_time
         = _led.preview_state_clock + _led.settings.scheduler.items[_led.settings.scheduler.item_count - 1].instant;
     for (; _led.state == LED_STATE_PREVIEW && _led.preview_state_clock < end_time; _led.preview_state_clock += 60) {
-        sch_drive();
+        led_sch_drive();
         // taskYIELD();
         vTaskDelay(pdMS_TO_TICKS(10));
     }
@@ -935,6 +931,6 @@ int led_set_correction_method(uint8_t correction_method)
     }
 
     _led.settings.correction_method = correction_method;
-    BO_TRY(led_save_user_settings(&_led.settings));
+    BO_TRY(led_save_user_settings());
     return 0;
 }

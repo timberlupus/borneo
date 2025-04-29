@@ -1,5 +1,7 @@
 #pragma once
 
+#include <time.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -22,37 +24,22 @@ enum solar_instants_enum {
  */
 struct solar_instant {
     double time; // Time in hours (e.g., 6.5 represents 6:30)
-    double brightness; // Brightness value (0 to 1000)
+    double brightness; // Brightness value (0 to 1.0)
 };
 
 /**
- * @brief Calculates the day of the year for a given date.
- * @param year The year (e.g., 2025).
- * @param month The month (1-12).
- * @param day The day of the month (1-31).
- * @return The day of the year (1-365 or 366 for leap years).
- */
-int solar_day_of_year(int year, int month, int day);
-
-/**
  * @brief Calculates the timezone offset in hours for a given date.
- * @param year The year (e.g., 2025).
- * @param month The month (1-12).
- * @param day The day of the month (1-31).
  * @return The timezone offset in hours.
  */
-double solar_calculate_timezone_offset(int year, int month, int day);
+double solar_calculate_timezone_offset(const struct tm* tm_local);
 
 /**
  * @brief Calculate sunrise and sunset times
  * @param latitude Location latitude (-90 to 90)
  * @param longitude Location longitude (-180 to 180)
- * @param year Year
- * @param month Month (1-12)
- * @param day Day of month
+ * @param tm_local Local time
  * @param[out] sunrise Calculated sunrise time (hours, 0-24)
  * @param[out] sunset Calculated sunset time (hours, 0-24)
- * @param[out] error_msg Buffer for error message
  * @return 0 on success, negative errno value on failure
  *
  * @note Possible errors:
@@ -60,8 +47,18 @@ double solar_calculate_timezone_offset(int year, int month, int day);
  *  -ENODATA: Polar night/midnight sun condition
  *  -EFAULT: Time calculation error
  */
-int solar_calculate_sunrise_sunset(double latitude, double longitude, int timezone_offset, int year, int month, int day,
+int solar_calculate_sunrise_sunset(double latitude, double longitude, double timezone_offset, const struct tm* tm_local,
                                    double* sunrise, double* sunset);
+
+/**
+ * @brief Generates key points for solar brightness throughout the day.
+ * @param sunrise The sunrise time in hours.
+ * @param sunset The sunset time in hours.
+ * @param instants Array to store the generated instants.
+ * @param max_points Maximum number of key points to generate.
+ * @return The number of key points generated.
+ */
+int solar_generate_instants(double sunrise, double sunset, struct solar_instant* instants);
 
 #ifdef __cplusplus
 }

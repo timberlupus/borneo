@@ -34,11 +34,13 @@ struct sch_time_pair {
 
 static int sch_find_closest_time_range(const struct led_scheduler* sch, uint32_t instant, struct sch_time_pair* result);
 
-void led_sch_compute_color_in_range(led_color_t color, const struct tm* now,
+extern struct led_status _led;
+
+void led_sch_compute_color_in_range(led_color_t color, const struct tm* tm_local,
                                     const struct led_scheduler_item* range_begin,
                                     const struct led_scheduler_item* range_end)
 {
-    int32_t now_instant = (now->tm_hour * 3600) + (now->tm_min * 60) + now->tm_sec;
+    int32_t now_instant = (tm_local->tm_hour * 3600) + (tm_local->tm_min * 60) + tm_local->tm_sec;
     if (range_begin->instant >= SECS_PER_DAY) {
         now_instant += SECS_PER_DAY;
     }
@@ -58,7 +60,7 @@ void led_sch_compute_color_in_range(led_color_t color, const struct tm* now,
     }
 }
 
-void led_sch_compute_color(const struct led_scheduler* sch, time_t now, led_color_t color)
+void led_sch_compute_color(const struct led_scheduler* sch, const struct tm* local_tm, led_color_t color)
 {
     if (sch->item_count == 0) {
         memset(color, 0, sizeof(led_color_t));
@@ -67,9 +69,7 @@ void led_sch_compute_color(const struct led_scheduler* sch, time_t now, led_colo
 
     // time_t utc_now = _led.state == LED_STATE_PREVIEW ? _led.preview_state_clock : time(NULL);
 
-    struct tm local_now = { 0 };
-    localtime_r(&now, &local_now);
-    uint32_t local_instant = (local_now.tm_hour * 3600) + (local_now.tm_min * 60) + local_now.tm_sec;
+    uint32_t local_instant = (local_tm->tm_hour * 3600) + (local_tm->tm_min * 60) + local_tm->tm_sec;
     uint32_t local_next_day_instant = SECS_PER_DAY + local_instant;
 
     // Find the instant range
@@ -94,7 +94,7 @@ void led_sch_compute_color(const struct led_scheduler* sch, time_t now, led_colo
 
     // Between two instants
     if (pair.begin != NULL && pair.end != NULL) {
-        led_sch_compute_color_in_range(color, &local_now, pair.begin, pair.end);
+        led_sch_compute_color_in_range(color, local_tm, pair.begin, pair.end);
     }
 }
 
@@ -133,4 +133,19 @@ int sch_find_closest_time_range(const struct led_scheduler* sch, uint32_t instan
     // now_instant >= all items
     result->begin = &items[size - 1];
     return 0;
+}
+
+void led_sch_drive()
+{
+    assert((_led.state == LED_STATE_PREVIEW || _led.state == LED_STATE_NORMAL)
+           && _led.settings.mode == LED_MODE_SCHEDULED);
+
+    led_color_t color;
+    time_t utc_now = _led.state == LED_STATE_PREVIEW ? _led.preview_state_clock : time(NULL);
+    struct tm local_tm;
+    localtime_r(&utc_now, &local_tm);
+
+    led_sch_compute_color(&_led.settings.scheduler, &local_tm, color);
+
+    ESP_ERROR_CHECK(led_update_color(color));
 }

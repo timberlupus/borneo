@@ -22,32 +22,7 @@
 #define TAG "solar"
 
 static time_t solar_offset_time_by_hours(time_t base_time, double offset_hours);
-static bool is_valid_date(int year, int month, int day);
-
-/**
- * @brief Validate a date
- * @param year Year (1900-3000)
- * @param month Month (1-12)
- * @param day Day of month
- * @return true if date is valid, false otherwise
- */
-static bool is_valid_date(int year, int month, int day)
-{
-    if (year < 1900 || year > 3000)
-        return false;
-    if (month < 1 || month > 12)
-        return false;
-
-    static const int days_in_month[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-    int days = days_in_month[month - 1];
-
-    // Handle February in leap years
-    if (month == 2 && ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))) {
-        days = 29;
-    }
-
-    return day >= 1 && day <= days;
-}
+static int solar_day_of_year(const struct tm* tm_local);
 
 /**
  * @brief Offsets a given time by a specified number of hours.
@@ -75,35 +50,25 @@ double rad_to_deg(double rad) { return rad * 180.0 / M_PI; }
 
 /**
  * @brief Calculates the day of the year for a given date.
- * @param year The year (e.g., 2025).
- * @param month The month (1-12).
- * @param day The day of the month (1-31).
  * @return The day of the year (1-365 or 366 for leap years).
  */
-int solar_day_of_year(int year, int month, int day)
+int solar_day_of_year(const struct tm* tm_local)
 {
     static const int days_before_month[] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
-    int doy = days_before_month[month - 1] + day;
+    int doy = days_before_month[tm_local->tm_mon] + tm_local->tm_mday;
     // Add one day for leap years after February
-    if (month > 2) {
-        if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))
+    if (tm_local->tm_mon > 1) {
+        if ((tm_local->tm_year % 4 == 0 && tm_local->tm_year % 100 != 0) || (tm_local->tm_year % 400 == 0)) {
             doy += 1;
+        }
     }
     return doy;
 }
 
-double solar_calculate_timezone_offset(int year, int month, int day)
+double solar_calculate_timezone_offset(const struct tm* tm_local)
 {
-    // Create a tm structure for local time at noon
-    struct tm tm_local = { 0 };
-    tm_local.tm_year = year - 1900;
-    tm_local.tm_mon = month - 1;
-    tm_local.tm_mday = day;
-    tm_local.tm_hour = 12; // Noon as reference time
-    tm_local.tm_isdst = -1; // Let system determine daylight saving time
-
     // Convert to time_t, accounting for local timezone
-    time_t local_time = mktime(&tm_local);
+    time_t local_time = mktime(tm_local);
 
     // Get UTC time
     struct tm tm_utc;
@@ -114,7 +79,7 @@ double solar_calculate_timezone_offset(int year, int month, int day)
     return difftime(local_time, utc_time) / 3600.0;
 }
 
-int solar_calculate_sunrise_sunset(double latitude, double longitude, int timezone_offset, int year, int month, int day,
+int solar_calculate_sunrise_sunset(double latitude, double longitude, double timezone_offset, const struct tm* tm_local,
                                    double* sunrise, double* sunset)
 {
     // Validate input parameters
@@ -126,12 +91,8 @@ int solar_calculate_sunrise_sunset(double latitude, double longitude, int timezo
         ESP_LOGE(TAG, "Longitude must be between -180 and 180 degrees");
         return -EINVAL;
     }
-    if (!is_valid_date(year, month, day)) {
-        ESP_LOGE(TAG, "Invalid date provided");
-        return -EINVAL;
-    }
 
-    int doy = solar_day_of_year(year, month, day);
+    int doy = solar_day_of_year(tm_local);
 
     // Calculate solar declination angle (simplified)
     double decl = 23.45 * sin(deg_to_rad(360.0 * (284 + doy) / 365.0));
@@ -204,14 +165,6 @@ double solar_clamp_time(double time)
     return time;
 }
 
-/**
- * @brief Generates key points for solar brightness throughout the day.
- * @param sunrise The sunrise time in hours.
- * @param sunset The sunset time in hours.
- * @param instants Array to store the generated instants.
- * @param max_points Maximum number of key points to generate.
- * @return The number of key points generated.
- */
 int solar_generate_instants(double sunrise, double sunset, struct solar_instant* instants)
 {
     double noon = solar_calculate_noon(sunrise, sunset);
@@ -225,13 +178,13 @@ int solar_generate_instants(double sunrise, double sunset, struct solar_instant*
 
     size_t idx = 0;
     instants[idx++] = (struct solar_instant) { sunrise_twilight, 0 }; // Start of dawn
-    instants[idx++] = (struct solar_instant) { sunrise, 800 }; // Sunrise
-    instants[idx++] = (struct solar_instant) { sunrise_plus_1h, 900 }; // 1 hour after sunrise
-    instants[idx++] = (struct solar_instant) { noon, 1000 }; // Noon
-    instants[idx++] = (struct solar_instant) { noon_plus_3h, 950 }; // 3 hours after noon
-    instants[idx++] = (struct solar_instant) { sunset_minus_1h, 850 }; // 1 hour before sunset
-    instants[idx++] = (struct solar_instant) { sunset, 800 }; // Sunset
+    instants[idx++] = (struct solar_instant) { sunrise, 0.800 }; // Sunrise
+    instants[idx++] = (struct solar_instant) { sunrise_plus_1h, 0.900 }; // 1 hour after sunrise
+    instants[idx++] = (struct solar_instant) { noon, 1.0 }; // Noon
+    instants[idx++] = (struct solar_instant) { noon_plus_3h, 0.950 }; // 3 hours after noon
+    instants[idx++] = (struct solar_instant) { sunset_minus_1h, 0.850 }; // 1 hour before sunset
+    instants[idx++] = (struct solar_instant) { sunset, 0.800 }; // Sunset
     instants[idx++] = (struct solar_instant) { sunset_plus_twilight, 0 }; // End of dusk
 
-    return idx;
+    return 0;
 }

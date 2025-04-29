@@ -65,6 +65,7 @@ struct led_scheduler_item {
 struct led_scheduler {
     size_t item_count;
     struct led_scheduler_item items[LYFI_LEDC_SCHEDULER_ITEMS_CAPACITY];
+    // struct led_scheduler_item items[]; FIXME TODO
 };
 
 struct led_factory_settings {
@@ -73,6 +74,8 @@ struct led_factory_settings {
 
 struct led_user_settings {
     uint8_t mode; ///< Running mode, see `enum led_running_modes`
+
+    uint64_t flags; ///< The option flags
 
     uint16_t nightlight_duration; ///< Night lighting state duration (in seconds)
     struct led_scheduler scheduler; ///< Scheduling scheduler for scheduled state
@@ -95,6 +98,9 @@ struct led_status {
     led_color_t fade_end_color;
     int64_t fade_start_time_ms; ///< Time point of fading started
     uint32_t fade_duration_ms; ///< The duration of fading
+
+    time_t sun_next_reschedule_time_utc; ///< The next rescheduling time in UTC
+    struct led_scheduler sun_scheduler; ///< The scheduler of sun simulation for today
 
     struct led_user_settings settings;
 };
@@ -144,13 +150,20 @@ int32_t led_get_nightlight_remaining();
 int led_set_correction_method(uint8_t correction_method);
 
 int led_load_factory_settings(struct led_factory_settings* factory_settings);
-int led_load_user_settings(struct led_user_settings* settings);
-int led_save_user_settings(const struct led_user_settings* settings);
+int led_load_user_settings();
+int led_save_user_settings();
 
-void led_sch_compute_color(const struct led_scheduler* sch, time_t now, led_color_t color);
-void led_sch_compute_color_in_range(led_color_t color, const struct tm* now,
+void led_sch_compute_color(const struct led_scheduler* sch, const struct tm* local_tm, led_color_t color);
+void led_sch_compute_color_in_range(led_color_t color, const struct tm* tm_local,
                                     const struct led_scheduler_item* range_begin,
                                     const struct led_scheduler_item* range_end);
+void led_sch_drive();
+
+
+int led_sun_init();
+int led_sun_update_scheduler();
+bool led_sun_is_in_progress(const struct tm* local_tm);
+void led_sun_drive();
 
 #ifdef __cplusplus
 }

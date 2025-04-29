@@ -25,6 +25,7 @@
 
 #define LED_NVS_NS "led"
 #define LED_NVS_KEY_RUNNING_MODE "mode"
+#define LED_NVS_KEY_FLAGS "flags"
 #define LED_NVS_KEY_MANUAL_COLOR "mcolor"
 #define LED_NVS_KEY_SUN_COLOR "suncolor"
 #define LED_NVS_KEY_SCHEDULER "sch"
@@ -78,6 +79,8 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     },
 };
 
+extern struct led_status _led;
+
 int led_load_factory_settings(struct led_factory_settings* factory_settings)
 {
     int rc;
@@ -102,8 +105,9 @@ _EXIT_WITHOUT_CLOSE:
     return rc;
 }
 
-int led_load_user_settings(struct led_user_settings* settings)
+int led_load_user_settings()
 {
+    struct led_user_settings* settings = &_led.settings;
     int rc;
     size_t size;
     nvs_handle_t handle;
@@ -116,6 +120,17 @@ int led_load_user_settings(struct led_user_settings* settings)
         rc = nvs_get_u8(handle, LED_NVS_KEY_RUNNING_MODE, &settings->mode);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
             settings->mode = LED_DEFAULT_SETTINGS.mode;
+            rc = 0;
+        }
+        if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
+    {
+        rc = nvs_get_u64(handle, LED_NVS_KEY_FLAGS, &settings->flags);
+        if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->flags = LED_DEFAULT_SETTINGS.flags;
             rc = 0;
         }
         if (rc) {
@@ -204,8 +219,9 @@ _EXIT_WITHOUT_CLOSE:
     return rc;
 }
 
-int led_save_user_settings(const struct led_user_settings* settings)
+int led_save_user_settings()
 {
+    const struct led_user_settings* settings = &_led.settings;
     int rc;
     nvs_handle_t handle;
     rc = bo_nvs_user_open(LED_NVS_NS, NVS_READWRITE, &handle);
@@ -214,6 +230,11 @@ int led_save_user_settings(const struct led_user_settings* settings)
     }
 
     rc = nvs_set_u8(handle, LED_NVS_KEY_RUNNING_MODE, settings->mode);
+    if (rc) {
+        goto _EXIT_CLOSE;
+    }
+
+    rc = nvs_set_u64(handle, LED_NVS_KEY_FLAGS, settings->flags);
     if (rc) {
         goto _EXIT_CLOSE;
     }
