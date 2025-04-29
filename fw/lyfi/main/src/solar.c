@@ -8,13 +8,46 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <time.h>
+#include <sys/errno.h>
 
+#include <esp_check.h>
+#include <esp_log.h>
+#
 #include <borneo/algo/astronomy.h>
 
 #include "solar.h"
 
+#define TAG "solar"
+
 static time_t solar_offset_time_by_hours(time_t base_time, double offset_hours);
+static bool is_valid_date(int year, int month, int day);
+
+/**
+ * @brief Validate a date
+ * @param year Year (1900-3000)
+ * @param month Month (1-12)
+ * @param day Day of month
+ * @return true if date is valid, false otherwise
+ */
+static bool is_valid_date(int year, int month, int day)
+{
+    if (year < 1900 || year > 3000)
+        return false;
+    if (month < 1 || month > 12)
+        return false;
+
+    static const int days_in_month[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    int days = days_in_month[month - 1];
+
+    // Handle February in leap years
+    if (month == 2 && ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))) {
+        days = 29;
+    }
+
+    return day >= 1 && day <= days;
+}
 
 /**
  * @brief Offsets a given time by a specified number of hours.
@@ -59,14 +92,7 @@ int solar_day_of_year(int year, int month, int day)
     return doy;
 }
 
-/**
- * @brief Calculates the timezone offset in hours for a given date.
- * @param year The year (e.g., 2025).
- * @param month The month (1-12).
- * @param day The day of the month (1-31).
- * @return The timezone offset in hours.
- */
-double solar_calc_timezone_offset(int year, int month, int day)
+double solar_calculate_timezone_offset(int year, int month, int day)
 {
     // Create a tm structure for local time at noon
     struct tm tm_local = { 0 };
@@ -88,20 +114,23 @@ double solar_calc_timezone_offset(int year, int month, int day)
     return difftime(local_time, utc_time) / 3600.0;
 }
 
-/**
- * @brief Calculates sunrise and sunset times in local hours.
- * @param latitude The latitude of the location in degrees.
- * @param longitude The longitude of the location in degrees.
- * @param timezone_offset The timezone offset in hours (e.g., +8 for China).
- * @param year The year (e.g., 2025).
- * @param month The month (1-12).
- * @param day The day of the month (1-31).
- * @param sunrise Pointer to store the sunrise time (in hours).
- * @param sunset Pointer to store the sunset time (in hours).
- */
-void solar_calculate_sunrise_sunset(double latitude, double longitude, int timezone_offset, int year, int month,
-                                    int day, double* sunrise, double* sunset)
+int solar_calculate_sunrise_sunset(double latitude, double longitude, int timezone_offset, int year, int month, int day,
+                                   double* sunrise, double* sunset)
 {
+    // Validate input parameters
+    if (latitude < -90.0 || latitude > 90.0) {
+        strcpy(error_msg, "Latitude must be between -90 and 90 degrees");
+        return -EINVAL;
+    }
+    if (longitude < -180.0 || longitude > 180.0) {
+        ESP_LOGE(TAG, "Longitude must be between -180 and 180 degrees");
+        return -EINVAL;
+    }
+    if (!is_valid_date(year, month, day)) {
+        ESP_LOGE(TAG, "Invalid date provided");
+        return -EINVAL;
+    }
+
     int doy = solar_day_of_year(year, month, day);
 
     // Calculate solar declination angle (simplified)
@@ -111,11 +140,23 @@ void solar_calculate_sunrise_sunset(double latitude, double longitude, int timez
     double decl_rad = deg_to_rad(decl);
 
     double cos_omega = -tan(lat_rad) * tan(decl_rad);
-    if (cos_omega > 1.0)
+    if (cos_omega > 1.0) {
         cos_omega = 1.0;
-    if (cos_omega < -1.0)
+    }
+    if (cos_omega < -1.0) {
         cos_omega = -1.0;
+    }
     double omega = acos(cos_omega); // Solar hour angle for sunrise/sunset (radians)
+
+    // Check for polar day/night conditions
+    if (cos_omega >= 1.0) {
+        ESP_LOGE(TAG, "Polar night condition (sun does not rise)");
+        return -ENODATA;
+    }
+    if (cos_omega <= -1.0) {
+        ESP_LOGE(TAG, "Midnight sun condition (sun does not set)");
+        return -ENODATA;
+    }
 
     // Convert omega to time (hours)
     double daylight_hours = rad_to_deg(omega) / 15.0 * 2.0;
@@ -125,6 +166,18 @@ void solar_calculate_sunrise_sunset(double latitude, double longitude, int timez
 
     *sunrise = solar_noon - daylight_hours / 2.0;
     *sunset = solar_noon + daylight_hours / 2.0;
+
+    // Normalize times to 0-24 hour range
+    while (*sunrise < 0)
+        *sunrise += 24;
+    while (*sunrise >= 24)
+        *sunrise -= 24;
+    while (*sunset < 0)
+        *sunset += 24;
+    while (*sunset >= 24)
+        *sunset -= 24;
+
+    return 0;
 }
 
 /**
@@ -142,10 +195,12 @@ double solar_calculate_noon(double sunrise, double sunset) { return (sunrise + s
  */
 double solar_clamp_time(double time)
 {
-    if (time < 0)
+    if (time < 0) {
         return 0;
-    if (time > 24)
+    }
+    if (time > 24) {
         return 24;
+    }
     return time;
 }
 
@@ -153,11 +208,11 @@ double solar_clamp_time(double time)
  * @brief Generates key points for solar brightness throughout the day.
  * @param sunrise The sunrise time in hours.
  * @param sunset The sunset time in hours.
- * @param keypoints Array to store the generated key points.
+ * @param instants Array to store the generated instants.
  * @param max_points Maximum number of key points to generate.
  * @return The number of key points generated.
  */
-int solar_generate_instants(double sunrise, double sunset, struct solar_instant* keypoints)
+int solar_generate_instants(double sunrise, double sunset, struct solar_instant* instants)
 {
     double noon = solar_calculate_noon(sunrise, sunset);
     const double twilight = 0.5; // 30 minutes for civil twilight
@@ -169,14 +224,14 @@ int solar_generate_instants(double sunrise, double sunset, struct solar_instant*
     double sunset_plus_twilight = solar_clamp_time(sunset + twilight);
 
     size_t idx = 0;
-    keypoints[idx++] = (struct solar_instant) { sunrise_twilight, 0 }; // Start of dawn
-    keypoints[idx++] = (struct solar_instant) { sunrise, 800 }; // Sunrise
-    keypoints[idx++] = (struct solar_instant) { sunrise_plus_1h, 900 }; // 1 hour after sunrise
-    keypoints[idx++] = (struct solar_instant) { noon, 1000 }; // Noon
-    keypoints[idx++] = (struct solar_instant) { noon_plus_3h, 950 }; // 3 hours after noon
-    keypoints[idx++] = (struct solar_instant) { sunset_minus_1h, 850 }; // 1 hour before sunset
-    keypoints[idx++] = (struct solar_instant) { sunset, 800 }; // Sunset
-    keypoints[idx++] = (struct solar_instant) { sunset_plus_twilight, 0 }; // End of dusk
+    instants[idx++] = (struct solar_instant) { sunrise_twilight, 0 }; // Start of dawn
+    instants[idx++] = (struct solar_instant) { sunrise, 800 }; // Sunrise
+    instants[idx++] = (struct solar_instant) { sunrise_plus_1h, 900 }; // 1 hour after sunrise
+    instants[idx++] = (struct solar_instant) { noon, 1000 }; // Noon
+    instants[idx++] = (struct solar_instant) { noon_plus_3h, 950 }; // 3 hours after noon
+    instants[idx++] = (struct solar_instant) { sunset_minus_1h, 850 }; // 1 hour before sunset
+    instants[idx++] = (struct solar_instant) { sunset, 800 }; // Sunset
+    instants[idx++] = (struct solar_instant) { sunset_plus_twilight, 0 }; // End of dusk
 
     return idx;
 }
