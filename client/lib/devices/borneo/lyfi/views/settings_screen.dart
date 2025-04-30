@@ -1,12 +1,12 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
 import 'package:flutter/material.dart';
 
-import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatelessWidget {
-  final LyfiViewModel vm;
+  final SettingsViewModel vm;
   const SettingsScreen(this.vm, {super.key});
 
   @override
@@ -29,7 +29,7 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Icon _buildWifiRssiIcon(BuildContext bc) {
-    var rssi = vm.borneoDeviceStatus?.wifiRssi;
+    var rssi = vm.borneoStatus.wifiRssi;
     if (rssi != null) {
       return switch (RssiLevelExtension.fromRssi(rssi)) {
         RssiLevel.strong => Icon(Icons.wifi),
@@ -50,51 +50,43 @@ class SettingsScreen extends StatelessWidget {
         tileColor: tileColor,
         leading: Icon(Icons.info_outline),
         title: Text('Name'),
-        subtitle: vm.isOnline ? Text(vm.borneoDeviceInfo.name) : null,
+        subtitle: Text(vm.borneoInfo.name) ,
         trailing: rightChevron,
         onTap: () {},
       ),
       ListTile(
         tileColor: tileColor,
         leading: Icon(Icons.factory_outlined),
-        title: const Text('Manufacturer'),
-        trailing: vm.isOnline ? Text(vm.borneoDeviceInfo.manufName) : null,
-      ),
-      ListTile(
-        tileColor: tileColor,
-        leading: Icon(Icons.info_outline),
-        title: const Text('Model'),
-        trailing: vm.isOnline ? Text(vm.borneoDeviceInfo.modelName) : null,
+        title: const Text('Manufacturer & Model'),
+        trailing:
+                 Column(children: [Text(vm.borneoInfo.manufName), Text(vm.borneoInfo.modelName)]),
       ),
       ListTile(
         tileColor: tileColor,
         leading: Icon(Icons.numbers_outlined),
         title: Text('Serial number'),
-        trailing: vm.isOnline ? Text(vm.borneoDeviceInfo.serno) : null,
+        trailing: Text(vm.borneoInfo.serno),
       ),
       ListTile(
         tileColor: tileColor,
         leading: Icon(Icons.info_outline),
         title: Text('Address'),
-        subtitle: Text(vm.deviceEntity.address.toString()),
-        trailing:
-            vm.isOnline
-                ? _buildWifiRssiIcon(context)
-                : Icon(Icons.wifi_off_outlined, color: Theme.of(context).colorScheme.error),
+        subtitle: Text(vm.address.toString()),
+        trailing: _buildWifiRssiIcon(context)
       ),
       ListTile(title: Text('DEVICE STATUS')),
       ListTile(
         tileColor: tileColor,
         leading: Icon(Icons.access_time_outlined),
         title: Text('Device time'),
-        subtitle: vm.isOnline ? Text(vm.borneoDeviceStatus?.timestamp.toString() ?? '') : null,
+        subtitle:  Text(vm.borneoStatus.timestamp.toString()),
         trailing: rightChevron,
       ),
       ListTile(
         tileColor: tileColor,
         leading: Icon(Icons.location_pin),
         title: Text('Time zone'),
-        subtitle: vm.isOnline ? Text(vm.borneoDeviceStatus?.timezone ?? '') : null,
+        subtitle: Text(vm.borneoStatus.timezone),
         trailing: rightChevron,
       ),
       ListTile(
@@ -129,8 +121,8 @@ class SettingsScreen extends StatelessWidget {
         tileColor: tileColor,
         leading: Icon(Icons.emergency_outlined),
         title: Text('Last emergency shutdown'),
-        trailing: Text(vm.borneoDeviceStatus?.shutdownTimestamp?.toString() ?? 'N/A'),
-        subtitle: Text("Reason: ${vm.borneoDeviceStatus?.shutdownReason}"),
+        trailing: Text(vm.borneoStatus.shutdownTimestamp?.toString() ?? 'N/A'),
+        subtitle: Text("Reason: ${vm.borneoStatus.shutdownReason}"),
       ),
 
       // Version & upgrade group
@@ -139,13 +131,13 @@ class SettingsScreen extends StatelessWidget {
         leading: Icon(Icons.info_outline),
         tileColor: tileColor,
         title: Text('Hardware version'),
-        trailing: vm.isOnline ? Text(vm.borneoDeviceInfo.hwVer.toString()) : null,
+        trailing:  Text(vm.borneoInfo.hwVer.toString()) ,
       ),
       ListTile(
         leading: Icon(Icons.info_outline),
         tileColor: tileColor,
         title: Text('Firmware version'),
-        trailing: vm.isOnline ? Text(vm.borneoDeviceInfo.fwVer.toString()) : null,
+        trailing:  Text(vm.borneoInfo.fwVer.toString()),
       ),
       /*
       ListTile(

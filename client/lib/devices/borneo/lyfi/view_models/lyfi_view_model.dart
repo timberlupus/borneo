@@ -1,3 +1,4 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/sun_editor_view_model.dart';
 import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
@@ -252,5 +253,16 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
         break;
     }
     await currentEditor!.initialize();
+  }
+
+  Future<SettingsViewModel> loadSettings() async {
+    await refreshStatus();
+    return SettingsViewModel(
+      address: deviceEntity.address,
+      borneoStatus: borneoDeviceStatus!,
+      borneoInfo: borneoDeviceInfo,
+      ledInfo: lyfiDeviceInfo,
+      ledStatus: lyfiDeviceStatus!,
+    );
   }
 }
