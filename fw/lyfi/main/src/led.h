@@ -83,7 +83,7 @@ struct led_user_settings {
     led_color_t sun_color; ///< Sun simulation color settings.
     uint8_t correction_method; ///< Brightness correction method: Log/Exp/Linear/CIE1931
 
-    struct geo_location loc; ///< The location for Solar and Lunar simulation.
+    struct geo_location location; ///< The location for Solar and Lunar simulation.
 };
 
 struct led_status {
@@ -148,6 +148,8 @@ void led_set_nightlight_duration(uint16_t duration);
 int32_t led_get_nightlight_remaining();
 
 int led_set_correction_method(uint8_t correction_method);
+
+int led_set_geo_location(const struct geo_location* location);
 
 int led_load_factory_settings(struct led_factory_settings* factory_settings);
 int led_load_user_settings();

@@ -73,7 +73,7 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     .sun_color = {0},
     .scheduler = { 0 },
 
-    .loc = {
+    .location = {
         .lat = NAN,
         .lng = NAN,
     },
@@ -198,9 +198,9 @@ int led_load_user_settings()
 
     {
         size = sizeof(struct geo_location);
-        rc = nvs_get_blob(handle, LED_NVS_KEY_LOC, &settings->loc, &size);
+        rc = nvs_get_blob(handle, LED_NVS_KEY_LOC, &settings->location, &size);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
-            settings->loc = LED_DEFAULT_SETTINGS.loc;
+            settings->location = LED_DEFAULT_SETTINGS.location;
             rc = 0;
         }
         if (rc) {
@@ -264,7 +264,7 @@ int led_save_user_settings()
         goto _EXIT_CLOSE;
     }
 
-    rc = nvs_set_blob(handle, LED_NVS_KEY_LOC, &settings->loc, sizeof(struct geo_location));
+    rc = nvs_set_blob(handle, LED_NVS_KEY_LOC, &settings->location, sizeof(struct geo_location));
     if (rc) {
         goto _EXIT_CLOSE;
     }
@@ -275,4 +275,20 @@ _EXIT_CLOSE:
     bo_nvs_close(handle);
 _EXIT_WITHOUT_CLOSE:
     return rc;
+}
+
+int led_set_geo_location(const struct geo_location* location)
+{
+    // TODO lock
+    if (location == NULL) {
+        return -EINVAL;
+    }
+
+    if(location->lat == NAN || location->lng == NAN) {
+        return -EINVAL;
+    }
+
+    memcpy(&_led.settings.location, location, sizeof(struct geo_location));
+    BO_TRY(led_save_user_settings());
+    return 0;
 }
