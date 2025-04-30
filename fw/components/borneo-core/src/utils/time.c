@@ -1,5 +1,11 @@
 // https://stackoverflow.com/questions/7960318/math-to-convert-seconds-since-1970-into-date-and-vice-versa
 
+#include <time.h>
+#include <sys/time.h>
+#include <errno.h>
+
+#include <freertos/FreeRTOS.h>
+
 #include "borneo/common.h"
 #include "borneo/utils/time.h"
 
@@ -58,4 +64,34 @@ int64_t to_unix_time(int year, int month, int day, int hour, int min, int sec)
             // + Seconds
             )
         + sec;
+}
+
+int bo_tz_set(const char* tz)
+{
+    if (tz == NULL) {
+        return -EINVAL;
+    }
+
+    static StaticSemaphore_t mutex_buffer;
+    static SemaphoreHandle_t tz_mutex = NULL;
+
+    if (tz_mutex == NULL) {
+        tz_mutex = xSemaphoreCreateMutexStatic(&mutex_buffer);
+        if (tz_mutex == NULL) {
+            ESP_LOGE(TAG, "Failed to create mutex for timezone");
+            return -ENODATA;
+        }
+    }
+
+    if (xSemaphoreTake(tz_mutex, pdMS_TO_TICKS(100)) != pdTRUE) {
+        ESP_LOGE(TAG, "Timeout acquiring timezone mutex");
+        return -EINVAL;
+    }
+
+    setenv("TZ", tz, 1);
+    tzset();
+
+    xSemaphoreGive(tz_mutex);
+
+    return ESP_OK;
 }
