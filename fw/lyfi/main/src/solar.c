@@ -168,23 +168,15 @@ double solar_clamp_time(double time)
 int solar_generate_instants(double sunrise, double sunset, struct solar_instant* instants)
 {
     double noon = solar_calculate_noon(sunrise, sunset);
-    const double twilight = 0.5; // 30 minutes for civil twilight
 
-    double sunrise_twilight = solar_clamp_time(sunrise - twilight);
-    double sunrise_plus_1h = solar_clamp_time(sunrise + 1.0);
-    double noon_plus_3h = solar_clamp_time(noon + 3.0);
-    double sunset_minus_1h = solar_clamp_time(sunset - 1.0);
-    double sunset_plus_twilight = solar_clamp_time(sunset + twilight);
-
-    size_t idx = 0;
-    instants[idx++] = (struct solar_instant) { sunrise_twilight, 0 }; // Start of dawn
-    instants[idx++] = (struct solar_instant) { sunrise, 0.800 }; // Sunrise
-    instants[idx++] = (struct solar_instant) { sunrise_plus_1h, 0.900 }; // 1 hour after sunrise
-    instants[idx++] = (struct solar_instant) { noon, 1.0 }; // Noon
-    instants[idx++] = (struct solar_instant) { noon_plus_3h, 0.950 }; // 3 hours after noon
-    instants[idx++] = (struct solar_instant) { sunset_minus_1h, 0.850 }; // 1 hour before sunset
-    instants[idx++] = (struct solar_instant) { sunset, 0.800 }; // Sunset
-    instants[idx++] = (struct solar_instant) { sunset_plus_twilight, 0 }; // End of dusk
+    instants[SOLAR_INDEX_SUNRISE] = (struct solar_instant) { sunrise, 0 };
+    instants[SOLAR_INDEX_AFTER_SUNRISE] = (struct solar_instant) { solar_clamp_time(sunrise + 0.5), 0.2 };
+    instants[SOLAR_INDEX_MORNING_MAX_SLOPE] = (struct solar_instant) { solar_clamp_time(noon - 1.5), 0.6 };
+    instants[SOLAR_INDEX_NOON_MINUS_1HOUR] = (struct solar_instant) { solar_clamp_time(noon - 1.0), 0.95 };
+    instants[SOLAR_INDEX_NOON] = (struct solar_instant) { noon, 1.0 };
+    instants[SOLAR_INDEX_NOON_PLUS_1HOUR] = (struct solar_instant) { solar_clamp_time(noon + 1.0), 0.95 };
+    instants[SOLAR_INDEX_AFTERNOON_MAX_SLOPE] = (struct solar_instant) { solar_clamp_time(sunset - 1.5), 0.5 };
+    instants[SOLAR_INDEX_SUNSET] = (struct solar_instant) { sunset, 0 };
 
     return 0;
 }

@@ -7,14 +7,14 @@ extern "C" {
 #endif
 
 enum solar_instants_enum {
-    SOLAR_INDEX_SUNRISE_TWILIGHT = 0, ///< Start of dawn
-    SOLAR_INDEX_SUNRISE, ///< Sunrise
-    SOLAR_INDEX_SUNRISE_PLUS_1H, // 1 hour after sunrise
-    SOLAR_INDEX_NOON, ///< Noon
-    SOLAR_INDEX_NOON_PLUS_3H, ///< 3 hours after noon
-    SOLAR_INDEX_SUNSET_MINUS_1H, ///< 1 hour before sunset
-    SOLAR_INDEX_SUNSET, ///< Sunset
-    SOLAR_INDEX_SUNSET_PLUS_TWILIGHT, ///< End of dusk
+    SOLAR_INDEX_SUNRISE = 0,
+    SOLAR_INDEX_AFTER_SUNRISE,
+    SOLAR_INDEX_MORNING_MAX_SLOPE,
+    SOLAR_INDEX_NOON_MINUS_1HOUR,
+    SOLAR_INDEX_NOON,
+    SOLAR_INDEX_NOON_PLUS_1HOUR,
+    SOLAR_INDEX_AFTERNOON_MAX_SLOPE,
+    SOLAR_INDEX_SUNSET,
 
     SOLAR_INSTANTS_COUNT,
 };
