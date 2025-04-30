@@ -520,7 +520,8 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
 
     case LYFI_LED_NOTIFY_NIGHTLIGHT_STATE: {
         assert(bo_power_is_on());
-        if (_led.state == LED_STATE_NORMAL && _led.settings.mode == LED_MODE_SCHEDULED) {
+        if (_led.state == LED_STATE_NORMAL
+            && (_led.settings.mode == LED_MODE_SCHEDULED || _led.settings.mode == LED_MODE_SUN)) {
             led_switch_state(LED_STATE_NIGHTLIGHT);
         }
         else if (_led.state == LED_STATE_NIGHTLIGHT) {
@@ -723,9 +724,9 @@ int nightlight_state_entry(uint8_t prev_state)
         return -EINVAL;
     }
 
-    int64_t now = esp_timer_get_time() / 1000ULL;
+    int64_t now = esp_timer_get_time() / 1000LL;
 
-    _led.nightlight_off_time = now + (_led.settings.nightlight_duration * 1000) + FADE_PERIOD_MS;
+    _led.nightlight_off_time = now + (_led.settings.nightlight_duration * 1000) + FADE_PERIOD_MS * 2;
     _led.state = LED_STATE_NIGHTLIGHT;
 
     BO_TRY(led_fade_to_color(_led.settings.manual_color, FADE_PERIOD_MS));
@@ -748,7 +749,7 @@ static void nightlight_state_drive()
         return;
     }
 
-    int64_t now = esp_timer_get_time() / 1000ULL;
+    int64_t now = esp_timer_get_time() / 1000LL;
 
     if (now >= _led.nightlight_off_time) {
         BO_MUST(led_switch_state(LED_STATE_NORMAL));
@@ -756,6 +757,9 @@ static void nightlight_state_drive()
     else {
         if (!led_fade_inprogress()) {
             led_update_color(_led.settings.manual_color);
+        }
+        else {
+            led_fade_drive();
         }
     }
 }

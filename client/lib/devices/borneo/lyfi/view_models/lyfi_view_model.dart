@@ -125,7 +125,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     await super.refreshStatus();
     await _fetchDeviceStatus();
 
-    if(_mode == LedRunningMode.sun) {
+    if (_mode == LedRunningMode.sun) {
       final sunSchedule = await _deviceApi.getSunSchedule(boundDevice!.device);
       if (sunSchedule.length == sunInstants.length) {
         for (int i = 0; i < sunSchedule.length; i++) {
@@ -170,7 +170,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   bool get canSwitchNightlightState =>
       !isBusy &&
       _isOn &&
-      _mode == LedRunningMode.scheduled &&
+      (_mode == LedRunningMode.scheduled || _mode == LedRunningMode.sun) &&
       (ledState == LedState.nightlight || ledState == LedState.normal || ledState == LedState.poweringOn);
 
   void switchNightlightState() {

@@ -247,7 +247,7 @@ class DashboardView extends StatelessWidget {
                                     } else if (vm.mode == LedRunningMode.manual) {
                                       chart = ManualRunningChart();
                                     } else {
-                                      chart = ScheduleChart(); 
+                                      chart = ScheduleChart();
                                     }
                                     return AnimatedSwitcher(
                                       duration: Duration(milliseconds: 300),

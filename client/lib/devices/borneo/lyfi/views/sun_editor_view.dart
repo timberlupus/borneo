@@ -34,8 +34,6 @@ class SunEditorView extends StatelessWidget {
     );
   }
 
-
-
   Widget buildTitles(BuildContext context, SunEditorViewModel vm, double value) {
     if (vm.isInitialized) {
       final index = value.toInt();
@@ -51,8 +49,7 @@ class SunEditorView extends StatelessWidget {
       builder: (context, vm, _) {
         return MultiValueListenableBuilder<int>(
           valueNotifiers: vm.channels,
-          builder:
-              (context, values, _) => ScheduleChart(),
+          builder: (context, values, _) => ScheduleChart(),
         );
       },
     );
