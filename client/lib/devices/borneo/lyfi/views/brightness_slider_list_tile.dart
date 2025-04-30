@@ -37,8 +37,8 @@ class BrightnessSliderListTile extends StatelessWidget {
           selectByTap: true,
           jump: true,
           disabled: disabled,
-          handlerWidth: 32,
-          handlerHeight: 32,
+          handlerWidth: 24,
+          handlerHeight: 24,
           handler: FlutterSliderHandler(
             decoration: BoxDecoration(),
             child: Material(
@@ -81,6 +81,7 @@ class BrightnessSliderListTile extends StatelessWidget {
           onDragging: (index, low, _) => onChanged(low.toInt()),
           onDragCompleted: (index, low, _) => onChanged(low.toInt()),
         ),
+        /*
         leading: Text(
           channelName,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -88,6 +89,7 @@ class BrightnessSliderListTile extends StatelessWidget {
             fontFeatures: [FontFeature.tabularFigures()],
           ),
         ),
+        */
         trailing: trailing,
       ),
     );

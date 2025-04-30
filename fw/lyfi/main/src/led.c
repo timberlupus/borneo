@@ -353,19 +353,33 @@ int led_fade_to_color(const led_color_t color, uint32_t duration_ms)
 
 int led_fade_powering_on()
 {
-    if (_led.settings.mode == LED_MODE_SCHEDULED) {
-        time_t now = time(NULL);
-        now += FADE_PERIOD_MS / 1000;
-        led_color_t end_color;
-        struct tm local_tm = { 0 };
-        localtime_r(&now, &local_tm);
+    led_color_t end_color;
 
+    time_t now = time(NULL);
+    now += FADE_PERIOD_MS / 1000;
+    struct tm local_tm = { 0 };
+    localtime_r(&now, &local_tm);
+
+    switch (_led.settings.mode) {
+
+    case LED_MODE_MANUAL: {
+        memcpy(end_color, _led.settings.manual_color, sizeof(led_color_t));
+    } break;
+
+    case LED_MODE_SCHEDULED: {
         led_sch_compute_color(&_led.settings.scheduler, &local_tm, end_color);
-        BO_TRY(led_fade_to_color(end_color, FADE_PERIOD_MS));
+    } break;
+
+    case LED_MODE_SUN: {
+        led_sch_compute_color(&_led.sun_scheduler, &local_tm, end_color);
+    } break;
+
+    default:
+        assert(false);
+        break;
     }
-    else { // manual mode
-        BO_TRY(led_fade_to_color(_led.settings.manual_color, FADE_PERIOD_MS));
-    }
+
+    BO_TRY(led_fade_to_color(end_color, FADE_PERIOD_MS));
 
     return 0;
 }
@@ -571,6 +585,8 @@ int led_mode_sun_entry()
         return 0;
     }
 
+    BO_TRY(led_sun_update_scheduler());
+
     return 0;
 }
 
@@ -620,7 +636,7 @@ static void normal_state_drive()
 
     switch (_led.settings.mode) {
     case LED_MODE_MANUAL: {
-        ESP_ERROR_CHECK(led_update_color(_led.settings.manual_color));
+        BO_MUST(led_update_color(_led.settings.manual_color));
     } break;
 
     case LED_MODE_SCHEDULED: {

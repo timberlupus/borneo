@@ -41,6 +41,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
   IEditor? currentEditor;
   final List<ScheduledInstant> scheduledInstants = [];
+  final List<ScheduledInstant> sunInstants = [];
 
   // Borneo device general status and info
   GeneralBorneoDeviceInfo get borneoDeviceInfo => _deviceApi.getGeneralDeviceInfo(super.boundDevice!.device);
@@ -92,7 +93,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     if (_mode == LedRunningMode.scheduled) {
       scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
     } else if (_mode == LedRunningMode.sun) {
-      scheduledInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
+      sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
     } else {
       // do nothing
     }
@@ -123,6 +124,15 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   Future<void> refreshStatus() async {
     await super.refreshStatus();
     await _fetchDeviceStatus();
+
+    if(_mode == LedRunningMode.sun) {
+      final sunSchedule = await _deviceApi.getSunSchedule(boundDevice!.device);
+      if (sunSchedule.length == sunInstants.length) {
+        for (int i = 0; i < sunSchedule.length; i++) {
+          sunInstants[i] = sunSchedule[i];
+        }
+      }
+    }
   }
 
   Future<void> _fetchDeviceStatus() async {
@@ -185,7 +195,13 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     super.enqueueUIJob(() => _toggleLock(isLocked));
   }
 
+  Future<void> toggleLockAsync(bool isLocked) async {
+    await _toggleLock(isLocked);
+  }
+
   Future<void> _toggleLock(bool isLocked) async {
+    _isLocked = isLocked;
+
     if (isLocked) {
       assert(currentEditor != null);
       // Exiting the edit mode
@@ -200,7 +216,6 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
     final state = isLocked ? LedState.normal : LedState.dimming;
     await _deviceApi.switchState(super.boundDevice!.device, state);
-    _isLocked = isLocked;
 
     if (!isLocked) {
       //Entering edit mode

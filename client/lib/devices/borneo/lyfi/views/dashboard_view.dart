@@ -1,4 +1,5 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/schedule_chart.dart';
 import 'package:borneo_app/widgets/power_switch.dart';
 import 'package:borneo_app/widgets/value_listenable_builders.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
@@ -13,136 +14,6 @@ import 'package:borneo_app/views/common/hex_color.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import '../view_models/lyfi_view_model.dart';
 import 'color_chart.dart';
-
-class ScheduleRunningChart extends StatelessWidget {
-  const ScheduleRunningChart({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    LyfiViewModel vm = context.read<LyfiViewModel>();
-    return Container(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: LineChart(_buildChartData(context, vm), duration: const Duration(milliseconds: 250)),
-    );
-  }
-
-  LineChartData _buildChartData(BuildContext context, LyfiViewModel vm) {
-    final now = DateTime.now();
-    final borderSide = BorderSide(color: Theme.of(context).scaffoldBackgroundColor, width: 1.5);
-    return LineChartData(
-      lineTouchData: lineTouchData1,
-      gridData: FlGridData(
-        show: true,
-        drawVerticalLine: false,
-        drawHorizontalLine: true,
-        horizontalInterval: lyfiBrightnessMax.toDouble() * 0.25,
-        verticalInterval: 3600 * 6,
-        getDrawingHorizontalLine: (value) => FlLine(color: Theme.of(context).colorScheme.surface, strokeWidth: 1.5),
-        getDrawingVerticalLine: (value) => FlLine(color: Theme.of(context).colorScheme.surface, strokeWidth: 1.5),
-      ),
-      titlesData: _makeTitlesData(context),
-      borderData: FlBorderData(
-        show: true,
-        border: Border(bottom: borderSide, left: borderSide, right: borderSide, top: borderSide),
-      ),
-      lineBarsData: buildLineData(vm),
-      minX: 0,
-      maxX: 24 * 3600.0,
-      minY: 0,
-      maxY: lyfiBrightnessMax.toDouble(),
-      extraLinesData: ExtraLinesData(
-        extraLinesOnTop: false,
-        verticalLines: [
-          if (vm.isOn && vm.isOnline)
-            VerticalLine(
-              x:
-                  Duration(
-                    hours: now.hour.toInt(),
-                    minutes: now.minute.toInt(),
-                    seconds: now.second.toInt(),
-                  ).inSeconds.toDouble(),
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
-                  Theme.of(context).colorScheme.surfaceContainer,
-                ],
-              ),
-              strokeWidth: 8,
-              label: VerticalLineLabel(
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
-                padding: const EdgeInsets.all(0),
-                alignment: Alignment(0, -1.8),
-                show: true,
-                labelResolver: (vl) => Duration(seconds: vl.x.toInt()).toHHMM(),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  LineTouchData get lineTouchData1 => LineTouchData(
-    handleBuiltInTouches: true,
-    touchTooltipData: LineTouchTooltipData(getTooltipColor: (touchedSpot) => Colors.black54.withOpacity(0.8)),
-  );
-
-  FlTitlesData _makeTitlesData(BuildContext context) {
-    return FlTitlesData(
-      bottomTitles: AxisTitles(sideTitles: _bottomTitles(context)),
-      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-    );
-  }
-
-  List<LineChartBarData> buildLineData(LyfiViewModel vm) {
-    final series = <LineChartBarData>[];
-    for (int channelIndex = 0; channelIndex < vm.channels.length; channelIndex++) {
-      final spots = <FlSpot>[];
-      //final sortedEntries = vm.entries.toList();
-      //sortedEntries.sort((a, b) => a.instant.compareTo(b.instant));
-      for (final entry in vm.scheduledInstants) {
-        double x = entry.instant.inSeconds.toDouble();
-        double y = entry.color[channelIndex].toDouble();
-        final spot = FlSpot(x, y);
-        spots.add(spot);
-      }
-      // Skip empty channel
-      series.add(
-        LineChartBarData(
-          isCurved: false,
-          barWidth: 2,
-          color: HexColor.fromHex(vm.lyfiDeviceInfo.channels[channelIndex].color),
-          dotData: const FlDotData(show: false),
-          spots: spots,
-        ),
-      );
-    }
-    return series;
-  }
-
-  Widget bottomTitleWidgets(BuildContext context, double value, TitleMeta meta) {
-    final style = Theme.of(
-      context,
-    ).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(97));
-    final instant = Duration(seconds: value.round().toInt()).toHH();
-    final text = Text(instant, style: style);
-    return SideTitleWidget(meta: meta, space: 0, child: text);
-  }
-
-  SideTitles _bottomTitles(BuildContext context) {
-    return SideTitles(
-      showTitles: true,
-      reservedSize: 16,
-      interval: 3600 * 3,
-      getTitlesWidget: (v, m) => bottomTitleWidgets(context, v, m),
-    );
-  }
-
-  FlGridData get gridData => const FlGridData(show: true);
-}
 
 class ManualRunningChart extends StatelessWidget {
   const ManualRunningChart({super.key});
@@ -365,25 +236,29 @@ class DashboardView extends StatelessWidget {
                         Expanded(
                           child: Container(
                             padding: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
-                            child: Selector<LyfiViewModel, ({LedRunningMode mode, LedState? state, bool isOn})>(
-                              selector: (_, vm) => (mode: vm.mode, state: vm.ledState, isOn: vm.isOn),
-                              builder: (context, vm, _) {
-                                Widget chart;
-                                if (vm.state == LedState.nightlight) {
-                                  chart = ManualRunningChart();
-                                } else if (vm.mode == LedRunningMode.manual) {
-                                  chart = ManualRunningChart();
-                                } else {
-                                  chart = ScheduleRunningChart();
-                                }
-                                return AnimatedSwitcher(
-                                  duration: Duration(milliseconds: 300),
-                                  transitionBuilder: (Widget child, Animation<double> animation) {
-                                    return FadeTransition(opacity: animation, child: child);
+                            child: Stack(
+                              children: [
+                                Selector<LyfiViewModel, ({LedRunningMode mode, LedState? state, bool isOn})>(
+                                  selector: (_, vm) => (mode: vm.mode, state: vm.ledState, isOn: vm.isOn),
+                                  builder: (context, vm, _) {
+                                    Widget chart;
+                                    if (vm.state == LedState.nightlight) {
+                                      chart = ManualRunningChart();
+                                    } else if (vm.mode == LedRunningMode.manual) {
+                                      chart = ManualRunningChart();
+                                    } else {
+                                      chart = ScheduleChart(); 
+                                    }
+                                    return AnimatedSwitcher(
+                                      duration: Duration(milliseconds: 300),
+                                      transitionBuilder: (Widget child, Animation<double> animation) {
+                                        return FadeTransition(opacity: animation, child: child);
+                                      },
+                                      child: chart,
+                                    );
                                   },
-                                  child: chart,
-                                );
-                              },
+                                ),
+                              ],
                             ),
                           ),
                         ),

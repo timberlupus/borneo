@@ -23,7 +23,7 @@ final class DefaultKernel implements IKernel {
   static const Duration kProbeTimeOut = Duration(seconds: 3);
   static const Duration kHeartbeatPollingInterval = Duration(seconds: 5);
 
-  late Timer _timer;
+  Timer? _timer;
 
   bool _isInitialized = false;
   bool _isDisposed = false;
@@ -86,7 +86,7 @@ final class DefaultKernel implements IKernel {
       if (isScanning) {
         stopDevicesScanning();
       }
-      _timer.cancel();
+      _timer?.cancel();
       _deviceOfflineSub.cancel();
       _foundDeviceEventSub.cancel();
       _heartbeatPollingTaskCancelToken.cancel();
@@ -211,11 +211,13 @@ final class DefaultKernel implements IKernel {
   void _startTimer() {
     assert(!_isDisposed);
 
-    _timer = Timer.periodic(
-      kHeartbeatPollingInterval,
-      (_) => _heartbeatPollingPeriodicTask()
-          .asCancellable(_heartbeatPollingTaskCancelToken),
-    );
+    if (_timer != null) {
+      _timer = Timer.periodic(
+        kHeartbeatPollingInterval,
+        (_) => _heartbeatPollingPeriodicTask()
+            .asCancellable(_heartbeatPollingTaskCancelToken),
+      );
+    }
   }
 
   Future<void> _heartbeatPollingPeriodicTask() async {

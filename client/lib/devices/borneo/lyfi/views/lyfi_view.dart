@@ -134,32 +134,28 @@ class HeroPanel extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Consumer<LyfiViewModel>(
               builder: (context, vm, _) {
                 return SegmentedButton<LedRunningMode>(
-                  style: ButtonStyle(
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    minimumSize: WidgetStateProperty.all(Size.zero),
-                  ),
                   showSelectedIcon: false,
                   selected: <LedRunningMode>{vm.mode},
                   segments: [
                     ButtonSegment<LedRunningMode>(
                       value: LedRunningMode.manual,
-                      label: Text('Manual'),
-                      icon: Icon(Icons.bar_chart_outlined),
+                      label: Text('MANU'),
+                      icon: Icon(Icons.bar_chart_outlined, size: 24),
                     ),
                     ButtonSegment<LedRunningMode>(
                       value: LedRunningMode.scheduled,
-                      label: Text('Sched.'),
-                      icon: Icon(Icons.alarm_outlined),
+                      label: Text('SCHED'),
+                      icon: Icon(Icons.alarm_outlined, size: 24),
                     ),
                     ButtonSegment<LedRunningMode>(
                       value: LedRunningMode.sun,
-                      label: Text('Sun Sim.'),
-                      icon: Icon(Icons.wb_sunny_outlined),
+                      label: Text('SUN'),
+                      icon: Icon(Icons.wb_sunny_outlined, size: 24),
                     ),
                   ],
                   onSelectionChanged:
@@ -321,6 +317,7 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                     RssiLevel.weak => Icon(Icons.wifi_1_bar, size: 24),
                   },
             ),
+            SizedBox(width: 16),
           ],
         ),
         body: Selector<LyfiViewModel, ({bool isLocked})>(

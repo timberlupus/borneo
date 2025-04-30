@@ -147,5 +147,5 @@ void led_sch_drive()
 
     led_sch_compute_color(&_led.settings.scheduler, &local_tm, color);
 
-    ESP_ERROR_CHECK(led_update_color(color));
+    BO_MUST(led_update_color(color));
 }

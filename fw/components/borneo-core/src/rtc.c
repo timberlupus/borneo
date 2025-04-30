@@ -12,6 +12,7 @@
 
 #include <drvfx/drvfx.h>
 
+#include "borneo/utils/time.h"
 #include "borneo/common.h"
 #include "borneo/system.h"
 #include "borneo/nvs.h"
@@ -45,8 +46,7 @@ int bo_rtc_init()
         ESP_LOGI(TAG, "Using default time-zone: %s", tz);
     }
 
-    setenv("TZ", tz, 1);
-    tzset();
+    BO_TRY(bo_tz_set(tz));
 
     return 0;
 }
@@ -88,8 +88,7 @@ int bo_rtc_set_tz(const char* tz)
     if (xSemaphoreTake(s_lock, portMAX_DELAY) == pdTRUE) {
         BO_SEM_AUTO_RELEASE(s_lock);
 
-        setenv("TZ", tz, 1);
-        tzset();
+        BO_TRY(bo_tz_set(tz));
 
         // Saving the time-zone into the NVS
         nvs_handle_t nvs_handle;

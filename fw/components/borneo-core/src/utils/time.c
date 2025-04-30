@@ -78,13 +78,11 @@ int bo_tz_set(const char* tz)
     if (tz_mutex == NULL) {
         tz_mutex = xSemaphoreCreateMutexStatic(&mutex_buffer);
         if (tz_mutex == NULL) {
-            ESP_LOGE(TAG, "Failed to create mutex for timezone");
             return -ENODATA;
         }
     }
 
     if (xSemaphoreTake(tz_mutex, pdMS_TO_TICKS(100)) != pdTRUE) {
-        ESP_LOGE(TAG, "Timeout acquiring timezone mutex");
         return -EINVAL;
     }
 

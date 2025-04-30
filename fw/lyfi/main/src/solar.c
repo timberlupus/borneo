@@ -14,14 +14,14 @@
 
 #include <esp_check.h>
 #include <esp_log.h>
-#
+
 #include <borneo/algo/astronomy.h>
 
 #include "solar.h"
 
 #define TAG "solar"
 
-static time_t solar_offset_time_by_hours(time_t base_time, double offset_hours);
+static time_t solar_offset_time_by_hours(time_t base_time, float offset_hours);
 static int solar_day_of_year(const struct tm* tm_local);
 
 /**
@@ -30,12 +30,12 @@ static int solar_day_of_year(const struct tm* tm_local);
  * @param offset_hours The number of hours to offset (can be fractional).
  * @return The adjusted time as a time_t value.
  */
-time_t solar_offset_time_by_hours(time_t base_time, double offset_hours)
+time_t solar_offset_time_by_hours(time_t base_time, float offset_hours)
 {
     struct tm tm_time;
     localtime_r(&base_time, &tm_time);
 
-    int offset_seconds = (int)(offset_hours * 3600.0);
+    int offset_seconds = (int)(offset_hours * 3600.0f);
     base_time += offset_seconds;
 
     // Re-normalize the time
@@ -44,9 +44,9 @@ time_t solar_offset_time_by_hours(time_t base_time, double offset_hours)
 }
 
 // Utility functions for angle conversions
-double deg_to_rad(double deg) { return deg * M_PI / 180.0; }
+float deg_to_rad(float deg) { return deg * (float)M_PI / 180.0f; }
 
-double rad_to_deg(double rad) { return rad * 180.0 / M_PI; }
+float rad_to_deg(float rad) { return rad * 180.0f / (float)M_PI; }
 
 /**
  * @brief Calculates the day of the year for a given date.
@@ -65,7 +65,7 @@ int solar_day_of_year(const struct tm* tm_local)
     return doy;
 }
 
-double solar_calculate_timezone_offset(const struct tm* tm_local)
+float solar_calculate_timezone_offset(const struct tm* tm_local)
 {
     // Convert to time_t, accounting for local timezone
     time_t local_time = mktime(tm_local);
@@ -76,18 +76,18 @@ double solar_calculate_timezone_offset(const struct tm* tm_local)
     time_t utc_time = mktime(&tm_utc);
 
     // Calculate timezone offset in hours
-    return difftime(local_time, utc_time) / 3600.0;
+    return (float)difftime(local_time, utc_time) / 3600.0f;
 }
 
-int solar_calculate_sunrise_sunset(double latitude, double longitude, double timezone_offset, const struct tm* tm_local,
-                                   double* sunrise, double* sunset)
+int solar_calculate_sunrise_sunset(float latitude, float longitude, float timezone_offset, const struct tm* tm_local,
+                                   float* sunrise, float* sunset)
 {
     // Validate input parameters
-    if (latitude < -90.0 || latitude > 90.0) {
+    if (latitude < -90.0f || latitude > 90.0f) {
         ESP_LOGE(TAG, "Latitude must be between -90 and 90 degrees");
         return -EINVAL;
     }
-    if (longitude < -180.0 || longitude > 180.0) {
+    if (longitude < -180.0f || longitude > 180.0f) {
         ESP_LOGE(TAG, "Longitude must be between -180 and 180 degrees");
         return -EINVAL;
     }
@@ -95,48 +95,48 @@ int solar_calculate_sunrise_sunset(double latitude, double longitude, double tim
     int doy = solar_day_of_year(tm_local);
 
     // Calculate solar declination angle (simplified)
-    double decl = 23.45 * sin(deg_to_rad(360.0 * (284 + doy) / 365.0));
+    float decl = 23.45f * sinf(deg_to_rad(360.0f * (284 + doy) / 365.0f));
 
-    double lat_rad = deg_to_rad(latitude);
-    double decl_rad = deg_to_rad(decl);
+    float lat_rad = deg_to_rad(latitude);
+    float decl_rad = deg_to_rad(decl);
 
-    double cos_omega = -tan(lat_rad) * tan(decl_rad);
-    if (cos_omega > 1.0) {
-        cos_omega = 1.0;
+    float cos_omega = -tanf(lat_rad) * tanf(decl_rad);
+    if (cos_omega > 1.0f) {
+        cos_omega = 1.0f;
     }
-    if (cos_omega < -1.0) {
-        cos_omega = -1.0;
+    if (cos_omega < -1.0f) {
+        cos_omega = -1.0f;
     }
-    double omega = acos(cos_omega); // Solar hour angle for sunrise/sunset (radians)
+    float omega = acosf(cos_omega); // Solar hour angle for sunrise/sunset (radians)
 
     // Check for polar day/night conditions
-    if (cos_omega >= 1.0) {
+    if (cos_omega >= 1.0f) {
         ESP_LOGE(TAG, "Polar night condition (sun does not rise)");
         return -ENODATA;
     }
-    if (cos_omega <= -1.0) {
+    if (cos_omega <= -1.0f) {
         ESP_LOGE(TAG, "Midnight sun condition (sun does not set)");
         return -ENODATA;
     }
 
     // Convert omega to time (hours)
-    double daylight_hours = rad_to_deg(omega) / 15.0 * 2.0;
+    float daylight_hours = rad_to_deg(omega) / 15.0f * 2.0f;
 
     // Calculate true solar noon (local time)
-    double solar_noon = 12.0 + (timezone_offset * 15.0 - longitude) / 15.0;
+    float solar_noon = 12.0f + (timezone_offset * 15.0f - longitude) / 15.0f;
 
-    *sunrise = solar_noon - daylight_hours / 2.0;
-    *sunset = solar_noon + daylight_hours / 2.0;
+    *sunrise = solar_noon - daylight_hours / 2.0f;
+    *sunset = solar_noon + daylight_hours / 2.0f;
 
     // Normalize times to 0-24 hour range
-    while (*sunrise < 0)
-        *sunrise += 24;
-    while (*sunrise >= 24)
-        *sunrise -= 24;
-    while (*sunset < 0)
-        *sunset += 24;
-    while (*sunset >= 24)
-        *sunset -= 24;
+    while (*sunrise < 0.0f)
+        *sunrise += 24.0f;
+    while (*sunrise >= 24.0f)
+        *sunrise -= 24.0f;
+    while (*sunset < 0.0f)
+        *sunset += 24.0f;
+    while (*sunset >= 24.0f)
+        *sunset -= 24.0f;
 
     return 0;
 }
@@ -147,36 +147,36 @@ int solar_calculate_sunrise_sunset(double latitude, double longitude, double tim
  * @param sunset The sunset time in hours.
  * @return The solar noon time in hours.
  */
-double solar_calculate_noon(double sunrise, double sunset) { return (sunrise + sunset) / 2.0; }
+float solar_calculate_noon(float sunrise, float sunset) { return (sunrise + sunset) / 2.0f; }
 
 /**
  * @brief Clamps a time value to the range [0, 24].
  * @param time The time value to clamp (in hours).
  * @return The clamped time value.
  */
-double solar_clamp_time(double time)
+float solar_clamp_time(float time)
 {
-    if (time < 0) {
-        return 0;
+    if (time < 0.0f) {
+        return 0.0f;
     }
-    if (time > 24) {
-        return 24;
+    if (time > 24.0f) {
+        return 24.0f;
     }
     return time;
 }
 
-int solar_generate_instants(double sunrise, double sunset, struct solar_instant* instants)
+int solar_generate_instants(float sunrise, float sunset, struct solar_instant* instants)
 {
-    double noon = solar_calculate_noon(sunrise, sunset);
+    float noon = solar_calculate_noon(sunrise, sunset);
 
-    instants[SOLAR_INDEX_SUNRISE] = (struct solar_instant) { sunrise, 0 };
-    instants[SOLAR_INDEX_AFTER_SUNRISE] = (struct solar_instant) { solar_clamp_time(sunrise + 0.5), 0.2 };
-    instants[SOLAR_INDEX_MORNING_MAX_SLOPE] = (struct solar_instant) { solar_clamp_time(noon - 1.5), 0.6 };
-    instants[SOLAR_INDEX_NOON_MINUS_1HOUR] = (struct solar_instant) { solar_clamp_time(noon - 1.0), 0.95 };
-    instants[SOLAR_INDEX_NOON] = (struct solar_instant) { noon, 1.0 };
-    instants[SOLAR_INDEX_NOON_PLUS_1HOUR] = (struct solar_instant) { solar_clamp_time(noon + 1.0), 0.95 };
-    instants[SOLAR_INDEX_AFTERNOON_MAX_SLOPE] = (struct solar_instant) { solar_clamp_time(sunset - 1.5), 0.5 };
-    instants[SOLAR_INDEX_SUNSET] = (struct solar_instant) { sunset, 0 };
+    instants[SOLAR_INDEX_SUNRISE] = (struct solar_instant) { sunrise, 0.0f };
+    instants[SOLAR_INDEX_AFTER_SUNRISE] = (struct solar_instant) { solar_clamp_time(sunrise + 0.5f), 0.2f };
+    instants[SOLAR_INDEX_MORNING_MAX_SLOPE] = (struct solar_instant) { solar_clamp_time(noon - 1.5f), 0.6f };
+    instants[SOLAR_INDEX_NOON_MINUS_1HOUR] = (struct solar_instant) { solar_clamp_time(noon - 1.0f), 0.95f };
+    instants[SOLAR_INDEX_NOON] = (struct solar_instant) { noon, 1.0f };
+    instants[SOLAR_INDEX_NOON_PLUS_1HOUR] = (struct solar_instant) { solar_clamp_time(noon + 1.0f), 0.95f };
+    instants[SOLAR_INDEX_AFTERNOON_MAX_SLOPE] = (struct solar_instant) { solar_clamp_time(sunset - 1.5f), 0.5f };
+    instants[SOLAR_INDEX_SUNSET] = (struct solar_instant) { sunset, 0.0f };
 
     return 0;
 }

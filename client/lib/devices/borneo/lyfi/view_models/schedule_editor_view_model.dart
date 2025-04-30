@@ -79,7 +79,7 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
   List<ValueNotifier<int>> get channels => _channels;
 
   @override
-  bool get canEdit => !isBusy && _parent.isOnline && _parent.isOn && !_parent.isLocked;
+  bool get canEdit => !isBusy && _parent.isOnline && _parent.isOn;
 
   bool get canChangeColor => canEdit && currentEntry != null;
 

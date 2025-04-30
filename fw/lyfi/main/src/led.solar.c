@@ -45,10 +45,10 @@ int led_sun_update_scheduler()
     time(&now);
     localtime_r(&now, &local_tm);
 
-    double tz_offset = solar_calculate_timezone_offset(&local_tm);
-    double sunrise, sunset;
+    float tz_offset = solar_calculate_timezone_offset(&local_tm);
+    float sunrise, sunset;
     //TODO FIXME
-    BO_TRY(solar_calculate_sunrise_sunset(25.0430, 102.7062, tz_offset, &local_tm, &sunrise, &sunset));
+    BO_TRY(solar_calculate_sunrise_sunset(25.0430f, 102.7062f, tz_offset, &local_tm, &sunrise, &sunset));
 
     struct solar_instant instants[SOLAR_INSTANTS_COUNT];
     BO_TRY(solar_generate_instants(sunrise, sunset, instants));
@@ -60,7 +60,7 @@ int led_sun_update_scheduler()
         sch->items[i].instant = (uint32_t)round(instants[i].time * 3600.0);
         // ESP_LOGI(TAG, ">>>>>>>> item %u \t instant %lu", i, sch->items[i].instant);
         for (size_t j = 0; j < LYFI_LED_CHANNEL_COUNT; j++) {
-            uint16_t brightness = (uint16_t)round((double)_led.settings.sun_color[j] * instants[i].brightness);
+            uint16_t brightness = (uint16_t)roundf((float)_led.settings.sun_color[j] * instants[i].brightness);
             if (brightness > LED_BRIGHTNESS_MAX) {
                 brightness = LED_BRIGHTNESS_MAX;
             }
@@ -99,14 +99,14 @@ void led_sun_drive()
 
     led_color_t color;
     time_t utc_now = time(NULL);
-    struct tm local_tm;
+    struct tm local_tm = { 0 };
     localtime_r(&utc_now, &local_tm);
 
     led_sch_compute_color(&_led.sun_scheduler, &local_tm, color);
 
-    ESP_ERROR_CHECK(led_update_color(color));
+    BO_MUST(led_update_color(color));
 
     if (utc_now >= _led.sun_next_reschedule_time_utc && !led_sun_is_in_progress(&local_tm)) {
-        ESP_ERROR_CHECK(led_sun_update_scheduler() == 0);
+        BO_MUST(led_sun_update_scheduler());
     }
 }

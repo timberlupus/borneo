@@ -1,6 +1,8 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/brightness_slider_list.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/color_chart.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/lyfi_view.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/schedule_chart.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:flutter/material.dart';
 
@@ -32,39 +34,7 @@ class SunEditorView extends StatelessWidget {
     );
   }
 
-  List<BarChartGroupData> buildGroupDataItems(BuildContext context, SunEditorViewModel vm) {
-    int index = 0;
-    if (vm.isInitialized) {
-      return vm.deviceInfo.channels.map((ch) {
-        final channel = vm.channels[index];
-        final g = makeGroupData(context, ch, index, channel.value.toDouble());
-        index++;
-        return g;
-      }).toList();
-    } else {
-      return [];
-    }
-  }
 
-  BarChartGroupData makeGroupData(BuildContext context, LyfiChannelInfo ch, int x, double y) {
-    return BarChartGroupData(
-      x: x,
-      barRods: [
-        BarChartRodData(
-          borderRadius: BorderRadius.circular(4),
-          toY: y,
-          color: HexColor.fromHex(ch.color),
-          width: 16,
-          backDrawRodData: BackgroundBarChartRodData(
-            show: true,
-            fromY: 0,
-            toY: lyfiBrightnessMax.toDouble(),
-            color: Theme.of(context).colorScheme.surface,
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget buildTitles(BuildContext context, SunEditorViewModel vm, double value) {
     if (vm.isInitialized) {
@@ -82,28 +52,7 @@ class SunEditorView extends StatelessWidget {
         return MultiValueListenableBuilder<int>(
           valueNotifiers: vm.channels,
           builder:
-              (context, values, _) => LyfiColorChart(
-                BarChartData(
-                  barGroups: buildGroupDataItems(context, vm),
-                  titlesData: FlTitlesData(
-                    show: true,
-                    bottomTitles: AxisTitles(
-                      axisNameSize: 24,
-                      sideTitles: SideTitles(
-                        reservedSize: 24,
-                        showTitles: true,
-                        getTitlesWidget: (value, _) => buildTitles(context, vm, value),
-                      ),
-                    ),
-                    leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  ),
-                  borderData: FlBorderData(show: false),
-                  barTouchData: BarTouchData(enabled: true),
-                  gridData: FlGridData(show: false),
-                ),
-              ),
+              (context, values, _) => ScheduleChart(),
         );
       },
     );
@@ -111,6 +60,10 @@ class SunEditorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rightChevron = Icon(Icons.chevron_right_outlined, color: Theme.of(context).hintColor);
+    final tileColor = Theme.of(context).colorScheme.surfaceContainer;
+    final items = <Widget>[ListTile(title: const Text('DEVICE INFORMATION'))];
+
     return ChangeNotifierProvider.value(
       value: context.read<LyfiViewModel>().currentEditor! as SunEditorViewModel,
       builder:
@@ -120,7 +73,10 @@ class SunEditorView extends StatelessWidget {
               Container(
                 color: Theme.of(context).colorScheme.surfaceContainer,
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: AspectRatio(aspectRatio: 2.75, child: buildGraph(context)),
+                child: AspectRatio(
+                  aspectRatio: 2.75,
+                  child: Consumer<LyfiViewModel>(builder: (conterxt, vm, _) => buildGraph(context)),
+                ),
               ),
               Expanded(child: buildSliders(context)),
             ],

@@ -21,7 +21,7 @@ class ManualEditorViewModel extends ChangeNotifier implements IEditor {
   bool get isBusy => _parent.isBusy;
 
   @override
-  bool get canEdit => !isBusy && _parent.isOnline && _parent.isOn && !_parent.isLocked;
+  bool get canEdit => !isBusy && _parent.isOnline && _parent.isOn;
 
   bool get canChangeColor => canEdit;
 
