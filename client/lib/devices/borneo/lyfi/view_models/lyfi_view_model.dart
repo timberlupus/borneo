@@ -256,13 +256,21 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   }
 
   Future<SettingsViewModel> loadSettings() async {
-    await refreshStatus();
-    return SettingsViewModel(
-      address: deviceEntity.address,
-      borneoStatus: borneoDeviceStatus!,
-      borneoInfo: borneoDeviceInfo,
-      ledInfo: lyfiDeviceInfo,
-      ledStatus: lyfiDeviceStatus!,
-    );
+    isBusy = true;
+    notifyListeners();
+    try {
+      await refreshStatus();
+      return SettingsViewModel(
+        address: deviceEntity.address,
+        borneoStatus: borneoDeviceStatus!,
+        borneoInfo: borneoDeviceInfo,
+        ledInfo: lyfiDeviceInfo,
+        ledStatus: lyfiDeviceStatus!,
+        powerBehavior: await _deviceApi.getPowerBehavior(boundDevice!.device),
+      );
+    } finally {
+      isBusy = false;
+      notifyListeners();
+    }
   }
 }

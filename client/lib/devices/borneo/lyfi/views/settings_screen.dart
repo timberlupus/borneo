@@ -50,7 +50,7 @@ class SettingsScreen extends StatelessWidget {
         tileColor: tileColor,
         leading: Icon(Icons.info_outline),
         title: Text('Name'),
-        subtitle: Text(vm.borneoInfo.name) ,
+        subtitle: Text(vm.borneoInfo.name),
         trailing: rightChevron,
         onTap: () {},
       ),
@@ -58,8 +58,7 @@ class SettingsScreen extends StatelessWidget {
         tileColor: tileColor,
         leading: Icon(Icons.factory_outlined),
         title: const Text('Manufacturer & Model'),
-        trailing:
-                 Column(children: [Text(vm.borneoInfo.manufName), Text(vm.borneoInfo.modelName)]),
+        trailing: Column(children: [Text(vm.borneoInfo.manufName), Text(vm.borneoInfo.modelName)]),
       ),
       ListTile(
         tileColor: tileColor,
@@ -72,43 +71,45 @@ class SettingsScreen extends StatelessWidget {
         leading: Icon(Icons.info_outline),
         title: Text('Address'),
         subtitle: Text(vm.address.toString()),
-        trailing: _buildWifiRssiIcon(context)
+        trailing: _buildWifiRssiIcon(context),
       ),
       ListTile(title: Text('DEVICE STATUS')),
       ListTile(
         tileColor: tileColor,
         leading: Icon(Icons.access_time_outlined),
-        title: Text('Device time'),
-        subtitle:  Text(vm.borneoStatus.timestamp.toString()),
-        trailing: rightChevron,
-      ),
-      ListTile(
-        tileColor: tileColor,
-        leading: Icon(Icons.location_pin),
-        title: Text('Time zone'),
-        subtitle: Text(vm.borneoStatus.timezone),
+        title: Text('Device time & time zone'),
+        subtitle: Row(
+          children: [Text(vm.borneoStatus.timestamp.toString()), SizedBox(width: 16), Text(vm.borneoStatus.timezone)],
+        ),
         trailing: rightChevron,
       ),
       ListTile(
         leading: Icon(Icons.settings_power_outlined),
         tileColor: tileColor,
         title: Text('Power status at startup'),
-        trailing: DropdownButton<PowerBehavior>(
-          items: [
-            DropdownMenuItem<PowerBehavior>(
-              value: PowerBehavior.autoPowerOn,
-              child: Text("On", style: Theme.of(context).textTheme.bodySmall),
-            ),
-            DropdownMenuItem<PowerBehavior>(
-              value: PowerBehavior.maintainPowerOff,
-              child: Text("Off", style: Theme.of(context).textTheme.bodySmall),
-            ),
-            DropdownMenuItem<PowerBehavior>(
-              value: PowerBehavior.lastPowerState,
-              child: Text("Maintain last", style: Theme.of(context).textTheme.bodySmall),
-            ),
-          ],
-          onChanged: (value) {},
+        trailing: Selector<SettingsViewModel, PowerBehavior>(
+          selector: (context, vm) => vm.selectedPowerBehavior,
+          builder:
+              (context, selectedPowerBehavior, child) => DropdownButton<PowerBehavior>(
+                value: vm.selectedPowerBehavior,
+                items: [
+                  DropdownMenuItem<PowerBehavior>(
+                    value: PowerBehavior.autoPowerOn,
+                    child: Text("Keep on", style: Theme.of(context).textTheme.bodySmall),
+                  ),
+                  DropdownMenuItem<PowerBehavior>(
+                    value: PowerBehavior.maintainPowerOff,
+                    child: Text("Keep off", style: Theme.of(context).textTheme.bodySmall),
+                  ),
+                  DropdownMenuItem<PowerBehavior>(
+                    value: PowerBehavior.lastPowerState,
+                    child: Text("Maintain last", style: Theme.of(context).textTheme.bodySmall),
+                  ),
+                ],
+                onChanged: (PowerBehavior? newValue) {
+                  vm.selectedPowerBehavior = newValue!;
+                },
+              ),
         ),
 
         /*
@@ -131,13 +132,13 @@ class SettingsScreen extends StatelessWidget {
         leading: Icon(Icons.info_outline),
         tileColor: tileColor,
         title: Text('Hardware version'),
-        trailing:  Text(vm.borneoInfo.hwVer.toString()) ,
+        trailing: Text(vm.borneoInfo.hwVer.toString()),
       ),
       ListTile(
         leading: Icon(Icons.info_outline),
         tileColor: tileColor,
         title: Text('Firmware version'),
-        trailing:  Text(vm.borneoInfo.fwVer.toString()),
+        trailing: Text(vm.borneoInfo.fwVer.toString()),
       ),
       /*
       ListTile(

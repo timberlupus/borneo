@@ -39,7 +39,7 @@ class BorneoApp extends StatelessWidget {
       title: 'Borneo-IoT',
       theme: BorneoTheme(Theme.of(context).textTheme).light(),
       darkTheme: BorneoTheme(Theme.of(context).textTheme).dark(),
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.light,
       onGenerateRoute: context.read<RouteManager>().onGenerateRoute,
       supportedLocales: _kSupportedLocales,
       localizationsDelegates: [
