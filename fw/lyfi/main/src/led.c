@@ -49,7 +49,7 @@ static void led_drive();
 #define LED_DUTY_RES LEDC_TIMER_10_BIT
 
 #define FADE_PERIOD_MS 5000
-#define FADE_OFF_PERIOD_MS 3000
+#define FADE_OFF_PERIOD_MS 5000
 
 static led_duty_t channel_brightness_to_duty(led_brightness_t power);
 static void color_to_duties(const led_color_t color, led_duty_t* duties);
@@ -60,7 +60,6 @@ static bool led_fade_inprogress();
 static int led_fade_stop();
 static int led_fade_powering_on();
 static void led_fade_drive();
-
 
 static int led_mode_manual_entry();
 static int led_mode_scheduled_entry();
@@ -195,11 +194,11 @@ int led_init()
 
     ESP_LOGI(TAG, "Starting LED controller...");
 
-    if(_led.settings.mode == LED_MODE_SUN) {
+    if (_led.settings.mode == LED_MODE_SUN) {
         BO_TRY(led_sun_init());
     }
 
-    xTaskCreate(&led_proc, "led_task", 2 * 1024, NULL, tskIDLE_PRIORITY, NULL);
+    xTaskCreate(&led_proc, "led_task", 2 * 1024, NULL, tskIDLE_PRIORITY + 2, NULL);
     ESP_LOGI(TAG, "LED Controller module has been initialized successfully.");
     return 0;
 }
@@ -271,7 +270,7 @@ inline led_duty_t channel_brightness_to_duty(led_brightness_t brightness)
         return LED_CORLUT_EXP[brightness];
 
     default:
-        return brightness;
+        return brightness + (brightness >> 5) - (brightness >> 7);
     }
 }
 
@@ -382,6 +381,7 @@ int led_fade_powering_on()
 int led_fade_stop()
 {
     _led.fade_start_time_ms = 0LL;
+    BO_MUST(led_update_color(_led.fade_end_color));
     return 0;
 }
 
@@ -394,17 +394,16 @@ void led_fade_drive()
     int64_t now = esp_timer_get_time() / 1000LL;
     if (now >= _led.fade_start_time_ms + _led.fade_duration_ms) {
         BO_MUST(led_fade_stop());
+        return;
     }
 
-    int64_t elapsed_time_ms = now - _led.fade_start_time_ms;
+    uint32_t elapsed_time_ms = (uint32_t)(now - _led.fade_start_time_ms);
+    uint32_t progress = (elapsed_time_ms * 65536U) / _led.fade_duration_ms;
+
     led_color_t color;
     for (size_t ich = 0; ich < LYFI_LED_CHANNEL_COUNT; ich++) {
-        int64_t delta = ((int64_t)_led.fade_end_color[ich] - (int64_t)_led.fade_start_color[ich]);
-        delta = delta * elapsed_time_ms / (int64_t)_led.fade_duration_ms;
-        color[ich] = (led_brightness_t)((int64_t)_led.fade_start_color[ich] + delta);
-        if (color[ich] > LED_BRIGHTNESS_MAX) {
-            color[ich] = LED_BRIGHTNESS_MAX;
-        }
+        int32_t delta = (int32_t)(_led.fade_end_color[ich] - _led.fade_start_color[ich]) * progress;
+        color[ich] = _led.fade_start_color[ich] + (delta >> 16);
     }
     BO_MUST(led_update_color(color));
 }
@@ -699,7 +698,6 @@ static void preview_state_drive()
         = _led.preview_state_clock + _led.settings.scheduler.items[_led.settings.scheduler.item_count - 1].instant;
     for (; _led.state == LED_STATE_PREVIEW && _led.preview_state_clock < end_time; _led.preview_state_clock += 60) {
         led_sch_drive();
-        // taskYIELD();
         vTaskDelay(pdMS_TO_TICKS(10));
     }
     BO_MUST(led_switch_state(LED_STATE_DIMMING));
@@ -707,15 +705,15 @@ static void preview_state_drive()
 
 int nightlight_state_entry(uint8_t prev_state)
 {
-    if(!bo_power_is_on()) {
+    if (!bo_power_is_on()) {
         return -EINVAL;
     }
 
-    if(prev_state != LED_STATE_NORMAL) {
+    if (prev_state != LED_STATE_NORMAL) {
         return -EINVAL;
     }
 
-    if(_led.settings.mode != LED_MODE_SUN && _led.settings.mode != LED_MODE_SCHEDULED) {
+    if (_led.settings.mode != LED_MODE_SUN && _led.settings.mode != LED_MODE_SCHEDULED) {
         return -EINVAL;
     }
 
@@ -806,8 +804,7 @@ void led_proc()
 {
     while (true) {
         led_drive();
-        vTaskDelay(pdMS_TO_TICKS(10));
-        // taskYIELD();
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
 
@@ -912,7 +909,7 @@ int led_switch_mode(uint8_t mode)
         return -EINVAL;
     }
 
-    if(mode == _led.settings.mode) {
+    if (mode == _led.settings.mode) {
         return 0;
     }
 
