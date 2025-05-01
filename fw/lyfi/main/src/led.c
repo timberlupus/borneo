@@ -199,11 +199,6 @@ int led_init()
         BO_TRY(led_sun_init());
     }
 
-    if (bo_power_is_on()) {
-        _led.state = LED_STATE_POWERING_ON;
-        BO_TRY(led_fade_powering_on());
-    }
-
     xTaskCreate(&led_proc, "led_task", 2 * 1024, NULL, tskIDLE_PRIORITY, NULL);
     ESP_LOGI(TAG, "LED Controller module has been initialized successfully.");
     return 0;

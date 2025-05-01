@@ -25,6 +25,7 @@ class LyfiPaths {
   static final Uri mode = Uri(path: '/borneo/lyfi/mode');
   static final Uri correctionMethod =
       Uri(path: '/borneo/lyfi/correction-method');
+  static final Uri geoLocation = Uri(path: '/borneo/lyfi/geo-location');
 }
 
 class LyfiChannelInfo {
@@ -431,14 +432,13 @@ class BorneoLyfiDriver
   @override
   Future<GeoLocation> getLocation(Device dev) async {
     final dd = dev.driverData as LyfiDriverData;
-    final value = await dd.coap.getCbor<int>(LyfiPaths.correctionMethod);
-    return LedCorrectionMethod.values[value];
+    final response = await dd.coap.get(LyfiPaths.geoLocation);
+    return GeoLocation.fromMap(cbor.decode(response.payload) as CborMap);
   }
 
   @override
   Future<void> setLocation(Device dev, GeoLocation location) async {
     final dd = dev.driverData as LyfiDriverData;
-    return await dd.coap
-        .putCbor(LyfiPaths.correctionMethod, correctionMethod.index);
+    return await dd.coap.putCbor(LyfiPaths.geoLocation, location);
   }
 }
