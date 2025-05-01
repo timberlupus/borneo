@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:coap/coap.dart';
 import 'package:cbor/cbor.dart';
 
@@ -22,6 +23,8 @@ class LyfiPaths {
   static final Uri schedule = Uri(path: '/borneo/lyfi/schedule');
   static final Uri sunSchedule = Uri(path: '/borneo/lyfi/sun-schedule');
   static final Uri mode = Uri(path: '/borneo/lyfi/mode');
+  static final Uri correctionMethod =
+      Uri(path: '/borneo/lyfi/correction-method');
 }
 
 class LyfiChannelInfo {
@@ -86,6 +89,46 @@ enum LedRunningMode {
   sun;
 
   bool get isSchedulerEnabled => this == scheduled;
+}
+
+enum LedCorrectionMethod {
+  log,
+  linear,
+  exp,
+  gamma,
+  cie1931,
+}
+
+class GeoLocation {
+  final double lat;
+  final double lng;
+  GeoLocation({required this.lat, required this.lng});
+
+  @override
+  String toString() => "(${lat.toStringAsFixed(4)}, ${lng.toStringAsFixed(4)})";
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! GeoLocation) {
+      return false;
+    }
+    const double tolerance = 0.00001;
+    return (lat - other.lat).abs() < tolerance &&
+        (lng - other.lng).abs() < tolerance;
+  }
+
+  @override
+  int get hashCode => Object.hash(lat, lng);
+
+  factory GeoLocation.fromMap(dynamic map) {
+    return GeoLocation(
+      lat: map['lat'],
+      lng: map['lng'],
+    );
+  }
 }
 
 class LyfiDeviceStatus {
@@ -168,6 +211,12 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   Future<void> setColor(Device dev, List<int> color);
 
   Future<int> getKeepTemp(Device dev);
+
+  Future<LedCorrectionMethod> getCorrectionMethod(Device dev);
+  Future<void> setCorrectionMethod(Device dev, LedCorrectionMethod mode);
+
+  Future<GeoLocation> getLocation(Device dev);
+  Future<void> setLocation(Device dev, GeoLocation location);
 }
 
 class LyfiDriverData extends BorneoDriverData {
@@ -362,5 +411,34 @@ class BorneoLyfiDriver
     final dd = dev.driverData as LyfiDriverData;
     final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.sunSchedule);
     return items.map((x) => ScheduledInstant.fromMap(x!)).toList();
+  }
+
+  @override
+  Future<LedCorrectionMethod> getCorrectionMethod(Device dev) async {
+    final dd = dev.driverData as LyfiDriverData;
+    final value = await dd.coap.getCbor<int>(LyfiPaths.correctionMethod);
+    return LedCorrectionMethod.values[value];
+  }
+
+  @override
+  Future<void> setCorrectionMethod(
+      Device dev, LedCorrectionMethod correctionMethod) async {
+    final dd = dev.driverData as LyfiDriverData;
+    return await dd.coap
+        .putCbor(LyfiPaths.correctionMethod, correctionMethod.index);
+  }
+
+  @override
+  Future<GeoLocation> getLocation(Device dev) async {
+    final dd = dev.driverData as LyfiDriverData;
+    final value = await dd.coap.getCbor<int>(LyfiPaths.correctionMethod);
+    return LedCorrectionMethod.values[value];
+  }
+
+  @override
+  Future<void> setLocation(Device dev, GeoLocation location) async {
+    final dd = dev.driverData as LyfiDriverData;
+    return await dd.coap
+        .putCbor(LyfiPaths.correctionMethod, correctionMethod.index);
   }
 }
