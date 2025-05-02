@@ -18,12 +18,13 @@
 #include <borneo/power.h>
 #include <borneo/nvs.h>
 #include <borneo/algo/astronomy.h>
+#include <borneo/wifi.h>
 
 #include "lyfi-events.h"
 #include "algo.h"
 #include "led.h"
 
-static void _borneo_system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id,
+static void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id,
                                           void* event_data);
 static void led_events_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data);
 
@@ -49,7 +50,8 @@ static void led_drive();
 #define LED_DUTY_RES LEDC_TIMER_10_BIT
 
 #define FADE_PERIOD_MS 5000
-#define FADE_OFF_PERIOD_MS 5000
+#define FADE_ON_PERIOD_MS 5000
+#define FADE_OFF_PERIOD_MS 3000
 
 static led_duty_t channel_brightness_to_duty(led_brightness_t power);
 static void color_to_duties(const led_color_t color, led_duty_t* duties);
@@ -187,10 +189,8 @@ int led_init()
     // Initialize fade service.
     BO_TRY(ledc_fade_func_install(0));
 
-    // 加载配置
-    BO_TRY(esp_event_handler_instance_register(LYFI_LED_EVENTS, ESP_EVENT_ANY_ID, led_events_handler, NULL, NULL));
-    BO_TRY(esp_event_handler_instance_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, _borneo_system_events_handler, NULL,
-                                               NULL));
+    BO_TRY(esp_event_handler_register(LYFI_LED_EVENTS, ESP_EVENT_ANY_ID, led_events_handler, NULL));
+    BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, system_events_handler, NULL));
 
     ESP_LOGI(TAG, "Starting LED controller...");
 
@@ -349,8 +349,9 @@ int led_fade_powering_on()
 {
     led_color_t end_color;
 
-    time_t now = time(NULL);
-    now += FADE_PERIOD_MS / 1000;
+    time_t now = time(NULL) * 1000;
+    now += FADE_ON_PERIOD_MS;
+    now /= 1000;
     struct tm local_tm = { 0 };
     localtime_r(&now, &local_tm);
 
@@ -373,7 +374,7 @@ int led_fade_powering_on()
         break;
     }
 
-    BO_TRY(led_fade_to_color(end_color, FADE_PERIOD_MS));
+    BO_TRY(led_fade_to_color(end_color, FADE_ON_PERIOD_MS));
 
     return 0;
 }
@@ -482,20 +483,19 @@ bool led_is_blank()
     return true;
 }
 
-static void _borneo_system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data)
+static void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data)
 {
     switch (event_id) {
-    case BO_EVENT_SHUTDOWN_SCHEDULED:
-    case BO_EVENT_EMERGENCY_SHUTDOWN:
+    case BO_EVENT_SHUTDOWN_FAULT:
     case BO_EVENT_FATAL_ERROR: {
         if (led_fade_inprogress()) {
             BO_MUST(led_fade_stop());
         }
-        BO_MUST(led_switch_state(LED_STATE_NORMAL));
+        BO_MUST(led_switch_state(LED_STATE_POWERING_OFF));
         led_blank();
     } break;
 
-    case BO_EVENT_POWER_OFF: {
+    case BO_EVENT_SHUTDOWN_SCHEDULED: {
         BO_MUST(led_switch_state(LED_STATE_POWERING_OFF));
     } break;
 
@@ -804,7 +804,7 @@ void led_proc()
 {
     while (true) {
         led_drive();
-        vTaskDelay(pdMS_TO_TICKS(1));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 

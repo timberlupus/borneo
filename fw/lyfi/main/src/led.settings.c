@@ -40,34 +40,34 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     .manual_color = {
 // From kconfig
 #if CONFIG_LYFI_LED_CH0_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH1_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH2_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH3_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH4_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH5_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH6_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH7_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH8_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH9_ENABLED
-        10,
+        5,
 #endif
     },
     .sun_color = {0},

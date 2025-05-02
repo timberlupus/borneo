@@ -60,9 +60,9 @@ enum {
     BO_EVENT_INITIALIZING = 0, ///< Power-on start initialization
     BO_EVENT_READY, ///< Power-on initialization completed
     BO_EVENT_POWER_ON, ///< Soft power on
-    BO_EVENT_POWER_OFF, ///< Soft power off
+    BO_EVENT_REBOOTING, ///< Rebooting
     BO_EVENT_SHUTDOWN_SCHEDULED, ///< Scheduled a shutdown
-    BO_EVENT_EMERGENCY_SHUTDOWN, ///< Emergency shutdown event
+    BO_EVENT_SHUTDOWN_FAULT, ///< Fault shutdown event
 
     BO_EVENT_ENTRY_FACTORY_MODE, ///< Entry the Factory Mode
 
@@ -70,9 +70,11 @@ enum {
 };
 
 enum {
-    BO_SHUTDOWN_REASON_UNKNOWN = 0x00000000,
+    BO_SHUTDOWN_REASON_SCHEDULED = 0,
     BO_SHUTDOWN_REASON_FATAL_ERROR = 0x00000001,
     BO_SHUTDOWN_REASON_OVERHEATED = 0x00000002,
+
+    BO_SHUTDOWN_REASON_UNKNOWN = 0xFFFFFFFF,
 };
 
 struct system_info {
@@ -84,6 +86,7 @@ struct system_info {
 };
 
 struct system_status {
+    uint32_t state_flags;
     uint32_t shutdown_reason;
     uint64_t shutdown_timestamp;
     bool is_ready;
@@ -93,7 +96,6 @@ int bo_system_init();
 void bo_system_set_ready();
 
 const struct system_info* bo_system_get_info();
-const struct system_status* bo_system_get_status();
 
 void bo_system_reboot_later(uint32_t delay_ms);
 
@@ -105,9 +107,15 @@ int bo_system_set_name(const char* name);
 int bo_system_set_model(const char* model);
 int bo_system_set_manuf(const char* manuf);
 
+uint32_t bo_system_get_shutdown_reason();
 void bo_system_set_shutdown_reason(uint32_t reason);
 
+uint64_t bo_system_get_shutdown_timestamp();
+
 void bo_sem_release(SemaphoreHandle_t* sem);
+
+bool bo_system_is_operable();
+bool bo_system_connection_configurated();
 
 #ifdef __cplusplus
 }

@@ -17,8 +17,6 @@ bool bo_power_is_on();
 
 int bo_power_on();
 
-int bo_power_off();
-
 int bo_power_shutdown(uint32_t reason);
 
 uint8_t bo_power_get_behavior();

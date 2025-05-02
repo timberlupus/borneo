@@ -344,7 +344,7 @@ static void coap_hnd_download(coap_resource_t* resource, coap_session_t* session
         ESP_LOGI(TAG, "OTA update successful, preparing to reboot...");
 
         // Delay reboot to allow response to be sent
-        bo_system_reboot_later(1000);
+        bo_system_reboot_later(5000);
 
         coap_pdu_set_code(response, COAP_RESPONSE_CODE_CREATED);
     }

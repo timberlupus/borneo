@@ -62,7 +62,7 @@ static void coap_hnd_borneo_power_put(coap_resource_t* resource, coap_session_t*
         BO_COAP_TRY(bo_power_on(), BO_COAP_CODE_400_BAD_REQUEST);
     }
     else {
-        BO_COAP_TRY(bo_power_off(), BO_COAP_CODE_400_BAD_REQUEST);
+        BO_COAP_TRY(bo_power_shutdown(0), BO_COAP_CODE_400_BAD_REQUEST);
     }
 
     coap_pdu_set_code(response, COAP_RESPONSE_CODE(204));

@@ -136,8 +136,7 @@ static void coap_hnd_borneo_info_get(coap_resource_t* resource, coap_session_t* 
 static void coap_hnd_borneo_reboot_post(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
                                         const coap_string_t* query, coap_pdu_t* response)
 {
-    // 1 秒以后重启
-    bo_system_reboot_later(1000);
+    bo_system_reboot_later(5000);
 
     coap_pdu_set_code(response, COAP_RESPONSE_CODE(204));
 }
@@ -151,8 +150,6 @@ static void coap_hnd_borneo_status_get(coap_resource_t* resource, coap_session_t
     CborEncoder encoder;
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
     CborEncoder root_map;
-
-    const struct system_status* sys_status = bo_system_get_status();
 
     BO_COAP_TRY_ENCODE_CBOR(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength));
 
@@ -204,10 +201,10 @@ static void coap_hnd_borneo_status_get(coap_resource_t* resource, coap_session_t
     BO_COAP_TRY_ENCODE_CBOR(cbor_encode_int(&root_map, errno));
 
     BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "shutdownReason"));
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, sys_status->shutdown_reason));
+    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, bo_system_get_shutdown_reason()));
 
     BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "shutdownTimestamp"));
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, sys_status->shutdown_timestamp));
+    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, bo_system_get_shutdown_timestamp()));
 
 #if CONFIG_BORNEO_NTC_ENABLED
     {
