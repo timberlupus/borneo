@@ -295,23 +295,6 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                     ),
             ),
             */
-            IconButton(
-              icon: Icon(Icons.settings_outlined, size: 24),
-              onPressed: () async {
-                final lyfi = context.read<LyfiViewModel>();
-                final vm = await lyfi.loadSettings();
-                await Future.delayed(Duration(milliseconds: 200));
-                final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
-                if (context.mounted) {
-                  lyfi.stopTimer();
-                  try {
-                    await Navigator.push(context, route);
-                  } finally {
-                    lyfi.startTimer();
-                  }
-                }
-              },
-            ),
 
             Selector<LyfiViewModel, RssiLevel?>(
               selector: (_, vm) => vm.rssiLevel,

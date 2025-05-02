@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'package:coap/coap.dart';
 import 'package:cbor/cbor.dart';
 
