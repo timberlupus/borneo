@@ -33,8 +33,7 @@ class _IconProgressBarState extends State<IconProgressBar> with SingleTickerProv
       _controller = AnimationController(vsync: this, duration: widget.duration);
       _progressAnimation = Tween<double>(begin: 0, end: widget.progress).animate(_controller!);
       _controller!.repeat(reverse: false);
-    }
-    else {
+    } else {
       _controller = null;
       _progressAnimation = null;
     }

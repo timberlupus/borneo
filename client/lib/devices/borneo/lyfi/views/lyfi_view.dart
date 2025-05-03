@@ -295,7 +295,6 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                     ),
             ),
             */
-
             Selector<LyfiViewModel, RssiLevel?>(
               selector: (_, vm) => vm.rssiLevel,
               builder:
