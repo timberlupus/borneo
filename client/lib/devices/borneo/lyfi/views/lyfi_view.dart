@@ -241,20 +241,8 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
           leading: Selector<LyfiViewModel, bool>(
             selector: (context, vm) => vm.isBusy,
             builder:
-                (context, isBusy, child) => IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  onPressed:
-                      isBusy
-                          ? null
-                          : () {
-                            final vm = context.read<LyfiViewModel>();
-                            if (vm.isLocked) {
-                              Navigator.of(context).pop();
-                            } else {
-                              vm.toggleLock(true);
-                            }
-                          },
-                ),
+                (context, isBusy, child) =>
+                    IconButton(icon: Icon(Icons.arrow_back), onPressed: isBusy ? null : () => goBack(context)),
           ),
           actions: [
             Container(
@@ -321,6 +309,15 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void goBack(BuildContext context) async {
+    final vm = context.read<LyfiViewModel>();
+    if (vm.isLocked) {
+      Navigator.of(context).pop();
+    } else {
+      vm.toggleLock(true);
+    }
   }
 }
 

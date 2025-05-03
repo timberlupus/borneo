@@ -69,9 +69,20 @@ class SettingsScreen extends StatelessWidget {
       ListTile(
         tileColor: tileColor,
         leading: Icon(Icons.info_outline),
-        title: Text('Address'),
+        title: Text('Device address'),
         subtitle: Text(vm.address.toString()),
         trailing: _buildWifiRssiIcon(context),
+      ),
+      ListTile(
+        tileColor: tileColor,
+        leading: Icon(Icons.info_outline),
+        title: Text('Location'),
+        subtitle:
+            vm.location != null
+                ? Text("(${vm.location!.lat.toStringAsFixed(3)}, ${vm.location!.lng.toStringAsFixed(3)}}")
+                : Text('Unknown'),
+        trailing: rightChevron,
+        onTap: () {},
       ),
       ListTile(title: Text('DEVICE STATUS')),
       ListTile(

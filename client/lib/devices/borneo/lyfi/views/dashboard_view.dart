@@ -442,7 +442,6 @@ class DashboardView extends StatelessWidget {
         ),
       ),
       */
-        // Power
         Selector<
           LyfiViewModel,
           ({
@@ -468,6 +467,7 @@ class DashboardView extends StatelessWidget {
           builder:
               (context, vm, _) => Container(
                 margin: const EdgeInsets.fromLTRB(0, 24, 0, 0),
+                color: Theme.of(context).colorScheme.surfaceContainer,
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                   child: Column(
@@ -569,7 +569,6 @@ class DashboardView extends StatelessWidget {
                               onPressed: () async {
                                 final lyfi = context.read<LyfiViewModel>();
                                 final vm = await lyfi.loadSettings();
-                                await Future.delayed(Duration(milliseconds: 200));
                                 final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
                                 if (context.mounted) {
                                   lyfi.stopTimer();

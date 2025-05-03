@@ -215,7 +215,7 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   Future<LedCorrectionMethod> getCorrectionMethod(Device dev);
   Future<void> setCorrectionMethod(Device dev, LedCorrectionMethod mode);
 
-  Future<GeoLocation> getLocation(Device dev);
+  Future<GeoLocation?> getLocation(Device dev);
   Future<void> setLocation(Device dev, GeoLocation location);
 }
 
@@ -429,10 +429,10 @@ class BorneoLyfiDriver
   }
 
   @override
-  Future<GeoLocation> getLocation(Device dev) async {
+  Future<GeoLocation?> getLocation(Device dev) async {
     final dd = dev.driverData as LyfiDriverData;
-    final response = await dd.coap.get(LyfiPaths.geoLocation);
-    return GeoLocation.fromMap(cbor.decode(response.payload) as CborMap);
+    final loc = await dd.coap.getCbor<GeoLocation?>(LyfiPaths.geoLocation);
+    return loc;
   }
 
   @override

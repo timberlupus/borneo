@@ -55,6 +55,7 @@ enum led_running_modes {
 enum led_option_flags {
     LED_OPTION_LUNAR_ENABLED = 1,
     LED_OPTION_ACCLIMATION_ENABLED = 2,
+    LED_OPTION_HAS_GEO_LOCATION = 4,
 };
 
 struct led_scheduler_item {
@@ -75,7 +76,6 @@ struct led_factory_settings {
 struct led_user_settings {
     uint8_t mode; ///< Running mode, see `enum led_running_modes`
 
-    uint64_t flags; ///< The option flags
 
     uint16_t nightlight_duration; ///< Night lighting state duration (in seconds)
     struct led_scheduler scheduler; ///< Scheduling scheduler for scheduled state
@@ -84,6 +84,8 @@ struct led_user_settings {
     uint8_t correction_method; ///< Brightness correction method: Log/Exp/Linear/CIE1931
 
     struct geo_location location; ///< The location for Solar and Lunar simulation.
+
+    uint64_t flags; ///< The option flags
 };
 
 struct led_status {
@@ -149,6 +151,7 @@ int32_t led_get_nightlight_remaining();
 
 int led_set_correction_method(uint8_t correction_method);
 
+bool led_has_geo_location();
 int led_set_geo_location(const struct geo_location* location);
 
 int led_load_factory_settings(struct led_factory_settings* factory_settings);

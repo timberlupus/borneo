@@ -74,9 +74,11 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     .scheduler = { 0 },
 
     .location = {
-        .lat = NAN,
-        .lng = NAN,
+        .lat = 25.0430f,
+        .lng = 102.7062f,
     },
+
+    .flags = 0ULL,
 };
 
 extern struct led_status _led;
@@ -200,12 +202,13 @@ int led_load_user_settings()
         size = sizeof(struct geo_location);
         rc = nvs_get_blob(handle, LED_NVS_KEY_LOC, &settings->location, &size);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
-            settings->location = LED_DEFAULT_SETTINGS.location;
+            settings->flags &= ~LED_OPTION_HAS_GEO_LOCATION;
             rc = 0;
         }
         if (rc) {
             goto _EXIT_CLOSE;
         }
+        settings->flags &= LED_OPTION_HAS_GEO_LOCATION;
     }
 
     // TODO
@@ -264,9 +267,11 @@ int led_save_user_settings()
         goto _EXIT_CLOSE;
     }
 
-    rc = nvs_set_blob(handle, LED_NVS_KEY_LOC, &settings->location, sizeof(struct geo_location));
-    if (rc) {
-        goto _EXIT_CLOSE;
+    if (led_has_geo_location()) {
+        rc = nvs_set_blob(handle, LED_NVS_KEY_LOC, &settings->location, sizeof(struct geo_location));
+        if (rc) {
+            goto _EXIT_CLOSE;
+        }
     }
 
     rc = nvs_commit(handle);
@@ -277,6 +282,11 @@ _EXIT_WITHOUT_CLOSE:
     return rc;
 }
 
+bool led_has_geo_location() {
+    // TODO lock
+    return _led.settings.flags & LED_OPTION_HAS_GEO_LOCATION;
+}
+
 int led_set_geo_location(const struct geo_location* location)
 {
     // TODO lock
@@ -284,11 +294,23 @@ int led_set_geo_location(const struct geo_location* location)
         return -EINVAL;
     }
 
-    if(location->lat == NAN || location->lng == NAN) {
+    if (location->lat == NAN || location->lng == NAN) {
+        return -EINVAL;
+    }
+    if (isnan(location->lat) || isnan(location->lng) || isinf(location->lat) || isinf(location->lng)) {
         return -EINVAL;
     }
 
-    memcpy(&_led.settings.location, location, sizeof(struct geo_location));
+    // lat [-90.0, 90.0]
+    if (location->lat < -90.0f || location->lat > 90.0f) {
+        return -EINVAL;
+    }
+    // lng [-180.0, 180.0]
+    if (location->lng < -180.0f || location->lng > 180.0f) {
+        return -EINVAL;
+    }
+    _led.settings.location.lat = location->lat;
+    _led.settings.location.lng = location->lng;
     BO_TRY(led_save_user_settings());
     return 0;
 }

@@ -73,6 +73,7 @@ dependencies:
   flutter_gettext: ^2.0.1
   progressive_time_picker: ^1.0.3
   flutter_timezone: ^4.1.0
+  geolocator: ^14.0.0
 
 
 

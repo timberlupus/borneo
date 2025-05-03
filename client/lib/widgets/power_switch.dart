@@ -18,10 +18,8 @@ class _PowerButtonState extends State<PowerButton> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     final iconColor = widget.value ? colorScheme.primary : colorScheme.error;
-    final textColor = widget.value ? colorScheme.primary : colorScheme.error;
     final loadingColor = colorScheme.onSurface;
 
     return RoundedIconTextButton(

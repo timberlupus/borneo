@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include <esp_system.h>
 #include <esp_event.h>
@@ -414,7 +415,7 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
 }
 
 static void coap_hnd_state_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
-                              const coap_string_t* query, coap_pdu_t* response)
+                               const coap_string_t* query, coap_pdu_t* response)
 {
     CborEncoder encoder;
     size_t encoded_size = 0;
@@ -432,7 +433,7 @@ static void coap_hnd_state_get(coap_resource_t* resource, coap_session_t* sessio
 }
 
 static void coap_hnd_state_put(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
-                              const coap_string_t* query, coap_pdu_t* response)
+                               const coap_string_t* query, coap_pdu_t* response)
 {
     coap_resource_notify_observers(resource, NULL);
 
@@ -490,8 +491,8 @@ static void coap_hnd_correction_method_put(coap_resource_t* resource, coap_sessi
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
 
-static void coap_hnd_mode_get(coap_resource_t* resource, coap_session_t* session,
-                                           const coap_pdu_t* request, const coap_string_t* query, coap_pdu_t* response)
+static void coap_hnd_mode_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
+                              const coap_string_t* query, coap_pdu_t* response)
 {
     CborEncoder encoder;
     size_t encoded_size = 0;
@@ -507,8 +508,8 @@ static void coap_hnd_mode_get(coap_resource_t* resource, coap_session_t* session
     coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
 }
 
-static void coap_hnd_mode_put(coap_resource_t* resource, coap_session_t* session,
-                                           const coap_pdu_t* request, const coap_string_t* query, coap_pdu_t* response)
+static void coap_hnd_mode_put(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
+                              const coap_string_t* query, coap_pdu_t* response)
 {
     coap_resource_notify_observers(resource, NULL);
 
@@ -568,9 +569,8 @@ static void coap_hnd_nightlight_duration_put(coap_resource_t* resource, coap_ses
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
 
-static void coap_hnd_geo_location_get(coap_resource_t* resource, coap_session_t* session,
-                                               const coap_pdu_t* request, const coap_string_t* query,
-                                               coap_pdu_t* response)
+static void coap_hnd_geo_location_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
+                                      const coap_string_t* query, coap_pdu_t* response)
 {
     size_t encoded_size = 0;
     uint8_t buf[128];
@@ -581,27 +581,29 @@ static void coap_hnd_geo_location_get(coap_resource_t* resource, coap_session_t*
     CborEncoder encoder;
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
 
-    CborEncoder root_map;
-    BO_COAP_VERIFY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength)); // 修改字典条目数需要改这里
+    if (led_has_geo_location()) {
+        CborEncoder root_map;
+        BO_COAP_VERIFY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength));
 
-    BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "lat"));
-    BO_COAP_VERIFY(cbor_encode_float(&root_map, _led.settings.location.lat));
+        BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "lat"));
+        BO_COAP_VERIFY(cbor_encode_float(&root_map, _led.settings.location.lat));
 
-    BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "lng"));
-    BO_COAP_VERIFY(cbor_encode_float(&root_map, _led.settings.location.lng));
+        BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "lng"));
+        BO_COAP_VERIFY(cbor_encode_float(&root_map, _led.settings.location.lng));
 
-    BO_COAP_VERIFY(cbor_encoder_close_container(&encoder, &root_map));
+        BO_COAP_VERIFY(cbor_encoder_close_container(&encoder, &root_map));
+    }
+    else {
+        BO_COAP_VERIFY(cbor_encode_null(&encoder));
+    }
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
-
     coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
-
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
 }
 
-static void coap_hnd_geo_location_put(coap_resource_t* resource, coap_session_t* session,
-                                               const coap_pdu_t* request, const coap_string_t* query,
-                                               coap_pdu_t* response)
+static void coap_hnd_geo_location_put(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
+                                      const coap_string_t* query, coap_pdu_t* response)
 {
     coap_resource_notify_observers(resource, NULL);
 
@@ -630,7 +632,6 @@ static void coap_hnd_geo_location_put(coap_resource_t* resource, coap_session_t*
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
-
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/color", false, coap_hnd_color_get, NULL, coap_hnd_color_put, NULL);
 
