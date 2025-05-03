@@ -1,7 +1,9 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/schedule_chart.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/settings_screen.dart';
+import 'package:borneo_app/widgets/icon_progress.dart';
 import 'package:borneo_app/widgets/power_switch.dart';
+import 'package:borneo_app/widgets/rounded_icon_text_button.dart';
 import 'package:borneo_app/widgets/value_listenable_builders.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:flutter/material.dart';
@@ -155,6 +157,7 @@ class DashboardToufu extends StatelessWidget {
                             child: LayoutBuilder(
                               builder:
                                   (context, constraints) => CircularPercentIndicator(
+                                    animationDuration: 300,
                                     radius: (constraints.maxHeight) / 2.5,
                                     lineWidth: 10.0,
                                     circularStrokeCap: CircularStrokeCap.butt,
@@ -467,119 +470,118 @@ class DashboardView extends StatelessWidget {
                 margin: const EdgeInsets.fromLTRB(0, 24, 0, 0),
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  color: Theme.of(context).colorScheme.surfaceContainer,
                   child: Column(
                     children: [
                       Row(
                         children: [
-                          Spacer(),
-                          PowerButton(
-                            value: vm.isOn,
-                            label: Text(
-                              vm.isOn ? 'ON' : 'OFF',
-                              style: Theme.of(
-                                context,
-                              ).textTheme.titleSmall?.copyWith(color: Theme.of(context).hintColor),
+                          Expanded(
+                            child: PowerButton(
+                              value: vm.isOn,
+                              label: Text(
+                                vm.isOn ? 'ON' : 'OFF',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleSmall?.copyWith(color: Theme.of(context).hintColor),
+                              ),
+                              onChanged:
+                                  vm.isOnline && !vm.isBusy && vm.isLocked
+                                      ? (value) => context.read<LyfiViewModel>().switchPowerOnOff(!vm.isOn)
+                                      : null,
                             ),
-                            onChanged:
-                                vm.isOnline && !vm.isBusy && vm.isLocked
-                                    ? (value) => context.read<LyfiViewModel>().switchPowerOnOff(!vm.isOn)
-                                    : null,
                           ),
-                          Spacer(),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                icon:
-                                    vm.ledState == LedState.nightlight
-                                        ? Icon(Icons.flashlight_on, size: 48)
-                                        : Icon(Icons.flashlight_off, size: 48),
 
-                                onPressed:
-                                    vm.canSwitchNightlightState
-                                        ? () {
-                                          context.read<LyfiViewModel>().switchNightlightState();
-                                        }
-                                        : null,
-                              ),
-                              vm.ledState == LedState.nightlight
-                                  ? Text('Temporary (${vm.nightlightRemaining.inSeconds})')
-                                  : Text('Temporary'),
-                            ],
+                          Expanded(
+                            child: RoundedIconTextButton(
+                              borderColor: Theme.of(context).colorScheme.primary,
+                              text:
+                                  vm.ledState == LedState.nightlight
+                                      ? 'Temporary (${vm.nightlightRemaining.inSeconds})'
+                                      : 'Temporary',
+                              buttonSize: 64,
+                              icon:
+                                  vm.ledState == LedState.nightlight
+                                      ? IconProgressBar(
+                                        icon: Icon(Icons.flashlight_on, size: 40),
+                                        progress: 0.5,
+                                        size: 40,
+                                        progressColor: Theme.of(context).colorScheme.primary,
+                                        backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
+                                      )
+                                      : Icon(Icons.flashlight_off, size: 40),
+
+                              onPressed:
+                                  vm.canSwitchNightlightState
+                                      ? () => context.read<LyfiViewModel>().switchNightlightState()
+                                      : null,
+                            ),
                           ),
-                          Spacer(),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Selector<LyfiViewModel, bool>(
-                                selector: (_, vm) => vm.canUnlock,
-                                builder:
-                                    (context, canUnlock, _) => IconButton(
-                                      icon: Icon(Icons.lightbulb, size: 48),
-                                      onPressed:
-                                          canUnlock
-                                              ? () async => context.read<LyfiViewModel>().toggleLock(false)
-                                              : null,
-                                    ),
-                              ),
-                              Text("Dimming"),
-                            ],
+
+                          Selector<LyfiViewModel, bool>(
+                            selector: (_, vm) => vm.canUnlock,
+                            builder:
+                                (context, canUnlock, _) => Expanded(
+                                  child: RoundedIconTextButton(
+                                    borderColor: Theme.of(context).colorScheme.primary,
+                                    text: "Dimming",
+                                    buttonSize: 64,
+                                    icon: Icon(Icons.tips_and_updates_outlined, size: 40),
+                                    onPressed:
+                                        canUnlock ? () async => context.read<LyfiViewModel>().toggleLock(false) : null,
+                                  ),
+                                ),
                           ),
-                          Spacer(),
                         ],
                       ),
-                      SizedBox(height: 8),
+
+                      //sep
+                      SizedBox(height: 16),
+
+                      // next row
                       Row(
                         children: [
-                          Spacer(),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(icon: Icon(Icons.nightlight, size: 48), onPressed: () => {}),
-                              Text("Moon"),
-                            ],
-                          ),
-                          Spacer(),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(icon: Icon(Icons.calendar_month, size: 48), onPressed: () => {}),
-                              Text("Acclimation"),
-                            ],
-                          ),
-                          Spacer(),
-                          // Settings button
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.settings, size: 48),
-                                onPressed: () async {
-                                  final lyfi = context.read<LyfiViewModel>();
-                                  final vm = await lyfi.loadSettings();
-                                  await Future.delayed(Duration(milliseconds: 200));
-                                  final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
-                                  if (context.mounted) {
-                                    lyfi.stopTimer();
-                                    try {
-                                      await Navigator.push(context, route);
-                                    } finally {
-                                      lyfi.startTimer();
-                                    }
-                                  }
-                                },
-                              ),
-                              Text("Settings"),
-                            ],
+                          Expanded(
+                            child: RoundedIconTextButton(
+                              borderColor: Theme.of(context).colorScheme.primary,
+                              text: "Moon",
+                              buttonSize: 64,
+                              icon: Icon(Icons.nightlight_outlined, size: 40),
+                              onPressed: null,
+                            ),
                           ),
 
-                          Spacer(),
+                          // Settings button
+                          Expanded(
+                            child: RoundedIconTextButton(
+                              borderColor: Theme.of(context).colorScheme.primary,
+                              text: "Acclimation",
+                              buttonSize: 64,
+                              icon: Icon(Icons.calendar_month_outlined, size: 40),
+                              onPressed: null,
+                            ),
+                          ),
+
+                          Expanded(
+                            child: RoundedIconTextButton(
+                              borderColor: Theme.of(context).colorScheme.primary,
+                              text: "Settings",
+                              buttonSize: 64,
+                              icon: Icon(Icons.settings_outlined, size: 40),
+                              onPressed: () async {
+                                final lyfi = context.read<LyfiViewModel>();
+                                final vm = await lyfi.loadSettings();
+                                await Future.delayed(Duration(milliseconds: 200));
+                                final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
+                                if (context.mounted) {
+                                  lyfi.stopTimer();
+                                  try {
+                                    await Navigator.push(context, route);
+                                  } finally {
+                                    lyfi.startTimer();
+                                  }
+                                }
+                              },
+                            ),
+                          ),
                         ],
                       ),
                     ],

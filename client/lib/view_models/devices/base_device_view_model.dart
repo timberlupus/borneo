@@ -11,7 +11,7 @@ import 'package:borneo_app/view_models/base_view_model.dart';
 import 'package:logger/logger.dart';
 
 abstract class BaseDeviceViewModel extends BaseViewModel with WidgetsBindingObserver, ViewModelEventBusMixin {
-  static const Duration timerDuration = Duration(seconds: 3);
+  static const Duration timerDuration = Duration(seconds: 1);
 
   final Logger? logger;
   final CancellationToken initializationCancelToken = CancellationToken();
