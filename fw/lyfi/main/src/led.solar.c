@@ -102,20 +102,16 @@ bool led_sun_is_in_progress(const struct tm* local_tm)
         && _led.sun_scheduler.items[_led.sun_scheduler.item_count - 1].instant <= local_instant;
 }
 
-void led_sun_drive()
+void led_sun_drive(time_t utc_now, led_color_t color)
 {
     assert(led_sun_can_active());
     assert(_led.settings.mode == LED_MODE_SUN && _led.state == LED_STATE_NORMAL);
     assert(_led.sun_scheduler.item_count == SOLAR_INSTANTS_COUNT);
 
-    led_color_t color;
-    time_t utc_now = time(NULL);
     struct tm local_tm = { 0 };
     localtime_r(&utc_now, &local_tm);
 
     led_sch_compute_color(&_led.sun_scheduler, &local_tm, color);
-
-    BO_MUST(led_update_color(color));
 
     if (utc_now >= _led.sun_next_reschedule_time_utc && !led_sun_is_in_progress(&local_tm)) {
         BO_MUST(led_sun_update_scheduler());

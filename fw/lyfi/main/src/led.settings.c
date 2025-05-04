@@ -32,6 +32,9 @@
 #define LED_NVS_KEY_CORRECTION_METHOD "corrmtd"
 #define LED_NVS_KEY_PWM_FREQ "pwmfreq"
 #define LED_NVS_KEY_LOC "loc"
+#define LED_NVS_KEY_ACCLIMATION_START "acc.start"
+#define LED_NVS_KEY_ACCLIMATION_DURATION "acc.days"
+#define LED_NVS_KEY_ACCLIMATION_START_PERCENT "acc.pc"
 
 static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     .mode = LED_MODE_MANUAL,
@@ -78,6 +81,12 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     },
 
     .flags = 0ULL,
+
+    .acclimation = {
+        .start_utc = 0,
+        .duration = 30,
+        .start_percent = 30,
+    },
 };
 
 extern struct led_status _led;
@@ -201,6 +210,39 @@ int led_load_user_settings()
         }
     }
 
+    {
+        rc = nvs_get_i64(handle, LED_NVS_KEY_ACCLIMATION_START, &settings->acclimation.start_utc);
+        if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->acclimation.start_utc = LED_DEFAULT_SETTINGS.acclimation.start_utc;
+            rc = 0;
+        }
+        if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
+    {
+        rc = nvs_get_u8(handle, LED_NVS_KEY_ACCLIMATION_DURATION, &settings->acclimation.duration);
+        if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->acclimation.duration = LED_DEFAULT_SETTINGS.acclimation.duration;
+            rc = 0;
+        }
+        if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
+    {
+        rc = nvs_get_u8(handle, LED_NVS_KEY_ACCLIMATION_START_PERCENT, &settings->acclimation.start_percent);
+        if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->acclimation.start_percent = LED_DEFAULT_SETTINGS.acclimation.start_percent;
+            rc = 0;
+        }
+        if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
     // TODO
     // Loading the brightness and power settings...
 #ifdef CONFIG_LYFI_STANDALONE_CONTROLLER
@@ -257,6 +299,21 @@ int led_save_user_settings()
         if (rc) {
             goto _EXIT_CLOSE;
         }
+    }
+
+    rc = nvs_set_i64(handle, LED_NVS_KEY_ACCLIMATION_START, settings->acclimation.start_utc);
+    if (rc) {
+        goto _EXIT_CLOSE;
+    }
+
+    rc = nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_DURATION, settings->acclimation.duration);
+    if (rc) {
+        goto _EXIT_CLOSE;
+    }
+
+    rc = nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_START_PERCENT, settings->acclimation.start_percent);
+    if (rc) {
+        goto _EXIT_CLOSE;
     }
 
     rc = nvs_commit(handle);

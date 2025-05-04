@@ -35,4 +35,17 @@ extension CoapClientExtensions on CoapClient {
       throw CoapException("Failed to request uri `$uri`", response);
     }
   }
+
+  Future<void> postCbor<T>(Uri uri, T payload,
+      {bool confirmable = true}) async {
+    final bytes = simple_cbor.cbor.encode(payload);
+    final response = await postBytes(uri,
+        payload: bytes,
+        accept: CoapMediaType.applicationCbor,
+        format: CoapMediaType.applicationCbor,
+        confirmable: confirmable);
+    if (!response.isSuccess) {
+      throw CoapException("Failed to request uri `$uri`", response);
+    }
+  }
 }

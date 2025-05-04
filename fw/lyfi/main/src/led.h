@@ -22,6 +22,9 @@ typedef led_duty_t led_duties_t[LYFI_LED_CHANNEL_COUNT];
 #define LED_BRIGHTNESS_MIN ((led_brightness_t)0)
 #define LED_BRIGHTNESS_MAX ((led_brightness_t)1000)
 
+#define LED_ACCLIMATION_DAYS_MAX 100
+#define LED_ACCLIMATION_DAYS_MIN 5
+
 enum led_correction_methods {
     LED_CORRECTION_LOG = 0, ///< Default
     LED_CORRECTION_LINEAR = 1,
@@ -54,8 +57,7 @@ enum led_running_modes {
 
 enum led_option_flags {
     LED_OPTION_LUNAR_ENABLED = 1,
-    LED_OPTION_ACCLIMATION_ENABLED = 2,
-    LED_OPTION_HAS_GEO_LOCATION = 4,
+    LED_OPTION_HAS_GEO_LOCATION = 2,
 };
 
 struct led_scheduler_item {
@@ -73,9 +75,14 @@ struct led_factory_settings {
     uint16_t pwm_freq; ///< The frequency of PWM signals
 };
 
+struct led_acclimation_settings {
+    time_t start_utc;
+    uint8_t duration; ///< In days
+    uint8_t start_percent; ///< [0, 100%]
+};
+
 struct led_user_settings {
     uint8_t mode; ///< Running mode, see `enum led_running_modes`
-
 
     uint16_t nightlight_duration; ///< Night lighting state duration (in seconds)
     struct led_scheduler scheduler; ///< Scheduling scheduler for scheduled state
@@ -84,6 +91,8 @@ struct led_user_settings {
     uint8_t correction_method; ///< Brightness correction method: Log/Exp/Linear/CIE1931
 
     struct geo_location location; ///< The location for Solar and Lunar simulation.
+
+    struct led_acclimation_settings acclimation;
 
     uint64_t flags; ///< The option flags
 };
@@ -162,14 +171,18 @@ void led_sch_compute_color(const struct led_scheduler* sch, const struct tm* loc
 void led_sch_compute_color_in_range(led_color_t color, const struct tm* tm_local,
                                     const struct led_scheduler_item* range_begin,
                                     const struct led_scheduler_item* range_end);
-void led_sch_drive();
-
+void led_sch_drive(time_t utc_now, led_color_t color);
 
 int led_sun_init();
 int led_sun_update_scheduler();
 bool led_sun_is_in_progress(const struct tm* local_tm);
-void led_sun_drive();
+void led_sun_drive(time_t utc_now, led_color_t color);
 bool led_sun_can_active();
+
+bool led_acclimation_inprogress();
+int led_acclimation_drive(time_t utc_now, led_color_t color);
+int led_acclimation_set(const struct led_acclimation_settings* settings);
+int led_acclimation_terminate();
 
 #ifdef __cplusplus
 }

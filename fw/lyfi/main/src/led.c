@@ -24,8 +24,7 @@
 #include "algo.h"
 #include "led.h"
 
-static void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id,
-                                          void* event_data);
+static void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data);
 static void led_events_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data);
 
 static void led_proc();
@@ -46,15 +45,15 @@ static void led_drive();
 #define TAG "lyfi-ledc"
 
 #define SECS_PER_DAY 172800
-#define LED_MAX_DUTY 1023
+#define LED_MAX_DUTY ((1 << LEDC_TIMER_10_BIT) - 1)
 #define LED_DUTY_RES LEDC_TIMER_10_BIT
 
 #define FADE_PERIOD_MS 5000
 #define FADE_ON_PERIOD_MS 5000
 #define FADE_OFF_PERIOD_MS 3000
 
-static led_duty_t channel_brightness_to_duty(led_brightness_t power);
-static void color_to_duties(const led_color_t color, led_duty_t* duties);
+static inline led_duty_t channel_brightness_to_duty(led_brightness_t power);
+static inline void color_to_duties(const led_color_t color, led_duty_t* duties);
 static int led_set_channel_duty(uint8_t ch, led_duty_t duty);
 static int led_set_duties(const led_duty_t* duties);
 static int led_fade_to_color(const led_color_t color, uint32_t milssecs);
@@ -256,7 +255,7 @@ led_brightness_t led_get_channel_power(uint8_t ch)
 
 inline led_duty_t channel_brightness_to_duty(led_brightness_t brightness)
 {
-    if(led_fade_inprogress()) {
+    if (led_fade_inprogress()) {
         return LED_CORLUT_LOG[brightness];
     }
 
@@ -274,7 +273,7 @@ inline led_duty_t channel_brightness_to_duty(led_brightness_t brightness)
         return LED_CORLUT_EXP[brightness];
 
     default:
-        return (led_duty_t)(((uint32_t)brightness * 1023 + 500) / 1000);
+        return (led_duty_t)(((uint32_t)brightness * LED_MAX_DUTY + (LED_BRIGHTNESS_MAX / 2)) / LED_BRIGHTNESS_MAX);
     }
 }
 
@@ -641,23 +640,33 @@ static void normal_state_drive()
         return;
     }
 
+    led_color_t color;
+    time_t utc_now = time(NULL);
+
     switch (_led.settings.mode) {
     case LED_MODE_MANUAL: {
-        BO_MUST(led_update_color(_led.settings.manual_color));
+        memcpy(color, _led.settings.manual_color, sizeof(led_color_t));
     } break;
 
     case LED_MODE_SCHEDULED: {
-        led_sch_drive();
+        led_sch_drive(utc_now, color);
     } break;
 
     case LED_MODE_SUN: {
-        led_sun_drive();
+        led_sun_drive(utc_now, color);
     } break;
 
     default:
         assert(false);
         break;
     }
+
+    // Apply filters
+    if (led_acclimation_inprogress()) {
+        BO_MUST(led_acclimation_drive(utc_now, color));
+    }
+
+    BO_MUST(led_update_color(color));
 }
 
 static int preview_state_entry()
@@ -708,8 +717,10 @@ static void preview_state_drive()
 
     time_t end_time
         = _led.preview_state_clock + _led.settings.scheduler.items[_led.settings.scheduler.item_count - 1].instant;
+    led_color_t color;
     for (; _led.state == LED_STATE_PREVIEW && _led.preview_state_clock < end_time; _led.preview_state_clock += 60) {
-        led_sch_drive();
+        led_sch_drive(_led.preview_state_clock, color);
+        BO_MUST(led_update_color(color));
         vTaskDelay(pdMS_TO_TICKS(10));
     }
     BO_MUST(led_switch_state(LED_STATE_DIMMING));

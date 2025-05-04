@@ -26,6 +26,7 @@ class LyfiPaths {
   static final Uri correctionMethod =
       Uri(path: '/borneo/lyfi/correction-method');
   static final Uri geoLocation = Uri(path: '/borneo/lyfi/geo-location');
+  static final Uri acclimation = Uri(path: '/borneo/lyfi/acclimation');
 }
 
 class LyfiChannelInfo {
@@ -144,6 +145,35 @@ class GeoLocation {
   }
 }
 
+class AcclimationSettings {
+  final DateTime startTimestamp;
+  final int startPercent;
+  final int days;
+
+  AcclimationSettings(
+      {required this.startTimestamp,
+      required this.startPercent,
+      required this.days});
+
+  factory AcclimationSettings.fromMap(dynamic map) {
+    return AcclimationSettings(
+      startTimestamp:
+          DateTime.fromMillisecondsSinceEpoch(map['startTimestamp'] * 1000),
+      days: map["days"],
+      startPercent: map["startPercent"],
+    );
+  }
+
+  CborMap toCbor() {
+    return CborMap({
+      CborString("startTimestamp"):
+          CborValue((startTimestamp.millisecondsSinceEpoch / 1000.0).round()),
+      CborString("startPercent"): CborSmallInt(startPercent),
+      CborString("days"): CborSmallInt(days),
+    });
+  }
+}
+
 class LyfiDeviceStatus {
   final LedState state;
   final LedRunningMode mode;
@@ -230,6 +260,10 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
 
   Future<GeoLocation?> getLocation(Device dev);
   Future<void> setLocation(Device dev, GeoLocation location);
+
+  Future<AcclimationSettings> getAcclimation(Device dev);
+  Future<void> setAcclimation(Device dev, AcclimationSettings location);
+  Future<void> terminateAcclimation(Device dev);
 }
 
 class LyfiDriverData extends BorneoDriverData {
@@ -456,5 +490,24 @@ class BorneoLyfiDriver
   Future<void> setLocation(Device dev, GeoLocation location) async {
     final dd = dev.driverData as LyfiDriverData;
     return await dd.coap.putCbor(LyfiPaths.geoLocation, location);
+  }
+
+  @override
+  Future<AcclimationSettings> getAcclimation(Device dev) async {
+    final dd = dev.driverData as LyfiDriverData;
+    final map = await dd.coap.getCbor<dynamic>(LyfiPaths.acclimation);
+    return AcclimationSettings.fromMap(map);
+  }
+
+  @override
+  Future<void> setAcclimation(Device dev, AcclimationSettings acc) async {
+    final dd = dev.driverData as LyfiDriverData;
+    return await dd.coap.postCbor(LyfiPaths.geoLocation, acc);
+  }
+
+  @override
+  Future<void> terminateAcclimation(Device dev) async {
+    final dd = dev.driverData as LyfiDriverData;
+    await dd.coap.delete(LyfiPaths.acclimation);
   }
 }
