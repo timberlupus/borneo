@@ -5,7 +5,6 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/views/dashboard_view.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/schedule_editor_view.dart';
@@ -82,6 +81,7 @@ class HeroVerticalDivider extends StatelessWidget {
   }
 }
 
+/*
 class HeroProgressIndicator extends StatelessWidget {
   final Widget? label;
   final Widget? center;
@@ -122,6 +122,7 @@ class HeroProgressIndicator extends StatelessWidget {
     );
   }
 }
+*/
 
 class HeroPanel extends StatelessWidget {
   const HeroPanel({super.key});
