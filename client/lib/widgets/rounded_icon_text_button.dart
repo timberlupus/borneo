@@ -56,7 +56,7 @@ class _RoundedIconTextButtonState extends State<RoundedIconTextButton> with Sing
             onPressed: widget.onPressed,
             style: OutlinedButton.styleFrom(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(widget.borderRadius)),
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               side: BorderSide(color: widget.borderColor),
               padding: EdgeInsets.all(8),
             ),

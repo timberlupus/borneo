@@ -9,7 +9,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fl_chart/fl_chart.dart';
-import 'package:percent_indicator/percent_indicator.dart';
+import 'package:gauge_indicator/gauge_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:borneo_common/duration_ext.dart';
 
@@ -105,22 +105,28 @@ class ManualRunningChart extends StatelessWidget {
 class DashboardToufu extends StatelessWidget {
   final String title;
   final double value;
+  final double maxValue;
+  final double minValue;
   final IconData? icon;
   final Widget? center;
   final Color? backgroundColor;
   final Color? foregroundColor;
   final Color? progressColor;
   final Color? arcColor;
+  List<GaugeSegment> segments = const [];
 
-  const DashboardToufu({
+  DashboardToufu({
     required this.title,
     required this.value,
     required this.center,
+    required this.minValue,
+    required this.maxValue,
     this.icon,
     this.backgroundColor,
     this.foregroundColor,
     this.progressColor,
     this.arcColor,
+    this.segments = const [],
     super.key,
   });
 
@@ -131,55 +137,78 @@ class DashboardToufu extends StatelessWidget {
     final progColor = progressColor ?? Theme.of(context).colorScheme.primary;
     final arcColor = this.arcColor ?? Theme.of(context).colorScheme.onSurfaceVariant;
     return Card(
-      margin: EdgeInsets.all(0),
+      margin: const EdgeInsets.all(0),
       color: bgColor,
       elevation: 0,
       child: LayoutBuilder(
         builder:
-            (context, constraints) => Stack(
-              children: [
-                if (icon != null)
-                  Positioned(
-                    bottom: -constraints.maxHeight * 0.15,
-                    right: -constraints.maxWidth * 0.15,
-                    child: Icon(icon!, size: constraints.maxWidth * 0.75, color: fgColor.withAlpha(8)),
-                  ),
-                Positioned.fill(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(0),
-                            child: LayoutBuilder(
-                              builder:
-                                  (context, constraints) => CircularPercentIndicator(
-                                    animationDuration: 300,
-                                    radius: (constraints.maxHeight) / 2.5,
-                                    lineWidth: 10.0,
-                                    circularStrokeCap: CircularStrokeCap.butt,
-                                    animateFromLastPercent: true,
-                                    animation: true,
-                                    curve: Curves.decelerate,
-                                    arcType: ArcType.FULL,
-                                    percent: value,
-                                    center: center,
-                                    arcBackgroundColor: arcColor,
-                                    progressColor: progColor,
-                                    footer: Text(title),
+            (context, constraints) => Padding(
+              padding: const EdgeInsets.all(0),
+              child: Stack(
+                children: [
+                  if (icon != null)
+                    Positioned(
+                      bottom: -constraints.maxHeight * 0.15,
+                      right: -constraints.maxWidth * 0.15,
+                      child: Icon(icon!, size: constraints.maxWidth * 0.75, color: fgColor.withAlpha(8)),
+                    ),
+                  Positioned.fill(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(8, 16, 8, 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: Container(
+                                    padding: const EdgeInsets.all(0),
+                                    child: LayoutBuilder(
+                                      builder:
+                                          (context, constraints) => AnimatedRadialGauge(
+                                            duration: Duration(milliseconds: 300),
+                                            curve: Curves.decelerate,
+                                            value: value,
+                                            radius: null,
+                                            axis: GaugeAxis(
+                                              min: minValue,
+                                              max: maxValue,
+                                              degrees: 270,
+                                              style: GaugeAxisStyle(
+                                                thickness: 13,
+                                                segmentSpacing: 0,
+                                                background: segments.isEmpty ? arcColor : null,
+                                                cornerRadius: Radius.zero,
+                                              ),
+                                              pointer: null,
+                                              progressBar: GaugeProgressBar.basic(color: progColor),
+                                              segments: segments,
+                                            ),
+                                          ),
+                                    ),
                                   ),
+                                ),
+                                if (center != null)
+                                  Positioned.fill(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [Center(child: center!)],
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
-                        ),
-                        //Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: fgColor)),
-                      ],
+                          SizedBox(height: 8),
+                          Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: fgColor)),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
       ),
     );
@@ -207,39 +236,6 @@ class DashboardView extends StatelessWidget {
                     margin: EdgeInsets.all(0),
                     child: Column(
                       children: [
-                        /*
-              Container(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Row(children: [
-                  Selector<LyfiViewModel, ({bool schedulerEnabled})>(
-                      selector: (_, vm) =>
-                          (schedulerEnabled: vm.schedulerEnabled,),
-                      builder: (context, vm, _) {
-                        if (vm.schedulerEnabled) {
-                          return Row(children: [
-                            Icon(Icons.stacked_line_chart_outlined, size: 16),
-                            SizedBox(width: 8),
-                            Text('Scheduled mode'),
-                          ]);
-                        } else {
-                          return Row(children: [
-                            Icon(Icons.bar_chart_outlined, size: 16),
-                            SizedBox(width: 8),
-                            Text('Manual mode'),
-                          ]);
-                        }
-                      }),
-                  Spacer(),
-                  Selector<LyfiViewModel, ({DateTime? timestamp})>(
-                    selector: (_, vm) =>
-                        (timestamp: vm.borneoDeviceStatus?.timestamp),
-                    builder: (context, vm, _) => Text(vm.timestamp != null
-                        ? LyfiViewModel.deviceDateFormat.format(vm.timestamp!)
-                        : 'N/A'),
-                  ),
-                ]),
-              ),
-              */
                         Expanded(
                           child: Container(
                             padding: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
@@ -295,12 +291,13 @@ class DashboardView extends StatelessWidget {
                                     child: DashboardToufu(
                                       title: 'Brightness',
                                       icon: Icons.lightbulb_outline,
-                                      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                                      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
                                       foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
                                       arcColor: Theme.of(context).colorScheme.outlineVariant,
                                       progressColor: Theme.of(context).colorScheme.secondary,
-                                      value:
-                                          vm.channels.isNotEmpty ? vm.overallBrightness / vm.maxOverallBrightness : 0.0,
+                                      minValue: 0,
+                                      maxValue: vm.maxOverallBrightness,
+                                      value: vm.channels.isNotEmpty ? vm.overallBrightness : 0.0,
                                       center: Text(
                                         vm.channels.isNotEmpty
                                             ? '${(vm.overallBrightness / vm.maxOverallBrightness * 100).toStringAsFixed(1)}%'
@@ -330,10 +327,13 @@ class DashboardView extends StatelessWidget {
                                       backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
                                       arcColor: Theme.of(context).colorScheme.outlineVariant,
                                       progressColor: Theme.of(context).colorScheme.tertiary,
-                                      value:
-                                          vm.channels.isNotEmpty ? vm.overallBrightness / vm.maxOverallBrightness : 0,
+                                      minValue: vm.overallBrightness,
+                                      maxValue: vm.maxOverallBrightness,
+                                      value: vm.channels.isNotEmpty ? vm.overallBrightness : 0,
                                       center: Column(
                                         mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.max,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
                                           Text(
                                             vm.channels.isNotEmpty &&
@@ -379,9 +379,16 @@ class DashboardView extends StatelessWidget {
                                 icon: Icons.thermostat,
                                 foregroundColor: Theme.of(context).colorScheme.onSurface,
                                 backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                                arcColor: Theme.of(context).colorScheme.outlineVariant,
-                                progressColor: Theme.of(context).colorScheme.secondary,
-                                value: vm.currentTempRatio,
+                                arcColor: null,
+                                progressColor: switch (vm.currentTemp) {
+                                  != null && <= 45 => Theme.of(context).primaryColor,
+                                  != null && > 45 && < 65 => Theme.of(context).colorScheme.secondary,
+                                  != null && >= 65 => Theme.of(context).colorScheme.error,
+                                  null || int() => Colors.grey,
+                                },
+                                value: vm.currentTemp?.toDouble() ?? 0.0,
+                                minValue: 0,
+                                maxValue: 105,
                                 center: Text(
                                   vm.currentTemp != null ? '${vm.currentTemp}℃' : "N/A",
                                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -389,6 +396,11 @@ class DashboardView extends StatelessWidget {
                                     color: Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
+                                segments: [
+                                  GaugeSegment(from: 0, to: 45, color: Colors.green[100]!),
+                                  GaugeSegment(from: 45, to: 65, color: Colors.orange[100]!),
+                                  GaugeSegment(from: 65, to: 105, color: Colors.red[100]!),
+                                ],
                               ),
                             ),
                       ),
@@ -406,7 +418,9 @@ class DashboardView extends StatelessWidget {
                                 backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
                                 arcColor: Theme.of(context).colorScheme.outlineVariant,
                                 progressColor: Theme.of(context).colorScheme.secondary,
-                                value: vm.fanPowerRatio / 100.0,
+                                minValue: 0,
+                                maxValue: 100,
+                                value: vm.fanPowerRatio,
                                 center: Text(
                                   '${vm.fanPowerRatio.toInt()}%',
                                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -467,7 +481,7 @@ class DashboardView extends StatelessWidget {
           builder:
               (context, vm, _) => Container(
                 margin: const EdgeInsets.fromLTRB(0, 24, 0, 0),
-                color: Theme.of(context).colorScheme.surfaceContainer,
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                   child: Column(
@@ -530,7 +544,6 @@ class DashboardView extends StatelessWidget {
                                       : null,
                             ),
                           ),
-
                         ],
                       ),
 

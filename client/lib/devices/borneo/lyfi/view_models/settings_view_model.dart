@@ -28,13 +28,6 @@ class SettingsViewModel extends BaseViewModel with ViewModelEventBusMixin {
   ILyfiDeviceApi get api => deviceManager.getBoundDevice(deviceID).api<ILyfiDeviceApi>();
   BoundDevice get boundDevice => deviceManager.getBoundDevice(deviceID);
 
-  PowerBehavior _selectedPowerBehavior;
-  PowerBehavior get selectedPowerBehavior => _selectedPowerBehavior;
-  set selectedPowerBehavior(PowerBehavior value) {
-    _selectedPowerBehavior = value;
-    notifyListeners();
-  }
-
   GeoLocation? _location;
   GeoLocation? get location => _location;
   bool get canUpdateGeoLocation => !isBusy && isOnline;
@@ -47,6 +40,10 @@ class SettingsViewModel extends BaseViewModel with ViewModelEventBusMixin {
   LedCorrectionMethod get correctionMethod => _correctionMethod;
   bool get canUpdateCorrectionMethod => !isBusy && isOnline;
 
+  PowerBehavior _powerBehavior;
+  PowerBehavior get powerBehavior => _powerBehavior;
+  bool get canUpdatePowerBehavior => !isBusy && isOnline;
+
   SettingsViewModel({
     required this.deviceID,
     required this.deviceManager,
@@ -58,8 +55,8 @@ class SettingsViewModel extends BaseViewModel with ViewModelEventBusMixin {
     required this.ledStatus,
     required GeoLocation? location,
     required PowerBehavior powerBehavior,
-  }) : _selectedPowerBehavior = powerBehavior,
-       _location = location,
+  }) : _location = location,
+       _powerBehavior = powerBehavior,
        _timezone = borneoStatus.timezone;
 
   Future<void> initialize() async {
@@ -130,6 +127,15 @@ class SettingsViewModel extends BaseViewModel with ViewModelEventBusMixin {
       notifyListeners();
       await api.setCorrectionMethod(boundDevice.device, newMethod);
       _correctionMethod = newMethod;
+    });
+  }
+
+  Future<void> updatePowerBehavior(PowerBehavior behavior) async {
+    super.enqueueUIJob(() async {
+      isBusy = true;
+      notifyListeners();
+      await api.setPowerBehavior(boundDevice.device, behavior);
+      _powerBehavior = behavior;
     });
   }
 }

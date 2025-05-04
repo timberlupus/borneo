@@ -112,15 +112,16 @@ class SettingsScreen extends StatelessWidget {
               onTap: map.canUpdate ? vm.updateTimezone : null,
             ),
       ),
-      ListTile(
-        leading: Icon(Icons.settings_power_outlined),
-        tileColor: tileColor,
-        title: Text('Power status at startup'),
-        trailing: Selector<SettingsViewModel, PowerBehavior>(
-          selector: (context, vm) => vm.selectedPowerBehavior,
-          builder:
-              (context, selectedPowerBehavior, child) => DropdownButton<PowerBehavior>(
-                value: vm.selectedPowerBehavior,
+
+      Selector<SettingsViewModel, ({bool canUpdate, PowerBehavior behavior})>(
+        selector: (_, vm) => (canUpdate: vm.canUpdatePowerBehavior, behavior: vm.powerBehavior),
+        builder:
+            (context, map, _) => ListTile(
+              leading: Icon(Icons.settings_power_outlined),
+              tileColor: tileColor,
+              title: Text('Power status at startup'),
+              trailing: DropdownButton<PowerBehavior>(
+                value: map.behavior,
                 items: [
                   DropdownMenuItem<PowerBehavior>(
                     value: PowerBehavior.autoPowerOn,
@@ -135,18 +136,13 @@ class SettingsScreen extends StatelessWidget {
                     child: Text("Maintain last", style: Theme.of(context).textTheme.bodySmall),
                   ),
                 ],
-                onChanged: (PowerBehavior? newValue) {
-                  vm.selectedPowerBehavior = newValue!;
+                onChanged: (PowerBehavior? newValue) async {
+                  await vm.updatePowerBehavior(newValue!);
                 },
               ),
-        ),
-
-        /*
-         Text(
-            vm.borneoDeviceStatus?.shutdownTimestamp?.toString() ?? 'PowerOn'),
-            */
-        onTap: () {},
+            ),
       ),
+
       ListTile(
         tileColor: tileColor,
         leading: Icon(Icons.power_off),
@@ -193,7 +189,6 @@ class SettingsScreen extends StatelessWidget {
                       },
                     ),
               ),
-              onTap: () {},
             ),
       ),
 
@@ -226,7 +221,7 @@ class SettingsScreen extends StatelessWidget {
       ListTile(
         title: Row(
           children: [
-            Icon(Icons.warning, size: 24, color: Theme.of(context).colorScheme.error,),
+            Icon(Icons.warning, size: 24, color: Theme.of(context).colorScheme.error),
             SizedBox(width: 8),
             Text('DANGER ZONE', style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ],
