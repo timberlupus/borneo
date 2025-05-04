@@ -274,7 +274,7 @@ inline led_duty_t channel_brightness_to_duty(led_brightness_t brightness)
         return LED_CORLUT_EXP[brightness];
 
     default:
-        return brightness + (brightness >> 5) - (brightness >> 7);
+        return (led_duty_t)(((uint32_t)brightness * 1023 + 500) / 1000);
     }
 }
 

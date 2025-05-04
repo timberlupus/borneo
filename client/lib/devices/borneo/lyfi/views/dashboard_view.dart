@@ -524,8 +524,8 @@ class DashboardView extends StatelessWidget {
                               borderColor: Theme.of(context).colorScheme.primary,
                               text:
                                   vm.ledState == LedState.nightlight
-                                      ? 'Temporary (${vm.nightlightRemaining.inSeconds})'
-                                      : 'Temporary',
+                                      ? 'Temporary On'
+                                      : 'Temporary Off',
                               buttonSize: 64,
                               icon:
                                   vm.ledState == LedState.nightlight
