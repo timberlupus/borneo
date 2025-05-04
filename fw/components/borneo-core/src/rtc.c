@@ -41,9 +41,13 @@ int bo_rtc_init()
     BO_TRY(bo_nvs_user_open(NVS_RTC_NAMESPACE, NVS_READWRITE, &nvs_handle));
     BO_NVS_AUTO_CLOSE(nvs_handle);
     int rc = nvs_get_str(nvs_handle, NVS_RTC_TZ_KEY, tz, &tz_len);
-    if (rc != 0) {
+    if (rc == ESP_ERR_NVS_NOT_FOUND) {
         strncpy(tz, TIMEZONE_DEFAULT, MAX_TZ_LEN);
-        ESP_LOGI(TAG, "Using default time-zone: %s", tz);
+        rc = 0;
+        ESP_LOGI(TAG, "Time zone setting not found, using default time zone: %s", tz);
+    }
+    if (rc) {
+        return rc;
     }
 
     BO_TRY(bo_tz_set(tz));

@@ -18,6 +18,7 @@
 #include <borneo/system.h>
 #include <borneo/power.h>
 #include <borneo/nvs.h>
+#include <borneo/utils/time.h>
 
 #include "solar.h"
 #include "lyfi-events.h"
@@ -30,15 +31,20 @@ extern struct led_status _led;
 
 int led_sun_init()
 {
-    if(_led.settings.mode != LED_MODE_SUN) {
+    if (_led.settings.mode != LED_MODE_SUN) {
         return -EINVAL;
     }
+
     BO_TRY(led_sun_update_scheduler());
     return 0;
 }
 
 int led_sun_update_scheduler()
 {
+    if (!led_sun_can_active()) {
+        return -EINVAL;
+    }
+
     time_t now;
     struct tm local_tm;
 
@@ -47,8 +53,9 @@ int led_sun_update_scheduler()
 
     float tz_offset = solar_calculate_timezone_offset(&local_tm);
     float sunrise, sunset;
-    //TODO FIXME
-    BO_TRY(solar_calculate_sunrise_sunset(25.0430f, 102.7062f, tz_offset, &local_tm, &sunrise, &sunset));
+
+    BO_TRY(solar_calculate_sunrise_sunset(_led.settings.location.lat, _led.settings.location.lng, tz_offset, &local_tm,
+                                          &sunrise, &sunset));
 
     struct solar_instant instants[SOLAR_INSTANTS_COUNT];
     BO_TRY(solar_generate_instants(sunrise, sunset, instants));
@@ -81,10 +88,13 @@ int led_sun_update_scheduler()
 
 bool led_sun_is_in_progress(const struct tm* local_tm)
 {
+    if (!led_has_geo_location()) {
+        return false;
+    }
     if (_led.settings.mode != LED_MODE_SUN) {
         return false;
     }
-    if(_led.sun_scheduler.item_count == 0) {
+    if (_led.sun_scheduler.item_count == 0) {
         return false;
     }
     uint32_t local_instant = (local_tm->tm_hour * 3600) + (local_tm->tm_min * 60) + local_tm->tm_sec;
@@ -94,6 +104,7 @@ bool led_sun_is_in_progress(const struct tm* local_tm)
 
 void led_sun_drive()
 {
+    assert(led_sun_can_active());
     assert(_led.settings.mode == LED_MODE_SUN && _led.state == LED_STATE_NORMAL);
     assert(_led.sun_scheduler.item_count == SOLAR_INSTANTS_COUNT);
 
@@ -109,4 +120,10 @@ void led_sun_drive()
     if (utc_now >= _led.sun_next_reschedule_time_utc && !led_sun_is_in_progress(&local_tm)) {
         BO_MUST(led_sun_update_scheduler());
     }
+}
+
+bool led_sun_can_active()
+{
+    //
+    return led_has_geo_location() && bo_tz_get() != NULL;
 }

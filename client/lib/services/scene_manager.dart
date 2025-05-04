@@ -91,7 +91,7 @@ class SceneManager {
     final currentRecord = await store.findFirst(tx, finder: finder);
     if (currentRecord == null) {
       logger?.e('Failed to find current scene!');
-      throw KeyNotFoundException('There was no current scene!');
+      throw KeyNotFoundException(message:'There was no current scene!');
     }
     return SceneEntity.fromMap(currentRecord.key, currentRecord.value);
   }
@@ -160,7 +160,7 @@ class SceneManager {
       // Load the new one
       final newCurrentRecord = await store.record(newSceneID).get(tx);
       if (newCurrentRecord == null) {
-        throw KeyNotFoundException('Failed to found current scene ID `$newSceneID`');
+        throw KeyNotFoundException(message:'Failed to found current scene ID `$newSceneID`');
       }
       final fromScene = _current;
       final toScene = SceneEntity.fromMap(newSceneID, newCurrentRecord);

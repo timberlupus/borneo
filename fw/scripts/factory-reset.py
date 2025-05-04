@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 async def main():
-    client = LyfiDeviceCoapClient('coap://192.168.0.18')
+    client = LyfiDeviceCoapClient('coap://192.168.0.21')
 
     await client.open()
     response = await client.get_wellknown_core()

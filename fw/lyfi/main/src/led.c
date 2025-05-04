@@ -256,6 +256,10 @@ led_brightness_t led_get_channel_power(uint8_t ch)
 
 inline led_duty_t channel_brightness_to_duty(led_brightness_t brightness)
 {
+    if(led_fade_inprogress()) {
+        return LED_CORLUT_LOG[brightness];
+    }
+
     switch (_led.settings.correction_method) {
     case LED_CORRECTION_CIE1931:
         return LED_CORLUT_CIE1931[brightness];
@@ -503,6 +507,10 @@ static void system_events_handler(void* handler_args, esp_event_base_t base, int
         BO_MUST(led_switch_state(LED_STATE_POWERING_ON));
     } break;
 
+    case BO_EVENT_GEO_LOCATION_CHANGED: {
+        led_sun_update_scheduler();
+    } break;
+
     default:
         break;
     }
@@ -569,6 +577,10 @@ int led_mode_scheduled_entry()
 int led_mode_sun_entry()
 {
     if (!bo_power_is_on()) {
+        return -EINVAL;
+    }
+
+    if (!led_sun_can_active()) {
         return -EINVAL;
     }
 

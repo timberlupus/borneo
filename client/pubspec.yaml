@@ -84,6 +84,7 @@ dependencies:
     path: packages/borneo_kernel_abstractions
   borneo_kernel:
     path: packages/borneo_kernel
+  flutter_progress_hud: ^2.0.2
 
 
 dev_dependencies:

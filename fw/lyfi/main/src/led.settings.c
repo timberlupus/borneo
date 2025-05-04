@@ -25,7 +25,6 @@
 
 #define LED_NVS_NS "led"
 #define LED_NVS_KEY_RUNNING_MODE "mode"
-#define LED_NVS_KEY_FLAGS "flags"
 #define LED_NVS_KEY_MANUAL_COLOR "mcolor"
 #define LED_NVS_KEY_SUN_COLOR "suncolor"
 #define LED_NVS_KEY_SCHEDULER "sch"
@@ -130,17 +129,6 @@ int led_load_user_settings()
     }
 
     {
-        rc = nvs_get_u64(handle, LED_NVS_KEY_FLAGS, &settings->flags);
-        if (rc == ESP_ERR_NVS_NOT_FOUND) {
-            settings->flags = LED_DEFAULT_SETTINGS.flags;
-            rc = 0;
-        }
-        if (rc) {
-            goto _EXIT_CLOSE;
-        }
-    }
-
-    {
         rc = nvs_get_u16(handle, LED_NVS_KEY_NIGHTLIGHT_DURATION, &settings->nightlight_duration);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
             settings->nightlight_duration = LED_DEFAULT_SETTINGS.nightlight_duration;
@@ -201,14 +189,16 @@ int led_load_user_settings()
     {
         size = sizeof(struct geo_location);
         rc = nvs_get_blob(handle, LED_NVS_KEY_LOC, &settings->location, &size);
-        if (rc == ESP_ERR_NVS_NOT_FOUND) {
+        if (rc == 0) {
+            settings->flags |= LED_OPTION_HAS_GEO_LOCATION;
+        }
+        else if (rc == ESP_ERR_NVS_NOT_FOUND) {
             settings->flags &= ~LED_OPTION_HAS_GEO_LOCATION;
             rc = 0;
         }
         if (rc) {
             goto _EXIT_CLOSE;
         }
-        settings->flags &= LED_OPTION_HAS_GEO_LOCATION;
     }
 
     // TODO
@@ -233,11 +223,6 @@ int led_save_user_settings()
     }
 
     rc = nvs_set_u8(handle, LED_NVS_KEY_RUNNING_MODE, settings->mode);
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_set_u64(handle, LED_NVS_KEY_FLAGS, settings->flags);
     if (rc) {
         goto _EXIT_CLOSE;
     }
@@ -282,7 +267,8 @@ _EXIT_WITHOUT_CLOSE:
     return rc;
 }
 
-bool led_has_geo_location() {
+bool led_has_geo_location()
+{
     // TODO lock
     return _led.settings.flags & LED_OPTION_HAS_GEO_LOCATION;
 }
@@ -311,6 +297,11 @@ int led_set_geo_location(const struct geo_location* location)
     }
     _led.settings.location.lat = location->lat;
     _led.settings.location.lng = location->lng;
+    _led.settings.flags |= LED_OPTION_HAS_GEO_LOCATION;
+
     BO_TRY(led_save_user_settings());
+
+    BO_TRY(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_GEO_LOCATION_CHANGED, NULL, 0, portMAX_DELAY));
+
     return 0;
 }

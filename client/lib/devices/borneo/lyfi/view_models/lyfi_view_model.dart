@@ -232,6 +232,19 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     if (isLocked) {
       return;
     }
+
+    if (mode == LedRunningMode.sun) {
+      if (borneoDeviceStatus?.timezone.isEmpty ?? true) {
+        notifyAppError("Unable to switch to Sun Simulation mode, the device's timezone is not set.");
+        return;
+      }
+      final location = await _deviceApi.getLocation(super.boundDevice!.device);
+      if (location == null) {
+        notifyAppError("Unable to switch to Sun Simulation mode, the device's geographic location is not set.");
+        return;
+      }
+    }
+
     await _deviceApi.switchMode(boundDevice!.device, mode);
     _toggleEditor(mode);
     _mode = mode;
@@ -256,22 +269,19 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   }
 
   Future<SettingsViewModel> loadSettings() async {
-    //notifyListeners();
-    try {
-      await refreshStatus();
-      return SettingsViewModel(
-        deviceManager: deviceManager,
-        deviceID: deviceID,
-        address: deviceEntity.address,
-        borneoStatus: borneoDeviceStatus!,
-        borneoInfo: borneoDeviceInfo,
-        ledInfo: lyfiDeviceInfo,
-        ledStatus: lyfiDeviceStatus!,
-        powerBehavior: await _deviceApi.getPowerBehavior(boundDevice!.device),
-        location: await _deviceApi.getLocation(boundDevice!.device),
-      );
-    } finally {
-      //notifyListeners();
-    }
+    final vm = SettingsViewModel(
+      deviceID: deviceID,
+      deviceManager: deviceManager,
+      globalEventBus: globalEventBus,
+      address: deviceEntity.address,
+      borneoStatus: borneoDeviceStatus!,
+      borneoInfo: borneoDeviceInfo,
+      ledInfo: lyfiDeviceInfo,
+      ledStatus: lyfiDeviceStatus!,
+      powerBehavior: await _deviceApi.getPowerBehavior(boundDevice!.device),
+      location: await _deviceApi.getLocation(boundDevice!.device),
+    );
+    await vm.initialize();
+    return vm;
   }
 }

@@ -224,14 +224,14 @@ abstract class BorneoDriverData {
 
   CoapClient get coap {
     if (_disposed) {
-      ObjectDisposedException('The object has been disposed.');
+      ObjectDisposedException(message: 'The object has been disposed.');
     }
     return _coap;
   }
 
   GeneralBorneoDeviceInfo get generalDeviceInfo {
     if (_disposed) {
-      ObjectDisposedException('The object has been disposed.');
+      ObjectDisposedException(message:'The object has been disposed.');
     }
     return _generalDeviceInfo;
   }

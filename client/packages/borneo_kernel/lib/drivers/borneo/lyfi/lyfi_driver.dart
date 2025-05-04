@@ -4,6 +4,7 @@ import 'package:cbor/cbor.dart';
 
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_common/io/net/coap_client.dart';
+import 'package:borneo_common/utils/float.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/metadata.dart';
 import 'package:borneo_kernel_abstractions/errors.dart';
 import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
@@ -129,6 +130,18 @@ class GeoLocation {
       lng: map['lng'],
     );
   }
+
+  CborMap toCbor() {
+    final cborLat = CborFloat(convertToFloat32(lat));
+    cborLat.floatPrecision();
+    final cborLng = CborFloat(convertToFloat32(lng));
+    cborLng.floatPrecision();
+
+    return CborMap({
+      CborString("lat"): cborLat,
+      CborString("lng"): cborLng,
+    });
+  }
 }
 
 class LyfiDeviceStatus {
@@ -227,7 +240,7 @@ class LyfiDriverData extends BorneoDriverData {
 
   LyfiDeviceInfo get lyfiDeviceInfo {
     if (super.isDisposed) {
-      ObjectDisposedException('The object has been disposed.');
+      ObjectDisposedException(message: 'The object has been disposed.');
     }
     return _lyfiDeviceInfo;
   }
@@ -431,8 +444,12 @@ class BorneoLyfiDriver
   @override
   Future<GeoLocation?> getLocation(Device dev) async {
     final dd = dev.driverData as LyfiDriverData;
-    final loc = await dd.coap.getCbor<GeoLocation?>(LyfiPaths.geoLocation);
-    return loc;
+    final result = await dd.coap.getCbor<dynamic>(LyfiPaths.geoLocation);
+    if (result != null) {
+      return GeoLocation.fromMap(result);
+    } else {
+      return null;
+    }
   }
 
   @override

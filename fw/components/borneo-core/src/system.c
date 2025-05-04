@@ -14,6 +14,9 @@
 #include <esp_event.h>
 #include <esp_mac.h>
 #include <nvs_flash.h>
+#include <esp_flash.h>
+
+#include <mbedtls/sha256.h>
 
 #include <borneo/common.h>
 #include <borneo/nvs.h>
@@ -50,7 +53,19 @@ int bo_system_init()
     BO_TRY(load_factory_settings());
 
     // Make the device ID
-    BO_TRY(esp_read_mac(_sysinfo.id, ESP_MAC_WIFI_STA));
+    uint8_t mac[6];
+    BO_TRY(esp_read_mac(mac, ESP_MAC_WIFI_STA));
+
+    uint64_t flash_id;
+    BO_TRY(esp_flash_read_unique_chip_id(NULL, &flash_id));
+
+    mbedtls_sha256_context sha256_ctx;
+    mbedtls_sha256_init(&sha256_ctx);
+    mbedtls_sha256_starts(&sha256_ctx, 0);
+    mbedtls_sha256_update(&sha256_ctx, (const uint8_t*)(mac), 6);
+    mbedtls_sha256_update(&sha256_ctx, (const uint8_t*)(&flash_id), sizeof(flash_id));
+    mbedtls_sha256_finish(&sha256_ctx, _sysinfo.id);
+    mbedtls_sha256_free(&sha256_ctx);
 
     for (size_t i = 0; i < BO_DEVICE_ID_LENGTH; ++i) {
         _sysinfo.hex_id[2 * i] = to_hex_digit_upper(_sysinfo.id[i] >> 4);

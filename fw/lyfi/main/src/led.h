@@ -169,6 +169,7 @@ int led_sun_init();
 int led_sun_update_scheduler();
 bool led_sun_is_in_progress(const struct tm* local_tm);
 void led_sun_drive();
+bool led_sun_can_active();
 
 #ifdef __cplusplus
 }

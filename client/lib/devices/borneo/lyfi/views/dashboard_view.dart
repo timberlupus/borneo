@@ -490,6 +490,21 @@ class DashboardView extends StatelessWidget {
                             ),
                           ),
 
+                          Selector<LyfiViewModel, bool>(
+                            selector: (_, vm) => vm.canUnlock,
+                            builder:
+                                (context, canUnlock, _) => Expanded(
+                                  child: RoundedIconTextButton(
+                                    borderColor: Theme.of(context).colorScheme.primary,
+                                    text: "Dimming",
+                                    buttonSize: 64,
+                                    icon: Icon(Icons.tips_and_updates_outlined, size: 40),
+                                    onPressed:
+                                        canUnlock ? () async => context.read<LyfiViewModel>().toggleLock(false) : null,
+                                  ),
+                                ),
+                          ),
+
                           Expanded(
                             child: RoundedIconTextButton(
                               borderColor: Theme.of(context).colorScheme.primary,
@@ -516,20 +531,6 @@ class DashboardView extends StatelessWidget {
                             ),
                           ),
 
-                          Selector<LyfiViewModel, bool>(
-                            selector: (_, vm) => vm.canUnlock,
-                            builder:
-                                (context, canUnlock, _) => Expanded(
-                                  child: RoundedIconTextButton(
-                                    borderColor: Theme.of(context).colorScheme.primary,
-                                    text: "Dimming",
-                                    buttonSize: 64,
-                                    icon: Icon(Icons.tips_and_updates_outlined, size: 40),
-                                    onPressed:
-                                        canUnlock ? () async => context.read<LyfiViewModel>().toggleLock(false) : null,
-                                  ),
-                                ),
-                          ),
                         ],
                       ),
 

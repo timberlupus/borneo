@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-#define BO_DEVICE_ID_LENGTH 6 ///< in bytes
+#define BO_DEVICE_ID_LENGTH 32 ///< in bytes
 #define BO_DEVICE_NAME_MAX 64
 #define BO_DEVICE_MANUF_MAX 64
 #define BO_DEVICE_MODEL_MAX 32
@@ -67,6 +67,8 @@ enum {
     BO_EVENT_ENTRY_FACTORY_MODE, ///< Entry the Factory Mode
 
     BO_EVENT_FATAL_ERROR, ///< Fatal error occurred
+
+    BO_EVENT_GEO_LOCATION_CHANGED, ///< Location changed
 };
 
 enum {

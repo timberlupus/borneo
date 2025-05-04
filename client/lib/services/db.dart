@@ -37,7 +37,7 @@ class DBProvider {
     if (await file.exists()) {
       await file.delete();
     } else {
-      throw FileNotFoundException(dbPath);
+      throw FileNotFoundException(path: dbPath);
     }
   }
 
