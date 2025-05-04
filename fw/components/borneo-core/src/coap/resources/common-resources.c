@@ -113,17 +113,13 @@ static void coap_hnd_borneo_info_get(coap_resource_t* resource, coap_session_t* 
     }
 
     {
-        const esp_partition_t* running = esp_ota_get_running_partition();
-        if (running == NULL) {
+        const esp_app_desc_t* app_desc = esp_app_get_description();
+        if (app_desc == NULL) {
             coap_pdu_set_code(response, BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
             return;
         }
-        esp_app_desc_t running_app_info;
-        BO_COAP_TRY(esp_ota_get_partition_description(running, &running_app_info),
-                    BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
-
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "fwVer"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, running_app_info.version));
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, app_desc->version));
     }
 
     BO_COAP_TRY_ENCODE_CBOR(cbor_encoder_close_container(&encoder, &root_map));
