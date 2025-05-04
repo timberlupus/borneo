@@ -180,6 +180,10 @@ class SettingsScreen extends StatelessWidget {
                           child: Text("Exponential", style: Theme.of(context).textTheme.bodySmall),
                         ),
                         DropdownMenuItem<LedCorrectionMethod>(
+                          value: LedCorrectionMethod.gamma,
+                          child: Text("Gamma", style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                        DropdownMenuItem<LedCorrectionMethod>(
                           value: LedCorrectionMethod.cie1931,
                           child: Text("CIE1931", style: Theme.of(context).textTheme.bodySmall),
                         ),

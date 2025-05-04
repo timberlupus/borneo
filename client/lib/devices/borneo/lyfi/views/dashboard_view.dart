@@ -312,7 +312,7 @@ class DashboardView extends StatelessWidget {
                             ),
                       ),
 
-                      SizedBox(width: 8.0),
+                      SizedBox(width: 16.0),
                       // Total Power
                       Consumer<LyfiViewModel>(
                         builder:
@@ -364,7 +364,7 @@ class DashboardView extends StatelessWidget {
                   ),
                 ),
 
-                SizedBox(height: 8.0),
+                SizedBox(height: 16.0),
 
                 Expanded(
                   child: Row(
@@ -405,7 +405,7 @@ class DashboardView extends StatelessWidget {
                             ),
                       ),
 
-                      SizedBox(width: 8.0),
+                      SizedBox(width: 16.0),
                       // Fan
                       Selector<LyfiViewModel, ({double fanPowerRatio})>(
                         selector: (_, vm) => (fanPowerRatio: vm.fanPowerRatio),
