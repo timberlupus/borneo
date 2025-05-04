@@ -256,7 +256,7 @@ led_brightness_t led_get_channel_power(uint8_t ch)
 inline led_duty_t channel_brightness_to_duty(led_brightness_t brightness)
 {
     if (led_fade_inprogress()) {
-        return LED_CORLUT_LOG[brightness];
+        return LED_CORLUT_EXP[brightness];
     }
 
     switch (_led.settings.correction_method) {
