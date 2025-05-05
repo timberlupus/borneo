@@ -15,5 +15,4 @@ class RoutineSummaryViewModel extends BaseViewModel {
   void notifyAppError(String message, {Object? error, StackTrace? stackTrace}) {
     // TODO
   }
-
 }

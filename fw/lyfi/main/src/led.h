@@ -76,6 +76,7 @@ struct led_factory_settings {
 };
 
 struct led_acclimation_settings {
+    bool enabled; ///<
     time_t start_utc;
     uint8_t duration; ///< In days
     uint8_t start_percent; ///< [0, 100%]
@@ -114,6 +115,8 @@ struct led_status {
     struct led_scheduler sun_scheduler; ///< The scheduler of sun simulation for today
 
     struct led_user_settings settings;
+
+    bool acclimation_activated;
 };
 
 extern const led_duty_t LED_CORLUT_CIE1931[LED_BRIGHTNESS_MAX + 1];
@@ -179,7 +182,8 @@ bool led_sun_is_in_progress(const struct tm* local_tm);
 void led_sun_drive(time_t utc_now, led_color_t color);
 bool led_sun_can_active();
 
-bool led_acclimation_inprogress();
+bool led_acclimation_is_enabled();
+bool led_acclimation_is_activated();
 int led_acclimation_drive(time_t utc_now, led_color_t color);
 int led_acclimation_set(const struct led_acclimation_settings* settings);
 int led_acclimation_terminate();

@@ -7,7 +7,6 @@ class RoundedIconTextButton extends StatefulWidget {
   final double borderRadius;
   final double buttonSize;
   final Color borderColor;
-  final Color iconColor;
   final Color textColor;
   final EdgeInsetsGeometry padding;
   final double spacing;
@@ -20,7 +19,6 @@ class RoundedIconTextButton extends StatefulWidget {
     this.borderRadius = 8.0,
     this.buttonSize = 48.0,
     this.borderColor = Colors.grey,
-    this.iconColor = Colors.black,
     this.textColor = Colors.black,
     this.padding = const EdgeInsets.all(0),
     this.spacing = 4.0,

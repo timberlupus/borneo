@@ -6,8 +6,10 @@ import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
+import 'package:intl/intl.dart';
 
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 
 class AcclimationScreen extends StatelessWidget {
   final String deviceID;
@@ -16,21 +18,49 @@ class AcclimationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = _buildSettingItems(context);
+    final vm = AcclimationViewModel(deviceID, context.read<DeviceManager>(), globalEventBus: context.read<EventBus>());
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: Text('Acclimation Mode')),
-      body: ChangeNotifierProvider(
-        create:
-            (cb) =>
-                AcclimationViewModel(deviceID, cb.read<DeviceManager>(), globalEventBus: cb.read<EventBus>()),
-        builder: (context, child) {
-          return ListView.separated(
-            physics: ClampingScrollPhysics(),
-            shrinkWrap: true,
-            itemBuilder: (context, index) => items[index],
-            itemCount: items.length,
-            separatorBuilder: (context, index) => SizedBox(height: 1),
-          );
+      body: FutureBuilder(
+        future: vm.isInitialized ? null : vm.initialize(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            return ChangeNotifierProvider(
+              create: (cb) => vm,
+              builder: (context, child) {
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    ListView.separated(
+                      physics: ClampingScrollPhysics(),
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) => items[index],
+                      itemCount: items.length,
+                      separatorBuilder: (context, index) => SizedBox(height: 1),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Consumer<AcclimationViewModel>(
+                        builder:
+                            (context, vm, child) => ElevatedButton.icon(
+                              onPressed: vm.canSubmit ? () => onSubmit(vm) : null,
+                              label: child!,
+                              icon: const Icon(Icons.upload),
+                            ),
+                        child: Text("Submit"),
+                      ),
+                    ),
+                    Spacer(),
+                  ],
+                );
+              },
+            );
+          }
         },
       ),
     );
@@ -53,13 +83,41 @@ class AcclimationScreen extends StatelessWidget {
         builder:
             (context, vm, _) => ListTile(
               tileColor: tileColor,
-              title: Text('Start date'),
+              title: const Text('Start date'),
               trailing: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
-                children: [Text("2222/2222/222"), SizedBox(width: 8), const CupertinoListTileChevron()],
+                children: [
+                  Text(
+                    vm.startTimestamp.toLocal().year < 2025
+                        ? '-'
+                        : DateFormat.yMd().format(vm.startTimestamp.toLocal()),
+                  ),
+                  SizedBox(width: 8),
+                  const CupertinoListTileChevron(),
+                ],
               ),
-              onTap: !vm.isBusy && vm.isOnline && vm.enabled ? () {} : null,
+              onTap:
+                  !vm.isBusy && vm.isOnline
+                      ? () async {
+                        final now = DateTime.now();
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: vm.startTimestamp.toLocal().year < 2025 ? now : vm.startTimestamp.toLocal(),
+                          firstDate: DateTime(2025, 1, 1),
+                          lastDate: now.add(const Duration(days: 100)),
+                        );
+                        if (picked != null) {
+                          vm.updateStartTimestamp(picked);
+                        }
+                        /*
+                          firstDate: now,
+                          lastDate: now.add(Duration(days: vm.days.round())),
+                        );
+                        dlg.show
+                        */
+                      }
+                      : null,
             ),
       ),
       Consumer<AcclimationViewModel>(
@@ -67,15 +125,11 @@ class AcclimationScreen extends StatelessWidget {
             (context, vm, _) => ListTile(
               tileColor: tileColor,
               leading: Text("Duration"),
-              title: FlutterSlider(
-                values: [5, 100],
-                min: 5,
-                max: 100,
-                disabled: !vm.enabled,
-                rangeSlider: false,
-                hatchMark: FlutterSliderHatchMark(),
+              title: Slider(value: vm.days, min: 5, max: 100, onChanged: vm.updateDays),
+              trailing: Text(
+                '${vm.days.round().toString()} days',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(fontFeatures: [FontFeature.tabularFigures()]),
               ),
-              trailing: Text("30 days"),
             ),
       ),
       Consumer<AcclimationViewModel>(
@@ -83,20 +137,30 @@ class AcclimationScreen extends StatelessWidget {
             (context, vm, _) => ListTile(
               tileColor: tileColor,
               leading: Text('Start percent'),
-              title: FlutterSlider(
-                values: [10],
-                min: 10,
-                max: 90,
-                disabled: !vm.enabled,
-                rangeSlider: false,
-                hatchMark: FlutterSliderHatchMark(),
+              title: Slider(value: vm.startPercent, min: 10, max: 90, onChanged: vm.updateStartPercent),
+              trailing: Text(
+                '${vm.startPercent.round().toString()}%',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(fontFeatures: [FontFeature.tabularFigures()]),
               ),
-              trailing: Text("90%"),
             ),
       ),
+      /*
       ListTile(title: Text('STATUS', style: Theme.of(context).textTheme.titleSmall)),
       ListTile(title: Text("Elapsed time"), trailing: Text("3.3 days")),
       ListTile(title: Text("Current percent"), trailing: Text("63%")),
+      */
     ];
+  }
+
+  void onSubmit(AcclimationViewModel vm) {
+    vm.enqueueUIJob(() async {
+      await vm.submitToDevice();
+      toastification.show(
+        title: Text('Update acclimation settings succeed.'),
+        autoCloseDuration: const Duration(seconds: 5),
+        closeOnClick: true,
+        type: ToastificationType.success,
+      );
+    });
   }
 }

@@ -662,7 +662,7 @@ static void normal_state_drive()
     }
 
     // Apply filters
-    if (led_acclimation_inprogress()) {
+    if (led_acclimation_is_enabled()) {
         BO_MUST(led_acclimation_drive(utc_now, color));
     }
 

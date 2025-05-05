@@ -32,6 +32,7 @@
 #define LED_NVS_KEY_CORRECTION_METHOD "corrmtd"
 #define LED_NVS_KEY_PWM_FREQ "pwmfreq"
 #define LED_NVS_KEY_LOC "loc"
+#define LED_NVS_KEY_ACCLIMATION_ENABLED "acc.en"
 #define LED_NVS_KEY_ACCLIMATION_START "acc.start"
 #define LED_NVS_KEY_ACCLIMATION_DURATION "acc.days"
 #define LED_NVS_KEY_ACCLIMATION_START_PERCENT "acc.pc"
@@ -83,6 +84,7 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     .flags = 0ULL,
 
     .acclimation = {
+        .enabled = false,
         .start_utc = 0,
         .duration = 30,
         .start_percent = 30,
@@ -211,6 +213,21 @@ int led_load_user_settings()
     }
 
     {
+        uint8_t acc_en = 0;
+        rc = nvs_get_u8(handle, LED_NVS_KEY_ACCLIMATION_ENABLED, &acc_en);
+        if (rc == 0 && acc_en) {
+            settings->acclimation.enabled = acc_en;
+        }
+        else if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->acclimation.enabled = false;
+            rc = 0;
+        }
+        if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
+    {
         rc = nvs_get_i64(handle, LED_NVS_KEY_ACCLIMATION_START, &settings->acclimation.start_utc);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
             settings->acclimation.start_utc = LED_DEFAULT_SETTINGS.acclimation.start_utc;
@@ -299,6 +316,11 @@ int led_save_user_settings()
         if (rc) {
             goto _EXIT_CLOSE;
         }
+    }
+
+    rc = nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_ENABLED, (uint8_t)led_acclimation_is_enabled());
+    if (rc) {
+        goto _EXIT_CLOSE;
     }
 
     rc = nvs_set_i64(handle, LED_NVS_KEY_ACCLIMATION_START, settings->acclimation.start_utc);

@@ -146,17 +146,21 @@ class GeoLocation {
 }
 
 class AcclimationSettings {
+  final bool enabled;
   final DateTime startTimestamp;
   final int startPercent;
   final int days;
 
-  AcclimationSettings(
-      {required this.startTimestamp,
-      required this.startPercent,
-      required this.days});
+  AcclimationSettings({
+    required this.enabled,
+    required this.startTimestamp,
+    required this.startPercent,
+    required this.days,
+  });
 
   factory AcclimationSettings.fromMap(dynamic map) {
     return AcclimationSettings(
+      enabled: map["enabled"],
       startTimestamp:
           DateTime.fromMillisecondsSinceEpoch(map['startTimestamp'] * 1000),
       days: map["days"],
@@ -166,12 +170,30 @@ class AcclimationSettings {
 
   CborMap toCbor() {
     return CborMap({
+      CborString("enabled"): CborBool(enabled),
       CborString("startTimestamp"):
           CborValue((startTimestamp.millisecondsSinceEpoch / 1000.0).round()),
       CborString("startPercent"): CborSmallInt(startPercent),
       CborString("days"): CborSmallInt(days),
     });
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AcclimationSettings &&
+          runtimeType == other.runtimeType &&
+          enabled == other.enabled &&
+          startTimestamp == other.startTimestamp &&
+          startPercent == other.startPercent &&
+          days == other.days;
+
+  @override
+  int get hashCode =>
+      enabled.hashCode ^
+      startTimestamp.hashCode ^
+      startPercent.hashCode ^
+      days.hashCode;
 }
 
 class LyfiDeviceStatus {
@@ -183,6 +205,8 @@ class LyfiDeviceStatus {
   final List<int> currentColor;
   final List<int> manualColor;
   final List<int> sunColor;
+  final bool acclimationEnabled;
+  final bool acclimationActivated;
 
   double get brightness =>
       currentColor.fold(0, (p, v) => p + v).toDouble() *
@@ -198,6 +222,8 @@ class LyfiDeviceStatus {
     required this.currentColor,
     required this.manualColor,
     required this.sunColor,
+    this.acclimationEnabled = false,
+    this.acclimationActivated = false,
   });
 
   factory LyfiDeviceStatus.fromMap(CborMap cborMap) {
@@ -211,6 +237,8 @@ class LyfiDeviceStatus {
       currentColor: List<int>.from(map['currentColor']),
       manualColor: List<int>.from(map['manualColor']),
       sunColor: List<int>.from(map['sunColor']),
+      acclimationEnabled: map['acclimationEnabled'] ?? false,
+      acclimationActivated: map['acclimationActivated'] ?? false,
     );
   }
 }
@@ -262,7 +290,7 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   Future<void> setLocation(Device dev, GeoLocation location);
 
   Future<AcclimationSettings> getAcclimation(Device dev);
-  Future<void> setAcclimation(Device dev, AcclimationSettings location);
+  Future<void> setAcclimation(Device dev, AcclimationSettings acc);
   Future<void> terminateAcclimation(Device dev);
 }
 
@@ -502,7 +530,7 @@ class BorneoLyfiDriver
   @override
   Future<void> setAcclimation(Device dev, AcclimationSettings acc) async {
     final dd = dev.driverData as LyfiDriverData;
-    return await dd.coap.postCbor(LyfiPaths.geoLocation, acc);
+    return await dd.coap.postCbor(LyfiPaths.acclimation, acc);
   }
 
   @override

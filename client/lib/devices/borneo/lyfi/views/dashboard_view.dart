@@ -139,7 +139,7 @@ class DashboardToufu extends StatelessWidget {
     final bgColor = backgroundColor ?? Theme.of(context).colorScheme.surfaceContainer;
     final progColor = progressColor ?? Theme.of(context).colorScheme.primary;
     final arcColor = this.arcColor ?? Theme.of(context).colorScheme.onSurfaceVariant;
-    assert(minValue < maxValue);
+    assert(minValue <= maxValue);
     return Card(
       margin: const EdgeInsets.all(0),
       color: bgColor,
@@ -580,10 +580,12 @@ class DashboardView extends StatelessWidget {
                         builder:
                             (context, props, _) => RoundedIconTextButton(
                               borderColor: Theme.of(context).colorScheme.primary,
-                              text: props.state == LedState.nightlight ? 'Temporary On' : 'Temporary Off',
+                              text: 'Temporary',
                               buttonSize: 64,
                               backgroundColor:
-                                  props.state == LedState.nightlight ? Theme.of(context).colorScheme.primary : null,
+                                  props.state == LedState.nightlight
+                                      ? Theme.of(context).colorScheme.primaryContainer
+                                      : null,
                               icon:
                                   props.state == LedState.nightlight
                                       ? IconProgressBar(
@@ -596,8 +598,8 @@ class DashboardView extends StatelessWidget {
                                                 : Theme.of(context).colorScheme.primary,
                                         backgroundColor:
                                             props.state == LedState.nightlight
-                                                ? Theme.of(context).colorScheme.onPrimary
-                                                : Theme.of(context).colorScheme.primary,
+                                                ? Theme.of(context).colorScheme.onPrimaryContainer
+                                                : Theme.of(context).colorScheme.primaryContainer,
                                       )
                                       : Icon(Icons.flashlight_on, size: 40),
 
@@ -627,16 +629,32 @@ class DashboardView extends StatelessWidget {
 
                     // Settings button
                     Expanded(
-                      child: Selector<LyfiViewModel, bool>(
-                        selector: (_, vm) => vm.canLockOrUnlock,
+                      child: Selector<LyfiViewModel, ({bool canGo, bool enabled, bool activated})>(
+                        selector:
+                            (_, vm) => (
+                              canGo: vm.canLockOrUnlock,
+                              enabled: vm.lyfiDeviceStatus?.acclimationEnabled ?? false,
+                              activated: vm.lyfiDeviceStatus?.acclimationActivated ?? false,
+                            ),
                         builder:
-                            (context, canGoAcclimation, _) => RoundedIconTextButton(
+                            (context, props, _) => RoundedIconTextButton(
                               borderColor: Theme.of(context).colorScheme.primary,
                               text: "Acclimation",
                               buttonSize: 64,
-                              icon: Icon(Icons.calendar_month_outlined, size: 40),
+                              icon: Icon(
+                                Icons.calendar_month_outlined,
+                                size: 40,
+                                color:
+                                    props.enabled || props.activated
+                                        ? Theme.of(context).colorScheme.onPrimaryContainer
+                                        : Theme.of(context).colorScheme.primary,
+                              ),
+                              backgroundColor:
+                                  props.enabled || props.activated
+                                      ? Theme.of(context).colorScheme.primaryContainer
+                                      : null,
                               onPressed:
-                                  canGoAcclimation
+                                  props.canGo
                                       ? () async {
                                         if (context.mounted) {
                                           final vm = Provider.of<LyfiViewModel>(context, listen: false);

@@ -117,7 +117,7 @@ final class DeviceManager {
     final store = stringMapStoreFactory.store(StoreNames.devices);
     final originalRecord = await store.record(id).get(tx);
     if (originalRecord == null) {
-      throw KeyNotFoundException(message:'Cannot found device with ID `$id`');
+      throw KeyNotFoundException(message: 'Cannot found device with ID `$id`');
     }
     final oldEntity = DeviceEntity.fromMap(id, originalRecord);
     final fieldsToUpdate = {

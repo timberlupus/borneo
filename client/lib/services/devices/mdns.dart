@@ -23,7 +23,7 @@ class NsdMdnsDiscovery implements IMdnsDiscovery {
   Future<void> stop() async {
     assert(!_isStopped);
     if (_isDisposed) {
-      throw ObjectDisposedException(message:'The object has been disposed!');
+      throw ObjectDisposedException(message: 'The object has been disposed!');
     }
     await nsd.stopDiscovery(_discovery);
     _isStopped = true;

@@ -231,7 +231,7 @@ abstract class BorneoDriverData {
 
   GeneralBorneoDeviceInfo get generalDeviceInfo {
     if (_disposed) {
-      ObjectDisposedException(message:'The object has been disposed.');
+      ObjectDisposedException(message: 'The object has been disposed.');
     }
     return _generalDeviceInfo;
   }

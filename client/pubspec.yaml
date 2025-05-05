@@ -85,6 +85,7 @@ dependencies:
     path: packages/borneo_kernel
   flutter_progress_hud: ^2.0.2
   gauge_indicator: ^0.4.3
+  toastification: ^3.0.2
 
 
 dev_dependencies:

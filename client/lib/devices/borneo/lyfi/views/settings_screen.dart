@@ -2,6 +2,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.d
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
@@ -43,7 +44,7 @@ class SettingsScreen extends StatelessWidget {
   }
 
   List<Widget> _buildSettingItems(BuildContext context) {
-    final rightChevron = Icon(Icons.chevron_right_outlined, color: Theme.of(context).hintColor);
+    const rightChevron = CupertinoListTileChevron();
     final tileColor = Theme.of(context).colorScheme.surfaceContainer;
     return <Widget>[
       ListTile(title: const Text('DEVICE INFORMATION')),
