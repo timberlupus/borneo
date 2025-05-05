@@ -136,6 +136,7 @@ class DashboardToufu extends StatelessWidget {
     final bgColor = backgroundColor ?? Theme.of(context).colorScheme.surfaceContainer;
     final progColor = progressColor ?? Theme.of(context).colorScheme.primary;
     final arcColor = this.arcColor ?? Theme.of(context).colorScheme.onSurfaceVariant;
+    assert(minValue < maxValue);
     return Card(
       margin: const EdgeInsets.all(0),
       color: bgColor,
@@ -526,202 +527,139 @@ class DashboardView extends StatelessWidget {
         ),
       ),
       */
-        Selector<
-          LyfiViewModel,
-          ({
-            bool isOnline,
-            bool isOn,
-            bool isBusy,
-            bool isLocked,
-            LedState? ledState,
-            bool canSwitchNightlightState,
-            Duration nightlightRemaining,
-          })
-        >(
-          selector:
-              (_, vm) => (
-                isOnline: vm.isOnline,
-                isOn: vm.isOn,
-                isBusy: vm.isBusy,
-                isLocked: vm.isLocked,
-                ledState: vm.ledState,
-                canSwitchNightlightState: vm.canSwitchNightlightState,
-                nightlightRemaining: vm.nightlightRemaining,
-              ),
-          builder:
-              (context, vm, _) => Container(
-                margin: const EdgeInsets.fromLTRB(0, 24, 0, 0),
-                color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: PowerButton(
-                              value: vm.isOn,
+        Container(
+          margin: const EdgeInsets.fromLTRB(0, 24, 0, 0),
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Selector<LyfiViewModel, ({bool isOn, bool isOnline, bool isBusy, bool isLocked})>(
+                        selector:
+                            (_, vm) => (isOn: vm.isOn, isOnline: vm.isOnline, isBusy: vm.isBusy, isLocked: vm.isLocked),
+                        builder:
+                            (context, props, _) => PowerButton(
+                              value: props.isOn,
                               label: Text(
-                                vm.isOn ? 'ON' : 'OFF',
+                                props.isOn ? 'ON' : 'OFF',
                                 style: Theme.of(
                                   context,
                                 ).textTheme.titleSmall?.copyWith(color: Theme.of(context).hintColor),
                               ),
                               onChanged:
-                                  vm.isOnline && !vm.isBusy && vm.isLocked
-                                      ? (value) => context.read<LyfiViewModel>().switchPowerOnOff(!vm.isOn)
+                                  props.isOnline && !props.isBusy && props.isLocked
+                                      ? (value) => context.read<LyfiViewModel>().switchPowerOnOff(!props.isOn)
                                       : null,
                             ),
-                          ),
+                      ),
+                    ),
 
-                          Selector<LyfiViewModel, bool>(
-                            selector: (_, vm) => vm.canUnlock,
-                            builder:
-                                (context, canUnlock, _) => Expanded(
-                                  child: RoundedIconTextButton(
-                                    borderColor: Theme.of(context).colorScheme.primary,
-                                    text: "Dimming",
-                                    buttonSize: 64,
-                                    icon: Icon(Icons.tips_and_updates_outlined, size: 40),
-                                    onPressed:
-                                        canUnlock ? () async => context.read<LyfiViewModel>().toggleLock(false) : null,
-                                  ),
-                                ),
-                          ),
-
-                          Expanded(
-                            child: RoundedIconTextButton(
+                    Expanded(
+                      child: Selector<LyfiViewModel, bool>(
+                        selector: (_, vm) => vm.canUnlock,
+                        builder:
+                            (context, canUnlock, _) => RoundedIconTextButton(
                               borderColor: Theme.of(context).colorScheme.primary,
-                              text: vm.ledState == LedState.nightlight ? 'Temporary On' : 'Temporary Off',
+                              text: "Dimming",
+                              buttonSize: 64,
+                              icon: Icon(Icons.tips_and_updates_outlined, size: 40),
+                              onPressed: canUnlock ? () async => context.read<LyfiViewModel>().toggleLock(false) : null,
+                            ),
+                      ),
+                    ),
+
+                    Expanded(
+                      child: Selector<LyfiViewModel, ({LedState? state, bool canSwitch})>(
+                        selector: (_, vm) => (state: vm.ledState, canSwitch: vm.canSwitchNightlightState),
+                        builder:
+                            (context, props, _) => RoundedIconTextButton(
+                              borderColor: Theme.of(context).colorScheme.primary,
+                              text: props.state == LedState.nightlight ? 'Temporary On' : 'Temporary Off',
                               buttonSize: 64,
                               backgroundColor:
-                                  vm.ledState == LedState.nightlight ? Theme.of(context).colorScheme.primary : null,
-                              icon: IconProgressBar(
-                                icon: Icon(Icons.flashlight_on, size: 40),
-                                progress: 0.5,
-                                size: 40,
-                                progressColor:
-                                    vm.ledState == LedState.nightlight
-                                        ? Theme.of(context).colorScheme.inversePrimary
-                                        : Theme.of(context).colorScheme.primary,
-                                backgroundColor:
-                                    vm.ledState == LedState.nightlight
-                                        ? Theme.of(context).colorScheme.onPrimary
-                                        : Theme.of(context).colorScheme.primary,
-                              ),
+                                  props.state == LedState.nightlight ? Theme.of(context).colorScheme.primary : null,
+                              icon:
+                                  props.state == LedState.nightlight
+                                      ? IconProgressBar(
+                                        icon: Icon(Icons.flashlight_on, size: 40),
+                                        progress: 0.5,
+                                        size: 40,
+                                        progressColor:
+                                            props.state == LedState.nightlight
+                                                ? Theme.of(context).colorScheme.inversePrimary
+                                                : Theme.of(context).colorScheme.primary,
+                                        backgroundColor:
+                                            props.state == LedState.nightlight
+                                                ? Theme.of(context).colorScheme.onPrimary
+                                                : Theme.of(context).colorScheme.primary,
+                                      )
+                                      : Icon(Icons.flashlight_on, size: 40),
 
                               onPressed:
-                                  vm.canSwitchNightlightState
-                                      ? () => context.read<LyfiViewModel>().switchNightlightState()
-                                      : null,
+                                  props.canSwitch ? () => context.read<LyfiViewModel>().switchNightlightState() : null,
                             ),
-                          ),
-                        ],
                       ),
-
-                      //sep
-                      SizedBox(height: 16),
-
-                      // next row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: RoundedIconTextButton(
-                              borderColor: Theme.of(context).colorScheme.primary,
-                              text: "Moon",
-                              buttonSize: 64,
-                              icon: Icon(Icons.nightlight_outlined, size: 40),
-                              onPressed: null,
-                            ),
-                          ),
-
-                          // Settings button
-                          Expanded(
-                            child: RoundedIconTextButton(
-                              borderColor: Theme.of(context).colorScheme.primary,
-                              text: "Acclimation",
-                              buttonSize: 64,
-                              icon: Icon(Icons.calendar_month_outlined, size: 40),
-                              onPressed: null,
-                            ),
-                          ),
-
-                          Expanded(
-                            child: RoundedIconTextButton(
-                              borderColor: Theme.of(context).colorScheme.primary,
-                              text: "Settings",
-                              buttonSize: 64,
-                              icon: Icon(Icons.settings_outlined, size: 40),
-                              onPressed: () async {
-                                final lyfi = context.read<LyfiViewModel>();
-                                final vm = await lyfi.loadSettings();
-                                final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
-                                if (context.mounted) {
-                                  lyfi.stopTimer();
-                                  try {
-                                    await Navigator.push(context, route);
-                                  } finally {
-                                    lyfi.startTimer();
-                                  }
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-        ),
-
-        // Unlock
-        /*
-        Builder(
-          builder: (context) {
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-              child: Selector<LyfiViewModel, bool>(
-                selector: (_, vm) => vm.canUnlock,
-                builder:
-                    (context, canUnlock, _) => SlideAction(
-                      height: 64,
-                      sliderRotate: false,
-                      borderRadius: 8,
-                      animationDuration: const Duration(milliseconds: 200),
-                      outerColor: _desaturateColor(Theme.of(context).colorScheme.primaryContainer, 0.5),
-                      innerColor: Theme.of(context).colorScheme.inverseSurface,
-                      key: key,
-                      enabled: canUnlock,
-                      sliderButtonIconPadding: 8,
-                      onSubmit: () async => context.read<LyfiViewModel>().toggleLock(false),
-                      alignment: Alignment.centerRight,
-                      sliderButtonIcon: Icon(
-                        Icons.lock_outline,
-                        size: 32,
-                        color:
-                            canUnlock
-                                ? Theme.of(context).colorScheme.onInverseSurface
-                                : Theme.of(context).disabledColor,
-                      ),
-                      submittedIcon: Icon(
-                        Icons.lock_open_outlined,
-                        color: Theme.of(context).colorScheme.onInverseSurface,
-                        size: 32,
-                      ),
-                      textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color:
-                            canUnlock
-                                ? Theme.of(context).colorScheme.onPrimaryContainer
-                                : Theme.of(context).disabledColor,
-                      ),
-                      text: 'Unlock dimming mode',
                     ),
-              ),
-            );
-          },
+                  ],
+                ),
+
+                //sep
+                SizedBox(height: 16),
+
+                // next row
+                Row(
+                  children: [
+                    Expanded(
+                      child: RoundedIconTextButton(
+                        borderColor: Theme.of(context).colorScheme.primary,
+                        text: "Moon",
+                        buttonSize: 64,
+                        icon: Icon(Icons.nightlight_outlined, size: 40),
+                        onPressed: null,
+                      ),
+                    ),
+
+                    // Settings button
+                    Expanded(
+                      child: RoundedIconTextButton(
+                        borderColor: Theme.of(context).colorScheme.primary,
+                        text: "Acclimation",
+                        buttonSize: 64,
+                        icon: Icon(Icons.calendar_month_outlined, size: 40),
+                        onPressed: null,
+                      ),
+                    ),
+
+                    Expanded(
+                      child: RoundedIconTextButton(
+                        borderColor: Theme.of(context).colorScheme.primary,
+                        text: "Settings",
+                        buttonSize: 64,
+                        icon: Icon(Icons.settings_outlined, size: 40),
+                        onPressed: () async {
+                          final lyfi = context.read<LyfiViewModel>();
+                          final vm = await lyfi.loadSettings();
+                          final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
+                          if (context.mounted) {
+                            lyfi.stopTimer();
+                            try {
+                              await Navigator.push(context, route);
+                            } finally {
+                              lyfi.startTimer();
+                            }
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
-        */
       ],
     );
   }
