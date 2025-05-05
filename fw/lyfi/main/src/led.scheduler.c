@@ -135,17 +135,13 @@ int sch_find_closest_time_range(const struct led_scheduler* sch, uint32_t instan
     return 0;
 }
 
-void led_sch_drive()
+void led_sch_drive(time_t utc_now, led_color_t color)
 {
     assert((_led.state == LED_STATE_PREVIEW || _led.state == LED_STATE_NORMAL)
            && _led.settings.mode == LED_MODE_SCHEDULED);
 
-    led_color_t color;
-    time_t utc_now = _led.state == LED_STATE_PREVIEW ? _led.preview_state_clock : time(NULL);
     struct tm local_tm;
     localtime_r(&utc_now, &local_tm);
 
     led_sch_compute_color(&_led.settings.scheduler, &local_tm, color);
-
-    BO_MUST(led_update_color(color));
 }

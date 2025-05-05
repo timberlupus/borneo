@@ -66,6 +66,12 @@ int64_t to_unix_time(int year, int month, int day, int hour, int min, int sec)
         + sec;
 }
 
+const char* bo_tz_get()
+{
+    // TODO lock
+    return getenv("TZ");
+}
+
 int bo_tz_set(const char* tz)
 {
     if (tz == NULL) {

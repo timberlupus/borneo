@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 async def main():
-    client = LyfiDeviceCoapClient('coap://192.168.0.11')
+    client = LyfiDeviceCoapClient('coap://192.168.0.18')
 
     await client.open()
     response = await client.get_wellknown_core()
@@ -31,7 +31,7 @@ async def main():
     print("Current thermal PID:")
     print(await client.get_thermal_pid())
 
-    await client.set_thermal_pid(100, 20, 10)
+    #await client.set_thermal_pid(250, 10, 50)
 
     print("changed thermal PID:")
     print(await client.get_thermal_pid())
@@ -39,11 +39,11 @@ async def main():
     print("keep temp:")
     print(await client.get_keep_temp())
 
-    print("set keep temp to 40")
-    print(await client.set_keep_temp(40))
+    #print("set keep temp to 45")
+    #print(await client.set_keep_temp(45))
 
-    print("changed keep temp:")
-    print(await client.get_keep_temp())
+    #print("changed keep temp:")
+    #print(await client.get_keep_temp())
     
     print("all done.")
 

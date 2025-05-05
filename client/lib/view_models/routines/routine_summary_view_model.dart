@@ -10,4 +10,9 @@ class RoutineSummaryViewModel extends BaseViewModel {
 
   final AbstractRoutine _model;
   RoutineSummaryViewModel(this._model);
+
+  @override
+  void notifyAppError(String message, {Object? error, StackTrace? stackTrace}) {
+    // TODO
+  }
 }

@@ -14,6 +14,9 @@
 #include <esp_event.h>
 #include <esp_mac.h>
 #include <nvs_flash.h>
+#include <esp_flash.h>
+
+#include <mbedtls/sha256.h>
 
 #include <borneo/common.h>
 #include <borneo/nvs.h>
@@ -26,6 +29,11 @@
 #define SYSTEM_NVS_KEY_MODEL "model"
 #define SYSTEM_NVS_KEY_MANUF "manuf"
 #define SYSTEM_DEFAULT_MANUF "BorneoIoT"
+
+enum state_flags_enum {
+    STATE_FLAG_OPERABLE = 1,
+    STATE_FLAG_CONNECTION_CONFIGURATED = 2,
+};
 
 static inline char to_hex_digit_upper(uint8_t val) { return (val < 10) ? ('0' + val) : ('A' + val - 10); }
 static inline char to_hex_digit_lower(uint8_t val) { return (val < 10) ? ('0' + val) : ('a' + val - 10); }
@@ -45,7 +53,19 @@ int bo_system_init()
     BO_TRY(load_factory_settings());
 
     // Make the device ID
-    BO_TRY(esp_read_mac(_sysinfo.id, ESP_MAC_WIFI_STA));
+    uint8_t mac[6];
+    BO_TRY(esp_read_mac(mac, ESP_MAC_WIFI_STA));
+
+    uint64_t flash_id;
+    BO_TRY(esp_flash_read_unique_chip_id(NULL, &flash_id));
+
+    mbedtls_sha256_context sha256_ctx;
+    mbedtls_sha256_init(&sha256_ctx);
+    mbedtls_sha256_starts(&sha256_ctx, 0);
+    mbedtls_sha256_update(&sha256_ctx, (const uint8_t*)(mac), 6);
+    mbedtls_sha256_update(&sha256_ctx, (const uint8_t*)(&flash_id), sizeof(flash_id));
+    mbedtls_sha256_finish(&sha256_ctx, _sysinfo.id);
+    mbedtls_sha256_free(&sha256_ctx);
 
     for (size_t i = 0; i < BO_DEVICE_ID_LENGTH; ++i) {
         _sysinfo.hex_id[2 * i] = to_hex_digit_upper(_sysinfo.id[i] >> 4);
@@ -117,16 +137,16 @@ void bo_system_reboot_later(uint32_t delay_ms)
         return;
     }
 
-    BO_MUST(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_SHUTDOWN_SCHEDULED, NULL, 0, pdMS_TO_TICKS(100)));
+    if (bo_power_is_on()) {
+        BO_MUST(bo_power_shutdown(0));
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+
+    BO_MUST(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_REBOOTING, NULL, 0, portMAX_DELAY));
 }
 
-/**
- * \brief 系统恢复出厂设置
- *
- **/
 int bo_system_factory_reset()
 {
-    // 擦除用户分区
     BO_TRY(bo_nvs_user_reset());
 
     return 0;
@@ -192,11 +212,29 @@ int bo_system_set_manuf(const char* manuf)
     return 0;
 }
 
+uint32_t bo_system_get_shutdown_reason()
+{
+    uint32_t reason;
+    portENTER_CRITICAL(&_status_lock);
+    reason = _status.shutdown_reason;
+    portEXIT_CRITICAL(&_status_lock);
+    return reason;
+}
+
 void bo_system_set_shutdown_reason(uint32_t reason)
 {
     portENTER_CRITICAL(&_status_lock);
     _status.shutdown_reason = reason;
     portEXIT_CRITICAL(&_status_lock);
+}
+
+uint64_t bo_system_get_shutdown_timestamp()
+{
+    uint64_t timestamp;
+    portENTER_CRITICAL(&_status_lock);
+    timestamp = _status.shutdown_timestamp;
+    portEXIT_CRITICAL(&_status_lock);
+    return timestamp;
 }
 
 void _reboot_callback() { esp_restart(); }
@@ -212,10 +250,8 @@ void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event
     case BO_EVENT_POWER_ON: {
     } break;
 
-    case BO_EVENT_POWER_OFF: {
-    } break;
-
-    case BO_EVENT_EMERGENCY_SHUTDOWN: {
+    case BO_EVENT_SHUTDOWN_SCHEDULED:
+    case BO_EVENT_SHUTDOWN_FAULT: {
         portENTER_CRITICAL(&_status_lock);
         time_t t;
         time(&t);
@@ -263,6 +299,24 @@ int load_factory_settings()
     return 0;
 }
 
+bool bo_system_is_operable()
+{
+    bool result;
+    portENTER_CRITICAL(&_status_lock);
+    result = _status.state_flags & STATE_FLAG_OPERABLE;
+    portEXIT_CRITICAL(&_status_lock);
+    return result;
+}
+
+bool bo_system_connection_configurated()
+{
+    bool result;
+    portENTER_CRITICAL(&_status_lock);
+    result = _status.state_flags & STATE_FLAG_CONNECTION_CONFIGURATED;
+    portEXIT_CRITICAL(&_status_lock);
+    return result;
+}
+
 void bo_sem_release(SemaphoreHandle_t* sem)
 {
     if (*sem) {
@@ -270,4 +324,3 @@ void bo_sem_release(SemaphoreHandle_t* sem)
         *sem = NULL;
     }
 }
-

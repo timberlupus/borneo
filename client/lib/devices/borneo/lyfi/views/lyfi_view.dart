@@ -5,7 +5,6 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/views/dashboard_view.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/schedule_editor_view.dart';
@@ -82,6 +81,7 @@ class HeroVerticalDivider extends StatelessWidget {
   }
 }
 
+/*
 class HeroProgressIndicator extends StatelessWidget {
   final Widget? label;
   final Widget? center;
@@ -122,6 +122,7 @@ class HeroProgressIndicator extends StatelessWidget {
     );
   }
 }
+*/
 
 class HeroPanel extends StatelessWidget {
   const HeroPanel({super.key});
@@ -241,20 +242,8 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
           leading: Selector<LyfiViewModel, bool>(
             selector: (context, vm) => vm.isBusy,
             builder:
-                (context, isBusy, child) => IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  onPressed:
-                      isBusy
-                          ? null
-                          : () {
-                            final vm = context.read<LyfiViewModel>();
-                            if (vm.isLocked) {
-                              Navigator.of(context).pop();
-                            } else {
-                              vm.toggleLock(true);
-                            }
-                          },
-                ),
+                (context, isBusy, child) =>
+                    IconButton(icon: Icon(Icons.arrow_back), onPressed: isBusy ? null : () => goBack(context)),
           ),
           actions: [
             Container(
@@ -295,18 +284,6 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                     ),
             ),
             */
-            IconButton(
-              icon: Icon(Icons.settings_outlined, size: 24),
-              onPressed: () async {
-                final vm = context.read<LyfiViewModel>();
-                await Future.delayed(Duration(milliseconds: 200));
-                final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
-                if (context.mounted) {
-                  Navigator.push(context, route);
-                }
-              },
-            ),
-
             Selector<LyfiViewModel, RssiLevel?>(
               selector: (_, vm) => vm.rssiLevel,
               builder:
@@ -333,6 +310,15 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void goBack(BuildContext context) async {
+    final vm = context.read<LyfiViewModel>();
+    if (vm.isLocked) {
+      Navigator.of(context).pop();
+    } else {
+      vm.toggleLock(true);
+    }
   }
 }
 

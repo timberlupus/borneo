@@ -41,7 +41,11 @@ static esp_timer_handle_t _wifi_reconnect_timer = NULL;
 static esp_timer_handle_t _shutdown_checking_timer = NULL;
 static bool _has_ssid();
 
-static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
+static void wifi_events_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
+static void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data);
+
+static bool s_configurated = false;
+static portMUX_TYPE s_status_lock = portMUX_INITIALIZER_UNLOCKED;
 
 int bo_wifi_init()
 {
@@ -55,7 +59,8 @@ int bo_wifi_init()
     BO_TRY(esp_wifi_init(&cfg));
     BO_TRY(esp_wifi_set_mode(WIFI_MODE_STA));
     BO_TRY(esp_wifi_set_ps(WIFI_PS_NONE));
-    BO_TRY(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL));
+    BO_TRY(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_events_handler, NULL));
+    BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &system_events_handler, NULL));
 
     return bo_wifi_start();
 }
@@ -124,7 +129,7 @@ int bo_wifi_forget()
     return 0;
 }
 
-static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
+static void wifi_events_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
     switch (event_id) {
 
@@ -271,4 +276,25 @@ bool _has_ssid()
     else {
         return false;
     }
+}
+
+void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data)
+{
+    switch (event_id) {
+    case BO_EVENT_REBOOTING: {
+        esp_wifi_disconnect();
+    } break;
+
+    default:
+        break;
+    }
+}
+
+bool bo_wifi_configurated()
+{
+    bool configurated;
+    portENTER_CRITICAL(&s_status_lock);
+    configurated = s_configurated;
+    portEXIT_CRITICAL(&s_status_lock);
+    return configurated;
 }

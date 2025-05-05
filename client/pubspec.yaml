@@ -49,7 +49,6 @@ dependencies:
   fluttertoast: ^8.2.8
   sembast: ^3.7.5
   fl_chart: ^0.71.0
-  percent_indicator: ^4.2.3
   esp_smartconfig: ^2.0.4
   permission_handler: ^12.0.0+1
   logger: ^2.5.0
@@ -73,6 +72,7 @@ dependencies:
   flutter_gettext: ^2.0.1
   progressive_time_picker: ^1.0.3
   flutter_timezone: ^4.1.0
+  geolocator: ^14.0.0
 
 
 
@@ -83,6 +83,9 @@ dependencies:
     path: packages/borneo_kernel_abstractions
   borneo_kernel:
     path: packages/borneo_kernel
+  flutter_progress_hud: ^2.0.2
+  gauge_indicator: ^0.4.3
+  toastification: ^3.0.2
 
 
 dev_dependencies:

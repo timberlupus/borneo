@@ -201,7 +201,8 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel with ViewModelEve
       }
     } else {
       throw PermissionDeniedException(
-        'The program requires permission to access WiFi network information; otherwise, the WiFi name needs to be manually entered.',
+        message:
+            'The program requires permission to access WiFi network information; otherwise, the WiFi name needs to be manually entered.',
       );
     }
   }

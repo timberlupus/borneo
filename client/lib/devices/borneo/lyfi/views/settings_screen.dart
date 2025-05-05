@@ -1,12 +1,14 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatelessWidget {
-  final LyfiViewModel vm;
+  final SettingsViewModel vm;
   const SettingsScreen(this.vm, {super.key});
 
   @override
@@ -29,7 +31,7 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Icon _buildWifiRssiIcon(BuildContext bc) {
-    var rssi = vm.borneoDeviceStatus?.wifiRssi;
+    var rssi = vm.borneoStatus.wifiRssi;
     if (rssi != null) {
       return switch (RssiLevelExtension.fromRssi(rssi)) {
         RssiLevel.strong => Icon(Icons.wifi),
@@ -42,7 +44,7 @@ class SettingsScreen extends StatelessWidget {
   }
 
   List<Widget> _buildSettingItems(BuildContext context) {
-    final rightChevron = Icon(Icons.chevron_right_outlined, color: Theme.of(context).hintColor);
+    const rightChevron = CupertinoListTileChevron();
     final tileColor = Theme.of(context).colorScheme.surfaceContainer;
     return <Widget>[
       ListTile(title: const Text('DEVICE INFORMATION')),
@@ -50,87 +52,149 @@ class SettingsScreen extends StatelessWidget {
         tileColor: tileColor,
         leading: Icon(Icons.info_outline),
         title: Text('Name'),
-        subtitle: vm.isOnline ? Text(vm.borneoDeviceInfo.name) : null,
+        subtitle: Text(vm.borneoInfo.name),
         trailing: rightChevron,
         onTap: () {},
       ),
       ListTile(
         tileColor: tileColor,
         leading: Icon(Icons.factory_outlined),
-        title: const Text('Manufacturer'),
-        trailing: vm.isOnline ? Text(vm.borneoDeviceInfo.manufName) : null,
-      ),
-      ListTile(
-        tileColor: tileColor,
-        leading: Icon(Icons.info_outline),
-        title: const Text('Model'),
-        trailing: vm.isOnline ? Text(vm.borneoDeviceInfo.modelName) : null,
+        title: const Text('Manufacturer & Model'),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [Text(vm.borneoInfo.manufName), Text(vm.borneoInfo.modelName)],
+        ),
       ),
       ListTile(
         tileColor: tileColor,
         leading: Icon(Icons.numbers_outlined),
         title: Text('Serial number'),
-        trailing: vm.isOnline ? Text(vm.borneoDeviceInfo.serno) : null,
+        subtitle: Text(vm.borneoInfo.serno.substring(0, 12)),
       ),
       ListTile(
         tileColor: tileColor,
         leading: Icon(Icons.info_outline),
-        title: Text('Address'),
-        subtitle: Text(vm.deviceEntity.address.toString()),
-        trailing:
-            vm.isOnline
-                ? _buildWifiRssiIcon(context)
-                : Icon(Icons.wifi_off_outlined, color: Theme.of(context).colorScheme.error),
+        title: Text('Device address'),
+        subtitle: Text(vm.address.toString()),
+        trailing: _buildWifiRssiIcon(context),
       ),
-      ListTile(title: Text('DEVICE STATUS')),
-      ListTile(
-        tileColor: tileColor,
-        leading: Icon(Icons.access_time_outlined),
-        title: Text('Device time'),
-        subtitle: vm.isOnline ? Text(vm.borneoDeviceStatus?.timestamp.toString() ?? '') : null,
-        trailing: rightChevron,
-      ),
-      ListTile(
-        tileColor: tileColor,
-        leading: Icon(Icons.location_pin),
-        title: Text('Time zone'),
-        subtitle: vm.isOnline ? Text(vm.borneoDeviceStatus?.timezone ?? '') : null,
-        trailing: rightChevron,
-      ),
-      ListTile(
-        leading: Icon(Icons.settings_power_outlined),
-        tileColor: tileColor,
-        title: Text('Power status at startup'),
-        trailing: DropdownButton<PowerBehavior>(
-          items: [
-            DropdownMenuItem<PowerBehavior>(
-              value: PowerBehavior.autoPowerOn,
-              child: Text("On", style: Theme.of(context).textTheme.bodySmall),
-            ),
-            DropdownMenuItem<PowerBehavior>(
-              value: PowerBehavior.maintainPowerOff,
-              child: Text("Off", style: Theme.of(context).textTheme.bodySmall),
-            ),
-            DropdownMenuItem<PowerBehavior>(
-              value: PowerBehavior.lastPowerState,
-              child: Text("Maintain last", style: Theme.of(context).textTheme.bodySmall),
-            ),
-          ],
-          onChanged: (value) {},
-        ),
 
-        /*
-         Text(
-            vm.borneoDeviceStatus?.shutdownTimestamp?.toString() ?? 'PowerOn'),
-            */
-        onTap: () {},
+      // Location
+      Selector<SettingsViewModel, ({bool canUpdate, GeoLocation? location})>(
+        selector: (_, vm) => (canUpdate: vm.canUpdateGeoLocation, location: vm.location),
+        builder:
+            (context, map, _) => ListTile(
+              tileColor: tileColor,
+              leading: const Icon(Icons.location_pin),
+              title: Text('Location'),
+              subtitle:
+                  map.location != null
+                      ? Text("(${vm.location!.lat.toStringAsFixed(3)}, ${vm.location!.lng.toStringAsFixed(3)})")
+                      : Text('Unknown'),
+              trailing: rightChevron,
+              onTap: map.canUpdate ? vm.updateGeoLocation : null,
+            ),
       ),
+
+      ListTile(title: Text('DEVICE STATUS')),
+
+      Selector<SettingsViewModel, ({bool canUpdate, String? tz, DateTime timestamp})>(
+        selector: (_, vm) => (canUpdate: vm.canUpdateTimezone, tz: vm.timezone, timestamp: vm.borneoStatus.timestamp),
+        builder:
+            (context, map, _) => ListTile(
+              tileColor: tileColor,
+              leading: Icon(Icons.access_time_outlined),
+              title: Text('Device time & time zone'),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [Text(map.timestamp.toString()), Text(map.tz ?? "Unknown time zone")],
+              ),
+              trailing: rightChevron,
+              onTap: map.canUpdate ? vm.updateTimezone : null,
+            ),
+      ),
+
+      Selector<SettingsViewModel, ({bool canUpdate, PowerBehavior behavior})>(
+        selector: (_, vm) => (canUpdate: vm.canUpdatePowerBehavior, behavior: vm.powerBehavior),
+        builder:
+            (context, map, _) => ListTile(
+              leading: Icon(Icons.settings_power_outlined),
+              tileColor: tileColor,
+              title: Text('Power status at startup'),
+              trailing: DropdownButton<PowerBehavior>(
+                value: map.behavior,
+                items: [
+                  DropdownMenuItem<PowerBehavior>(
+                    value: PowerBehavior.autoPowerOn,
+                    child: Text("Keep on", style: Theme.of(context).textTheme.bodySmall),
+                  ),
+                  DropdownMenuItem<PowerBehavior>(
+                    value: PowerBehavior.maintainPowerOff,
+                    child: Text("Keep off", style: Theme.of(context).textTheme.bodySmall),
+                  ),
+                  DropdownMenuItem<PowerBehavior>(
+                    value: PowerBehavior.lastPowerState,
+                    child: Text("Maintain last", style: Theme.of(context).textTheme.bodySmall),
+                  ),
+                ],
+                onChanged: (PowerBehavior? newValue) async {
+                  await vm.updatePowerBehavior(newValue!);
+                },
+              ),
+            ),
+      ),
+
       ListTile(
         tileColor: tileColor,
-        leading: Icon(Icons.emergency_outlined),
-        title: Text('Last emergency shutdown'),
-        trailing: Text(vm.borneoDeviceStatus?.shutdownTimestamp?.toString() ?? 'N/A'),
-        subtitle: Text("Reason: ${vm.borneoDeviceStatus?.shutdownReason}"),
+        leading: Icon(Icons.power_off),
+        title: Text('Last shutdown'),
+        trailing: Text(vm.borneoStatus.shutdownTimestamp?.toString() ?? 'N/A'),
+        subtitle: Text("Reason code: ${vm.borneoStatus.shutdownReason}"),
+      ),
+
+      // LED Lighting settings
+      ListTile(title: Text('LIGHTING')),
+
+      Selector<SettingsViewModel, ({bool canUpdate, LedCorrectionMethod correctionMethod})>(
+        selector: (_, vm) => (canUpdate: vm.canUpdateCorrectionMethod, correctionMethod: vm.correctionMethod),
+        builder:
+            (context, map, _) => ListTile(
+              leading: Icon(Icons.settings_power_outlined),
+              tileColor: tileColor,
+              title: Text('Correction method'),
+              trailing: Selector<SettingsViewModel, LedCorrectionMethod>(
+                selector: (context, map) => map.correctionMethod,
+                builder:
+                    (context, selectedPowerBehavior, child) => DropdownButton<LedCorrectionMethod>(
+                      value: map.correctionMethod,
+                      items: [
+                        DropdownMenuItem<LedCorrectionMethod>(
+                          value: LedCorrectionMethod.log,
+                          child: Text("Logarithmic", style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                        DropdownMenuItem<LedCorrectionMethod>(
+                          value: LedCorrectionMethod.linear,
+                          child: Text("Linear", style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                        DropdownMenuItem<LedCorrectionMethod>(
+                          value: LedCorrectionMethod.exp,
+                          child: Text("Exponential", style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                        DropdownMenuItem<LedCorrectionMethod>(
+                          value: LedCorrectionMethod.gamma,
+                          child: Text("Gamma", style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                        DropdownMenuItem<LedCorrectionMethod>(
+                          value: LedCorrectionMethod.cie1931,
+                          child: Text("CIE1931", style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                      ],
+                      onChanged: (LedCorrectionMethod? newValue) async {
+                        await vm.updateLedCorrectionMethod(newValue!);
+                      },
+                    ),
+              ),
+            ),
       ),
 
       // Version & upgrade group
@@ -139,13 +203,13 @@ class SettingsScreen extends StatelessWidget {
         leading: Icon(Icons.info_outline),
         tileColor: tileColor,
         title: Text('Hardware version'),
-        trailing: vm.isOnline ? Text(vm.borneoDeviceInfo.hwVer.toString()) : null,
+        trailing: Text(vm.borneoInfo.hwVer.toString()),
       ),
       ListTile(
         leading: Icon(Icons.info_outline),
         tileColor: tileColor,
         title: Text('Firmware version'),
-        trailing: vm.isOnline ? Text(vm.borneoDeviceInfo.fwVer.toString()) : null,
+        trailing: Text(vm.borneoInfo.fwVer.toString()),
       ),
       /*
       ListTile(
@@ -159,13 +223,21 @@ class SettingsScreen extends StatelessWidget {
         onTap: () {},
       ),
       */
-      ListTile(title: Text('DANGER ZONE', style: TextStyle(color: Theme.of(context).colorScheme.error))),
+      ListTile(
+        title: Row(
+          children: [
+            Icon(Icons.warning, size: 24, color: Theme.of(context).colorScheme.error),
+            SizedBox(width: 8),
+            Text('DANGER ZONE', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          ],
+        ),
+      ),
       ListTile(
         leading: Icon(Icons.restore_outlined),
         tileColor: tileColor,
         title: Text('Restore to factory settings', style: TextStyle(color: Theme.of(context).colorScheme.error)),
         subtitle: Text('Your device will lose all custom settings.'),
-        trailing: Icon(Icons.warning),
+        trailing: rightChevron,
       ),
     ];
   }

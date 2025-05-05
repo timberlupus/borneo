@@ -67,8 +67,7 @@ void indicator_task(void* args)
             x = 0;
         } break;
 
-        case BO_INDICATOR_STATE_FAULT:
-        case BO_INDICATOR_STATE_EMERGENCY_SHUTDOWN: {
+        case BO_INDICATOR_STATE_FAULT: {
             x = !x;
             delay = pdMS_TO_TICKS(200);
         } break;
@@ -111,7 +110,7 @@ static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_
         _state = BO_INDICATOR_STATE_FAULT;
     } break;
 
-    case BO_EVENT_EMERGENCY_SHUTDOWN: {
+    case BO_EVENT_SHUTDOWN_FAULT: {
         _state = BO_INDICATOR_STATE_FAULT;
     } break;
 

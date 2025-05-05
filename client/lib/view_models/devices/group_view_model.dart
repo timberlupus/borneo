@@ -30,4 +30,9 @@ class GroupViewModel extends BaseViewModel {
       super.dispose();
     }
   }
+
+  @override
+  void notifyAppError(String message, {Object? error, StackTrace? stackTrace}) {
+    // TODO
+  }
 }

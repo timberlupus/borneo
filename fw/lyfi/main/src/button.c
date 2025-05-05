@@ -77,7 +77,7 @@ static void button_long_press_cb(void* arg, void* usr_data)
     if(rc) {
         ESP_LOGE(TAG, "Failed to forget WiFi configuration!");
     }
-    bo_system_reboot_later(1000);
+    bo_system_reboot_later(5000);
 }
 
 #endif // CONFIG_LYFI_PRESS_BUTTON_ENABLED

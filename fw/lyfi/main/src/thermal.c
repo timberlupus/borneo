@@ -20,9 +20,12 @@
 #include "fan.h"
 #include "thermal.h"
 
+#define TEMP_WINDOW_SIZE 8
+
 struct pid {
     int32_t prev_error;
     int32_t integral;
+    int32_t last_output;
 };
 
 struct thermal_state {
@@ -30,12 +33,15 @@ struct thermal_state {
     struct pid pid;
     int overheated_count;
     int current_temp;
+    int temp_window[TEMP_WINDOW_SIZE];
+    uint8_t temp_window_index;
 };
 
 static int load_factory_settings();
 static void thermal_timer_callback(void* args);
 static int thermal_reinit();
 static uint8_t thermal_pid_step(int32_t current_temp);
+static int update_temp_average(int new_sample);
 
 #define CLAMP(x, _min, _max)                                                                                           \
     if ((x) > (_max))                                                                                                  \
@@ -55,7 +61,7 @@ static uint8_t thermal_pid_step(int32_t current_temp);
 #define THERMAL_NVS_KEY_FAN_MANUAL_POWER "fanmanpwr"
 
 #define PID_Q 100
-#define PID_PERIOD (3000)
+#define PID_PERIOD (1000)
 #define PID_INTEGRAL_RESET_THRESHOLD 3
 #define PID_INTEGRAL_MAX 50000
 #define PID_INTEGRAL_MIN -50000
@@ -67,9 +73,9 @@ static uint8_t thermal_pid_step(int32_t current_temp);
 #define OUTPUT_MAX 100
 
 const struct thermal_settings THERMAL_DEFAULT_SETTINGS = {
-    .kp = 300,
+    .kp = 250,
     .ki = 10,
-    .kd = 100,
+    .kd = 50,
     .keep_temp = 45,
     .overheated_temp = 65,
     .fan_mode = THERMAL_FAN_MODE_PID,
@@ -84,6 +90,7 @@ static int thermal_reinit()
     if (THERMAL_FAN_MODE_PID == _settings.fan_mode) {
         _thermal.pid.integral = 0;
         _thermal.pid.prev_error = 0;
+        _thermal.pid.last_output = 0;
         thermal_timer_callback(NULL);
     }
     return 0;
@@ -100,6 +107,19 @@ int thermal_init()
             fan_set_power(OUTPUT_MAX);
         }
         return -1;
+    }
+
+    {
+        // Fill the window
+        for (size_t ti = 0; ti < TEMP_WINDOW_SIZE; ti++) {
+            int rc = ntc_read_temp(_thermal.temp_window + ti);
+            if (rc == 0) {
+                _thermal.current_temp = _thermal.temp_window[ti];
+            }
+            else {
+                _thermal.temp_window[ti] = -1;
+            }
+        }
     }
 
     if (_settings.fan_mode != THERMAL_FAN_MODE_DISABLED) {
@@ -207,9 +227,13 @@ uint8_t thermal_pid_step(int32_t current_temp)
 
     int32_t error = current_temp - _settings.keep_temp;
 
+    if (abs(error) <= 1) { // ±1°C
+        return (uint8_t)(pid->last_output);
+    }
+
     int32_t p_term = _settings.kp * error;
 
-    if (abs(error) > 1) {
+    if (abs(error) >= 2) {
         int32_t new_integral = pid->integral + _settings.ki * error;
         if (new_integral > PID_INTEGRAL_MAX) {
             pid->integral = PID_INTEGRAL_MAX;
@@ -244,12 +268,14 @@ uint8_t thermal_pid_step(int32_t current_temp)
         output /= PID_Q;
     }
 
+    pid->last_output = output;
     return (uint8_t)output;
 }
 
 static void thermal_timer_callback(void* args)
 {
-    int rc = ntc_read_temp(&_thermal.current_temp);
+    int new_temp = -1;
+    int rc = ntc_read_temp(&new_temp);
     if (rc != 0) {
         ESP_LOGE(TAG, "Temperature sensor fault or not connected.");
         if (bo_power_is_on()) {
@@ -260,6 +286,7 @@ static void thermal_timer_callback(void* args)
         }
         return;
     }
+    update_temp_average(new_temp);
 
     uint8_t fan_power_to_set = OUTPUT_MAX;
 
@@ -319,5 +346,26 @@ int thermal_set_keep_temp(uint8_t keep_temp)
     }
 
     _settings.keep_temp = keep_temp;
+
+    return 0;
+}
+
+int update_temp_average(int new_sample)
+{
+    _thermal.temp_window[_thermal.temp_window_index % TEMP_WINDOW_SIZE] = new_sample;
+    _thermal.temp_window_index++;
+
+    int sum = 0;
+    int n = 0;
+    for (size_t i = 0; i < TEMP_WINDOW_SIZE; i++) {
+        if (_thermal.temp_window[i] >= 0) {
+            sum += _thermal.temp_window[i];
+            n++;
+        }
+    }
+    if (n == 0) {
+        return -1;
+    }
+    _thermal.current_temp = (int)((sum + (n / 2)) / n);
     return 0;
 }

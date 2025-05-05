@@ -4,6 +4,7 @@ import 'package:cbor/cbor.dart';
 
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_common/io/net/coap_client.dart';
+import 'package:borneo_common/utils/float.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/metadata.dart';
 import 'package:borneo_kernel_abstractions/errors.dart';
 import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
@@ -22,6 +23,10 @@ class LyfiPaths {
   static final Uri schedule = Uri(path: '/borneo/lyfi/schedule');
   static final Uri sunSchedule = Uri(path: '/borneo/lyfi/sun-schedule');
   static final Uri mode = Uri(path: '/borneo/lyfi/mode');
+  static final Uri correctionMethod =
+      Uri(path: '/borneo/lyfi/correction-method');
+  static final Uri geoLocation = Uri(path: '/borneo/lyfi/geo-location');
+  static final Uri acclimation = Uri(path: '/borneo/lyfi/acclimation');
 }
 
 class LyfiChannelInfo {
@@ -88,6 +93,109 @@ enum LedRunningMode {
   bool get isSchedulerEnabled => this == scheduled;
 }
 
+enum LedCorrectionMethod {
+  log,
+  linear,
+  exp,
+  gamma,
+  cie1931,
+}
+
+class GeoLocation {
+  final double lat;
+  final double lng;
+  GeoLocation({required this.lat, required this.lng});
+
+  @override
+  String toString() => "(${lat.toStringAsFixed(4)}, ${lng.toStringAsFixed(4)})";
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! GeoLocation) {
+      return false;
+    }
+    const double tolerance = 0.00001;
+    return (lat - other.lat).abs() < tolerance &&
+        (lng - other.lng).abs() < tolerance;
+  }
+
+  @override
+  int get hashCode => Object.hash(lat, lng);
+
+  factory GeoLocation.fromMap(dynamic map) {
+    return GeoLocation(
+      lat: map['lat'],
+      lng: map['lng'],
+    );
+  }
+
+  CborMap toCbor() {
+    final cborLat = CborFloat(convertToFloat32(lat));
+    cborLat.floatPrecision();
+    final cborLng = CborFloat(convertToFloat32(lng));
+    cborLng.floatPrecision();
+
+    return CborMap({
+      CborString("lat"): cborLat,
+      CborString("lng"): cborLng,
+    });
+  }
+}
+
+class AcclimationSettings {
+  final bool enabled;
+  final DateTime startTimestamp;
+  final int startPercent;
+  final int days;
+
+  AcclimationSettings({
+    required this.enabled,
+    required this.startTimestamp,
+    required this.startPercent,
+    required this.days,
+  });
+
+  factory AcclimationSettings.fromMap(dynamic map) {
+    return AcclimationSettings(
+      enabled: map["enabled"],
+      startTimestamp:
+          DateTime.fromMillisecondsSinceEpoch(map['startTimestamp'] * 1000),
+      days: map["days"],
+      startPercent: map["startPercent"],
+    );
+  }
+
+  CborMap toCbor() {
+    return CborMap({
+      CborString("enabled"): CborBool(enabled),
+      CborString("startTimestamp"):
+          CborValue((startTimestamp.millisecondsSinceEpoch / 1000.0).round()),
+      CborString("startPercent"): CborSmallInt(startPercent),
+      CborString("days"): CborSmallInt(days),
+    });
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AcclimationSettings &&
+          runtimeType == other.runtimeType &&
+          enabled == other.enabled &&
+          startTimestamp == other.startTimestamp &&
+          startPercent == other.startPercent &&
+          days == other.days;
+
+  @override
+  int get hashCode =>
+      enabled.hashCode ^
+      startTimestamp.hashCode ^
+      startPercent.hashCode ^
+      days.hashCode;
+}
+
 class LyfiDeviceStatus {
   final LedState state;
   final LedRunningMode mode;
@@ -97,6 +205,8 @@ class LyfiDeviceStatus {
   final List<int> currentColor;
   final List<int> manualColor;
   final List<int> sunColor;
+  final bool acclimationEnabled;
+  final bool acclimationActivated;
 
   double get brightness =>
       currentColor.fold(0, (p, v) => p + v).toDouble() *
@@ -112,6 +222,8 @@ class LyfiDeviceStatus {
     required this.currentColor,
     required this.manualColor,
     required this.sunColor,
+    this.acclimationEnabled = false,
+    this.acclimationActivated = false,
   });
 
   factory LyfiDeviceStatus.fromMap(CborMap cborMap) {
@@ -125,6 +237,8 @@ class LyfiDeviceStatus {
       currentColor: List<int>.from(map['currentColor']),
       manualColor: List<int>.from(map['manualColor']),
       sunColor: List<int>.from(map['sunColor']),
+      acclimationEnabled: map['acclimationEnabled'] ?? false,
+      acclimationActivated: map['acclimationActivated'] ?? false,
     );
   }
 }
@@ -168,6 +282,16 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   Future<void> setColor(Device dev, List<int> color);
 
   Future<int> getKeepTemp(Device dev);
+
+  Future<LedCorrectionMethod> getCorrectionMethod(Device dev);
+  Future<void> setCorrectionMethod(Device dev, LedCorrectionMethod mode);
+
+  Future<GeoLocation?> getLocation(Device dev);
+  Future<void> setLocation(Device dev, GeoLocation location);
+
+  Future<AcclimationSettings> getAcclimation(Device dev);
+  Future<void> setAcclimation(Device dev, AcclimationSettings acc);
+  Future<void> terminateAcclimation(Device dev);
 }
 
 class LyfiDriverData extends BorneoDriverData {
@@ -178,7 +302,7 @@ class LyfiDriverData extends BorneoDriverData {
 
   LyfiDeviceInfo get lyfiDeviceInfo {
     if (super.isDisposed) {
-      ObjectDisposedException('The object has been disposed.');
+      ObjectDisposedException(message: 'The object has been disposed.');
     }
     return _lyfiDeviceInfo;
   }
@@ -362,5 +486,56 @@ class BorneoLyfiDriver
     final dd = dev.driverData as LyfiDriverData;
     final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.sunSchedule);
     return items.map((x) => ScheduledInstant.fromMap(x!)).toList();
+  }
+
+  @override
+  Future<LedCorrectionMethod> getCorrectionMethod(Device dev) async {
+    final dd = dev.driverData as LyfiDriverData;
+    final value = await dd.coap.getCbor<int>(LyfiPaths.correctionMethod);
+    return LedCorrectionMethod.values[value];
+  }
+
+  @override
+  Future<void> setCorrectionMethod(
+      Device dev, LedCorrectionMethod correctionMethod) async {
+    final dd = dev.driverData as LyfiDriverData;
+    return await dd.coap
+        .putCbor(LyfiPaths.correctionMethod, correctionMethod.index);
+  }
+
+  @override
+  Future<GeoLocation?> getLocation(Device dev) async {
+    final dd = dev.driverData as LyfiDriverData;
+    final result = await dd.coap.getCbor<dynamic>(LyfiPaths.geoLocation);
+    if (result != null) {
+      return GeoLocation.fromMap(result);
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  Future<void> setLocation(Device dev, GeoLocation location) async {
+    final dd = dev.driverData as LyfiDriverData;
+    return await dd.coap.putCbor(LyfiPaths.geoLocation, location);
+  }
+
+  @override
+  Future<AcclimationSettings> getAcclimation(Device dev) async {
+    final dd = dev.driverData as LyfiDriverData;
+    final map = await dd.coap.getCbor<dynamic>(LyfiPaths.acclimation);
+    return AcclimationSettings.fromMap(map);
+  }
+
+  @override
+  Future<void> setAcclimation(Device dev, AcclimationSettings acc) async {
+    final dd = dev.driverData as LyfiDriverData;
+    return await dd.coap.postCbor(LyfiPaths.acclimation, acc);
+  }
+
+  @override
+  Future<void> terminateAcclimation(Device dev) async {
+    final dd = dev.driverData as LyfiDriverData;
+    await dd.coap.delete(LyfiPaths.acclimation);
   }
 }

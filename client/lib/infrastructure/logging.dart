@@ -3,7 +3,7 @@ import 'package:logger/logger.dart';
 Logger createLogger() {
   return Logger(
     printer: PrettyPrinter(
-      methodCount: 0,
+      methodCount: 2,
       excludeBox: const {Level.info: true},
       noBoxingByDefault: true,
       lineLength: 120,

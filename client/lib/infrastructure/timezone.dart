@@ -21,7 +21,7 @@ class TimezoneConverter {
 
     // Lookup POSIX string in zones.json
     if (_zonesData != null && _zonesData!.containsKey(ianaTimezone)) {
-      return _zonesData![ianaTimezone]['posix'] as String?;
+      return _zonesData![ianaTimezone] as String?;
     } else {
       // Fallback if timezone not found
       return null;

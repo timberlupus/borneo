@@ -125,4 +125,9 @@ class SceneSummaryViewModel extends BaseViewModel {
       notifyListeners();
     }
   }
+
+  @override
+  void notifyAppError(String message, {Object? error, StackTrace? stackTrace}) {
+    // TODO
+  }
 }

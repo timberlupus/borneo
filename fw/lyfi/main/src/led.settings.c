@@ -25,7 +25,6 @@
 
 #define LED_NVS_NS "led"
 #define LED_NVS_KEY_RUNNING_MODE "mode"
-#define LED_NVS_KEY_FLAGS "flags"
 #define LED_NVS_KEY_MANUAL_COLOR "mcolor"
 #define LED_NVS_KEY_SUN_COLOR "suncolor"
 #define LED_NVS_KEY_SCHEDULER "sch"
@@ -33,6 +32,10 @@
 #define LED_NVS_KEY_CORRECTION_METHOD "corrmtd"
 #define LED_NVS_KEY_PWM_FREQ "pwmfreq"
 #define LED_NVS_KEY_LOC "loc"
+#define LED_NVS_KEY_ACCLIMATION_ENABLED "acc.en"
+#define LED_NVS_KEY_ACCLIMATION_START "acc.start"
+#define LED_NVS_KEY_ACCLIMATION_DURATION "acc.days"
+#define LED_NVS_KEY_ACCLIMATION_START_PERCENT "acc.pc"
 
 static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     .mode = LED_MODE_MANUAL,
@@ -40,42 +43,51 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     .manual_color = {
 // From kconfig
 #if CONFIG_LYFI_LED_CH0_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH1_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH2_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH3_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH4_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH5_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH6_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH7_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH8_ENABLED
-        10,
+        5,
 #endif
 #if CONFIG_LYFI_LED_CH9_ENABLED
-        10,
+        5,
 #endif
     },
     .sun_color = {0},
     .scheduler = { 0 },
 
     .location = {
-        .lat = NAN,
-        .lng = NAN,
+        .lat = 25.0430f,
+        .lng = 102.7062f,
+    },
+
+    .flags = 0ULL,
+
+    .acclimation = {
+        .enabled = false,
+        .start_utc = 0,
+        .duration = 30,
+        .start_percent = 30,
     },
 };
 
@@ -120,17 +132,6 @@ int led_load_user_settings()
         rc = nvs_get_u8(handle, LED_NVS_KEY_RUNNING_MODE, &settings->mode);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
             settings->mode = LED_DEFAULT_SETTINGS.mode;
-            rc = 0;
-        }
-        if (rc) {
-            goto _EXIT_CLOSE;
-        }
-    }
-
-    {
-        rc = nvs_get_u64(handle, LED_NVS_KEY_FLAGS, &settings->flags);
-        if (rc == ESP_ERR_NVS_NOT_FOUND) {
-            settings->flags = LED_DEFAULT_SETTINGS.flags;
             rc = 0;
         }
         if (rc) {
@@ -199,8 +200,59 @@ int led_load_user_settings()
     {
         size = sizeof(struct geo_location);
         rc = nvs_get_blob(handle, LED_NVS_KEY_LOC, &settings->location, &size);
+        if (rc == 0) {
+            settings->flags |= LED_OPTION_HAS_GEO_LOCATION;
+        }
+        else if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->flags &= ~LED_OPTION_HAS_GEO_LOCATION;
+            rc = 0;
+        }
+        if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
+    {
+        uint8_t acc_en = 0;
+        rc = nvs_get_u8(handle, LED_NVS_KEY_ACCLIMATION_ENABLED, &acc_en);
+        if (rc == 0 && acc_en) {
+            settings->acclimation.enabled = acc_en;
+        }
+        else if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->acclimation.enabled = false;
+            rc = 0;
+        }
+        if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
+    {
+        rc = nvs_get_i64(handle, LED_NVS_KEY_ACCLIMATION_START, &settings->acclimation.start_utc);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
-            settings->location = LED_DEFAULT_SETTINGS.location;
+            settings->acclimation.start_utc = LED_DEFAULT_SETTINGS.acclimation.start_utc;
+            rc = 0;
+        }
+        if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
+    {
+        rc = nvs_get_u8(handle, LED_NVS_KEY_ACCLIMATION_DURATION, &settings->acclimation.duration);
+        if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->acclimation.duration = LED_DEFAULT_SETTINGS.acclimation.duration;
+            rc = 0;
+        }
+        if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
+    {
+        rc = nvs_get_u8(handle, LED_NVS_KEY_ACCLIMATION_START_PERCENT, &settings->acclimation.start_percent);
+        if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->acclimation.start_percent = LED_DEFAULT_SETTINGS.acclimation.start_percent;
             rc = 0;
         }
         if (rc) {
@@ -234,11 +286,6 @@ int led_save_user_settings()
         goto _EXIT_CLOSE;
     }
 
-    rc = nvs_set_u64(handle, LED_NVS_KEY_FLAGS, settings->flags);
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
     rc = nvs_set_u16(handle, LED_NVS_KEY_NIGHTLIGHT_DURATION, settings->nightlight_duration);
     if (rc) {
         goto _EXIT_CLOSE;
@@ -264,7 +311,29 @@ int led_save_user_settings()
         goto _EXIT_CLOSE;
     }
 
-    rc = nvs_set_blob(handle, LED_NVS_KEY_LOC, &settings->location, sizeof(struct geo_location));
+    if (led_has_geo_location()) {
+        rc = nvs_set_blob(handle, LED_NVS_KEY_LOC, &settings->location, sizeof(struct geo_location));
+        if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
+    rc = nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_ENABLED, (uint8_t)led_acclimation_is_enabled());
+    if (rc) {
+        goto _EXIT_CLOSE;
+    }
+
+    rc = nvs_set_i64(handle, LED_NVS_KEY_ACCLIMATION_START, settings->acclimation.start_utc);
+    if (rc) {
+        goto _EXIT_CLOSE;
+    }
+
+    rc = nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_DURATION, settings->acclimation.duration);
+    if (rc) {
+        goto _EXIT_CLOSE;
+    }
+
+    rc = nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_START_PERCENT, settings->acclimation.start_percent);
     if (rc) {
         goto _EXIT_CLOSE;
     }
@@ -277,6 +346,12 @@ _EXIT_WITHOUT_CLOSE:
     return rc;
 }
 
+bool led_has_geo_location()
+{
+    // TODO lock
+    return _led.settings.flags & LED_OPTION_HAS_GEO_LOCATION;
+}
+
 int led_set_geo_location(const struct geo_location* location)
 {
     // TODO lock
@@ -284,11 +359,28 @@ int led_set_geo_location(const struct geo_location* location)
         return -EINVAL;
     }
 
-    if(location->lat == NAN || location->lng == NAN) {
+    if (location->lat == NAN || location->lng == NAN) {
+        return -EINVAL;
+    }
+    if (isnan(location->lat) || isnan(location->lng) || isinf(location->lat) || isinf(location->lng)) {
         return -EINVAL;
     }
 
-    memcpy(&_led.settings.location, location, sizeof(struct geo_location));
+    // lat [-90.0, 90.0]
+    if (location->lat < -90.0f || location->lat > 90.0f) {
+        return -EINVAL;
+    }
+    // lng [-180.0, 180.0]
+    if (location->lng < -180.0f || location->lng > 180.0f) {
+        return -EINVAL;
+    }
+    _led.settings.location.lat = location->lat;
+    _led.settings.location.lng = location->lng;
+    _led.settings.flags |= LED_OPTION_HAS_GEO_LOCATION;
+
     BO_TRY(led_save_user_settings());
+
+    BO_TRY(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_GEO_LOCATION_CHANGED, NULL, 0, portMAX_DELAY));
+
     return 0;
 }
