@@ -154,51 +154,37 @@ class DashboardToufu extends StatelessWidget {
                     ),
                   Positioned.fill(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(8, 16, 8, 8),
+                      padding: EdgeInsets.fromLTRB(0, 16, 0, 8),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Expanded(
-                            child: Stack(
-                              children: [
-                                Positioned.fill(
-                                  child: Container(
-                                    padding: const EdgeInsets.all(0),
-                                    child: LayoutBuilder(
-                                      builder:
-                                          (context, constraints) => AnimatedRadialGauge(
-                                            duration: Duration(milliseconds: 300),
-                                            curve: Curves.decelerate,
-                                            value: value,
-                                            radius: null,
-                                            axis: GaugeAxis(
-                                              min: minValue,
-                                              max: maxValue,
-                                              degrees: 270,
-                                              style: GaugeAxisStyle(
-                                                thickness: 13,
-                                                segmentSpacing: 0,
-                                                background: segments.isEmpty ? arcColor : null,
-                                                cornerRadius: Radius.zero,
-                                              ),
-                                              pointer: null,
-                                              progressBar: GaugeProgressBar.basic(color: progColor),
-                                              segments: segments,
-                                            ),
-                                          ),
+                            child: LayoutBuilder(
+                              builder:
+                                  (context, constraints) => AnimatedRadialGauge(
+                                    initialValue: minValue,
+                                    duration: Duration(milliseconds: 300),
+                                    curve: Curves.decelerate,
+                                    value: value,
+                                    radius: null,
+                                    axis: GaugeAxis(
+                                      min: minValue,
+                                      max: maxValue,
+                                      degrees: 280,
+                                      style: GaugeAxisStyle(
+                                        thickness: 13,
+                                        segmentSpacing: 0,
+                                        background: segments.isEmpty ? arcColor : null,
+                                        cornerRadius: Radius.zero,
+                                      ),
+                                      pointer: null,
+                                      progressBar: GaugeProgressBar.basic(color: progColor),
+                                      segments: segments,
                                     ),
+                                    builder: (context, label, value) => Center(child: label),
+                                    child: center,
                                   ),
-                                ),
-                                if (center != null)
-                                  Positioned.fill(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [Center(child: center!)],
-                                    ),
-                                  ),
-                              ],
                             ),
                           ),
                           SizedBox(height: 8),
@@ -298,14 +284,32 @@ class DashboardView extends StatelessWidget {
                                       minValue: 0,
                                       maxValue: vm.maxOverallBrightness,
                                       value: vm.channels.isNotEmpty ? vm.overallBrightness : 0.0,
-                                      center: Text(
-                                        vm.channels.isNotEmpty
-                                            ? '${(vm.overallBrightness / vm.maxOverallBrightness * 100).toStringAsFixed(1)}%'
-                                            : "N/A",
-                                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSecondaryContainer,
-                                          fontFeatures: [FontFeature.tabularFigures()],
-                                        ),
+                                      center: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        textBaseline: TextBaseline.alphabetic,
+                                        children: [
+                                          Text(
+                                            vm.channels.isNotEmpty
+                                                ? (vm.overallBrightness / vm.maxOverallBrightness * 100)
+                                                    .toStringAsFixed(0)
+                                                : "N/A",
+                                            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                              fontFeatures: [FontFeature.tabularFigures()],
+                                              color: Theme.of(context).colorScheme.primary,
+                                              fontSize: 24,
+                                            ),
+                                          ),
+                                          if (vm.channels.isNotEmpty)
+                                            Text(
+                                              '%',
+                                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                                fontFeatures: [FontFeature.tabularFigures()],
+                                                color: Theme.of(context).colorScheme.primary,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                        ],
                                       ),
                                     ),
                                   ),
@@ -335,24 +339,57 @@ class DashboardView extends StatelessWidget {
                                         mainAxisSize: MainAxisSize.max,
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
-                                          Text(
-                                            vm.channels.isNotEmpty &&
-                                                    vm.borneoDeviceStatus?.powerVoltage != null &&
-                                                    vm.borneoDeviceStatus?.powerCurrent != null
-                                                ? '${(vm.borneoDeviceStatus!.powerVoltage! * vm.borneoDeviceStatus!.powerCurrent!).toStringAsFixed(0)}W'
-                                                : "N/A",
-                                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                              color: Theme.of(context).colorScheme.tertiary,
-                                            ),
+                                          Row(
+                                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            textBaseline: TextBaseline.alphabetic,
+                                            children: [
+                                              Text(
+                                                vm.channels.isNotEmpty &&
+                                                        vm.borneoDeviceStatus?.powerVoltage != null &&
+                                                        vm.borneoDeviceStatus?.powerCurrent != null
+                                                    ? (vm.borneoDeviceStatus!.powerVoltage! *
+                                                            vm.borneoDeviceStatus!.powerCurrent!)
+                                                        .toStringAsFixed(0)
+                                                    : "N/A",
+                                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                                  color: Theme.of(context).colorScheme.primary,
+                                                  fontSize: 24,
+                                                ),
+                                              ),
+                                              if (vm.channels.isNotEmpty &&
+                                                  vm.borneoDeviceStatus?.powerVoltage != null &&
+                                                  vm.borneoDeviceStatus?.powerCurrent != null)
+                                                Text(
+                                                  'W',
+                                                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                                    fontFeatures: [FontFeature.tabularFigures()],
+                                                    color: Theme.of(context).colorScheme.primary,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                            ],
                                           ),
-                                          Text(
-                                            vm.channels.isNotEmpty
-                                                ? '${vm.borneoDeviceStatus?.powerVoltage?.toStringAsFixed(1) ?? ''}V/${vm.borneoDeviceStatus?.powerCurrent?.toStringAsFixed(1) ?? ''}A'
-                                                : "N/A",
-                                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                              color: Theme.of(context).colorScheme.onSurface.withAlpha(97),
-                                              fontFeatures: [FontFeature.tabularFigures()],
-                                            ),
+                                          Row(
+                                            children: [
+                                              if (vm.borneoDeviceStatus?.powerVoltage != null)
+                                                Text(
+                                                  '${vm.borneoDeviceStatus!.powerVoltage!.toStringAsFixed(1)}V',
+                                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                                    color: Theme.of(context).colorScheme.onSurface,
+                                                    fontFeatures: [FontFeature.tabularFigures()],
+                                                  ),
+                                                ),
+                                              if (vm.borneoDeviceStatus?.powerCurrent != null) SizedBox(width: 4),
+                                              if (vm.borneoDeviceStatus?.powerCurrent != null)
+                                                Text(
+                                                  '${vm.borneoDeviceStatus!.powerCurrent!.toStringAsFixed(1)}A',
+                                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                                    color: Theme.of(context).colorScheme.onSurface,
+                                                    fontFeatures: [FontFeature.tabularFigures()],
+                                                  ),
+                                                ),
+                                            ],
                                           ),
                                         ],
                                       ),
@@ -389,12 +426,29 @@ class DashboardView extends StatelessWidget {
                                 value: vm.currentTemp?.toDouble() ?? 0.0,
                                 minValue: 0,
                                 maxValue: 105,
-                                center: Text(
-                                  vm.currentTemp != null ? '${vm.currentTemp}℃' : "N/A",
-                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontFeatures: [FontFeature.tabularFigures()],
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
+                                center: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: [
+                                    Text(
+                                      vm.currentTemp != null ? '${vm.currentTemp}' : "N/A",
+                                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                        fontFeatures: [FontFeature.tabularFigures()],
+                                        color: Theme.of(context).colorScheme.primary,
+                                        fontSize: 24,
+                                      ),
+                                    ),
+                                    if (vm.currentTemp != null)
+                                      Text(
+                                        '℃',
+                                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                          fontFeatures: [FontFeature.tabularFigures()],
+                                          color: Theme.of(context).colorScheme.primary,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                  ],
                                 ),
                                 segments: [
                                   GaugeSegment(from: 0, to: 45, color: Colors.green[100]!),
@@ -421,12 +475,28 @@ class DashboardView extends StatelessWidget {
                                 minValue: 0,
                                 maxValue: 100,
                                 value: vm.fanPowerRatio,
-                                center: Text(
-                                  '${vm.fanPowerRatio.toInt()}%',
-                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontFeatures: [FontFeature.tabularFigures()],
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
+                                center: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: [
+                                    Text(
+                                      '${vm.fanPowerRatio.toInt()}',
+                                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                        fontFeatures: [FontFeature.tabularFigures()],
+                                        fontSize: 24,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                    ),
+                                    Text(
+                                      '%',
+                                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                        fontFeatures: [FontFeature.tabularFigures()],
+                                        fontSize: 12,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -522,21 +592,23 @@ class DashboardView extends StatelessWidget {
                           Expanded(
                             child: RoundedIconTextButton(
                               borderColor: Theme.of(context).colorScheme.primary,
-                              text:
-                                  vm.ledState == LedState.nightlight
-                                      ? 'Temporary On'
-                                      : 'Temporary Off',
+                              text: vm.ledState == LedState.nightlight ? 'Temporary On' : 'Temporary Off',
                               buttonSize: 64,
-                              icon:
-                                  vm.ledState == LedState.nightlight
-                                      ? IconProgressBar(
-                                        icon: Icon(Icons.flashlight_on, size: 40),
-                                        progress: 0.5,
-                                        size: 40,
-                                        progressColor: Theme.of(context).colorScheme.primary,
-                                        backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
-                                      )
-                                      : Icon(Icons.flashlight_off, size: 40),
+                              backgroundColor:
+                                  vm.ledState == LedState.nightlight ? Theme.of(context).colorScheme.primary : null,
+                              icon: IconProgressBar(
+                                icon: Icon(Icons.flashlight_on, size: 40),
+                                progress: 0.5,
+                                size: 40,
+                                progressColor:
+                                    vm.ledState == LedState.nightlight
+                                        ? Theme.of(context).colorScheme.inversePrimary
+                                        : Theme.of(context).colorScheme.primary,
+                                backgroundColor:
+                                    vm.ledState == LedState.nightlight
+                                        ? Theme.of(context).colorScheme.onPrimary
+                                        : Theme.of(context).colorScheme.primary,
+                              ),
 
                               onPressed:
                                   vm.canSwitchNightlightState

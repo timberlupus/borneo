@@ -11,6 +11,7 @@ class RoundedIconTextButton extends StatefulWidget {
   final Color textColor;
   final EdgeInsetsGeometry padding;
   final double spacing;
+  final Color? backgroundColor;
 
   const RoundedIconTextButton({
     required this.icon,
@@ -23,6 +24,7 @@ class RoundedIconTextButton extends StatefulWidget {
     this.textColor = Colors.black,
     this.padding = const EdgeInsets.all(0),
     this.spacing = 4.0,
+    this.backgroundColor,
     super.key,
   });
 
@@ -56,7 +58,7 @@ class _RoundedIconTextButtonState extends State<RoundedIconTextButton> with Sing
             onPressed: widget.onPressed,
             style: OutlinedButton.styleFrom(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(widget.borderRadius)),
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              backgroundColor: widget.backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHighest,
               side: BorderSide(color: widget.borderColor),
               padding: EdgeInsets.all(8),
             ),
