@@ -1,4 +1,7 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/acclimation_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/acclimation_screen.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/lyfi_view.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/schedule_chart.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/settings_screen.dart';
 import 'package:borneo_app/widgets/icon_progress.dart';
@@ -624,12 +627,32 @@ class DashboardView extends StatelessWidget {
 
                     // Settings button
                     Expanded(
-                      child: RoundedIconTextButton(
-                        borderColor: Theme.of(context).colorScheme.primary,
-                        text: "Acclimation",
-                        buttonSize: 64,
-                        icon: Icon(Icons.calendar_month_outlined, size: 40),
-                        onPressed: null,
+                      child: Selector<LyfiViewModel, bool>(
+                        selector: (_, vm) => vm.canLockOrUnlock,
+                        builder:
+                            (context, canGoAcclimation, _) => RoundedIconTextButton(
+                              borderColor: Theme.of(context).colorScheme.primary,
+                              text: "Acclimation",
+                              buttonSize: 64,
+                              icon: Icon(Icons.calendar_month_outlined, size: 40),
+                              onPressed:
+                                  canGoAcclimation
+                                      ? () async {
+                                        if (context.mounted) {
+                                          final vm = Provider.of<LyfiViewModel>(context, listen: false);
+                                          final route = MaterialPageRoute(
+                                            builder: (context) => AcclimationScreen(deviceID: vm.deviceID),
+                                          );
+                                          try {
+                                            vm.stopTimer();
+                                            await Navigator.push(context, route);
+                                          } finally {
+                                            vm.startTimer();
+                                          }
+                                        }
+                                      }
+                                      : null,
+                            ),
                       ),
                     ),
 
