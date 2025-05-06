@@ -24,17 +24,24 @@
 #include "fan.h"
 
 #define NVS_FAN_NAMESPACE "fan"
-#define FAN_NVS_KEY_USE_PWM "use_pwm"
+#define FAN_NVS_KEY_DAC_ENABLED "dac_en"
+#define FAN_NVS_KEY_PWM_ENABLED "pwm_en"
 
 #define TAG "fan"
+
+int fan_factory_settings_load();
 
 static portMUX_TYPE _status_lock = portMUX_INITIALIZER_UNLOCKED;
 
 static struct fan_status _status = { 0 };
-static struct fan_settings _settings = { 0 };
+static struct fan_factory_settings _factory_settings = { 0 };
 
+#define DAC_FAN_MIN_DUTY 0
+#define DAC_FAN_MAX_DUTY 255
 #define PWMDAC_FAN_MIN_DUTY 30 ///< About ~3.5V
 #define PWMDAC_FAN_MAX_DUTY 80 ///< About ~12V
+#define PWM_FAN_MAX_DUTY 100
+#define PWM_FAN_MIN_DUTY 0
 
 int fan_init()
 {
@@ -58,35 +65,30 @@ int fan_init()
     }
 #endif // CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED
 
-    {
-        nvs_handle_t nvs_handle;
-        BO_TRY(bo_nvs_factory_open(NVS_FAN_NAMESPACE, NVS_READWRITE, &nvs_handle));
-        uint8_t use_pwm_fan = 0;
-        int rc = nvs_get_u8(nvs_handle, FAN_NVS_KEY_USE_PWM, &use_pwm_fan);
-        if (rc == 0) {
-            _settings.use_pwm_fan = use_pwm_fan;
-        }
-        else {
-            _settings.use_pwm_fan = 0;
-        }
-        bo_nvs_close(nvs_handle);
+    BO_TRY(fan_factory_settings_load());
+
+    bool dac_enabled = _factory_settings.flags & FAN_FLAG_DAC_ENABLED;
+    bool pwm_enabled = _factory_settings.flags & FAN_FLAG_PWM_ENABLED;
+
+    if (dac_enabled || pwm_enabled) {
+        BO_TRY(rmtpwm_init());
     }
 
-    BO_TRY(rmtpwm_init());
-
-    if (!_settings.use_pwm_fan) {
+    if (dac_enabled) {
 #if SOC_DAC_SUPPORTED
         ESP_LOGI(TAG, "Fan driver using DAC, channel=%u", CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL);
         BO_TRY(dac_output_enable(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL));
-#endif
-    }
-    else {
-#if !SOC_DAC_SUPPORTED
-        BO_TRY(rmtpwm_set_dac_duty(0));
+        BO_TRY(dac_output_voltage(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL, DAC_FAN_MAX_DUTY));
+#else
+        BO_TRY(rmtpwm_dac_init());
+        BO_TRY(rmtpwm_set_dac_duty(PWMDAC_FAN_MAX_DUTY));
 #endif
     }
 
-    BO_TRY(fan_set_power(FAN_POWER_MAX));
+    if (pwm_enabled) {
+        BO_TRY(rmtpwm_pwm_init());
+        BO_TRY(rmtpwm_set_pwm_duty(PWM_FAN_MIN_DUTY));
+    }
 
     ESP_LOGI(TAG, "Fan driver initizlied.");
     return 0;
@@ -117,12 +119,12 @@ int fan_set_power(uint8_t value)
     }
 #endif // LYFI_FAN_CTRL_SHUTDOWN_ENABLED
 
-    if (_settings.use_pwm_fan) {
+    if (_factory_settings.flags & FAN_FLAG_PWM_ENABLED) {
         BO_TRY(rmtpwm_set_pwm_duty(value));
         ESP_LOGI(TAG, "Set fan power, method: PWM, power=%u%%", value);
     }
-    else {
 
+    if (_factory_settings.flags & FAN_FLAG_DAC_ENABLED) {
 #if SOC_DAC_SUPPORTED
         // Built-in DAC
         {
@@ -175,4 +177,44 @@ struct fan_status fan_get_status()
     return status;
 }
 
-const struct fan_settings* fan_get_settings() { return &_settings; }
+int fan_factory_settings_load()
+{
+    nvs_handle_t nvs_handle;
+    BO_TRY(bo_nvs_factory_open(NVS_FAN_NAMESPACE, NVS_READWRITE, &nvs_handle));
+
+    {
+        uint8_t en = 0;
+        int rc = nvs_get_u8(nvs_handle, FAN_NVS_KEY_DAC_ENABLED, &en);
+        if (rc == 0) {
+            if (en) {
+                _factory_settings.flags |= FAN_FLAG_DAC_ENABLED;
+            }
+            else {
+                _factory_settings.flags &= ~FAN_FLAG_DAC_ENABLED;
+            }
+        }
+        else {
+            _factory_settings.flags |= FAN_FLAG_DAC_ENABLED;
+        }
+    }
+
+    {
+        uint8_t en = 0;
+        int rc = nvs_get_u8(nvs_handle, FAN_NVS_KEY_PWM_ENABLED, &en);
+        if (rc == 0) {
+            if (en) {
+                _factory_settings.flags |= FAN_FLAG_PWM_ENABLED;
+            }
+            else {
+                _factory_settings.flags &= ~FAN_FLAG_PWM_ENABLED;
+            }
+        }
+        else {
+            _factory_settings.flags &= ~FAN_FLAG_PWM_ENABLED;
+        }
+    }
+
+    bo_nvs_close(nvs_handle);
+
+    return 0;
+}

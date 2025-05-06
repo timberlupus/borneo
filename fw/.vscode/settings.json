@@ -13,9 +13,12 @@
     "**/managed_components": true
   },
   "idf.espIdfPath": "${env:IDF_PATH}",
-"idf.adapterTargetName": "${input:targetName}",
-"files.associations": {
-    "stdint.h": "c",
-    "esp_system.h": "c"
-}
+  "idf.adapterTargetName": "${input:targetName}",
+  "files.associations": {
+    "*.c": "c",
+    "*.h": "c",
+    "*.cpp": "cpp",
+    "*.inc": "c",
+    "*_config.h": "c"
+  }
 }

@@ -95,7 +95,7 @@ struct led_user_settings {
 
     struct led_acclimation_settings acclimation;
 
-    uint64_t flags; ///< The option flags
+    uint32_t flags; ///< The option flags
 };
 
 struct led_status {
