@@ -33,8 +33,8 @@ menu "Borneo LyFi"
 
         config LYFI_DEFAULT_PWM_FREQ
             int "LED PWM frequency"
-            default 24000
-            range 1000 24000
+            default 19000
+            range 1000 19000
 
     endmenu
 
