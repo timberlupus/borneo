@@ -1,3 +1,22 @@
 {
-    "cmake.sourceDirectory": "C:/dev/borneo/borneo/client/linux"
+    "dart.flutterSdkPath": null,
+    "dart.lineLength": 80,
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+    "editor.defaultFormatter": "Dart-Code.dart-code",
+    "files.exclude": {
+        "**/.dart_tool": true,
+        "**/.flutter-plugins": true,
+        "**/.flutter-plugins-dependencies": true,
+        "**/.metadata": true,
+        "**/.packages": true,
+        "**/build": true
+    },
+    "[dart]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.detectIndentation": false
+    },
+    "dart.previewFlutterUiGuides": true,
+    "extensions.autoUpdate": true
 }
