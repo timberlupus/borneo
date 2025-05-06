@@ -26,17 +26,14 @@ def generate_logarithmic_lut(size: int, gamma: float = 2.0, min_input: float = 0
         if level == 0:
             pwm = 0
         else:
-            # 对数调光公式
-            log_value = math.log10(level / (size - 1) * 9 + 1)  # 1-10对数范围
+            log_value = math.log10(level / (size - 1) * 9 + 1)  # 1-10
             pwm = int(log_value * PWM_DUTY_MAX)
-            # 确保最小值至少为1（如果需要完全关闭则为0）
             if pwm < 1 and level > 0:
                 pwm = 1
             elif pwm > PWM_DUTY_MAX:
                 pwm = PWM_DUTY_MAX
         lut.append(pwm)
     return lut
-
 
 
 def generate_exponential_lut(size: int):
@@ -50,12 +47,13 @@ def generate_exponential_lut(size: int):
     for i in range(size):
         if i == 0:
             brightness = 0
-        elif i == size-1:
+        elif i == size - 1:
             brightness = PWM_DUTY_MAX
         else:
             brightness = (size * pow(2, i / R)) / size
         lut.append(round(brightness))
     return lut
+
 
 def generate_gamma_lut(size: int, gamma: float = 2.2):
     """Generate gamma correction lookup table
@@ -115,8 +113,6 @@ const led_duty_t LED_CORLUT_GAMMA[LED_BRIGHTNESS_MAX + 1] = {{
 
 """
     return header
-
-
 
 
 if __name__ == "__main__":
