@@ -1,0 +1,21 @@
+{
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/**",
+    "${env:IDF_PATH}/components/**"
+  ],
+  "C_Cpp.default.cStandard": "c11",
+  "C_Cpp.default.cppStandard": "c++17",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "ms-vscode.cpptools",
+  "files.exclude": {
+    "**/build": true,
+    "**/sdkconfig*": true,
+    "**/managed_components": true
+  },
+  "idf.espIdfPath": "${env:IDF_PATH}",
+"idf.adapterTargetName": "${input:targetName}",
+"files.associations": {
+    "stdint.h": "c",
+    "esp_system.h": "c"
+}
+}
