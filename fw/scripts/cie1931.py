@@ -3,6 +3,7 @@ import numpy as np
 import datetime
 
 PWM_DUTY_MAX = 1023
+BRIGHT_LEVEL_MAX = 1000
 
 
 def generate_cie1931_lut(size: int):
@@ -42,7 +43,7 @@ def generate_exponential_lut(size: int):
 
     # Replace 4095 by the amount of PWM steps
     # Calculate the r variable (only needs to be done once at setup)
-    R = (PWM_DUTY_MAX * math.log10(2)) / (math.log10(size))
+    R = ((size - 1) * math.log10(2)) / (math.log10(PWM_DUTY_MAX))
 
     for i in range(size):
         if i == 0:
@@ -50,7 +51,7 @@ def generate_exponential_lut(size: int):
         elif i == size - 1:
             brightness = PWM_DUTY_MAX
         else:
-            brightness = (size * pow(2, i / R)) / size
+            brightness = (PWM_DUTY_MAX * pow(2, i / R)) / PWM_DUTY_MAX
         lut.append(round(brightness))
     return lut
 
@@ -79,9 +80,13 @@ def generate_gamma_lut(size: int, gamma: float = 2.2):
 def generate_lut_header(lut_size):
     """Generate C header file containing both LUTs"""
     cie_lut = generate_cie1931_lut(lut_size)
+    assert (len(cie_lut) == lut_size)
     log_lut = generate_logarithmic_lut(lut_size)
+    assert (len(log_lut) == lut_size)
     exp_lut = generate_exponential_lut(lut_size)
+    assert (len(exp_lut) == lut_size)
     gamma_lut = generate_gamma_lut(lut_size, gamma=2.2)  # Standard gamma 2.2
+    assert (len(gamma_lut) == lut_size)
 
     header = f"""// Auto-generated brightness lookup tables
 // Generation time: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
@@ -92,22 +97,22 @@ def generate_lut_header(lut_size):
 #include <time.h>
 
 // CIE 1931 brightness curve lookup table (perceptual uniform)
-const led_duty_t LED_CORLUT_CIE1931[LED_BRIGHTNESS_MAX + 1] = {{
+const led_duty_t LED_CORLUT_CIE1931[] = {{
     {', '.join(map(str, cie_lut))},
 }};
 
 // Logarithmic dimming curve lookup table
-const led_duty_t LED_CORLUT_LOG[LED_BRIGHTNESS_MAX + 1] = {{
+const led_duty_t LED_CORLUT_LOG[] = {{
     {', '.join(map(str, log_lut))},
 }};
 
 // Logarithmic dimming curve lookup table
-const led_duty_t LED_CORLUT_EXP[LED_BRIGHTNESS_MAX + 1] = {{
+const led_duty_t LED_CORLUT_EXP[] = {{
     {', '.join(map(str, exp_lut))},
 }};
 
 // Gamma correction lookup table (GAMMA=2.2)
-const led_duty_t LED_CORLUT_GAMMA[LED_BRIGHTNESS_MAX + 1] = {{
+const led_duty_t LED_CORLUT_GAMMA[] = {{
     {', '.join(map(str, gamma_lut))},
 }};
 
