@@ -20,15 +20,15 @@ typedef led_brightness_t led_color_t[LYFI_LED_CHANNEL_COUNT];
 typedef led_duty_t led_duties_t[LYFI_LED_CHANNEL_COUNT];
 
 #define LED_BRIGHTNESS_MIN ((led_brightness_t)0)
-#define LED_BRIGHTNESS_MAX ((led_brightness_t)1000)
+#define LED_BRIGHTNESS_MAX ((led_brightness_t)4095)
 
 #define LED_ACCLIMATION_DAYS_MAX 100
 #define LED_ACCLIMATION_DAYS_MIN 5
 
 enum led_correction_methods {
-    LED_CORRECTION_LOG = 0, ///< Default
+    LED_CORRECTION_LOG = 0,
     LED_CORRECTION_LINEAR = 1,
-    LED_CORRECTION_EXP = 2,
+    LED_CORRECTION_EXP = 2, ///< Default
     LED_CORRECTION_GAMMA = 3,
     LED_CORRECTION_CIE1931 = 4,
 

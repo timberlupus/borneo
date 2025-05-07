@@ -2,8 +2,8 @@ import math
 import numpy as np
 import datetime
 
-PWM_DUTY_MAX = 1023
-BRIGHT_LEVEL_MAX = 1000
+PWM_DUTY_MAX = 4095
+BRIGHT_LEVEL_MAX = 4095
 
 
 def generate_cie1931_lut(size: int):
@@ -122,7 +122,7 @@ const led_duty_t LED_CORLUT_GAMMA[] = {{
 
 if __name__ == "__main__":
     # User-configurable LUT size
-    lut_size = 1001  # Can be adjusted as needed
+    lut_size = BRIGHT_LEVEL_MAX + 1
 
     # Generate header file content
     header_content = generate_lut_header(lut_size)

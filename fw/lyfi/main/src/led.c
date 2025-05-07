@@ -45,7 +45,7 @@ static void led_drive();
 #define TAG "lyfi-ledc"
 
 #define SECS_PER_DAY 172800
-#define LED_MAX_DUTY ((1 << LEDC_TIMER_10_BIT) - 1)
+#define LED_MAX_DUTY ((1 << LEDC_TIMER_12_BIT) - 1)
 #define LED_DUTY_RES LEDC_TIMER_10_BIT
 
 #define FADE_PERIOD_MS 10000
@@ -137,7 +137,7 @@ int led_init()
     // Initialize the first timer
     // TODO allow set the freq in product definition
     ledc_timer_config_t ledc_timer = {
-        .duty_resolution = LEDC_TIMER_10_BIT,
+        .duty_resolution = LEDC_TIMER_12_BIT,
         .freq_hz = factory_settings.pwm_freq,
 
 #if SOC_LEDC_SUPPORT_HS_MODE
@@ -272,8 +272,14 @@ inline led_duty_t channel_brightness_to_duty(led_brightness_t brightness)
     case LED_CORRECTION_EXP:
         return LED_CORLUT_EXP[brightness];
 
-    default:
-        return (led_duty_t)(((uint32_t)brightness * LED_MAX_DUTY + (LED_BRIGHTNESS_MAX / 2)) / LED_BRIGHTNESS_MAX);
+    default: {
+        if (LED_MAX_DUTY == LED_BRIGHTNESS_MAX) {
+            return brightness;
+        }
+        else {
+            return (led_duty_t)(((uint32_t)brightness * LED_MAX_DUTY + (LED_BRIGHTNESS_MAX / 2)) / LED_BRIGHTNESS_MAX);
+        }
+    } break;
     }
 }
 

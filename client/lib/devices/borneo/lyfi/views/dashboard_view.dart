@@ -139,7 +139,6 @@ class DashboardToufu extends StatelessWidget {
     final bgColor = backgroundColor ?? Theme.of(context).colorScheme.surfaceContainer;
     final progColor = progressColor ?? Theme.of(context).colorScheme.primary;
     final arcColor = this.arcColor ?? Theme.of(context).colorScheme.onSurfaceVariant;
-    assert(minValue <= maxValue);
     return Card(
       margin: const EdgeInsets.all(0),
       color: bgColor,
