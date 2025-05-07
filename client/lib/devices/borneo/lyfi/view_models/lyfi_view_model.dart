@@ -1,3 +1,4 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/sun_editor_view_model.dart';
 import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_model.dart';
@@ -67,7 +68,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     return sum.toDouble();
   }
 
-  double get maxOverallBrightness => _channels.length * 1000.0;
+  double get maxOverallBrightness => _channels.length * lyfiBrightnessMax.toDouble();
 
   final List<ValueNotifier<int>> _channels = [];
   List<ValueNotifier<int>> get channels => _channels;
