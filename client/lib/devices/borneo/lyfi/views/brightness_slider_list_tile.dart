@@ -32,7 +32,7 @@ class BrightnessSliderListTile extends StatelessWidget {
         dense: true,
         tileColor: Theme.of(context).colorScheme.surfaceContainer,
         minVerticalPadding: 0,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
         title: FlutterSlider(
           selectByTap: true,
           jump: true,

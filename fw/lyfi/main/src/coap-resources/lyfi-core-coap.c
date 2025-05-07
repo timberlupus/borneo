@@ -222,9 +222,6 @@ static int _encode_channel_info_entry(CborEncoder* parent, const char* name, con
     BO_TRY(cbor_encode_text_stringz(&ch_map, "brightnessPercent"));
     BO_TRY(cbor_encode_uint(&ch_map, brightness_percent));
 
-    BO_TRY(cbor_encode_text_stringz(&ch_map, "power"));
-    BO_TRY(cbor_encode_uint(&ch_map, power));
-
     BO_TRY(cbor_encoder_close_container(parent, &ch_map));
 
     return 0;
@@ -325,6 +322,13 @@ static void coap_hnd_info_get(coap_resource_t* resource, coap_session_t* session
         BO_COAP_VERIFY(cbor_encode_boolean(&root_map, false));
 #endif // CONFIG_LYFI_STANDALONE_CONTROLLER
     }
+
+#if CONFIG_LYFI_LED_NOMINAL_POWER
+    {
+        BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "nominalPower"));
+        BO_COAP_VERIFY(cbor_encode_uint(&root_map, CONFIG_LYFI_LED_NOMINAL_POWER));
+    }
+#endif // CONFIG_LYFI_LED_NOMINAL_POWER
 
     {
         BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "channelCount"));

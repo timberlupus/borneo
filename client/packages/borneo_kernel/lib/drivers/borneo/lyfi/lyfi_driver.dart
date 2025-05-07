@@ -33,13 +33,11 @@ class LyfiChannelInfo {
   final String name;
   final String color;
   final double brightnessRatio;
-  final double power;
 
   const LyfiChannelInfo({
     required this.name,
     required this.color,
     required this.brightnessRatio,
-    required this.power,
   });
 
   factory LyfiChannelInfo.fromMap(dynamic map) {
@@ -47,18 +45,19 @@ class LyfiChannelInfo {
       name: map['name'],
       color: map['color'],
       brightnessRatio: map['brightnessPercent'].toDouble() / 100.0,
-      power: map['power'].toDouble() / 1000.0,
     );
   }
 }
 
 class LyfiDeviceInfo {
   final bool isStandaloneController;
+  final double? nominalPower;
   final int channelCount;
   final List<LyfiChannelInfo> channels;
 
   const LyfiDeviceInfo({
     required this.isStandaloneController,
+    required this.nominalPower,
     required this.channelCount,
     required this.channels,
   });
@@ -67,6 +66,7 @@ class LyfiDeviceInfo {
     final dynamic map = cborMap.toObject();
     return LyfiDeviceInfo(
         isStandaloneController: map['isStandaloneController'],
+        nominalPower: map['nominalPower']?.toDouble(),
         channelCount: map['channelCount'],
         channels: List<LyfiChannelInfo>.from(
           map['channels'].map((x) => LyfiChannelInfo.fromMap(x)),

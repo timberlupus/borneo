@@ -334,9 +334,14 @@ class DashboardView extends StatelessWidget {
                                       backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
                                       arcColor: Theme.of(context).colorScheme.outlineVariant,
                                       progressColor: Theme.of(context).colorScheme.tertiary,
-                                      minValue: vm.overallBrightness,
-                                      maxValue: vm.maxOverallBrightness,
-                                      value: vm.channels.isNotEmpty ? vm.overallBrightness : 0,
+                                      minValue: 0,
+                                      maxValue: vm.lyfiDeviceInfo.nominalPower ?? 0,
+                                      value:
+                                          vm.borneoDeviceStatus?.powerVoltage != null &&
+                                                  vm.borneoDeviceStatus?.powerCurrent != null
+                                              ? (vm.borneoDeviceStatus!.powerVoltage! *
+                                                  vm.borneoDeviceStatus!.powerCurrent!)
+                                              : 0,
                                       center: Column(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         mainAxisSize: MainAxisSize.max,
