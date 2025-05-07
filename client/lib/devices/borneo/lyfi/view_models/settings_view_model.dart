@@ -103,7 +103,7 @@ class SettingsViewModel extends BaseViewModel with ViewModelEventBusMixin {
 
     // Get current position
     final position = await Geolocator.getCurrentPosition(
-      locationSettings: LocationSettings(accuracy: LocationAccuracy.lowest, timeLimit: Duration(milliseconds: 200)),
+      locationSettings: LocationSettings(accuracy: LocationAccuracy.lowest, timeLimit: Duration(seconds: 5)),
     );
 
     return position;

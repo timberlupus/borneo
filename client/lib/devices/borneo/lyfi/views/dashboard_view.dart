@@ -271,13 +271,13 @@ class DashboardView extends StatelessWidget {
                   child: Row(
                     children: [
                       // Total Brightness
-                      Consumer<LyfiViewModel>(
-                        builder:
-                            (context, vm, _) => MultiValueListenableBuilder<int>(
-                              valueNotifiers: vm.channels,
-                              builder:
-                                  (context, values, _) => Expanded(
-                                    child: DashboardToufu(
+                      Expanded(
+                        child: Consumer<LyfiViewModel>(
+                          builder:
+                              (context, vm, _) => MultiValueListenableBuilder<int>(
+                                valueNotifiers: vm.channels,
+                                builder:
+                                    (context, values, _) => DashboardToufu(
                                       title: 'Brightness',
                                       icon: Icons.lightbulb_outline,
                                       backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
@@ -315,19 +315,19 @@ class DashboardView extends StatelessWidget {
                                         ],
                                       ),
                                     ),
-                                  ),
-                            ),
+                              ),
+                        ),
                       ),
 
                       SizedBox(width: 16.0),
                       // Total Power
-                      Consumer<LyfiViewModel>(
-                        builder:
-                            (context, vm, _) => MultiValueListenableBuilder<int>(
-                              valueNotifiers: vm.channels,
-                              builder:
-                                  (context, values, _) => Expanded(
-                                    child: DashboardToufu(
+                      Expanded(
+                        child: Consumer<LyfiViewModel>(
+                          builder:
+                              (context, vm, _) => MultiValueListenableBuilder<int>(
+                                valueNotifiers: vm.channels,
+                                builder:
+                                    (context, values, _) => DashboardToufu(
                                       title: 'Power',
                                       icon: Icons.power_outlined,
                                       foregroundColor: Theme.of(context).colorScheme.onSurface,
@@ -402,8 +402,8 @@ class DashboardView extends StatelessWidget {
                                         ],
                                       ),
                                     ),
-                                  ),
-                            ),
+                              ),
+                        ),
                       ),
                     ],
                   ),
@@ -415,11 +415,11 @@ class DashboardView extends StatelessWidget {
                   child: Row(
                     children: [
                       // Temp.
-                      Selector<LyfiViewModel, ({int? currentTemp, double currentTempRatio})>(
-                        selector: (_, vm) => (currentTemp: vm.currentTemp, currentTempRatio: vm.currentTempRatio),
-                        builder:
-                            (context, vm, _) => Expanded(
-                              child: DashboardToufu(
+                      Expanded(
+                        child: Selector<LyfiViewModel, ({int? currentTemp, double currentTempRatio})>(
+                          selector: (_, vm) => (currentTemp: vm.currentTemp, currentTempRatio: vm.currentTempRatio),
+                          builder:
+                              (context, vm, _) => DashboardToufu(
                                 title: 'Temperature',
                                 icon: Icons.thermostat,
                                 foregroundColor: Theme.of(context).colorScheme.onSurface,
@@ -464,16 +464,16 @@ class DashboardView extends StatelessWidget {
                                   GaugeSegment(from: 65, to: 105, color: Colors.red[100]!),
                                 ],
                               ),
-                            ),
+                        ),
                       ),
 
                       SizedBox(width: 16.0),
                       // Fan
-                      Selector<LyfiViewModel, ({double fanPowerRatio})>(
-                        selector: (_, vm) => (fanPowerRatio: vm.fanPowerRatio),
-                        builder:
-                            (context, vm, _) => Expanded(
-                              child: DashboardToufu(
+                      Expanded(
+                        child: Selector<LyfiViewModel, ({double fanPowerRatio})>(
+                          selector: (_, vm) => (fanPowerRatio: vm.fanPowerRatio),
+                          builder:
+                              (context, vm, _) => DashboardToufu(
                                 title: 'Fan',
                                 icon: Icons.air,
                                 foregroundColor: Theme.of(context).colorScheme.onSurface,
@@ -507,7 +507,7 @@ class DashboardView extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                            ),
+                        ),
                       ),
                     ],
                   ),
