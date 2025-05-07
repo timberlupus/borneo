@@ -1,23 +1,26 @@
 {
     "configurations": [
-        {
-            "name": "ESP32",
-            "includePath": [
-                "${env:IDF_PATH}/components/**",
-                "${workspaceFolder}/components/**",
-                "${workspaceFolder}/**"
-            ],
-            "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE"
-            ],
-            "compilerPath": "",
-            "cStandard": "c17",
-            "cppStandard": "c++20",
-            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
-            "configurationProvider": "ms-vscode.cmake-tools"
-        }
+      {
+        "name": "ESP-IDF",
+        "includePath": [
+          "${workspaceFolder}/**",
+          "${env:IDF_PATH}/components/**"
+        ],
+        "defines": [
+          "ESP_PLATFORM",
+          "CONFIG_FREERTOS_UNICORE=0",
+          "CONFIG_IDF_TARGET_ESP32=1"
+        ],
+        "compilerPath": "${env:PATH}/xtensa-esp32-elf-gcc",
+        "cStandard": "c17",
+        "cppStandard": "c++20",
+        "intelliSenseMode": "gcc-x64",
+        "compileCommands": [
+            "${workspaceFolder}/lyfi/build/compile_commands.json",
+            "${workspaceFolder}/doser/build/compile_commands.json"
+        ],
+        "configurationProvider": "ms-vscode.cmake-tools"
+      }
     ],
     "version": 4
-}
+  }

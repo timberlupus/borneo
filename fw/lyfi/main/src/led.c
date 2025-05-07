@@ -48,7 +48,7 @@ static void led_drive();
 #define LED_MAX_DUTY ((1 << LEDC_TIMER_10_BIT) - 1)
 #define LED_DUTY_RES LEDC_TIMER_10_BIT
 
-#define FADE_PERIOD_MS 5000
+#define FADE_PERIOD_MS 10000
 #define FADE_ON_PERIOD_MS 5000
 #define FADE_OFF_PERIOD_MS 3000
 
@@ -402,12 +402,12 @@ void led_fade_drive()
     }
 
     uint32_t elapsed_time_ms = (uint32_t)(now - _led.fade_start_time_ms);
-    uint32_t progress = (elapsed_time_ms * 65536U) / _led.fade_duration_ms;
+    uint32_t progress = (elapsed_time_ms * 65536ULL + (_led.fade_duration_ms / 2)) / _led.fade_duration_ms;
 
     led_color_t color;
     for (size_t ich = 0; ich < LYFI_LED_CHANNEL_COUNT; ich++) {
         int32_t delta = (int32_t)(_led.fade_end_color[ich] - _led.fade_start_color[ich]) * progress;
-        color[ich] = _led.fade_start_color[ich] + (delta >> 16);
+        color[ich] = _led.fade_start_color[ich] + ((delta + (1 << 15)) >> 16);
     }
     BO_MUST(led_update_color(color));
 }

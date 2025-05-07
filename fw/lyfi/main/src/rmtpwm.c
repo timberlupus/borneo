@@ -13,7 +13,7 @@
 
 static const char* TAG = "rmtpwm";
 
-#define RMTPWM_FREQ_HZ 24000 // 24 kHz PWM
+#define RMTPWM_FREQ_HZ 19000 // 19 kHz PWM
 #define RMT_PWM_RESOLUTION_HZ 10000000 // 10MHz resolution
 
 typedef struct {
@@ -67,11 +67,38 @@ int rmtpwm_init()
         .resolution = RMT_PWM_RESOLUTION_HZ,
     };
     BO_TRY(rmt_new_pwm_encoder(&encoder_config, &s_pwm_encoder));
+    return 0;
+}
 
+#if !SOC_DAC_SUPPORTED
+int rmtpwm_dac_init()
+{
+    ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan PWM-DAC...", CONFIG_LYFI_FAN_CTRL_PWMDAC_GPIO);
     rmt_transmit_config_t tx_config = {
         .loop_count = -1,
     };
+    s_dac_channel.mutex = xSemaphoreCreateMutexStatic(&s_dac_channel.mutex_buffer);
+    rmt_tx_channel_config_t fan_dac_tx_chan_config = {
+        .clk_src = RMT_CLK_SRC_DEFAULT, // select source clock
+        .gpio_num = CONFIG_LYFI_FAN_CTRL_PWMDAC_GPIO,
+        .mem_block_symbols = 48, // DO NOT CHANGE THIS!!!
+        .resolution_hz = RMT_PWM_RESOLUTION_HZ,
+        .trans_queue_depth = 8, // set the maximum number of transactions that can pend in the background
+    };
+    BO_TRY(rmt_new_tx_channel(&fan_dac_tx_chan_config, &s_dac_channel.rmt_channel));
+    BO_TRY(rmt_enable(s_dac_channel.rmt_channel));
+    BO_TRY(rmt_transmit(s_dac_channel.rmt_channel, s_pwm_encoder, &s_dac_channel.duty, sizeof(s_dac_channel.duty),
+                        &tx_config));
 
+    return 0;
+}
+#endif
+
+int rmtpwm_pwm_init()
+{
+    rmt_transmit_config_t tx_config = {
+        .loop_count = -1,
+    };
     ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan PWM...", CONFIG_LYFI_FAN_CTRL_PWM_GPIO);
     s_pwm_channel.mutex = xSemaphoreCreateMutexStatic(&s_pwm_channel.mutex_buffer);
     rmt_tx_channel_config_t fan_pwm_tx_chan_config = {
@@ -85,22 +112,6 @@ int rmtpwm_init()
     BO_TRY(rmt_enable(s_pwm_channel.rmt_channel));
     BO_TRY(rmt_transmit(s_pwm_channel.rmt_channel, s_pwm_encoder, &s_pwm_channel.duty, sizeof(s_pwm_channel.duty),
                         &tx_config));
-
-#if !SOC_DAC_SUPPORTED
-    ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan PWM-DAC...", CONFIG_LYFI_FAN_CTRL_PWMDAC_GPIO);
-    s_dac_channel.mutex = xSemaphoreCreateMutexStatic(&s_dac_channel.mutex_buffer);
-    rmt_tx_channel_config_t fan_dac_tx_chan_config = {
-        .clk_src = RMT_CLK_SRC_DEFAULT, // select source clock
-        .gpio_num = CONFIG_LYFI_FAN_CTRL_PWMDAC_GPIO,
-        .mem_block_symbols = 48, // DO NOT CHANGE THIS!!!
-        .resolution_hz = RMT_PWM_RESOLUTION_HZ,
-        .trans_queue_depth = 8, // set the maximum number of transactions that can pend in the background
-    };
-    BO_TRY(rmt_new_tx_channel(&fan_dac_tx_chan_config, &s_dac_channel.rmt_channel));
-    BO_TRY(rmt_enable(s_dac_channel.rmt_channel));
-    BO_TRY(rmt_transmit(s_dac_channel.rmt_channel, s_pwm_encoder, &s_dac_channel.duty, sizeof(s_dac_channel.duty),
-                        &tx_config));
-#endif // !SOC_DAC_SUPPORTED
 
     return 0;
 }

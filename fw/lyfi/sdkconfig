@@ -477,7 +477,7 @@ CONFIG_PARTITION_TABLE_MD5=y
 #
 # LED PWM settings
 #
-CONFIG_LYFI_DEFAULT_PWM_FREQ=24000
+
 # end of LED PWM settings
 
 #

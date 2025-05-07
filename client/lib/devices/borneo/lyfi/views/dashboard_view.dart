@@ -513,23 +513,6 @@ class DashboardView extends StatelessWidget {
           ),
         ),
 
-        // Temp. On button
-        /*
-      Consumer<LyfiViewModel>(
-        builder: (context, vm, _) => Container(
-          margin: EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: ElevatedButton.icon(
-            iconAlignment: IconAlignment.start,
-            label: const Text("Temporary On"),
-            icon: const Icon(Icons.lightbulb_outline),
-            onPressed:
-                !vm.isOnline || vm.isOn || vm.isBusy || !vm.schedulerEnabled
-                    ? null
-                    : () {},
-          ),
-        ),
-      ),
-      */
         Container(
           margin: const EdgeInsets.fromLTRB(0, 24, 0, 0),
           color: Theme.of(context).colorScheme.surfaceContainerHigh,
@@ -586,22 +569,25 @@ class DashboardView extends StatelessWidget {
                                   props.state == LedState.nightlight
                                       ? Theme.of(context).colorScheme.primaryContainer
                                       : null,
-                              icon:
-                                  props.state == LedState.nightlight
-                                      ? IconProgressBar(
-                                        icon: Icon(Icons.flashlight_on, size: 40),
-                                        progress: 0.5,
-                                        size: 40,
-                                        progressColor:
-                                            props.state == LedState.nightlight
-                                                ? Theme.of(context).colorScheme.inversePrimary
-                                                : Theme.of(context).colorScheme.primary,
-                                        backgroundColor:
-                                            props.state == LedState.nightlight
-                                                ? Theme.of(context).colorScheme.onPrimaryContainer
-                                                : Theme.of(context).colorScheme.primaryContainer,
-                                      )
-                                      : Icon(Icons.flashlight_on, size: 40),
+                              icon: AnimatedSwitcher(
+                                duration: Duration(milliseconds: 500),
+                                child:
+                                    props.state == LedState.nightlight
+                                        ? IconProgressBar(
+                                          icon: Icon(Icons.flashlight_on, size: 40),
+                                          progress: 0.5,
+                                          size: 40,
+                                          progressColor:
+                                              props.state == LedState.nightlight
+                                                  ? Theme.of(context).colorScheme.inversePrimary
+                                                  : Theme.of(context).colorScheme.primary,
+                                          backgroundColor:
+                                              props.state == LedState.nightlight
+                                                  ? Theme.of(context).colorScheme.onPrimaryContainer
+                                                  : Theme.of(context).colorScheme.primaryContainer,
+                                        )
+                                        : Icon(Icons.flashlight_on, size: 40),
+                              ),
 
                               onPressed:
                                   props.canSwitch ? () => context.read<LyfiViewModel>().switchNightlightState() : null,
