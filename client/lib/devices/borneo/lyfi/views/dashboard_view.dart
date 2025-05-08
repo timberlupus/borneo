@@ -239,7 +239,7 @@ class DashboardView extends StatelessWidget {
                                   selector: (_, vm) => (mode: vm.mode, state: vm.ledState, isOn: vm.isOn),
                                   builder: (context, vm, _) {
                                     Widget chart;
-                                    if (vm.state == LedState.nightlight) {
+                                    if (vm.state == LedState.temporary) {
                                       chart = ManualRunningChart();
                                     } else if (vm.mode == LedRunningMode.manual) {
                                       chart = ManualRunningChart();
@@ -338,7 +338,7 @@ class DashboardView extends StatelessWidget {
                                     progressColor: Theme.of(context).colorScheme.tertiary,
                                     minValue: 0.0,
                                     maxValue: vm.lyfiDeviceInfo.nominalPower ?? 9999,
-                                    value: vm.currentWatts,
+                                    value: vm.isOn && vm.isOnline ? vm.currentWatts : 0,
                                     center: Column(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       mainAxisSize: MainAxisSize.max,
@@ -357,8 +357,7 @@ class DashboardView extends StatelessWidget {
                                                 fontSize: 23,
                                               ),
                                             ),
-                                            if (vm.borneoDeviceStatus?.powerVoltage != null &&
-                                                vm.borneoDeviceStatus?.powerCurrent != null)
+                                            if (vm.canMeasurePower)
                                               Text(
                                                 'W',
                                                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
@@ -372,18 +371,18 @@ class DashboardView extends StatelessWidget {
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            if (vm.borneoDeviceStatus?.powerVoltage != null)
+                                            if (vm.canMeasureVoltage)
                                               Text(
-                                                '${vm.borneoDeviceStatus!.powerVoltage!.toStringAsFixed(0)}V',
+                                                '${vm.borneoDeviceStatus!.powerVoltage!.toStringAsFixed(1)}V',
                                                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                                   color: Theme.of(context).colorScheme.onSurface,
                                                   fontFeatures: [FontFeature.tabularFigures()],
                                                 ),
                                               ),
-                                            if (vm.borneoDeviceStatus?.powerCurrent != null) SizedBox(width: 4),
-                                            if (vm.borneoDeviceStatus?.powerCurrent != null)
+                                            if (vm.canMeasureCurrent) SizedBox(width: 4),
+                                            if (vm.canMeasureCurrent)
                                               Text(
-                                                '${vm.borneoDeviceStatus!.powerCurrent!.toStringAsFixed(0)}A',
+                                                '${vm.borneoDeviceStatus!.powerCurrent!.toStringAsFixed(1)}A',
                                                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                                   color: Theme.of(context).colorScheme.onSurface,
                                                   fontFeatures: [FontFeature.tabularFigures()],
@@ -553,31 +552,38 @@ class DashboardView extends StatelessWidget {
                     ),
 
                     // Temporary button
-                    Selector<LyfiViewModel, ({LedState? state, bool canSwitch})>(
-                      selector: (_, vm) => (state: vm.ledState, canSwitch: vm.canSwitchNightlightState),
+                    Selector<LyfiViewModel, ({LedState? state, bool canSwitch, Duration total, Duration remain})>(
+                      selector:
+                          (context, vm) => (
+                            state: vm.ledState,
+                            canSwitch: vm.canSwitchTemporaryState,
+                            total: vm.temporaryDuration,
+                            remain: vm.temporaryRemaining.value,
+                          ),
                       builder:
                           (context, props, _) => RoundedIconTextButton(
                             borderColor: Theme.of(context).colorScheme.primary,
                             text: 'Temporary',
                             buttonSize: 64,
                             backgroundColor:
-                                props.state == LedState.nightlight
+                                props.state == LedState.temporary
                                     ? Theme.of(context).colorScheme.primaryContainer
                                     : null,
                             icon: AnimatedSwitcher(
                               duration: Duration(milliseconds: 500),
                               child:
-                                  props.state == LedState.nightlight
+                                  props.state == LedState.temporary
                                       ? IconProgressBar(
                                         icon: Icon(Icons.flashlight_on, size: 40),
-                                        progress: 0.5,
+                                        progress:
+                                            (props.total.inSeconds - props.remain.inSeconds) / props.total.inSeconds,
                                         size: 40,
                                         progressColor:
-                                            props.state == LedState.nightlight
+                                            props.state == LedState.temporary
                                                 ? Theme.of(context).colorScheme.inversePrimary
                                                 : Theme.of(context).colorScheme.primary,
                                         backgroundColor:
-                                            props.state == LedState.nightlight
+                                            props.state == LedState.temporary
                                                 ? Theme.of(context).colorScheme.onPrimaryContainer
                                                 : Theme.of(context).colorScheme.primaryContainer,
                                       )
@@ -585,7 +591,7 @@ class DashboardView extends StatelessWidget {
                             ),
 
                             onPressed:
-                                props.canSwitch ? () => context.read<LyfiViewModel>().switchNightlightState() : null,
+                                props.canSwitch ? () => context.read<LyfiViewModel>().switchTemporaryState() : null,
                           ),
                     ),
                   ],

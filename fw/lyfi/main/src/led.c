@@ -32,9 +32,9 @@ static void led_proc();
 static int normal_state_entry();
 static void normal_state_drive();
 
-static int nightlight_state_entry(uint8_t prev_state);
-static int nightlight_state_exit();
-static void nightlight_state_drive();
+static int temporary_state_entry(uint8_t prev_state);
+static int temporary_state_exit();
+static void temporary_state_drive();
 
 static int preview_state_entry();
 static void preview_state_exit();
@@ -342,7 +342,7 @@ int led_fade_to_color(const led_color_t color, uint32_t duration_ms)
         return -EINVAL;
     }
 
-    int64_t now = esp_timer_get_time() / 1000LL;
+    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
     _led.fade_start_time_ms = now;
     _led.fade_duration_ms = duration_ms;
     BO_TRY(led_get_color(_led.fade_start_color));
@@ -397,7 +397,7 @@ void led_fade_drive()
         return;
     }
 
-    int64_t now = esp_timer_get_time() / 1000LL;
+    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
     if (now >= _led.fade_start_time_ms + _led.fade_duration_ms) {
         BO_MUST(led_fade_stop());
         return;
@@ -521,13 +521,13 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
 {
     switch (event_id) {
 
-    case LYFI_LED_NOTIFY_NIGHTLIGHT_STATE: {
+    case LYFI_LED_NOTIFY_TEMPORARY_STATE: {
         assert(bo_power_is_on());
         if (_led.state == LED_STATE_NORMAL
             && (_led.settings.mode == LED_MODE_SCHEDULED || _led.settings.mode == LED_MODE_SUN)) {
-            led_switch_state(LED_STATE_NIGHTLIGHT);
+            led_switch_state(LED_STATE_TEMPORARY);
         }
-        else if (_led.state == LED_STATE_NIGHTLIGHT) {
+        else if (_led.state == LED_STATE_TEMPORARY) {
             BO_MUST(led_switch_state(LED_STATE_NORMAL));
         }
     } break;
@@ -598,13 +598,18 @@ int led_mode_sun_entry()
     return 0;
 }
 
-void led_set_nightlight_duration(uint16_t duration) { _led.settings.nightlight_duration = duration; }
-
-int32_t led_get_nightlight_remaining()
+int led_set_temporary_duration(uint16_t duration)
 {
-    if (_led.state == LED_STATE_NIGHTLIGHT) {
-        time_t now = time(NULL);
-        return (int32_t)(_led.nightlight_off_time - now);
+    _led.settings.temporary_duration = duration;
+    BO_TRY(led_save_user_settings());
+    return 0;
+}
+
+int32_t led_get_temporary_remaining()
+{
+    if (_led.state == LED_STATE_TEMPORARY) {
+        int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
+        return (int32_t)((_led.temporary_off_time - now + 500LL) / 1000LL);
     }
     else {
         return -1;
@@ -728,13 +733,13 @@ static void preview_state_drive()
     BO_MUST(led_switch_state(LED_STATE_DIMMING));
 }
 
-int nightlight_state_entry(uint8_t prev_state)
+int temporary_state_entry(uint8_t prev_state)
 {
     if (!bo_power_is_on()) {
         return -EINVAL;
     }
 
-    if (prev_state != LED_STATE_NORMAL) {
+    if (prev_state != LED_STATE_NORMAL && prev_state != LED_STATE_POWERING_ON) {
         return -EINVAL;
     }
 
@@ -742,34 +747,34 @@ int nightlight_state_entry(uint8_t prev_state)
         return -EINVAL;
     }
 
-    int64_t now = esp_timer_get_time() / 1000LL;
+    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
 
-    _led.nightlight_off_time = now + (_led.settings.nightlight_duration * 1000) + FADE_PERIOD_MS * 2;
-    _led.state = LED_STATE_NIGHTLIGHT;
+    _led.temporary_off_time = now + (_led.settings.temporary_duration * 60 * 1000) + FADE_PERIOD_MS * 2;
+    _led.state = LED_STATE_TEMPORARY;
 
     BO_TRY(led_fade_to_color(_led.settings.manual_color, FADE_PERIOD_MS));
     return 0;
 }
 
-static int nightlight_state_exit()
+static int temporary_state_exit()
 {
-    if (_led.state != LED_STATE_NIGHTLIGHT) {
+    if (_led.state != LED_STATE_TEMPORARY) {
         return -1;
     }
 
-    _led.nightlight_off_time = 0;
+    _led.temporary_off_time = 0;
     return 0;
 }
 
-static void nightlight_state_drive()
+static void temporary_state_drive()
 {
-    if (_led.state != LED_STATE_NIGHTLIGHT) {
+    if (_led.state != LED_STATE_TEMPORARY) {
         return;
     }
 
-    int64_t now = esp_timer_get_time() / 1000LL;
+    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
 
-    if (now >= _led.nightlight_off_time) {
+    if (now >= _led.temporary_off_time) {
         BO_MUST(led_switch_state(LED_STATE_NORMAL));
     }
     else {
@@ -793,8 +798,8 @@ static void led_drive()
     case LED_STATE_DIMMING: {
     } break;
 
-    case LED_STATE_NIGHTLIGHT: {
-        nightlight_state_drive();
+    case LED_STATE_TEMPORARY: {
+        temporary_state_drive();
     } break;
 
     case LED_STATE_PREVIEW: {
@@ -860,8 +865,9 @@ int led_switch_state(uint8_t state)
     case LED_STATE_DIMMING:
         break;
 
-    case LED_STATE_NIGHTLIGHT: {
-        BO_TRY(nightlight_state_exit());
+    case LED_STATE_TEMPORARY: {
+        BO_TRY(temporary_state_exit());
+        _led.state = LED_STATE_NORMAL;
     } break;
 
     case LED_STATE_PREVIEW: {
@@ -887,7 +893,8 @@ int led_switch_state(uint8_t state)
             return -EINVAL;
         }
         // TODO Start the timer
-        if (_led.state == LED_STATE_NORMAL || _led.state == LED_STATE_PREVIEW || _led.state == LED_STATE_POWERING_ON) {
+        if (_led.state == LED_STATE_NORMAL || _led.state == LED_STATE_PREVIEW || _led.state == LED_STATE_POWERING_ON
+            || _led.state == LED_STATE_TEMPORARY) {
             _led.state = state;
         }
         else {
@@ -895,11 +902,11 @@ int led_switch_state(uint8_t state)
         }
     } break;
 
-    case LED_STATE_NIGHTLIGHT: {
+    case LED_STATE_TEMPORARY: {
         if (!bo_power_is_on()) {
             return -EINVAL;
         }
-        BO_TRY(nightlight_state_entry(_led.state));
+        BO_TRY(temporary_state_entry(_led.state));
     } break;
 
     case LED_STATE_PREVIEW: {

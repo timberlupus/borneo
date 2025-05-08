@@ -197,6 +197,60 @@ class SettingsScreen extends StatelessWidget {
             ),
       ),
 
+      Selector<SettingsViewModel, ({bool canUpdate, Duration duration})>(
+        selector: (_, vm) => (canUpdate: vm.canUpdateTemporaryDuration, duration: vm.temporaryDuration),
+        builder:
+            (context, map, _) => ListTile(
+              leading: Icon(Icons.settings_power_outlined),
+              tileColor: tileColor,
+              title: Text('Temporary light on duration'),
+              trailing: Selector<SettingsViewModel, Duration>(
+                selector: (context, map) => map.temporaryDuration,
+                builder:
+                    (context, selectedPowerBehavior, child) => DropdownButton<Duration>(
+                      value: map.duration,
+                      items: [
+                        DropdownMenuItem<Duration>(
+                          value: Duration(minutes: 5),
+                          child: Text("5 minutes", style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                        DropdownMenuItem<Duration>(
+                          value: Duration(minutes: 10),
+                          child: Text("10 minutes", style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                        DropdownMenuItem<Duration>(
+                          value: Duration(minutes: 20),
+                          child: Text("20 minutes", style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                        DropdownMenuItem<Duration>(
+                          value: Duration(hours: 1),
+                          child: Text("1 hour", style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                        DropdownMenuItem<Duration>(
+                          value: Duration(hours: 2),
+                          child: Text("2 hour", style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                        DropdownMenuItem<Duration>(
+                          value: Duration(hours: 4),
+                          child: Text("4 hour", style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                        DropdownMenuItem<Duration>(
+                          value: Duration(hours: 8),
+                          child: Text("8 hour", style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                        DropdownMenuItem<Duration>(
+                          value: Duration(hours: 12),
+                          child: Text("12 hour", style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                      ],
+                      onChanged: (Duration? newValue) async {
+                        await vm.updateTemporaryDuration(newValue!);
+                      },
+                    ),
+              ),
+            ),
+      ),
+
       // Version & upgrade group
       ListTile(title: Text('VERSION & UPGRADE')),
       ListTile(

@@ -13,7 +13,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:borneo_app/services/device_manager.dart';
 import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
-import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 
 class SettingsViewModel extends BaseLyfiDeviceViewModel {
   final Uri address;
@@ -21,10 +20,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   final GeneralBorneoDeviceInfo borneoInfo;
   final LyfiDeviceInfo ledInfo;
   final LyfiDeviceStatus ledStatus;
-  final bool isOnline = true; // FIXME
 
   ILyfiDeviceApi get api => deviceManager.getBoundDevice(deviceID).api<ILyfiDeviceApi>();
-  BoundDevice get boundDevice => deviceManager.getBoundDevice(deviceID);
 
   GeoLocation? _location;
   GeoLocation? get location => _location;
@@ -37,6 +34,10 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   LedCorrectionMethod _correctionMethod = LedCorrectionMethod.log;
   LedCorrectionMethod get correctionMethod => _correctionMethod;
   bool get canUpdateCorrectionMethod => !isBusy && isOnline;
+
+  Duration _temporaryDuration = Duration(minutes: 20);
+  Duration get temporaryDuration => _temporaryDuration;
+  bool get canUpdateTemporaryDuration => !isBusy && isOnline;
 
   PowerBehavior _powerBehavior;
   PowerBehavior get powerBehavior => _powerBehavior;
@@ -59,7 +60,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
 
   @override
   Future<void> onInitialize() async {
-    _correctionMethod = await api.getCorrectionMethod(boundDevice.device);
+    _correctionMethod = await api.getCorrectionMethod(boundDevice!.device);
   }
 
   Future<void> updateGeoLocation() async {
@@ -67,12 +68,13 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       notifyListeners();
       final pos = await getLocation();
       final loc = GeoLocation(lat: pos.latitude, lng: pos.longitude);
-      await api.setLocation(boundDevice.device, loc);
+      await super.lyfiDeviceApi.setLocation(super.boundDevice!.device, loc);
       _location = loc;
     });
   }
 
   Future<Position> getLocation() async {
+    // TODO cancellable
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -97,7 +99,11 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
 
     // Get current position
     final position = await Geolocator.getCurrentPosition(
-      locationSettings: LocationSettings(accuracy: LocationAccuracy.lowest, timeLimit: Duration(seconds: 5)),
+      locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.low,
+        timeLimit: Duration(seconds: 30),
+        distanceFilter: 100,
+      ),
     );
 
     return position;
@@ -110,7 +116,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       final tzc = TimezoneConverter();
       await tzc.init();
       final posixTZ = await tzc.getLocalPosixTimezone();
-      await api.setTimeZone(boundDevice.device, posixTZ!);
+      await api.setTimeZone(boundDevice!.device, posixTZ!);
       _timezone = posixTZ;
     });
   }
@@ -119,8 +125,17 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     super.enqueueUIJob(() async {
       isBusy = true;
       notifyListeners();
-      await api.setCorrectionMethod(boundDevice.device, newMethod);
+      await api.setCorrectionMethod(boundDevice!.device, newMethod);
       _correctionMethod = newMethod;
+    });
+  }
+
+  Future<void> updateTemporaryDuration(Duration dur) async {
+    super.enqueueUIJob(() async {
+      isBusy = true;
+      notifyListeners();
+      await api.setTemporaryDuration(boundDevice!.device, dur);
+      _temporaryDuration = dur;
     });
   }
 
@@ -128,7 +143,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     super.enqueueUIJob(() async {
       isBusy = true;
       notifyListeners();
-      await api.setPowerBehavior(boundDevice.device, behavior);
+      await api.setPowerBehavior(boundDevice!.device, behavior);
       _powerBehavior = behavior;
     });
   }

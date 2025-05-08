@@ -28,7 +28,7 @@
 #define LED_NVS_KEY_MANUAL_COLOR "mcolor"
 #define LED_NVS_KEY_SUN_COLOR "suncolor"
 #define LED_NVS_KEY_SCHEDULER "sch"
-#define LED_NVS_KEY_NIGHTLIGHT_DURATION "nld"
+#define LED_NVS_KEY_TEMPORARY_DURATION "tmpdur"
 #define LED_NVS_KEY_CORRECTION_METHOD "corrmtd"
 #define LED_NVS_KEY_PWM_FREQ "pwmfreq"
 #define LED_NVS_KEY_LOC "loc"
@@ -39,7 +39,7 @@
 
 static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     .mode = LED_MODE_MANUAL,
-    .nightlight_duration = 60 * 20,
+    .temporary_duration = 20,
     .manual_color = {
 // From kconfig
 #if CONFIG_LYFI_LED_CH0_ENABLED
@@ -143,9 +143,9 @@ int led_load_user_settings()
     }
 
     {
-        rc = nvs_get_u16(handle, LED_NVS_KEY_NIGHTLIGHT_DURATION, &settings->nightlight_duration);
+        rc = nvs_get_u16(handle, LED_NVS_KEY_TEMPORARY_DURATION, &settings->temporary_duration);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
-            settings->nightlight_duration = LED_DEFAULT_SETTINGS.nightlight_duration;
+            settings->temporary_duration = LED_DEFAULT_SETTINGS.temporary_duration;
             rc = 0;
         }
         if (rc) {
@@ -289,7 +289,7 @@ int led_save_user_settings()
         goto _EXIT_CLOSE;
     }
 
-    rc = nvs_set_u16(handle, LED_NVS_KEY_NIGHTLIGHT_DURATION, settings->nightlight_duration);
+    rc = nvs_set_u16(handle, LED_NVS_KEY_TEMPORARY_DURATION, settings->temporary_duration);
     if (rc) {
         goto _EXIT_CLOSE;
     }

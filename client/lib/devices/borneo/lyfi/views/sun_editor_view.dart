@@ -57,12 +57,10 @@ class SunEditorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rightChevron = Icon(Icons.chevron_right_outlined, color: Theme.of(context).hintColor);
-    final tileColor = Theme.of(context).colorScheme.surfaceContainer;
-    final items = <Widget>[ListTile(title: const Text('DEVICE INFORMATION'))];
+    final currentEditor = context.read<LyfiViewModel>().currentEditor!;
 
     return ChangeNotifierProvider.value(
-      value: context.read<LyfiViewModel>().currentEditor! as SunEditorViewModel,
+      value: currentEditor as SunEditorViewModel,
       builder:
           (context, child) => Column(
             spacing: 16,
