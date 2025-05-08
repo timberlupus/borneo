@@ -159,9 +159,8 @@ class SettingsScreen extends StatelessWidget {
         selector: (_, vm) => (canUpdate: vm.canUpdateCorrectionMethod, correctionMethod: vm.correctionMethod),
         builder:
             (context, map, _) => ListTile(
-              leading: Icon(Icons.settings_power_outlined),
               tileColor: tileColor,
-              title: Text('Correction method'),
+              title: Text('Correction curve'),
               trailing: Selector<SettingsViewModel, LedCorrectionMethod>(
                 selector: (context, map) => map.correctionMethod,
                 builder:
@@ -201,7 +200,6 @@ class SettingsScreen extends StatelessWidget {
         selector: (_, vm) => (canUpdate: vm.canUpdateTemporaryDuration, duration: vm.temporaryDuration),
         builder:
             (context, map, _) => ListTile(
-              leading: Icon(Icons.settings_power_outlined),
               tileColor: tileColor,
               title: Text('Temporary light on duration'),
               trailing: Selector<SettingsViewModel, Duration>(
