@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:borneo_kernel/drivers/borneo/borneo_coap_config.dart';
+import 'package:borneo_kernel/drivers/borneo/borneo_probe_coap_config.dart';
 import 'package:coap/coap.dart';
 import 'package:cbor/cbor.dart';
 
@@ -322,7 +323,7 @@ class BorneoLyfiDriver
   @override
   Future<bool> probe(Device dev) async {
     final probeCoapClient =
-        CoapClient(dev.address, config: BorneoCoapConfig.coapConfig);
+        CoapClient(dev.address, config: BorneoProbeCoapConfig.coapConfig);
     try {
       final generalDeviceInfo = await _getGeneralDeviceInfo(probeCoapClient);
       final lyfiInfo = await _getLyfiInfo(probeCoapClient);
@@ -334,7 +335,8 @@ class BorneoLyfiDriver
           versionRange: kLyfiFWVersionConstraint,
         );
       }
-      final coapClient = CoapClient(dev.address);
+      final coapClient =
+          CoapClient(dev.address, config: BorneoCoapConfig.coapConfig);
       dev.driverData = LyfiDriverData(coapClient, generalDeviceInfo, lyfiInfo);
       return true;
     } finally {
