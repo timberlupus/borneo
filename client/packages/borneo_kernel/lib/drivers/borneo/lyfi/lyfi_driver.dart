@@ -28,6 +28,8 @@ class LyfiPaths {
       Uri(path: '/borneo/lyfi/correction-method');
   static final Uri geoLocation = Uri(path: '/borneo/lyfi/geo-location');
   static final Uri acclimation = Uri(path: '/borneo/lyfi/acclimation');
+  static final Uri temporaryDuration =
+      Uri(path: '/borneo/lyfi/temporary-duration');
 }
 
 class LyfiChannelInfo {
@@ -78,7 +80,7 @@ class LyfiDeviceInfo {
 enum LedState {
   normal,
   dimming,
-  nightlight,
+  temporary,
   preview,
   poweringOn,
   poweringOff;
@@ -201,7 +203,7 @@ class LyfiDeviceStatus {
   final LedState state;
   final LedRunningMode mode;
   final bool unscheduled;
-  final Duration nightlightRemaining;
+  final Duration temporaryRemaining;
   final int fanPower;
   final List<int> currentColor;
   final List<int> manualColor;
@@ -218,7 +220,7 @@ class LyfiDeviceStatus {
     required this.state,
     required this.mode,
     required this.unscheduled,
-    required this.nightlightRemaining,
+    required this.temporaryRemaining,
     required this.fanPower,
     required this.currentColor,
     required this.manualColor,
@@ -233,7 +235,7 @@ class LyfiDeviceStatus {
       state: LedState.values[map['state']],
       mode: LedRunningMode.values[map['mode']],
       unscheduled: map['unscheduled'],
-      nightlightRemaining: Duration(seconds: map['nlRemain']),
+      temporaryRemaining: Duration(seconds: map['tempRemain']),
       fanPower: map['fanPower'],
       currentColor: List<int>.from(map['currentColor']),
       manualColor: List<int>.from(map['manualColor']),
@@ -286,6 +288,9 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
 
   Future<LedCorrectionMethod> getCorrectionMethod(Device dev);
   Future<void> setCorrectionMethod(Device dev, LedCorrectionMethod mode);
+
+  Future<Duration> getTemporaryDuration(Device dev);
+  Future<void> setTemporaryDuration(Device dev, Duration duration);
 
   Future<GeoLocation?> getLocation(Device dev);
   Future<void> setLocation(Device dev, GeoLocation location);
@@ -503,6 +508,20 @@ class BorneoLyfiDriver
     final dd = dev.driverData as LyfiDriverData;
     return await dd.coap
         .putCbor(LyfiPaths.correctionMethod, correctionMethod.index);
+  }
+
+  @override
+  Future<Duration> getTemporaryDuration(Device dev) async {
+    final dd = dev.driverData as LyfiDriverData;
+    final minutes = await dd.coap.getCbor<int>(LyfiPaths.temporaryDuration);
+    return Duration(minutes: minutes);
+  }
+
+  @override
+  Future<void> setTemporaryDuration(Device dev, Duration duration) async {
+    final dd = dev.driverData as LyfiDriverData;
+    final minutes = duration.inMinutes;
+    return await dd.coap.putCbor(LyfiPaths.temporaryDuration, minutes);
   }
 
   @override

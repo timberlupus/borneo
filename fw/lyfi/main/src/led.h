@@ -38,7 +38,7 @@ enum led_correction_methods {
 enum led_status_enum {
     LED_STATE_NORMAL = 0,
     LED_STATE_DIMMING = 1,
-    LED_STATE_NIGHTLIGHT = 2,
+    LED_STATE_TEMPORARY = 2,
     LED_STATE_PREVIEW = 3,
 
     LED_STATE_POWERING_ON = 4,
@@ -85,7 +85,7 @@ struct led_acclimation_settings {
 struct led_user_settings {
     uint8_t mode; ///< Running mode, see `enum led_running_modes`
 
-    uint16_t nightlight_duration; ///< Night lighting state duration (in seconds)
+    uint16_t temporary_duration; ///< Night lighting state duration (in seconds)
     struct led_scheduler scheduler; ///< Scheduling scheduler for scheduled state
     led_color_t manual_color; ///< Manual dimming color settings.
     led_color_t sun_color; ///< Sun simulation color settings.
@@ -101,8 +101,8 @@ struct led_user_settings {
 struct led_status {
     uint8_t state; ///< Current state
     led_color_t color; ///< Current hardware LED power percentage for each channel
-    int64_t nightlight_off_time; ///< Time point after temporary lighting state to turn off, this time point is when
-                                 ///< fading out starts
+    int64_t temporary_off_time; ///< Time point after temporary lighting state to turn off, this time point is when
+                                ///< fading out starts
     time_t preview_state_clock; ///< Clock for preview state
     led_color_t color_to_resume; ///< Color to be resumed
 
@@ -158,8 +158,8 @@ int led_switch_mode(uint8_t mode);
 
 bool led_is_blank();
 
-void led_set_nightlight_duration(uint16_t duration);
-int32_t led_get_nightlight_remaining();
+int led_set_temporary_duration(uint16_t duration);
+int32_t led_get_temporary_remaining();
 
 int led_set_correction_method(uint8_t correction_method);
 

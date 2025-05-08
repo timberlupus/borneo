@@ -32,13 +32,16 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   LedState? _ledState;
   LedState? get ledState => _ledState;
 
-  bool get canMeasureCurrent => borneoDeviceStatus?.powerCurrent != null;
-  bool get canMeasureVoltage => borneoDeviceStatus?.powerVoltage != null;
+  bool get canMeasureCurrent => isOnline && isOn && borneoDeviceStatus?.powerCurrent != null;
+  bool get canMeasureVoltage => isOnline && isOn && borneoDeviceStatus?.powerVoltage != null;
   bool get canMeasurePower => canMeasureCurrent && canMeasureVoltage;
   double get currentWatts => (borneoDeviceStatus?.powerCurrent ?? 0) * (borneoDeviceStatus?.powerVoltage ?? 0);
 
-  Duration _nightlightRemaining = Duration.zero;
-  Duration get nightlightRemaining => _nightlightRemaining;
+  Duration _temporaryDuration = Duration.zero;
+  Duration get temporaryDuration => _temporaryDuration;
+
+  final ValueNotifier<Duration> _temporaryRemaining = ValueNotifier<Duration>(Duration.zero);
+  ValueNotifier<Duration> get temporaryRemaining => _temporaryRemaining;
 
   bool get canLockOrUnlock => !isBusy && isOn;
   bool get canUnlock => !isBusy && isOnline && isOn && isLocked;
@@ -92,6 +95,8 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     for (int i = 0; i < lyfiDeviceInfo.channels.length; i++) {
       _channels.add(ValueNotifier(0));
     }
+
+    _temporaryDuration = await _deviceApi.getTemporaryDuration(boundDevice!.device);
 
     await refreshStatus();
 
@@ -158,7 +163,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
       _mode = lyfiDeviceStatus!.mode;
     }
 
-    _nightlightRemaining = lyfiDeviceStatus!.nightlightRemaining;
+    _temporaryRemaining.value = lyfiDeviceStatus!.temporaryRemaining;
 
     for (int i = 0; i < lyfiDeviceStatus!.currentColor.length; i++) {
       _channels[i].value = lyfiDeviceStatus!.currentColor[i];
@@ -175,28 +180,26 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     _isOn = onOff;
   }
 
-  bool get canSwitchNightlightState =>
+  bool get canSwitchTemporaryState =>
       !isBusy &&
       _isOn &&
       (_mode == LedRunningMode.scheduled || _mode == LedRunningMode.sun) &&
-      (ledState == LedState.nightlight || ledState == LedState.normal || ledState == LedState.poweringOn);
+      (ledState == LedState.temporary || ledState == LedState.normal || ledState == LedState.poweringOn);
 
-  void switchNightlightState() {
-    if (_ledState == LedState.normal || _ledState == LedState.nightlight) {
-      super.enqueueUIJob(() => _switchNightlightState());
-    }
+  void switchTemporaryState() {
+    assert(_ledState == LedState.normal || _ledState == LedState.temporary || _ledState == LedState.poweringOn);
+    super.enqueueUIJob(() => _switchTemporaryState());
   }
 
-  Future<void> _switchNightlightState() async {
+  Future<void> _switchTemporaryState() async {
     // Turn the temp mode on
     if (_ledState == LedState.normal) {
-      _deviceApi.switchState(super.boundDevice!.device, LedState.nightlight);
-      _ledState = LedState.nightlight;
+      _deviceApi.switchState(super.boundDevice!.device, LedState.temporary);
     } else {
       // Restore running mode
       _deviceApi.switchState(super.boundDevice!.device, LedState.normal);
-      _ledState = LedState.normal;
     }
+    await refreshStatus();
   }
 
   void toggleLock(bool isLocked) {
@@ -228,6 +231,8 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     if (!isLocked) {
       //Entering edit mode
       _toggleEditor(_mode);
+    } else {
+      await refreshStatus();
     }
   }
 
@@ -255,6 +260,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     await _deviceApi.switchMode(boundDevice!.device, mode);
     _toggleEditor(mode);
     _mode = mode;
+    await refreshStatus();
   }
 
   Future<void> _toggleEditor(LedRunningMode mode) async {

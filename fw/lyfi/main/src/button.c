@@ -63,7 +63,7 @@ int button_init()
 static void button_single_click_cb(void* arg, void* usr_data)
 {
     if (bo_power_is_on()) {
-        BO_MUST(esp_event_post(LYFI_LED_EVENTS, LYFI_LED_NOTIFY_NIGHTLIGHT_STATE, NULL, 0, portMAX_DELAY));
+        BO_MUST(esp_event_post(LYFI_LED_EVENTS, LYFI_LED_NOTIFY_TEMPORARY_STATE, NULL, 0, portMAX_DELAY));
     }
     else {
         // Turn the power on
@@ -74,7 +74,7 @@ static void button_single_click_cb(void* arg, void* usr_data)
 static void button_long_press_cb(void* arg, void* usr_data)
 {
     int rc = bo_wifi_forget();
-    if(rc) {
+    if (rc) {
         ESP_LOGE(TAG, "Failed to forget WiFi configuration!");
     }
     bo_system_reboot_later(5000);

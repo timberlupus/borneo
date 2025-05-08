@@ -1,6 +1,7 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/acclimation_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/acclimation_screen.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/toufu_view.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/lyfi_view.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/schedule_chart.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/settings_screen.dart';
@@ -17,8 +18,8 @@ import 'package:provider/provider.dart';
 import 'package:borneo_common/duration_ext.dart';
 
 import 'package:borneo_app/views/common/hex_color.dart';
-import '../view_models/lyfi_view_model.dart';
-import 'color_chart.dart';
+import '../../view_models/lyfi_view_model.dart';
+import '../color_chart.dart';
 
 class ManualRunningChart extends StatelessWidget {
   const ManualRunningChart({super.key});
@@ -105,110 +106,6 @@ class ManualRunningChart extends StatelessWidget {
   }
 }
 
-class DashboardToufu extends StatelessWidget {
-  final String title;
-  final double value;
-  final double maxValue;
-  final double minValue;
-  final IconData? icon;
-  final Widget? center;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-  final Color? progressColor;
-  final Color? arcColor;
-  final List<GaugeSegment> segments;
-
-  const DashboardToufu({
-    required this.title,
-    required this.value,
-    required this.center,
-    required this.minValue,
-    required this.maxValue,
-    this.icon,
-    this.backgroundColor,
-    this.foregroundColor,
-    this.progressColor,
-    this.arcColor,
-    this.segments = const [],
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final fgColor = foregroundColor ?? Theme.of(context).colorScheme.onSurface ?? Colors.black;
-    final bgColor = backgroundColor ?? Theme.of(context).colorScheme.surfaceContainer ?? Colors.grey[200]!;
-    final progColor = progressColor ?? Theme.of(context).colorScheme.primary ?? Colors.blue;
-    final arcColor = this.arcColor ?? Theme.of(context).colorScheme.onSurfaceVariant ?? Colors.grey;
-
-    assert(!minValue.isNaN);
-    assert(!maxValue.isNaN);
-    assert(!value.isNaN);
-
-    return Card(
-      margin: const EdgeInsets.all(0),
-      color: bgColor,
-      elevation: 0,
-      child: SizedBox(
-        height: 200, // Provide bounded height
-        child: LayoutBuilder(
-          builder:
-              (context, constraints) => Padding(
-                padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
-                child: Stack(
-                  clipBehavior: Clip.hardEdge, // Prevent overflow
-                  children: [
-                    if (icon != null)
-                      Positioned(
-                        bottom: -constraints.maxHeight * 0.2,
-                        right: -constraints.maxWidth * 0.2,
-                        child: ClipRect(
-                          child: Icon(icon!, size: constraints.maxWidth * 0.75, color: fgColor.withAlpha(8)),
-                        ),
-                      ),
-                    Positioned.fill(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: AnimatedRadialGauge(
-                              initialValue: minValue.roundToDouble(),
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.decelerate,
-                              value: value.roundToDouble(),
-                              radius: null,
-                              axis: GaugeAxis(
-                                min: minValue.roundToDouble(),
-                                max: maxValue.roundToDouble(),
-                                degrees: 270,
-                                style: GaugeAxisStyle(
-                                  thickness: 13,
-                                  segmentSpacing: 0,
-                                  background: segments.isEmpty ? arcColor : null,
-                                  cornerRadius: Radius.zero,
-                                ),
-                                pointer: null,
-                                progressBar: GaugeProgressBar.basic(color: progColor),
-                                segments: segments,
-                              ),
-                              builder: (context, label, value) => Center(child: label),
-                              child: center,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: fgColor)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-        ),
-      ),
-    );
-  }
-}
-
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
 
@@ -239,7 +136,7 @@ class DashboardView extends StatelessWidget {
                                   selector: (_, vm) => (mode: vm.mode, state: vm.ledState, isOn: vm.isOn),
                                   builder: (context, vm, _) {
                                     Widget chart;
-                                    if (vm.state == LedState.nightlight) {
+                                    if (vm.state == LedState.temporary) {
                                       chart = ManualRunningChart();
                                     } else if (vm.mode == LedRunningMode.manual) {
                                       chart = ManualRunningChart();
@@ -338,7 +235,7 @@ class DashboardView extends StatelessWidget {
                                     progressColor: Theme.of(context).colorScheme.tertiary,
                                     minValue: 0.0,
                                     maxValue: vm.lyfiDeviceInfo.nominalPower ?? 9999,
-                                    value: vm.currentWatts,
+                                    value: vm.isOn && vm.isOnline ? vm.currentWatts : 0,
                                     center: Column(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       mainAxisSize: MainAxisSize.max,
@@ -357,8 +254,7 @@ class DashboardView extends StatelessWidget {
                                                 fontSize: 23,
                                               ),
                                             ),
-                                            if (vm.borneoDeviceStatus?.powerVoltage != null &&
-                                                vm.borneoDeviceStatus?.powerCurrent != null)
+                                            if (vm.canMeasurePower)
                                               Text(
                                                 'W',
                                                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
@@ -372,18 +268,18 @@ class DashboardView extends StatelessWidget {
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            if (vm.borneoDeviceStatus?.powerVoltage != null)
+                                            if (vm.canMeasureVoltage)
                                               Text(
-                                                '${vm.borneoDeviceStatus!.powerVoltage!.toStringAsFixed(0)}V',
+                                                '${vm.borneoDeviceStatus!.powerVoltage!.toStringAsFixed(1)}V',
                                                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                                   color: Theme.of(context).colorScheme.onSurface,
                                                   fontFeatures: [FontFeature.tabularFigures()],
                                                 ),
                                               ),
-                                            if (vm.borneoDeviceStatus?.powerCurrent != null) SizedBox(width: 4),
-                                            if (vm.borneoDeviceStatus?.powerCurrent != null)
+                                            if (vm.canMeasureCurrent) SizedBox(width: 4),
+                                            if (vm.canMeasureCurrent)
                                               Text(
-                                                '${vm.borneoDeviceStatus!.powerCurrent!.toStringAsFixed(0)}A',
+                                                '${vm.borneoDeviceStatus!.powerCurrent!.toStringAsFixed(1)}A',
                                                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                                   color: Theme.of(context).colorScheme.onSurface,
                                                   fontFeatures: [FontFeature.tabularFigures()],
@@ -553,31 +449,38 @@ class DashboardView extends StatelessWidget {
                     ),
 
                     // Temporary button
-                    Selector<LyfiViewModel, ({LedState? state, bool canSwitch})>(
-                      selector: (_, vm) => (state: vm.ledState, canSwitch: vm.canSwitchNightlightState),
+                    Selector<LyfiViewModel, ({LedState? state, bool canSwitch, Duration total, Duration remain})>(
+                      selector:
+                          (context, vm) => (
+                            state: vm.ledState,
+                            canSwitch: vm.canSwitchTemporaryState,
+                            total: vm.temporaryDuration,
+                            remain: vm.temporaryRemaining.value,
+                          ),
                       builder:
                           (context, props, _) => RoundedIconTextButton(
                             borderColor: Theme.of(context).colorScheme.primary,
                             text: 'Temporary',
                             buttonSize: 64,
                             backgroundColor:
-                                props.state == LedState.nightlight
+                                props.state == LedState.temporary
                                     ? Theme.of(context).colorScheme.primaryContainer
                                     : null,
                             icon: AnimatedSwitcher(
                               duration: Duration(milliseconds: 500),
                               child:
-                                  props.state == LedState.nightlight
+                                  props.state == LedState.temporary
                                       ? IconProgressBar(
                                         icon: Icon(Icons.flashlight_on, size: 40),
-                                        progress: 0.5,
+                                        progress:
+                                            (props.total.inSeconds - props.remain.inSeconds) / props.total.inSeconds,
                                         size: 40,
                                         progressColor:
-                                            props.state == LedState.nightlight
+                                            props.state == LedState.temporary
                                                 ? Theme.of(context).colorScheme.inversePrimary
                                                 : Theme.of(context).colorScheme.primary,
                                         backgroundColor:
-                                            props.state == LedState.nightlight
+                                            props.state == LedState.temporary
                                                 ? Theme.of(context).colorScheme.onPrimaryContainer
                                                 : Theme.of(context).colorScheme.primaryContainer,
                                       )
@@ -585,7 +488,7 @@ class DashboardView extends StatelessWidget {
                             ),
 
                             onPressed:
-                                props.canSwitch ? () => context.read<LyfiViewModel>().switchNightlightState() : null,
+                                props.canSwitch ? () => context.read<LyfiViewModel>().switchTemporaryState() : null,
                           ),
                     ),
                   ],
@@ -682,48 +585,6 @@ class DashboardView extends StatelessWidget {
                     ),
                   ],
                 ),
-
-                /*
-                Row(
-                  children: [
-                    Expanded(
-                      child: 
-                      child: Container(),
-                    ),
-
-                    Expanded(
-                      child: 
-                    ),
-
-                    Expanded(
-                      child: 
-                      
-                    ),
-                  ],
-                ),
-
-                //sep
-
-                // next row
-                Row(
-                  children: [
-                    Expanded(
-                      child:
-                    ),
-
-                    // Settings button
-                    Expanded(
-                      child:
-               
-                    ),
-
-                    Expanded(
-                      child: 
-
-                    ),
-                  ],
-                ),
-                */
               ],
             ),
           ),
@@ -738,19 +599,6 @@ class DashboardView extends StatelessWidget {
           children.map((child) {
             return Expanded(child: Center(child: child));
           }).toList(),
-    );
-  }
-
-  Widget _buildToufuRow({required List<Widget> children}) {
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        for (int i = 0; i < children.length; i++) ...[
-          Flexible(flex: 1, child: children[i]),
-          if (i != children.length - 1) const SizedBox(width: 16),
-        ],
-      ],
     );
   }
 

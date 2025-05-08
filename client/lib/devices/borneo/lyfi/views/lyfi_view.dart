@@ -6,7 +6,7 @@ import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:borneo_app/devices/borneo/lyfi/views/dashboard_view.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/dashboard_view.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/schedule_editor_view.dart';
 import 'package:borneo_app/services/device_manager.dart';
 
