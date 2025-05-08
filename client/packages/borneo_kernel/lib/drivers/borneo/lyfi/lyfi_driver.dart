@@ -339,6 +339,8 @@ class BorneoLyfiDriver
           CoapClient(dev.address, config: BorneoCoapConfig.coapConfig);
       dev.driverData = LyfiDriverData(coapClient, generalDeviceInfo, lyfiInfo);
       return true;
+    } on CoapRequestTimeoutException catch (_) {
+      return false;
     } finally {
       probeCoapClient.close();
     }
