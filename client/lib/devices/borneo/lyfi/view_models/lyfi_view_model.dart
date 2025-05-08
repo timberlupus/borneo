@@ -80,7 +80,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     notifyListeners();
   }
 
-  LyfiViewModel(super.deviceID, super.deviceManager, {required super.globalEventBus, super.logger}) {
+  LyfiViewModel({required super.deviceID, required super.deviceManager, required super.globalEventBus, super.logger}) {
     //
   }
 

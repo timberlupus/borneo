@@ -20,6 +20,9 @@ class GroupManager {
   GroupManager(this._logger, this._globalBus, this._db, this._scenes) : isInitialized = false;
 
   Future<void> initialize() async {
+    if (isInitialized) {
+      return;
+    }
     return await _db.transaction((tx) async {
       //  await _ensureDefaultGroupExists(tx);
       isInitialized = true;

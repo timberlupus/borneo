@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
+import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_app/infrastructure/timezone.dart';
 import 'package:borneo_app/view_models/devices/base_device_view_model.dart';
 import 'package:borneo_common/exceptions.dart' as boEX;
@@ -9,15 +11,11 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'package:borneo_app/services/device_manager.dart';
-import 'package:borneo_app/view_models/base_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 
-class SettingsViewModel extends BaseViewModel with ViewModelEventBusMixin {
-  final String deviceID;
-  final DeviceManager deviceManager;
-  final EventBus globalEventBus;
+class SettingsViewModel extends BaseLyfiDeviceViewModel {
   final Uri address;
   final GeneralBorneoDeviceStatus borneoStatus;
   final GeneralBorneoDeviceInfo borneoInfo;
@@ -45,9 +43,9 @@ class SettingsViewModel extends BaseViewModel with ViewModelEventBusMixin {
   bool get canUpdatePowerBehavior => !isBusy && isOnline;
 
   SettingsViewModel({
-    required this.deviceID,
-    required this.deviceManager,
-    required this.globalEventBus,
+    required super.deviceID,
+    required super.deviceManager,
+    required super.globalEventBus,
     required this.address,
     required this.borneoStatus,
     required this.borneoInfo,
@@ -59,13 +57,9 @@ class SettingsViewModel extends BaseViewModel with ViewModelEventBusMixin {
        _powerBehavior = powerBehavior,
        _timezone = borneoStatus.timezone;
 
-  Future<void> initialize() async {
-    isBusy = true;
-    try {
-      _correctionMethod = await api.getCorrectionMethod(boundDevice.device);
-    } finally {
-      isBusy = false;
-    }
+  @override
+  Future<void> onInitialize() async {
+    _correctionMethod = await api.getCorrectionMethod(boundDevice.device);
   }
 
   Future<void> updateGeoLocation() async {

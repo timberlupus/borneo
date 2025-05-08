@@ -4,5 +4,5 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   ILyfiDeviceApi get lyfiDeviceApi => super.boundDevice!.driver as ILyfiDeviceApi;
 
-  BaseLyfiDeviceViewModel(super.deviceID, super.deviceManager, {required super.globalEventBus});
+  BaseLyfiDeviceViewModel({required super.deviceID, required super.deviceManager, required super.globalEventBus});
 }

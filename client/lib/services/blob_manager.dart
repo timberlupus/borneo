@@ -33,6 +33,9 @@ class FlutterAppBlobManager implements IBlobManager {
 
   @override
   Future<void> initialize() async {
+    if (_isInitialized) {
+      return;
+    }
     logger?.i('Start to initialize BlobManager...');
     final appDir = await getApplicationDocumentsDirectory();
     await appDir.create(recursive: true);

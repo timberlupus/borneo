@@ -37,6 +37,7 @@ class BorneoApp extends StatelessWidget {
 
     // Main screen
     child: ToastificationWrapper(
+      config: ToastificationConfig(animationDuration: Duration(milliseconds: 300)),
       child: MaterialApp(
         title: 'Borneo-IoT',
         theme: BorneoTheme(Theme.of(context).textTheme).light(),

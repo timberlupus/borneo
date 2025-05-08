@@ -19,8 +19,8 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         detailsViewBuilder: (_) => LyfiView(),
         detailsViewModelBuilder:
             (context, deviceID) => LyfiViewModel(
-              deviceID,
-              context.read<DeviceManager>(),
+              deviceID: deviceID,
+              deviceManager: context.read<DeviceManager>(),
               globalEventBus: context.read<EventBus>(),
               logger: context.read<Logger>(),
             ),

@@ -29,7 +29,7 @@ class AcclimationViewModel extends BaseLyfiDeviceViewModel {
     notifyListeners();
   }
 
-  AcclimationViewModel(super.deviceID, super.deviceManager, {required super.globalEventBus});
+  AcclimationViewModel({required super.deviceID, required super.deviceManager, required super.globalEventBus});
 
   @override
   Future<void> onInitialize() async {

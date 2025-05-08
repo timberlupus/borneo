@@ -22,6 +22,12 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
   TabIndices _currentIndex = TabIndices.scenes;
   bool _isInitialized = false;
 
+  DateTime? _lastPressedAt;
+  bool _showExitPrompt = false;
+  Timer? _exitTimer;
+
+  bool get showExitPrompt => _showExitPrompt;
+
   late final StreamSubscription<AppErrorEvent> _appErrorEventSub;
   late final StreamSubscription<DeviceDiscoveringStartedEvent> _deviceDiscoveringStartedEventSub;
   late final StreamSubscription<DeviceDiscoveringStoppedEvent> _deviceDiscoveringStoppedEventSub;
@@ -78,6 +84,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
   @override
   void dispose() {
     if (!isDisposed) {
+      _exitTimer?.cancel();
       _appErrorEventSub.cancel();
       _errorsStack.clear();
       _deviceDiscoveringStartedEventSub.cancel();
@@ -116,5 +123,25 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
     if (!isDisposed && !isBusy) {
       notifyListeners();
     }
+  }
+
+  Future<bool> handleWillPop() async {
+    final now = DateTime.now();
+
+    if (_lastPressedAt == null || now.difference(_lastPressedAt!) > const Duration(seconds: 2)) {
+      _lastPressedAt = now;
+      _showExitPrompt = true;
+      notifyListeners();
+
+      _exitTimer?.cancel();
+      _exitTimer = Timer(const Duration(seconds: 2), () {
+        _showExitPrompt = false;
+        notifyListeners();
+      });
+
+      return false;
+    }
+
+    return true;
   }
 }

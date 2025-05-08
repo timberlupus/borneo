@@ -8,9 +8,11 @@ import 'package:borneo_app/views/devices/group_edit_screen.dart';
 import 'package:borneo_app/views/scenes/scene_edit_screen.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 import '../services/device_manager.dart';
 import '../services/scene_manager.dart';
 import '../view_models/devices/grouped_devices_view_model.dart';
@@ -253,56 +255,89 @@ class MainScreen extends StatelessWidget {
         final sm = context.read<SceneManager>();
         final gm = context.read<GroupManager>();
         final dm = context.read<DeviceManager>();
-        final vm = MainViewModel(bus, bm, sm, gm, dm, logger: context.read<Logger>());
-        return vm;
+        return MainViewModel(bus, bm, sm, gm, dm, logger: context.read<Logger>());
       },
       lazy: false,
-      child: Selector<MainViewModel, bool>(
-        selector: (context, vm) => vm.isInitialized,
-        builder: (context, viewModel, child) {
-          return FutureBuilder(
-            future: context.read<MainViewModel>().isInitialized ? null : context.read<MainViewModel>().initialize(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Scaffold(body: Center(child: CircularProgressIndicator()));
-              } else if (snapshot.hasError) {
-                return Scaffold(body: Center(child: Text('Error: ${snapshot.error}')));
-              } else {
-                return MultiProvider(
-                  providers: [
-                    ChangeNotifierProvider<ScenesViewModel>(
-                      create:
-                          (context) => ScenesViewModel(
-                            context.read<EventBus>(),
-                            context.read<SceneManager>(),
-                            context.read<DeviceManager>(),
-                            context.read<RoutineManager>(),
-                          ),
-                      lazy: true,
-                    ),
+      child: Builder(
+        builder: (context) {
+          final vm = context.read<MainViewModel>();
 
-                    ChangeNotifierProvider(create: (_) => MyViewModel(), lazy: true),
+          return PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, _) async {
+              if (didPop) return;
 
-                    // Device-related pages
-                    ChangeNotifierProvider(
-                      create: (context) {
-                        final logger = context.read<Logger>();
-                        final globalEventBus = context.read<EventBus>();
-                        final sm = context.read<SceneManager>();
-                        final gm = context.read<GroupManager>();
-                        final dm = context.read<DeviceManager>();
-                        return GroupedDevicesViewModel(globalEventBus, sm, gm, dm, logger: logger);
-                      },
-                      lazy: true,
-                    ),
-                  ],
-                  child: buildScaffold(context),
+              final shouldPop = await vm.handleWillPop();
+              if (!shouldPop) {
+                toastification.show(
+                  title: const Text('Press back again to exit'),
+                  animationDuration: Duration(milliseconds: 300),
+                  style: ToastificationStyle.flatColored,
+                  autoCloseDuration: const Duration(seconds: 5),
+                  closeOnClick: true,
+                  closeButton: ToastCloseButton(showType: CloseButtonShowType.none),
+                  type: ToastificationType.info,
                 );
+              } else if (context.mounted) {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                } else {
+                  SystemNavigator.pop();
+                }
               }
             },
+            child: Selector<MainViewModel, bool>(
+              selector: (context, vm) => vm.isInitialized,
+              builder: (context, isInitialized, child) {
+                return FutureBuilder(
+                  future: isInitialized ? null : vm.initialize(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+                    }
+
+                    if (snapshot.hasError) {
+                      return Scaffold(body: Center(child: Text('Error: ${snapshot.error}')));
+                    }
+
+                    return _buildInitializedContent(context);
+                  },
+                );
+              },
+            ),
           );
         },
       ),
+    );
+  }
+
+  Widget _buildInitializedContent(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<ScenesViewModel>(
+          create:
+              (context) => ScenesViewModel(
+                context.read<EventBus>(),
+                context.read<SceneManager>(),
+                context.read<DeviceManager>(),
+                context.read<RoutineManager>(),
+              ),
+          lazy: true,
+        ),
+        ChangeNotifierProvider(create: (_) => MyViewModel(), lazy: true),
+        ChangeNotifierProvider(
+          create: (context) {
+            final logger = context.read<Logger>();
+            final globalEventBus = context.read<EventBus>();
+            final sm = context.read<SceneManager>();
+            final gm = context.read<GroupManager>();
+            final dm = context.read<DeviceManager>();
+            return GroupedDevicesViewModel(globalEventBus, sm, gm, dm, logger: logger);
+          },
+          lazy: true,
+        ),
+      ],
+      child: buildScaffold(context),
     );
   }
 }

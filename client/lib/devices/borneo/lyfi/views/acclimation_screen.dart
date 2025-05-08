@@ -18,7 +18,11 @@ class AcclimationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = _buildSettingItems(context);
-    final vm = AcclimationViewModel(deviceID, context.read<DeviceManager>(), globalEventBus: context.read<EventBus>());
+    final vm = AcclimationViewModel(
+      deviceID: deviceID,
+      deviceManager: context.read<DeviceManager>(),
+      globalEventBus: context.read<EventBus>(),
+    );
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: Text('Acclimation Mode')),

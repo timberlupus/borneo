@@ -51,6 +51,9 @@ final class DeviceManager {
   }
 
   Future<void> initialize() async {
+    if (_isInitialized) {
+      return;
+    }
     _logger.i('Initializing DeviceManager...');
     try {
       _kernel.start();

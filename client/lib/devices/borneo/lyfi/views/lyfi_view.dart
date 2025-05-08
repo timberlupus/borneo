@@ -329,7 +329,12 @@ class LyfiView extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = ModalRoute.of(context)!.settings.arguments as DeviceEntity;
     return ChangeNotifierProvider(
-      create: (cb) => LyfiViewModel(device.id, cb.read<DeviceManager>(), globalEventBus: cb.read<EventBus>()),
+      create:
+          (cb) => LyfiViewModel(
+            deviceID: device.id,
+            deviceManager: cb.read<DeviceManager>(),
+            globalEventBus: cb.read<EventBus>(),
+          ),
       builder: (context, child) {
         final vm = context.read<LyfiViewModel>();
         return FutureBuilder(

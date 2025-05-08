@@ -38,6 +38,9 @@ class SceneManager {
   SceneManager(this._gt, this._db, this._globalEventBus, this._blobManager, {this.logger});
 
   Future<void> initialize(GroupManager groupManager, DeviceManager deviceManager) async {
+    if (isInitialized) {
+      return;
+    }
     _groupManager = groupManager;
     _deviceManager = deviceManager;
     return await _db.transaction((tx) async {

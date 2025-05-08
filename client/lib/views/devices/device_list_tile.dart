@@ -17,35 +17,11 @@ class DeviceTile extends StatelessWidget {
     var vm = context.read<DeviceSummaryViewModel>();
 
     Future.delayed(Duration(milliseconds: 200)).then((_) async {
-      if (!vm.isOnline) {
-        showDialog(
-          context: context,
-          barrierDismissible: false, // 用户无法通过点击对话框外部关闭它
-          builder: (BuildContext context) {
-            return AlertDialog(
-              content: Row(children: [CircularProgressIndicator(), SizedBox(width: 15), Text("Connecting...")]),
-            );
-          },
-        );
-
-        try {
-          bool isConnected = await vm.tryConnect();
-          if (!isConnected) {
-            vm.notifyAppError("Failed to connect device");
-            return;
-          }
-        } finally {
-          Navigator.of(context, rootNavigator: true).pop();
-        }
-      }
       if (context.mounted) {
         await Navigator.of(context).pushNamed(AppRoutes.makeDeviceScreenRoute(device.driverID), arguments: device);
-        //.then((results) {});
+        vm.notifyListeners();
       }
     });
-    // TODO FIXME
-    //if (shouldRefresh ?? false) {
-    //}
   }
 
   @override

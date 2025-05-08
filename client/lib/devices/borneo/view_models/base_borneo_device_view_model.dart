@@ -12,7 +12,12 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   RssiLevel? get rssiLevel =>
       _borneoDeviceStatus?.wifiRssi != null ? RssiLevelExtension.fromRssi(_borneoDeviceStatus!.wifiRssi!) : null;
 
-  BaseBorneoDeviceViewModel(super.deviceID, super.deviceManager, {required super.globalEventBus, super.logger});
+  BaseBorneoDeviceViewModel({
+    required super.deviceID,
+    required super.deviceManager,
+    required super.globalEventBus,
+    super.logger,
+  });
 
   @override
   Future<void> refreshStatus() async {

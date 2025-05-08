@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/widgets.dart';
@@ -35,7 +36,12 @@ abstract class BaseDeviceViewModel extends BaseViewModel with WidgetsBindingObse
   bool get isTimerRunning => _isTimerRunning;
   BoundDevice? get boundDevice => deviceManager.getBoundDevice(deviceID);
 
-  BaseDeviceViewModel(this.deviceID, this.deviceManager, {required EventBus globalEventBus, super.logger}) {
+  BaseDeviceViewModel({
+    required this.deviceID,
+    required this.deviceManager,
+    required EventBus globalEventBus,
+    super.logger,
+  }) {
     super.globalEventBus = globalEventBus;
     WidgetsBinding.instance.addObserver(this);
   }
@@ -45,7 +51,14 @@ abstract class BaseDeviceViewModel extends BaseViewModel with WidgetsBindingObse
       deviceEntity = await deviceManager.getDevice(deviceID);
       _isLoaded = true;
       await onInitialize();
-      await refreshStatus();
+      if (isOnline) {
+        await refreshStatus();
+      }
+    } on IOException catch (ioex, stackTrace) {
+      logger?.e(ioex.toString(), error: ioex, stackTrace: stackTrace);
+      if (isOnline) {
+        super.notifyAppError('Failed to initialize device: $ioex');
+      }
     } catch (e, stackTrace) {
       logger?.e('Failed to initialize device(${deviceEntity.toString()}): $e', error: e, stackTrace: stackTrace);
       super.notifyAppError('Failed to initialize device: $e');
