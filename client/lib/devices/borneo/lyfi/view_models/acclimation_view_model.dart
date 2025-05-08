@@ -1,7 +1,6 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
-import 'package:sembast/timestamp.dart';
 
 class AcclimationViewModel extends BaseLyfiDeviceViewModel {
   late final AcclimationSettings _origSettings;

@@ -1,3 +1,4 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/base_editor_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/ieditor.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
@@ -43,58 +44,41 @@ class ScheduleEntryViewModel extends ChangeNotifier {
   ScheduledInstant toModel() => ScheduledInstant(instant: _instant, color: _channels);
 }
 
-class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
+class ScheduleEditorViewModel extends BaseEditorViewModel {
   static const Duration defaultInstantSpan = Duration(minutes: 30);
 
-  final LyfiViewModel _parent;
   final EasySetupViewModel easySetupViewModel;
-  final List<int> blackColor;
-  bool _isInitialized = false;
-  bool _isChanged = false;
 
   int? _currentEntryIndex;
-
-  final AsyncRateLimiter<Future Function()> _colorChangeRateLimiter = AsyncRateLimiter(
-    interval: localDimmingTrackingInterval,
-  );
 
   final List<ScheduleEntryViewModel> _entries = [];
 
   bool get isEmpty => _entries.isEmpty;
   bool get isNotEmpty => _entries.isNotEmpty;
 
-  bool get isInitialized => _isInitialized;
-  bool get isOnline => _parent.isOnline;
-  bool get isBusy => _parent.isBusy;
   List<ScheduleEntryViewModel> get entries => _entries;
   Iterable<int> get instants => _entries.map((x) => x.instant.inSeconds);
-  bool get isPreviewMode => _parent.ledState == LedState.preview;
+  bool get isPreviewMode => parent.ledState == LedState.preview;
 
   @override
-  LyfiDeviceInfo get deviceInfo => _parent.lyfiDeviceInfo;
-
-  final List<ValueNotifier<int>> _channels;
-
-  @override
-  List<ValueNotifier<int>> get channels => _channels;
-
-  @override
-  bool get canEdit => !isBusy && _parent.isOnline && _parent.isOn;
+  bool get canEdit =>
+      !isBusy &&
+      parent.isOnline &&
+      parent.isOn &&
+      parent.mode == LedRunningMode.scheduled &&
+      parent.ledState == LedState.dimming;
 
   bool get canChangeColor => canEdit && currentEntry != null;
 
   ScheduleEntryViewModel? get currentEntry => _currentEntryIndex != null ? _entries[_currentEntryIndex!] : null;
 
-  ILyfiDeviceApi get _deviceApi => _parent.boundDevice!.driver as ILyfiDeviceApi;
+  ILyfiDeviceApi get _deviceApi => parent.boundDevice!.driver as ILyfiDeviceApi;
 
-  ScheduleEditorViewModel(this._parent)
-    : _channels = List.generate(_parent.lyfiDeviceInfo.channelCount, growable: false, (index) => ValueNotifier(0)),
-      easySetupViewModel = EasySetupViewModel(),
-      blackColor = List.filled(_parent.lyfiDeviceInfo.channelCount, 0);
+  ScheduleEditorViewModel(super.parent) : easySetupViewModel = EasySetupViewModel();
 
   @override
-  Future<void> initialize() async {
-    final deviceSideInstants = _parent.scheduledInstants;
+  Future<void> onInitialize() async {
+    final deviceSideInstants = parent.scheduledInstants;
     _entries.addAll(deviceSideInstants.map((x) => ScheduleEntryViewModel(x)));
 
     if (deviceSideInstants.isNotEmpty) {
@@ -104,26 +88,16 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
       }
       _setCurrentEntry(currentEntryIndex);
     }
-    await _syncDimmingColor(false);
-
-    _isInitialized = true;
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _colorChangeRateLimiter.dispose();
-    super.dispose();
   }
 
   void _setCurrentEntry(int? index) {
     if (index != null) {
       _currentEntryIndex = index;
-      for (int channelIndex = 0; channelIndex < _channels.length; channelIndex++) {
+      for (int channelIndex = 0; channelIndex < channels.length; channelIndex++) {
         channels[channelIndex].value = currentEntry!.channels[channelIndex];
       }
     } else {
-      for (final ch in _channels) {
+      for (final ch in channels) {
         ch.value = 0;
       }
       _currentEntryIndex = null;
@@ -132,7 +106,7 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
 
   Future<void> setCurrentEntryAndSyncDimmingColor(int index) async {
     _setCurrentEntry(index);
-    await _syncDimmingColor(false);
+    await syncDimmingColor(false);
     notifyListeners();
   }
 
@@ -175,7 +149,7 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
 
     int removed = _currentEntryIndex!;
     _entries.removeAt(_currentEntryIndex!);
-    _isChanged = true;
+    isChanged = true;
 
     if (_entries.isNotEmpty) {
       if (removed >= 1) {
@@ -231,7 +205,7 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
   ScheduleEntryViewModel _insertInstant(int insertPos, Duration instant, List<int> channels) {
     final entry = ScheduleEntryViewModel(ScheduledInstant(instant: instant, color: channels));
     _entries.insert(insertPos, entry);
-    _isChanged = true;
+    isChanged = true;
     return entry;
   }
 
@@ -239,51 +213,36 @@ class ScheduleEditorViewModel extends ChangeNotifier implements IEditor {
     final entry = ScheduleEntryViewModel(ScheduledInstant(instant: instant, color: channels));
 
     _entries.add(entry);
-    _isChanged = true;
+    isChanged = true;
     return entry;
   }
 
   @override
-  int get availableChannelCount => deviceInfo.channelCount;
-
-  @override
   Future<void> updateChannelValue(int index, int value) async {
-    if (index >= 0 && index < _channels.length && value != _channels[index].value) {
-      _channels[index].value = value;
+    if (index >= 0 && index < channels.length && value != channels[index].value) {
+      channels[index].value = value;
       currentEntry?.channels[index] = value;
-      await _syncDimmingColor(true);
-      _isChanged = true;
+      await super.syncDimmingColor(true);
+      isChanged = true;
       notifyListeners();
     }
   }
 
-  Future<void> _syncDimmingColor(bool isLimited) async {
-    final color = _channels.map((x) => x.value).toList();
-    if (isLimited) {
-      _colorChangeRateLimiter.add(() => _deviceApi.setColor(_parent.boundDevice!.device, color));
-    } else {
-      await _deviceApi.setColor(_parent.boundDevice!.device, color);
-    }
-  }
-
   void togglePreviewMode() {
-    _parent.enqueueJob(() async {
+    parent.enqueueJob(() async {
       if (isPreviewMode) {
-        _deviceApi.switchState(_parent.boundDevice!.device, LedState.dimming);
+        _deviceApi.switchState(parent.boundDevice!.device, LedState.dimming);
       } else {
-        _deviceApi.switchState(_parent.boundDevice!.device, LedState.preview);
+        _deviceApi.switchState(parent.boundDevice!.device, LedState.preview);
       }
       notifyListeners();
     });
   }
 
   @override
-  bool get isChanged => _isChanged;
-
-  @override
   Future<void> save() async {
     final schedule = _entries.map((x) => x.toModel());
-    await _deviceApi.setSchedule(_parent.boundDevice!.device, schedule);
+    await _deviceApi.setSchedule(parent.boundDevice!.device, schedule);
   }
 
   void resetChannelValues() {}

@@ -211,7 +211,7 @@ void led_blank()
 
 int led_set_color(const led_color_t color)
 {
-    if (!bo_power_is_on() || _led.state != LED_STATE_DIMMING) {
+    if (!(bo_power_is_on() && _led.state == LED_STATE_DIMMING)) {
         return -EINVAL;
     }
     // Verify the colors

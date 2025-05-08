@@ -1,11 +1,8 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/acclimation_view_model.dart';
-import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_app/services/device_manager.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_xlider/flutter_xlider.dart';
 import 'package:intl/intl.dart';
 
 import 'package:provider/provider.dart';

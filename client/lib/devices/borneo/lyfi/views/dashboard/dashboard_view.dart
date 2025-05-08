@@ -1,6 +1,7 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/acclimation_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/acclimation_screen.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/toufu_view.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/lyfi_view.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/schedule_chart.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/settings_screen.dart';
@@ -17,8 +18,8 @@ import 'package:provider/provider.dart';
 import 'package:borneo_common/duration_ext.dart';
 
 import 'package:borneo_app/views/common/hex_color.dart';
-import '../view_models/lyfi_view_model.dart';
-import 'color_chart.dart';
+import '../../view_models/lyfi_view_model.dart';
+import '../color_chart.dart';
 
 class ManualRunningChart extends StatelessWidget {
   const ManualRunningChart({super.key});
@@ -102,110 +103,6 @@ class ManualRunningChart extends StatelessWidget {
         child: Text("Device Offline.", style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.error)),
       );
     }
-  }
-}
-
-class DashboardToufu extends StatelessWidget {
-  final String title;
-  final double value;
-  final double maxValue;
-  final double minValue;
-  final IconData? icon;
-  final Widget? center;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-  final Color? progressColor;
-  final Color? arcColor;
-  final List<GaugeSegment> segments;
-
-  const DashboardToufu({
-    required this.title,
-    required this.value,
-    required this.center,
-    required this.minValue,
-    required this.maxValue,
-    this.icon,
-    this.backgroundColor,
-    this.foregroundColor,
-    this.progressColor,
-    this.arcColor,
-    this.segments = const [],
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final fgColor = foregroundColor ?? Theme.of(context).colorScheme.onSurface ?? Colors.black;
-    final bgColor = backgroundColor ?? Theme.of(context).colorScheme.surfaceContainer ?? Colors.grey[200]!;
-    final progColor = progressColor ?? Theme.of(context).colorScheme.primary ?? Colors.blue;
-    final arcColor = this.arcColor ?? Theme.of(context).colorScheme.onSurfaceVariant ?? Colors.grey;
-
-    assert(!minValue.isNaN);
-    assert(!maxValue.isNaN);
-    assert(!value.isNaN);
-
-    return Card(
-      margin: const EdgeInsets.all(0),
-      color: bgColor,
-      elevation: 0,
-      child: SizedBox(
-        height: 200, // Provide bounded height
-        child: LayoutBuilder(
-          builder:
-              (context, constraints) => Padding(
-                padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
-                child: Stack(
-                  clipBehavior: Clip.hardEdge, // Prevent overflow
-                  children: [
-                    if (icon != null)
-                      Positioned(
-                        bottom: -constraints.maxHeight * 0.2,
-                        right: -constraints.maxWidth * 0.2,
-                        child: ClipRect(
-                          child: Icon(icon!, size: constraints.maxWidth * 0.75, color: fgColor.withAlpha(8)),
-                        ),
-                      ),
-                    Positioned.fill(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: AnimatedRadialGauge(
-                              initialValue: minValue.roundToDouble(),
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.decelerate,
-                              value: value.roundToDouble(),
-                              radius: null,
-                              axis: GaugeAxis(
-                                min: minValue.roundToDouble(),
-                                max: maxValue.roundToDouble(),
-                                degrees: 270,
-                                style: GaugeAxisStyle(
-                                  thickness: 13,
-                                  segmentSpacing: 0,
-                                  background: segments.isEmpty ? arcColor : null,
-                                  cornerRadius: Radius.zero,
-                                ),
-                                pointer: null,
-                                progressBar: GaugeProgressBar.basic(color: progColor),
-                                segments: segments,
-                              ),
-                              builder: (context, label, value) => Center(child: label),
-                              child: center,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: fgColor)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-        ),
-      ),
-    );
   }
 }
 
@@ -688,48 +585,6 @@ class DashboardView extends StatelessWidget {
                     ),
                   ],
                 ),
-
-                /*
-                Row(
-                  children: [
-                    Expanded(
-                      child: 
-                      child: Container(),
-                    ),
-
-                    Expanded(
-                      child: 
-                    ),
-
-                    Expanded(
-                      child: 
-                      
-                    ),
-                  ],
-                ),
-
-                //sep
-
-                // next row
-                Row(
-                  children: [
-                    Expanded(
-                      child:
-                    ),
-
-                    // Settings button
-                    Expanded(
-                      child:
-               
-                    ),
-
-                    Expanded(
-                      child: 
-
-                    ),
-                  ],
-                ),
-                */
               ],
             ),
           ),
@@ -744,19 +599,6 @@ class DashboardView extends StatelessWidget {
           children.map((child) {
             return Expanded(child: Center(child: child));
           }).toList(),
-    );
-  }
-
-  Widget _buildToufuRow({required List<Widget> children}) {
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        for (int i = 0; i < children.length; i++) ...[
-          Flexible(flex: 1, child: children[i]),
-          if (i != children.length - 1) const SizedBox(width: 16),
-        ],
-      ],
     );
   }
 
