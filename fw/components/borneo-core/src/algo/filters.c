@@ -1,5 +1,3 @@
-// https://stackoverflow.com/questions/7960318/math-to-convert-seconds-since-1970-into-date-and-vice-versa
-
 #include "borneo/common.h"
 #include "borneo/algo/filters.h"
 

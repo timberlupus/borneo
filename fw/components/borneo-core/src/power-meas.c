@@ -42,7 +42,7 @@ int bo_power_volt_read(int* mv)
     }
     int adc_mv;
     BO_TRY(bo_adc_read_mv_filtered(CONFIG_BORNEO_MEAS_VOLTAGE_ADC_CHANNEL, &adc_mv));
-    *mv = adc_mv * CONFIG_BORNEO_MEAS_VOLTAGE_FACTOR / 1000;
+    *mv = (adc_mv * CONFIG_BORNEO_MEAS_VOLTAGE_FACTOR + 500) / 1000;
     return 0;
 }
 #endif
@@ -55,7 +55,7 @@ int bo_power_current_read(int* ma)
     }
     int adc_mv;
     BO_TRY(bo_adc_read_mv_filtered(CONFIG_BORNEO_MEAS_CURRENT_ADC_CHANNEL, &adc_mv));
-    *ma = adc_mv * 1000 / CONFIG_BORNEO_MEAS_CURRENT_FACTOR;
+    *ma = (adc_mv * 1000 + (CONFIG_BORNEO_MEAS_CURRENT_FACTOR / 2)) / CONFIG_BORNEO_MEAS_CURRENT_FACTOR;
     return 0;
 }
 #endif

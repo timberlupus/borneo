@@ -140,7 +140,7 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release --split-per-abi --no-pub
+        run: flutter build apk --release --target-platform android-arm64 --no-pub
 
 #      - name: Upload APK artifact
 #        uses: actions/upload-artifact@v2

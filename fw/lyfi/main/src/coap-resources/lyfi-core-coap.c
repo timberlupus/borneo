@@ -211,7 +211,7 @@ static int _encode_channel_info_entry(CborEncoder* parent, const char* name, con
                                       uint32_t brightness_percent, uint32_t power)
 {
     CborEncoder ch_map;
-    BO_TRY(cbor_encoder_create_map(parent, &ch_map, CborIndefiniteLength)); // 修改字典条目数需要改这里
+    BO_TRY(cbor_encoder_create_map(parent, &ch_map, CborIndefiniteLength));
 
     BO_TRY(cbor_encode_text_stringz(&ch_map, "name"));
     BO_TRY(cbor_encode_text_stringz(&ch_map, name));
