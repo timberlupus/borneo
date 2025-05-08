@@ -887,7 +887,7 @@ int led_switch_state(uint8_t state)
             return -EINVAL;
         }
         // TODO Start the timer
-        if (_led.state == LED_STATE_NORMAL || _led.state == LED_STATE_PREVIEW) {
+        if (_led.state == LED_STATE_NORMAL || _led.state == LED_STATE_PREVIEW || _led.state == LED_STATE_POWERING_ON) {
             _led.state = state;
         }
         else {

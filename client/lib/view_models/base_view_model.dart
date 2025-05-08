@@ -69,7 +69,7 @@ abstract class BaseViewModel extends ChangeNotifier {
         logger?.w('A job has been cancelled.', error: e, stackTrace: stackTrace);
       } catch (e, stackTrace) {
         logger?.e('$e', error: e, stackTrace: stackTrace);
-        notifyAppError('$e');
+        notifyAppError('$e', error: e, stackTrace: stackTrace);
       } finally {
         if (!isDisposed) {
           isBusy = false;

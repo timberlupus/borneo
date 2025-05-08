@@ -57,11 +57,11 @@ abstract class BaseDeviceViewModel extends BaseViewModel with WidgetsBindingObse
     } on IOException catch (ioex, stackTrace) {
       logger?.e(ioex.toString(), error: ioex, stackTrace: stackTrace);
       if (isOnline) {
-        super.notifyAppError('Failed to initialize device: $ioex');
+        super.notifyAppError('Failed to initialize device: $ioex', stackTrace: stackTrace);
       }
     } catch (e, stackTrace) {
       logger?.e('Failed to initialize device(${deviceEntity.toString()}): $e', error: e, stackTrace: stackTrace);
-      super.notifyAppError('Failed to initialize device: $e');
+      super.notifyAppError('Failed to initialize device: $e', stackTrace: stackTrace);
     } finally {
       startTimer();
       isInitialized = true;
@@ -128,7 +128,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel with WidgetsBindingObse
       await deviceManager.delete(deviceID);
     } catch (e, stackTrace) {
       logger?.e('$e', error: e, stackTrace: stackTrace);
-      notifyAppError('$e');
+      notifyAppError('$e', stackTrace: stackTrace);
     } finally {
       isBusy = false;
       notifyListeners();
