@@ -252,15 +252,7 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                 width: 16,
                 child: Selector<LyfiViewModel, ({bool isBusy, bool isOnline})>(
                   selector: (_, vm) => (isBusy: vm.isBusy, isOnline: vm.isOnline),
-                  builder:
-                      (context, vm, _) => Container(
-                        child:
-                            vm.isBusy
-                                ? CircularProgressIndicator()
-                                : !vm.isOnline
-                                ? Icon(Icons.wifi_off_outlined, color: Theme.of(context).colorScheme.error)
-                                : null,
-                      ),
+                  builder: (context, vm, _) => Container(child: vm.isBusy ? CircularProgressIndicator() : null),
                 ),
               ),
             ),
@@ -286,12 +278,14 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
             Selector<LyfiViewModel, RssiLevel?>(
               selector: (_, vm) => vm.rssiLevel,
               builder:
-                  (content, rssi, _) => switch (rssi) {
-                    null => Icon(Icons.signal_wifi_off_outlined, size: 24),
-                    RssiLevel.strong => Icon(Icons.wifi, size: 24),
-                    RssiLevel.medium => Icon(Icons.wifi_2_bar, size: 24),
-                    RssiLevel.weak => Icon(Icons.wifi_1_bar, size: 24),
-                  },
+                  (content, rssi, _) => Center(
+                    child: switch (rssi) {
+                      null => Icon(Icons.wifi_off_rounded, size: 24, color: Theme.of(context).colorScheme.error),
+                      RssiLevel.strong => Icon(Icons.wifi_rounded, size: 24),
+                      RssiLevel.medium => Icon(Icons.wifi_2_bar_rounded, size: 24),
+                      RssiLevel.weak => Icon(Icons.wifi_1_bar_rounded, size: 24),
+                    },
+                  ),
             ),
             SizedBox(width: 16),
           ],

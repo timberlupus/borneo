@@ -2,11 +2,12 @@ import 'package:borneo_app/widgets/rounded_icon_text_button.dart';
 import 'package:flutter/material.dart';
 
 class PowerButton extends StatefulWidget {
+  final bool enabled;
   final bool value;
   final void Function(bool)? onChanged;
   final Widget label;
 
-  const PowerButton({required this.value, required this.label, this.onChanged});
+  const PowerButton({required this.enabled, required this.value, required this.label, this.onChanged});
 
   @override
   _PowerButtonState createState() => _PowerButtonState();
@@ -19,7 +20,12 @@ class _PowerButtonState extends State<PowerButton> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final iconColor = widget.value ? Colors.green : colorScheme.error;
+    final iconColor =
+        widget.enabled
+            ? widget.value
+                ? Colors.green
+                : colorScheme.error
+            : null;
     final loadingColor = colorScheme.onSurface;
 
     return RoundedIconTextButton(

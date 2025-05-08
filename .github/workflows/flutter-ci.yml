@@ -99,7 +99,7 @@ jobs:
       - name: Run tests
         run: melos run test:all
 
-  build:
+  build-apk:
     needs: setup
     runs-on: ubuntu-latest
     defaults:
@@ -147,3 +147,54 @@ jobs:
 #        with:
 #          name: release-apk
 #          path: build/app/outputs/flutter-apk/borneo-app-release.apk
+#
+
+  build-windows:
+    needs: setup
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: client
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Restore pub cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/AppData/Local/Pub/Cache
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml') }}
+          restore-keys: ${{ runner.os }}-pub-cache-
+
+      - name: Install Visual Studio Build Tools
+        run: |
+          choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK" -y
+        shell: powershell
+
+      - name: Cache MSBuild
+        uses: actions/cache@v4
+        with:
+          path: ~/AppData/Local/Microsoft/VisualStudio
+          key: ${{ runner.os }}-msbuild-${{ hashFiles('client/windows/**') }}
+          restore-keys: ${{ runner.os }}-msbuild-
+
+      - name: Install Melos
+        run: dart pub global activate melos
+        shell: powershell
+
+      - name: Install dependencies
+        run: flutter pub get
+        shell: powershell
+
+      - name: Build Windows executable
+        run: flutter build windows --release --no-pub
+        shell: powershell
+

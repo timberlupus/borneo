@@ -232,7 +232,7 @@ class DashboardView extends StatelessWidget {
                                     arcColor: Theme.of(context).colorScheme.outlineVariant,
                                     progressColor: Theme.of(context).colorScheme.tertiary,
                                     minValue: 0.0,
-                                    maxValue: vm.lyfiDeviceInfo.nominalPower ?? 9999,
+                                    maxValue: vm.isOnline ? vm.lyfiDeviceInfo.nominalPower ?? 9999 : 9999,
                                     value: vm.isOn && vm.isOnline ? vm.currentWatts : 0,
                                     center: Column(
                                       mainAxisAlignment: MainAxisAlignment.center,
@@ -419,6 +419,7 @@ class DashboardView extends StatelessWidget {
                           (_, vm) => (isOn: vm.isOn, isOnline: vm.isOnline, isBusy: vm.isBusy, isLocked: vm.isLocked),
                       builder:
                           (context, props, _) => PowerButton(
+                            enabled: props.isOnline,
                             value: props.isOn,
                             label: Text(
                               props.isOn ? 'ON' : 'OFF',
@@ -521,9 +522,11 @@ class DashboardView extends StatelessWidget {
                               Icons.calendar_month_outlined,
                               size: 40,
                               color:
-                                  props.enabled || props.activated
-                                      ? Theme.of(context).colorScheme.onPrimaryContainer
-                                      : Theme.of(context).colorScheme.primary,
+                                  props.canGo
+                                      ? props.enabled || props.activated
+                                          ? Theme.of(context).colorScheme.onPrimaryContainer
+                                          : Theme.of(context).colorScheme.primary
+                                      : null,
                             ),
                             backgroundColor:
                                 props.enabled || props.activated
