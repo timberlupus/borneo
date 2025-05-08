@@ -1,4 +1,4 @@
-import 'package:borneo_app/devices/borneo/lyfi/views/sun_editor_view.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/editor/sun_editor_view.dart';
 import 'package:borneo_app/models/devices/device_entity.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
@@ -7,12 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/dashboard_view.dart';
-import 'package:borneo_app/devices/borneo/lyfi/views/schedule_editor_view.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/editor/schedule_editor_view.dart';
 import 'package:borneo_app/services/device_manager.dart';
 
 import '../view_models/lyfi_view_model.dart';
-import 'manual_editor_view.dart';
-import 'settings_screen.dart';
+import 'editor/manual_editor_view.dart';
 
 class CircleButton extends StatelessWidget {
   final String text;

@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_app/views/common/hex_color.dart';
 import 'package:borneo_app/widgets/value_listenable_builders.dart';
-import '../view_models/manual_editor_view_model.dart';
+import '../../view_models/editor/manual_editor_view_model.dart';
 
 class ManualEditorView extends StatelessWidget {
   const ManualEditorView({super.key});

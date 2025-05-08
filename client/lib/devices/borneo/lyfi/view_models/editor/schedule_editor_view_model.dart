@@ -1,13 +1,9 @@
-import 'package:borneo_app/devices/borneo/lyfi/view_models/base_editor_view_model.dart';
-import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
-import 'package:borneo_app/devices/borneo/lyfi/view_models/ieditor.dart';
-import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
-import 'package:borneo_common/async/async_rate_limiter.dart';
+import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/base_editor_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'easy_setup_view_model.dart';
+import '../easy_setup_view_model.dart';
 
 String _formatDuration(Duration duration) {
   final buffer = StringBuffer();

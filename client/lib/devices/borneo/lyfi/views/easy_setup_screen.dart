@@ -1,7 +1,7 @@
 import 'package:borneo_common/duration_ext.dart';
 import 'package:flutter/material.dart';
 
-import 'package:borneo_app/devices/borneo/lyfi/view_models/schedule_editor_view_model.dart';
+import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/schedule_editor_view_model.dart';
 import 'package:progressive_time_picker/progressive_time_picker.dart';
 import 'package:provider/provider.dart';
 

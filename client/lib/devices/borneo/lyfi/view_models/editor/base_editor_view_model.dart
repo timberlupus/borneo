@@ -1,5 +1,5 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
-import 'package:borneo_app/devices/borneo/lyfi/view_models/ieditor.dart';
+import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/ieditor.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_common/async/async_rate_limiter.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
@@ -26,7 +26,7 @@ abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
   @override
   bool get isChanged => _isChanged;
 
-  set isChanged(bool newValue) => _isChanged;
+  set isChanged(bool newValue) => _isChanged = newValue;
 
   @override
   List<ValueNotifier<int>> get channels => _channels;

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 
-import 'schedule_editor_view_model.dart';
+import 'editor/schedule_editor_view_model.dart';
 
 const Duration fadingDuration = Duration(minutes: 30);
 const Duration defaultStartTime = Duration(hours: 7);

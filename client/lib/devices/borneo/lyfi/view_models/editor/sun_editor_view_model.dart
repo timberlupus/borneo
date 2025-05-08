@@ -1,10 +1,5 @@
-import 'package:borneo_app/devices/borneo/lyfi/view_models/base_editor_view_model.dart';
-import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
-import 'package:borneo_app/devices/borneo/lyfi/view_models/ieditor.dart';
-import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
-import 'package:borneo_common/async/async_rate_limiter.dart';
+import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/base_editor_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
-import 'package:flutter/material.dart';
 
 class SunEditorViewModel extends BaseEditorViewModel {
   ILyfiDeviceApi get _deviceApi => parent.boundDevice!.driver as ILyfiDeviceApi;

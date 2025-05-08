@@ -1,8 +1,6 @@
-import 'package:borneo_app/devices/borneo/lyfi/view_models/acclimation_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/acclimation_screen.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/toufu_view.dart';
-import 'package:borneo_app/devices/borneo/lyfi/views/lyfi_view.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/schedule_chart.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/settings_screen.dart';
 import 'package:borneo_app/widgets/icon_progress.dart';
@@ -602,10 +600,12 @@ class DashboardView extends StatelessWidget {
     );
   }
 
+  /*
   Color _desaturateColor(Color color, double factor) {
     final hslColor = HSLColor.fromColor(color);
     var newSaturation = hslColor.saturation * (1.0 - factor);
     newSaturation = newSaturation.clamp(0.0, 1.0);
     return hslColor.withSaturation(newSaturation).toColor();
   }
+  */
 }

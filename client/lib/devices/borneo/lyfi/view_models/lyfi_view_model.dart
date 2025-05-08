@@ -1,16 +1,16 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
-import 'package:borneo_app/devices/borneo/lyfi/view_models/sun_editor_view_model.dart';
+import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_view_model.dart';
 import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
-import 'package:borneo_app/devices/borneo/lyfi/view_models/manual_editor_view_model.dart';
-import 'package:borneo_app/devices/borneo/lyfi/view_models/schedule_editor_view_model.dart';
+import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/manual_editor_view_model.dart';
+import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/schedule_editor_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
 
-import 'ieditor.dart';
+import 'editor/ieditor.dart';
 
 class LyfiViewModel extends BaseBorneoDeviceViewModel {
   static const initializationTimeout = Duration(seconds: 5);

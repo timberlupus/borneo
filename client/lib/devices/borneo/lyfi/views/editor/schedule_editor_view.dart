@@ -8,16 +8,16 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:borneo_app/devices/borneo/lyfi/view_models/schedule_editor_view_model.dart';
+import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/schedule_editor_view_model.dart';
 import 'package:borneo_app/views/common/hex_color.dart';
-import '../view_models/lyfi_view_model.dart';
-import 'brightness_slider_list.dart';
+import '../../view_models/lyfi_view_model.dart';
+import '../brightness_slider_list.dart';
 
 class ScheduleEditorView extends StatelessWidget {
   const ScheduleEditorView({super.key});
 
   Future<Duration?> showNewInstantDialog(BuildContext context, TimeOfDay initialTime) async {
-    bool isNextDay = false;
+    // bool isNextDay = false;
     final selectedTime = await showTimePicker(
       initialTime: initialTime,
       context: context,
