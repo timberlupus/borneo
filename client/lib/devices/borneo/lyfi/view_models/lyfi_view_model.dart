@@ -32,6 +32,9 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   LedState? _ledState;
   LedState? get ledState => _ledState;
 
+  bool get canMeasureCurrent => borneoDeviceStatus?.powerCurrent != null;
+  bool get canMeasureVoltage => borneoDeviceStatus?.powerVoltage != null;
+  bool get canMeasurePower => canMeasureCurrent && canMeasureVoltage;
   double get currentWatts => (borneoDeviceStatus?.powerCurrent ?? 0) * (borneoDeviceStatus?.powerVoltage ?? 0);
 
   Duration _nightlightRemaining = Duration.zero;

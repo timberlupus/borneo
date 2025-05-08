@@ -18,7 +18,7 @@ import 'services/routine_manager.dart';
 import 'services/scene_manager.dart';
 import 'theme/app_theme.dart';
 
-const _kSupportedLocales = [Locale('en'), Locale('zh', 'CN')];
+const _kSupportedLocales = [Locale('en', 'US'), Locale('zh', 'CN')];
 
 class BorneoApp extends StatelessWidget {
   final EventBus _globalEventBus = EventBus();

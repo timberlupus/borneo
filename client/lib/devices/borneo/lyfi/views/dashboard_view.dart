@@ -105,107 +105,6 @@ class ManualRunningChart extends StatelessWidget {
   }
 }
 
-/*
-class DashboardToufu extends StatelessWidget {
-  final String title;
-  final double value;
-  final double maxValue;
-  final double minValue;
-  final IconData? icon;
-  final Widget? center;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-  final Color? progressColor;
-  final Color? arcColor;
-  final List<GaugeSegment> segments;
-
-  const DashboardToufu({
-    required this.title,
-    required this.value,
-    required this.center,
-    required this.minValue,
-    required this.maxValue,
-    this.icon,
-    this.backgroundColor,
-    this.foregroundColor,
-    this.progressColor,
-    this.arcColor,
-    this.segments = const [],
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final fgColor = foregroundColor ?? Theme.of(context).colorScheme.onSurface;
-    final bgColor = backgroundColor ?? Theme.of(context).colorScheme.surfaceContainer;
-    final progColor = progressColor ?? Theme.of(context).colorScheme.primary;
-    final arcColor = this.arcColor ?? Theme.of(context).colorScheme.onSurfaceVariant;
-    return Card(
-      margin: const EdgeInsets.all(0),
-      color: bgColor,
-      elevation: 0,
-      child: LayoutBuilder(
-        builder:
-            (context, constraints) => Padding(
-              padding: const EdgeInsets.all(0),
-              child: Stack(
-                children: [
-                  if (icon != null)
-                    Positioned(
-                      bottom: -constraints.maxHeight * 0.15,
-                      right: -constraints.maxWidth * 0.15,
-                      child: Icon(icon!, size: constraints.maxWidth * 0.75, color: fgColor.withAlpha(8)),
-                    ),
-                  Positioned.fill(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(0, 16, 0, 8),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: LayoutBuilder(
-                              builder:
-                                  (context, constraints) => AnimatedRadialGauge(
-                                    initialValue: minValue.roundToDouble(),
-                                    duration: Duration(milliseconds: 300),
-                                    curve: Curves.decelerate,
-                                    value: value.roundToDouble(),
-                                    radius: null,
-                                    axis: GaugeAxis(
-                                      min: minValue.roundToDouble(),
-                                      max: maxValue.roundToDouble(),
-                                      degrees: 280,
-                                      style: GaugeAxisStyle(
-                                        thickness: 13,
-                                        segmentSpacing: 0,
-                                        background: segments.isEmpty ? arcColor : null,
-                                        cornerRadius: Radius.zero,
-                                      ),
-                                      pointer: null,
-                                      progressBar: GaugeProgressBar.basic(color: progColor),
-                                      segments: segments,
-                                    ),
-                                    builder: (context, label, value) => Center(child: label),
-                                    child: center,
-                                  ),
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: fgColor)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-      ),
-    );
-  }
-}
-*/
-
 class DashboardToufu extends StatelessWidget {
   final String title;
   final double value;
@@ -240,6 +139,10 @@ class DashboardToufu extends StatelessWidget {
     final bgColor = backgroundColor ?? Theme.of(context).colorScheme.surfaceContainer ?? Colors.grey[200]!;
     final progColor = progressColor ?? Theme.of(context).colorScheme.primary ?? Colors.blue;
     final arcColor = this.arcColor ?? Theme.of(context).colorScheme.onSurfaceVariant ?? Colors.grey;
+
+    assert(!minValue.isNaN);
+    assert(!maxValue.isNaN);
+    assert(!value.isNaN);
 
     return Card(
       margin: const EdgeInsets.all(0),
@@ -378,44 +281,42 @@ class DashboardView extends StatelessWidget {
                               (context, vm, _) => MultiValueListenableBuilder<int>(
                                 valueNotifiers: vm.channels,
                                 builder:
-                                    (context, values, _) => Expanded(
-                                      child: DashboardToufu(
-                                        title: 'Brightness',
-                                        icon: Icons.lightbulb_outline,
-                                        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                                        foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-                                        arcColor: Theme.of(context).colorScheme.outlineVariant,
-                                        progressColor: Theme.of(context).colorScheme.secondary,
-                                        minValue: 0,
-                                        maxValue: vm.maxOverallBrightness,
-                                        value: vm.channels.isNotEmpty ? vm.overallBrightness : 0.0,
-                                        center: Row(
-                                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          textBaseline: TextBaseline.alphabetic,
-                                          children: [
+                                    (context, values, _) => DashboardToufu(
+                                      title: 'Brightness',
+                                      icon: Icons.lightbulb_outline,
+                                      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                                      foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                                      arcColor: Theme.of(context).colorScheme.outlineVariant,
+                                      progressColor: Theme.of(context).colorScheme.secondary,
+                                      minValue: 0,
+                                      maxValue: vm.maxOverallBrightness,
+                                      value: vm.channels.isNotEmpty ? vm.overallBrightness : 0.0,
+                                      center: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        textBaseline: TextBaseline.alphabetic,
+                                        children: [
+                                          Text(
+                                            vm.channels.isNotEmpty
+                                                ? (vm.overallBrightness / vm.maxOverallBrightness * 100)
+                                                    .toStringAsFixed(0)
+                                                : "N/A",
+                                            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                              fontFeatures: [FontFeature.tabularFigures()],
+                                              color: Theme.of(context).colorScheme.primary,
+                                              fontSize: 24,
+                                            ),
+                                          ),
+                                          if (vm.channels.isNotEmpty)
                                             Text(
-                                              vm.channels.isNotEmpty
-                                                  ? (vm.overallBrightness / vm.maxOverallBrightness * 100)
-                                                      .toStringAsFixed(0)
-                                                  : "N/A",
-                                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                              '%',
+                                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
                                                 fontFeatures: [FontFeature.tabularFigures()],
                                                 color: Theme.of(context).colorScheme.primary,
-                                                fontSize: 24,
+                                                fontSize: 12,
                                               ),
                                             ),
-                                            if (vm.channels.isNotEmpty)
-                                              Text(
-                                                '%',
-                                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                                  fontFeatures: [FontFeature.tabularFigures()],
-                                                  color: Theme.of(context).colorScheme.primary,
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                          ],
-                                        ),
+                                        ],
                                       ),
                                     ),
                               ),
@@ -427,86 +328,73 @@ class DashboardView extends StatelessWidget {
                           builder:
                               (context, vm, _) => MultiValueListenableBuilder<int>(
                                 valueNotifiers: vm.channels,
-                                builder:
-                                    (context, values, _) => Expanded(
-                                      child: DashboardToufu(
-                                        title: 'Power',
-                                        icon: Icons.power_outlined,
-                                        foregroundColor: Theme.of(context).colorScheme.onSurface,
-                                        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                                        arcColor: Theme.of(context).colorScheme.outlineVariant,
-                                        progressColor: Theme.of(context).colorScheme.tertiary,
-                                        minValue: -1,
-                                        maxValue: vm.isOnline ? vm.lyfiDeviceInfo.nominalPower ?? -1 : 0,
-                                        value:
-                                            vm.borneoDeviceStatus?.powerVoltage != null &&
-                                                    vm.borneoDeviceStatus?.powerCurrent != null
-                                                ? (vm.borneoDeviceStatus!.powerVoltage! *
-                                                    vm.borneoDeviceStatus!.powerCurrent!)
-                                                : -1,
-                                        center: Column(
+                                builder: (context, values, _) {
+                                  return DashboardToufu(
+                                    title: 'Power',
+                                    icon: Icons.power_outlined,
+                                    foregroundColor: Theme.of(context).colorScheme.onSurface,
+                                    backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                                    arcColor: Theme.of(context).colorScheme.outlineVariant,
+                                    progressColor: Theme.of(context).colorScheme.tertiary,
+                                    minValue: 0.0,
+                                    maxValue: vm.lyfiDeviceInfo.nominalPower ?? 9999,
+                                    value: vm.currentWatts,
+                                    center: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.max,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Row(
+                                          crossAxisAlignment: CrossAxisAlignment.baseline,
                                           mainAxisAlignment: MainAxisAlignment.center,
-                                          mainAxisSize: MainAxisSize.max,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          textBaseline: TextBaseline.alphabetic,
                                           children: [
-                                            Row(
-                                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              textBaseline: TextBaseline.alphabetic,
-                                              children: [
-                                                Text(
-                                                  vm.channels.isNotEmpty &&
-                                                          vm.borneoDeviceStatus?.powerVoltage != null &&
-                                                          vm.borneoDeviceStatus?.powerCurrent != null
-                                                      ? (vm.borneoDeviceStatus!.powerVoltage! *
-                                                              vm.borneoDeviceStatus!.powerCurrent!)
-                                                          .toStringAsFixed(0)
-                                                      : "N/A",
-                                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                                    color: Theme.of(context).colorScheme.primary,
-                                                    fontFeatures: [FontFeature.tabularFigures()],
-                                                    fontSize: 23,
-                                                  ),
+                                            Text(
+                                              vm.canMeasurePower ? vm.currentWatts.toStringAsFixed(0) : "N/A",
+                                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                                color: Theme.of(context).colorScheme.primary,
+                                                fontFeatures: [FontFeature.tabularFigures()],
+                                                fontSize: 23,
+                                              ),
+                                            ),
+                                            if (vm.borneoDeviceStatus?.powerVoltage != null &&
+                                                vm.borneoDeviceStatus?.powerCurrent != null)
+                                              Text(
+                                                'W',
+                                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                                  fontFeatures: [FontFeature.tabularFigures()],
+                                                  color: Theme.of(context).colorScheme.primary,
+                                                  fontSize: 11,
                                                 ),
-                                                if (vm.channels.isNotEmpty &&
-                                                    vm.borneoDeviceStatus?.powerVoltage != null &&
-                                                    vm.borneoDeviceStatus?.powerCurrent != null)
-                                                  Text(
-                                                    'W',
-                                                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                                      fontFeatures: [FontFeature.tabularFigures()],
-                                                      color: Theme.of(context).colorScheme.primary,
-                                                      fontSize: 11,
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                if (vm.borneoDeviceStatus?.powerVoltage != null)
-                                                  Text(
-                                                    '${vm.borneoDeviceStatus!.powerVoltage!.toStringAsFixed(0)}V',
-                                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                                      color: Theme.of(context).colorScheme.onSurface,
-                                                      fontFeatures: [FontFeature.tabularFigures()],
-                                                    ),
-                                                  ),
-                                                if (vm.borneoDeviceStatus?.powerCurrent != null) SizedBox(width: 4),
-                                                if (vm.borneoDeviceStatus?.powerCurrent != null)
-                                                  Text(
-                                                    '${vm.borneoDeviceStatus!.powerCurrent!.toStringAsFixed(0)}A',
-                                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                                      color: Theme.of(context).colorScheme.onSurface,
-                                                      fontFeatures: [FontFeature.tabularFigures()],
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
+                                              ),
                                           ],
                                         ),
-                                      ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            if (vm.borneoDeviceStatus?.powerVoltage != null)
+                                              Text(
+                                                '${vm.borneoDeviceStatus!.powerVoltage!.toStringAsFixed(0)}V',
+                                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                                  color: Theme.of(context).colorScheme.onSurface,
+                                                  fontFeatures: [FontFeature.tabularFigures()],
+                                                ),
+                                              ),
+                                            if (vm.borneoDeviceStatus?.powerCurrent != null) SizedBox(width: 4),
+                                            if (vm.borneoDeviceStatus?.powerCurrent != null)
+                                              Text(
+                                                '${vm.borneoDeviceStatus!.powerCurrent!.toStringAsFixed(0)}A',
+                                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                                  color: Theme.of(context).colorScheme.onSurface,
+                                                  fontFeatures: [FontFeature.tabularFigures()],
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
+                                  );
+                                },
                               ),
                         ),
                       ),
@@ -523,52 +411,50 @@ class DashboardView extends StatelessWidget {
                         child: Selector<LyfiViewModel, ({int? currentTemp, double currentTempRatio})>(
                           selector: (_, vm) => (currentTemp: vm.currentTemp, currentTempRatio: vm.currentTempRatio),
                           builder:
-                              (context, vm, _) => Expanded(
-                                child: DashboardToufu(
-                                  title: 'Temperature',
-                                  icon: Icons.thermostat,
-                                  foregroundColor: Theme.of(context).colorScheme.onSurface,
-                                  backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                                  arcColor: null,
-                                  progressColor: switch (vm.currentTemp) {
-                                    != null && <= 45 => Theme.of(context).primaryColor,
-                                    != null && > 45 && < 65 => Theme.of(context).colorScheme.secondary,
-                                    != null && >= 65 => Theme.of(context).colorScheme.error,
-                                    null || int() => Colors.grey,
-                                  },
-                                  value: vm.currentTemp?.toDouble() ?? 0.0,
-                                  minValue: 0,
-                                  maxValue: 105,
-                                  center: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    textBaseline: TextBaseline.alphabetic,
-                                    children: [
+                              (context, vm, _) => DashboardToufu(
+                                title: 'Temperature',
+                                icon: Icons.thermostat,
+                                foregroundColor: Theme.of(context).colorScheme.onSurface,
+                                backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                                arcColor: null,
+                                progressColor: switch (vm.currentTemp) {
+                                  != null && <= 45 => Theme.of(context).primaryColor,
+                                  != null && > 45 && < 65 => Theme.of(context).colorScheme.secondary,
+                                  != null && >= 65 => Theme.of(context).colorScheme.error,
+                                  null || int() => Colors.grey,
+                                },
+                                value: vm.currentTemp?.toDouble() ?? 0.0,
+                                minValue: 0,
+                                maxValue: 105,
+                                center: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: [
+                                    Text(
+                                      vm.currentTemp != null ? '${vm.currentTemp}' : "N/A",
+                                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                        fontFeatures: [FontFeature.tabularFigures()],
+                                        color: Theme.of(context).colorScheme.primary,
+                                        fontSize: 24,
+                                      ),
+                                    ),
+                                    if (vm.currentTemp != null)
                                       Text(
-                                        vm.currentTemp != null ? '${vm.currentTemp}' : "N/A",
-                                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                        '℃',
+                                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
                                           fontFeatures: [FontFeature.tabularFigures()],
                                           color: Theme.of(context).colorScheme.primary,
-                                          fontSize: 24,
+                                          fontSize: 12,
                                         ),
                                       ),
-                                      if (vm.currentTemp != null)
-                                        Text(
-                                          '℃',
-                                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                            fontFeatures: [FontFeature.tabularFigures()],
-                                            color: Theme.of(context).colorScheme.primary,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                  segments: [
-                                    GaugeSegment(from: 0, to: 45, color: Colors.green[100]!),
-                                    GaugeSegment(from: 45, to: 65, color: Colors.orange[100]!),
-                                    GaugeSegment(from: 65, to: 105, color: Colors.red[100]!),
                                   ],
                                 ),
+                                segments: [
+                                  GaugeSegment(from: 0, to: 45, color: Colors.green[100]!),
+                                  GaugeSegment(from: 45, to: 65, color: Colors.orange[100]!),
+                                  GaugeSegment(from: 65, to: 105, color: Colors.red[100]!),
+                                ],
                               ),
                         ),
                       ),
