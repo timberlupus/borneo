@@ -1,4 +1,5 @@
 import 'package:borneo_common/io/net/coap_client.dart';
+import 'package:borneo_kernel/drivers/borneo/borneo_coap_config.dart';
 import 'package:coap/coap.dart';
 import 'package:cbor/simple.dart' as simple_cbor;
 
@@ -9,7 +10,7 @@ class BorneoClient {
 
   BorneoClient(this.baseAddress, this.isLocal) {
     if (isLocal) {
-      _localCoap = CoapClient(baseAddress);
+      _localCoap = CoapClient(baseAddress, config: BorneoCoapConfig.coapConfig);
     } else {
       throw UnimplementedError('Remote client was not implemented yet.');
     }

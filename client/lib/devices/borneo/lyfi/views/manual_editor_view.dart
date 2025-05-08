@@ -111,8 +111,9 @@ class ManualEditorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final editor = context.read<LyfiViewModel>().currentEditor;
     return ChangeNotifierProvider.value(
-      value: context.read<LyfiViewModel>().currentEditor! as ManualEditorViewModel,
+      value: editor! as ManualEditorViewModel,
       builder:
           (context, child) => Column(
             spacing: 16,

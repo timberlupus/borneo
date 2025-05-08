@@ -763,27 +763,40 @@ class DashboardView extends StatelessWidget {
                     ),
 
                     // Settings button
-                    RoundedIconTextButton(
-                      borderColor: Theme.of(context).colorScheme.primary,
-                      text: "Settings",
-                      buttonSize: 64,
-                      icon: Icon(Icons.settings_outlined, size: 40),
-                      onPressed: () async {
-                        final lyfi = context.read<LyfiViewModel>();
-                        final vm = await lyfi.loadSettings();
-                        final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
-                        if (context.mounted) {
-                          lyfi.stopTimer();
-                          try {
-                            await Navigator.push(context, route);
-                          } finally {
-                            lyfi.startTimer();
-                          }
-                        }
-                      },
+                    Selector<LyfiViewModel, ({bool isOnline, bool enabled, bool activated})>(
+                      selector:
+                          (_, vm) => (
+                            isOnline: vm.isOnline,
+                            enabled: vm.lyfiDeviceStatus?.acclimationEnabled ?? false,
+                            activated: vm.lyfiDeviceStatus?.acclimationActivated ?? false,
+                          ),
+                      builder:
+                          (context, props, _) => RoundedIconTextButton(
+                            borderColor: Theme.of(context).colorScheme.primary,
+                            text: "Settings",
+                            buttonSize: 64,
+                            icon: Icon(Icons.settings_outlined, size: 40),
+                            onPressed:
+                                props.isOnline
+                                    ? () async {
+                                      final lyfi = context.read<LyfiViewModel>();
+                                      final vm = await lyfi.loadSettings();
+                                      final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
+                                      if (context.mounted) {
+                                        lyfi.stopTimer();
+                                        try {
+                                          await Navigator.push(context, route);
+                                        } finally {
+                                          lyfi.startTimer();
+                                        }
+                                      }
+                                    }
+                                    : null,
+                          ),
                     ),
                   ],
                 ),
+
                 /*
                 Row(
                   children: [

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:borneo_kernel/drivers/borneo/borneo_coap_config.dart';
 import 'package:coap/coap.dart';
 import 'package:cbor/cbor.dart';
 
@@ -315,7 +316,8 @@ class BorneoLyfiDriver
 
   @override
   Future<bool> probe(Device dev) async {
-    final probeCoapClient = CoapClient(dev.address);
+    final probeCoapClient =
+        CoapClient(dev.address, config: BorneoCoapConfig.coapConfig);
     try {
       final generalDeviceInfo = await _getGeneralDeviceInfo(probeCoapClient);
       final lyfiInfo = await _getLyfiInfo(probeCoapClient);
