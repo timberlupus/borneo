@@ -124,6 +124,9 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
   @override
   Future<void> refreshStatus() async {
+    if (!isOnline) {
+      return;
+    }
     await super.refreshStatus();
     await _fetchDeviceStatus();
 

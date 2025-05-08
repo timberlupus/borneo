@@ -31,14 +31,12 @@ class _PowerButtonState extends State<PowerButton> {
         duration: Duration(milliseconds: 300),
         child:
             _isLoading
-                ? Expanded(child: CircularProgressIndicator(color: loadingColor, key: ValueKey('loading')))
-                : Expanded(
-                  child: Icon(
-                    widget.value ? Icons.power_settings_new_outlined : Icons.power_settings_new,
-                    key: ValueKey<bool>(widget.value),
-                    size: 40,
-                    color: iconColor,
-                  ),
+                ? CircularProgressIndicator(color: loadingColor, key: ValueKey('loading'))
+                : Icon(
+                  widget.value ? Icons.power_settings_new_outlined : Icons.power_settings_new,
+                  key: ValueKey<bool>(widget.value),
+                  size: 40,
+                  color: iconColor,
                 ),
       ),
     );

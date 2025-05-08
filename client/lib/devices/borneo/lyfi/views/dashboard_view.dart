@@ -105,6 +105,7 @@ class ManualRunningChart extends StatelessWidget {
   }
 }
 
+/*
 class DashboardToufu extends StatelessWidget {
   final String title;
   final double value;
@@ -116,9 +117,9 @@ class DashboardToufu extends StatelessWidget {
   final Color? foregroundColor;
   final Color? progressColor;
   final Color? arcColor;
-  List<GaugeSegment> segments = const [];
+  final List<GaugeSegment> segments;
 
-  DashboardToufu({
+  const DashboardToufu({
     required this.title,
     required this.value,
     required this.center,
@@ -166,14 +167,14 @@ class DashboardToufu extends StatelessWidget {
                             child: LayoutBuilder(
                               builder:
                                   (context, constraints) => AnimatedRadialGauge(
-                                    initialValue: minValue,
+                                    initialValue: minValue.roundToDouble(),
                                     duration: Duration(milliseconds: 300),
                                     curve: Curves.decelerate,
-                                    value: value,
+                                    value: value.roundToDouble(),
                                     radius: null,
                                     axis: GaugeAxis(
-                                      min: minValue,
-                                      max: maxValue,
+                                      min: minValue.roundToDouble(),
+                                      max: maxValue.roundToDouble(),
                                       degrees: 280,
                                       style: GaugeAxisStyle(
                                         thickness: 13,
@@ -199,6 +200,107 @@ class DashboardToufu extends StatelessWidget {
                 ],
               ),
             ),
+      ),
+    );
+  }
+}
+*/
+
+class DashboardToufu extends StatelessWidget {
+  final String title;
+  final double value;
+  final double maxValue;
+  final double minValue;
+  final IconData? icon;
+  final Widget? center;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+  final Color? progressColor;
+  final Color? arcColor;
+  final List<GaugeSegment> segments;
+
+  const DashboardToufu({
+    required this.title,
+    required this.value,
+    required this.center,
+    required this.minValue,
+    required this.maxValue,
+    this.icon,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.progressColor,
+    this.arcColor,
+    this.segments = const [],
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fgColor = foregroundColor ?? Theme.of(context).colorScheme.onSurface ?? Colors.black;
+    final bgColor = backgroundColor ?? Theme.of(context).colorScheme.surfaceContainer ?? Colors.grey[200]!;
+    final progColor = progressColor ?? Theme.of(context).colorScheme.primary ?? Colors.blue;
+    final arcColor = this.arcColor ?? Theme.of(context).colorScheme.onSurfaceVariant ?? Colors.grey;
+
+    return Card(
+      margin: const EdgeInsets.all(0),
+      color: bgColor,
+      elevation: 0,
+      child: SizedBox(
+        height: 200, // Provide bounded height
+        child: LayoutBuilder(
+          builder:
+              (context, constraints) => Padding(
+                padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
+                child: Stack(
+                  clipBehavior: Clip.hardEdge, // Prevent overflow
+                  children: [
+                    if (icon != null)
+                      Positioned(
+                        bottom: -constraints.maxHeight * 0.2,
+                        right: -constraints.maxWidth * 0.2,
+                        child: ClipRect(
+                          child: Icon(icon!, size: constraints.maxWidth * 0.75, color: fgColor.withAlpha(8)),
+                        ),
+                      ),
+                    Positioned.fill(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: AnimatedRadialGauge(
+                              initialValue: minValue.roundToDouble(),
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.decelerate,
+                              value: value.roundToDouble(),
+                              radius: null,
+                              axis: GaugeAxis(
+                                min: minValue.roundToDouble(),
+                                max: maxValue.roundToDouble(),
+                                degrees: 270,
+                                style: GaugeAxisStyle(
+                                  thickness: 13,
+                                  segmentSpacing: 0,
+                                  background: segments.isEmpty ? arcColor : null,
+                                  cornerRadius: Radius.zero,
+                                ),
+                                pointer: null,
+                                progressBar: GaugeProgressBar.basic(color: progColor),
+                                segments: segments,
+                              ),
+                              builder: (context, label, value) => Center(child: label),
+                              child: center,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: fgColor)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+        ),
       ),
     );
   }
@@ -261,145 +363,148 @@ class DashboardView extends StatelessWidget {
               ),
         ),
 
-        // Measured power, Temp. and fan
+        // Toufu blocks
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+            padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
             child: Column(
               children: [
                 Expanded(
                   child: Row(
                     children: [
-                      // Total Brightness
                       Expanded(
                         child: Consumer<LyfiViewModel>(
                           builder:
                               (context, vm, _) => MultiValueListenableBuilder<int>(
                                 valueNotifiers: vm.channels,
                                 builder:
-                                    (context, values, _) => DashboardToufu(
-                                      title: 'Brightness',
-                                      icon: Icons.lightbulb_outline,
-                                      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                                      foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-                                      arcColor: Theme.of(context).colorScheme.outlineVariant,
-                                      progressColor: Theme.of(context).colorScheme.secondary,
-                                      minValue: 0,
-                                      maxValue: vm.maxOverallBrightness,
-                                      value: vm.channels.isNotEmpty ? vm.overallBrightness : 0.0,
-                                      center: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        textBaseline: TextBaseline.alphabetic,
-                                        children: [
-                                          Text(
-                                            vm.channels.isNotEmpty
-                                                ? (vm.overallBrightness / vm.maxOverallBrightness * 100)
-                                                    .toStringAsFixed(0)
-                                                : "N/A",
-                                            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                              fontFeatures: [FontFeature.tabularFigures()],
-                                              color: Theme.of(context).colorScheme.primary,
-                                              fontSize: 24,
-                                            ),
-                                          ),
-                                          if (vm.channels.isNotEmpty)
+                                    (context, values, _) => Expanded(
+                                      child: DashboardToufu(
+                                        title: 'Brightness',
+                                        icon: Icons.lightbulb_outline,
+                                        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                                        foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                                        arcColor: Theme.of(context).colorScheme.outlineVariant,
+                                        progressColor: Theme.of(context).colorScheme.secondary,
+                                        minValue: 0,
+                                        maxValue: vm.maxOverallBrightness,
+                                        value: vm.channels.isNotEmpty ? vm.overallBrightness : 0.0,
+                                        center: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          textBaseline: TextBaseline.alphabetic,
+                                          children: [
                                             Text(
-                                              '%',
-                                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                              vm.channels.isNotEmpty
+                                                  ? (vm.overallBrightness / vm.maxOverallBrightness * 100)
+                                                      .toStringAsFixed(0)
+                                                  : "N/A",
+                                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                                                 fontFeatures: [FontFeature.tabularFigures()],
                                                 color: Theme.of(context).colorScheme.primary,
-                                                fontSize: 12,
+                                                fontSize: 24,
                                               ),
                                             ),
-                                        ],
+                                            if (vm.channels.isNotEmpty)
+                                              Text(
+                                                '%',
+                                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                                  fontFeatures: [FontFeature.tabularFigures()],
+                                                  color: Theme.of(context).colorScheme.primary,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                               ),
                         ),
                       ),
-
-                      SizedBox(width: 16.0),
-                      // Total Power
+                      const SizedBox(width: 16),
                       Expanded(
                         child: Consumer<LyfiViewModel>(
                           builder:
                               (context, vm, _) => MultiValueListenableBuilder<int>(
                                 valueNotifiers: vm.channels,
                                 builder:
-                                    (context, values, _) => DashboardToufu(
-                                      title: 'Power',
-                                      icon: Icons.power_outlined,
-                                      foregroundColor: Theme.of(context).colorScheme.onSurface,
-                                      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                                      arcColor: Theme.of(context).colorScheme.outlineVariant,
-                                      progressColor: Theme.of(context).colorScheme.tertiary,
-                                      minValue: 0,
-                                      maxValue: vm.lyfiDeviceInfo.nominalPower ?? 0,
-                                      value:
-                                          vm.borneoDeviceStatus?.powerVoltage != null &&
-                                                  vm.borneoDeviceStatus?.powerCurrent != null
-                                              ? (vm.borneoDeviceStatus!.powerVoltage! *
-                                                  vm.borneoDeviceStatus!.powerCurrent!)
-                                              : 0,
-                                      center: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.max,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Row(
-                                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            textBaseline: TextBaseline.alphabetic,
-                                            children: [
-                                              Text(
-                                                vm.channels.isNotEmpty &&
-                                                        vm.borneoDeviceStatus?.powerVoltage != null &&
-                                                        vm.borneoDeviceStatus?.powerCurrent != null
-                                                    ? (vm.borneoDeviceStatus!.powerVoltage! *
-                                                            vm.borneoDeviceStatus!.powerCurrent!)
-                                                        .toStringAsFixed(0)
-                                                    : "N/A",
-                                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                                  color: Theme.of(context).colorScheme.primary,
-                                                  fontSize: 24,
-                                                ),
-                                              ),
-                                              if (vm.channels.isNotEmpty &&
-                                                  vm.borneoDeviceStatus?.powerVoltage != null &&
-                                                  vm.borneoDeviceStatus?.powerCurrent != null)
+                                    (context, values, _) => Expanded(
+                                      child: DashboardToufu(
+                                        title: 'Power',
+                                        icon: Icons.power_outlined,
+                                        foregroundColor: Theme.of(context).colorScheme.onSurface,
+                                        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                                        arcColor: Theme.of(context).colorScheme.outlineVariant,
+                                        progressColor: Theme.of(context).colorScheme.tertiary,
+                                        minValue: -1,
+                                        maxValue: vm.isOnline ? vm.lyfiDeviceInfo.nominalPower ?? -1 : 0,
+                                        value:
+                                            vm.borneoDeviceStatus?.powerVoltage != null &&
+                                                    vm.borneoDeviceStatus?.powerCurrent != null
+                                                ? (vm.borneoDeviceStatus!.powerVoltage! *
+                                                    vm.borneoDeviceStatus!.powerCurrent!)
+                                                : -1,
+                                        center: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.max,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Row(
+                                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              textBaseline: TextBaseline.alphabetic,
+                                              children: [
                                                 Text(
-                                                  'W',
-                                                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                                    fontFeatures: [FontFeature.tabularFigures()],
+                                                  vm.channels.isNotEmpty &&
+                                                          vm.borneoDeviceStatus?.powerVoltage != null &&
+                                                          vm.borneoDeviceStatus?.powerCurrent != null
+                                                      ? (vm.borneoDeviceStatus!.powerVoltage! *
+                                                              vm.borneoDeviceStatus!.powerCurrent!)
+                                                          .toStringAsFixed(0)
+                                                      : "N/A",
+                                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                                     color: Theme.of(context).colorScheme.primary,
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              if (vm.borneoDeviceStatus?.powerVoltage != null)
-                                                Text(
-                                                  '${vm.borneoDeviceStatus!.powerVoltage!.toStringAsFixed(1)}V',
-                                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                                    color: Theme.of(context).colorScheme.onSurface,
                                                     fontFeatures: [FontFeature.tabularFigures()],
+                                                    fontSize: 23,
                                                   ),
                                                 ),
-                                              if (vm.borneoDeviceStatus?.powerCurrent != null) SizedBox(width: 4),
-                                              if (vm.borneoDeviceStatus?.powerCurrent != null)
-                                                Text(
-                                                  '${vm.borneoDeviceStatus!.powerCurrent!.toStringAsFixed(1)}A',
-                                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                                    color: Theme.of(context).colorScheme.onSurface,
-                                                    fontFeatures: [FontFeature.tabularFigures()],
+                                                if (vm.channels.isNotEmpty &&
+                                                    vm.borneoDeviceStatus?.powerVoltage != null &&
+                                                    vm.borneoDeviceStatus?.powerCurrent != null)
+                                                  Text(
+                                                    'W',
+                                                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                                      fontFeatures: [FontFeature.tabularFigures()],
+                                                      color: Theme.of(context).colorScheme.primary,
+                                                      fontSize: 11,
+                                                    ),
                                                   ),
-                                                ),
-                                            ],
-                                          ),
-                                        ],
+                                              ],
+                                            ),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                if (vm.borneoDeviceStatus?.powerVoltage != null)
+                                                  Text(
+                                                    '${vm.borneoDeviceStatus!.powerVoltage!.toStringAsFixed(0)}V',
+                                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                                      color: Theme.of(context).colorScheme.onSurface,
+                                                      fontFeatures: [FontFeature.tabularFigures()],
+                                                    ),
+                                                  ),
+                                                if (vm.borneoDeviceStatus?.powerCurrent != null) SizedBox(width: 4),
+                                                if (vm.borneoDeviceStatus?.powerCurrent != null)
+                                                  Text(
+                                                    '${vm.borneoDeviceStatus!.powerCurrent!.toStringAsFixed(0)}A',
+                                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                                      color: Theme.of(context).colorScheme.onSurface,
+                                                      fontFeatures: [FontFeature.tabularFigures()],
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                               ),
@@ -409,66 +514,67 @@ class DashboardView extends StatelessWidget {
                   ),
                 ),
 
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16),
 
                 Expanded(
                   child: Row(
                     children: [
-                      // Temp.
                       Expanded(
                         child: Selector<LyfiViewModel, ({int? currentTemp, double currentTempRatio})>(
                           selector: (_, vm) => (currentTemp: vm.currentTemp, currentTempRatio: vm.currentTempRatio),
                           builder:
-                              (context, vm, _) => DashboardToufu(
-                                title: 'Temperature',
-                                icon: Icons.thermostat,
-                                foregroundColor: Theme.of(context).colorScheme.onSurface,
-                                backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                                arcColor: null,
-                                progressColor: switch (vm.currentTemp) {
-                                  != null && <= 45 => Theme.of(context).primaryColor,
-                                  != null && > 45 && < 65 => Theme.of(context).colorScheme.secondary,
-                                  != null && >= 65 => Theme.of(context).colorScheme.error,
-                                  null || int() => Colors.grey,
-                                },
-                                value: vm.currentTemp?.toDouble() ?? 0.0,
-                                minValue: 0,
-                                maxValue: 105,
-                                center: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  textBaseline: TextBaseline.alphabetic,
-                                  children: [
-                                    Text(
-                                      vm.currentTemp != null ? '${vm.currentTemp}' : "N/A",
-                                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                        fontFeatures: [FontFeature.tabularFigures()],
-                                        color: Theme.of(context).colorScheme.primary,
-                                        fontSize: 24,
-                                      ),
-                                    ),
-                                    if (vm.currentTemp != null)
+                              (context, vm, _) => Expanded(
+                                child: DashboardToufu(
+                                  title: 'Temperature',
+                                  icon: Icons.thermostat,
+                                  foregroundColor: Theme.of(context).colorScheme.onSurface,
+                                  backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                                  arcColor: null,
+                                  progressColor: switch (vm.currentTemp) {
+                                    != null && <= 45 => Theme.of(context).primaryColor,
+                                    != null && > 45 && < 65 => Theme.of(context).colorScheme.secondary,
+                                    != null && >= 65 => Theme.of(context).colorScheme.error,
+                                    null || int() => Colors.grey,
+                                  },
+                                  value: vm.currentTemp?.toDouble() ?? 0.0,
+                                  minValue: 0,
+                                  maxValue: 105,
+                                  center: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
                                       Text(
-                                        '℃',
-                                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                        vm.currentTemp != null ? '${vm.currentTemp}' : "N/A",
+                                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                                           fontFeatures: [FontFeature.tabularFigures()],
                                           color: Theme.of(context).colorScheme.primary,
-                                          fontSize: 12,
+                                          fontSize: 24,
                                         ),
                                       ),
+                                      if (vm.currentTemp != null)
+                                        Text(
+                                          '℃',
+                                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                            fontFeatures: [FontFeature.tabularFigures()],
+                                            color: Theme.of(context).colorScheme.primary,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  segments: [
+                                    GaugeSegment(from: 0, to: 45, color: Colors.green[100]!),
+                                    GaugeSegment(from: 45, to: 65, color: Colors.orange[100]!),
+                                    GaugeSegment(from: 65, to: 105, color: Colors.red[100]!),
                                   ],
                                 ),
-                                segments: [
-                                  GaugeSegment(from: 0, to: 45, color: Colors.green[100]!),
-                                  GaugeSegment(from: 45, to: 65, color: Colors.orange[100]!),
-                                  GaugeSegment(from: 65, to: 105, color: Colors.red[100]!),
-                                ],
                               ),
                         ),
                       ),
 
-                      SizedBox(width: 16.0),
-                      // Fan
+                      const SizedBox(width: 16),
+
                       Expanded(
                         child: Selector<LyfiViewModel, ({double fanPowerRatio})>(
                           selector: (_, vm) => (fanPowerRatio: vm.fanPowerRatio),
@@ -517,180 +623,234 @@ class DashboardView extends StatelessWidget {
           ),
         ),
 
+        // Icon buttons
         Container(
           margin: const EdgeInsets.fromLTRB(0, 24, 0, 0),
           color: Theme.of(context).colorScheme.surfaceContainerHigh,
           child: Container(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
+                _buildIconButtonsRow(
+                  children: [
+                    Selector<LyfiViewModel, ({bool isOn, bool isOnline, bool isBusy, bool isLocked})>(
+                      selector:
+                          (_, vm) => (isOn: vm.isOn, isOnline: vm.isOnline, isBusy: vm.isBusy, isLocked: vm.isLocked),
+                      builder:
+                          (context, props, _) => PowerButton(
+                            value: props.isOn,
+                            label: Text(
+                              props.isOn ? 'ON' : 'OFF',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleSmall?.copyWith(color: Theme.of(context).hintColor),
+                            ),
+                            onChanged:
+                                props.isOnline && !props.isBusy && props.isLocked
+                                    ? (value) => context.read<LyfiViewModel>().switchPowerOnOff(!props.isOn)
+                                    : null,
+                          ),
+                    ),
+
+                    // Dimming button
+                    Selector<LyfiViewModel, bool>(
+                      selector: (_, vm) => vm.canUnlock,
+                      builder:
+                          (context, canUnlock, _) => RoundedIconTextButton(
+                            borderColor: Theme.of(context).colorScheme.primary,
+                            text: "Dimming",
+                            buttonSize: 64,
+                            icon: Icon(Icons.tips_and_updates_outlined, size: 40),
+                            onPressed: canUnlock ? () async => context.read<LyfiViewModel>().toggleLock(false) : null,
+                          ),
+                    ),
+
+                    // Temporary button
+                    Selector<LyfiViewModel, ({LedState? state, bool canSwitch})>(
+                      selector: (_, vm) => (state: vm.ledState, canSwitch: vm.canSwitchNightlightState),
+                      builder:
+                          (context, props, _) => RoundedIconTextButton(
+                            borderColor: Theme.of(context).colorScheme.primary,
+                            text: 'Temporary',
+                            buttonSize: 64,
+                            backgroundColor:
+                                props.state == LedState.nightlight
+                                    ? Theme.of(context).colorScheme.primaryContainer
+                                    : null,
+                            icon: AnimatedSwitcher(
+                              duration: Duration(milliseconds: 500),
+                              child:
+                                  props.state == LedState.nightlight
+                                      ? IconProgressBar(
+                                        icon: Icon(Icons.flashlight_on, size: 40),
+                                        progress: 0.5,
+                                        size: 40,
+                                        progressColor:
+                                            props.state == LedState.nightlight
+                                                ? Theme.of(context).colorScheme.inversePrimary
+                                                : Theme.of(context).colorScheme.primary,
+                                        backgroundColor:
+                                            props.state == LedState.nightlight
+                                                ? Theme.of(context).colorScheme.onPrimaryContainer
+                                                : Theme.of(context).colorScheme.primaryContainer,
+                                      )
+                                      : Icon(Icons.flashlight_on, size: 40),
+                            ),
+
+                            onPressed:
+                                props.canSwitch ? () => context.read<LyfiViewModel>().switchNightlightState() : null,
+                          ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+                _buildIconButtonsRow(
+                  children: [
+                    // Moon button
+                    RoundedIconTextButton(
+                      borderColor: Theme.of(context).colorScheme.primary,
+                      text: "Moon",
+                      buttonSize: 64,
+                      icon: const Icon(Icons.nightlight_outlined, size: 40),
+                      onPressed: null,
+                    ),
+
+                    // Acclimation button
+                    Selector<LyfiViewModel, ({bool canGo, bool enabled, bool activated})>(
+                      selector:
+                          (_, vm) => (
+                            canGo: vm.canLockOrUnlock,
+                            enabled: vm.lyfiDeviceStatus?.acclimationEnabled ?? false,
+                            activated: vm.lyfiDeviceStatus?.acclimationActivated ?? false,
+                          ),
+                      builder:
+                          (context, props, _) => RoundedIconTextButton(
+                            borderColor: Theme.of(context).colorScheme.primary,
+                            text: "Acclimation",
+                            buttonSize: 64,
+                            icon: Icon(
+                              Icons.calendar_month_outlined,
+                              size: 40,
+                              color:
+                                  props.enabled || props.activated
+                                      ? Theme.of(context).colorScheme.onPrimaryContainer
+                                      : Theme.of(context).colorScheme.primary,
+                            ),
+                            backgroundColor:
+                                props.enabled || props.activated
+                                    ? Theme.of(context).colorScheme.primaryContainer
+                                    : null,
+                            onPressed:
+                                props.canGo
+                                    ? () async {
+                                      if (context.mounted) {
+                                        final vm = Provider.of<LyfiViewModel>(context, listen: false);
+                                        final route = MaterialPageRoute(
+                                          builder: (context) => AcclimationScreen(deviceID: vm.deviceID),
+                                        );
+                                        try {
+                                          vm.stopTimer();
+                                          await Navigator.push(context, route);
+                                        } finally {
+                                          vm.startTimer();
+                                        }
+                                      }
+                                    }
+                                    : null,
+                          ),
+                    ),
+
+                    // Settings button
+                    RoundedIconTextButton(
+                      borderColor: Theme.of(context).colorScheme.primary,
+                      text: "Settings",
+                      buttonSize: 64,
+                      icon: Icon(Icons.settings_outlined, size: 40),
+                      onPressed: () async {
+                        final lyfi = context.read<LyfiViewModel>();
+                        final vm = await lyfi.loadSettings();
+                        final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
+                        if (context.mounted) {
+                          lyfi.stopTimer();
+                          try {
+                            await Navigator.push(context, route);
+                          } finally {
+                            lyfi.startTimer();
+                          }
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                /*
                 Row(
                   children: [
                     Expanded(
-                      child: Selector<LyfiViewModel, ({bool isOn, bool isOnline, bool isBusy, bool isLocked})>(
-                        selector:
-                            (_, vm) => (isOn: vm.isOn, isOnline: vm.isOnline, isBusy: vm.isBusy, isLocked: vm.isLocked),
-                        builder:
-                            (context, props, _) => PowerButton(
-                              value: props.isOn,
-                              label: Text(
-                                props.isOn ? 'ON' : 'OFF',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.titleSmall?.copyWith(color: Theme.of(context).hintColor),
-                              ),
-                              onChanged:
-                                  props.isOnline && !props.isBusy && props.isLocked
-                                      ? (value) => context.read<LyfiViewModel>().switchPowerOnOff(!props.isOn)
-                                      : null,
-                            ),
-                      ),
+                      child: 
+                      child: Container(),
                     ),
 
                     Expanded(
-                      child: Selector<LyfiViewModel, bool>(
-                        selector: (_, vm) => vm.canUnlock,
-                        builder:
-                            (context, canUnlock, _) => RoundedIconTextButton(
-                              borderColor: Theme.of(context).colorScheme.primary,
-                              text: "Dimming",
-                              buttonSize: 64,
-                              icon: Icon(Icons.tips_and_updates_outlined, size: 40),
-                              onPressed: canUnlock ? () async => context.read<LyfiViewModel>().toggleLock(false) : null,
-                            ),
-                      ),
+                      child: 
                     ),
 
                     Expanded(
-                      child: Selector<LyfiViewModel, ({LedState? state, bool canSwitch})>(
-                        selector: (_, vm) => (state: vm.ledState, canSwitch: vm.canSwitchNightlightState),
-                        builder:
-                            (context, props, _) => RoundedIconTextButton(
-                              borderColor: Theme.of(context).colorScheme.primary,
-                              text: 'Temporary',
-                              buttonSize: 64,
-                              backgroundColor:
-                                  props.state == LedState.nightlight
-                                      ? Theme.of(context).colorScheme.primaryContainer
-                                      : null,
-                              icon: AnimatedSwitcher(
-                                duration: Duration(milliseconds: 500),
-                                child:
-                                    props.state == LedState.nightlight
-                                        ? IconProgressBar(
-                                          icon: Icon(Icons.flashlight_on, size: 40),
-                                          progress: 0.5,
-                                          size: 40,
-                                          progressColor:
-                                              props.state == LedState.nightlight
-                                                  ? Theme.of(context).colorScheme.inversePrimary
-                                                  : Theme.of(context).colorScheme.primary,
-                                          backgroundColor:
-                                              props.state == LedState.nightlight
-                                                  ? Theme.of(context).colorScheme.onPrimaryContainer
-                                                  : Theme.of(context).colorScheme.primaryContainer,
-                                        )
-                                        : Icon(Icons.flashlight_on, size: 40),
-                              ),
-
-                              onPressed:
-                                  props.canSwitch ? () => context.read<LyfiViewModel>().switchNightlightState() : null,
-                            ),
-                      ),
+                      child: 
+                      
                     ),
                   ],
                 ),
 
                 //sep
-                SizedBox(height: 16),
 
                 // next row
                 Row(
                   children: [
                     Expanded(
-                      child: RoundedIconTextButton(
-                        borderColor: Theme.of(context).colorScheme.primary,
-                        text: "Moon",
-                        buttonSize: 64,
-                        icon: Icon(Icons.nightlight_outlined, size: 40),
-                        onPressed: null,
-                      ),
+                      child:
                     ),
 
                     // Settings button
                     Expanded(
-                      child: Selector<LyfiViewModel, ({bool canGo, bool enabled, bool activated})>(
-                        selector:
-                            (_, vm) => (
-                              canGo: vm.canLockOrUnlock,
-                              enabled: vm.lyfiDeviceStatus?.acclimationEnabled ?? false,
-                              activated: vm.lyfiDeviceStatus?.acclimationActivated ?? false,
-                            ),
-                        builder:
-                            (context, props, _) => RoundedIconTextButton(
-                              borderColor: Theme.of(context).colorScheme.primary,
-                              text: "Acclimation",
-                              buttonSize: 64,
-                              icon: Icon(
-                                Icons.calendar_month_outlined,
-                                size: 40,
-                                color:
-                                    props.enabled || props.activated
-                                        ? Theme.of(context).colorScheme.onPrimaryContainer
-                                        : Theme.of(context).colorScheme.primary,
-                              ),
-                              backgroundColor:
-                                  props.enabled || props.activated
-                                      ? Theme.of(context).colorScheme.primaryContainer
-                                      : null,
-                              onPressed:
-                                  props.canGo
-                                      ? () async {
-                                        if (context.mounted) {
-                                          final vm = Provider.of<LyfiViewModel>(context, listen: false);
-                                          final route = MaterialPageRoute(
-                                            builder: (context) => AcclimationScreen(deviceID: vm.deviceID),
-                                          );
-                                          try {
-                                            vm.stopTimer();
-                                            await Navigator.push(context, route);
-                                          } finally {
-                                            vm.startTimer();
-                                          }
-                                        }
-                                      }
-                                      : null,
-                            ),
-                      ),
+                      child:
+               
                     ),
 
                     Expanded(
-                      child: RoundedIconTextButton(
-                        borderColor: Theme.of(context).colorScheme.primary,
-                        text: "Settings",
-                        buttonSize: 64,
-                        icon: Icon(Icons.settings_outlined, size: 40),
-                        onPressed: () async {
-                          final lyfi = context.read<LyfiViewModel>();
-                          final vm = await lyfi.loadSettings();
-                          final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
-                          if (context.mounted) {
-                            lyfi.stopTimer();
-                            try {
-                              await Navigator.push(context, route);
-                            } finally {
-                              lyfi.startTimer();
-                            }
-                          }
-                        },
-                      ),
+                      child: 
+
                     ),
                   ],
                 ),
+                */
               ],
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildIconButtonsRow({required List<Widget> children}) {
+    return Row(
+      children:
+          children.map((child) {
+            return Expanded(child: Center(child: child));
+          }).toList(),
+    );
+  }
+
+  Widget _buildToufuRow({required List<Widget> children}) {
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        for (int i = 0; i < children.length; i++) ...[
+          Flexible(flex: 1, child: children[i]),
+          if (i != children.length - 1) const SizedBox(width: 16),
+        ],
       ],
     );
   }

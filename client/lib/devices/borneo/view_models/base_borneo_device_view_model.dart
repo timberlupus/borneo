@@ -4,7 +4,7 @@ import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
 
 abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   GeneralBorneoDeviceStatus? _borneoDeviceStatus;
-  GeneralBorneoDeviceStatus? get borneoDeviceStatus => _borneoDeviceStatus;
+  GeneralBorneoDeviceStatus? get borneoDeviceStatus => isOnline ? _borneoDeviceStatus : null;
 
   IBorneoDeviceApi get borneoDeviceApi => super.boundDevice!.driver as IBorneoDeviceApi;
 
