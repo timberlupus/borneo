@@ -92,6 +92,7 @@ class AcclimationViewModel extends BaseLyfiDeviceViewModel {
     );
 
     super.lyfiDeviceApi.setAcclimation(super.boundDevice!.device, acc);
+    _isChanged = false;
   }
 
   @override

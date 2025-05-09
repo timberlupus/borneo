@@ -100,13 +100,8 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
     await refreshStatus();
 
-    if (_mode == LedRunningMode.scheduled) {
-      scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
-    } else if (_mode == LedRunningMode.sun) {
-      sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
-    } else {
-      // do nothing
-    }
+    scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
+    sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
 
     // Update schedule
     // final schedule = await _deviceApi.getSchedule(boundDevice.device);
@@ -221,12 +216,16 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
         if (currentEditor is ScheduleEditorViewModel) {
           scheduledInstants.clear();
           scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
+        } else if (currentEditor is SunEditorViewModel) {
+          sunInstants.clear();
+          sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
         }
       }
     }
 
     final state = isLocked ? LedState.normal : LedState.dimming;
     await _deviceApi.switchState(super.boundDevice!.device, state);
+    _ledState = state;
 
     if (!isLocked) {
       //Entering edit mode
