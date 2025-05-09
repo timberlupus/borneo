@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:nsd/nsd.dart' as nsd;
 
@@ -59,8 +60,10 @@ class NsdMdnsDiscovery implements IMdnsDiscovery {
 
 class NsdMdnsProvider implements IMdnsProvider {
   @override
-  Future<IMdnsDiscovery> startDiscovery(String serviceType, EventBus eventBus) async {
-    final nsdDiscovery = await nsd.startDiscovery(serviceType, autoResolve: true, ipLookupType: nsd.IpLookupType.any);
+  Future<IMdnsDiscovery> startDiscovery(String serviceType, EventBus eventBus, {CancellationToken? cancelToken}) async {
+    final nsdDiscovery = await nsd
+        .startDiscovery(serviceType, autoResolve: true, ipLookupType: nsd.IpLookupType.any)
+        .asCancellable(cancelToken);
     final discovery = NsdMdnsDiscovery(nsdDiscovery, serviceType, eventBus);
     return discovery;
   }

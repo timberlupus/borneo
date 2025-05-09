@@ -56,8 +56,11 @@ final class DeviceManager {
     }
     _logger.i('Initializing DeviceManager...');
     try {
-      _kernel.start();
-      await rebindAll();
+      final devices = await fetchAllDevicesInScene();
+      _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
+      await _kernel.start();
+
+      await _rebindAll(devices);
       /*
       await db.transaction((tx) async {
       });
@@ -77,9 +80,17 @@ final class DeviceManager {
 
   BoundDevice getBoundDevice(String deviceID) => _kernel.getBoundDevice(deviceID);
 
-  Future<void> rebindAll() async {
+  Future<void> reloadAllDevices() async {
     await _kernel.unbindAll();
+    _kernel.unregisterAllDevices();
     final devices = await fetchAllDevicesInScene();
+    _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
+
+    await _rebindAll(devices);
+  }
+
+  Future<void> _rebindAll(Iterable<DeviceEntity> devices) async {
+    await _kernel.unbindAll();
     final futures = <Future>[];
     for (var device in devices) {
       futures.add(tryBind(device));
@@ -93,8 +104,6 @@ final class DeviceManager {
 
   Future<void> unbind(String deviceID) => _kernel.unbind(deviceID);
 
-  Future<void> addDevice(Device device) async {}
-
   Future<void> delete(String id, {Transaction? tx}) async {
     if (tx == null) {
       await _db.transaction((tx) => delete(id, tx: tx));
@@ -102,6 +111,7 @@ final class DeviceManager {
       if (_kernel.isBound(id)) {
         await _kernel.unbind(id);
       }
+      _kernel.unregisterDevice(id);
       final store = stringMapStoreFactory.store(StoreNames.devices);
       await store.record(id).delete(tx);
       deviceEvents.fire(DeviceEntityDeletedEvent(id));

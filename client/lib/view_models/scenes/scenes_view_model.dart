@@ -118,7 +118,7 @@ class ScenesViewModel extends BaseViewModel with ViewModelEventBusMixin {
 
   void _onCurrentSceneChanged(CurrentSceneChangedEvent event) {
     assert(!isDisposed);
-    _deviceManager.rebindAll().then((_) {
+    _deviceManager.reloadAllDevices().then((_) {
       for (final scene in _scenes) {
         scene.notifyListeners();
       }

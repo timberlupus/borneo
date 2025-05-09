@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:borneo_kernel/drivers/borneo/borneo_coap_config.dart';
 import 'package:borneo_kernel/drivers/borneo/borneo_probe_coap_config.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:coap/coap.dart';
 import 'package:cbor/cbor.dart';
 
@@ -321,7 +322,7 @@ class BorneoLyfiDriver
   static const String lyfiCompatibleString = 'bst,borneo-lyfi';
 
   @override
-  Future<bool> probe(Device dev) async {
+  Future<bool> probe(Device dev, {CancellationToken? cancelToken}) async {
     final probeCoapClient =
         CoapClient(dev.address, config: BorneoProbeCoapConfig.coapConfig);
     try {
@@ -347,16 +348,16 @@ class BorneoLyfiDriver
   }
 
   @override
-  Future<bool> remove(Device dev) async {
+  Future<bool> remove(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as LyfiDriverData;
     dd.dispose();
     return true;
   }
 
   @override
-  Future<bool> heartbeat(Device dev) async {
+  Future<bool> heartbeat(Device dev, {CancellationToken? cancelToken}) async {
     try {
-      await getOnOff(dev);
+      await getOnOff(dev).asCancellable(cancelToken); // FIXME
       return true;
     } catch (e) {
       return false;

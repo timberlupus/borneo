@@ -5,6 +5,13 @@ import '../device.dart';
 import '../device_capability.dart';
 import '../idriver.dart';
 
+/// The meta data of the BoundDevice
+final class BoundDeviceDescriptor {
+  final Device device;
+  final String driverID;
+  BoundDeviceDescriptor({required this.device, required this.driverID});
+}
+
 final class BoundDevice implements IDisposable {
   bool _isDisposed = false;
   final String driverID;

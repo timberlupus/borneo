@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:borneo_common/borneo_common.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 
 abstract class IMdnsDiscovery extends IDisposable {
@@ -9,7 +10,8 @@ abstract class IMdnsDiscovery extends IDisposable {
 }
 
 abstract class IMdnsProvider {
-  Future<IMdnsDiscovery> startDiscovery(String serviceType, EventBus eventBus);
+  Future<IMdnsDiscovery> startDiscovery(String serviceType, EventBus eventBus,
+      {CancellationToken? cancelToken});
 }
 
 final class NullMdnsDiscovery implements IMdnsDiscovery {
@@ -29,8 +31,8 @@ final class NullMdnsDiscovery implements IMdnsDiscovery {
 
 final class NullMdnsProvider implements IMdnsProvider {
   @override
-  Future<IMdnsDiscovery> startDiscovery(
-      String serviceType, EventBus eventBus) async {
+  Future<IMdnsDiscovery> startDiscovery(String serviceType, EventBus eventBus,
+      {CancellationToken? cancelToken}) async {
     return NullMdnsDiscovery(serviceType);
   }
 }

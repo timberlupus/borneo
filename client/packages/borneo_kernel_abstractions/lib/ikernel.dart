@@ -1,4 +1,5 @@
 import 'package:borneo_kernel_abstractions/idriver.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 
 import 'package:borneo_common/borneo_common.dart';
@@ -18,17 +19,23 @@ abstract class IKernel implements IDisposable {
 
   BoundDevice getBoundDevice(String deviceID);
 
-  Future<bool> tryBind(Device device, String driverID);
+  Future<bool> tryBind(Device device, String driverID,
+      {CancellationToken? cancelToken});
 
-  Future<void> bind(Device device, String driverID);
+  Future<void> bind(Device device, String driverID,
+      {CancellationToken? cancelToken});
 
-  Future<void> unbind(String deviceID);
-  Future<void> unbindAll();
+  Future<void> unbind(String deviceID, {CancellationToken? cancelToken});
+  Future<void> unbindAll({CancellationToken? cancelToken});
 
   bool get isScanning;
 
-  Future<void> startDevicesScanning({Duration? timeout});
+  Future<void> startDevicesScanning(
+      {Duration? timeout, CancellationToken? cancelToken});
   Future<void> stopDevicesScanning();
 
-  // DriverDescriptor? matchesDriver(DiscoveredDevice discovered);
+  void registerDevice(BoundDeviceDescriptor device);
+  void registerDevices(Iterable<BoundDeviceDescriptor> devices);
+  void unregisterDevice(String deviceID);
+  void unregisterAllDevices();
 }
