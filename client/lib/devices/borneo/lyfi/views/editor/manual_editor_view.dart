@@ -47,19 +47,24 @@ class ManualEditorView extends StatelessWidget {
   }
 
   BarChartGroupData makeGroupData(BuildContext context, LyfiChannelInfo ch, int x, double y) {
+    final primaryColor = HexColor.fromHex(ch.color);
     return BarChartGroupData(
       x: x,
       barRods: [
         BarChartRodData(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(5),
           toY: y,
-          color: HexColor.fromHex(ch.color),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [primaryColor, Color.lerp(primaryColor, Colors.white, 0.7)!],
+          ),
           width: 16,
           backDrawRodData: BackgroundBarChartRodData(
             show: true,
             fromY: 0,
             toY: lyfiBrightnessMax.toDouble(),
-            color: Theme.of(context).colorScheme.surface,
+            color: Theme.of(context).scaffoldBackgroundColor,
           ),
         ),
       ],
