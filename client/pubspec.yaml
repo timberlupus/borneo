@@ -48,7 +48,7 @@ dependencies:
   nsd: ^4.0.3
   fluttertoast: ^8.2.8
   sembast: ^3.7.5
-  fl_chart: ^0.71.0
+  fl_chart: ^1.0.0
   esp_smartconfig: ^2.0.4
   permission_handler: ^12.0.0+1
   logger: ^2.5.0

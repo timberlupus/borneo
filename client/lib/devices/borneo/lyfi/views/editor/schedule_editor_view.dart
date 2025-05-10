@@ -78,7 +78,7 @@ class ScheduleEditorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final editor = context.read<LyfiViewModel>().currentEditor!;
+    final editor = context.read<LyfiViewModel>().currentEditor;
     final editorVM = editor as ScheduleEditorViewModel;
     return ChangeNotifierProvider.value(
       value: editorVM,

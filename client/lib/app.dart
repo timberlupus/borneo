@@ -83,12 +83,12 @@ class BorneoApp extends StatelessWidget {
               Provider<DeviceManager>(
                 create:
                     (context) => DeviceManager(
-                      context.read<Logger>(),
                       context.read<Database>(),
                       context.read<IKernel>(),
                       context.read<EventBus>(),
                       context.read<SceneManager>(),
                       context.read<GroupManager>(),
+                      logger: context.read<Logger>(),
                     ),
                 dispose: (context, dm) => dm.dispose(),
               ),
@@ -102,7 +102,7 @@ class BorneoApp extends StatelessWidget {
                       context.read<DeviceManager>(),
                       logger: context.read<Logger>(),
                     ),
-                dispose: (context, dm) => dm.dispose(),
+                dispose: (context, rm) => rm.dispose(),
               ),
             ],
             child: child,

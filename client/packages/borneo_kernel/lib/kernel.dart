@@ -195,12 +195,12 @@ final class DefaultKernel implements IKernel {
     assert(_registeredDevices.containsKey(deviceID));
     final boundDevice = _boundDevices[deviceID];
     if (boundDevice != null) {
-      boundDevice.dispose();
       await boundDevice.driver
           .remove(boundDevice.device, cancelToken: cancelToken);
+      boundDevice.dispose();
       _boundDevices.remove(deviceID);
       _purgeUnusedDriver();
-      _events.fire(DeviceRemovedEvent(boundDevice.device));
+      //_events.fire(DeviceRemovedEvent(boundDevice.device));
     }
     if (_pollIDList.contains(deviceID)) {
       _pollIDList.remove(deviceID);
@@ -285,6 +285,7 @@ final class DefaultKernel implements IKernel {
       throw InvalidOperationException(
           message: 'The kernel has not been initialized!');
     }
+    assert(!_isDisposed);
   }
 
   IDriver _ensureDriverActivated(String driverID) {

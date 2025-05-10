@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:borneo_common/borneo_common.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/device_capability.dart';
 import 'package:event_bus/event_bus.dart';
@@ -21,8 +22,9 @@ import 'package:borneo_app/models/devices/device_entity.dart';
 
 import '../models/devices/device_state.dart';
 
-final class DeviceManager {
-  final Logger _logger;
+final class DeviceManager implements IDisposable {
+  bool _isDisposed = false;
+  final Logger? logger;
   final Database _db;
   bool _isInitialized = false;
   final SceneManager _sceneManager;
@@ -43,7 +45,8 @@ final class DeviceManager {
 
   Iterable<BoundDevice> get boundDevices => _kernel.boundDevices;
 
-  DeviceManager(this._logger, this._db, this._kernel, this._globalBus, this._sceneManager, this._groupManager) {
+  DeviceManager(this._db, this._kernel, this._globalBus, this._sceneManager, this._groupManager, {this.logger}) {
+    logger?.i("Creating DeviceManager...");
     _unboundDeviceDiscoveredEventSub = deviceEvents.on<UnboundDeviceDiscoveredEvent>().listen(
       _onUnboundDeviceDiscovered,
     );
@@ -53,7 +56,7 @@ final class DeviceManager {
     if (_isInitialized) {
       return;
     }
-    _logger.i('Initializing DeviceManager...');
+    logger?.i('Initializing DeviceManager...');
     try {
       final devices = await fetchAllDevicesInScene();
       _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
@@ -64,15 +67,18 @@ final class DeviceManager {
       await db.transaction((tx) async {
       });
       */
-      _logger.i('DeviceManager has been initialized successfully.');
+      logger?.i('DeviceManager has been initialized successfully.');
     } finally {
       _isInitialized = true;
     }
   }
 
+  @override
   void dispose() {
-    _unboundDeviceDiscoveredEventSub.cancel();
-    _kernel.dispose();
+    if (_isDisposed) {
+      _unboundDeviceDiscoveredEventSub.cancel();
+      _isDisposed = true;
+    }
   }
 
   bool isBound(String deviceID) => _kernel.isBound(deviceID);
@@ -84,7 +90,6 @@ final class DeviceManager {
     _kernel.unregisterAllDevices();
     final devices = await fetchAllDevicesInScene();
     _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
-
     await _rebindAll(devices);
   }
 
@@ -214,7 +219,7 @@ final class DeviceManager {
       await store.record(device.id).put(tx, device.toMap());
       final bindResult = await tryBind(device);
       if (!bindResult) {
-        _logger.e('Failed to bind device: $device');
+        logger?.e('Failed to bind device: $device');
       }
       deviceEvents.fire(NewDeviceEntityAddedEvent(device));
       return device;
@@ -257,7 +262,7 @@ final class DeviceManager {
   }
 
   Future<void> _onUnboundDeviceDiscovered(UnboundDeviceDiscoveredEvent event) async {
-    _logger.i('Device discovered: ${event.matched}');
+    logger?.i('Device discovered: ${event.matched}');
     assert(isInitialized);
     return await _db.transaction((tx) async {
       final existed = await singleOrDefaultByFingerprint(event.matched.fingerprint, tx: tx);
