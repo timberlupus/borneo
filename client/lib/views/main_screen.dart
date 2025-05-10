@@ -185,18 +185,12 @@ class MainScreen extends StatelessWidget {
             body: ErrorSnackBarListener(
               child: Selector<MainViewModel, TabIndices>(
                 selector: (context, vm) => vm.currentTabIndex,
-                builder: (context, index, child) {
-                  switch (index) {
-                    case TabIndices.devices:
-                      return const DevicesScreen();
-                    case TabIndices.scenes:
-                      return const ScenesScreen();
-                    case TabIndices.my:
-                      return const MyScreen();
-                    default:
-                      return const DevicesScreen();
-                  }
-                },
+                builder:
+                    (context, index, child) => switch (index) {
+                      TabIndices.devices => const DevicesScreen(),
+                      TabIndices.scenes => const ScenesScreen(),
+                      TabIndices.my => const MyScreen(),
+                    },
               ),
             ),
 
