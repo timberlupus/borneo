@@ -66,7 +66,7 @@ class ScheduleEditorView extends StatelessWidget {
       series.add(
         LineChartBarData(
           isCurved: false,
-          barWidth: 2,
+          barWidth: 2.5,
           color: channelColor,
           dotData: const FlDotData(show: true),
           spots: spots,
@@ -152,7 +152,7 @@ class ScheduleEditorView extends StatelessWidget {
                                 vm.currentEntry == null
                                     ? null
                                     : ExtraLinesData(
-                                      extraLinesOnTop: false,
+                                      extraLinesOnTop: true,
                                       verticalLines: [
                                         VerticalLine(
                                           x: vm.currentEntry!.instant.inSeconds.toDouble(),
@@ -167,9 +167,9 @@ class ScheduleEditorView extends StatelessWidget {
                                           strokeWidth: 8,
                                           label: VerticalLineLabel(
                                             show: true,
-                                            padding: const EdgeInsets.all(0),
+                                            padding: const EdgeInsets.only(bottom: 8),
                                             direction: LabelDirection.horizontal,
-                                            alignment: Alignment(0, -1.5),
+                                            alignment: Alignment(0, -1.6),
                                             style: Theme.of(context).textTheme.labelMedium?.copyWith(
                                               fontFeatures: [FontFeature.tabularFigures()],
                                               color: Theme.of(context).colorScheme.primary,

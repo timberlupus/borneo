@@ -44,7 +44,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   ValueNotifier<Duration> get temporaryRemaining => _temporaryRemaining;
 
   bool get canLockOrUnlock => !isBusy && isOn;
-  bool get canUnlock => !isBusy && isOnline && isOn && isLocked;
+  bool get canUnlock => !isBusy && isOnline && isOn && isLocked && _ledState == LedState.normal;
   bool get canTimedOn => !isBusy && (!isOn || _mode == LedRunningMode.scheduled);
 
   IEditor? currentEditor;

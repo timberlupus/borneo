@@ -15,7 +15,17 @@ class ScheduleChart extends StatelessWidget {
     LyfiViewModel vm = context.read<LyfiViewModel>();
     return Container(
       padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: LineChart(_buildChartData(context, vm), duration: const Duration(milliseconds: 250)),
+      child: LineChart(
+        _buildChartData(context, vm),
+        duration: const Duration(milliseconds: 250),
+        transformationConfig: FlTransformationConfig(
+          scaleAxis: FlScaleAxis.horizontal,
+          minScale: 1.0,
+          maxScale: 2.5,
+          panEnabled: true,
+          scaleEnabled: true,
+        ),
+      ),
     );
   }
 
@@ -44,7 +54,7 @@ class ScheduleChart extends StatelessWidget {
       minY: 0,
       maxY: lyfiBrightnessMax.toDouble(),
       extraLinesData: ExtraLinesData(
-        extraLinesOnTop: false,
+        extraLinesOnTop: true,
         verticalLines: [
           if (vm.isOn && vm.isOnline)
             VerticalLine(
@@ -59,14 +69,15 @@ class ScheduleChart extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 colors: [
                   Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
-                  Theme.of(context).colorScheme.surfaceContainer,
+                  Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.75),
                 ],
               ),
-              strokeWidth: 8,
+              dashArray: const [3, 2],
+              strokeWidth: 1.5,
               label: VerticalLineLabel(
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
-                padding: const EdgeInsets.all(0),
-                alignment: Alignment(0, -1.8),
+                padding: const EdgeInsets.only(bottom: 8),
+                alignment: const Alignment(0, -1.6),
                 show: true,
                 labelResolver: (vl) => Duration(seconds: vl.x.toInt()).toHHMM(),
               ),
@@ -78,7 +89,7 @@ class ScheduleChart extends StatelessWidget {
 
   LineTouchData get lineTouchData1 => LineTouchData(
     handleBuiltInTouches: true,
-    touchTooltipData: LineTouchTooltipData(getTooltipColor: (touchedSpot) => Colors.black54.withOpacity(0.8)),
+    touchTooltipData: LineTouchTooltipData(getTooltipColor: (touchedSpot) => Colors.black54.withAlpha(200)),
   );
 
   FlTitlesData _makeTitlesData(BuildContext context) {
@@ -107,7 +118,7 @@ class ScheduleChart extends StatelessWidget {
       series.add(
         LineChartBarData(
           isCurved: false,
-          barWidth: 2,
+          barWidth: 2.5,
           color: HexColor.fromHex(vm.lyfiDeviceInfo.channels[channelIndex].color),
           dotData: const FlDotData(show: false),
           spots: spots,
