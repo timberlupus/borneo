@@ -15,7 +15,6 @@ import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.da
 
 import 'package:borneo_app/services/store_names.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
-import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/ikernel.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 import 'package:borneo_app/models/devices/device_entity.dart';
