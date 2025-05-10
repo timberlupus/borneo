@@ -173,47 +173,42 @@ class DashboardView extends StatelessWidget {
                       Expanded(
                         child: Consumer<LyfiViewModel>(
                           builder:
-                              (context, vm, _) => MultiValueListenableBuilder<int>(
-                                valueNotifiers: vm.channels,
-                                builder:
-                                    (context, values, _) => DashboardToufu(
-                                      title: 'Brightness',
-                                      icon: Icons.lightbulb_outline,
-                                      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                                      foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-                                      arcColor: Theme.of(context).colorScheme.outlineVariant,
-                                      progressColor: Theme.of(context).colorScheme.secondary,
-                                      minValue: 0,
-                                      maxValue: vm.maxOverallBrightness,
-                                      value: vm.channels.isNotEmpty ? vm.overallBrightness : 0.0,
-                                      center: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        textBaseline: TextBaseline.alphabetic,
-                                        children: [
-                                          Text(
-                                            vm.channels.isNotEmpty
-                                                ? (vm.overallBrightness / vm.maxOverallBrightness * 100)
-                                                    .toStringAsFixed(0)
-                                                : "N/A",
-                                            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                              fontFeatures: [FontFeature.tabularFigures()],
-                                              color: Theme.of(context).colorScheme.primary,
-                                              fontSize: 24,
-                                            ),
-                                          ),
-                                          if (vm.channels.isNotEmpty)
-                                            Text(
-                                              '%',
-                                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                                fontFeatures: [FontFeature.tabularFigures()],
-                                                color: Theme.of(context).colorScheme.primary,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                        ],
+                              (context, vm, _) => DashboardToufu(
+                                title: 'Brightness',
+                                icon: Icons.lightbulb_outline,
+                                backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                                foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                                arcColor: Theme.of(context).colorScheme.outlineVariant,
+                                progressColor: Theme.of(context).colorScheme.secondary,
+                                minValue: 0,
+                                maxValue: 100,
+                                value: vm.overallBrightness * 100.0,
+                                center: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: [
+                                    Text(
+                                      vm.channels.isNotEmpty
+                                          ? (vm.overallBrightness * 100.0).toStringAsFixed(0)
+                                          : "N/A",
+                                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                        fontFeatures: [FontFeature.tabularFigures()],
+                                        color: Theme.of(context).colorScheme.primary,
+                                        fontSize: 24,
                                       ),
                                     ),
+                                    if (vm.channels.isNotEmpty)
+                                      Text(
+                                        '%',
+                                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                          fontFeatures: [FontFeature.tabularFigures()],
+                                          color: Theme.of(context).colorScheme.primary,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ),
                         ),
                       ),

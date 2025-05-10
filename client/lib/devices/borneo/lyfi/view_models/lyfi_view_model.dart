@@ -66,15 +66,8 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   double _fanPowerRatio = 0.0;
   double get fanPowerRatio => _fanPowerRatio;
 
-  double get overallBrightness {
-    int sum = 0;
-    for (final v in _channels) {
-      sum += v.value;
-    }
-    return sum.toDouble();
-  }
-
-  double get maxOverallBrightness => _channels.length * lyfiBrightnessMax.toDouble();
+  double _overallBrightness = 0;
+  double get overallBrightness => _overallBrightness;
 
   final List<ValueNotifier<int>> _channels = [];
   List<ValueNotifier<int>> get channels => _channels;
@@ -97,6 +90,8 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     }
 
     _temporaryDuration = await _deviceApi.getTemporaryDuration(boundDevice!.device);
+
+    //_channels.length * lyfiBrightnessMax.toDouble();
 
     await refreshStatus();
 
@@ -160,9 +155,12 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
     _temporaryRemaining.value = lyfiDeviceStatus!.temporaryRemaining;
 
+    double ob = 0;
     for (int i = 0; i < lyfiDeviceStatus!.currentColor.length; i++) {
       _channels[i].value = lyfiDeviceStatus!.currentColor[i];
+      ob += lyfiDeviceInfo.channels[i].brightnessRatio * _channels[i].value / lyfiBrightnessMax;
     }
+    _overallBrightness = ob;
   }
 
   void switchPowerOnOff(bool onOff) {

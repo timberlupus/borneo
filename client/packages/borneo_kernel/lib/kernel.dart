@@ -218,10 +218,13 @@ final class DefaultKernel implements IKernel {
   void _startTimer() {
     assert(!_isDisposed);
 
-    _timer ??= Timer.periodic(
-      kHeartbeatPollingInterval,
-      (_) => _heartbeatPollingPeriodicTask(),
-    );
+    _timer ??= Timer.periodic(kHeartbeatPollingInterval, (_) {
+      try {
+        _heartbeatPollingPeriodicTask();
+      } catch (e, stackTrace) {
+        _logger.e(e.toString(), error: e, stackTrace: stackTrace);
+      }
+    });
   }
 
   Future<void> _heartbeatPollingPeriodicTask() async {
