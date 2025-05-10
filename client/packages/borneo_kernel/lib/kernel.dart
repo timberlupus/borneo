@@ -276,7 +276,6 @@ final class DefaultKernel implements IKernel {
       if (!boundResults[i]) {
         _logger
             .w('Failed to bind device(${unboundDeviceDescriptors[i].device})');
-        // _events.fire(DeviceOfflineEvent(unboundDeviceDescriptors[i].device));
       }
     }
   }
