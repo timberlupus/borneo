@@ -20,7 +20,7 @@ import 'package:borneo_kernel_abstractions/mdns.dart';
 
 final class DefaultKernel implements IKernel {
   static const Duration kStartupDiscoveryDuration = Duration(seconds: 10);
-  static const Duration kProbeTimeOut = Duration(seconds: 3);
+  static const Duration kLocalProbeTimeOut = Duration(seconds: 3);
   static const Duration kHeartbeatPollingInterval = Duration(seconds: 5);
 
   Timer? _timer;
@@ -102,10 +102,14 @@ final class DefaultKernel implements IKernel {
     if (deviceID.isEmpty) {
       throw ArgumentError('`deviceID` cannnot be empty.', 'deviceID');
     }
+    if (!_registeredDevices.containsKey(deviceID)) {
+      throw ArgumentError('Cannot found deviceID `$deviceID`', 'deviceID');
+    }
     final bound = _boundDevices[deviceID];
     if (bound == null) {
+      final dev = _registeredDevices[deviceID];
       throw DeviceNotBoundError(
-          'Cannot found the bound device(id=`$deviceID`)', deviceID);
+          'Cannot found the bound ${dev!.device}', dev.device);
     }
     return bound;
   }
@@ -144,6 +148,8 @@ final class DefaultKernel implements IKernel {
     } on TimeoutException catch (_) {
       _logger.w('Probing device($device) timed out');
       return false;
+    } on DeviceProbeError catch (_) {
+      return false;
     } catch (e, stackTrace) {
       _logger.e('Kernel error: $e', error: e, stackTrace: stackTrace);
       events.fire(
@@ -170,7 +176,7 @@ final class DefaultKernel implements IKernel {
 
     final driverInitialized = await driver
         .probe(device, cancelToken: cancelToken)
-        .timeout(kProbeTimeOut);
+        .timeout(kLocalProbeTimeOut);
 
     if (driverInitialized) {
       // Try to activate device
@@ -183,9 +189,7 @@ final class DefaultKernel implements IKernel {
       }
       _events.fire(DeviceBoundEvent(device));
     } else {
-      final msg = "Failed to probe device: $device";
-      _logger.e(msg);
-      throw InvalidOperationException(message: msg);
+      throw DeviceProbeError("Failed to probe $device", device);
     }
   }
 
@@ -200,7 +204,7 @@ final class DefaultKernel implements IKernel {
       boundDevice.dispose();
       _boundDevices.remove(deviceID);
       _purgeUnusedDriver();
-      //_events.fire(DeviceRemovedEvent(boundDevice.device));
+      _events.fire(DeviceRemovedEvent(boundDevice.device));
     }
     if (_pollIDList.contains(deviceID)) {
       _pollIDList.remove(deviceID);
@@ -241,7 +245,7 @@ final class DefaultKernel implements IKernel {
           futures.add(bd.driver
               .heartbeat(bd.device,
                   cancelToken: _heartbeatPollingTaskCancelToken)
-              .timeout(kProbeTimeOut, onTimeout: () => false));
+              .timeout(kLocalProbeTimeOut, onTimeout: () => false));
           devices.add(bd);
         }
       }
@@ -265,7 +269,7 @@ final class DefaultKernel implements IKernel {
     for (final descriptor in unboundDeviceDescriptors) {
       futures.add(tryBind(descriptor.device, descriptor.driverID,
               cancelToken: _heartbeatPollingTaskCancelToken)
-          .timeout(kProbeTimeOut));
+          .timeout(kLocalProbeTimeOut));
     }
     _logger.i(
         'Polling heartbeat for (${unboundDeviceDescriptors.length}) unbound devices...');
@@ -273,10 +277,12 @@ final class DefaultKernel implements IKernel {
         .timeout(kHeartbeatPollingInterval)
         .asCancellable(_heartbeatPollingTaskCancelToken);
     for (int i = 0; i < boundResults.length; i++) {
+      /*
       if (!boundResults[i]) {
         _logger
             .w('Failed to bind device(${unboundDeviceDescriptors[i].device})');
       }
+            */
     }
   }
 

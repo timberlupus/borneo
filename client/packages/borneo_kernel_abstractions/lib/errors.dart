@@ -7,6 +7,8 @@ class DeviceError extends IOException {
   final String message;
   final Device device;
   DeviceError(this.message, this.device);
+  @override
+  String toString() => message;
 }
 
 class UnsupportedVersionError extends DeviceError {
@@ -57,12 +59,10 @@ class DeviceNotFoundError extends DeviceError {
   }
 }
 
-class DeviceNotBoundError extends IOException {
-  final String message;
-  final String deviceID;
+class DeviceNotBoundError extends DeviceError {
+  DeviceNotBoundError(super.message, super.device);
+}
 
-  DeviceNotBoundError(this.message, this.deviceID);
-
-  @override
-  String toString() => message;
+class DeviceProbeError extends DeviceError {
+  DeviceProbeError(super.message, super.device);
 }

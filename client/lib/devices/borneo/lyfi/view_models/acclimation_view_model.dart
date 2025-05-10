@@ -11,7 +11,7 @@ class AcclimationViewModel extends BaseLyfiDeviceViewModel {
   late double _days;
   double get days => _days;
 
-  late bool _enabled;
+  bool _enabled = false;
   bool get enabled => _enabled;
 
   late double _startPercent;

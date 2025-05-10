@@ -58,42 +58,43 @@ class ManualRunningChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final vm = context.read<LyfiViewModel>();
-    if (vm.isOnline) {
-      return Consumer<LyfiViewModel>(
-        builder:
-            (context, vm, _) => MultiValueListenableBuilder<int>(
-              valueNotifiers: vm.channels,
-              builder:
-                  (context, values, _) => Padding(
-                    padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
-                    child: LyfiColorChart(
-                      BarChartData(
-                        barGroups: buildGroupDataItems(context, vm),
-                        titlesData: FlTitlesData(
-                          show: true,
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              getTitlesWidget: (value, _) => buildTitles(context, vm, value),
+    return Consumer<LyfiViewModel>(
+      builder:
+          (context, vm, _) => MultiValueListenableBuilder<int>(
+            valueNotifiers: vm.channels,
+            builder:
+                (context, values, _) => Padding(
+                  padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
+                  child:
+                      vm.isOnline
+                          ? LyfiColorChart(
+                            BarChartData(
+                              barGroups: buildGroupDataItems(context, vm),
+                              titlesData: FlTitlesData(
+                                show: true,
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    getTitlesWidget: (value, _) => buildTitles(context, vm, value),
+                                  ),
+                                ),
+                                leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                              ),
+                              borderData: FlBorderData(show: false),
+                              barTouchData: BarTouchData(enabled: true),
+                              gridData: FlGridData(show: false),
+                            ),
+                          )
+                          : Center(
+                            child: Text(
+                              "Device Offline.",
+                              style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.error),
                             ),
                           ),
-                          leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        ),
-                        borderData: FlBorderData(show: false),
-                        barTouchData: BarTouchData(enabled: true),
-                        gridData: FlGridData(show: false),
-                      ),
-                    ),
-                  ),
-            ),
-      );
-    } else {
-      return Center(
-        child: Text("Device Offline.", style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.error)),
-      );
-    }
+                ),
+          ),
+    );
   }
 }
