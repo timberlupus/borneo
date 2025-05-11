@@ -47,8 +47,8 @@ int populate_hostname()
 {
     uint8_t mac[6] = { 0 };
     BO_TRY(esp_read_mac(mac, ESP_MAC_WIFI_STA));
-    snprintf(_hostname, sizeof(_hostname), "borneo-%02x%02x%02x%02x%02x%02x", mac[0], mac[1], mac[2], mac[3],
-             mac[4], mac[5]);
+    snprintf(_hostname, sizeof(_hostname), "borneo-%02x%02x%02x%02x%02x%02x", mac[0], mac[1], mac[2], mac[3], mac[4],
+             mac[5]);
     return 0;
 }
 
@@ -56,7 +56,7 @@ static int add_mdns_services()
 {
     const struct system_info* sysinfo = bo_system_get_info();
     // Add the mDNS service
-    BO_TRY(mdns_service_add(NULL, MDNS_SERVICE_TYPE, "_udp", MDNS_UDP_PORT, NULL, 0));
+    BO_TRY(mdns_service_add(sysinfo->name, MDNS_SERVICE_TYPE, "_udp", MDNS_UDP_PORT, NULL, 0));
 
     // Note: You must add the service first, then you can set its properties.
     // The web server uses a custom instance name.
@@ -78,7 +78,8 @@ static int add_mdns_services()
         { "compatible", CONFIG_BORNEO_DEVICE_COMPATIBLE },
     };
 
-    BO_TRY(mdns_service_txt_set(MDNS_SERVICE_TYPE, "_udp", serviceTxtData, sizeof(serviceTxtData) / sizeof(mdns_txt_item_t)));
+    BO_TRY(mdns_service_txt_set(MDNS_SERVICE_TYPE, "_udp", serviceTxtData,
+                                sizeof(serviceTxtData) / sizeof(mdns_txt_item_t)));
 
     return 0;
 }
