@@ -76,6 +76,7 @@ static int add_mdns_services()
         { "serno", sysinfo->hex_id },
         { "category", CONFIG_BORNEO_DEVICE_CATEGORY },
         { "compatible", CONFIG_BORNEO_DEVICE_COMPATIBLE },
+        { "path", "/borneo" },
     };
 
     BO_TRY(mdns_service_txt_set(MDNS_SERVICE_TYPE, "_udp", serviceTxtData,
