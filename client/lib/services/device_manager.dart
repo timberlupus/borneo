@@ -204,6 +204,7 @@ final class DeviceManager implements IDisposable {
             ? await _db.transaction((tx) async => await _addNewDeviceToStore(discovered, groupID: groupID, tx: tx))
             : await _addNewDeviceToStore(discovered, tx: tx);
 
+    _kernel.registerDevice(BoundDeviceDescriptor(device: device, driverID: device.driverID));
     final bindResult = await tryBind(device);
     if (!bindResult) {
       logger?.e('Failed to bind device: $device');
