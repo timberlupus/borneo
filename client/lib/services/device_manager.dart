@@ -198,32 +198,41 @@ final class DeviceManager implements IDisposable {
 
   Future<DeviceEntity> addNewDevice(SupportedDeviceDescriptor discovered, {String? groupID, Transaction? tx}) async {
     assert(isInitialized);
-    if (tx == null) {
-      return await _db.transaction((tx) async {
-        return await addNewDevice(discovered, groupID: groupID, tx: tx);
-      });
-    } else {
-      final store = stringMapStoreFactory.store(StoreNames.devices);
 
-      final device = DeviceEntity(
-        id: BaseEntity.generateID(),
-        sceneID: _sceneManager.current.id,
-        driverID: discovered.driverDescriptor.id,
-        groupID: groupID,
-        address: discovered.address,
-        compatible: discovered.compatible,
-        fingerprint: discovered.fingerprint,
-        name: discovered.name,
-        model: discovered.model,
-      );
-      await store.record(device.id).put(tx, device.toMap());
-      final bindResult = await tryBind(device);
-      if (!bindResult) {
-        logger?.e('Failed to bind device: $device');
-      }
-      deviceEvents.fire(NewDeviceEntityAddedEvent(device));
-      return device;
+    final device =
+        tx == null
+            ? await _db.transaction((tx) async => await _addNewDeviceToStore(discovered, groupID: groupID, tx: tx))
+            : await _addNewDeviceToStore(discovered, tx: tx);
+
+    final bindResult = await tryBind(device);
+    if (!bindResult) {
+      logger?.e('Failed to bind device: $device');
     }
+    return device;
+  }
+
+  Future<DeviceEntity> _addNewDeviceToStore(
+    SupportedDeviceDescriptor discovered, {
+    String? groupID,
+    required Transaction tx,
+  }) async {
+    assert(isInitialized);
+    final store = stringMapStoreFactory.store(StoreNames.devices);
+
+    final device = DeviceEntity(
+      id: BaseEntity.generateID(),
+      sceneID: _sceneManager.current.id,
+      driverID: discovered.driverDescriptor.id,
+      groupID: groupID,
+      address: discovered.address,
+      compatible: discovered.compatible,
+      fingerprint: discovered.fingerprint,
+      name: discovered.name,
+      model: discovered.model,
+    );
+    await store.record(device.id).put(tx, device.toMap());
+    deviceEvents.fire(NewDeviceEntityAddedEvent(device));
+    return device;
   }
 
   Future<DeviceEntity> getDevice(String id, {Transaction? tx}) async {
