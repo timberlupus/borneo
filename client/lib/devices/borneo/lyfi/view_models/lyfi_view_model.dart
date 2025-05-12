@@ -200,7 +200,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
       _deviceApi.switchState(super.boundDevice!.device, LedState.temporary);
     } else {
       // Restore running mode
-      _deviceApi.switchState(super.boundDevice!.device, LedState.normal);
+      _deviceApi.switchState(super.boundDevice!.device, LedState.poweringOn);
     }
     await refreshStatus();
   }

@@ -197,6 +197,10 @@ int led_init()
         BO_TRY(led_sun_init());
     }
 
+    if (bo_power_is_on()) {
+        BO_TRY(led_fade_powering_on());
+    }
+
     xTaskCreate(&led_proc, "led_task", 2 * 1024, NULL, tskIDLE_PRIORITY + 2, NULL);
     ESP_LOGI(TAG, "LED Controller module has been initialized successfully.");
     return 0;
@@ -387,7 +391,6 @@ int led_fade_powering_on()
 int led_fade_stop()
 {
     _led.fade_start_time_ms = 0LL;
-    BO_MUST(led_update_color(_led.fade_end_color));
     return 0;
 }
 
@@ -400,6 +403,7 @@ void led_fade_drive()
     int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
     if (now >= _led.fade_start_time_ms + _led.fade_duration_ms) {
         BO_MUST(led_fade_stop());
+        BO_MUST(led_update_color(_led.fade_end_color));
         return;
     }
 
@@ -749,7 +753,7 @@ int temporary_state_entry(uint8_t prev_state)
 
     int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
 
-    _led.temporary_off_time = now + (_led.settings.temporary_duration * 60 * 1000) + FADE_PERIOD_MS * 2;
+    _led.temporary_off_time = now + (_led.settings.temporary_duration * 60 * 1000) + FADE_PERIOD_MS;
     _led.state = LED_STATE_TEMPORARY;
 
     BO_TRY(led_fade_to_color(_led.settings.manual_color, FADE_PERIOD_MS));
@@ -763,6 +767,7 @@ static int temporary_state_exit()
     }
 
     _led.temporary_off_time = 0;
+    BO_TRY(led_switch_state(LED_STATE_POWERING_ON));
     return 0;
 }
 
@@ -775,7 +780,7 @@ static void temporary_state_drive()
     int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
 
     if (now >= _led.temporary_off_time) {
-        BO_MUST(led_switch_state(LED_STATE_NORMAL));
+        BO_MUST(temporary_state_exit());
     }
     else {
         if (!led_fade_inprogress()) {
@@ -863,12 +868,8 @@ int led_switch_state(uint8_t state)
 
     case LED_STATE_NORMAL:
     case LED_STATE_DIMMING:
+    case LED_STATE_TEMPORARY:
         break;
-
-    case LED_STATE_TEMPORARY: {
-        BO_TRY(temporary_state_exit());
-        _led.state = LED_STATE_NORMAL;
-    } break;
 
     case LED_STATE_PREVIEW: {
         preview_state_exit();
