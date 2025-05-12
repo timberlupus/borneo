@@ -16,7 +16,7 @@
 
 #include "../led.h"
 #include "../solar.h"
-#include "common.h"
+#include "cbor.h"
 
 #define TAG "lyfi-coap"
 
@@ -37,7 +37,7 @@ static void coap_hnd_sun_schedule_get(coap_resource_t* resource, coap_session_t*
     BO_COAP_VERIFY(cbor_encoder_create_array(&encoder, &root_array, _led.sun_scheduler.item_count));
     for (size_t i = 0; i < _led.sun_scheduler.item_count; i++) {
         const struct led_scheduler_item* sch_item = &_led.sun_scheduler.items[i];
-        BO_COAP_VERIFY(coap_led_sch_item_encode(&root_array, sch_item));
+        BO_COAP_VERIFY(cbor_encode_led_sch_item(&root_array, sch_item));
     }
     BO_COAP_VERIFY(cbor_encoder_close_container(&encoder, &root_array));
 

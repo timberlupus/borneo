@@ -16,37 +16,15 @@
 
 #include "../led.h"
 #include "../fan.h"
-#include "common.h"
+#include "cbor.h"
 
 #define TAG "lyfi-coap"
 
-static int color_decode(CborValue* value, led_color_t color);
 static int _encode_channel_info_entry(CborEncoder* parent, const char* name, const char* color,
                                       uint32_t brightness_percent, uint32_t power);
 static int _encode_channel_info_array(CborEncoder* parent);
 
-static int color_decode(CborValue* value, led_color_t color)
-{
-    CborValue array;
-    size_t array_length = 0;
-    BO_TRY(cbor_value_enter_container(value, &array));
-    BO_TRY(cbor_value_get_array_length(value, &array_length));
-    if (array_length != LYFI_LED_CHANNEL_COUNT) {
-        return -EINVAL;
-    }
-
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        int ch_value = 0;
-        BO_TRY(cbor_value_get_int_checked(&array, &ch_value));
-        if (ch_value < 0) {
-            return -EINVAL;
-        }
-        color[ch] = ch_value;
-        BO_TRY(cbor_value_advance_fixed(&array));
-    }
-    BO_TRY(cbor_value_leave_container(value, &array));
-    return 0;
-}
+extern struct led_status _led;
 
 static void coap_hnd_color_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
                                const coap_string_t* query, coap_pdu_t* response)
@@ -59,7 +37,7 @@ static void coap_hnd_color_get(coap_resource_t* resource, coap_session_t* sessio
     BO_COAP_VERIFY(led_get_color(color));
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
-    BO_COAP_VERIFY(coap_color_encode(&encoder, color));
+    BO_COAP_VERIFY(cbor_encode_color(&encoder, color));
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
@@ -84,7 +62,7 @@ static void coap_hnd_color_put(coap_resource_t* resource, coap_session_t* sessio
     CborParser parser;
     CborValue value;
     BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
-    BO_COAP_VERIFY(color_decode(&value, color));
+    BO_COAP_VERIFY(cbor_value_get_led_color(&value, color));
     BO_COAP_VERIFY(led_set_color(color));
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
@@ -103,7 +81,7 @@ static void coap_hnd_schedule_get(coap_resource_t* resource, coap_session_t* ses
     BO_COAP_VERIFY(cbor_encoder_create_array(&encoder, &root_array, sch->item_count));
     for (size_t i = 0; i < sch->item_count; i++) {
         const struct led_scheduler_item* sch_item = &sch->items[i];
-        BO_COAP_VERIFY(coap_led_sch_item_encode(&root_array, sch_item));
+        BO_COAP_VERIFY(cbor_encode_led_sch_item(&root_array, sch_item));
     }
     BO_COAP_VERIFY(cbor_encoder_close_container(&encoder, &root_array));
 
@@ -147,7 +125,7 @@ static void coap_hnd_schedule_put(coap_resource_t* resource, coap_session_t* ses
         sch_item->instant = (uint32_t)instant;
         BO_COAP_VERIFY(cbor_value_advance(&item_array));
 
-        BO_COAP_VERIFY(color_decode(&item_array, sch_item->color));
+        BO_COAP_VERIFY(cbor_value_get_led_color(&item_array, sch_item->color));
         BO_COAP_VERIFY(cbor_value_leave_container(&root_array, &item_array));
     }
     BO_COAP_VERIFY(cbor_value_leave_container(&it, &root_array));
@@ -346,17 +324,17 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "currentColor"));
         led_color_t color;
         BO_COAP_VERIFY(led_get_color(color));
-        BO_COAP_TRY_ENCODE_CBOR(coap_color_encode(&root_map, color));
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_color(&root_map, color));
     }
 
     {
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "manualColor"));
-        BO_COAP_TRY_ENCODE_CBOR(coap_color_encode(&root_map, led_get_settings()->manual_color));
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_color(&root_map, led_get_settings()->manual_color));
     }
 
     {
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "sunColor"));
-        BO_COAP_TRY_ENCODE_CBOR(coap_color_encode(&root_map, led_get_settings()->sun_color));
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_color(&root_map, led_get_settings()->sun_color));
     }
 
     {
@@ -536,7 +514,6 @@ static void coap_hnd_geo_location_get(coap_resource_t* resource, coap_session_t*
     uint8_t buf[128];
 
     // TODO lock
-    extern struct led_status _led;
 
     CborEncoder encoder;
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
