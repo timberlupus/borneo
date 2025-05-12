@@ -95,8 +95,18 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
     await refreshStatus();
 
-    scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
-    sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
+    switch (mode) {
+      case LedRunningMode.scheduled:
+        scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
+        break;
+
+      case LedRunningMode.sun:
+        sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
+        break;
+
+      default:
+        break;
+    }
 
     // Update schedule
     // final schedule = await _deviceApi.getSchedule(boundDevice.device);

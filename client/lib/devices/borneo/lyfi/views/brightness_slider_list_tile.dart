@@ -43,7 +43,7 @@ class BrightnessSliderListTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(32),
             color: Theme.of(context).colorScheme.primaryContainer,
             child: Center(
-              child: Icon(Icons.circle_outlined, color: Theme.of(context).colorScheme.onPrimaryContainer, size: 16),
+              child: Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onPrimaryContainer, size: 16),
             ),
           ),
         ),

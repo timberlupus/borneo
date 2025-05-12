@@ -1,13 +1,15 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/acclimation_screen.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/toufu_view.dart';
-import 'package:borneo_app/devices/borneo/lyfi/views/manual_running_chart.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/widgets/manual_running_chart.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/schedule_chart.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/widgets/schedule_running_chart.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/settings_screen.dart';
 import 'package:borneo_app/widgets/icon_progress.dart';
 import 'package:borneo_app/widgets/power_switch.dart';
 import 'package:borneo_app/widgets/rounded_icon_text_button.dart';
 import 'package:borneo_app/widgets/value_listenable_builders.dart';
+import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:flutter/material.dart';
 
@@ -49,14 +51,12 @@ class DashboardView extends StatelessWidget {
                                 Selector<LyfiViewModel, ({LedRunningMode mode, LedState? state, bool isOn})>(
                                   selector: (_, vm) => (mode: vm.mode, state: vm.ledState, isOn: vm.isOn),
                                   builder: (context, vm, _) {
-                                    Widget chart;
-                                    if (vm.state == LedState.temporary) {
-                                      chart = ManualRunningChart();
-                                    } else if (vm.mode == LedRunningMode.manual) {
-                                      chart = ManualRunningChart();
-                                    } else {
-                                      chart = ScheduleChart();
-                                    }
+                                    Widget chart = switch (vm.mode) {
+                                      LedRunningMode.manual => ManualRunningChart(),
+                                      LedRunningMode.scheduled => ScheduleRunningChart(),
+                                      LedRunningMode.sun => ScheduleRunningChart(),
+                                      _ => throw InvalidDataException(message: 'Invalid LED running mode: $vm.mode'),
+                                    };
                                     return AnimatedSwitcher(
                                       duration: Duration(milliseconds: 300),
                                       transitionBuilder: (Widget child, Animation<double> animation) {

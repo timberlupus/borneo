@@ -7,8 +7,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ScheduleChart extends StatelessWidget {
-  const ScheduleChart({super.key});
+class ScheduleRunningChart extends StatelessWidget {
+  const ScheduleRunningChart({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +107,7 @@ class ScheduleChart extends StatelessWidget {
       final spots = <FlSpot>[];
       //final sortedEntries = vm.entries.toList();
       //sortedEntries.sort((a, b) => a.instant.compareTo(b.instant));
-      final instants = vm.mode == LedRunningMode.sun ? vm.sunInstants : vm.scheduledInstants;
+      final instants = vm.scheduledInstants;
       for (final entry in instants) {
         double x = entry.instant.inSeconds.toDouble();
         double y = entry.color[channelIndex].toDouble();

@@ -13,6 +13,9 @@ class SunEditorViewModel extends BaseEditorViewModel {
   @override
   LyfiDeviceInfo get deviceInfo => parent.lyfiDeviceInfo;
 
+  late List<ScheduledInstant> _sunInstants;
+  List<ScheduledInstant> get sunInstants => _sunInstants;
+
   SunEditorViewModel(super.parent);
 
   @override
@@ -23,6 +26,9 @@ class SunEditorViewModel extends BaseEditorViewModel {
     for (int i = 0; i < parent.lyfiDeviceInfo.channels.length; i++) {
       channels[i].value = lyfiStatus.sunColor[i];
     }
+
+    final instants = await _deviceApi.getSunSchedule(parent.boundDevice!.device);
+    _sunInstants = instants;
   }
 
   @override

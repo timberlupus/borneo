@@ -70,7 +70,8 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
 
   @override
   Future<void> onInitialize() async {
-    final deviceSideInstants = parent.scheduledInstants;
+    final deviceSideInstants = await super.deviceApi.getSchedule(parent.boundDevice!.device);
+
     _entries.addAll(deviceSideInstants.map((x) => ScheduleEntryViewModel(x)));
 
     if (deviceSideInstants.isNotEmpty) {
