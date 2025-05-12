@@ -34,7 +34,7 @@
 
 ESP_EVENT_DEFINE_BASE(BO_SNTP_EVENTS);
 
-#define SNTP_SERVER_0 "ntp.aliyun.com"
+#define SNTP_SERVER_0 "pool.ntp.org"
 
 #define DELTA (2208988800ull)
 
