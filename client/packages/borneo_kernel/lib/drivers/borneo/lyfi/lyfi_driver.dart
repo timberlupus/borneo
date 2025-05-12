@@ -24,7 +24,6 @@ class LyfiPaths {
   static final Uri state = Uri(path: '/borneo/lyfi/state');
   static final Uri color = Uri(path: '/borneo/lyfi/color');
   static final Uri schedule = Uri(path: '/borneo/lyfi/schedule');
-  static final Uri sunSchedule = Uri(path: '/borneo/lyfi/sun-schedule');
   static final Uri mode = Uri(path: '/borneo/lyfi/mode');
   static final Uri correctionMethod =
       Uri(path: '/borneo/lyfi/correction-method');
@@ -32,6 +31,9 @@ class LyfiPaths {
   static final Uri acclimation = Uri(path: '/borneo/lyfi/acclimation');
   static final Uri temporaryDuration =
       Uri(path: '/borneo/lyfi/temporary-duration');
+
+  static final Uri sunSchedule = Uri(path: '/borneo/lyfi/sun/schedule');
+  static final Uri sunCurve = Uri(path: '/borneo/lyfi/sun/curve');
 }
 
 class LyfiChannelInfo {
@@ -268,6 +270,36 @@ class ScheduledInstant {
   bool get isZero => !color.any((x) => x != 0);
 }
 
+class SunCurveItem {
+  final Duration instant;
+  final double brightness;
+  const SunCurveItem({required this.instant, required this.brightness});
+
+  factory SunCurveItem.fromMap(dynamic map) {
+    final secs = map['time'] as double;
+    return SunCurveItem(
+      instant: Duration(seconds: (secs * 3600.0).round()),
+      brightness: map['brightness'],
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! SunCurveItem) {
+      return false;
+    }
+    const double tolerance = 0.00001;
+    return instant == other.instant &&
+        (brightness - other.brightness).abs() < tolerance;
+  }
+
+  @override
+  int get hashCode => Object.hash(instant, brightness);
+}
+
 abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   LyfiDeviceInfo getLyfiInfo(Device dev);
   Future<LyfiDeviceStatus> getLyfiStatus(Device dev);
@@ -280,8 +312,6 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
 
   Future<List<ScheduledInstant>> getSchedule(Device dev);
   Future<void> setSchedule(Device dev, Iterable<ScheduledInstant> schedule);
-
-  Future<List<ScheduledInstant>> getSunSchedule(Device dev);
 
   Future<List<int>> getColor(Device dev);
   Future<void> setColor(Device dev, List<int> color);
@@ -300,6 +330,9 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   Future<AcclimationSettings> getAcclimation(Device dev);
   Future<void> setAcclimation(Device dev, AcclimationSettings acc);
   Future<void> terminateAcclimation(Device dev);
+
+  Future<List<ScheduledInstant>> getSunSchedule(Device dev);
+  Future<List<SunCurveItem>> getSunCurve(Device dev);
 }
 
 class LyfiDriverData extends BorneoDriverData {
@@ -494,13 +527,6 @@ class BorneoLyfiDriver
   }
 
   @override
-  Future<List<ScheduledInstant>> getSunSchedule(Device dev) async {
-    final dd = dev.driverData as LyfiDriverData;
-    final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.sunSchedule);
-    return items.map((x) => ScheduledInstant.fromMap(x!)).toList();
-  }
-
-  @override
   Future<LedCorrectionMethod> getCorrectionMethod(Device dev) async {
     final dd = dev.driverData as LyfiDriverData;
     final value = await dd.coap.getCbor<int>(LyfiPaths.correctionMethod);
@@ -563,5 +589,19 @@ class BorneoLyfiDriver
   Future<void> terminateAcclimation(Device dev) async {
     final dd = dev.driverData as LyfiDriverData;
     await dd.coap.delete(LyfiPaths.acclimation);
+  }
+
+  @override
+  Future<List<ScheduledInstant>> getSunSchedule(Device dev) async {
+    final dd = dev.driverData as LyfiDriverData;
+    final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.sunSchedule);
+    return items.map((x) => ScheduledInstant.fromMap(x!)).toList();
+  }
+
+  @override
+  Future<List<SunCurveItem>> getSunCurve(Device dev) async {
+    final dd = dev.driverData as LyfiDriverData;
+    final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.sunCurve);
+    return items.map((x) => SunCurveItem.fromMap(x!)).toList();
   }
 }

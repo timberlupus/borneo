@@ -1,26 +1,20 @@
-import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/acclimation_screen.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/toufu_view.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/widgets/manual_running_chart.dart';
-import 'package:borneo_app/devices/borneo/lyfi/views/schedule_chart.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/widgets/schedule_running_chart.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/settings_screen.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/widgets/sun_running_chart.dart';
 import 'package:borneo_app/widgets/icon_progress.dart';
 import 'package:borneo_app/widgets/power_switch.dart';
 import 'package:borneo_app/widgets/rounded_icon_text_button.dart';
 import 'package:borneo_app/widgets/value_listenable_builders.dart';
-import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fl_chart/fl_chart.dart';
 import 'package:gauge_indicator/gauge_indicator.dart';
 import 'package:provider/provider.dart';
-import 'package:borneo_common/duration_ext.dart';
 
-import 'package:borneo_app/views/common/hex_color.dart';
 import '../../view_models/lyfi_view_model.dart';
-import '../color_chart.dart';
 
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
@@ -53,9 +47,24 @@ class DashboardView extends StatelessWidget {
                                   builder: (context, vm, _) {
                                     Widget chart = switch (vm.mode) {
                                       LedRunningMode.manual => ManualRunningChart(),
+
                                       LedRunningMode.scheduled => ScheduleRunningChart(),
-                                      LedRunningMode.sun => ScheduleRunningChart(),
-                                      _ => throw InvalidDataException(message: 'Invalid LED running mode: $vm.mode'),
+
+                                      LedRunningMode.sun => Selector<
+                                        LyfiViewModel,
+                                        ({List<LyfiChannelInfo> channels, List<ScheduledInstant> instants})
+                                      >(
+                                        selector:
+                                            (context, vm) => (
+                                              channels: vm.lyfiDeviceInfo.channels,
+                                              instants: vm.sunInstants,
+                                            ),
+                                        builder:
+                                            (context, selected, _) => SunRunningChart(
+                                              sunInstants: selected.instants,
+                                              channelInfoList: selected.channels,
+                                            ),
+                                      ),
                                     };
                                     return AnimatedSwitcher(
                                       duration: Duration(milliseconds: 300),

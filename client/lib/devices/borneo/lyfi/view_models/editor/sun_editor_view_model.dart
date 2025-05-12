@@ -13,8 +13,10 @@ class SunEditorViewModel extends BaseEditorViewModel {
   @override
   LyfiDeviceInfo get deviceInfo => parent.lyfiDeviceInfo;
 
-  late List<ScheduledInstant> _sunInstants;
+  List<ScheduledInstant> _sunInstants = const [];
   List<ScheduledInstant> get sunInstants => _sunInstants;
+
+  List<SunCurveItem> _sunCurve = const [];
 
   SunEditorViewModel(super.parent);
 
@@ -27,6 +29,8 @@ class SunEditorViewModel extends BaseEditorViewModel {
       channels[i].value = lyfiStatus.sunColor[i];
     }
 
+    _sunCurve = await _deviceApi.getSunCurve(parent.boundDevice!.device);
+
     final instants = await _deviceApi.getSunSchedule(parent.boundDevice!.device);
     _sunInstants = instants;
   }
@@ -38,6 +42,9 @@ class SunEditorViewModel extends BaseEditorViewModel {
       final color = channels.map((x) => x.value).toList();
       super.colorChangeRateLimiter.add(() => _deviceApi.setColor(parent.boundDevice!.device, color));
       isChanged = true;
+      for (var i = 0; i < _sunInstants.length; i++) {
+        _sunInstants[i].color[index] = (value * _sunCurve[i].brightness).round();
+      }
     }
   }
 

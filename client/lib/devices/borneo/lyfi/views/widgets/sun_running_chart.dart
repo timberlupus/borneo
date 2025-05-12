@@ -1,23 +1,22 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
-import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_app/views/common/hex_color.dart';
 import 'package:borneo_common/duration_ext.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class SunRunningChart extends StatelessWidget {
-  const SunRunningChart({super.key});
+  final List<ScheduledInstant> sunInstants;
+  final List<LyfiChannelInfo> channelInfoList;
+  const SunRunningChart({required this.sunInstants, required this.channelInfoList, super.key});
 
   @override
   Widget build(BuildContext context) {
-    LyfiViewModel vm = context.read<LyfiViewModel>();
     return Container(
       padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: LineChart(
-        _buildChartData(context, vm),
-        duration: const Duration(milliseconds: 250),
+        _buildChartData(context),
+        duration: const Duration(milliseconds: 200),
         transformationConfig: FlTransformationConfig(
           scaleAxis: FlScaleAxis.horizontal,
           minScale: 1.0,
@@ -29,7 +28,7 @@ class SunRunningChart extends StatelessWidget {
     );
   }
 
-  LineChartData _buildChartData(BuildContext context, LyfiViewModel vm) {
+  LineChartData _buildChartData(BuildContext context) {
     final now = DateTime.now();
     final borderSide = BorderSide(color: Theme.of(context).scaffoldBackgroundColor, width: 1.5);
     return LineChartData(
@@ -48,7 +47,7 @@ class SunRunningChart extends StatelessWidget {
         show: true,
         border: Border(bottom: borderSide, left: borderSide, right: borderSide, top: borderSide),
       ),
-      lineBarsData: buildLineData(vm),
+      lineBarsData: buildLineData(),
       minX: 0,
       maxX: 24 * 3600.0,
       minY: 0,
@@ -56,32 +55,31 @@ class SunRunningChart extends StatelessWidget {
       extraLinesData: ExtraLinesData(
         extraLinesOnTop: true,
         verticalLines: [
-          if (vm.isOn && vm.isOnline)
-            VerticalLine(
-              x:
-                  Duration(
-                    hours: now.hour.toInt(),
-                    minutes: now.minute.toInt(),
-                    seconds: now.second.toInt(),
-                  ).inSeconds.toDouble(),
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
-                  Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.75),
-                ],
-              ),
-              dashArray: const [3, 2],
-              strokeWidth: 1.5,
-              label: VerticalLineLabel(
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
-                padding: const EdgeInsets.only(bottom: 8),
-                alignment: const Alignment(0, -1.6),
-                show: true,
-                labelResolver: (vl) => Duration(seconds: vl.x.toInt()).toHHMM(),
-              ),
+          VerticalLine(
+            x:
+                Duration(
+                  hours: now.hour.toInt(),
+                  minutes: now.minute.toInt(),
+                  seconds: now.second.toInt(),
+                ).inSeconds.toDouble(),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
+                Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.75),
+              ],
             ),
+            dashArray: const [3, 2],
+            strokeWidth: 1.5,
+            label: VerticalLineLabel(
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
+              padding: const EdgeInsets.only(bottom: 8),
+              alignment: const Alignment(0, -1.6),
+              show: true,
+              labelResolver: (vl) => Duration(seconds: vl.x.toInt()).toHHMM(),
+            ),
+          ),
         ],
       ),
     );
@@ -101,14 +99,13 @@ class SunRunningChart extends StatelessWidget {
     );
   }
 
-  List<LineChartBarData> buildLineData(LyfiViewModel vm) {
+  List<LineChartBarData> buildLineData() {
     final series = <LineChartBarData>[];
-    for (int channelIndex = 0; channelIndex < vm.channels.length; channelIndex++) {
+    for (int channelIndex = 0; channelIndex < channelInfoList.length; channelIndex++) {
       final spots = <FlSpot>[];
       //final sortedEntries = vm.entries.toList();
       //sortedEntries.sort((a, b) => a.instant.compareTo(b.instant));
-      final instants = vm.sunInstants;
-      for (final entry in instants) {
+      for (final entry in sunInstants) {
         double x = entry.instant.inSeconds.toDouble();
         double y = entry.color[channelIndex].toDouble();
         final spot = FlSpot(x, y);
@@ -119,7 +116,7 @@ class SunRunningChart extends StatelessWidget {
         LineChartBarData(
           isCurved: false,
           barWidth: 2.5,
-          color: HexColor.fromHex(vm.lyfiDeviceInfo.channels[channelIndex].color),
+          color: HexColor.fromHex(channelInfoList[channelIndex].color),
           dotData: const FlDotData(show: false),
           spots: spots,
         ),

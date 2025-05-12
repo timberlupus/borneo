@@ -16,6 +16,7 @@
 
 #include "../led.h"
 #include "../fan.h"
+#include "common.h"
 
 #define TAG "lyfi-coap"
 
@@ -47,33 +48,6 @@ static int color_decode(CborValue* value, led_color_t color)
     return 0;
 }
 
-static int color_encode(CborEncoder* encoder, const led_color_t color)
-{
-    CborEncoder ch_array;
-    BO_TRY(cbor_encoder_create_array(encoder, &ch_array, LYFI_LED_CHANNEL_COUNT));
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        BO_TRY(cbor_encode_uint(&ch_array, color[ch]));
-    }
-    BO_TRY(cbor_encoder_close_container(encoder, &ch_array));
-    return 0;
-}
-
-static int sch_item_encode(CborEncoder* encoder, const struct led_scheduler_item* sch_item)
-{
-    CborEncoder item_map;
-    BO_TRY(cbor_encoder_create_map(encoder, &item_map, CborIndefiniteLength));
-
-    BO_TRY(cbor_encode_text_stringz(&item_map, "instant"));
-    BO_TRY(cbor_encode_uint(&item_map, sch_item->instant));
-
-    BO_TRY(cbor_encode_text_stringz(&item_map, "color"));
-    BO_TRY(color_encode(&item_map, sch_item->color));
-
-    BO_TRY(cbor_encoder_close_container(encoder, &item_map));
-
-    return 0;
-}
-
 static void coap_hnd_color_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
                                const coap_string_t* query, coap_pdu_t* response)
 {
@@ -85,7 +59,7 @@ static void coap_hnd_color_get(coap_resource_t* resource, coap_session_t* sessio
     BO_COAP_VERIFY(led_get_color(color));
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
-    BO_COAP_VERIFY(color_encode(&encoder, color));
+    BO_COAP_VERIFY(coap_color_encode(&encoder, color));
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
@@ -129,7 +103,7 @@ static void coap_hnd_schedule_get(coap_resource_t* resource, coap_session_t* ses
     BO_COAP_VERIFY(cbor_encoder_create_array(&encoder, &root_array, sch->item_count));
     for (size_t i = 0; i < sch->item_count; i++) {
         const struct led_scheduler_item* sch_item = &sch->items[i];
-        BO_COAP_VERIFY(sch_item_encode(&root_array, sch_item));
+        BO_COAP_VERIFY(coap_led_sch_item_encode(&root_array, sch_item));
     }
     BO_COAP_VERIFY(cbor_encoder_close_container(&encoder, &root_array));
 
@@ -181,30 +155,6 @@ static void coap_hnd_schedule_put(coap_resource_t* resource, coap_session_t* ses
     BO_COAP_VERIFY(led_set_schedule(scheduler.items, scheduler.item_count));
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
-}
-
-static void coap_hnd_sun_schedule_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
-                                      const coap_string_t* query, coap_pdu_t* response)
-{
-    size_t encoded_size = 0;
-    uint8_t buf[1024];
-
-    // TODO lock
-    extern struct led_status _led;
-
-    CborEncoder encoder;
-    cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
-    CborEncoder root_array;
-    BO_COAP_VERIFY(cbor_encoder_create_array(&encoder, &root_array, _led.sun_scheduler.item_count));
-    for (size_t i = 0; i < _led.sun_scheduler.item_count; i++) {
-        const struct led_scheduler_item* sch_item = &_led.sun_scheduler.items[i];
-        BO_COAP_VERIFY(sch_item_encode(&root_array, sch_item));
-    }
-    BO_COAP_VERIFY(cbor_encoder_close_container(&encoder, &root_array));
-
-    encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
-
-    coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
 }
 
 static int _encode_channel_info_entry(CborEncoder* parent, const char* name, const char* color,
@@ -396,17 +346,17 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "currentColor"));
         led_color_t color;
         BO_COAP_VERIFY(led_get_color(color));
-        BO_COAP_TRY_ENCODE_CBOR(color_encode(&root_map, color));
+        BO_COAP_TRY_ENCODE_CBOR(coap_color_encode(&root_map, color));
     }
 
     {
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "manualColor"));
-        BO_COAP_TRY_ENCODE_CBOR(color_encode(&root_map, led_get_settings()->manual_color));
+        BO_COAP_TRY_ENCODE_CBOR(coap_color_encode(&root_map, led_get_settings()->manual_color));
     }
 
     {
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "sunColor"));
-        BO_COAP_TRY_ENCODE_CBOR(color_encode(&root_map, led_get_settings()->sun_color));
+        BO_COAP_TRY_ENCODE_CBOR(coap_color_encode(&root_map, led_get_settings()->sun_color));
     }
 
     {
@@ -646,8 +596,6 @@ static void coap_hnd_geo_location_put(coap_resource_t* resource, coap_session_t*
 COAP_RESOURCE_DEFINE("borneo/lyfi/color", false, coap_hnd_color_get, NULL, coap_hnd_color_put, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/schedule", false, coap_hnd_schedule_get, NULL, coap_hnd_schedule_put, NULL);
-
-COAP_RESOURCE_DEFINE("borneo/lyfi/sun-schedule", false, coap_hnd_sun_schedule_get, NULL, NULL, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/info", false, coap_hnd_info_get, NULL, NULL, NULL);
 

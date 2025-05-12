@@ -11,6 +11,11 @@ class DeviceError extends IOException {
   String toString() => message;
 }
 
+class DeviceCommuncationError extends DeviceError {
+  Exception? innerException;
+  DeviceCommuncationError(super.message, super.device, {this.innerException});
+}
+
 class UnsupportedVersionError extends DeviceError {
   final Version currentVersion;
   final VersionConstraint? versionRange;
