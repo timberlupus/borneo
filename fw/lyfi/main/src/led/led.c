@@ -24,6 +24,11 @@
 #include "../algo.h"
 #include "led.h"
 
+int led_temporary_state_entry(uint8_t prev_state);
+int led_temporary_state_exit();
+void led_temporary_state_drive();
+void led_sch_drive(time_t utc_now, led_color_t color);
+
 static void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data);
 static void led_events_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data);
 
@@ -35,12 +40,6 @@ static void normal_state_drive();
 static int preview_state_entry();
 static void preview_state_exit();
 static void preview_state_drive();
-
-static int led_temporary_state_entry(uint8_t prev_state);
-static int led_temporary_state_exit();
-static void led_temporary_state_drive();
-
-static void led_sch_drive(time_t utc_now, led_color_t color);
 
 static void led_drive();
 
@@ -188,10 +187,6 @@ int led_init()
 
     if (_led.settings.mode == LED_MODE_SUN) {
         BO_TRY(led_sun_init());
-    }
-
-    if (bo_power_is_on()) {
-        BO_TRY(led_fade_to_normal());
     }
 
     xTaskCreate(&led_proc, "led_task", 2 * 1024, NULL, tskIDLE_PRIORITY + 2, NULL);
@@ -414,10 +409,12 @@ static void system_events_handler(void* handler_args, esp_event_base_t base, int
     } break;
 
     case BO_EVENT_SHUTDOWN_SCHEDULED: {
+        BO_MUST(led_fade_black());
         BO_MUST(led_switch_state(LED_STATE_NORMAL));
     } break;
 
     case BO_EVENT_POWER_ON: {
+        BO_MUST(led_fade_to_normal());
         BO_MUST(led_switch_state(LED_STATE_NORMAL));
     } break;
 
@@ -655,27 +652,6 @@ static void led_drive()
         preview_state_drive();
     } break;
 
-        /*
-        case LED_STATE_POWERING_OFF: {
-            if (led_is_fading()) {
-                led_fade_drive();
-            }
-            else {
-                led_blank();
-                _led.state = LED_STATE_NORMAL;
-            }
-        } break;
-
-        case LED_STATE_POWERING_ON: {
-            if (led_is_fading()) {
-                led_fade_drive();
-            }
-            else {
-                led_switch_state(LED_STATE_NORMAL);
-            }
-        } break;
-         */
-
     default:
         assert(false);
     }
@@ -683,6 +659,10 @@ static void led_drive()
 
 void led_proc()
 {
+    if (bo_power_is_on()) {
+        BO_MUST(led_fade_to_normal());
+    }
+
     while (true) {
         led_drive();
         vTaskDelay(pdMS_TO_TICKS(10));
@@ -703,10 +683,6 @@ int led_switch_state(uint8_t state)
 
     if (state >= LED_STATE_COUNT) {
         return -EINVAL;
-    }
-
-    if (led_is_fading()) {
-        BO_TRY(led_fade_stop());
     }
 
     // Processing the previous state:
@@ -735,6 +711,10 @@ int led_switch_state(uint8_t state)
         if (!bo_power_is_on()) {
             return -EINVAL;
         }
+        if (led_is_fading()) {
+            BO_TRY(led_fade_stop());
+        }
+
         // TODO Start the timer
         if (_led.state == LED_STATE_NORMAL || _led.state == LED_STATE_PREVIEW || _led.state == LED_STATE_TEMPORARY) {
             _led.state = state;

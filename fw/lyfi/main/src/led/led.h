@@ -165,6 +165,7 @@ bool led_is_fading();
 int led_fade_stop();
 int led_fade_to_normal();
 void led_fade_drive();
+int led_fade_black();
 
 bool led_has_geo_location();
 int led_set_geo_location(const struct geo_location* location);

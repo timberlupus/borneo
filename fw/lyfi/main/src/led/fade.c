@@ -90,6 +90,14 @@ int led_fade_stop()
     return 0;
 }
 
+int led_fade_black()
+{
+    led_color_t off_color;
+    memset(off_color, 0, sizeof(led_color_t));
+    BO_TRY(led_fade_to_color(off_color, FADE_OFF_PERIOD_MS));
+    return 0;
+}
+
 void led_fade_drive()
 {
     if (!led_is_fading()) {
