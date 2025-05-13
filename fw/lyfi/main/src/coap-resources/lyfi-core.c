@@ -14,7 +14,7 @@
 #include <borneo/coap.h>
 #include <borneo/rtc.h>
 
-#include "../led.h"
+#include "../led/led.h"
 #include "../fan.h"
 #include "cbor.h"
 

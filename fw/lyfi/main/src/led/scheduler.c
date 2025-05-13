@@ -19,8 +19,8 @@
 #include <borneo/power.h>
 #include <borneo/nvs.h>
 
-#include "lyfi-events.h"
-#include "algo.h"
+#include "../lyfi-events.h"
+#include "../algo.h"
 #include "led.h"
 
 #define SECS_PER_DAY 172800

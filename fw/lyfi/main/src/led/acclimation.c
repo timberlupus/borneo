@@ -20,8 +20,8 @@
 #include <borneo/nvs.h>
 #include <borneo/utils/time.h>
 
-#include "lyfi-events.h"
-#include "algo.h"
+#include "../lyfi-events.h"
+#include "../algo.h"
 #include "led.h"
 
 #define TAG "led.acclimation"

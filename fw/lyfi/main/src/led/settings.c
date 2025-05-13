@@ -19,8 +19,7 @@
 #include <borneo/power.h>
 #include <borneo/nvs.h>
 
-#include "lyfi-events.h"
-#include "algo.h"
+#include "../lyfi-events.h"
 #include "led.h"
 
 #define LED_NVS_NS "led"

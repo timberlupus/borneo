@@ -20,8 +20,8 @@
 #include <borneo/algo/astronomy.h>
 #include <borneo/wifi.h>
 
-#include "lyfi-events.h"
-#include "algo.h"
+#include "../lyfi-events.h"
+#include "../algo.h"
 #include "led.h"
 
 static void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data);
@@ -32,13 +32,15 @@ static void led_proc();
 static int normal_state_entry();
 static void normal_state_drive();
 
-static int temporary_state_entry(uint8_t prev_state);
-static int temporary_state_exit();
-static void temporary_state_drive();
-
 static int preview_state_entry();
 static void preview_state_exit();
 static void preview_state_drive();
+
+static int led_temporary_state_entry(uint8_t prev_state);
+static int led_temporary_state_exit();
+static void led_temporary_state_drive();
+
+static void led_sch_drive(time_t utc_now, led_color_t color);
 
 static void led_drive();
 
@@ -48,19 +50,10 @@ static void led_drive();
 #define LED_MAX_DUTY ((1 << LEDC_TIMER_12_BIT) - 1)
 #define LED_DUTY_RES LEDC_TIMER_10_BIT
 
-#define FADE_PERIOD_MS 10000
-#define FADE_ON_PERIOD_MS 5000
-#define FADE_OFF_PERIOD_MS 3000
-
 static inline led_duty_t channel_brightness_to_duty(led_brightness_t power);
 static inline void color_to_duties(const led_color_t color, led_duty_t* duties);
 static int led_set_channel_duty(uint8_t ch, led_duty_t duty);
 static int led_set_duties(const led_duty_t* duties);
-static int led_fade_to_color(const led_color_t color, uint32_t milssecs);
-static bool led_is_fading();
-static int led_fade_stop();
-static int led_fade_to_normal();
-static void led_fade_drive();
 
 static int led_mode_manual_entry();
 static int led_mode_scheduled_entry();
@@ -336,90 +329,6 @@ int led_set_duties(const led_duty_t* duties)
     return 0;
 }
 
-int led_fade_to_color(const led_color_t color, uint32_t duration_ms)
-{
-    if (_led.state == LED_STATE_DIMMING) {
-        return -EINVAL;
-    }
-
-    if (duration_ms < 10) {
-        return -EINVAL;
-    }
-
-    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
-    _led.fade_start_time_ms = now;
-    _led.fade_duration_ms = duration_ms;
-    BO_TRY(led_get_color(_led.fade_start_color));
-    memcpy(_led.fade_end_color, color, sizeof(led_color_t));
-    return 0;
-}
-
-int led_fade_to_normal()
-{
-    led_color_t end_color;
-
-    time_t now = time(NULL) * 1000;
-    now += FADE_ON_PERIOD_MS;
-    now /= 1000;
-    struct tm local_tm = { 0 };
-    localtime_r(&now, &local_tm);
-
-    switch (_led.settings.mode) {
-
-    case LED_MODE_MANUAL: {
-        memcpy(end_color, _led.settings.manual_color, sizeof(led_color_t));
-    } break;
-
-    case LED_MODE_SCHEDULED: {
-        led_sch_compute_color(&_led.settings.scheduler, &local_tm, end_color);
-    } break;
-
-    case LED_MODE_SUN: {
-        led_sch_compute_color(&_led.sun_scheduler, &local_tm, end_color);
-    } break;
-
-    default:
-        assert(false);
-        break;
-    }
-
-    BO_TRY(led_fade_to_color(end_color, FADE_ON_PERIOD_MS));
-
-    return 0;
-}
-
-int led_fade_stop()
-{
-    _led.fade_start_time_ms = 0LL;
-    return 0;
-}
-
-void led_fade_drive()
-{
-    if (!led_is_fading()) {
-        return;
-    }
-
-    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
-    if (now >= _led.fade_start_time_ms + _led.fade_duration_ms) {
-        BO_MUST(led_fade_stop());
-        BO_MUST(led_update_color(_led.fade_end_color));
-        return;
-    }
-
-    uint32_t elapsed_time_ms = (uint32_t)(now - _led.fade_start_time_ms);
-    uint32_t progress = (elapsed_time_ms * 65536ULL + (_led.fade_duration_ms / 2)) / _led.fade_duration_ms;
-
-    led_color_t color;
-    for (size_t ich = 0; ich < LYFI_LED_CHANNEL_COUNT; ich++) {
-        int32_t delta = (int32_t)(_led.fade_end_color[ich] - _led.fade_start_color[ich]) * progress;
-        color[ich] = _led.fade_start_color[ich] + ((delta + (1 << 15)) >> 16);
-    }
-    BO_MUST(led_update_color(color));
-}
-
-inline static bool led_is_fading() { return _led.fade_start_time_ms > 0LL; }
-
 int led_set_channel_brightness(uint8_t ch, led_brightness_t brightness)
 {
     if (ch >= LYFI_LED_CHANNEL_COUNT || brightness > LED_BRIGHTNESS_MAX) {
@@ -605,24 +514,6 @@ int led_mode_sun_entry()
     return 0;
 }
 
-int led_set_temporary_duration(uint16_t duration)
-{
-    _led.settings.temporary_duration = duration;
-    BO_TRY(led_save_user_settings());
-    return 0;
-}
-
-int32_t led_get_temporary_remaining()
-{
-    if (_led.state == LED_STATE_TEMPORARY) {
-        int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
-        return (int32_t)((_led.temporary_off_time - now + 500LL) / 1000LL);
-    }
-    else {
-        return -1;
-    }
-}
-
 ////////////////////////////// Status switching //////////////////////////////////
 
 static int normal_state_entry()
@@ -740,61 +631,6 @@ static void preview_state_drive()
     BO_MUST(led_switch_state(LED_STATE_DIMMING));
 }
 
-int temporary_state_entry(uint8_t prev_state)
-{
-    if (!bo_power_is_on()) {
-        return -EINVAL;
-    }
-
-    if (prev_state != LED_STATE_NORMAL) {
-        return -EINVAL;
-    }
-
-    if (_led.settings.mode != LED_MODE_SUN && _led.settings.mode != LED_MODE_SCHEDULED) {
-        return -EINVAL;
-    }
-
-    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
-
-    _led.temporary_off_time = now + (_led.settings.temporary_duration * 60 * 1000) + FADE_PERIOD_MS;
-    _led.state = LED_STATE_TEMPORARY;
-
-    BO_TRY(led_fade_to_color(_led.settings.manual_color, FADE_PERIOD_MS));
-    return 0;
-}
-
-static int temporary_state_exit()
-{
-    if (_led.state != LED_STATE_TEMPORARY) {
-        return -1;
-    }
-
-    _led.temporary_off_time = 0;
-    BO_TRY(led_switch_state(LED_STATE_NORMAL));
-    return 0;
-}
-
-static void temporary_state_drive()
-{
-    if (_led.state != LED_STATE_TEMPORARY) {
-        return;
-    }
-
-    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
-
-    if (now >= _led.temporary_off_time) {
-        BO_MUST(temporary_state_exit());
-    }
-    else {
-        if (!led_is_fading()) {
-            led_update_color(_led.settings.manual_color);
-        }
-        else {
-            led_fade_drive();
-        }
-    }
-}
-
 static void led_drive()
 {
     if (led_is_fading()) {
@@ -812,7 +648,7 @@ static void led_drive()
     } break;
 
     case LED_STATE_TEMPORARY: {
-        temporary_state_drive();
+        led_temporary_state_drive();
     } break;
 
     case LED_STATE_PREVIEW: {
@@ -912,7 +748,7 @@ int led_switch_state(uint8_t state)
         if (!bo_power_is_on()) {
             return -EINVAL;
         }
-        BO_TRY(temporary_state_entry(_led.state));
+        BO_TRY(led_temporary_state_entry(_led.state));
     } break;
 
     case LED_STATE_PREVIEW: {

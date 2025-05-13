@@ -20,9 +20,9 @@
 #include <borneo/nvs.h>
 #include <borneo/utils/time.h>
 
-#include "solar.h"
-#include "lyfi-events.h"
-#include "algo.h"
+#include "../solar.h"
+#include "../lyfi-events.h"
+#include "../algo.h"
 #include "led.h"
 
 #define TAG "led.solar"

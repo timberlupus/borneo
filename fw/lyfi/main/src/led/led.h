@@ -160,6 +160,12 @@ int32_t led_get_temporary_remaining();
 
 int led_set_correction_method(uint8_t correction_method);
 
+int led_fade_to_color(const led_color_t color, uint32_t milssecs);
+bool led_is_fading();
+int led_fade_stop();
+int led_fade_to_normal();
+void led_fade_drive();
+
 bool led_has_geo_location();
 int led_set_geo_location(const struct geo_location* location);
 
@@ -171,7 +177,6 @@ void led_sch_compute_color(const struct led_scheduler* sch, const struct tm* loc
 void led_sch_compute_color_in_range(led_color_t color, const struct tm* tm_local,
                                     const struct led_scheduler_item* range_begin,
                                     const struct led_scheduler_item* range_end);
-void led_sch_drive(time_t utc_now, led_color_t color);
 
 int led_sun_init();
 int led_sun_update_scheduler();

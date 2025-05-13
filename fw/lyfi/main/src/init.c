@@ -10,7 +10,7 @@
 #include <borneo/system.h>
 #include <borneo/common.h>
 
-#include "led.h"
+#include "led/led.h"
 #include "fan.h"
 #include "thermal.h"
 #include "button.h"

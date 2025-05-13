@@ -14,7 +14,7 @@
 #include <borneo/coap.h>
 #include <borneo/rtc.h>
 
-#include "../led.h"
+#include "../led/led.h"
 #include "cbor.h"
 
 int cbor_encode_led_sch_item(CborEncoder* encoder, const struct led_scheduler_item* sch_item)
