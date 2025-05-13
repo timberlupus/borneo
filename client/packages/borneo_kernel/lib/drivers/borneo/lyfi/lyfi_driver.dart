@@ -85,9 +85,7 @@ enum LedState {
   normal,
   dimming,
   temporary,
-  preview,
-  poweringOn,
-  poweringOff;
+  preview;
 
   bool get isLocked => !(this == preview || this == dimming);
 }

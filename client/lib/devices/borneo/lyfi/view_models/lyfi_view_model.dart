@@ -45,11 +45,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
   bool get canLockOrUnlock => !isBusy && isOn;
   bool get canUnlock =>
-      !isBusy &&
-      isOnline &&
-      isOn &&
-      isLocked &&
-      (_ledState == LedState.normal || _ledState == LedState.poweringOn || _ledState == LedState.temporary);
+      !isBusy && isOnline && isOn && isLocked && (_ledState == LedState.normal || _ledState == LedState.temporary);
   bool get canTimedOn => !isBusy && (!isOn || _mode == LedRunningMode.scheduled);
 
   IEditor? currentEditor;
@@ -192,10 +188,10 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
       !isBusy &&
       _isOn &&
       (_mode == LedRunningMode.scheduled || _mode == LedRunningMode.sun) &&
-      (ledState == LedState.temporary || ledState == LedState.normal || ledState == LedState.poweringOn);
+      (ledState == LedState.temporary || ledState == LedState.normal);
 
   void switchTemporaryState() {
-    assert(_ledState == LedState.normal || _ledState == LedState.temporary || _ledState == LedState.poweringOn);
+    assert(_ledState == LedState.normal || _ledState == LedState.temporary);
     super.enqueueUIJob(() => _switchTemporaryState());
   }
 
@@ -205,7 +201,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
       _deviceApi.switchState(super.boundDevice!.device, LedState.temporary);
     } else {
       // Restore running mode
-      _deviceApi.switchState(super.boundDevice!.device, LedState.poweringOn);
+      _deviceApi.switchState(super.boundDevice!.device, LedState.normal);
     }
     await refreshStatus();
   }

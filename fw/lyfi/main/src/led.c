@@ -57,9 +57,9 @@ static inline void color_to_duties(const led_color_t color, led_duty_t* duties);
 static int led_set_channel_duty(uint8_t ch, led_duty_t duty);
 static int led_set_duties(const led_duty_t* duties);
 static int led_fade_to_color(const led_color_t color, uint32_t milssecs);
-static bool led_fade_inprogress();
+static bool led_is_fading();
 static int led_fade_stop();
-static int led_fade_powering_on();
+static int led_fade_to_normal();
 static void led_fade_drive();
 
 static int led_mode_manual_entry();
@@ -198,7 +198,7 @@ int led_init()
     }
 
     if (bo_power_is_on()) {
-        BO_TRY(led_fade_powering_on());
+        BO_TRY(led_fade_to_normal());
     }
 
     xTaskCreate(&led_proc, "led_task", 2 * 1024, NULL, tskIDLE_PRIORITY + 2, NULL);
@@ -354,7 +354,7 @@ int led_fade_to_color(const led_color_t color, uint32_t duration_ms)
     return 0;
 }
 
-int led_fade_powering_on()
+int led_fade_to_normal()
 {
     led_color_t end_color;
 
@@ -396,7 +396,7 @@ int led_fade_stop()
 
 void led_fade_drive()
 {
-    if (!led_fade_inprogress()) {
+    if (!led_is_fading()) {
         return;
     }
 
@@ -418,7 +418,7 @@ void led_fade_drive()
     BO_MUST(led_update_color(color));
 }
 
-inline static bool led_fade_inprogress() { return _led.fade_start_time_ms > 0LL; }
+inline static bool led_is_fading() { return _led.fade_start_time_ms > 0LL; }
 
 int led_set_channel_brightness(uint8_t ch, led_brightness_t brightness)
 {
@@ -497,23 +497,26 @@ static void system_events_handler(void* handler_args, esp_event_base_t base, int
     switch (event_id) {
     case BO_EVENT_SHUTDOWN_FAULT:
     case BO_EVENT_FATAL_ERROR: {
-        if (led_fade_inprogress()) {
+        if (led_is_fading()) {
             BO_MUST(led_fade_stop());
         }
-        BO_MUST(led_switch_state(LED_STATE_POWERING_OFF));
         led_blank();
+        BO_MUST(led_switch_state(LED_STATE_NORMAL));
     } break;
 
     case BO_EVENT_SHUTDOWN_SCHEDULED: {
-        BO_MUST(led_switch_state(LED_STATE_POWERING_OFF));
+        BO_MUST(led_switch_state(LED_STATE_NORMAL));
     } break;
 
     case BO_EVENT_POWER_ON: {
-        BO_MUST(led_switch_state(LED_STATE_POWERING_ON));
+        BO_MUST(led_switch_state(LED_STATE_NORMAL));
     } break;
 
     case BO_EVENT_GEO_LOCATION_CHANGED: {
-        led_sun_update_scheduler();
+        int rc = led_sun_update_scheduler();
+        if (rc) {
+            ESP_LOGE(TAG, "Failed to update solar scheduler");
+        }
     } break;
 
     default:
@@ -641,7 +644,7 @@ static int normal_state_entry()
 
 static void normal_state_drive()
 {
-    if (led_fade_inprogress()) {
+    if (led_is_fading()) {
         led_fade_drive();
         return;
     }
@@ -743,7 +746,7 @@ int temporary_state_entry(uint8_t prev_state)
         return -EINVAL;
     }
 
-    if (prev_state != LED_STATE_NORMAL && prev_state != LED_STATE_POWERING_ON) {
+    if (prev_state != LED_STATE_NORMAL) {
         return -EINVAL;
     }
 
@@ -767,7 +770,7 @@ static int temporary_state_exit()
     }
 
     _led.temporary_off_time = 0;
-    BO_TRY(led_switch_state(LED_STATE_POWERING_ON));
+    BO_TRY(led_switch_state(LED_STATE_NORMAL));
     return 0;
 }
 
@@ -783,7 +786,7 @@ static void temporary_state_drive()
         BO_MUST(temporary_state_exit());
     }
     else {
-        if (!led_fade_inprogress()) {
+        if (!led_is_fading()) {
             led_update_color(_led.settings.manual_color);
         }
         else {
@@ -794,6 +797,11 @@ static void temporary_state_drive()
 
 static void led_drive()
 {
+    if (led_is_fading()) {
+        led_fade_drive();
+        return;
+    }
+
     switch (_led.state) {
 
     case LED_STATE_NORMAL: {
@@ -811,24 +819,26 @@ static void led_drive()
         preview_state_drive();
     } break;
 
-    case LED_STATE_POWERING_OFF: {
-        if (led_fade_inprogress()) {
-            led_fade_drive();
-        }
-        else {
-            led_blank();
-            _led.state = LED_STATE_NORMAL;
-        }
-    } break;
+        /*
+        case LED_STATE_POWERING_OFF: {
+            if (led_is_fading()) {
+                led_fade_drive();
+            }
+            else {
+                led_blank();
+                _led.state = LED_STATE_NORMAL;
+            }
+        } break;
 
-    case LED_STATE_POWERING_ON: {
-        if (led_fade_inprogress()) {
-            led_fade_drive();
-        }
-        else {
-            led_switch_state(LED_STATE_NORMAL);
-        }
-    } break;
+        case LED_STATE_POWERING_ON: {
+            if (led_is_fading()) {
+                led_fade_drive();
+            }
+            else {
+                led_switch_state(LED_STATE_NORMAL);
+            }
+        } break;
+         */
 
     default:
         assert(false);
@@ -859,7 +869,7 @@ int led_switch_state(uint8_t state)
         return -EINVAL;
     }
 
-    if (led_fade_inprogress()) {
+    if (led_is_fading()) {
         BO_TRY(led_fade_stop());
     }
 
@@ -873,10 +883,6 @@ int led_switch_state(uint8_t state)
 
     case LED_STATE_PREVIEW: {
         preview_state_exit();
-    } break;
-
-    case LED_STATE_POWERING_ON:
-    case LED_STATE_POWERING_OFF: {
     } break;
 
     default:
@@ -894,8 +900,7 @@ int led_switch_state(uint8_t state)
             return -EINVAL;
         }
         // TODO Start the timer
-        if (_led.state == LED_STATE_NORMAL || _led.state == LED_STATE_PREVIEW || _led.state == LED_STATE_POWERING_ON
-            || _led.state == LED_STATE_TEMPORARY) {
+        if (_led.state == LED_STATE_NORMAL || _led.state == LED_STATE_PREVIEW || _led.state == LED_STATE_TEMPORARY) {
             _led.state = state;
         }
         else {
@@ -915,16 +920,6 @@ int led_switch_state(uint8_t state)
             return -EINVAL;
         }
         BO_TRY(preview_state_entry());
-    } break;
-
-    case LED_STATE_POWERING_ON: {
-        _led.state = state;
-        BO_TRY(led_fade_powering_on());
-    } break;
-
-    case LED_STATE_POWERING_OFF: {
-        _led.state = state;
-        BO_TRY(led_fade_to_color(LED_COLOR_BLANK, FADE_OFF_PERIOD_MS));
     } break;
 
     default:
