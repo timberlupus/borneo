@@ -329,10 +329,6 @@ int led_set_channel_brightness(uint8_t ch, led_brightness_t brightness)
     if (ch >= LYFI_LED_CHANNEL_COUNT || brightness > LED_BRIGHTNESS_MAX) {
         return -EINVAL;
     }
-    if(_led.color[ch] == brightness) {
-        return 0;
-    }
-    _led.color[ch] = brightness;
     led_duty_t duty = channel_brightness_to_duty(brightness);
     BO_TRY(led_set_channel_duty(ch, duty));
     return 0;
@@ -343,10 +339,7 @@ int led_update_color(const led_color_t color)
     if (memcmp(color, _led.color, sizeof(led_color_t)) == 0) {
         return 0;
     }
-
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-        BO_TRY(led_set_channel_brightness(ch, color[ch]));
-    }
+    memcpy(_led.color, color, sizeof(led_color_t));
     return 0;
 }
 
@@ -633,11 +626,6 @@ static void preview_state_drive()
 
 static void led_drive()
 {
-    if (led_is_fading()) {
-        led_fade_drive();
-        return;
-    }
-
     switch (_led.state) {
 
     case LED_STATE_NORMAL: {
@@ -662,12 +650,24 @@ static void led_drive()
 
 void led_render_task()
 {
+    led_color_t current_color;
+    memcpy(current_color, LED_COLOR_BLANK, sizeof(led_color_t));
+
     if (bo_power_is_on()) {
         BO_MUST(led_fade_to_normal());
     }
 
     while (true) {
         led_drive();
+
+        // Sync color to hardware
+        if (memcmp(current_color, _led.color, sizeof(led_color_t))) {
+            memcpy(current_color, _led.color, sizeof(led_color_t));
+            for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+                BO_MUST(led_set_channel_brightness(ch, current_color[ch]));
+            }
+        }
+
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
