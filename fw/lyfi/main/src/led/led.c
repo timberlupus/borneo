@@ -662,9 +662,11 @@ void led_render_task()
 
         // Sync color to hardware
         if (memcmp(current_color, _led.color, sizeof(led_color_t))) {
-            memcpy(current_color, _led.color, sizeof(led_color_t));
             for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-                BO_MUST(led_set_channel_brightness(ch, current_color[ch]));
+                if (current_color[ch] != _led.color[ch]) {
+                    BO_MUST(led_set_channel_brightness(ch, current_color[ch]));
+                    current_color[ch] = _led.color[ch];
+                }
             }
         }
 
