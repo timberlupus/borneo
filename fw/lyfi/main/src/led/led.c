@@ -32,7 +32,7 @@ void led_sch_drive(time_t utc_now, led_color_t color);
 static void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data);
 static void led_events_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data);
 
-static void led_proc();
+static void led_render_task();
 
 static int normal_state_entry();
 static void normal_state_drive();
@@ -189,7 +189,7 @@ int led_init()
         BO_TRY(led_sun_init());
     }
 
-    xTaskCreate(&led_proc, "led_task", 2 * 1024, NULL, tskIDLE_PRIORITY + 2, NULL);
+    xTaskCreate(&led_render_task, "led_render_task", 2 * 1024, NULL, tskIDLE_PRIORITY + 2, NULL);
     ESP_LOGI(TAG, "LED Controller module has been initialized successfully.");
     return 0;
 }
@@ -657,7 +657,7 @@ static void led_drive()
     }
 }
 
-void led_proc()
+void led_render_task()
 {
     if (bo_power_is_on()) {
         BO_MUST(led_fade_to_normal());
