@@ -329,6 +329,9 @@ int led_set_channel_brightness(uint8_t ch, led_brightness_t brightness)
     if (ch >= LYFI_LED_CHANNEL_COUNT || brightness > LED_BRIGHTNESS_MAX) {
         return -EINVAL;
     }
+    if(_led.color[ch] == brightness) {
+        return 0;
+    }
     _led.color[ch] = brightness;
     led_duty_t duty = channel_brightness_to_duty(brightness);
     BO_TRY(led_set_channel_duty(ch, duty));
