@@ -1,6 +1,9 @@
 
 set(SDKCONFIG "${CMAKE_BINARY_DIR}/sdkconfig")
-set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../components")
+set(EXTRA_COMPONENT_DIRS
+    "${CMAKE_CURRENT_SOURCE_DIR}/../components"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../3rd-components"
+)
 
 message("[BORNEO] > Product ID: `${PRODUCT_ID}`")
 
