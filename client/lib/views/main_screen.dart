@@ -26,9 +26,9 @@ import '../view_models/main_view_model.dart';
 
 enum PlusMenuIndexes { addScene, addGroup, addDevice }
 
-class ErrorSnackBarListener extends StatelessWidget {
+class NotificationListener extends StatelessWidget {
   final Widget child;
-  const ErrorSnackBarListener({super.key, required this.child});
+  const NotificationListener({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +36,7 @@ class ErrorSnackBarListener extends StatelessWidget {
       builder: (context, vm, child) {
         if (vm.hasError) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            /*
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -53,6 +54,18 @@ class ErrorSnackBarListener extends StatelessWidget {
                     }
                   },
                 ),
+              ),
+            );
+            */
+            toastification.show(
+              context: context,
+              title: Text("Error"),
+              type: ToastificationType.error,
+              description: Text(
+                vm.errorMessage,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onErrorContainer),
               ),
             );
           });
@@ -182,7 +195,7 @@ class MainScreen extends StatelessWidget {
             appBar: null,
 
             // page body
-            body: ErrorSnackBarListener(
+            body: NotificationListener(
               child: Selector<MainViewModel, TabIndices>(
                 selector: (context, vm) => vm.currentTabIndex,
                 builder:

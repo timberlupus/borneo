@@ -30,7 +30,7 @@
 #include <borneo/rtc.h>
 
 #define TAG "bo-sntp"
-#define MAX_RETRY_COUNT 3
+#define MAX_RETRY_COUNT 5
 
 ESP_EVENT_DEFINE_BASE(BO_SNTP_EVENTS);
 

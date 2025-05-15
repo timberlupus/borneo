@@ -78,7 +78,6 @@ int led_temporary_state_exit()
     }
 
     _led.temporary_off_time = 0;
-    BO_TRY(led_switch_state(LED_STATE_NORMAL));
     return 0;
 }
 

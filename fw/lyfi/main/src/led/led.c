@@ -695,8 +695,11 @@ int led_switch_state(uint8_t state)
 
     case LED_STATE_NORMAL:
     case LED_STATE_DIMMING:
-    case LED_STATE_TEMPORARY:
         break;
+
+    case LED_STATE_TEMPORARY: {
+        BO_MUST(led_temporary_state_exit());
+    } break;
 
     case LED_STATE_PREVIEW: {
         preview_state_exit();
