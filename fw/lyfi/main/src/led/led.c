@@ -444,17 +444,23 @@ static void system_events_handler(void* handler_args, esp_event_base_t base, int
             BO_MUST(led_fade_stop());
         }
         led_blank();
-        BO_MUST(led_switch_state(LED_STATE_NORMAL));
+        if (led_get_state() != LED_STATE_NORMAL) {
+            BO_MUST(led_switch_state(LED_STATE_NORMAL));
+        }
     } break;
 
     case BO_EVENT_SHUTDOWN_SCHEDULED: {
         BO_MUST(led_fade_black());
-        BO_MUST(led_switch_state(LED_STATE_NORMAL));
+        if (led_get_state() != LED_STATE_NORMAL) {
+            BO_MUST(led_switch_state(LED_STATE_NORMAL));
+        }
     } break;
 
     case BO_EVENT_POWER_ON: {
         BO_MUST(led_fade_to_normal());
-        BO_MUST(led_switch_state(LED_STATE_NORMAL));
+        if (led_get_state() != LED_STATE_NORMAL) {
+            BO_MUST(led_switch_state(LED_STATE_NORMAL));
+        }
     } break;
 
     case BO_EVENT_GEO_LOCATION_CHANGED: {
