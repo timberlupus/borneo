@@ -13,6 +13,8 @@
 #include <nvs_flash.h>
 #include <esp_rom_md5.h>
 
+#include <smf/smf.h>
+
 #include <borneo/common.h>
 #include <borneo/system.h>
 #include <borneo/power.h>
@@ -24,9 +26,8 @@
 #include "../algo.h"
 #include "led.h"
 
-int led_temporary_state_entry(uint8_t prev_state);
-int led_temporary_state_exit();
-void led_temporary_state_drive();
+static const struct smf_state LED_STATE_TABLE[];
+
 void led_sch_drive(time_t utc_now, led_color_t color);
 
 static void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data);
@@ -34,14 +35,21 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
 
 static void led_render_task();
 
-static int normal_state_entry();
-static void normal_state_drive();
+void led_temporary_state_entry();
+void led_temporary_state_run();
+void led_temporary_state_exit();
 
-static int preview_state_entry();
+static void normal_state_entry();
+static void normal_state_run();
+static void normal_state_exit();
+
+static void preview_state_entry();
+static void preview_state_run();
 static void preview_state_exit();
-static void preview_state_drive();
 
-static void led_drive();
+static void dimming_state_entry();
+static void dimming_state_run();
+static void dimming_state_exit();
 
 #define TAG "lyfi-ledc"
 
@@ -59,6 +67,29 @@ static int led_mode_scheduled_entry();
 static int led_mode_sun_entry();
 
 ESP_EVENT_DEFINE_BASE(LYFI_LED_EVENTS);
+/*
+    LED_STATE_NORMAL = 0,
+    LED_STATE_DIMMING = 1,
+    LED_STATE_TEMPORARY = 2,
+    LED_STATE_PREVIEW = 3,
+
+    LED_STATE_COUNT,
+
+    LED_STATE_NORMAL_MANUAL_MODE,
+    LED_STATE_NORMAL_SCHEDULED_MODE,
+    LED_STATE_NORMAL_SUN_MODE,
+    */
+
+static const struct smf_state LED_STATE_TABLE[] = {
+    [LED_STATE_NORMAL] = SMF_CREATE_STATE(&normal_state_entry, &normal_state_run, &normal_state_exit, NULL, NULL),
+
+    [LED_STATE_DIMMING] = SMF_CREATE_STATE(&dimming_state_entry, &dimming_state_run, &dimming_state_exit, NULL, NULL),
+
+    [LED_STATE_TEMPORARY]
+    = SMF_CREATE_STATE(&led_temporary_state_entry, &led_temporary_state_run, &led_temporary_state_exit, NULL, NULL),
+
+    [LED_STATE_PREVIEW] = SMF_CREATE_STATE(&preview_state_entry, &preview_state_run, &preview_state_exit, NULL, NULL),
+};
 
 static const uint8_t LED_GPIOS[CONFIG_LYFI_LED_CHANNEL_COUNT] = {
 
@@ -180,6 +211,8 @@ int led_init()
     // Initialize fade service.
     BO_TRY(ledc_fade_func_install(0));
 
+    smf_set_initial(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_NORMAL]);
+
     BO_TRY(esp_event_handler_register(LYFI_LED_EVENTS, ESP_EVENT_ANY_ID, led_events_handler, NULL));
     BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, system_events_handler, NULL));
 
@@ -194,6 +227,16 @@ int led_init()
     return 0;
 }
 
+inline uint8_t led_get_state() { return _led.ctx.current - &LED_STATE_TABLE[0]; }
+
+inline uint8_t led_get_previous_state()
+{
+    if (_led.ctx.previous == NULL) {
+        return LED_STATE_COUNT;
+    }
+    return _led.ctx.previous - &LED_STATE_TABLE[0];
+}
+
 void led_blank()
 {
     if (memcmp(_led.color, LED_COLOR_BLANK, sizeof(led_color_t)) != 0) {
@@ -203,7 +246,7 @@ void led_blank()
 
 int led_set_color(const led_color_t color)
 {
-    if (!(bo_power_is_on() && _led.state == LED_STATE_DIMMING)) {
+    if (!(bo_power_is_on() && led_get_state() == LED_STATE_DIMMING)) {
         return -EINVAL;
     }
     // Verify the colors
@@ -432,11 +475,11 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
 
     case LYFI_LED_NOTIFY_TEMPORARY_STATE: {
         assert(bo_power_is_on());
-        if (_led.state == LED_STATE_NORMAL
+        if (led_get_state() == LED_STATE_NORMAL
             && (_led.settings.mode == LED_MODE_SCHEDULED || _led.settings.mode == LED_MODE_SUN)) {
             led_switch_state(LED_STATE_TEMPORARY);
         }
-        else if (_led.state == LED_STATE_TEMPORARY) {
+        else if (led_get_state() == LED_STATE_TEMPORARY) {
             BO_MUST(led_switch_state(LED_STATE_NORMAL));
         }
     } break;
@@ -452,7 +495,7 @@ int led_mode_manual_entry()
         return -EINVAL;
     }
 
-    if (_led.state != LED_STATE_DIMMING) {
+    if (led_get_state() != LED_STATE_DIMMING) {
         return -EINVAL;
     }
 
@@ -469,7 +512,7 @@ int led_mode_scheduled_entry()
         return -EINVAL;
     }
 
-    if (_led.state != LED_STATE_DIMMING && _led.state != LED_STATE_PREVIEW) {
+    if (led_get_state() != LED_STATE_DIMMING && led_get_state() != LED_STATE_PREVIEW) {
         return -EINVAL;
     }
 
@@ -477,7 +520,7 @@ int led_mode_scheduled_entry()
         return 0;
     }
 
-    if (_led.state == LED_STATE_PREVIEW) {
+    if (led_get_state() == LED_STATE_PREVIEW) {
         BO_TRY(led_switch_state(LED_STATE_DIMMING));
     }
 
@@ -494,7 +537,7 @@ int led_mode_sun_entry()
         return -EINVAL;
     }
 
-    if (_led.state != LED_STATE_DIMMING) {
+    if (led_get_state() != LED_STATE_DIMMING) {
         return -EINVAL;
     }
 
@@ -507,26 +550,157 @@ int led_mode_sun_entry()
     return 0;
 }
 
-////////////////////////////// Status switching //////////////////////////////////
-
-static int normal_state_entry()
+void led_render_task()
 {
-    uint8_t prev_state = _led.state;
-    _led.state = LED_STATE_NORMAL;
+    led_color_t last_color;
+    memcpy(last_color, LED_COLOR_BLANK, sizeof(led_color_t));
 
-    if (_led.settings.mode == LED_MODE_SUN) {
-        BO_TRY(led_sun_update_scheduler());
+    if (bo_power_is_on()) {
+        BO_MUST(led_fade_to_normal());
     }
 
-    if (prev_state == LED_STATE_DIMMING || prev_state == LED_STATE_PREVIEW) {
-        ESP_LOGI(TAG, "Saving dimming settings...");
-        BO_TRY(led_save_user_settings());
-        ESP_LOGI(TAG, "Dimming settings updated.");
+    while (true) {
+        int smf_ret = smf_run_state(SMF_CTX(&_led));
+        if (smf_ret) {
+            bo_panic();
+        }
+
+        // Sync color to hardware
+        if (memcmp(last_color, _led.color, sizeof(led_color_t))) {
+            for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+                if (last_color[ch] != _led.color[ch]) {
+                    last_color[ch] = _led.color[ch];
+                    BO_MUST(led_set_channel_brightness(ch, last_color[ch]));
+                }
+            }
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
+}
+
+int led_switch_state(uint8_t state)
+{
+    if (state >= LED_STATE_COUNT) {
+        return -EINVAL;
+    }
+
+    if (led_get_state() == state) {
+        return -EINVAL;
+    }
+
+    if (!bo_power_is_on()) {
+        return -EINVAL;
+    }
+
+    ESP_LOGI(TAG, "Switching state from %u to %u", led_get_state(), state);
+
+    switch (state) {
+
+    case LED_STATE_NORMAL:
+        smf_set_state(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_NORMAL]);
+        break;
+
+    case LED_STATE_DIMMING: {
+        if (led_get_state() == LED_STATE_NORMAL || led_get_state() == LED_STATE_TEMPORARY) {
+            smf_set_state(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_DIMMING]);
+        }
+        else {
+            return -EINVAL;
+        }
+    } break;
+
+    case LED_STATE_TEMPORARY: {
+        if (led_get_state() == LED_STATE_NORMAL) {
+            smf_set_state(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_TEMPORARY]);
+        }
+        else {
+            return -EINVAL;
+        }
+    } break;
+
+    case LED_STATE_PREVIEW: {
+        if (led_get_state() == LED_STATE_DIMMING) {
+            smf_set_state(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_PREVIEW]);
+        }
+        else {
+            return -EINVAL;
+        }
+    } break;
+
+    default:
+        return -1;
+    }
+
+    BO_TRY(esp_event_post(LYFI_LED_EVENTS, LYFI_LED_STATE_CHANGED, NULL, 0, portMAX_DELAY));
+
     return 0;
 }
 
-static void normal_state_drive()
+int led_switch_mode(uint8_t mode)
+{
+    if (mode >= LED_MODE_COUNT) {
+        return -EINVAL;
+    }
+
+    if (mode == _led.settings.mode) {
+        return -EINVAL;
+    }
+
+    if (!(led_get_state() == LED_STATE_DIMMING || led_get_state() == LED_STATE_PREVIEW)) {
+        return -EINVAL;
+    }
+
+    switch (mode) {
+
+    case LED_MODE_MANUAL: {
+        BO_TRY(led_mode_manual_entry());
+    } break;
+
+    case LED_MODE_SCHEDULED: {
+        BO_TRY(led_mode_scheduled_entry());
+    } break;
+
+    case LED_MODE_SUN: {
+        BO_TRY(led_mode_sun_entry());
+    } break;
+
+    default:
+        return -EINVAL;
+    }
+
+    _led.settings.mode = mode;
+
+    return 0;
+}
+
+int led_set_correction_method(uint8_t correction_method)
+{
+    if (correction_method >= LED_CORRECTION_COUNT) {
+        return -EINVAL;
+    }
+
+    _led.settings.correction_method = correction_method;
+    BO_TRY(led_save_user_settings());
+    return 0;
+}
+
+static void normal_state_entry()
+{
+    if (_led.settings.mode == LED_MODE_SUN) {
+        BO_MUST(led_sun_update_scheduler());
+    }
+
+    if (led_get_previous_state() == LED_STATE_DIMMING || led_get_previous_state() == LED_STATE_PREVIEW) {
+        BO_MUST(led_save_user_settings());
+    }
+
+    if (_led.ctx.previous != NULL) {
+        BO_MUST(led_fade_to_normal());
+    }
+}
+
+static void normal_state_run()
 {
     if (led_is_fading()) {
         led_fade_drive();
@@ -567,19 +741,56 @@ static void normal_state_drive()
     BO_MUST(led_update_color(color));
 }
 
-static int preview_state_entry()
+void normal_state_exit()
 {
-    int rc = 0;
-
-    if (_led.state != LED_STATE_DIMMING) {
-        rc = -EINVAL;
-        goto _EXIT;
+    if (led_is_fading()) {
+        BO_MUST(led_fade_stop());
     }
+    return;
+}
 
+void dimming_state_entry()
+{
+    if (led_is_fading()) {
+        BO_MUST(led_fade_stop());
+    }
+    // TODO Start the timer
+
+    ESP_LOGI(TAG, "Entering dimming mode.");
+
+    switch (_led.settings.mode) {
+
+    case LED_MODE_MANUAL: {
+        BO_MUST(led_mode_manual_entry());
+    } break;
+
+    case LED_MODE_SCHEDULED: {
+        BO_MUST(led_mode_scheduled_entry());
+    } break;
+
+    case LED_MODE_SUN: {
+        BO_MUST(led_mode_sun_entry());
+    } break;
+
+    default:
+        return bo_panic();
+    }
+}
+
+void dimming_state_run()
+{
     //
+}
+
+void dimming_state_exit()
+{
+    //
+}
+
+static void preview_state_entry()
+{
     if (_led.settings.scheduler.item_count <= 1) {
-        rc = -ERANGE;
-        goto _EXIT;
+        return;
     }
 
     memcpy(_led.color_to_resume, _led.color, sizeof(led_color_t));
@@ -593,208 +804,29 @@ static int preview_state_entry()
 
     _led.preview_state_clock = mktime(&local_today) + _led.settings.scheduler.items[0].instant;
 
-    _led.state = LED_STATE_PREVIEW;
     ESP_LOGI(TAG, "Preview state started.");
-
-_EXIT:
-    return rc;
 }
 
-static void preview_state_exit()
+static void preview_state_run()
 {
-    assert(_led.state == LED_STATE_PREVIEW);
-    _led.preview_state_clock = 0;
-    led_update_color(_led.color_to_resume);
-    ESP_LOGI(TAG, "Preview state ended.");
-}
-
-static void preview_state_drive()
-{
-    assert(_led.state == LED_STATE_PREVIEW);
+    assert(led_get_state() == LED_STATE_PREVIEW);
     assert(_led.settings.scheduler.item_count > 0);
 
     time_t end_time
         = _led.preview_state_clock + _led.settings.scheduler.items[_led.settings.scheduler.item_count - 1].instant;
     led_color_t color;
-    for (; _led.state == LED_STATE_PREVIEW && _led.preview_state_clock < end_time; _led.preview_state_clock += 60) {
+    for (; led_get_state() == LED_STATE_PREVIEW && _led.preview_state_clock < end_time;
+         _led.preview_state_clock += 60) {
         led_sch_drive(_led.preview_state_clock, color);
         BO_MUST(led_update_color(color));
         vTaskDelay(pdMS_TO_TICKS(10));
     }
-    BO_MUST(led_switch_state(LED_STATE_DIMMING));
+    smf_set_state(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_DIMMING]);
 }
 
-static void led_drive()
+static void preview_state_exit()
 {
-    switch (_led.state) {
-
-    case LED_STATE_NORMAL: {
-        normal_state_drive();
-    } break;
-
-    case LED_STATE_DIMMING: {
-    } break;
-
-    case LED_STATE_TEMPORARY: {
-        led_temporary_state_drive();
-    } break;
-
-    case LED_STATE_PREVIEW: {
-        preview_state_drive();
-    } break;
-
-    default:
-        assert(false);
-    }
-}
-
-void led_render_task()
-{
-    led_color_t current_color;
-    memcpy(current_color, LED_COLOR_BLANK, sizeof(led_color_t));
-
-    if (bo_power_is_on()) {
-        BO_MUST(led_fade_to_normal());
-    }
-
-    while (true) {
-        led_drive();
-
-        // Sync color to hardware
-        if (memcmp(current_color, _led.color, sizeof(led_color_t))) {
-            for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-                if (current_color[ch] != _led.color[ch]) {
-                    BO_MUST(led_set_channel_brightness(ch, current_color[ch]));
-                    current_color[ch] = _led.color[ch];
-                }
-            }
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(10));
-    }
-}
-
-int led_switch_state(uint8_t state)
-{
-    if (_led.state >= LED_STATE_COUNT) {
-        return -EINVAL;
-    }
-
-    if (_led.state == state) {
-        return 0;
-    }
-
-    ESP_LOGI(TAG, "Switching state from %u to %u", _led.state, state);
-
-    if (state >= LED_STATE_COUNT) {
-        return -EINVAL;
-    }
-
-    // Processing the previous state:
-    switch (_led.state) {
-
-    case LED_STATE_NORMAL:
-    case LED_STATE_DIMMING:
-        break;
-
-    case LED_STATE_TEMPORARY: {
-        BO_MUST(led_temporary_state_exit());
-    } break;
-
-    case LED_STATE_PREVIEW: {
-        preview_state_exit();
-    } break;
-
-    default:
-        return -1;
-    }
-
-    switch (state) {
-
-    case LED_STATE_NORMAL: {
-        BO_TRY(normal_state_entry());
-    } break;
-
-    case LED_STATE_DIMMING: {
-        if (!bo_power_is_on()) {
-            return -EINVAL;
-        }
-        if (led_is_fading()) {
-            BO_TRY(led_fade_stop());
-        }
-
-        // TODO Start the timer
-        if (_led.state == LED_STATE_NORMAL || _led.state == LED_STATE_PREVIEW || _led.state == LED_STATE_TEMPORARY) {
-            _led.state = state;
-        }
-        else {
-            return -EINVAL;
-        }
-    } break;
-
-    case LED_STATE_TEMPORARY: {
-        if (!bo_power_is_on()) {
-            return -EINVAL;
-        }
-        BO_TRY(led_temporary_state_entry(_led.state));
-    } break;
-
-    case LED_STATE_PREVIEW: {
-        if (!bo_power_is_on()) {
-            return -EINVAL;
-        }
-        BO_TRY(preview_state_entry());
-    } break;
-
-    default:
-        return -1;
-    }
-
-    BO_TRY(esp_event_post(LYFI_LED_EVENTS, LYFI_LED_STATE_CHANGED, NULL, 0, portMAX_DELAY));
-
-    return 0;
-}
-
-int led_switch_mode(uint8_t mode)
-{
-    if (mode >= LED_MODE_COUNT) {
-        return -EINVAL;
-    }
-
-    if (mode == _led.settings.mode) {
-        return 0;
-    }
-
-    switch (mode) {
-
-    case LED_MODE_MANUAL: {
-        BO_TRY(led_mode_manual_entry());
-    } break;
-
-    case LED_MODE_SCHEDULED: {
-        BO_TRY(led_mode_scheduled_entry());
-    } break;
-
-    case LED_MODE_SUN: {
-        BO_TRY(led_mode_sun_entry());
-    } break;
-
-    default:
-        return -EINVAL;
-    }
-
-    _led.settings.mode = mode;
-
-    return 0;
-}
-
-int led_set_correction_method(uint8_t correction_method)
-{
-    if (correction_method >= LED_CORRECTION_COUNT) {
-        return -EINVAL;
-    }
-
-    _led.settings.correction_method = correction_method;
-    BO_TRY(led_save_user_settings());
-    return 0;
+    _led.preview_state_clock = 0;
+    led_update_color(_led.color_to_resume);
+    ESP_LOGI(TAG, "Preview state ended.");
 }

@@ -105,7 +105,7 @@ bool led_sun_is_in_progress(const struct tm* local_tm)
 void led_sun_drive(time_t utc_now, led_color_t color)
 {
     assert(led_sun_can_active());
-    assert(_led.settings.mode == LED_MODE_SUN && _led.state == LED_STATE_NORMAL);
+    assert(_led.settings.mode == LED_MODE_SUN && led_get_state() == LED_STATE_NORMAL);
     assert(_led.sun_scheduler.item_count == SOLAR_INSTANTS_COUNT);
 
     struct tm local_tm = { 0 };

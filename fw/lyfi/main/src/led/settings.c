@@ -36,6 +36,8 @@
 #define LED_NVS_KEY_ACCLIMATION_DURATION "acc.days"
 #define LED_NVS_KEY_ACCLIMATION_START_PERCENT "acc.pc"
 
+#define TAG "led.settings"
+
 static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     .mode = LED_MODE_MANUAL,
     .temporary_duration = 20,
@@ -275,6 +277,8 @@ _EXIT_WITHOUT_CLOSE:
 
 int led_save_user_settings()
 {
+    ESP_LOGI(TAG, "Saving dimming settings...");
+
     const struct led_user_settings* settings = &_led.settings;
     int rc;
     nvs_handle_t handle;
@@ -341,6 +345,7 @@ int led_save_user_settings()
     }
 
     rc = nvs_commit(handle);
+    ESP_LOGI(TAG, "Dimming settings updated.");
 
 _EXIT_CLOSE:
     bo_nvs_close(handle);
