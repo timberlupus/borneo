@@ -34,7 +34,11 @@ extern struct led_status _led;
 
 int led_fade_to_color(const led_color_t color, uint32_t duration_ms)
 {
-    if (_led.state == LED_STATE_DIMMING) {
+    if (led_is_fading()) {
+        BO_TRY(led_fade_stop());
+    }
+
+    if (led_get_state() == LED_STATE_DIMMING) {
         return -EINVAL;
     }
 

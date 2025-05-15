@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
+#include <smf/smf.h>
 
 #include <borneo/algo/astronomy.h>
 
@@ -96,7 +97,7 @@ struct led_user_settings {
 };
 
 struct led_status {
-    uint8_t state; ///< Current state
+    struct smf_ctx ctx; ///< SMF context
     led_color_t color; ///< Current hardware LED power percentage for each channel
     int64_t temporary_off_time; ///< Time point after temporary lighting state to turn off, this time point is when
                                 ///< fading out starts
@@ -148,6 +149,9 @@ const struct led_user_settings* led_get_settings();
 // int led_switch_mode(uint8_t mode);
 
 const struct led_status* led_get_status();
+
+uint8_t led_get_state();
+uint8_t led_get_previous_state();
 
 int led_switch_state(uint8_t state);
 

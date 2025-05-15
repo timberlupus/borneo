@@ -137,7 +137,7 @@ int sch_find_closest_time_range(const struct led_scheduler* sch, uint32_t instan
 
 void led_sch_drive(time_t utc_now, led_color_t color)
 {
-    assert((_led.state == LED_STATE_PREVIEW || _led.state == LED_STATE_NORMAL)
+    assert((led_get_state() == LED_STATE_PREVIEW || led_get_state() == LED_STATE_NORMAL)
            && _led.settings.mode == LED_MODE_SCHEDULED);
 
     struct tm local_tm;

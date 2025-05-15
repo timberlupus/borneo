@@ -39,7 +39,7 @@ int led_set_temporary_duration(uint16_t duration)
 
 int32_t led_get_temporary_remaining()
 {
-    if (_led.state == LED_STATE_TEMPORARY) {
+    if (led_get_state() == LED_STATE_TEMPORARY) {
         int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
         return (int32_t)((_led.temporary_off_time - now + 500LL) / 1000LL);
     }
@@ -48,49 +48,38 @@ int32_t led_get_temporary_remaining()
     }
 }
 
-int led_temporary_state_entry(uint8_t prev_state)
+void led_temporary_state_entry()
 {
     if (!bo_power_is_on()) {
-        return -EINVAL;
-    }
-
-    if (prev_state != LED_STATE_NORMAL) {
-        return -EINVAL;
+        return;
     }
 
     if (_led.settings.mode != LED_MODE_SUN && _led.settings.mode != LED_MODE_SCHEDULED) {
-        return -EINVAL;
-    }
-
-    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
-
-    _led.temporary_off_time = now + (_led.settings.temporary_duration * 60 * 1000) + TEMPORARY_FADE_PERIOD_MS;
-    _led.state = LED_STATE_TEMPORARY;
-
-    BO_TRY(led_fade_to_color(_led.settings.manual_color, TEMPORARY_FADE_PERIOD_MS));
-    return 0;
-}
-
-int led_temporary_state_exit()
-{
-    if (_led.state != LED_STATE_TEMPORARY) {
-        return -1;
-    }
-
-    _led.temporary_off_time = 0;
-    return 0;
-}
-
-void led_temporary_state_drive()
-{
-    if (_led.state != LED_STATE_TEMPORARY) {
         return;
     }
 
     int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
 
+    _led.temporary_off_time = now + (_led.settings.temporary_duration * 60 * 1000) + TEMPORARY_FADE_PERIOD_MS;
+
+    BO_MUST(led_fade_to_color(_led.settings.manual_color, TEMPORARY_FADE_PERIOD_MS));
+}
+
+void led_temporary_state_exit()
+{
+    assert(led_get_state() == LED_STATE_TEMPORARY);
+
+    _led.temporary_off_time = 0;
+}
+
+void led_temporary_state_run()
+{
+    assert(led_get_state() == LED_STATE_TEMPORARY);
+
+    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
+
     if (now >= _led.temporary_off_time) {
-        BO_MUST(led_temporary_state_exit());
+        led_temporary_state_exit();
     }
     else {
         if (!led_is_fading()) {

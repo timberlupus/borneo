@@ -292,7 +292,7 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
 
     {
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "state"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, led_status->state));
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, led_get_state()));
     }
 
     {
@@ -302,7 +302,7 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
 
     {
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "unscheduled"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&root_map, led_status->state == LED_STATE_TEMPORARY));
+        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&root_map, led_get_state() == LED_STATE_TEMPORARY));
     }
 
     {
@@ -365,7 +365,7 @@ static void coap_hnd_state_get(coap_resource_t* resource, coap_session_t* sessio
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&encoder, status->state));
+    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&encoder, led_get_state()));
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
