@@ -47,9 +47,9 @@ static void preview_state_entry();
 static void preview_state_run();
 static void preview_state_exit();
 
-static void dimming_mode_entry();
-static void dimming_mode_run();
-static void dimming_mode_exit();
+static void dimming_state_entry();
+static void dimming_state_run();
+static void dimming_state_exit();
 
 #define TAG "lyfi-ledc"
 
@@ -83,7 +83,7 @@ ESP_EVENT_DEFINE_BASE(LYFI_LED_EVENTS);
 static const struct smf_state LED_STATE_TABLE[] = {
     [LED_STATE_NORMAL] = SMF_CREATE_STATE(&normal_state_entry, &normal_state_run, &normal_state_exit, NULL, NULL),
 
-    [LED_STATE_DIMMING] = SMF_CREATE_STATE(&dimming_mode_entry, &dimming_mode_run, &dimming_mode_exit, NULL, NULL),
+    [LED_STATE_DIMMING] = SMF_CREATE_STATE(&dimming_state_entry, &dimming_state_run, &dimming_state_exit, NULL, NULL),
 
     [LED_STATE_TEMPORARY]
     = SMF_CREATE_STATE(&led_temporary_state_entry, &led_temporary_state_run, &led_temporary_state_exit, NULL, NULL),
@@ -552,8 +552,8 @@ int led_mode_sun_entry()
 
 void led_render_task()
 {
-    led_color_t current_color;
-    memcpy(current_color, LED_COLOR_BLANK, sizeof(led_color_t));
+    led_color_t last_color;
+    memcpy(last_color, LED_COLOR_BLANK, sizeof(led_color_t));
 
     if (bo_power_is_on()) {
         BO_MUST(led_fade_to_normal());
@@ -566,11 +566,11 @@ void led_render_task()
         }
 
         // Sync color to hardware
-        if (memcmp(current_color, _led.color, sizeof(led_color_t))) {
+        if (memcmp(last_color, _led.color, sizeof(led_color_t))) {
             for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-                if (current_color[ch] != _led.color[ch]) {
-                    BO_MUST(led_set_channel_brightness(ch, current_color[ch]));
-                    current_color[ch] = _led.color[ch];
+                if (last_color[ch] != _led.color[ch]) {
+                    last_color[ch] = _led.color[ch];
+                    BO_MUST(led_set_channel_brightness(ch, last_color[ch]));
                 }
             }
         }
@@ -749,7 +749,7 @@ void normal_state_exit()
     return;
 }
 
-void dimming_mode_entry()
+void dimming_state_entry()
 {
     if (led_is_fading()) {
         BO_MUST(led_fade_stop());
@@ -777,12 +777,12 @@ void dimming_mode_entry()
     }
 }
 
-void dimming_mode_run()
+void dimming_state_run()
 {
     //
 }
 
-void dimming_mode_exit()
+void dimming_state_exit()
 {
     //
 }
