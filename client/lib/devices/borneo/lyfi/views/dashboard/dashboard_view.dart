@@ -386,11 +386,11 @@ class DashboardView extends StatelessWidget {
                                     ? Theme.of(context).colorScheme.primaryContainer
                                     : null,
                             icon: AnimatedSwitcher(
-                              duration: Duration(milliseconds: 500),
+                              duration: const Duration(milliseconds: 500),
                               child:
                                   props.state == LedState.temporary
                                       ? IconProgressBar(
-                                        icon: Icon(Icons.flashlight_on, size: 40),
+                                        icon: const Icon(Icons.flashlight_on, size: 40),
                                         progress:
                                             (props.total.inSeconds - props.remain.inSeconds) / props.total.inSeconds,
                                         size: 40,
@@ -403,7 +403,7 @@ class DashboardView extends StatelessWidget {
                                                 ? Theme.of(context).colorScheme.onPrimaryContainer
                                                 : Theme.of(context).colorScheme.primaryContainer,
                                       )
-                                      : Icon(Icons.flashlight_on, size: 40),
+                                      : const Icon(Icons.flashlight_on, size: 40),
                             ),
 
                             onPressed:
@@ -485,7 +485,7 @@ class DashboardView extends StatelessWidget {
                             borderColor: Theme.of(context).colorScheme.primary,
                             text: "Settings",
                             buttonSize: 64,
-                            icon: Icon(Icons.settings_outlined, size: 40),
+                            icon: const Icon(Icons.settings_outlined, size: 40),
                             onPressed:
                                 props.isOnline
                                     ? () async {

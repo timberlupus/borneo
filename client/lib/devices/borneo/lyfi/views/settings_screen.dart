@@ -47,8 +47,9 @@ class SettingsScreen extends StatelessWidget {
     const rightChevron = CupertinoListTileChevron();
     final tileColor = Theme.of(context).colorScheme.surfaceContainer;
     return <Widget>[
-      ListTile(title: const Text('DEVICE INFORMATION')),
+      ListTile(dense: true, title: Text('DEVICE INFORMATION', style: Theme.of(context).textTheme.titleSmall)),
       ListTile(
+        dense: true,
         tileColor: tileColor,
         leading: Icon(Icons.info_outline),
         title: Text('Name'),
@@ -57,6 +58,7 @@ class SettingsScreen extends StatelessWidget {
         onTap: () {},
       ),
       ListTile(
+        dense: true,
         tileColor: tileColor,
         leading: Icon(Icons.factory_outlined),
         title: const Text('Manufacturer & Model'),
@@ -66,17 +68,18 @@ class SettingsScreen extends StatelessWidget {
         ),
       ),
       ListTile(
+        dense: true,
         tileColor: tileColor,
-        leading: Icon(Icons.numbers_outlined),
+        leading: const Icon(Icons.numbers_outlined),
         title: Text('Serial number'),
-        subtitle: Text(vm.borneoInfo.serno.substring(0, 12)),
+        trailing: Text(vm.borneoInfo.serno.substring(0, 12)),
       ),
       ListTile(
+        dense: true,
         tileColor: tileColor,
-        leading: Icon(Icons.info_outline),
+        leading: _buildWifiRssiIcon(context),
         title: Text('Device address'),
-        subtitle: Text(vm.address.toString()),
-        trailing: _buildWifiRssiIcon(context),
+        trailing: Text(vm.address.toString()),
       ),
 
       // Location
@@ -84,6 +87,7 @@ class SettingsScreen extends StatelessWidget {
         selector: (_, vm) => (canUpdate: vm.canUpdateGeoLocation, location: vm.location),
         builder:
             (context, map, _) => ListTile(
+              dense: true,
               tileColor: tileColor,
               leading: const Icon(Icons.location_pin),
               title: Text('Location'),
@@ -96,14 +100,15 @@ class SettingsScreen extends StatelessWidget {
             ),
       ),
 
-      ListTile(title: Text('DEVICE STATUS')),
+      ListTile(dense: true, title: Text('DEVICE STATUS', style: Theme.of(context).textTheme.titleSmall)),
 
       Selector<SettingsViewModel, ({bool canUpdate, String? tz, DateTime timestamp})>(
         selector: (_, vm) => (canUpdate: vm.canUpdateTimezone, tz: vm.timezone, timestamp: vm.borneoStatus.timestamp),
         builder:
             (context, map, _) => ListTile(
+              dense: true,
               tileColor: tileColor,
-              leading: Icon(Icons.access_time_outlined),
+              leading: const Icon(Icons.access_time_outlined),
               title: Text('Device time & time zone'),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,7 +123,8 @@ class SettingsScreen extends StatelessWidget {
         selector: (_, vm) => (canUpdate: vm.canUpdatePowerBehavior, behavior: vm.powerBehavior),
         builder:
             (context, map, _) => ListTile(
-              leading: Icon(Icons.settings_power_outlined),
+              dense: true,
+              leading: const Icon(Icons.settings_power_outlined),
               tileColor: tileColor,
               title: Text('Power status at startup'),
               trailing: DropdownButton<PowerBehavior>(
@@ -145,20 +151,22 @@ class SettingsScreen extends StatelessWidget {
       ),
 
       ListTile(
+        dense: true,
         tileColor: tileColor,
-        leading: Icon(Icons.power_off),
+        leading: const Icon(Icons.power_off),
         title: Text('Last shutdown'),
         trailing: Text(vm.borneoStatus.shutdownTimestamp?.toString() ?? 'N/A'),
         subtitle: Text("Reason code: ${vm.borneoStatus.shutdownReason}"),
       ),
 
       // LED Lighting settings
-      ListTile(title: Text('LIGHTING')),
+      ListTile(dense: true, title: Text('LIGHTING', style: Theme.of(context).textTheme.titleSmall)),
 
       Selector<SettingsViewModel, ({bool canUpdate, LedCorrectionMethod correctionMethod})>(
         selector: (_, vm) => (canUpdate: vm.canUpdateCorrectionMethod, correctionMethod: vm.correctionMethod),
         builder:
             (context, map, _) => ListTile(
+              dense: true,
               tileColor: tileColor,
               title: Text('Correction curve'),
               trailing: Selector<SettingsViewModel, LedCorrectionMethod>(
@@ -200,6 +208,7 @@ class SettingsScreen extends StatelessWidget {
         selector: (_, vm) => (canUpdate: vm.canUpdateTemporaryDuration, duration: vm.temporaryDuration),
         builder:
             (context, map, _) => ListTile(
+              dense: true,
               tileColor: tileColor,
               title: Text('Temporary light on duration'),
               trailing: Selector<SettingsViewModel, Duration>(
@@ -250,15 +259,17 @@ class SettingsScreen extends StatelessWidget {
       ),
 
       // Version & upgrade group
-      ListTile(title: Text('VERSION & UPGRADE')),
+      ListTile(dense: true, title: Text('VERSION & UPGRADE', style: Theme.of(context).textTheme.titleSmall)),
       ListTile(
-        leading: Icon(Icons.info_outline),
+        dense: true,
+        leading: const Icon(Icons.info_outline),
         tileColor: tileColor,
         title: Text('Hardware version'),
         trailing: Text(vm.borneoInfo.hwVer.toString()),
       ),
       ListTile(
-        leading: Icon(Icons.info_outline),
+        dense: true,
+        leading: const Icon(Icons.info_outline),
         tileColor: tileColor,
         title: Text('Firmware version'),
         trailing: Text(vm.borneoInfo.fwVer.toString()),
@@ -276,6 +287,7 @@ class SettingsScreen extends StatelessWidget {
       ),
       */
       ListTile(
+        dense: true,
         title: Row(
           children: [
             Icon(Icons.warning, size: 24, color: Theme.of(context).colorScheme.error),
@@ -285,6 +297,7 @@ class SettingsScreen extends StatelessWidget {
         ),
       ),
       ListTile(
+        dense: true,
         leading: Icon(Icons.restore_outlined),
         tileColor: tileColor,
         title: Text('Restore to factory settings', style: TextStyle(color: Theme.of(context).colorScheme.error)),
