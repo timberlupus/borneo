@@ -16,6 +16,10 @@ class DeviceCommuncationError extends DeviceError {
   DeviceCommuncationError(super.message, super.device, {this.innerException});
 }
 
+class UncompatibleDeviceError extends DeviceError {
+  UncompatibleDeviceError(super.message, super.device);
+}
+
 class UnsupportedVersionError extends DeviceError {
   final Version currentVersion;
   final VersionConstraint? versionRange;

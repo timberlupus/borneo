@@ -26,7 +26,8 @@ class InGroupDeviceListView extends StatelessWidget {
         final List<Widget> devices =
             gvm.devices
                 .map(
-                  (dvm) => ChangeNotifierProvider.value(value: dvm, child: DeviceTile(index == gvm.devices.length - 1)),
+                  (dvm) =>
+                      ChangeNotifierProvider.value(value: dvm, child: DeviceTile(index++ == gvm.devices.length - 1)),
                 )
                 .toList();
         return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: devices);

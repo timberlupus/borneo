@@ -217,7 +217,7 @@ static void coap_hnd_borneo_status_get(coap_resource_t* resource, coap_session_t
 #endif // CONFIG_BORNEO_NTC_ENABLED
 
 #if CONFIG_BORNEO_MEAS_VOLTAGE_ENABLED
-   {
+    {
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "powerVoltage"));
         int mv;
         int rc = bo_power_volt_read(&mv);
@@ -231,7 +231,7 @@ static void coap_hnd_borneo_status_get(coap_resource_t* resource, coap_session_t
 #endif // CONFIG_BORNEO_MEAS_VOLTAGE_ENABLED
 
 #if CONFIG_BORNEO_MEAS_CURRENT_ENABLED
-   {
+    {
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "powerCurrent"));
         int ma;
         int rc = bo_power_current_read(&ma);
@@ -244,7 +244,6 @@ static void coap_hnd_borneo_status_get(coap_resource_t* resource, coap_session_t
     }
 #endif // CONFIG_BORNEO_MEAS_CURRENT_ENABLED
 
-
     BO_COAP_TRY_ENCODE_CBOR(cbor_encoder_close_container(&encoder, &root_map));
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
@@ -252,8 +251,53 @@ static void coap_hnd_borneo_status_get(coap_resource_t* resource, coap_session_t
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
 }
 
+static void coap_hnd_borneo_fw_ver_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
+                                       const coap_string_t* query, coap_pdu_t* response)
+{
+    CborEncoder encoder;
+    size_t encoded_size = 0;
+    uint8_t buf[128] = { 0 };
+
+    cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
+    const esp_app_desc_t* app_desc = esp_app_get_description();
+    if (app_desc == NULL) {
+        coap_pdu_set_code(response, BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
+        return;
+    }
+    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&encoder, app_desc->version));
+
+    encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
+
+    coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
+
+    coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
+    return;
+}
+
+static void coap_hnd_borneo_compatible_get(coap_resource_t* resource, coap_session_t* session,
+                                           const coap_pdu_t* request, const coap_string_t* query, coap_pdu_t* response)
+{
+    CborEncoder encoder;
+    size_t encoded_size = 0;
+    uint8_t buf[128] = { 0 };
+
+    cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
+    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&encoder, CONFIG_BORNEO_DEVICE_COMPATIBLE));
+
+    encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
+
+    coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
+
+    coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
+    return;
+}
+
 COAP_RESOURCE_DEFINE("borneo/info", false, coap_hnd_borneo_info_get, NULL, NULL, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/reboot", false, NULL, coap_hnd_borneo_reboot_post, NULL, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/status", false, coap_hnd_borneo_status_get, NULL, NULL, NULL);
+
+COAP_RESOURCE_DEFINE("borneo/fwver", false, coap_hnd_borneo_fw_ver_get, NULL, NULL, NULL);
+
+COAP_RESOURCE_DEFINE("borneo/compatible", false, coap_hnd_borneo_compatible_get, NULL, NULL, NULL);

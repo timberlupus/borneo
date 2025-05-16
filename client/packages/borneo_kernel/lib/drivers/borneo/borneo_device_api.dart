@@ -13,11 +13,14 @@ import 'package:borneo_kernel_abstractions/device.dart';
 const String kBorneoDeviceMdnsServiceType = '_borneo._udp';
 
 class BorneoPaths {
+  static final Uri deviceInfo = Uri(path: '/borneo/info');
   static final Uri power = Uri(path: '/borneo/power');
   static final Uri powerBehavior = Uri(path: '/borneo/power/behavior');
   static final Uri status = Uri(path: '/borneo/status');
   static final Uri timezone = Uri(path: '/borneo/settings/timezone');
   static final Uri factoryReset = Uri(path: '/borneo/factory/reset');
+  static final Uri firmwareVersion = Uri(path: '/borneo/fwver');
+  static final Uri compatible = Uri(path: '/borneo/compatible');
 }
 
 /// Defines the power behavior of a device.
@@ -196,6 +199,9 @@ class BorneoDeviceUpgradeInfo {
 }
 
 abstract class IBorneoDeviceApi implements IDeviceApi, IPowerOnOffCapability {
+  Future<String> getCompatible(Device dev);
+  Future<Version> getFirmwareVersion(Device dev);
+
   GeneralBorneoDeviceInfo getGeneralDeviceInfo(Device dev);
   Future<GeneralBorneoDeviceStatus> getGeneralDeviceStatus(Device dev);
 
@@ -245,6 +251,19 @@ abstract class BorneoDriverData {
 }
 
 mixin BorneoDeviceApiImpl implements IBorneoDeviceApi {
+  @override
+  Future<String> getCompatible(Device dev) async {
+    final dd = dev.driverData as BorneoDriverData;
+    return await dd.coap.getCbor<String>(BorneoPaths.compatible);
+  }
+
+  @override
+  Future<Version> getFirmwareVersion(Device dev) async {
+    final dd = dev.driverData as BorneoDriverData;
+    final verStr = await dd.coap.getCbor<String>(BorneoPaths.firmwareVersion);
+    return Version.parse(verStr);
+  }
+
   @override
   Future<bool> getOnOff(Device dev) async {
     final dd = dev.driverData as BorneoDriverData;

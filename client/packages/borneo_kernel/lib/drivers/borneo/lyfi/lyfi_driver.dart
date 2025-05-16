@@ -15,6 +15,7 @@ import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/idriver.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 import '../borneo_device_api.dart';
 
@@ -357,15 +358,25 @@ class BorneoLyfiDriver
     final probeCoapClient =
         CoapClient(dev.address, config: BorneoProbeCoapConfig.coapConfig);
     try {
-      final generalDeviceInfo = await _getGeneralDeviceInfo(probeCoapClient);
-      if (!kLyfiFWVersionConstraint.allows(generalDeviceInfo.fwVer)) {
+      // Verify compatible string
+      final compatible = await _getCompatible(probeCoapClient);
+      if (compatible != lyfiCompatibleString) {
+        throw UncompatibleDeviceError(
+            "Uncompatible device: `$compatible`", dev);
+      }
+
+      // Verify firmware version
+      final fwver = await _getFirmwareVersion(probeCoapClient);
+      if (!kLyfiFWVersionConstraint.allows(fwver)) {
         throw UnsupportedVersionError(
           'Unsupported firmware version',
           dev,
-          currentVersion: generalDeviceInfo.fwVer,
+          currentVersion: fwver,
           versionRange: kLyfiFWVersionConstraint,
         );
       }
+
+      final generalDeviceInfo = await _getGeneralDeviceInfo(probeCoapClient);
       final coapClient =
           CoapClient(dev.address, config: BorneoCoapConfig.coapConfig);
       final lyfiInfo = await _getLyfiInfo(coapClient);
@@ -398,9 +409,23 @@ class BorneoLyfiDriver
   @override
   void dispose() {}
 
+  Future<String> _getCompatible(CoapClient coap) async {
+    final compatible = await coap.getCbor<String>(
+      BorneoPaths.compatible,
+    );
+    return compatible;
+  }
+
+  Future<Version> _getFirmwareVersion(CoapClient coap) async {
+    final fwver = await coap.getCbor<String>(
+      BorneoPaths.firmwareVersion,
+    );
+    return Version.parse(fwver);
+  }
+
   Future<GeneralBorneoDeviceInfo> _getGeneralDeviceInfo(CoapClient coap) async {
     final response = await coap.get(
-      Uri(path: '/borneo/info'),
+      BorneoPaths.deviceInfo,
       accept: CoapMediaType.applicationCbor,
     );
     return GeneralBorneoDeviceInfo.fromMap(
@@ -409,7 +434,7 @@ class BorneoLyfiDriver
 
   Future<LyfiDeviceInfo> _getLyfiInfo(CoapClient coap) async {
     final response = await coap.get(
-      Uri(path: '/borneo/lyfi/info'),
+      LyfiPaths.info,
       accept: CoapMediaType.applicationCbor,
     );
     return LyfiDeviceInfo.fromMap(cbor.decode(response.payload) as CborMap);
