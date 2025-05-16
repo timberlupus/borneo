@@ -160,6 +160,7 @@ class AcclimationScreen extends StatelessWidget {
         title: Text('Update acclimation settings succeed.'),
         autoCloseDuration: const Duration(seconds: 5),
         closeOnClick: true,
+        style: ToastificationStyle.fillColored,
         type: ToastificationType.success,
       );
     });

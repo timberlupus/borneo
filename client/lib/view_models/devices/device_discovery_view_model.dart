@@ -212,7 +212,6 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel with ViewModelEve
   }
 
   Future<void> _onNewDeviceEntityAdded(NewDeviceEntityAddedEvent event) async {
-    // TODO show a toast or snackbar
     try {
       _discoveredDevices.value.removeWhere((x) => x.fingerprint == event.device.fingerprint);
       _discoveredDevices.value = List.from(_discoveredDevices.value);

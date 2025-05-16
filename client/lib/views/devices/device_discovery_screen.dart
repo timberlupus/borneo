@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 
 import '../../services/device_manager.dart';
 import '../../view_models/devices/device_discovery_view_model.dart';
@@ -246,31 +247,27 @@ class NewDeviceAddedSnackBarListener extends StatelessWidget {
     return Selector<DeviceDiscoveryViewModel, DeviceEntity?>(
       selector: (_, viewModel) => viewModel.lastestAddedDevice,
       builder: (context, lastestAdded, child) {
-        final vm = context.read<DeviceDiscoveryViewModel>();
         if (lastestAdded != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(
-                  SnackBar(
-                    duration: Duration(seconds: 3),
-                    content: Text(
-                      context.translate(
-                        'New device "{deviceName}" has been added.',
-                        nArgs: {'deviceName': lastestAdded.name},
-                      ),
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onTertiaryContainer),
-                    ),
-                    backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-                  ),
-                )
-                .closed
-                .then((_) {
-                  if (!vm.isDisposed) {
-                    vm.clearAddedDevice();
-                  }
-                });
+            toastification.dismissAll();
+            toastification.show(
+              context: context,
+              type: ToastificationType.success,
+              style: ToastificationStyle.fillColored,
+              title: Text(context.translate('A new device has been added.')),
+              description: Text(lastestAdded.name),
+              autoCloseDuration: const Duration(seconds: 3),
+              icon: const Icon(Icons.device_hub),
+            );
+
+            // 在 toast 关闭后清除状态
+            /*
+            Future.delayed(const Duration(seconds: 3), () {
+              if (!vm.isDisposed) {
+                vm.clearAddedDevice();
+              }
+            });
+            */
           });
         }
         return child!;
@@ -329,71 +326,74 @@ class DeviceDiscoveryScreen extends StatelessWidget {
           Navigator.of(context).pop(vm.newDeviceCount > 0);
         }
       },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Container(
-            color: Theme.of(context).colorScheme.surface,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Input Fields
-                SmartConfigFormPanel(),
-                SizedBox(height: 8),
-                // Start/Stop Button
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  width: double.infinity,
-                  child: StartStopButton(),
-                ),
-                SizedBox(height: 16),
-              ],
-            ),
-          ),
-          ValueListenableBuilder<List<SupportedDeviceDescriptor>>(
-            valueListenable: vm.discoveredDevices,
-            builder: (context, devices, child) => devices.isNotEmpty ? child! : const SizedBox(height: 0),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: Text(context.translate('Discovered Devices:'), style: Theme.of(context).textTheme.titleMedium),
-            ),
-          ),
-          Expanded(
-            child: ValueListenableBuilder<List<SupportedDeviceDescriptor>>(
-              valueListenable: vm.discoveredDevices,
-              builder:
-                  (context, value, child) => ListView.separated(
-                    separatorBuilder:
-                        (BuildContext context, int index) => DecoratedBox(
-                          decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer),
-                          child: Divider(height: 1, indent: 16, color: Theme.of(context).colorScheme.surface),
-                        ),
-                    itemCount: vm.discoveredDevices.value.length,
-                    itemBuilder: (context, index) {
-                      final user = vm.discoveredDevices.value[index];
-                      return ListTile(
-                        tileColor: Theme.of(context).colorScheme.surfaceContainer,
-                        title: Text(user.name, style: Theme.of(context).textTheme.bodyLarge),
-                        subtitle: Text(user.address.toString(), style: Theme.of(context).textTheme.bodySmall),
-                        trailing: Consumer<DeviceDiscoveryViewModel>(
-                          builder:
-                              (context, vm, child) => IconButton.filledTonal(
-                                onPressed:
-                                    vm.isBusy || vm.isDiscovering
-                                        ? null
-                                        : () => _showAddDeviceSheet(context, vm, vm.discoveredDevices.value[index]),
-                                icon: child as Icon,
-                              ),
-                          child: Icon(Icons.add_outlined),
-                        ),
-                      );
-                    },
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Container(
+              color: Theme.of(context).colorScheme.surface,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Input Fields
+                  SmartConfigFormPanel(),
+                  SizedBox(height: 8),
+                  // Start/Stop Button
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    width: double.infinity,
+                    child: StartStopButton(),
                   ),
+                  SizedBox(height: 16),
+                ],
+              ),
             ),
-          ),
-          NewDeviceAddedSnackBarListener(child: SizedBox()),
-        ],
+            ValueListenableBuilder<List<SupportedDeviceDescriptor>>(
+              valueListenable: vm.discoveredDevices,
+              builder: (context, devices, child) => devices.isNotEmpty ? child! : const SizedBox(height: 0),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Text(context.translate('Discovered Devices:'), style: Theme.of(context).textTheme.titleMedium),
+              ),
+            ),
+            Expanded(
+              child: ValueListenableBuilder<List<SupportedDeviceDescriptor>>(
+                valueListenable: vm.discoveredDevices,
+                builder:
+                    (context, value, child) => ListView.separated(
+                      separatorBuilder:
+                          (BuildContext context, int index) => DecoratedBox(
+                            decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer),
+                            child: Divider(height: 1, indent: 16, color: Theme.of(context).colorScheme.surface),
+                          ),
+                      itemCount: vm.discoveredDevices.value.length,
+                      itemBuilder: (context, index) {
+                        final user = vm.discoveredDevices.value[index];
+                        return ListTile(
+                          tileColor: Theme.of(context).colorScheme.surfaceContainer,
+                          title: Text(user.name, style: Theme.of(context).textTheme.bodyLarge),
+                          subtitle: Text(user.address.toString(), style: Theme.of(context).textTheme.bodySmall),
+                          trailing: Consumer<DeviceDiscoveryViewModel>(
+                            builder:
+                                (context, vm, child) => IconButton.filledTonal(
+                                  onPressed:
+                                      vm.isBusy || vm.isDiscovering
+                                          ? null
+                                          : () => _showAddDeviceSheet(context, vm, vm.discoveredDevices.value[index]),
+                                  icon: child as Icon,
+                                ),
+                            child: Icon(Icons.add_outlined),
+                          ),
+                        );
+                      },
+                    ),
+              ),
+            ),
+            NewDeviceAddedSnackBarListener(child: SizedBox()),
+          ],
+        ),
       ),
     );
   }

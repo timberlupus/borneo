@@ -135,12 +135,16 @@ final class DefaultKernel implements IKernel {
   }
 
   @override
-  Future<bool> tryBind(Device device, String driverID,
-      {CancellationToken? cancelToken}) async {
+  Future<bool> tryBind(
+    Device device,
+    String driverID, {
+    Duration? timeout,
+    CancellationToken? cancelToken,
+  }) async {
     _ensureStarted();
     assert(_registeredDevices.containsKey(device.id));
     try {
-      await bind(device, driverID, cancelToken: cancelToken);
+      await bind(device, driverID, cancelToken: cancelToken, timeout: timeout);
       return true;
     } on CancelledException catch (_) {
       _logger.w('Device($device) binding cancelled');
@@ -160,7 +164,7 @@ final class DefaultKernel implements IKernel {
 
   @override
   Future<void> bind(Device device, String driverID,
-      {CancellationToken? cancelToken}) async {
+      {Duration? timeout, CancellationToken? cancelToken}) async {
     _ensureStarted();
     assert(_registeredDevices.containsKey(device.id));
     _logger.i('Binding device: `$device` to driver `$driverID`');
@@ -176,7 +180,7 @@ final class DefaultKernel implements IKernel {
 
     final driverInitialized = await driver
         .probe(device, cancelToken: cancelToken)
-        .timeout(kLocalProbeTimeOut);
+        .timeout(timeout ?? kLocalProbeTimeOut);
 
     if (driverInitialized) {
       // Try to activate device
@@ -245,15 +249,14 @@ final class DefaultKernel implements IKernel {
           futures.add(bd.driver
               .heartbeat(bd.device,
                   cancelToken: _heartbeatPollingTaskCancelToken)
-              .timeout(kLocalProbeTimeOut, onTimeout: () => false));
+              .timeout(kHeartbeatPollingInterval)
+              .asCancellable(_heartbeatPollingTaskCancelToken));
           devices.add(bd);
         }
       }
 
       _logger.i('Polling heartbeat for (${devices.length}) bound devices...');
-      final results = await Future.wait(futures)
-          .timeout(kHeartbeatPollingInterval)
-          .asCancellable(_heartbeatPollingTaskCancelToken);
+      final results = await Future.wait(futures);
       for (int i = 0; i < results.length; i++) {
         if (!results[i]) {
           _logger.w('The device(${devices[i].device}) is not responding.');
@@ -268,14 +271,12 @@ final class DefaultKernel implements IKernel {
         _registeredDevices.values.where((x) => !isBound(x.device.id)).toList();
     for (final descriptor in unboundDeviceDescriptors) {
       futures.add(tryBind(descriptor.device, descriptor.driverID,
-              cancelToken: _heartbeatPollingTaskCancelToken)
-          .timeout(kLocalProbeTimeOut));
+          timeout: kLocalProbeTimeOut,
+          cancelToken: _heartbeatPollingTaskCancelToken));
     }
     _logger.i(
         'Polling heartbeat for (${unboundDeviceDescriptors.length}) unbound devices...');
-    final boundResults = await Future.wait(futures)
-        .timeout(kHeartbeatPollingInterval)
-        .asCancellable(_heartbeatPollingTaskCancelToken);
+    final boundResults = await Future.wait(futures);
     for (int i = 0; i < boundResults.length; i++) {
       /*
       if (!boundResults[i]) {
