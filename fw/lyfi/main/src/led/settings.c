@@ -219,14 +219,13 @@ int led_load_user_settings()
     {
         uint8_t acc_en = 0;
         rc = nvs_get_u8(handle, LED_NVS_KEY_ACCLIMATION_ENABLED, &acc_en);
-        if (rc == 0 && acc_en) {
+        if (rc == 0) {
             settings->acclimation.enabled = acc_en;
         }
         else if (rc == ESP_ERR_NVS_NOT_FOUND) {
             settings->acclimation.enabled = false;
-            rc = 0;
         }
-        if (rc) {
+        else if (rc) {
             goto _EXIT_CLOSE;
         }
     }
@@ -235,9 +234,8 @@ int led_load_user_settings()
         rc = nvs_get_i64(handle, LED_NVS_KEY_ACCLIMATION_START, &settings->acclimation.start_utc);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
             settings->acclimation.start_utc = LED_DEFAULT_SETTINGS.acclimation.start_utc;
-            rc = 0;
         }
-        if (rc) {
+        else if (rc) {
             goto _EXIT_CLOSE;
         }
     }
@@ -248,7 +246,7 @@ int led_load_user_settings()
             settings->acclimation.duration = LED_DEFAULT_SETTINGS.acclimation.duration;
             rc = 0;
         }
-        if (rc) {
+        else if (rc) {
             goto _EXIT_CLOSE;
         }
     }
@@ -259,7 +257,7 @@ int led_load_user_settings()
             settings->acclimation.start_percent = LED_DEFAULT_SETTINGS.acclimation.start_percent;
             rc = 0;
         }
-        if (rc) {
+        else if (rc) {
             goto _EXIT_CLOSE;
         }
     }
