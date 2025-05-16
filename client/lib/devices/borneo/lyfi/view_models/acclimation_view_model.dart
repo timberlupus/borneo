@@ -25,6 +25,7 @@ class AcclimationViewModel extends BaseLyfiDeviceViewModel {
 
   Future<void> setEanbled(bool value) async {
     _enabled = value;
+    setChanged();
     notifyListeners();
   }
 
@@ -69,12 +70,8 @@ class AcclimationViewModel extends BaseLyfiDeviceViewModel {
   }
 
   bool validate() {
-    final localNow = DateTime.now();
-    final now = DateTime(localNow.year, localNow.month, localNow.day).toUtc();
     return _startTimestamp.isUtc &&
-        _startTimestamp.year >= now.year &&
-        _startTimestamp.month >= now.month &&
-        _startTimestamp.day >= now.day &&
+        _startTimestamp.isAfter(DateTime(2025, 1, 1).toUtc()) &&
         _days >= 5 &&
         _days <= 100 &&
         _startPercent >= 10 &&

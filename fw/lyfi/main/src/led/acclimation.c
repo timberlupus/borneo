@@ -41,20 +41,33 @@ int led_acclimation_drive(time_t utc_now, led_color_t color)
         return 0;
     }
 
+    if (!led_acclimation_is_enabled()) {
+        return 0;
+    }
+
     struct led_acclimation_settings* acc = &_led.settings.acclimation;
     time_t end_time_utc = acc->start_utc + (SECS_PER_DAY * acc->duration);
-    if (utc_now <= end_time_utc) {
+
+    if (utc_now >= acc->start_utc && utc_now <= end_time_utc) {
         if (!_led.acclimation_activated) {
             _led.acclimation_activated = true;
         }
-        int days_elapsed = (int)((end_time_utc - utc_now) / SECS_PER_DAY);
+
+        int days_elapsed = (int)((utc_now - acc->start_utc) / SECS_PER_DAY);
+
+        if (days_elapsed > acc->duration) {
+            days_elapsed = acc->duration;
+        }
+
         int total_increment = 100 - acc->start_percent;
-        int current_increment = days_elapsed * total_increment;
-        int percent = acc->start_percent + (current_increment + acc->duration / 2) / acc->duration;
+        int percent = acc->start_percent + (days_elapsed * total_increment) / acc->duration;
+
+        if (percent > 100) {
+            percent = 100;
+        }
+
         for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-            if (end_time_utc <= utc_now) {
-                return (led_brightness_t)(((uint32_t)color[ch] * percent + 50) / 100);
-            }
+            color[ch] = (led_brightness_t)(((uint32_t)color[ch] * percent + 50) / 100);
         }
         return 0;
     }

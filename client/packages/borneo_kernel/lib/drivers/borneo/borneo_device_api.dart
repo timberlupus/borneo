@@ -166,7 +166,8 @@ class GeneralBorneoDeviceStatus {
     final dynamic map = cborMap.toObject();
     return GeneralBorneoDeviceStatus(
       power: map['power'],
-      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] * 1000),
+      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] * 1000,
+          isUtc: true),
       bootDuration: Duration(milliseconds: map['bootDuration']),
       timezone: map['timezone'] ?? '',
       wifiStatus: map['wifiStatus'],
@@ -175,7 +176,8 @@ class GeneralBorneoDeviceStatus {
       error: map['error'],
       shutdownReason: map['shutdownReason'],
       shutdownTimestamp: map['shutdownTimestamp'] > 0
-          ? DateTime.fromMillisecondsSinceEpoch(map['shutdownTimestamp'] * 1000)
+          ? DateTime.fromMillisecondsSinceEpoch(map['shutdownTimestamp'] * 1000,
+              isUtc: true)
           : null,
       temperature: map['temperature'],
       powerVoltage:

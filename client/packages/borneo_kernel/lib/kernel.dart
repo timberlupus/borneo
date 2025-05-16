@@ -235,6 +235,19 @@ final class DefaultKernel implements IKernel {
     });
   }
 
+  Future<bool> _tryDoHeartBeat(BoundDevice bd) async {
+    try {
+      await bd.driver
+          .heartbeat(bd.device, cancelToken: _heartbeatPollingTaskCancelToken)
+          .timeout(kHeartbeatPollingInterval)
+          .asCancellable(_heartbeatPollingTaskCancelToken);
+      return true;
+    } catch (e, stackTrace) {
+      _logger.t("Failed to do heartbeat", error: e, stackTrace: stackTrace);
+      return false;
+    }
+  }
+
   Future<void> _heartbeatPollingPeriodicTask() async {
     if (!isInitialized) {
       return;
@@ -246,11 +259,7 @@ final class DefaultKernel implements IKernel {
       final devices = <BoundDevice>[];
       for (final bd in _boundDevices.values) {
         if (_pollIDList.contains(bd.device.id)) {
-          futures.add(bd.driver
-              .heartbeat(bd.device,
-                  cancelToken: _heartbeatPollingTaskCancelToken)
-              .timeout(kHeartbeatPollingInterval)
-              .asCancellable(_heartbeatPollingTaskCancelToken));
+          futures.add(_tryDoHeartBeat(bd));
           devices.add(bd);
         }
       }

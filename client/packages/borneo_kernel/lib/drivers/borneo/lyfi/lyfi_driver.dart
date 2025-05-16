@@ -167,8 +167,9 @@ class AcclimationSettings {
   factory AcclimationSettings.fromMap(dynamic map) {
     return AcclimationSettings(
       enabled: map["enabled"],
-      startTimestamp:
-          DateTime.fromMillisecondsSinceEpoch(map['startTimestamp'] * 1000),
+      startTimestamp: DateTime.fromMillisecondsSinceEpoch(
+          map['startTimestamp'] * 1000,
+          isUtc: true),
       days: map["days"],
       startPercent: map["startPercent"],
     );

@@ -97,7 +97,7 @@ static void coap_hnd_acclimation_post(coap_resource_t* resource, coap_session_t*
         return;
     }
 
-    if (start_percent < 0 || start_percent > 100) {
+    if (start_percent < 10 || start_percent > 90) {
         coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
         return;
     }
