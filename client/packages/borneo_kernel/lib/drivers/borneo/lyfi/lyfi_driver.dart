@@ -358,7 +358,6 @@ class BorneoLyfiDriver
         CoapClient(dev.address, config: BorneoProbeCoapConfig.coapConfig);
     try {
       final generalDeviceInfo = await _getGeneralDeviceInfo(probeCoapClient);
-      final lyfiInfo = await _getLyfiInfo(probeCoapClient);
       if (!kLyfiFWVersionConstraint.allows(generalDeviceInfo.fwVer)) {
         throw UnsupportedVersionError(
           'Unsupported firmware version',
@@ -369,6 +368,7 @@ class BorneoLyfiDriver
       }
       final coapClient =
           CoapClient(dev.address, config: BorneoCoapConfig.coapConfig);
+      final lyfiInfo = await _getLyfiInfo(coapClient);
       dev.driverData = LyfiDriverData(coapClient, generalDeviceInfo, lyfiInfo);
       return true;
     } on CoapRequestTimeoutException catch (_) {
