@@ -65,7 +65,7 @@ async def main(address):
         print(f"Switching the device to the dimming state...")
         state = await client.switch_state(LedState.DIMMING)
 
-        if device_info['channelCount'] == 5: # BLC06MK1
+        if device_info['channelCount'] == 6: # BLC06MK1
             await client.set_color([10, 15, 10, 20, 15, 10])
 
         await asyncio.sleep(3)
