@@ -1,30 +1,32 @@
 # A Based Open Source WiFi Aquarium LED DIY Kit
 
-![Firmware Build Status](https://github.com/oldrev/borneo/actions/workflows/fw-ci.yml/badge.svg)
-![App Build Status](https://github.com/oldrev/borneo/actions/workflows/flutter-ci.yml/badge.svg)
+![Firmware Build Status](https://github.com/borneo-iot/borneo/actions/workflows/fw-ci.yml/badge.svg)
+![App Build Status](https://github.com/borneo-iot/borneo/actions/workflows/flutter-ci.yml/badge.svg)
 
 ![BorneoIoT Banner](assets/borneo-repo-banner.jpg)
 
 <p align="center">
     <a href="https://www.borneoiot.com"><b>Website</b></a> •
     <a href="https://docs.borneoiot.com"><b>Documentation</b></a> •
-    <a href="https://github.com/oldrev/borneo/discussions"><b>Forum</b></a> •
+    <a href="https://github.com/borneo-iot/borneo/discussions"><b>Forum</b></a> •
     <a href="https://discord.gg/EFJTm7PpEs"><b>Discord</b></a>
 </p>
 
 
 ---
 
-The Borneo-IoT Project offers cutting-edge, open-source, modular, and affordable hardware and software solutions for hobbyists and professionals to create aquarium LEDs and other smart aquatic devices.
+The Borneo-IoT Project offers cutting-edge, open-source, modular, and affordable hardware and software solutions for hobbyists and professionals to create aquarium LEDs and other smart aquarium devices.
 
 
-For more information, please visit the project's website: [www.borneoiot.com](https://www.borneoiot.com).
+For more information, please visit the project's website: **[www.borneoiot.com](https://www.borneoiot.com)**.
 
-PDF versions of the hardware schematics, datasheets and BoM can be found in [`hw/datasheets`](hw/datasheets).
+PDF versions of the hardware schematics and datasheets [`hw/datasheets`](hw/datasheets).
 
-If you like this project, please don't forget to give it a star. Thank you!
+**The project's PCB design uses [Horizon EDA](https://horizon-eda.org). After installation, you can open the `.hprj` file and export the BoM and Gerber files yourself.**
 
-The Buce (Model BLC06MK1) LED PWM dimmer in this project is an [OSHWA (Open Source Hardware Association)](https://www.oshwa.org) certificated open-hardware:
+If you like this project, please don't forget to give it a ⭐. Thank you!
+
+The Buce (Model BLC06MK1) LED controller in this project is an [OSHWA (Open Source Hardware Association)](https://www.oshwa.org) certificated open-hardware:
 
 [![BLC06MK1](assets/buce-oshwa.png)](https://certification.oshwa.org/cn000017.html)
 
@@ -47,7 +49,7 @@ The Buce (Model BLC06MK1) LED PWM dimmer in this project is an [OSHWA (Open Sour
 - **Rich Functionality**
     - 6-channel PWM dimmer with zero peripheral components
     - Graphical sunrise/sunset dimming with soft-start
-    - SNTP time sync & PID-controlled cooling
+    - SNTP time sync & PID-controlled cooling sub-system
     - Python API client & demo scripts
     - Optional INA139 current monitoring
 
@@ -74,16 +76,6 @@ The Buce (Model BLC06MK1) LED PWM dimmer in this project is an [OSHWA (Open Sour
 
 [![YouTube](http://i.ytimg.com/vi/Z78nOzLQvq0/hqdefault.jpg)](https://www.youtube.com/watch?v=Z78nOzLQvq0)
 
-### Pictures
-
-| ![BLC06MK1](assets/blc06mk1-shot1.jpg) <br/> LED Dimmer Module Appearance | ![BLC05MK3-SCH](assets/blc05mk3-sch.png) <br/> LED LED Dimmer Module Schematic |
-|------------------------------------------|------------------------------------------ |
-| ![BLB08103 Board](assets/blc05mk3-old-prototype.jpg) <br/> 5-Channel LED Dimmer - Obsoleted Prototype | ![BLB08103 Old Board](assets/blb08103-old-prototype.jpg) <br/> Aluminum PCB - Obsoleted Prototype |
-| ![BLB08103 Board](assets/blb08103.jpg) <br/> Aluminum PCB Appearance | ![BLB08103 Case](assets/blb08103-case.jpg) <br/> Reference Design Lamp Appearance[^2] |
-
-
-[^2]: The enclosure was manually measured and modeled by me after purchasing it from a friend, therefore, I regret that the design cannot be made public. If there is significant interest, I can redesign it.
-
 ## Project Status
 
 ### Hardware & Firmware
@@ -96,7 +88,7 @@ The Buce (Model BLC06MK1) LED PWM dimmer in this project is an [OSHWA (Open Sour
 
 ## Roadmap
 
-Checkout the [milestones](https://github.com/oldrev/borneo/milestones) to get a glimpse of the upcoming features and milestones.
+Checkout the [milestones](https://github.com/borneo-iot/borneo/milestones) to get a glimpse of the upcoming features and milestones.
 
 ## Directory Structure
 
@@ -136,11 +128,11 @@ If you want to support the development of this project, you could consider buyin
 
 ## Issues, Feedback & Support
 
-We welcome your feedback! If you encounter any issues or have suggestions, please open an [issue](https://github.com/oldrev/borneo/issues).
+We welcome your feedback! If you encounter any issues or have suggestions, please open an [issue](https://github.com/borneo-iot/borneo/issues).
 
 - Website：[www.borneoiot.com](https://www.borneoiot.com)
 - Online documentation：[docs.borneoiot.com](https://docs.borneoiot.com)
-- GutHub Discussions: [github.com/oldrev/borneo/discussions](https://github.com/oldrev/borneo/discussions)
+- GutHub Discussions: [github.com/borneo-iot/borneo/discussions](https://github.com/borneo-iot/borneo/discussions)
 - Author's e-mail: [oldrev@gmail.com](mailto:oldrev@gmail.com)
 - Borneo-IoT Discord Server: [discord.gg/EFJTm7PpEs](https://discord.gg/EFJTm7PpEs)
 
