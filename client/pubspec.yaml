@@ -87,6 +87,12 @@ dependencies:
   gauge_indicator: ^0.4.3
   toastification: ^3.0.2
   equatable: ^2.0.7
+  flutter_typeahead: ^5.2.0
+  geocoding: ^3.0.0
+  latlong2: ^0.9.1
+  flutter_map: ^8.1.1
+  flutter_keyboard_visibility: ^6.0.0
+  lat_lng_to_timezone: ^0.2.0
 
 
 dev_dependencies:

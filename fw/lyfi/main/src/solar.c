@@ -76,7 +76,7 @@ float solar_calculate_timezone_offset(const struct tm* tm_local)
     time_t utc_time = mktime(&tm_utc);
 
     // Calculate timezone offset in hours
-    return (float)difftime(local_time, utc_time) / 3600.0f;
+    return (float)(local_time - utc_time) / 3600.0f;
 }
 
 int solar_calculate_sunrise_sunset(float latitude, float longitude, float timezone_offset, const struct tm* tm_local,

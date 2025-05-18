@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 
 import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
+import 'package:latlong2/latlong.dart';
 
 class SettingsViewModel extends BaseLyfiDeviceViewModel {
   final Uri address;
@@ -55,11 +56,9 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     _correctionMethod = await api.getCorrectionMethod(boundDevice!.device);
   }
 
-  Future<void> updateGeoLocation() async {
+  Future<void> updateGeoLocation(LatLng location) async {
     super.enqueueUIJob(() async {
-      notifyListeners();
-      final pos = await getLocation();
-      final loc = GeoLocation(lat: pos.latitude, lng: pos.longitude);
+      final loc = GeoLocation(lat: location.latitude, lng: location.longitude);
       await super.lyfiDeviceApi.setLocation(super.boundDevice!.device, loc);
       _location = loc;
     });

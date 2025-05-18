@@ -16,15 +16,11 @@ class ManualEditorView extends StatelessWidget {
   const ManualEditorView({super.key});
 
   Widget buildSliders(BuildContext context) {
-    return Consumer<ManualEditorViewModel>(
-      builder: (context, vm, _) {
-        if (vm.isInitialized) {
-          return Selector<ManualEditorViewModel, bool>(
-            selector: (_, editor) => editor.canChangeColor,
-            builder:
-                (_, canChangeColor, __) =>
-                    BrightnessSliderList(context.read<ManualEditorViewModel>(), disabled: !canChangeColor),
-          );
+    return Selector<ManualEditorViewModel, ({bool isInitialized, bool canChangeColor})>(
+      selector: (context, vm) => (canChangeColor: vm.canChangeColor, isInitialized: vm.isInitialized),
+      builder: (context, props, _) {
+        if (props.isInitialized) {
+          return BrightnessSliderList(context.read<ManualEditorViewModel>(), disabled: !props.canChangeColor);
         } else {
           return Container();
         }

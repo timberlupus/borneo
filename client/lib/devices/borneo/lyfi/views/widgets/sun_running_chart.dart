@@ -29,7 +29,6 @@ class SunRunningChart extends StatelessWidget {
   }
 
   LineChartData _buildChartData(BuildContext context) {
-    final now = DateTime.now();
     final borderSide = BorderSide(color: Theme.of(context).scaffoldBackgroundColor, width: 1.5);
     return LineChartData(
       lineTouchData: lineTouchData1,
@@ -52,36 +51,41 @@ class SunRunningChart extends StatelessWidget {
       maxX: 24 * 3600.0,
       minY: 0,
       maxY: lyfiBrightnessMax.toDouble(),
-      extraLinesData: ExtraLinesData(
-        extraLinesOnTop: true,
-        verticalLines: [
-          VerticalLine(
-            x:
-                Duration(
-                  hours: now.hour.toInt(),
-                  minutes: now.minute.toInt(),
-                  seconds: now.second.toInt(),
-                ).inSeconds.toDouble(),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
-                Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.75),
-              ],
-            ),
-            dashArray: const [3, 2],
-            strokeWidth: 1.5,
-            label: VerticalLineLabel(
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
-              padding: const EdgeInsets.only(bottom: 8),
-              alignment: const Alignment(0, -1.6),
-              show: true,
-              labelResolver: (vl) => Duration(seconds: vl.x.toInt()).toHHMM(),
-            ),
+      extraLinesData: _buildExtraLines(context),
+    );
+  }
+
+  ExtraLinesData _buildExtraLines(BuildContext context) {
+    final now = DateTime.now();
+    return ExtraLinesData(
+      extraLinesOnTop: true,
+      verticalLines: [
+        VerticalLine(
+          x:
+              Duration(
+                hours: now.hour.toInt(),
+                minutes: now.minute.toInt(),
+                seconds: now.second.toInt(),
+              ).inSeconds.toDouble(),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
+              Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.75),
+            ],
           ),
-        ],
-      ),
+          dashArray: const [3, 2],
+          strokeWidth: 1.5,
+          label: VerticalLineLabel(
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
+            padding: const EdgeInsets.only(bottom: 8),
+            alignment: const Alignment(0, -1.6),
+            show: true,
+            labelResolver: (vl) => Duration(seconds: vl.x.toInt()).toHHMM(),
+          ),
+        ),
+      ],
     );
   }
 

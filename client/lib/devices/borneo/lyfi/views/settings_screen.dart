@@ -1,9 +1,11 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
+import 'package:borneo_app/widgets/map_location_picker.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 
 import 'package:provider/provider.dart';
 
@@ -40,6 +42,24 @@ class SettingsScreen extends StatelessWidget {
       };
     } else {
       return Icon(Icons.wifi_off_outlined, color: Theme.of(bc).colorScheme.error);
+    }
+  }
+
+  Future<void> _pickLocation(BuildContext context, SettingsViewModel vm) async {
+    final route = MaterialPageRoute(
+      builder:
+          (context) => MapLocationPicker(
+            initialLocation: vm.location != null ? LatLng(vm.location!.lat, vm.location!.lng) : null,
+          ),
+    );
+    try {
+      final selectedLocation = await Navigator.push(context, route);
+      if (selectedLocation != null) {
+        // Update the location in the view model
+        vm.updateGeoLocation(selectedLocation!);
+      }
+    } finally {
+      //TODO
     }
   }
 
@@ -80,24 +100,6 @@ class SettingsScreen extends StatelessWidget {
         leading: _buildWifiRssiIcon(context),
         title: Text('Device address'),
         trailing: Text(vm.address.toString()),
-      ),
-
-      // Location
-      Selector<SettingsViewModel, ({bool canUpdate, GeoLocation? location})>(
-        selector: (_, vm) => (canUpdate: vm.canUpdateGeoLocation, location: vm.location),
-        builder:
-            (context, map, _) => ListTile(
-              dense: true,
-              tileColor: tileColor,
-              leading: const Icon(Icons.location_pin),
-              title: Text('Location'),
-              subtitle:
-                  map.location != null
-                      ? Text("(${vm.location!.lat.toStringAsFixed(3)}, ${vm.location!.lng.toStringAsFixed(3)})")
-                      : Text('Unknown'),
-              trailing: rightChevron,
-              onTap: map.canUpdate ? vm.updateGeoLocation : null,
-            ),
       ),
 
       ListTile(dense: true, title: Text('DEVICE STATUS', style: Theme.of(context).textTheme.titleSmall)),
@@ -162,6 +164,32 @@ class SettingsScreen extends StatelessWidget {
       // LED Lighting settings
       ListTile(dense: true, title: Text('LIGHTING', style: Theme.of(context).textTheme.titleSmall)),
 
+      // Location
+      Selector<SettingsViewModel, ({bool canUpdate, GeoLocation? location})>(
+        selector: (_, vm) => (canUpdate: vm.canUpdateGeoLocation, location: vm.location),
+        builder:
+            (context, map, _) => ListTile(
+              dense: true,
+              tileColor: tileColor,
+              leading: const Icon(Icons.location_pin),
+              title: Text('Location for sun & moon simulation'),
+              subtitle:
+                  map.location != null
+                      ? Text("(${vm.location!.lat.toStringAsFixed(3)}, ${vm.location!.lng.toStringAsFixed(3)})")
+                      : Text('Unknown'),
+              trailing: rightChevron,
+              onTap:
+                  map.canUpdate
+                      ? () async {
+                        if (context.mounted) {
+                          await _pickLocation(context, vm);
+                        }
+                      }
+                      : null,
+            ),
+      ),
+
+      // Curve
       Selector<SettingsViewModel, ({bool canUpdate, LedCorrectionMethod correctionMethod})>(
         selector: (_, vm) => (canUpdate: vm.canUpdateCorrectionMethod, correctionMethod: vm.correctionMethod),
         builder:
