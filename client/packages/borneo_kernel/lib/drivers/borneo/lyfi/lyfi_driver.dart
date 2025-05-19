@@ -29,6 +29,8 @@ class LyfiPaths {
   static final Uri correctionMethod =
       Uri(path: '/borneo/lyfi/correction-method');
   static final Uri geoLocation = Uri(path: '/borneo/lyfi/geo-location');
+  static final Uri tzEnabled = Uri(path: '/borneo/lyfi/tz/enabled');
+  static final Uri tzOffset = Uri(path: '/borneo/lyfi/tz/offset');
   static final Uri acclimation = Uri(path: '/borneo/lyfi/acclimation');
   static final Uri temporaryDuration =
       Uri(path: '/borneo/lyfi/temporary-duration');
@@ -327,6 +329,12 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   Future<GeoLocation?> getLocation(Device dev);
   Future<void> setLocation(Device dev, GeoLocation location);
 
+  Future<bool> getTimeZoneEnabled(Device dev);
+  Future<void> setTimeZoneEnabled(Device dev, bool enabled);
+
+  Future<int> getTimeZoneOffset(Device dev);
+  Future<void> setTimeZoneOffset(Device dev, int offset);
+
   Future<AcclimationSettings> getAcclimation(Device dev);
   Future<void> setAcclimation(Device dev, AcclimationSettings acc);
   Future<void> terminateAcclimation(Device dev);
@@ -594,6 +602,32 @@ class BorneoLyfiDriver
   Future<void> setLocation(Device dev, GeoLocation location) async {
     final dd = dev.driverData as LyfiDriverData;
     return await dd.coap.putCbor(LyfiPaths.geoLocation, location);
+  }
+
+  @override
+  Future<bool> getTimeZoneEnabled(Device dev) async {
+    final dd = dev.driverData as LyfiDriverData;
+    final result = await dd.coap.getCbor<bool>(LyfiPaths.tzEnabled);
+    return result;
+  }
+
+  @override
+  Future<void> setTimeZoneEnabled(Device dev, bool enabled) async {
+    final dd = dev.driverData as LyfiDriverData;
+    await dd.coap.putCbor(LyfiPaths.tzEnabled, enabled);
+  }
+
+  @override
+  Future<int> getTimeZoneOffset(Device dev) async {
+    final dd = dev.driverData as LyfiDriverData;
+    final result = await dd.coap.getCbor<int>(LyfiPaths.tzOffset);
+    return result;
+  }
+
+  @override
+  Future<void> setTimeZoneOffset(Device dev, int offset) async {
+    final dd = dev.driverData as LyfiDriverData;
+    await dd.coap.putCbor(LyfiPaths.tzOffset, offset);
   }
 
   @override

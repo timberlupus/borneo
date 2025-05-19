@@ -79,8 +79,8 @@ float solar_calculate_timezone_offset(const struct tm* tm_local)
     return (float)(local_time - utc_time) / 3600.0f;
 }
 
-int solar_calculate_sunrise_sunset(float latitude, float longitude, float timezone_offset, const struct tm* tm_local,
-                                   float* sunrise, float* sunset)
+int solar_calculate_sunrise_sunset(float latitude, float longitude, float timezone_offset, const struct tm* tm_utc,
+                                   float* sunrise, float* noon, float* sunset)
 {
     // Validate input parameters
     if (latitude < -90.0f || latitude > 90.0f) {
@@ -92,7 +92,8 @@ int solar_calculate_sunrise_sunset(float latitude, float longitude, float timezo
         return -EINVAL;
     }
 
-    int doy = solar_day_of_year(tm_local);
+    // 这里 tm_utc 是 UTC 时间
+    int doy = solar_day_of_year(tm_utc);
 
     // Calculate solar declination angle (simplified)
     float decl = 23.45f * sinf(deg_to_rad(360.0f * (284 + doy) / 365.0f));
@@ -122,13 +123,18 @@ int solar_calculate_sunrise_sunset(float latitude, float longitude, float timezo
     // Convert omega to time (hours)
     float daylight_hours = rad_to_deg(omega) / 15.0f * 2.0f;
 
-    // Calculate true solar noon (local time)
-    float solar_noon = 12.0f + (timezone_offset * 15.0f - longitude) / 15.0f;
+    // Calculate true solar noon (UTC)
+    float solar_noon_utc = 12.0f - longitude / 15.0f;
 
-    *sunrise = solar_noon - daylight_hours / 2.0f;
-    *sunset = solar_noon + daylight_hours / 2.0f;
+    *noon = solar_noon_utc + timezone_offset;
+    *sunrise = solar_noon_utc - daylight_hours / 2.0f + timezone_offset;
+    *sunset = solar_noon_utc + daylight_hours / 2.0f + timezone_offset;
 
     // Normalize times to 0-24 hour range
+    while (*noon < 0.0f)
+        *noon += 24.0f;
+    while (*noon >= 24.0f)
+        *noon -= 24.0f;
     while (*sunrise < 0.0f)
         *sunrise += 24.0f;
     while (*sunrise >= 24.0f)
@@ -140,14 +146,6 @@ int solar_calculate_sunrise_sunset(float latitude, float longitude, float timezo
 
     return 0;
 }
-
-/**
- * @brief Calculates the solar noon time.
- * @param sunrise The sunrise time in hours.
- * @param sunset The sunset time in hours.
- * @return The solar noon time in hours.
- */
-float solar_calculate_noon(float sunrise, float sunset) { return (sunrise + sunset) / 2.0f; }
 
 /**
  * @brief Clamps a time value to the range [0, 24].
@@ -165,9 +163,8 @@ float solar_clamp_time(float time)
     return time;
 }
 
-int solar_generate_instants(float sunrise, float sunset, struct solar_instant* instants)
+int solar_generate_instants(float sunrise, float noon, float sunset, struct solar_instant* instants)
 {
-    float noon = solar_calculate_noon(sunrise, sunset);
 
     instants[SOLAR_INDEX_SUNRISE] = (struct solar_instant) { sunrise, 0.0f };
     instants[SOLAR_INDEX_AFTER_SUNRISE] = (struct solar_instant) { solar_clamp_time(sunrise + 0.5f), 0.2f };
