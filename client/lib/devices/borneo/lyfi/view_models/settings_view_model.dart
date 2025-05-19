@@ -1,5 +1,6 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
 import 'package:borneo_app/infrastructure/timezone.dart';
+import 'package:borneo_app/services/inotification_service.dart';
 import 'package:borneo_common/exceptions.dart' as bo_ex;
 import 'package:geolocator/geolocator.dart';
 
@@ -8,6 +9,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:latlong2/latlong.dart';
 
 class SettingsViewModel extends BaseLyfiDeviceViewModel {
+  final INotificationService notification;
   final Uri address;
   final GeneralBorneoDeviceStatus borneoStatus;
   final GeneralBorneoDeviceInfo borneoInfo;
@@ -40,6 +42,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     required super.deviceID,
     required super.deviceManager,
     required super.globalEventBus,
+    required this.notification,
     required this.address,
     required this.borneoStatus,
     required this.borneoInfo,
@@ -61,6 +64,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       final loc = GeoLocation(lat: location.latitude, lng: location.longitude);
       await super.lyfiDeviceApi.setLocation(super.boundDevice!.device, loc);
       _location = loc;
+      notification.showSuccess("Location updated successfully");
     });
   }
 
@@ -109,6 +113,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       final posixTZ = await tzc.getLocalPosixTimezone();
       await api.setTimeZone(boundDevice!.device, posixTZ!);
       _timezone = posixTZ;
+      notification.showSuccess("Time zone updated successfully");
     });
   }
 
@@ -118,6 +123,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       notifyListeners();
       await api.setCorrectionMethod(boundDevice!.device, newMethod);
       _correctionMethod = newMethod;
+      notification.showSuccess("LED correction method updated successfully");
     });
   }
 
@@ -127,6 +133,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       notifyListeners();
       await api.setTemporaryDuration(boundDevice!.device, dur);
       _temporaryDuration = dur;
+      notification.showSuccess("Temporary duration updated successfully");
     });
   }
 
@@ -136,6 +143,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       notifyListeners();
       await api.setPowerBehavior(boundDevice!.device, behavior);
       _powerBehavior = behavior;
+      notification.showSuccess("Power behavior updated successfully");
     });
   }
 }

@@ -2,6 +2,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_view_model.dart';
 import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_model.dart';
+import 'package:borneo_app/services/inotification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -18,6 +19,8 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   static final int tempSetpoint = 45;
 
   static final DateFormat deviceDateFormat = DateFormat('yyyy-MM-dd HH:mm');
+
+  final INotificationService notification;
 
   ILyfiDeviceApi get _deviceApi => super.borneoDeviceApi as ILyfiDeviceApi;
 
@@ -80,7 +83,13 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     notifyListeners();
   }
 
-  LyfiViewModel({required super.deviceID, required super.deviceManager, required super.globalEventBus, super.logger}) {
+  LyfiViewModel({
+    required super.deviceID,
+    required super.deviceManager,
+    required super.globalEventBus,
+    required this.notification,
+    super.logger,
+  }) {
     //
   }
 
@@ -294,6 +303,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
       deviceID: deviceID,
       deviceManager: deviceManager,
       globalEventBus: globalEventBus,
+      notification: notification,
       address: deviceEntity.address,
       borneoStatus: borneoDeviceStatus!,
       borneoInfo: borneoDeviceInfo,

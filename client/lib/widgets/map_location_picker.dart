@@ -60,6 +60,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
     if (permission == LocationPermission.deniedForever) return;
 
     Position position = await Geolocator.getCurrentPosition();
+    if (!mounted) return;
     setState(() {
       _userLocation = LatLng(position.latitude, position.longitude);
     });
@@ -67,6 +68,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
 
   Future<void> _updateTimeZone(LatLng latLng) async {
     final tz = latLngToTimezoneString(latLng.latitude, latLng.longitude);
+    if (!mounted) return;
     setState(() {
       _currentTimeZone = tz;
     });
