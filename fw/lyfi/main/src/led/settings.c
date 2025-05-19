@@ -31,6 +31,8 @@
 #define LED_NVS_KEY_CORRECTION_METHOD "corrmtd"
 #define LED_NVS_KEY_PWM_FREQ "pwmfreq"
 #define LED_NVS_KEY_LOC "loc"
+#define LED_NVS_KEY_TZ_ENABLED "tz_en"
+#define LED_NVS_KEY_TZ_OFFSET "tz_off"
 #define LED_NVS_KEY_ACCLIMATION_ENABLED "acc.en"
 #define LED_NVS_KEY_ACCLIMATION_START "acc.start"
 #define LED_NVS_KEY_ACCLIMATION_DURATION "acc.days"
@@ -80,20 +82,21 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     .sun_color = {0},
     .scheduler = { 0 },
 
-    .location = {
+    .location = { // Kunming, China
         .lat = 25.0430f,
         .lng = 102.7062f,
     },
+    .tz_offset = 8 * 3600, // UTC+8
 
     .flags = 0ULL,
 
     .acclimation = {
-        .enabled = false,
         .start_utc = 0,
         .duration = 30,
         .start_percent = 30,
     },
-};
+}
+;
 
 extern struct led_status _led;
 
@@ -217,13 +220,47 @@ int led_load_user_settings()
     }
 
     {
+        uint8_t tz_en = 0;
+        rc = nvs_get_u8(handle, LED_NVS_KEY_TZ_ENABLED, &tz_en);
+        if (rc == 0) {
+            if (tz_en) {
+                settings->flags |= LED_OPTION_TZ_ENABLED;
+            }
+            else {
+                settings->flags &= ~LED_OPTION_TZ_ENABLED;
+            }
+        }
+        else if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->flags &= ~LED_OPTION_TZ_ENABLED;
+        }
+        else if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
+    {
+        rc = nvs_get_i32(handle, LED_NVS_KEY_TZ_OFFSET, &settings->tz_offset);
+        if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->tz_offset = LED_DEFAULT_SETTINGS.tz_offset;
+        }
+        else if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
+    {
         uint8_t acc_en = 0;
         rc = nvs_get_u8(handle, LED_NVS_KEY_ACCLIMATION_ENABLED, &acc_en);
         if (rc == 0) {
-            settings->acclimation.enabled = acc_en;
+            if (acc_en) {
+                settings->flags |= LED_OPTION_ACCLIMATION_ENABLED;
+            }
+            else {
+                settings->flags &= ~LED_OPTION_ACCLIMATION_ENABLED;
+            }
         }
         else if (rc == ESP_ERR_NVS_NOT_FOUND) {
-            settings->acclimation.enabled = false;
+            settings->flags &= ~LED_OPTION_ACCLIMATION_ENABLED;
         }
         else if (rc) {
             goto _EXIT_CLOSE;
@@ -322,6 +359,16 @@ int led_save_user_settings()
         }
     }
 
+    rc = nvs_set_u8(handle, LED_NVS_KEY_TZ_ENABLED, (uint8_t)(settings->flags & LED_OPTION_TZ_ENABLED));
+    if (rc) {
+        goto _EXIT_CLOSE;
+    }
+
+    rc = nvs_set_i32(handle, LED_NVS_KEY_TZ_OFFSET, settings->tz_offset);
+    if (rc) {
+        goto _EXIT_CLOSE;
+    }
+
     rc = nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_ENABLED, (uint8_t)led_acclimation_is_enabled());
     if (rc) {
         goto _EXIT_CLOSE;
@@ -387,5 +434,35 @@ int led_set_geo_location(const struct geo_location* location)
 
     BO_TRY(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_GEO_LOCATION_CHANGED, NULL, 0, portMAX_DELAY));
 
+    return 0;
+}
+
+int led_tz_enable(bool enabled)
+{
+    // TODO lock
+    if (enabled) {
+        if (_led.settings.tz_offset < -43200 || _led.settings.tz_offset > 50400) {
+            return -EINVAL;
+        }
+        _led.settings.flags |= LED_OPTION_TZ_ENABLED;
+    }
+    else {
+        _led.settings.flags &= ~LED_OPTION_TZ_ENABLED;
+    }
+    BO_TRY(led_save_user_settings());
+    return 0;
+}
+
+int led_tz_set_offset(int32_t offset)
+{
+    // TODO lock
+
+    // -12*3600 ~ +14*3600（-43200 ~ +50400），UTC-12:00 ~ UTC+14:00
+    if (offset < -43200 || offset > 50400) {
+        return -EINVAL;
+    }
+
+    _led.settings.tz_offset = offset;
+    BO_TRY(led_save_user_settings());
     return 0;
 }

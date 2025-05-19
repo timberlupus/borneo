@@ -288,7 +288,6 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
     BO_COAP_VERIFY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength));
 
     const struct led_user_settings* led_settings = led_get_settings();
-    const struct led_status* led_status = led_get_status();
 
     {
         BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "state"));
@@ -359,7 +358,6 @@ static void coap_hnd_state_get(coap_resource_t* resource, coap_session_t* sessio
 {
     CborEncoder encoder;
     size_t encoded_size = 0;
-    const struct led_status* status = led_get_status();
 
     uint8_t buf[128];
 
@@ -570,6 +568,78 @@ static void coap_hnd_geo_location_put(coap_resource_t* resource, coap_session_t*
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
 
+static void coap_hnd_tz_enabled_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
+                                    const coap_string_t* query, coap_pdu_t* response)
+{
+    CborEncoder encoder;
+    size_t encoded_size = 0;
+    uint8_t buf[16];
+
+    cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
+
+    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&encoder, _led.settings.flags & LED_OPTION_TZ_ENABLED));
+
+    encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
+    coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
+    coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
+}
+
+static void coap_hnd_tz_enabled_put(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
+                                    const coap_string_t* query, coap_pdu_t* response)
+{
+    coap_resource_notify_observers(resource, NULL);
+
+    size_t data_size;
+    const uint8_t* data;
+    coap_get_data(request, &data_size, &data);
+
+    CborParser parser;
+    CborValue value;
+    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
+    bool enabled = false;
+    BO_COAP_VERIFY(cbor_value_get_boolean(&value, &enabled));
+
+    BO_COAP_TRY(led_tz_enable(enabled), COAP_RESPONSE_CODE_INTERNAL_ERROR);
+
+    coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
+}
+
+static void coap_hnd_tz_offset_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
+                                   const coap_string_t* query, coap_pdu_t* response)
+{
+    CborEncoder encoder;
+    size_t encoded_size = 0;
+    uint8_t buf[16];
+
+    cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
+
+    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_int(&encoder, _led.settings.tz_offset));
+
+    encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
+    coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
+    coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
+}
+
+static void coap_hnd_tz_offset_put(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
+                                   const coap_string_t* query, coap_pdu_t* response)
+{
+    coap_resource_notify_observers(resource, NULL);
+
+    size_t data_size;
+    const uint8_t* data;
+    coap_get_data(request, &data_size, &data);
+
+    CborParser parser;
+    CborValue value;
+    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
+    int offset = 0;
+    BO_COAP_VERIFY(cbor_value_get_int_checked(&value, &offset));
+
+    BO_COAP_TRY(led_tz_set_offset(offset), COAP_RESPONSE_CODE_INTERNAL_ERROR);
+
+    coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
+}
+
 COAP_RESOURCE_DEFINE("borneo/lyfi/color", false, coap_hnd_color_get, NULL, coap_hnd_color_put, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/schedule", false, coap_hnd_schedule_get, NULL, coap_hnd_schedule_put, NULL);
@@ -590,3 +660,7 @@ COAP_RESOURCE_DEFINE("borneo/lyfi/temporary-duration", false, coap_hnd_temporary
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/geo-location", false, coap_hnd_geo_location_get, NULL, coap_hnd_geo_location_put,
                      NULL);
+
+COAP_RESOURCE_DEFINE("borneo/lyfi/tz/enabled", false, coap_hnd_tz_enabled_get, NULL, coap_hnd_tz_enabled_put, NULL);
+
+COAP_RESOURCE_DEFINE("borneo/lyfi/tz/offset", false, coap_hnd_tz_offset_get, NULL, coap_hnd_tz_offset_put, NULL);

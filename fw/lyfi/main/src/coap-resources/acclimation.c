@@ -35,7 +35,7 @@ static void coap_hnd_acclimation_get(coap_resource_t* resource, coap_session_t* 
     BO_COAP_VERIFY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength));
 
     BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "enabled"));
-    BO_COAP_VERIFY(cbor_encode_boolean(&root_map, _led.settings.acclimation.enabled));
+    BO_COAP_VERIFY(cbor_encode_boolean(&root_map, led_acclimation_is_enabled()));
 
     BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "startTimestamp"));
     BO_COAP_VERIFY(cbor_encode_int(&root_map, _led.settings.acclimation.start_utc));
@@ -103,13 +103,12 @@ static void coap_hnd_acclimation_post(coap_resource_t* resource, coap_session_t*
     }
 
     struct led_acclimation_settings acc = {
-        .enabled = enabled,
         .start_utc = start_time,
         .duration = (uint8_t)duration,
         .start_percent = (uint8_t)start_percent,
     };
 
-    BO_COAP_TRY(led_acclimation_set(&acc), COAP_RESPONSE_CODE_INTERNAL_ERROR);
+    BO_COAP_TRY(led_acclimation_set(&acc, enabled), COAP_RESPONSE_CODE_INTERNAL_ERROR);
 
     coap_pdu_set_code(response, BO_COAP_CODE_201_CREATED);
 }

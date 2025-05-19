@@ -56,6 +56,8 @@ enum led_running_modes {
 enum led_option_flags {
     LED_OPTION_LUNAR_ENABLED = 1,
     LED_OPTION_HAS_GEO_LOCATION = 2,
+    LED_OPTION_ACCLIMATION_ENABLED = 4, ///< Whether acclimation is enabled
+    LED_OPTION_TZ_ENABLED = 8, ///< Whether timezone is enabled
 };
 
 struct led_scheduler_item {
@@ -74,7 +76,6 @@ struct led_factory_settings {
 };
 
 struct led_acclimation_settings {
-    bool enabled; ///<
     time_t start_utc;
     uint8_t duration; ///< In days
     uint8_t start_percent; ///< [0, 100%]
@@ -90,6 +91,7 @@ struct led_user_settings {
     uint8_t correction_method; ///< Brightness correction method: Log/Exp/Linear/CIE1931
 
     struct geo_location location; ///< The location for Solar and Lunar simulation.
+    int32_t tz_offset; ///< The timezone offset in seconds
 
     struct led_acclimation_settings acclimation;
 
@@ -174,6 +176,9 @@ int led_fade_black();
 bool led_has_geo_location();
 int led_set_geo_location(const struct geo_location* location);
 
+int led_tz_enable(bool enabled);
+int led_tz_set_offset(int32_t offset);
+
 int led_load_factory_settings(struct led_factory_settings* factory_settings);
 int led_load_user_settings();
 int led_save_user_settings();
@@ -192,7 +197,7 @@ bool led_sun_can_active();
 bool led_acclimation_is_enabled();
 bool led_acclimation_is_activated();
 int led_acclimation_drive(time_t utc_now, led_color_t color);
-int led_acclimation_set(const struct led_acclimation_settings* settings);
+int led_acclimation_set(const struct led_acclimation_settings* settings, bool enabled);
 int led_acclimation_terminate();
 
 #ifdef __cplusplus

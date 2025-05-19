@@ -30,7 +30,7 @@
 
 extern struct led_status _led;
 
-bool led_acclimation_is_enabled() { return _led.settings.acclimation.enabled; }
+bool led_acclimation_is_enabled() { return _led.settings.flags & LED_OPTION_ACCLIMATION_ENABLED; }
 
 bool led_acclimation_is_activated() { return led_acclimation_is_enabled() && _led.acclimation_activated; }
 
@@ -79,12 +79,18 @@ int led_acclimation_drive(time_t utc_now, led_color_t color)
     return 0;
 }
 
-int led_acclimation_set(const struct led_acclimation_settings* settings)
+int led_acclimation_set(const struct led_acclimation_settings* settings, bool enabled)
 {
     if (settings == NULL) {
         return -EINVAL;
     }
     memcpy(&_led.settings.acclimation, settings, sizeof(struct led_acclimation_settings));
+    if (enabled) {
+        _led.settings.flags |= LED_OPTION_ACCLIMATION_ENABLED;
+    }
+    else {
+        _led.settings.flags &= ~LED_OPTION_ACCLIMATION_ENABLED;
+    }
     BO_TRY(led_save_user_settings());
     ESP_LOGI(TAG, "Acclimation settings has been updated.");
     return 0;
@@ -97,7 +103,7 @@ int led_acclimation_terminate()
     }
 
     _led.acclimation_activated = false;
-    _led.settings.acclimation.enabled = false;
+    _led.settings.flags &= ~LED_OPTION_ACCLIMATION_ENABLED;
     BO_TRY(led_save_user_settings());
     ESP_LOGI(TAG, "Acclimation settings has been terminated.");
     return 0;
