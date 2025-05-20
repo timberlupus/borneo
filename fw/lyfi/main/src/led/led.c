@@ -35,9 +35,9 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
 
 static void led_render_task();
 
-void led_temporary_state_entry();
-void led_temporary_state_run();
-void led_temporary_state_exit();
+static void led_temporary_state_entry();
+static void led_temporary_state_run();
+static void led_temporary_state_exit();
 
 static void normal_state_entry();
 static void normal_state_run();
@@ -56,6 +56,8 @@ static void dimming_state_exit();
 #define SECS_PER_DAY 172800
 #define LED_MAX_DUTY ((1 << LEDC_TIMER_12_BIT) - 1)
 #define LED_DUTY_RES LEDC_TIMER_10_BIT
+
+#define TEMPORARY_FADE_PERIOD_MS 5000
 
 static inline led_duty_t channel_brightness_to_duty(led_brightness_t power);
 static inline void color_to_duties(const led_color_t color, led_duty_t* duties);
@@ -835,4 +837,65 @@ static void preview_state_exit()
     _led.preview_state_clock = 0;
     led_update_color(_led.color_to_resume);
     ESP_LOGI(TAG, "Preview state ended.");
+}
+
+int led_set_temporary_duration(uint32_t duration)
+{
+    _led.settings.temporary_duration = duration;
+    BO_TRY(led_save_user_settings());
+    return 0;
+}
+
+int32_t led_get_temporary_remaining()
+{
+    if (led_get_state() == LED_STATE_TEMPORARY) {
+        int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
+        return (int32_t)((_led.temporary_off_time - now + 500LL) / 1000LL);
+    }
+    else {
+        return -1;
+    }
+}
+
+void led_temporary_state_entry()
+{
+    if (!bo_power_is_on()) {
+        return;
+    }
+
+    if (_led.settings.mode != LED_MODE_SUN && _led.settings.mode != LED_MODE_SCHEDULED) {
+        return;
+    }
+
+    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
+
+    _led.temporary_off_time = now + (_led.settings.temporary_duration * 60 * 1000) + TEMPORARY_FADE_PERIOD_MS;
+
+    BO_MUST(led_fade_to_color(_led.settings.manual_color, TEMPORARY_FADE_PERIOD_MS));
+}
+
+void led_temporary_state_exit()
+{
+    assert(led_get_state() == LED_STATE_TEMPORARY);
+
+    _led.temporary_off_time = 0;
+}
+
+void led_temporary_state_run()
+{
+    assert(led_get_state() == LED_STATE_TEMPORARY);
+
+    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
+
+    if (now >= _led.temporary_off_time) {
+        smf_set_state(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_NORMAL]);
+    }
+    else {
+        if (!led_is_fading()) {
+            led_update_color(_led.settings.manual_color);
+        }
+        else {
+            led_fade_drive();
+        }
+    }
 }

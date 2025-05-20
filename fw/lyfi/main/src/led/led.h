@@ -84,7 +84,7 @@ struct led_acclimation_settings {
 struct led_user_settings {
     uint8_t mode; ///< Running mode, see `enum led_running_modes`
 
-    uint16_t temporary_duration; ///< Night lighting state duration (in seconds)
+    uint32_t temporary_duration; ///< Night lighting state duration (in seconds)
     struct led_scheduler scheduler; ///< Scheduling scheduler for scheduled state
     led_color_t manual_color; ///< Manual dimming color settings.
     led_color_t sun_color; ///< Sun simulation color settings.
@@ -161,7 +161,7 @@ int led_switch_mode(uint8_t mode);
 
 bool led_is_blank();
 
-int led_set_temporary_duration(uint16_t duration);
+int led_set_temporary_duration(uint32_t duration);
 int32_t led_get_temporary_remaining();
 
 int led_set_correction_method(uint8_t correction_method);

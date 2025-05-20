@@ -2,7 +2,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart'
 import 'package:borneo_app/devices/borneo/lyfi/views/lyfi_view.dart';
 import 'package:borneo_app/models/devices/device_module_metadata.dart';
 import 'package:borneo_app/services/device_manager.dart';
-import 'package:borneo_app/services/inotification_service.dart';
+import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -23,7 +23,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
               deviceID: deviceID,
               deviceManager: context.read<DeviceManager>(),
               globalEventBus: context.read<EventBus>(),
-              notification: context.read<INotificationService>(),
+              notification: context.read<IAppNotificationService>(),
               logger: context.read<Logger>(),
             ),
         deviceIconBuilder: (BuildContext context) => Icon(Icons.lightbulb_outline),

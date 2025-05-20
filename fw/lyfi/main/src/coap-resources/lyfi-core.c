@@ -472,7 +472,7 @@ static void coap_hnd_temporary_duration_get(coap_resource_t* resource, coap_sess
     size_t encoded_size = 0;
     const struct led_user_settings* settings = led_get_settings();
 
-    uint8_t buf[128];
+    uint8_t buf[32];
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
     BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&encoder, settings->temporary_duration));
@@ -497,11 +497,11 @@ static void coap_hnd_temporary_duration_put(coap_resource_t* resource, coap_sess
     int duration;
     BO_COAP_VERIFY(cbor_value_get_int_checked(&value, &duration));
 
-    if (duration <= 0 || duration > 0xFFFF) {
+    if (duration <= 0 || duration > INT32_MAX - 1) {
         coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
         return;
     }
-    BO_COAP_TRY(led_set_temporary_duration((uint16_t)duration), COAP_RESPONSE_CODE_INTERNAL_ERROR);
+    BO_COAP_TRY(led_set_temporary_duration((uint32_t)duration), COAP_RESPONSE_CODE_INTERNAL_ERROR);
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
 

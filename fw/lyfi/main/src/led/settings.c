@@ -147,7 +147,7 @@ int led_load_user_settings()
     }
 
     {
-        rc = nvs_get_u16(handle, LED_NVS_KEY_TEMPORARY_DURATION, &settings->temporary_duration);
+        rc = nvs_get_u32(handle, LED_NVS_KEY_TEMPORARY_DURATION, &settings->temporary_duration);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
             settings->temporary_duration = LED_DEFAULT_SETTINGS.temporary_duration;
             rc = 0;
@@ -327,7 +327,7 @@ int led_save_user_settings()
         goto _EXIT_CLOSE;
     }
 
-    rc = nvs_set_u16(handle, LED_NVS_KEY_TEMPORARY_DURATION, settings->temporary_duration);
+    rc = nvs_set_u32(handle, LED_NVS_KEY_TEMPORARY_DURATION, settings->temporary_duration);
     if (rc) {
         goto _EXIT_CLOSE;
     }

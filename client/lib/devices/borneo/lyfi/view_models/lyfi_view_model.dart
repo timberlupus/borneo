@@ -2,7 +2,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_view_model.dart';
 import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_model.dart';
-import 'package:borneo_app/services/inotification_service.dart';
+import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -20,7 +20,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
   static final DateFormat deviceDateFormat = DateFormat('yyyy-MM-dd HH:mm');
 
-  final INotificationService notification;
+  final IAppNotificationService notification;
 
   ILyfiDeviceApi get _deviceApi => super.borneoDeviceApi as ILyfiDeviceApi;
 

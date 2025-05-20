@@ -1,5 +1,5 @@
-import 'package:borneo_app/services/default_notification_service.dart';
-import 'package:borneo_app/services/inotification_service.dart';
+import 'package:borneo_app/services/default_app_notification_service.dart';
+import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_app/views/main_screen.dart';
 import 'package:borneo_kernel_abstractions/ikernel.dart';
 import 'package:event_bus/event_bus.dart';
@@ -57,7 +57,7 @@ class BorneoApp extends StatelessWidget {
           final gt = GettextLocalizations.of(context);
           return MultiProvider(
             providers: [
-              Provider<INotificationService>(create: (context) => DefaultNotificationService()),
+              Provider<IAppNotificationService>(create: (context) => DefaultAppNotificationService()),
               // Here >>> register all providers that need to access the gettext interface <<<
               // SceneManager
               Provider<SceneManager>(

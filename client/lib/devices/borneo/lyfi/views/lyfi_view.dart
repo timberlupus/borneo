@@ -1,6 +1,6 @@
 import 'package:borneo_app/devices/borneo/lyfi/views/editor/sun_editor_view.dart';
 import 'package:borneo_app/models/devices/device_entity.dart';
-import 'package:borneo_app/services/inotification_service.dart';
+import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:event_bus/event_bus.dart';
@@ -329,7 +329,7 @@ class LyfiView extends StatelessWidget {
             deviceID: device.id,
             deviceManager: cb.read<DeviceManager>(),
             globalEventBus: cb.read<EventBus>(),
-            notification: cb.read<INotificationService>(),
+            notification: cb.read<IAppNotificationService>(),
             logger: cb.read<Logger>(),
           ),
       builder: (context, child) {

@@ -1,6 +1,6 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
 import 'package:borneo_app/infrastructure/timezone.dart';
-import 'package:borneo_app/services/inotification_service.dart';
+import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_common/exceptions.dart' as bo_ex;
 import 'package:geolocator/geolocator.dart';
 
@@ -9,7 +9,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:latlong2/latlong.dart';
 
 class SettingsViewModel extends BaseLyfiDeviceViewModel {
-  final INotificationService notification;
+  final IAppNotificationService notification;
   final Uri address;
   final GeneralBorneoDeviceStatus borneoStatus;
   final GeneralBorneoDeviceInfo borneoInfo;
@@ -57,6 +57,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   @override
   Future<void> onInitialize() async {
     _correctionMethod = await api.getCorrectionMethod(boundDevice!.device);
+    _temporaryDuration = await api.getTemporaryDuration(boundDevice!.device);
   }
 
   Future<void> updateGeoLocation(LatLng location) async {

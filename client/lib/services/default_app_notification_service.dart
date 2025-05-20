@@ -1,8 +1,8 @@
-import 'package:borneo_app/services/inotification_service.dart';
+import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
 
-class DefaultNotificationService implements INotificationService {
+class DefaultAppNotificationService implements IAppNotificationService {
   @override
   void showError(String title, {String? body}) {
     toastification.show(
@@ -36,6 +36,9 @@ class DefaultNotificationService implements INotificationService {
       type: ToastificationType.success,
       title: Text(title),
       description: body != null ? Text(body) : null,
+      autoCloseDuration: Duration(seconds: 5),
+      closeOnClick: true,
+      dragToClose: true,
     );
   }
 

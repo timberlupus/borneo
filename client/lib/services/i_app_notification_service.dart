@@ -1,4 +1,4 @@
-abstract class INotificationService {
+abstract class IAppNotificationService {
   void showSuccess(String title, {String? body});
   void showError(String title, {String? body});
   void showWarning(String title, {String? body});
