@@ -84,9 +84,9 @@ static void scheduler_task(void* params)
     struct schedule* sch = &s_scheduler_status.schedule;
     for (;;) {
         // TODO use DS1304
-        time_t current_time;
-        time(&current_time);
-        struct tm* const rtc_now = localtime(&current_time);
+        time_t utc_now = time(NULL);
+        struct tm rtc_now;
+        localtime_r(&utc_now, rtc_now);
 
         time_t rtc_time = mktime(rtc_now);
         for (size_t i = 0; i < sch->jobs_count; i++) {

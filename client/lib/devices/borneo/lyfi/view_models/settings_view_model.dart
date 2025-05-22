@@ -2,10 +2,13 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view
 import 'package:borneo_app/infrastructure/timezone.dart';
 import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_common/exceptions.dart' as bo_ex;
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:timezone/timezone.dart' as tz;
 import 'package:geolocator/geolocator.dart';
 
 import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
+import 'package:lat_lng_to_timezone/lat_lng_to_timezone.dart';
 import 'package:latlong2/latlong.dart';
 
 class SettingsViewModel extends BaseLyfiDeviceViewModel {
@@ -62,11 +65,33 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
 
   Future<void> updateGeoLocation(LatLng location) async {
     super.enqueueUIJob(() async {
+      /*
+      final tzc = TimezoneConverter();
+      await tzc.init();
+      final device_posix_tz = await super.lyfiDeviceApi.getTimeZone(super.boundDevice!.device);
+      final device_tz = await tzc.convertToIanaTimezone(device_posix_tz);
+      final selected_tz = latLngToTimezoneString(location.latitude, location.longitude);
+      final offset_enabled = device_tz != selected_tz;
+      var offset = offset_enabled ? _getTimeDifference(device_tz!, selected_tz).inSeconds : 0;
+      await super.lyfiDeviceApi.setTimeZoneEnabled(super.boundDevice!.device, offset_enabled);
+      await super.lyfiDeviceApi.setTimeZoneOffset(super.boundDevice!.device, offset);
+
+      //await super.lyfiDeviceApi.setTimeZoneOffset(super.boundDevice!.device, )
+      */
       final loc = GeoLocation(lat: location.latitude, lng: location.longitude);
       await super.lyfiDeviceApi.setLocation(super.boundDevice!.device, loc);
       _location = loc;
       notification.showSuccess("Location updated successfully");
     });
+  }
+
+  Duration _getTimeDifference(String timezone1, String timezone2) {
+    final location1 = tz.getLocation(timezone1);
+    final location2 = tz.getLocation(timezone2);
+    final now = tz.TZDateTime.now(location1);
+    final offset1 = now.timeZoneOffset;
+    final offset2 = tz.TZDateTime.now(location2).timeZoneOffset;
+    return offset1 - offset2;
   }
 
   Future<Position> getLocation() async {

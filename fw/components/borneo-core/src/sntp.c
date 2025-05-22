@@ -155,8 +155,7 @@ int bo_sntp(const char* server, unsigned port, unsigned long* seconds, unsigned 
 
 bool bo_sntp_is_sync_needed()
 {
-    time_t now = 0;
-    time(&now);
+    time_t now = time(NULL);
     return now < 612964800;
 }
 
@@ -185,8 +184,7 @@ static int bo_try_sync_time()
     struct timeval tv_now = { .tv_sec = ts };
     settimeofday(&tv_now, NULL);
 
-    time_t now = 0;
-    time(&now);
+    time_t now = time(NULL);
     struct tm timeinfo = { 0 };
     localtime_r(&now, &timeinfo);
 
@@ -281,13 +279,12 @@ bool bo_sntp_is_syncing() { return _is_syncing; }
 void bo_sntp_obtain_time_until()
 {
     // wait for time to be set
-    time_t now = 0;
     struct tm timeinfo = { 0 };
     int retry = 0;
     while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < MAX_RETRY_COUNT) {
         ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, MAX_RETRY_COUNT);
         vTaskDelay(pdMS_TO_TICKS(2000));
     }
-    time(&now);
+    time_t now = time(NULL);
     localtime_r(&now, &timeinfo);
 }

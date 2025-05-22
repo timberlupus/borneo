@@ -29,15 +29,18 @@ struct solar_instant {
 
 /**
  * @brief Calculates the timezone offset in hours for a given date.
+ * @param tm_local Local time
  * @return The timezone offset in hours.
  */
-float solar_calculate_timezone_offset(const struct tm* tm_local);
+float solar_calculate_local_tz_offset(const struct tm* tm_local);
 
 /**
  * @brief Calculate sunrise and sunset times
  * @param latitude Location latitude (-90 to 90)
  * @param longitude Location longitude (-180 to 180)
- * @param timezone_offset Timezone offset in hours
+ * @param utc_now UTC time
+ * @param target_tz_offset Target timezone offset in hours
+ * @param local_tz_offset Local timezone offset in hours
  * @param tm_local Local time
  * @param[out] sunrise Calculated sunrise time (hours, 0-24)
  * @param[out] noon Calculated solar noon time (hours, 0-24)
@@ -49,8 +52,9 @@ float solar_calculate_timezone_offset(const struct tm* tm_local);
  *  -ENODATA: Polar night/midnight sun condition
  *  -EFAULT: Time calculation error
  */
-int solar_calculate_sunrise_sunset(float latitude, float longitude, float timezone_offset, const struct tm* tm_local,
-                                   float* sunrise, float* noon, float* sunset);
+int solar_calculate_sunrise_sunset(float latitude, float longitude, time_t utc_now, float target_tz_offset,
+                                   float local_tz_offset, const struct tm* tm_local, float* sunrise, float* noon,
+                                   float* sunset);
 
 /**
  * @brief Generates key points for solar brightness throughout the day.

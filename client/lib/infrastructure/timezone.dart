@@ -28,6 +28,21 @@ class TimezoneConverter {
     }
   }
 
+  Future<String?> convertToIanaTimezone(String posixTimezone) async {
+    // Ensure zones.json is loaded
+    await init();
+
+    // Reverse lookup for POSIX string in zones.json
+    if (_zonesData != null) {
+      final ianaTimezone =
+          _zonesData!.entries.firstWhere((entry) => entry.value == posixTimezone, orElse: () => MapEntry('', '')).key;
+      return ianaTimezone.isNotEmpty ? ianaTimezone : null;
+    } else {
+      // Fallback if timezone not found
+      return null;
+    }
+  }
+
   // Get POSIX timezone string for the device's local timezone
   Future<String?> getLocalPosixTimezone() async {
     // Get device's local IANA timezone (e.g., "America/New_York")

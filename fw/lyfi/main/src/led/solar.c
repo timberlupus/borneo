@@ -45,24 +45,20 @@ int led_sun_update_scheduler()
         return -EINVAL;
     }
 
-    time_t utc_now;
+    time_t utc_now = time(NULL);
     struct tm local_tm;
 
-    time(&utc_now);
+    localtime_r(&utc_now, &local_tm);
 
-    float tz_offset;
-    if (_led.settings.flags & LED_OPTION_TZ_ENABLED) {
-        tz_offset = _led.settings.tz_offset / 3600.0f;
-    }
-    else {
-        localtime_r(&utc_now, &local_tm);
-        tz_offset = solar_calculate_timezone_offset(&local_tm);
-    }
+    float local_tz_offset = solar_calculate_local_tz_offset(&local_tm);
+
+    float target_tz_offset
+        = _led.settings.flags & LED_OPTION_TZ_ENABLED ? _led.settings.tz_offset / 3600.0f : local_tz_offset;
 
     float sunrise, noon, sunset;
 
-    BO_TRY(solar_calculate_sunrise_sunset(_led.settings.location.lat, _led.settings.location.lng, tz_offset, &local_tm,
-                                          &sunrise, &noon, &sunset));
+    BO_TRY(solar_calculate_sunrise_sunset(_led.settings.location.lat, _led.settings.location.lng, utc_now,
+                                          target_tz_offset, local_tz_offset, &local_tm, &sunrise, &noon, &sunset));
 
     struct solar_instant instants[SOLAR_INSTANTS_COUNT];
     BO_TRY(solar_generate_instants(sunrise, noon, sunset, instants));

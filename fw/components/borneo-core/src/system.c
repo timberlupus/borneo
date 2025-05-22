@@ -253,8 +253,7 @@ void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event
     case BO_EVENT_SHUTDOWN_SCHEDULED:
     case BO_EVENT_SHUTDOWN_FAULT: {
         portENTER_CRITICAL(&_status_lock);
-        time_t t;
-        time(&t);
+        time_t t = time(NULL);
         _status.shutdown_timestamp = t;
         portEXIT_CRITICAL(&_status_lock);
     } break;

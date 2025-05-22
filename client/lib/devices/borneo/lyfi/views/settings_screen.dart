@@ -56,7 +56,7 @@ class SettingsScreen extends StatelessWidget {
       final selectedLocation = await Navigator.push(context, route);
       if (selectedLocation != null) {
         // Update the location in the view model
-        vm.updateGeoLocation(selectedLocation!);
+        vm.enqueueUIJob(() async => await vm.updateGeoLocation(selectedLocation!));
       }
     } finally {
       //TODO

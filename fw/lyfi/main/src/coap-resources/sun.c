@@ -71,17 +71,20 @@ static void coap_hnd_sun_curve_get(coap_resource_t* resource, coap_session_t* se
         return;
     }
 
-    time_t now;
+    time_t utc_now = time(NULL);
     struct tm local_tm;
 
-    time(&now);
-    localtime_r(&now, &local_tm);
+    localtime_r(&utc_now, &local_tm);
 
-    float tz_offset = solar_calculate_timezone_offset(&local_tm);
+    float local_tz_offset = solar_calculate_local_tz_offset(&local_tm);
+
+    float target_tz_offset
+        = _led.settings.flags & LED_OPTION_TZ_ENABLED ? _led.settings.tz_offset / 3600.0f : local_tz_offset;
+
     float sunrise, noon, sunset;
 
-    int rc = solar_calculate_sunrise_sunset(_led.settings.location.lat, _led.settings.location.lng, tz_offset,
-                                            &local_tm, &sunrise, &noon, &sunset);
+    int rc = solar_calculate_sunrise_sunset(_led.settings.location.lat, _led.settings.location.lng, utc_now,
+                                            target_tz_offset, local_tz_offset, &local_tm, &sunrise, &noon, &sunset);
     if (rc) {
         coap_pdu_set_code(response, COAP_RESPONSE_CODE_INTERNAL_ERROR);
         return;
