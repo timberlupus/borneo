@@ -377,7 +377,7 @@ class BorneoTheme {
       ),
     ),
     cardColor: colorScheme.surfaceContainer,
-    cardTheme: CardTheme(color: colorScheme.surfaceContainer),
+    cardTheme: CardThemeData(color: colorScheme.surfaceContainer),
     dividerColor: colorScheme.onInverseSurface,
     dividerTheme: DividerThemeData(color: colorScheme.outlineVariant),
     listTileTheme: ListTileThemeData(tileColor: colorScheme.surfaceContainer),

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'dart:ui'; // for FontFeature
 import 'package:lat_lng_to_timezone/lat_lng_to_timezone.dart';
 
 class MapLocationPicker extends StatefulWidget {
