@@ -25,12 +25,12 @@ static int solar_day_of_year(const struct tm* tm_local);
 
 typedef struct {
     float altitude_deg;
-    float percent;
+    float brightness;
 } solar_altitude_lux_t;
 
 static const solar_altitude_lux_t solar_lux_table[] = {
-    { 0.0f, 0.0f },   { 15.0f, 25.0f }, { 30.0f, 50.0f },  { 45.0f, 70.0f },
-    { 60.0f, 85.0f }, { 75.0f, 95.0f }, { 90.0f, 100.0f },
+    { 0.0f, 0.0f },   { 15.0f, 0.25f }, { 30.0f, 0.50f }, { 45.0f, 0.70f },
+    { 60.0f, 0.85f }, { 75.0f, 0.95f }, { 90.0f, 1.0f },
 };
 
 // Utility functions for angle conversions
@@ -38,18 +38,18 @@ static inline float deg_to_rad(float deg) { return deg * (float)M_PI / 180.0f; }
 
 static inline float rad_to_deg(float rad) { return rad * 180.0f / (float)M_PI; }
 
-static float solar_altitude_to_percent(float altitude_deg)
+static float solar_altitude_to_brightness_ratio(float altitude_deg)
 {
     if (altitude_deg <= 0.0f) {
         return 0.0f;
     }
     if (altitude_deg >= 90.0f) {
-        return 100.0f;
+        return 1.0f;
     }
     for (int i = 1; i < sizeof(solar_lux_table) / sizeof(solar_lux_table[0]); ++i) {
         if (altitude_deg < solar_lux_table[i].altitude_deg) {
-            float x0 = solar_lux_table[i - 1].altitude_deg, y0 = solar_lux_table[i - 1].percent;
-            float x1 = solar_lux_table[i].altitude_deg, y1 = solar_lux_table[i].percent;
+            float x0 = solar_lux_table[i - 1].altitude_deg, y0 = solar_lux_table[i - 1].brightness;
+            float x1 = solar_lux_table[i].altitude_deg, y1 = solar_lux_table[i].brightness;
             return y0 + (y1 - y0) * (altitude_deg - x0) / (x1 - x0);
         }
     }
@@ -204,15 +204,16 @@ int solar_generate_instants(float latitude, float decl, float sunrise, float noo
         return -EINVAL;
     }
 
-    static const float altitudes[]
-        = { 0.0f, 15.0f, 30.0f, 45.0f, 60.0f, 75.0f, 90.0f, 75.0f, 60.0f, 45.0f, 30.0f, 15.0f, 0.0f };
+    static const float altitudes[] = {
+        0.0f, 15.0f, 30.0f, 45.0f, 60.0f, 75.0f, 90.0f, 75.0f, 60.0f, 45.0f, 30.0f, 15.0f, 0.0f,
+    };
     static const int count = sizeof(altitudes) / sizeof(altitudes[0]);
 
     int idx = 0;
     for (int i = 0; i < count; ++i) {
         int afternoon = (i > 6) ? 1 : 0;
         float t = solar_time_for_altitude(latitude, decl, noon, altitudes[i], afternoon);
-        float percent = solar_altitude_to_percent(altitudes[i]);
+        float brightness = solar_altitude_to_brightness_ratio(altitudes[i]);
         if (t < 0.0f) {
             if (idx > 0) {
                 instants[idx].time = instants[idx - 1].time;
@@ -225,7 +226,7 @@ int solar_generate_instants(float latitude, float decl, float sunrise, float noo
         }
         else {
             instants[idx].time = t;
-            instants[idx].brightness = percent / 100.0f;
+            instants[idx].brightness = brightness;
         }
         idx++;
     }

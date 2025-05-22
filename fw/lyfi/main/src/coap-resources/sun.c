@@ -99,7 +99,7 @@ static void coap_hnd_sun_curve_get(coap_resource_t* resource, coap_session_t* se
     }
 
     size_t encoded_size = 0;
-    uint8_t buf[256];
+    uint8_t buf[512];
     CborEncoder encoder;
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
     CborEncoder root_array;
