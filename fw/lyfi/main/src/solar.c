@@ -23,10 +23,57 @@
 
 static int solar_day_of_year(const struct tm* tm_local);
 
-// Utility functions for angle conversions
-float deg_to_rad(float deg) { return deg * (float)M_PI / 180.0f; }
+typedef struct {
+    float altitude_deg;
+    float percent;
+} solar_altitude_lux_t;
 
-float rad_to_deg(float rad) { return rad * 180.0f / (float)M_PI; }
+static const solar_altitude_lux_t solar_lux_table[] = {
+    { 0.0f, 0.0f },   { 15.0f, 25.0f }, { 30.0f, 50.0f },  { 45.0f, 70.0f },
+    { 60.0f, 85.0f }, { 75.0f, 95.0f }, { 90.0f, 100.0f },
+};
+
+// Utility functions for angle conversions
+static inline float deg_to_rad(float deg) { return deg * (float)M_PI / 180.0f; }
+
+static inline float rad_to_deg(float rad) { return rad * 180.0f / (float)M_PI; }
+
+static float solar_altitude_to_percent(float altitude_deg)
+{
+    if (altitude_deg <= 0.0f) {
+        return 0.0f;
+    }
+    if (altitude_deg >= 90.0f) {
+        return 100.0f;
+    }
+    for (int i = 1; i < sizeof(solar_lux_table) / sizeof(solar_lux_table[0]); ++i) {
+        if (altitude_deg < solar_lux_table[i].altitude_deg) {
+            float x0 = solar_lux_table[i - 1].altitude_deg, y0 = solar_lux_table[i - 1].percent;
+            float x1 = solar_lux_table[i].altitude_deg, y1 = solar_lux_table[i].percent;
+            return y0 + (y1 - y0) * (altitude_deg - x0) / (x1 - x0);
+        }
+    }
+    return 100.0f;
+}
+
+static float solar_time_for_altitude(float latitude, float decl, float noon, float altitude_deg, int afternoon)
+{
+    float lat_rad = deg_to_rad(latitude);
+    float decl_rad = deg_to_rad(decl);
+    float h_rad = deg_to_rad(altitude_deg);
+
+    float cos_omega = (sinf(h_rad) - sinf(lat_rad) * sinf(decl_rad)) / (cosf(lat_rad) * cosf(decl_rad));
+    if (cos_omega < -1.0f || cos_omega > 1.0f)
+        return -1.0f; // Not exists
+
+    float omega_deg = rad_to_deg(acosf(cos_omega));
+    if (afternoon) {
+        return noon + omega_deg / 15.0f;
+    }
+    else {
+        return noon - omega_deg / 15.0f;
+    }
+}
 
 /**
  * @brief Calculates the day of the year for a given date.
@@ -61,7 +108,7 @@ float solar_calculate_local_tz_offset(const struct tm* tm_local)
 
 int solar_calculate_sunrise_sunset(float latitude, float longitude, time_t utc_now, float target_tz_offset,
                                    float local_tz_offset, const struct tm* tm_local, float* sunrise, float* noon,
-                                   float* sunset)
+                                   float* sunset, float* decl_out)
 {
     // Validate input parameters
     if (latitude < -90.0f || latitude > 90.0f) {
@@ -81,6 +128,9 @@ int solar_calculate_sunrise_sunset(float latitude, float longitude, time_t utc_n
 
     // Calculate solar declination angle (simplified)
     float decl = 23.45f * sinf(deg_to_rad(360.0f * (284 + doy) / 365.0f));
+    if (decl_out != NULL) {
+        *decl_out = decl;
+    }
 
     float lat_rad = deg_to_rad(latitude);
     float decl_rad = deg_to_rad(decl);
@@ -147,17 +197,38 @@ float solar_clamp_time(float time)
     }
     return time;
 }
-
-int solar_generate_instants(float sunrise, float noon, float sunset, struct solar_instant* instants)
+int solar_generate_instants(float latitude, float decl, float sunrise, float noon, float sunset,
+                            struct solar_instant* instants)
 {
-    instants[SOLAR_INDEX_SUNRISE] = (struct solar_instant) { sunrise, 0.0f };
-    instants[SOLAR_INDEX_AFTER_SUNRISE] = (struct solar_instant) { solar_clamp_time(sunrise + 0.5f), 0.2f };
-    instants[SOLAR_INDEX_MORNING_MAX_SLOPE] = (struct solar_instant) { solar_clamp_time(noon - 1.5f), 0.6f };
-    instants[SOLAR_INDEX_NOON_MINUS_1HOUR] = (struct solar_instant) { solar_clamp_time(noon - 1.0f), 0.95f };
-    instants[SOLAR_INDEX_NOON] = (struct solar_instant) { noon, 1.0f };
-    instants[SOLAR_INDEX_NOON_PLUS_1HOUR] = (struct solar_instant) { solar_clamp_time(noon + 1.0f), 0.95f };
-    instants[SOLAR_INDEX_AFTERNOON_MAX_SLOPE] = (struct solar_instant) { solar_clamp_time(sunset - 1.5f), 0.5f };
-    instants[SOLAR_INDEX_SUNSET] = (struct solar_instant) { sunset, 0.0f };
+    if (instants == NULL) {
+        return -EINVAL;
+    }
+
+    static const float altitudes[]
+        = { 0.0f, 15.0f, 30.0f, 45.0f, 60.0f, 75.0f, 90.0f, 75.0f, 60.0f, 45.0f, 30.0f, 15.0f, 0.0f };
+    static const int count = sizeof(altitudes) / sizeof(altitudes[0]);
+
+    int idx = 0;
+    for (int i = 0; i < count; ++i) {
+        int afternoon = (i > 6) ? 1 : 0;
+        float t = solar_time_for_altitude(latitude, decl, noon, altitudes[i], afternoon);
+        float percent = solar_altitude_to_percent(altitudes[i]);
+        if (t < 0.0f) {
+            if (idx > 0) {
+                instants[idx].time = instants[idx - 1].time;
+                instants[idx].brightness = instants[idx - 1].brightness;
+            }
+            else {
+                instants[idx].time = sunrise;
+                instants[idx].brightness = 0.0f;
+            }
+        }
+        else {
+            instants[idx].time = t;
+            instants[idx].brightness = percent / 100.0f;
+        }
+        idx++;
+    }
 
     return 0;
 }

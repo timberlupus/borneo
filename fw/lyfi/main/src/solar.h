@@ -6,18 +6,7 @@
 extern "C" {
 #endif
 
-enum solar_instants_enum {
-    SOLAR_INDEX_SUNRISE = 0,
-    SOLAR_INDEX_AFTER_SUNRISE,
-    SOLAR_INDEX_MORNING_MAX_SLOPE,
-    SOLAR_INDEX_NOON_MINUS_1HOUR,
-    SOLAR_INDEX_NOON,
-    SOLAR_INDEX_NOON_PLUS_1HOUR,
-    SOLAR_INDEX_AFTERNOON_MAX_SLOPE,
-    SOLAR_INDEX_SUNSET,
-
-    SOLAR_INSTANTS_COUNT,
-};
+#define SOLAR_INSTANTS_COUNT 13
 
 /**
  * @brief Structure representing a key point in the solar day.
@@ -54,16 +43,14 @@ float solar_calculate_local_tz_offset(const struct tm* tm_local);
  */
 int solar_calculate_sunrise_sunset(float latitude, float longitude, time_t utc_now, float target_tz_offset,
                                    float local_tz_offset, const struct tm* tm_local, float* sunrise, float* noon,
-                                   float* sunset);
+                                   float* sunset, float* decl_out);
 
 /**
  * @brief Generates key points for solar brightness throughout the day.
- * @param sunrise The sunrise time in hours.
- * @param sunset The sunset time in hours.
- * @param instants Array to store the generated instants.
  * @return 0 on success
  */
-int solar_generate_instants(float sunrise, float noon, float sunset, struct solar_instant* instants);
+int solar_generate_instants(float latitude, float decl, float sunrise, float noon, float sunset,
+                            struct solar_instant* instants);
 
 #ifdef __cplusplus
 }

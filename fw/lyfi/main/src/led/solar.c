@@ -55,13 +55,14 @@ int led_sun_update_scheduler()
     float target_tz_offset
         = _led.settings.flags & LED_OPTION_TZ_ENABLED ? _led.settings.tz_offset / 3600.0f : local_tz_offset;
 
-    float sunrise, noon, sunset;
+    float sunrise, noon, sunset, decl;
 
     BO_TRY(solar_calculate_sunrise_sunset(_led.settings.location.lat, _led.settings.location.lng, utc_now,
-                                          target_tz_offset, local_tz_offset, &local_tm, &sunrise, &noon, &sunset));
+                                          target_tz_offset, local_tz_offset, &local_tm, &sunrise, &noon, &sunset,
+                                          &decl));
 
     struct solar_instant instants[SOLAR_INSTANTS_COUNT];
-    BO_TRY(solar_generate_instants(sunrise, noon, sunset, instants));
+    BO_TRY(solar_generate_instants(_led.settings.location.lat, decl, sunrise, noon, sunset, instants));
 
     struct led_scheduler* sch = &_led.sun_scheduler;
     memset(sch, 0, sizeof(struct led_scheduler));
