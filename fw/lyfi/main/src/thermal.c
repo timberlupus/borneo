@@ -38,6 +38,7 @@ struct thermal_state {
 };
 
 static int load_factory_settings();
+static int load_user_settings();
 static void thermal_timer_callback(void* args);
 static int thermal_reinit();
 static uint8_t thermal_pid_step(int32_t current_temp);
@@ -51,6 +52,7 @@ static int update_temp_average(int new_sample);
 
 #define TAG "thermal"
 
+#define THERMAL_NVS_USER_NS "thermal"
 #define THERMAL_NVS_FACTORY_NS "thermal"
 #define THERMAL_NVS_KEY_KP "kp"
 #define THERMAL_NVS_KEY_KI "ki"
@@ -101,6 +103,7 @@ int thermal_init()
     ESP_LOGI(TAG, "Initializing thermal management subsystem...");
 
     BO_TRY(load_factory_settings());
+    BO_TRY(load_user_settings());
 
     if (ntc_init() != 0) {
         if (_settings.fan_mode != THERMAL_FAN_MODE_DISABLED) {
@@ -195,6 +198,21 @@ int load_factory_settings()
     }
     if (rc) {
         goto _EXIT_CLOSE;
+    }
+
+_EXIT_CLOSE:
+    bo_nvs_close(handle);
+_EXIT_WITHOUT_CLOSE:
+    return rc;
+}
+
+int load_user_settings()
+{
+    int rc;
+    nvs_handle_t handle;
+    rc = bo_nvs_user_open(THERMAL_NVS_USER_NS, NVS_READWRITE, &handle);
+    if (rc) {
+        goto _EXIT_WITHOUT_CLOSE;
     }
 
     rc = nvs_get_u8(handle, THERMAL_NVS_KEY_FAN_MODE, &_settings.fan_mode);
