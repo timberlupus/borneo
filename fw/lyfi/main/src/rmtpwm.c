@@ -94,6 +94,8 @@ int rmtpwm_dac_init()
 }
 #endif
 
+#if CONFIG_LYFI_FAN_CTRL_PWM_ENABLED
+
 int rmtpwm_pwm_init()
 {
     rmt_transmit_config_t tx_config = {
@@ -121,6 +123,8 @@ int rmtpwm_set_pwm_duty(uint8_t duty)
     //
     return rmtpwm_set_duty_internal(&s_pwm_channel, duty);
 }
+
+#endif // CONFIG_LYFI_FAN_CTRL_PWM_ENABLED
 
 #if !SOC_DAC_SUPPORTED
 int rmtpwm_set_dac_duty(uint8_t duty)

@@ -368,17 +368,18 @@ menu "Borneo LyFi"
             bool "The Controlling Method of Fan Speed"
             default y
 
+        config LYFI_FAN_CTRL_PWM_ENABLED
+            bool "The GPIO number for PWM fan"
+            default y
+            depends on LYFI_FAN_CTRL_ENABLED
+
         config LYFI_FAN_CTRL_PWM_GPIO
             int "The GPIO number for PWM fan"
-            depends on LYFI_FAN_CTRL_ENABLED
+            depends on LYFI_FAN_CTRL_PWM_ENABLED
 
         config LYFI_FAN_CTRL_PWMDAC_GPIO
             int "The Output PWM-DAC GPIO for the voltage regulator"
             depends on LYFI_FAN_CTRL_ENABLED && IDF_TARGET_ESP32C3
-
-        config LYFI_FAN_CTRL_PWM_CHANNEL
-            int "PWM Channel for PWM or PWM DAC"
-            depends on LYFI_FAN_CTRL_ENABLED
 
         config LYFI_FAN_CTRL_DAC_CHANNEL
             int "DAC Channel for DAC"

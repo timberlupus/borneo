@@ -84,7 +84,7 @@ const struct thermal_settings THERMAL_DEFAULT_SETTINGS = {
     .fan_manual_power = 75,
 };
 
-static struct thermal_settings _settings;
+static struct thermal_settings _settings = { 0 };
 static struct thermal_state _thermal = { 0 };
 
 static int thermal_reinit()
@@ -129,8 +129,6 @@ int thermal_init()
         fan_set_power(0);
     }
 
-    BO_TRY(thermal_reinit());
-
     if (THERMAL_FAN_MODE_PID == _settings.fan_mode) {
         const esp_timer_create_args_t timer_args = {
             .callback = &thermal_timer_callback,
@@ -139,6 +137,9 @@ int thermal_init()
         BO_TRY(esp_timer_create(&timer_args, &_thermal.timer));
         BO_TRY(esp_timer_start_periodic(_thermal.timer, (uint64_t)PID_PERIOD * 1000));
     }
+
+    BO_TRY(thermal_reinit());
+
     ESP_LOGI(TAG, "Thermal management module has been initialized successfully.");
 
     return 0;

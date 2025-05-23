@@ -10,9 +10,8 @@ from lyfi_coap_client import *
 logging.basicConfig(level=logging.INFO)
 
 
-
 async def main():
-    client = LyfiDeviceCoapClient('coap://192.168.0.21')
+    client = LyfiDeviceCoapClient('coap://192.168.0.5')
 
     await client.open()
     response = await client.get_wellknown_core()
@@ -30,7 +29,7 @@ async def main():
 
     print("Do Factory reset")
     print(await client.factory_reset())
-    
+
     print("all done.")
 
 if __name__ == "__main__":
