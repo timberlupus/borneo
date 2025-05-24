@@ -68,6 +68,26 @@ uint32_t bo_rtc_get_timestamp()
     }
 }
 
+int64_t bo_rtc_get_timestamp_us()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (int64_t)tv.tv_sec * 1000000LL + tv.tv_usec;
+}
+
+int bo_rtc_set_time(int64_t timestamp_us)
+{
+    // TODO lock
+    struct timeval tv;
+    tv.tv_sec = timestamp_us / 1000000LL; // seconds
+    tv.tv_usec = timestamp_us % 1000000LL; // microseconds
+    if (settimeofday(&tv, NULL) == -1) {
+        ESP_LOGE(TAG, "settimeofday failed: %s\n", strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+
 const char* bo_rtc_get_tz()
 {
     //
