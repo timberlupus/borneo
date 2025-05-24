@@ -54,13 +54,13 @@ static void coap_hnd_rtc_local_get(coap_resource_t* resource, coap_session_t* se
         CborEncoder map_encoder;
         BO_COAP_VERIFY(cbor_encoder_create_map(&encoder, &map_encoder, CborIndefiniteLength));
         BO_COAP_VERIFY(cbor_encode_text_stringz(&map_encoder, "t1"));
-        BO_COAP_VERIFY(cbor_encode_uint(&map_encoder, t1));
+        BO_COAP_VERIFY(cbor_encode_int(&map_encoder, t1));
         BO_COAP_VERIFY(cbor_encode_text_stringz(&map_encoder, "t2"));
-        BO_COAP_VERIFY(cbor_encode_uint(&map_encoder, t2));
+        BO_COAP_VERIFY(cbor_encode_int(&map_encoder, t2));
 
         BO_COAP_VERIFY(cbor_encode_text_stringz(&map_encoder, "t3"));
         t3 = bo_rtc_get_timestamp_us();
-        BO_COAP_VERIFY(cbor_encode_uint(&map_encoder, t3));
+        BO_COAP_VERIFY(cbor_encode_int(&map_encoder, t3));
 
         BO_COAP_VERIFY(cbor_encoder_close_container(&encoder, &map_encoder));
 
