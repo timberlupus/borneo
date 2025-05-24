@@ -21,6 +21,7 @@ class BorneoPaths {
   static final Uri factoryReset = Uri(path: '/borneo/factory/reset');
   static final Uri firmwareVersion = Uri(path: '/borneo/fwver');
   static final Uri compatible = Uri(path: '/borneo/compatible');
+  static final Uri rtcLocal = Uri(path: '/borneo/rtc/local');
 }
 
 /// Defines the power behavior of a device.
@@ -200,6 +201,27 @@ class BorneoDeviceUpgradeInfo {
   });
 }
 
+class BorneoRtcLocalNtpResponse {
+  final int t1;
+  final int t2;
+  final int t3;
+
+  const BorneoRtcLocalNtpResponse({
+    required this.t1,
+    required this.t2,
+    required this.t3,
+  });
+
+  factory BorneoRtcLocalNtpResponse.fromMap(CborMap cborMap) {
+    final dynamic map = cborMap.toObject();
+    return BorneoRtcLocalNtpResponse(
+      t1: map['t1'] as int,
+      t2: map['t2'] as int,
+      t3: map['t3'] as int,
+    );
+  }
+}
+
 abstract class IBorneoDeviceApi implements IDeviceApi, IPowerOnOffCapability {
   Future<String> getCompatible(Device dev);
   Future<Version> getFirmwareVersion(Device dev);
@@ -209,6 +231,9 @@ abstract class IBorneoDeviceApi implements IDeviceApi, IPowerOnOffCapability {
 
   Future<PowerBehavior> getPowerBehavior(Device dev);
   Future setPowerBehavior(Device dev, PowerBehavior behavior);
+
+  Future<BorneoRtcLocalNtpResponse> getRtcLocal(Device dev, DateTime timestamp);
+  Future<void> setRtcLocalSkew(Device dev, Duration skew);
 
   Future<String> getTimeZone(Device dev);
   Future<void> setTimeZone(Device dev, String timezone);
@@ -291,14 +316,39 @@ mixin BorneoDeviceApiImpl implements IBorneoDeviceApi {
   }
 
   @override
+  Future<BorneoRtcLocalNtpResponse> getRtcLocal(
+      Device dev, DateTime timestamp) async {
+    final dd = dev.driverData as BorneoDriverData;
+    final timestampUS = timestamp.isUtc
+        ? timestamp.microsecondsSinceEpoch
+        : timestamp.toUtc().microsecondsSinceEpoch;
+    final request = CoapRequest.get(
+      BorneoPaths.rtcLocal,
+      confirmable: true,
+      accept: CoapMediaType.applicationCbor,
+      payload: simple_cbor.cbor.encode(timestampUS),
+    );
+    final response = await dd.coap.send(request);
+    return BorneoRtcLocalNtpResponse.fromMap(
+        cbor.decode(response.payload) as CborMap);
+  }
+
+  @override
+  Future<void> setRtcLocalSkew(Device dev, Duration skew) async {
+    if (skew.isNegative) {
+      throw ArgumentError('Skew must be a non-negative duration.');
+    }
+    if (skew < const Duration(microseconds: 1000)) {
+      throw ArgumentError('Skew must be greater than 1ms.');
+    }
+    final dd = dev.driverData as BorneoDriverData;
+    await dd.coap.postCbor(BorneoPaths.rtcLocal, skew.inMicroseconds);
+  }
+
+  @override
   Future setPowerBehavior(Device dev, PowerBehavior behavior) async {
     final dd = dev.driverData as BorneoDriverData;
-    final response = await dd.coap.putBytes(BorneoPaths.powerBehavior,
-        payload: simple_cbor.cbor.encode(behavior.index),
-        accept: CoapMediaType.applicationCbor);
-    if (!response.isSuccess) {
-      throw DeviceError("Failed to put to `${response.location}`", dev);
-    }
+    await dd.coap.putCbor(BorneoPaths.powerBehavior, behavior.index);
   }
 
   @override
