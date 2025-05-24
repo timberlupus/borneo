@@ -35,7 +35,7 @@ def generate_cie1931_lut(size: int):
     return lut
 
 
-def generate_logarithmic_lut(size: int, gamma: float = 2.0):
+def generate_logarithmic_lut(size: int, gamma: float = 2.2):
     """Generate logarithmic dimming curve lookup table (using exponential form)"""
     lut = []
     for level in range(size):
@@ -43,7 +43,10 @@ def generate_logarithmic_lut(size: int, gamma: float = 2.0):
             pwm = 0
         else:
             normalized = level / (size - 1)  # Normalize to 0-1
-            corrected = normalized ** gamma  # Use exponential form for logarithmic perception
+            if normalized > 0:
+                corrected = math.log(1 + normalized * (math.e - 1)) ** gamma
+            else:
+                corrected = 0.0
             pwm = round(corrected * PWM_DUTY_MAX)
             pwm = max(0, min(pwm, PWM_DUTY_MAX))
         lut.append(pwm)
@@ -82,7 +85,7 @@ def generate_gamma_lut(size: int, gamma: float = 2.6):
         else:
             # Gamma correction formula
             normalized = level / (size - 1)  # normalize to 0-1
-            corrected = normalized ** (1/gamma)  # apply gamma correction
+            corrected = normalized ** gamma  # apply gamma correction
             pwm = round(corrected * PWM_DUTY_MAX)
             # Clamp to valid range
             pwm = max(0, min(pwm, PWM_DUTY_MAX))
