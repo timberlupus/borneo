@@ -77,7 +77,7 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
 #endif
     },
 
-    .correction_method = LED_CORRECTION_EXP,
+    .correction_method = LED_CORRECTION_LOG,
 
     .sun_color = {0},
     .scheduler = { 0 },

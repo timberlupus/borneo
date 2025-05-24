@@ -7,32 +7,45 @@ BRIGHT_LEVEL_MAX = 4095
 
 
 def generate_cie1931_lut(size: int):
-    """Generate CIE 1931 brightness curve lookup table"""
-    lut = []
-    for i in range(size):
-        x = i / (size - 1)  # Normalize to 0-1
-        if x <= 0.008856:
-            y = x * 903.3
+    def cie1931_normalized(L):
+        if L <= 8:
+            y = L / 903.3
         else:
-            y = 116 * (x ** (1/3)) - 16
-        y = y / 100  # Normalize to 0-1
-        lut.append(round(y * PWM_DUTY_MAX))  # Scale to 0-1023
+            y = ((L + 16) / 116) ** 3
+
+        max_L = 100.0
+        if max_L <= 8:
+            max_y = max_L / 903.3
+        else:
+            max_y = ((max_L + 16) / 116) ** 3
+
+        return y / max_y
+
+    lut = []
+    input_max = size - 1
+
+    for i in range(size):
+        L = (i / input_max) * 100.0
+
+        normalized_value = cie1931_normalized(L)
+
+        pwm_value = round(normalized_value * PWM_DUTY_MAX)
+        lut.append(min(pwm_value, PWM_DUTY_MAX))
+
     return lut
 
 
-def generate_logarithmic_lut(size: int, gamma: float = 2.0, min_input: float = 0.1):
-    """Generate logarithmic dimming curve lookup table"""
+def generate_logarithmic_lut(size: int, gamma: float = 2.0):
+    """Generate logarithmic dimming curve lookup table (using exponential form)"""
     lut = []
     for level in range(size):
         if level == 0:
             pwm = 0
         else:
-            log_value = math.log10(level / (size - 1) * 9 + 1)  # 1-10
-            pwm = int(log_value * PWM_DUTY_MAX)
-            if pwm < 1 and level > 0:
-                pwm = 1
-            elif pwm > PWM_DUTY_MAX:
-                pwm = PWM_DUTY_MAX
+            normalized = level / (size - 1)  # Normalize to 0-1
+            corrected = normalized ** gamma  # Use exponential form for logarithmic perception
+            pwm = round(corrected * PWM_DUTY_MAX)
+            pwm = max(0, min(pwm, PWM_DUTY_MAX))
         lut.append(pwm)
     return lut
 
@@ -56,7 +69,7 @@ def generate_exponential_lut(size: int):
     return lut
 
 
-def generate_gamma_lut(size: int, gamma: float = 2.2):
+def generate_gamma_lut(size: int, gamma: float = 2.6):
     """Generate gamma correction lookup table
     Args:
         size: number of brightness levels

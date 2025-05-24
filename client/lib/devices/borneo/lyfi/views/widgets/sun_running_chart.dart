@@ -13,23 +13,17 @@ class SunRunningChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: LineChart(
-        _buildChartData(context),
-        duration: const Duration(milliseconds: 200),
-        transformationConfig: FlTransformationConfig(
-          scaleAxis: FlScaleAxis.horizontal,
-          minScale: 1.0,
-          maxScale: 2.5,
-          panEnabled: true,
-          scaleEnabled: true,
-        ),
-      ),
+      padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
+      child: LineChart(_buildChartData(context), duration: const Duration(milliseconds: 200)),
     );
   }
 
   LineChartData _buildChartData(BuildContext context) {
     final borderSide = BorderSide(color: Theme.of(context).scaffoldBackgroundColor, width: 1.5);
+    final double sunriseInstant =
+        sunInstants.isNotEmpty ? (sunInstants.first.instant.inSeconds / 3600.0).floorToDouble() * 3600 : 0;
+    final double sunsetInstant =
+        sunInstants.isNotEmpty ? (sunInstants.last.instant.inSeconds / 3600.0).ceilToDouble() * 3600 : 0;
     return LineChartData(
       lineTouchData: lineTouchData1,
       gridData: FlGridData(
@@ -47,45 +41,43 @@ class SunRunningChart extends StatelessWidget {
         border: Border(bottom: borderSide, left: borderSide, right: borderSide, top: borderSide),
       ),
       lineBarsData: buildLineData(),
-      minX: 0,
-      maxX: 24 * 3600.0,
+      minX: sunriseInstant,
+      maxX: sunsetInstant,
       minY: 0,
       maxY: lyfiBrightnessMax.toDouble(),
       extraLinesData: _buildExtraLines(context),
     );
   }
 
-  ExtraLinesData _buildExtraLines(BuildContext context) {
+  ExtraLinesData _buildExtraLines(BuildContext context) =>
+      ExtraLinesData(extraLinesOnTop: true, verticalLines: [_buildNowLine(context)]);
+
+  VerticalLine _buildNowLine(BuildContext context) {
     final now = DateTime.now();
-    return ExtraLinesData(
-      extraLinesOnTop: true,
-      verticalLines: [
-        VerticalLine(
-          x:
-              Duration(
-                hours: now.hour.toInt(),
-                minutes: now.minute.toInt(),
-                seconds: now.second.toInt(),
-              ).inSeconds.toDouble(),
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
-              Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.75),
-            ],
-          ),
-          dashArray: const [3, 2],
-          strokeWidth: 1.5,
-          label: VerticalLineLabel(
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
-            padding: const EdgeInsets.only(bottom: 8),
-            alignment: const Alignment(0, -1.6),
-            show: true,
-            labelResolver: (vl) => Duration(seconds: vl.x.toInt()).toHHMM(),
-          ),
-        ),
-      ],
+    return VerticalLine(
+      x:
+          Duration(
+            hours: now.hour.toInt(),
+            minutes: now.minute.toInt(),
+            seconds: now.second.toInt(),
+          ).inSeconds.toDouble(),
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
+          Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.75),
+        ],
+      ),
+      dashArray: const [3, 2],
+      strokeWidth: 1.5,
+      label: VerticalLineLabel(
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
+        padding: const EdgeInsets.only(bottom: 8),
+        alignment: const Alignment(0, -1.6),
+        show: true,
+        labelResolver: (vl) => Duration(seconds: vl.x.toInt()).toHHMM(),
+      ),
     );
   }
 
@@ -132,8 +124,8 @@ class SunRunningChart extends StatelessWidget {
   Widget bottomTitleWidgets(BuildContext context, double value, TitleMeta meta) {
     final style = Theme.of(
       context,
-    ).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(97));
-    final instant = Duration(seconds: value.round().toInt()).toHH();
+    ).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6));
+    final instant = Duration(seconds: value.round().toInt()).toHHMM();
     final text = Text(instant, style: style);
     return SideTitleWidget(meta: meta, space: 0, child: text);
   }
