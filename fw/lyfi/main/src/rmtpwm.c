@@ -4,6 +4,7 @@
 #include <esp_log.h>
 #include <sys/errno.h>
 #include <driver/rmt_tx.h>
+#include <driver/gpio.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
@@ -88,6 +89,7 @@ int rmtpwm_dac_init()
         .trans_queue_depth = 8, // set the maximum number of transactions that can pend in the background
     };
     BO_TRY(rmt_new_tx_channel(&fan_dac_tx_chan_config, &s_dac_channel.rmt_channel));
+    BO_TRY(gpio_pullup_en(CONFIG_LYFI_FAN_CTRL_PWMDAC_GPIO));
     BO_TRY(rmt_enable(s_dac_channel.rmt_channel));
     BO_TRY(rmt_transmit(s_dac_channel.rmt_channel, s_pwm_encoder, &s_dac_channel.duty, sizeof(s_dac_channel.duty),
                         &tx_config));

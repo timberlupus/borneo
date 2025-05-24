@@ -16,7 +16,7 @@
 
 #include "../led/led.h"
 #include "../fan.h"
-#include "cbor.h"
+#include "cbor-common.h"
 
 #define TAG "lyfi-coap"
 

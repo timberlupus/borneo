@@ -16,7 +16,7 @@
 
 #include "../led/led.h"
 #include "../solar.h"
-#include "cbor.h"
+#include "cbor-common.h"
 
 #define TAG "lyfi-coap"
 
