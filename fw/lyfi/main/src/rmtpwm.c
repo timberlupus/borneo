@@ -52,7 +52,9 @@ static int rmtpwm_set_duty_internal(struct rmtpwm_channel* channel, uint8_t duty
 
 static rmt_encoder_handle_t s_pwm_encoder = NULL;
 
+#if CONFIG_LYFI_FAN_CTRL_PWM_ENABLED
 static struct rmtpwm_channel s_pwm_channel = { 0 };
+#endif // CONFIG_LYFI_FAN_CTRL_PWM_ENABLED
 
 #if !SOC_DAC_SUPPORTED
 static struct rmtpwm_channel s_dac_channel = { 0 };

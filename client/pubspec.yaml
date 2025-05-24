@@ -18,6 +18,11 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # of the product and file versions while build-number is used as the build suffix.
 version: 0.2.1+1
 
+workspace:
+  - packages/borneo_common
+  - packages/borneo_kernel
+  - packages/borneo_kernel_abstractions
+
 environment:
   sdk: ^3.7.0
 
@@ -165,6 +170,61 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+melos:
+  scripts:
+    lint:all:
+      run: melos run analyze-ci
+      description: Run all static analysis checks.
+
+    analyze-ci:
+      # We are setting the concurrency to 1 because a higher concurrency can crash
+      # the analysis server on low performance machines (like GitHub Actions).
+      run: |
+        melos exec -c 1 -- \
+          dart analyze . --fatal-infos
+      description: |
+        Run `dart analyze` in all packages.
+        - Note: you can also rely on your IDEs Dart Analysis / Issues window.
+
+    format-ci:
+      run: |
+        dart pub global run flutter_plugin_tools format && \
+        swiftformat .
+      description: |
+        Formats the code of all packages (Java, Objective-C, and Dart).
+        - Requires `flutter_plugin_tools` (`pub global activate flutter_plugin_tools`).
+        - Requires `git`.
+        - Requires `clang-format` (can be installed via Brew on MacOS).
+        - Requires `swiftformat` (can be installed via Brew on macOS).
+
+    test:dart:
+      run: melos exec -c 6 --fail-fast -- "dart test" 
+      description: Run tests for Dart packages
+      packageFilters:
+        dirExists:
+          - test
+        ignore:
+          - '*web*'
+          - 'borneo_cli'
+          - '*example*'
+
+    test:flutter:
+      run: melos exec -c 6 --fail-fast -- "flutter test"
+      description: Run tests for Flutter packages
+      packageFilters:
+        dirExists:
+          - test
+        ignore:
+          - '*web*'
+          - 'borneo_cli'
+          - '*example*'
+
+    test:all:
+      #  melos run test:dart --no-select
+      run: |
+        melos run --no-select test:flutter
+      description: Run tests for all packages
 
 
 flutter_native_splash:
@@ -324,3 +384,7 @@ flutter_native_splash:
   #info_plist_files:
   #  - 'ios/Runner/Info-Debug.plist'
   #  - 'ios/Runner/Info-Release.plist'
+
+
+
+

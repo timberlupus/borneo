@@ -73,27 +73,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
-  borneo_common:
-    dependency: "direct main"
-    description:
-      path: "packages/borneo_common"
-      relative: true
-    source: path
-    version: "0.0.1"
-  borneo_kernel:
-    dependency: "direct main"
-    description:
-      path: "packages/borneo_kernel"
-      relative: true
-    source: path
-    version: "1.0.0"
-  borneo_kernel_abstractions:
-    dependency: "direct main"
-    description:
-      path: "packages/borneo_kernel_abstractions"
-      relative: true
-    source: path
-    version: "1.0.0"
   build:
     dependency: transitive
     description:
@@ -1390,10 +1369,10 @@ packages:
     dependency: "direct main"
     description:
       name: sembast
-      sha256: d3f0d0ba501a5f1fd7d6c8532ee01385977c8a069c334635dae390d059ae3d6d
+      sha256: "7119cf6f79bd1d48c8ec7943f4facd96c15ab26823021ed0792a487c7cd34441"
       url: "https://pub.dev"
     source: hosted
-    version: "3.8.5"
+    version: "3.8.5+1"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -1739,10 +1718,10 @@ packages:
     dependency: transitive
     description:
       name: vector_graphics_compiler
-      sha256: "1b4b9e706a10294258727674a340ae0d6e64a7231980f9f9a3d12e4b42407aad"
+      sha256: "557a315b7d2a6dbb0aaaff84d857967ce6bdc96a63dc6ee2a57ce5a6ee5d3331"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.16"
+    version: "1.1.17"
   vector_math:
     dependency: transitive
     description:
