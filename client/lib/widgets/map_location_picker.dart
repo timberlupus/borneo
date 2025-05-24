@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lat_lng_to_timezone/lat_lng_to_timezone.dart';
@@ -20,7 +19,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
   LatLng? _userLocation;
   String? _currentTimeZone;
 
-  final TextEditingController _searchController = TextEditingController();
+  // final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -72,6 +71,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
     });
   }
 
+  /*
   Future<List<String>> _getSuggestions(String query) async {
     if (query.isEmpty) return [];
     try {
@@ -105,6 +105,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
       // Handle error
     }
   }
+  */
 
   bool _isSameLocation(LatLng? a, LatLng? b, {double epsilon = 1e-6}) {
     if (a == null || b == null) return false;

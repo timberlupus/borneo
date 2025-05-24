@@ -408,8 +408,8 @@ class BorneoLyfiDriver
   @override
   Future<bool> heartbeat(Device dev, {CancellationToken? cancelToken}) async {
     try {
-      await getOnOff(dev).asCancellable(cancelToken); // FIXME
-      return true;
+      final dd = dev.driverData as LyfiDriverData;
+      return await dd.coap.ping().asCancellable(cancelToken);
     } catch (e) {
       return false;
     }

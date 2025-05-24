@@ -2,7 +2,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view
 import 'package:borneo_app/infrastructure/timezone.dart';
 import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_common/exceptions.dart' as bo_ex;
-import 'package:timezone/timezone.dart' as tz;
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
@@ -83,6 +83,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     });
   }
 
+  /*
   Duration _getTimeDifference(String timezone1, String timezone2) {
     final location1 = tz.getLocation(timezone1);
     final location2 = tz.getLocation(timezone2);
@@ -91,22 +92,22 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     final offset2 = tz.TZDateTime.now(location2).timeZoneOffset;
     return offset1 - offset2;
   }
+  */
 
-  Future<Position> getLocation() async {
-    // TODO cancellable
+  Future<Position> getLocation({CancellationToken? cancel}) async {
     bool serviceEnabled;
     LocationPermission permission;
 
     // Check if location services are enabled
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    serviceEnabled = await Geolocator.isLocationServiceEnabled().asCancellable(cancel);
     if (!serviceEnabled) {
       throw bo_ex.InvalidOperationException(message: 'Please enable location services');
     }
 
     // Check permissions
-    permission = await Geolocator.checkPermission();
+    permission = await Geolocator.checkPermission().asCancellable(cancel);
     if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
+      permission = await Geolocator.requestPermission().asCancellable(cancel);
       if (permission == LocationPermission.denied) {
         throw bo_ex.PermissionDeniedException(message: 'Location permissions are denied');
       }
@@ -123,7 +124,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
         timeLimit: Duration(seconds: 30),
         distanceFilter: 100,
       ),
-    );
+    ).asCancellable(cancel);
 
     return position;
   }

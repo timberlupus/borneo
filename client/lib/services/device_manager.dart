@@ -146,9 +146,18 @@ final class DeviceManager implements IDisposable {
     deviceEvents.fire(DeviceEntityUpdatedEvent(oldEntity, updatedEntity));
   }
 
+  Future<bool> _groupExists(Transaction tx, String groupID) async {
+    final groupStore = stringMapStoreFactory.store(StoreNames.groups);
+    final groupRecord = await groupStore.record(groupID).get(tx);
+    return groupRecord != null;
+  }
+
   Future<void> moveToGroup(String id, String newGroupID) async {
     return await _db.transaction((tx) async {
-      // TODO ensure newGroupID exists
+      final exists = await _groupExists(tx, newGroupID);
+      if (!exists) {
+        throw KeyNotFoundException(message: 'Cannot find group with ID `$newGroupID`');
+      }
       return await _update(id, tx: tx, groupID: newGroupID);
     });
   }

@@ -19,8 +19,7 @@ jobs:
     defaults:
       run:
         working-directory: client
-    outputs:
-      flutter-version: ${{ steps.setup-flutter.outputs.flutter-version }}
+    # outputs removed as setup-flutter does not define flutter-version output
 
     steps:
       - name: Checkout code

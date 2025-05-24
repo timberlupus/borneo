@@ -9,14 +9,14 @@ class IconProgressBar extends StatefulWidget {
   final Duration? duration;
 
   const IconProgressBar({
-    Key? key,
+    super.key,
     required this.icon,
     this.size = 50.0,
     required this.progress,
     this.backgroundColor = Colors.grey,
     this.progressColor = Colors.blue,
     this.duration,
-  }) : super(key: key);
+  });
 
   @override
   _IconProgressBarState createState() => _IconProgressBarState();

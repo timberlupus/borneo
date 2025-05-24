@@ -4,7 +4,7 @@ abstract class AbstractScreenViewModel extends BaseViewModel with ViewModelEvent
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
-  AbstractScreenViewModel();
+  AbstractScreenViewModel({super.logger});
 
   Future<void> initialize() async {
     if (_isInitialized) {
