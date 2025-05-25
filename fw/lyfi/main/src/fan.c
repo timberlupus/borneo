@@ -78,7 +78,7 @@ int fan_init()
         BO_TRY(dac_output_voltage(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL, LYFI_FAN_CTRL_DAC_DUTY_MAX));
 #else
         BO_TRY(rmtpwm_dac_init());
-        BO_TRY(rmtpwm_set_dac_duty(CONFIG_LYFI_FAN_CTRL_PWMDAC_DUTY_MAX));
+        BO_TRY(rmtpwm_set_dac_duty(RMTPWM_DUTY_MAX));
 #endif
     }
 
