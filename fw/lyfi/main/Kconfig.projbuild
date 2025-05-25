@@ -381,8 +381,24 @@ menu "Borneo LyFi"
             int "The Output PWM-DAC GPIO for the voltage regulator"
             depends on LYFI_FAN_CTRL_ENABLED && IDF_TARGET_ESP32C3
 
+        config LYFI_FAN_CTRL_PWMDAC_DUTY_MIN
+            int "The Minimum Duty for the PWM-DAC"
+            depends on LYFI_FAN_CTRL_ENABLED && IDF_TARGET_ESP32C3
+
+        config LYFI_FAN_CTRL_PWMDAC_DUTY_MAX
+            int "The Maximum Duty for the PWM-DAC"
+            depends on LYFI_FAN_CTRL_ENABLED && IDF_TARGET_ESP32C3
+
         config LYFI_FAN_CTRL_DAC_CHANNEL
             int "DAC Channel for DAC"
+            depends on LYFI_FAN_CTRL_ENABLED && (IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2)
+
+        config LYFI_FAN_CTRL_DAC_DUTY_MIN
+            int "The Minimum Duty for the DAC"
+            depends on LYFI_FAN_CTRL_ENABLED && (IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2)
+
+        config LYFI_FAN_CTRL_DAC_DUTY_MAX
+            int "The Maximum Duty for the DAC"
             depends on LYFI_FAN_CTRL_ENABLED && (IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2)
 
         config LYFI_FAN_CTRL_SHUTDOWN_ENABLED

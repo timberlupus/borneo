@@ -124,7 +124,9 @@ int rmtpwm_pwm_init()
 
 int rmtpwm_set_pwm_duty(uint8_t duty)
 {
-    //
+    if (duty >= RMTPWM_DUTY_MAX) {
+        return -EINVAL;
+    }
     return rmtpwm_set_duty_internal(&s_pwm_channel, duty);
 }
 
@@ -133,14 +135,16 @@ int rmtpwm_set_pwm_duty(uint8_t duty)
 #if !SOC_DAC_SUPPORTED
 int rmtpwm_set_dac_duty(uint8_t duty)
 {
-    //
+    if (duty > RMTPWM_DUTY_MAX) {
+        return -EINVAL;
+    }
     return rmtpwm_set_duty_internal(&s_dac_channel, duty);
 }
 #endif // SOC_DAC_SUPPORTED
 
 int rmtpwm_set_duty_internal(struct rmtpwm_channel* channel, uint8_t duty)
 {
-    if (duty > 100) {
+    if (duty > RMTPWM_DUTY_MAX) {
         return -EINVAL;
     }
 
@@ -173,10 +177,10 @@ static size_t rmt_encode_pwm(rmt_encoder_t* encoder, rmt_channel_handle_t channe
     rmt_encoder_handle_t copy_encoder = pwm_encoder->copy_encoder;
     rmt_encode_state_t session_state = RMT_ENCODING_RESET;
     uint32_t* duty = (uint32_t*)primary_data;
-    uint32_t rmt_raw_symbol_duration = pwm_encoder->resolution / (RMTPWM_FREQ_HZ) / 100;
+    uint32_t rmt_raw_symbol_duration = pwm_encoder->resolution / (RMTPWM_FREQ_HZ) / RMTPWM_DUTY_MAX;
     rmt_symbol_word_t pwm_rmt_symbol = {
         .level0 = 0,
-        .duration0 = rmt_raw_symbol_duration * (100 - (*duty)),
+        .duration0 = rmt_raw_symbol_duration * (RMTPWM_DUTY_MAX - (*duty)),
         .level1 = 1,
         .duration1 = rmt_raw_symbol_duration * (*duty),
     };

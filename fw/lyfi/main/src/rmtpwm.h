@@ -4,6 +4,8 @@
 extern "C" {
 #endif
 
+#define RMTPWM_DUTY_MAX 100
+
 int rmtpwm_init();
 
 #if !SOC_DAC_SUPPORTED
