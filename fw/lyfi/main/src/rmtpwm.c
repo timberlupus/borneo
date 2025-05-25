@@ -122,32 +122,16 @@ int rmtpwm_pwm_init()
     return 0;
 }
 
-int rmtpwm_set_pwm_duty(uint8_t duty)
-{
-    if (duty >= RMTPWM_DUTY_MAX) {
-        return -EINVAL;
-    }
-    return rmtpwm_set_duty_internal(&s_pwm_channel, duty);
-}
+int rmtpwm_set_pwm_duty(uint8_t duty) { return rmtpwm_set_duty_internal(&s_pwm_channel, duty); }
 
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_ENABLED
 
 #if !SOC_DAC_SUPPORTED
-int rmtpwm_set_dac_duty(uint8_t duty)
-{
-    if (duty > RMTPWM_DUTY_MAX) {
-        return -EINVAL;
-    }
-    return rmtpwm_set_duty_internal(&s_dac_channel, duty);
-}
+int rmtpwm_set_dac_duty(uint8_t duty) { return rmtpwm_set_duty_internal(&s_dac_channel, duty); }
 #endif // SOC_DAC_SUPPORTED
 
 int rmtpwm_set_duty_internal(struct rmtpwm_channel* channel, uint8_t duty)
 {
-    if (duty > RMTPWM_DUTY_MAX) {
-        return -EINVAL;
-    }
-
     if (duty == channel->duty) {
         return 0;
     }

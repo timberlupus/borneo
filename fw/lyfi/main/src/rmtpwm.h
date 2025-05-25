@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-#define RMTPWM_DUTY_MAX 100
+#define RMTPWM_DUTY_MAX 255
 
 int rmtpwm_init();
 
