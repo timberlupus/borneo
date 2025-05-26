@@ -454,7 +454,7 @@ static void system_events_handler(void* handler_args, esp_event_base_t base, int
     case BO_EVENT_SHUTDOWN_SCHEDULED: {
         BO_MUST(led_fade_black());
         if (led_get_state() != LED_STATE_NORMAL) {
-            BO_MUST(led_switch_state(LED_STATE_NORMAL));
+            smf_set_state(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_NORMAL]);
         }
     } break;
 

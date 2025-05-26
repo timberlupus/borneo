@@ -64,23 +64,29 @@ int led_fade_to_normal()
     struct tm local_tm = { 0 };
     localtime_r(&now, &local_tm);
 
-    switch (_led.settings.mode) {
+    if (bo_power_is_on()) {
 
-    case LED_MODE_MANUAL: {
-        memcpy(end_color, _led.settings.manual_color, sizeof(led_color_t));
-    } break;
+        switch (_led.settings.mode) {
 
-    case LED_MODE_SCHEDULED: {
-        led_sch_compute_color(&_led.settings.scheduler, &local_tm, end_color);
-    } break;
+        case LED_MODE_MANUAL: {
+            memcpy(end_color, _led.settings.manual_color, sizeof(led_color_t));
+        } break;
 
-    case LED_MODE_SUN: {
-        led_sch_compute_color(&_led.sun_scheduler, &local_tm, end_color);
-    } break;
+        case LED_MODE_SCHEDULED: {
+            led_sch_compute_color(&_led.settings.scheduler, &local_tm, end_color);
+        } break;
 
-    default:
-        assert(false);
-        break;
+        case LED_MODE_SUN: {
+            led_sch_compute_color(&_led.sun_scheduler, &local_tm, end_color);
+        } break;
+
+        default:
+            assert(false);
+            break;
+        }
+    }
+    else {
+        memset(end_color, 0, sizeof(led_color_t));
     }
 
     BO_TRY(led_fade_to_color(end_color, FADE_ON_PERIOD_MS));
