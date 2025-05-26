@@ -4,7 +4,6 @@ CONFIG_COMPILER_OPTIMIZATION_ASSERTIONS_SILENT=y
 ################ Flash ####################################
 CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
 CONFIG_ESPTOOLPY_FLASHSIZE="4MB"
-CONFIG_ESPTOOLPY_FLASHSIZE_DETECT=y
 
 
 ################ Table of Partitions ######################

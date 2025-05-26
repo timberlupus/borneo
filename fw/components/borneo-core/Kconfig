@@ -1,6 +1,10 @@
 menu "Borneo Core"
     menu "Board Information"
 
+        config BORNEO_PRODUCT_ID
+            string "Borneo Product ID"
+            default "$BORNEO_PRODUCT_ID"
+
         config BORNEO_BOARD_ID
             string "Borneo board ID"
             default "$BORNEO_BOARD"
