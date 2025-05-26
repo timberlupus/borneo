@@ -19,7 +19,9 @@
 #include <borneo/power.h>
 #include <borneo/power-meas.h>
 
+#include "thermal.h"
 #include "protect.h"
+#include "fan.h"
 
 #if CONFIG_LYFI_PROTECTION_ENABLED
 
@@ -29,13 +31,24 @@ static void protect_task();
 #define PROTECT_NVS_NAMESPACE "protect"
 #define NVS_KEY_ENABLED "en"
 #define NVS_KEY_OPP_VALUE "opp"
+#define NVS_KEY_OVERHEATED_TEMP "ohtemp"
+
+#define OVERHEATED_TEMP_COUNT_MAX 3
+#define PROTECT_OVERHEATED_TEMP_DEFAULT 65
+
 #define TAG "protect"
 
 struct bo_protect_settings {
     int32_t over_power_mw; // Over-Power Protection value
+    uint8_t overheated_temp; // Overheated temperature threshold
 };
 
-static struct bo_protect_settings _settings;
+struct bo_protect_status {
+    volatile int overheated_count; // Count of overheated events
+};
+
+static struct bo_protect_status _protect = { 0 };
+static struct bo_protect_settings _settings = { 0 };
 
 int bo_protect_init()
 {
@@ -51,6 +64,8 @@ int bo_protect_init()
     ESP_LOGI(TAG, "Over-power protection initialized");
     return 0;
 }
+
+uint8_t bo_protect_get_overheated_temp() { return _settings.overheated_temp; }
 
 int load_factory_settings()
 {
@@ -69,6 +84,17 @@ int load_factory_settings()
         }
     }
 
+    {
+        rc = nvs_get_u8(nvs_handle, NVS_KEY_OVERHEATED_TEMP, &_settings.overheated_temp);
+        if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            _settings.overheated_temp = PROTECT_OVERHEATED_TEMP_DEFAULT;
+            rc = 0;
+        }
+        if (rc) {
+            goto _EXIT_CLOSE;
+        }
+    }
+
 _EXIT_CLOSE:
     nvs_close(nvs_handle);
     return rc;
@@ -79,10 +105,31 @@ void protect_task()
     for (;;) {
         int32_t power_mw;
         BO_MUST(bo_power_read(&power_mw));
-        if (_settings.over_power_mw > 0 && power_mw > _settings.over_power_mw && bo_power_is_on()) {
-            ESP_LOGE(TAG, "Over-power protection triggered! Shutdown in progress...");
-            ESP_LOGE(TAG, "%ld mW >= %ld mW", power_mw, _settings.over_power_mw);
-            BO_MUST(bo_power_shutdown(BO_SHUTDOWN_REASON_OVER_POWER));
+        if (bo_power_is_on()) {
+            if (_settings.over_power_mw > 0 && power_mw > _settings.over_power_mw) {
+                ESP_LOGE(TAG, "Over-power protection triggered! Shutdown in progress...");
+                ESP_LOGE(TAG, "%ld mW >= %ld mW", power_mw, _settings.over_power_mw);
+                BO_MUST(bo_power_shutdown(BO_SHUTDOWN_REASON_OVER_POWER));
+            }
+
+            // Continuous detection of high temperatures multiple times will trigger an emergency shutdown of the
+            // lights.
+            int current_temp = thermal_get_current_temp();
+            if (current_temp >= _settings.overheated_temp) {
+                _protect.overheated_count++;
+                ESP_LOGW(TAG, "[%u/%u] Too hot!", _protect.overheated_count, OVERHEATED_TEMP_COUNT_MAX);
+                if (_protect.overheated_count > OVERHEATED_TEMP_COUNT_MAX) {
+                    fan_set_power(100);
+                    ESP_LOGW(TAG, "Over temperature(temp=%d, set=%u)! shuting down...", current_temp,
+                             _settings.overheated_temp);
+                    bo_power_shutdown(BO_SHUTDOWN_REASON_OVERHEATED);
+                    _protect.overheated_count = 0;
+                    return;
+                }
+            }
+            else {
+                _protect.overheated_count = 0;
+            }
         }
         vTaskDelay(pdMS_TO_TICKS(1000));
     }

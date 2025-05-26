@@ -8,11 +8,10 @@
 
 #include <borneo/common.h>
 #include <borneo/coap.h>
-// #include <borneo/rtc.h>
-// #include <borneo/ntc.h>
 #include "../thermal.h"
+#include "../protect.h"
 
-#define TAG "lyfi-coap"
+#define TAG "thermal-coap"
 
 static void _coap_hnd_thermal_pid_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
                                       const coap_string_t* query, coap_pdu_t* response)
@@ -124,24 +123,6 @@ static void _coap_hnd_thermal_keep_temp_get(coap_resource_t* resource, coap_sess
     coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
 }
 
-static void _coap_hnd_thermal_overheated_temp_get(coap_resource_t* resource, coap_session_t* session,
-                                                  const coap_pdu_t* request, const coap_string_t* query,
-                                                  coap_pdu_t* response)
-{
-    CborEncoder encoder;
-    size_t encoded_size = 0;
-    const struct thermal_settings* settings = thermal_get_settings();
-
-    uint8_t buf[128];
-
-    cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
-    BO_COAP_TRY(cbor_encode_uint(&encoder, settings->overheated_temp), response);
-    encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
-
-    coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
-    coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
-}
-
 static void _coap_hnd_thermal_settings_get(coap_resource_t* resource, coap_session_t* session,
                                            const coap_pdu_t* request, const coap_string_t* query, coap_pdu_t* response)
 {
@@ -178,7 +159,7 @@ static void _coap_hnd_thermal_settings_get(coap_resource_t* resource, coap_sessi
 
     {
         BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "tempOverheated"), response);
-        BO_COAP_TRY(cbor_encode_int(&root_map, settings->overheated_temp), response);
+        BO_COAP_TRY(cbor_encode_int(&root_map, bo_protect_get_overheated_temp()), response);
     }
 
     BO_COAP_TRY(cbor_encoder_close_container(&encoder, &root_map), response);
@@ -194,8 +175,5 @@ COAP_RESOURCE_DEFINE("borneo/lyfi/thermal/pid", false, _coap_hnd_thermal_pid_get
 COAP_RESOURCE_DEFINE("borneo/lyfi/thermal/temp/current", false, _coap_hnd_thermal_current_temp_get, NULL, NULL, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/thermal/temp/keep", false, _coap_hnd_thermal_keep_temp_get, NULL, NULL, NULL);
-
-COAP_RESOURCE_DEFINE("borneo/lyfi/thermal/temp/overheated", false, _coap_hnd_thermal_overheated_temp_get, NULL, NULL,
-                     NULL);
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/thermal/settings", false, _coap_hnd_thermal_settings_get, NULL, NULL, NULL);

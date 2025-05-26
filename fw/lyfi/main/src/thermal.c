@@ -18,6 +18,7 @@
 #include <borneo/nvs.h>
 
 #include "fan.h"
+#include "protect.h"
 #include "thermal.h"
 
 #define TEMP_WINDOW_SIZE 8
@@ -31,7 +32,6 @@ struct pid {
 struct thermal_state {
     esp_timer_handle_t timer;
     struct pid pid;
-    int overheated_count;
     int current_temp;
     int temp_window[TEMP_WINDOW_SIZE];
     uint8_t temp_window_index;
@@ -58,7 +58,6 @@ static int update_temp_average(int new_sample);
 #define THERMAL_NVS_KEY_KI "ki"
 #define THERMAL_NVS_KEY_KD "kd"
 #define THERMAL_NVS_KEY_KEEP_TEMP "ktemp"
-#define THERMAL_NVS_KEY_OVERHEATED_TEMP "ohtemp"
 #define THERMAL_NVS_KEY_FAN_MODE "fmode"
 #define THERMAL_NVS_KEY_FAN_MANUAL_POWER "fanmanpwr"
 
@@ -67,19 +66,17 @@ static int update_temp_average(int new_sample);
 #define PID_INTEGRAL_RESET_THRESHOLD 3
 #define PID_INTEGRAL_MAX 50000
 #define PID_INTEGRAL_MIN -50000
-#define OVERHEATED_TEMP_COUNT_MAX 3
-
-#define FAN_POWER_MIN 10
 
 #define OUTPUT_MIN 10
 #define OUTPUT_MAX 100
+
+#define KEEP_TEMP_MIN 35
 
 const struct thermal_settings THERMAL_DEFAULT_SETTINGS = {
     .kp = 250,
     .ki = 10,
     .kd = 50,
     .keep_temp = 45,
-    .overheated_temp = 65,
     .fan_mode = THERMAL_FAN_MODE_PID,
     .fan_manual_power = 75,
 };
@@ -186,15 +183,6 @@ int load_factory_settings()
     rc = nvs_get_u8(handle, THERMAL_NVS_KEY_KEEP_TEMP, &_settings.keep_temp);
     if (rc == ESP_ERR_NVS_NOT_FOUND) {
         _settings.keep_temp = THERMAL_DEFAULT_SETTINGS.keep_temp;
-        rc = 0;
-    }
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_get_u8(handle, THERMAL_NVS_KEY_OVERHEATED_TEMP, &_settings.overheated_temp);
-    if (rc == ESP_ERR_NVS_NOT_FOUND) {
-        _settings.overheated_temp = THERMAL_DEFAULT_SETTINGS.overheated_temp;
         rc = 0;
     }
     if (rc) {
@@ -319,23 +307,6 @@ static void thermal_timer_callback(void* args)
         return;
     }
 
-    // Continuous detection of high temperatures multiple times will trigger an emergency shutdown of the lights.
-    if (bo_power_is_on() && _thermal.current_temp >= _settings.overheated_temp) {
-        _thermal.overheated_count++;
-        ESP_LOGW(TAG, "[%u/%u] Too hot!", _thermal.overheated_count, OVERHEATED_TEMP_COUNT_MAX);
-        if (_thermal.overheated_count > OVERHEATED_TEMP_COUNT_MAX && bo_power_is_on()) {
-            fan_set_power(OUTPUT_MAX);
-            ESP_LOGW(TAG, "Over temperature(temp=%d, set=%u)! shuting down...", _thermal.current_temp,
-                     _settings.overheated_temp);
-            bo_power_shutdown(BO_SHUTDOWN_REASON_OVERHEATED);
-            _thermal.overheated_count = 0;
-            return;
-        }
-    }
-    else {
-        _thermal.overheated_count = 0;
-    }
-
     // Below the emergency shutdown temperature, execute PID fan speed control.
     fan_power_to_set = thermal_pid_step(_thermal.current_temp);
 
@@ -360,7 +331,7 @@ int thermal_set_pid(int32_t kp, int32_t ki, int32_t kd)
 
 int thermal_set_keep_temp(uint8_t keep_temp)
 {
-    if (keep_temp < 35 || keep_temp >= _settings.overheated_temp) {
+    if (keep_temp < KEEP_TEMP_MIN || keep_temp >= bo_protect_get_overheated_temp()) {
         return -EINVAL;
     }
 

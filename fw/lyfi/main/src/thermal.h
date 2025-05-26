@@ -15,8 +15,6 @@ struct thermal_settings {
     int32_t ki; ///< PID I
     int32_t kd; ///< PID D
     uint8_t keep_temp; ///< Maintaining temperature with PID
-    uint8_t overheated_temp; ///< This is overheating temperature, exceeding the lighting fixture will automatically
-                             ///< turn off
     uint8_t fan_mode; ///< The fan running mode, values in `enum thermal_fan_mode`
     uint8_t fan_manual_power; ///< The power ratio of the manual setting of the fan
 };
