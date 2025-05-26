@@ -34,12 +34,12 @@ static void coap_hnd_sun_schedule_get(coap_resource_t* resource, coap_session_t*
     CborEncoder encoder;
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
     CborEncoder root_array;
-    BO_COAP_VERIFY(cbor_encoder_create_array(&encoder, &root_array, _led.sun_scheduler.item_count));
+    BO_COAP_TRY(cbor_encoder_create_array(&encoder, &root_array, _led.sun_scheduler.item_count), response);
     for (size_t i = 0; i < _led.sun_scheduler.item_count; i++) {
         const struct led_scheduler_item* sch_item = &_led.sun_scheduler.items[i];
-        BO_COAP_VERIFY(cbor_encode_led_sch_item(&root_array, sch_item));
+        BO_COAP_TRY(cbor_encode_led_sch_item(&root_array, sch_item), response);
     }
-    BO_COAP_VERIFY(cbor_encoder_close_container(&encoder, &root_array));
+    BO_COAP_TRY(cbor_encoder_close_container(&encoder, &root_array), response);
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
@@ -103,11 +103,11 @@ static void coap_hnd_sun_curve_get(coap_resource_t* resource, coap_session_t* se
     CborEncoder encoder;
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
     CborEncoder root_array;
-    BO_COAP_VERIFY(cbor_encoder_create_array(&encoder, &root_array, _led.sun_scheduler.item_count));
+    BO_COAP_TRY(cbor_encoder_create_array(&encoder, &root_array, _led.sun_scheduler.item_count), response);
     for (size_t i = 0; i < SOLAR_INSTANTS_COUNT; i++) {
-        BO_COAP_VERIFY(sun_curve_item_encode(&root_array, &instants[i]));
+        BO_COAP_TRY(sun_curve_item_encode(&root_array, &instants[i]), response);
     }
-    BO_COAP_VERIFY(cbor_encoder_close_container(&encoder, &root_array));
+    BO_COAP_TRY(cbor_encoder_close_container(&encoder, &root_array), response);
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 

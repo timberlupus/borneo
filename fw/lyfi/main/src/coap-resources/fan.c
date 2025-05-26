@@ -27,7 +27,7 @@ static void _coap_hnd_fan_power_get(coap_resource_t* resource, coap_session_t* s
     uint8_t buf[128];
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
-    BO_COAP_VERIFY(cbor_encode_uint(&encoder, status.power));
+    BO_COAP_TRY(cbor_encode_uint(&encoder, status.power), response);
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
@@ -45,13 +45,13 @@ static void _coap_hnd_fan_power_put(coap_resource_t* resource, coap_session_t* s
 
     CborParser parser;
     CborValue it;
-    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &it));
+    BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &it), response);
     int power;
-    BO_COAP_VERIFY(cbor_value_get_int(&it, &power));
+    BO_COAP_TRY(cbor_value_get_int(&it, &power), response);
     if (power > 100 || power < 0) {
         goto _BAD_REQUEST;
     }
-    BO_COAP_TRY(fan_set_power((uint8_t)power), BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
+    BO_COAP_TRY(fan_set_power((uint8_t)power), response);
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
     return;

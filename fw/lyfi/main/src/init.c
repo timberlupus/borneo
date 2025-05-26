@@ -10,6 +10,7 @@
 #include <borneo/system.h>
 #include <borneo/common.h>
 
+#include "protect.h"
 #include "led/led.h"
 #include "fan.h"
 #include "thermal.h"
@@ -19,6 +20,9 @@
 
 static int _lyfi_init(const struct drvfx_device* dev)
 {
+#if CONFIG_LYFI_PROTECTION_ENABLED
+    BO_TRY(bo_protect_init());
+#endif
 
 #if CONFIG_LYFI_FAN_CTRL_ENABLED
     BO_TRY(fan_init());

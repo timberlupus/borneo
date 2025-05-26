@@ -428,7 +428,17 @@ menu "Borneo LyFi"
             default 9
     endmenu
 
+    menu "Protection"
 
+        config LYFI_PROTECTION_ENABLED
+            bool "Enable the protection feature"
+            default n
+            depends on BORNEO_MEAS_VOLTAGE_ENABLED && BORNEO_MEAS_CURRENT_ENABLED
+
+        config LYFI_PROTECTION_OPP_DEFAULT_VALUE
+            int "Over-power protection default value"
+            depends on  LYFI_PROTECTION_ENABLED
+    endmenu
 
 
 endmenu

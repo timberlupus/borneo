@@ -35,81 +35,80 @@ static void coap_hnd_borneo_info_get(coap_resource_t* resource, coap_session_t* 
     const struct system_info* sysinfo = bo_system_get_info();
 
     CborEncoder root_map;
-    BO_COAP_TRY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength),
-                BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
+    BO_COAP_TRY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength), response);
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "id"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, sysinfo->hex_id));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "id"), response);
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, sysinfo->hex_id), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "compatible"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, CONFIG_BORNEO_DEVICE_COMPATIBLE));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "compatible"), response);
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, CONFIG_BORNEO_DEVICE_COMPATIBLE), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "name"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, sysinfo->name));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "name"), response);
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, sysinfo->name), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "serno"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, sysinfo->hex_id));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "serno"), response);
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, sysinfo->hex_id), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "hasBT"));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "hasBT"), response);
 #if CONFIG_BT_BLE_ENABLED
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&root_map, true));
+        BO_COAP_TRY(cbor_encode_boolean(&root_map, true), response);
 #else
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&root_map, false));
+        BO_COAP_TRY(cbor_encode_boolean(&root_map, false), response);
 #endif
 
 #if CONFIG_BT_BLE_ENABLED
         // bt-mac
         uint8_t bt_mac[6];
-        BO_COAP_TRY(esp_read_mac(bt_mac, ESP_MAC_BT), BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "btMac"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_byte_string(&root_map, bt_mac, 6));
+        BO_COAP_TRY(esp_read_mac(bt_mac, ESP_MAC_BT), response);
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "btMac"), response);
+        BO_COAP_TRY(cbor_encode_byte_string(&root_map, bt_mac, 6), response);
 #endif
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "hasWifi"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&root_map, true));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "hasWifi"), response);
+        BO_COAP_TRY(cbor_encode_boolean(&root_map, true), response);
     }
 
     {
         uint8_t wifi_mac[6];
         esp_read_mac(wifi_mac, ESP_MAC_WIFI_STA);
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "wifiMac"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_byte_string(&root_map, wifi_mac, 6));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "wifiMac"), response);
+        BO_COAP_TRY(cbor_encode_byte_string(&root_map, wifi_mac, 6), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "manufID"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, 1));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "manufID"), response);
+        BO_COAP_TRY(cbor_encode_uint(&root_map, 1), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "manufName"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, sysinfo->manuf));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "manufName"), response);
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, sysinfo->manuf), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "modelID"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, 1));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "modelID"), response);
+        BO_COAP_TRY(cbor_encode_uint(&root_map, 1), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "modelName"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, sysinfo->model));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "modelName"), response);
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, sysinfo->model), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "hwVer"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, CONFIG_BORNEO_HW_VER));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "hwVer"), response);
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, CONFIG_BORNEO_HW_VER), response);
     }
 
     {
@@ -118,11 +117,11 @@ static void coap_hnd_borneo_info_get(coap_resource_t* resource, coap_session_t* 
             coap_pdu_set_code(response, BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
             return;
         }
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "fwVer"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, app_desc->version));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "fwVer"), response);
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, app_desc->version), response);
     }
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encoder_close_container(&encoder, &root_map));
+    BO_COAP_TRY(cbor_encoder_close_container(&encoder, &root_map), response);
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
@@ -147,104 +146,104 @@ static void coap_hnd_borneo_status_get(coap_resource_t* resource, coap_session_t
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
     CborEncoder root_map;
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength));
+    BO_COAP_TRY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength), response);
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "power"));
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&root_map, bo_power_is_on()));
+    BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "power"), response);
+    BO_COAP_TRY(cbor_encode_boolean(&root_map, bo_power_is_on()), response);
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "timestamp"));
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, bo_rtc_get_timestamp()));
+    BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "timestamp"), response);
+    BO_COAP_TRY(cbor_encode_uint(&root_map, bo_rtc_get_timestamp()), response);
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "bootDuration"));
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_int(&root_map, esp_timer_get_time() / 1000ULL));
+    BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "bootDuration"), response);
+    BO_COAP_TRY(cbor_encode_int(&root_map, esp_timer_get_time() / 1000ULL), response);
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "timezone"));
+    BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "timezone"), response);
     char* tz_name = getenv("TZ");
     if (tz_name == NULL) {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_null(&root_map));
+        BO_COAP_TRY(cbor_encode_null(&root_map), response);
     }
     else {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, tz_name));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, tz_name), response);
     }
 
     // TODO FIXME
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "wifiStatus"));
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, 0));
+    BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "wifiStatus"), response);
+    BO_COAP_TRY(cbor_encode_uint(&root_map, 0), response);
 
     // WiFi RSSI
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "wifiRssi"));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "wifiRssi"), response);
         int wifi_rssi;
         if (bo_wifi_get_rssi(&wifi_rssi) == 0) {
-            BO_COAP_TRY_ENCODE_CBOR(cbor_encode_int(&root_map, wifi_rssi));
+            BO_COAP_TRY(cbor_encode_int(&root_map, wifi_rssi), response);
         }
         else {
-            BO_COAP_TRY_ENCODE_CBOR(cbor_encode_null(&root_map));
+            BO_COAP_TRY(cbor_encode_null(&root_map), response);
         }
     }
 
 #if CONFIG_BT_BLE_ENABLED
     // TODO FIXME
-    cbor_encode_text_stringz(&root_map, "btStatus");
-    cbor_encode_uint(&root_map, 0);
+    BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "btStatus"), response);
+    BO_COAP_TRY(cbor_encode_uint(&root_map, 0), response);
 #endif
 
     // TODO FIXME
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "serverStatus"));
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, 0));
+    BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "serverStatus"), response);
+    BO_COAP_TRY(cbor_encode_uint(&root_map, 0), response);
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "error"));
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_int(&root_map, errno));
+    BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "error"), response);
+    BO_COAP_TRY(cbor_encode_int(&root_map, errno), response);
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "shutdownReason"));
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, bo_system_get_shutdown_reason()));
+    BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "shutdownReason"), response);
+    BO_COAP_TRY(cbor_encode_uint(&root_map, bo_system_get_shutdown_reason()), response);
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "shutdownTimestamp"));
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, bo_system_get_shutdown_timestamp()));
+    BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "shutdownTimestamp"), response);
+    BO_COAP_TRY(cbor_encode_uint(&root_map, bo_system_get_shutdown_timestamp()), response);
 
 #if CONFIG_BORNEO_NTC_ENABLED
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "temperature"));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "temperature"), response);
         int temp;
         int rc = ntc_read_temp(&temp);
         if (rc != 0) {
-            BO_COAP_TRY_ENCODE_CBOR(cbor_encode_null(&root_map));
+            BO_COAP_TRY(cbor_encode_null(&root_map), response);
         }
         else {
-            BO_COAP_TRY_ENCODE_CBOR(cbor_encode_int(&root_map, temp));
+            BO_COAP_TRY(cbor_encode_int(&root_map, temp), response);
         }
     }
 #endif // CONFIG_BORNEO_NTC_ENABLED
 
 #if CONFIG_BORNEO_MEAS_VOLTAGE_ENABLED
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "powerVoltage"));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "powerVoltage"), response);
         int mv;
         int rc = bo_power_volt_read(&mv);
         if (rc != 0) {
-            BO_COAP_TRY_ENCODE_CBOR(cbor_encode_null(&root_map));
+            BO_COAP_TRY(cbor_encode_null(&root_map), response);
         }
         else {
-            BO_COAP_TRY_ENCODE_CBOR(cbor_encode_int(&root_map, mv));
+            BO_COAP_TRY(cbor_encode_int(&root_map, mv), response);
         }
     }
 #endif // CONFIG_BORNEO_MEAS_VOLTAGE_ENABLED
 
 #if CONFIG_BORNEO_MEAS_CURRENT_ENABLED
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "powerCurrent"));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "powerCurrent"), response);
         int ma;
         int rc = bo_power_current_read(&ma);
         if (rc != 0) {
-            BO_COAP_TRY_ENCODE_CBOR(cbor_encode_null(&root_map));
+            BO_COAP_TRY(cbor_encode_null(&root_map), response);
         }
         else {
-            BO_COAP_TRY_ENCODE_CBOR(cbor_encode_int(&root_map, ma));
+            BO_COAP_TRY(cbor_encode_int(&root_map, ma), response);
         }
     }
 #endif // CONFIG_BORNEO_MEAS_CURRENT_ENABLED
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encoder_close_container(&encoder, &root_map));
+    BO_COAP_TRY(cbor_encoder_close_container(&encoder, &root_map), response);
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
@@ -264,7 +263,7 @@ static void coap_hnd_borneo_fw_ver_get(coap_resource_t* resource, coap_session_t
         coap_pdu_set_code(response, BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
         return;
     }
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&encoder, app_desc->version));
+    BO_COAP_TRY(cbor_encode_text_stringz(&encoder, app_desc->version), response);
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
@@ -282,7 +281,7 @@ static void coap_hnd_borneo_compatible_get(coap_resource_t* resource, coap_sessi
     uint8_t buf[128] = { 0 };
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&encoder, CONFIG_BORNEO_DEVICE_COMPATIBLE));
+    BO_COAP_TRY(cbor_encode_text_stringz(&encoder, CONFIG_BORNEO_DEVICE_COMPATIBLE), response);
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 

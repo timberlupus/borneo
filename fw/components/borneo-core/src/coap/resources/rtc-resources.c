@@ -34,9 +34,9 @@ static void coap_hnd_rtc_local_get(coap_resource_t* resource, coap_session_t* se
 
         CborParser parser;
         CborValue value;
-        BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
+        BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
 
-        BO_COAP_VERIFY(cbor_value_get_int64_checked(&value, &t1));
+        BO_COAP_TRY(cbor_value_get_int64_checked(&value, &t1), response);
 
         if (t1 <= 0LL) {
             coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
@@ -52,17 +52,17 @@ static void coap_hnd_rtc_local_get(coap_resource_t* resource, coap_session_t* se
         cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
 
         CborEncoder map_encoder;
-        BO_COAP_VERIFY(cbor_encoder_create_map(&encoder, &map_encoder, CborIndefiniteLength));
-        BO_COAP_VERIFY(cbor_encode_text_stringz(&map_encoder, "t1"));
-        BO_COAP_VERIFY(cbor_encode_int(&map_encoder, t1));
-        BO_COAP_VERIFY(cbor_encode_text_stringz(&map_encoder, "t2"));
-        BO_COAP_VERIFY(cbor_encode_int(&map_encoder, t2));
+        BO_COAP_TRY(cbor_encoder_create_map(&encoder, &map_encoder, CborIndefiniteLength), response);
+        BO_COAP_TRY(cbor_encode_text_stringz(&map_encoder, "t1"), response);
+        BO_COAP_TRY(cbor_encode_int(&map_encoder, t1), response);
+        BO_COAP_TRY(cbor_encode_text_stringz(&map_encoder, "t2"), response);
+        BO_COAP_TRY(cbor_encode_int(&map_encoder, t2), response);
 
-        BO_COAP_VERIFY(cbor_encode_text_stringz(&map_encoder, "t3"));
+        BO_COAP_TRY(cbor_encode_text_stringz(&map_encoder, "t3"), response);
         t3 = bo_rtc_get_timestamp_us();
-        BO_COAP_VERIFY(cbor_encode_int(&map_encoder, t3));
+        BO_COAP_TRY(cbor_encode_int(&map_encoder, t3), response);
 
-        BO_COAP_VERIFY(cbor_encoder_close_container(&encoder, &map_encoder));
+        BO_COAP_TRY(cbor_encoder_close_container(&encoder, &map_encoder), response);
 
         encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
@@ -82,11 +82,11 @@ static void coap_hnd_rtc_local_post(coap_resource_t* resource, coap_session_t* s
 
     CborParser parser;
     CborValue value;
-    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
+    BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
 
     int64_t time_skew_us;
 
-    BO_COAP_VERIFY(cbor_value_get_int64_checked(&value, &time_skew_us));
+    BO_COAP_TRY(cbor_value_get_int64_checked(&value, &time_skew_us), response);
 
     if (time_skew_us < 1000LL) {
 
@@ -95,7 +95,7 @@ static void coap_hnd_rtc_local_post(coap_resource_t* resource, coap_session_t* s
     }
     int64_t timestamp_us = bo_rtc_get_timestamp_us();
     timestamp_us += time_skew_us;
-    BO_COAP_TRY(bo_rtc_set_time(timestamp_us), BO_COAP_CODE_400_BAD_REQUEST);
+    BO_COAP_TRY(bo_rtc_set_time(timestamp_us), response);
 
     coap_pdu_set_code(response, BO_COAP_CODE_201_CREATED);
 }

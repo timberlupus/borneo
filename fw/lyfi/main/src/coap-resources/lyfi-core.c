@@ -34,10 +34,10 @@ static void coap_hnd_color_get(coap_resource_t* resource, coap_session_t* sessio
     uint8_t buf[128];
 
     led_color_t color;
-    BO_COAP_VERIFY(led_get_color(color));
+    BO_COAP_TRY(led_get_color(color), response);
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
-    BO_COAP_VERIFY(cbor_encode_color(&encoder, color));
+    BO_COAP_TRY(cbor_encode_color(&encoder, color), response);
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
@@ -61,9 +61,9 @@ static void coap_hnd_color_put(coap_resource_t* resource, coap_session_t* sessio
 
     CborParser parser;
     CborValue value;
-    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
-    BO_COAP_VERIFY(cbor_value_get_led_color(&value, color));
-    BO_COAP_VERIFY(led_set_color(color));
+    BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
+    BO_COAP_TRY(cbor_value_get_led_color(&value, color), response);
+    BO_COAP_TRY(led_set_color(color), response);
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
@@ -78,12 +78,12 @@ static void coap_hnd_schedule_get(coap_resource_t* resource, coap_session_t* ses
     CborEncoder encoder;
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
     CborEncoder root_array;
-    BO_COAP_VERIFY(cbor_encoder_create_array(&encoder, &root_array, sch->item_count));
+    BO_COAP_TRY(cbor_encoder_create_array(&encoder, &root_array, sch->item_count), response);
     for (size_t i = 0; i < sch->item_count; i++) {
         const struct led_scheduler_item* sch_item = &sch->items[i];
-        BO_COAP_VERIFY(cbor_encode_led_sch_item(&root_array, sch_item));
+        BO_COAP_TRY(cbor_encode_led_sch_item(&root_array, sch_item), response);
     }
-    BO_COAP_VERIFY(cbor_encoder_close_container(&encoder, &root_array));
+    BO_COAP_TRY(cbor_encoder_close_container(&encoder, &root_array), response);
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
@@ -108,29 +108,29 @@ static void coap_hnd_schedule_put(coap_resource_t* resource, coap_session_t* ses
 
     CborParser parser;
     CborValue it;
-    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &it));
+    BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &it), response);
 
     CborValue root_array;
-    BO_COAP_VERIFY(cbor_value_enter_container(&it, &root_array));
-    BO_COAP_VERIFY(cbor_value_get_array_length(&it, &item_count));
+    BO_COAP_TRY(cbor_value_enter_container(&it, &root_array), response);
+    BO_COAP_TRY(cbor_value_get_array_length(&it, &item_count), response);
     scheduler.item_count = item_count;
     ESP_LOGI(TAG, "received schedule, item count: %u", item_count);
     for (size_t i = 0; i < item_count; i++) {
         CborValue item_array;
-        BO_COAP_VERIFY(cbor_value_enter_container(&root_array, &item_array));
+        BO_COAP_TRY(cbor_value_enter_container(&root_array, &item_array), response);
         struct led_scheduler_item* sch_item = &scheduler.items[i];
 
         int instant;
-        BO_COAP_VERIFY(cbor_value_get_int(&item_array, &instant));
+        BO_COAP_TRY(cbor_value_get_int(&item_array, &instant), response);
         sch_item->instant = (uint32_t)instant;
-        BO_COAP_VERIFY(cbor_value_advance(&item_array));
+        BO_COAP_TRY(cbor_value_advance(&item_array), response);
 
-        BO_COAP_VERIFY(cbor_value_get_led_color(&item_array, sch_item->color));
-        BO_COAP_VERIFY(cbor_value_leave_container(&root_array, &item_array));
+        BO_COAP_TRY(cbor_value_get_led_color(&item_array, sch_item->color), response);
+        BO_COAP_TRY(cbor_value_leave_container(&root_array, &item_array), response);
     }
-    BO_COAP_VERIFY(cbor_value_leave_container(&it, &root_array));
+    BO_COAP_TRY(cbor_value_leave_container(&it, &root_array), response);
 
-    BO_COAP_VERIFY(led_set_schedule(scheduler.items, scheduler.item_count));
+    BO_COAP_TRY(led_set_schedule(scheduler.items, scheduler.item_count), response);
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
@@ -241,34 +241,34 @@ static void coap_hnd_info_get(coap_resource_t* resource, coap_session_t* session
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
 
     CborEncoder root_map;
-    BO_COAP_VERIFY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength));
+    BO_COAP_TRY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength), response);
     {
-        BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "isStandaloneController"));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "isStandaloneController"), response);
 #if CONFIG_LYFI_STANDALONE_CONTROLLER
-        BO_COAP_VERIFY(cbor_encode_boolean(&root_map, true));
+        BO_COAP_TRY(cbor_encode_boolean(&root_map, true));
 #else
-        BO_COAP_VERIFY(cbor_encode_boolean(&root_map, false));
+        BO_COAP_TRY(cbor_encode_boolean(&root_map, false), response);
 #endif // CONFIG_LYFI_STANDALONE_CONTROLLER
     }
 
 #if CONFIG_LYFI_LED_NOMINAL_POWER
     {
-        BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "nominalPower"));
-        BO_COAP_VERIFY(cbor_encode_uint(&root_map, CONFIG_LYFI_LED_NOMINAL_POWER));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "nominalPower"), response);
+        BO_COAP_TRY(cbor_encode_uint(&root_map, CONFIG_LYFI_LED_NOMINAL_POWER), response);
     }
 #endif // CONFIG_LYFI_LED_NOMINAL_POWER
 
     {
-        BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "channelCount"));
-        BO_COAP_VERIFY(cbor_encode_uint(&root_map, CONFIG_LYFI_LED_CHANNEL_COUNT));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "channelCount"), response);
+        BO_COAP_TRY(cbor_encode_uint(&root_map, CONFIG_LYFI_LED_CHANNEL_COUNT), response);
     }
 
     {
-        BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "channels"));
-        BO_COAP_VERIFY(_encode_channel_info_array(&root_map));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "channels"), response);
+        BO_COAP_TRY(_encode_channel_info_array(&root_map), response);
     }
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encoder_close_container(&encoder, &root_map));
+    BO_COAP_TRY(cbor_encoder_close_container(&encoder, &root_map), response);
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
@@ -285,68 +285,68 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
 
     CborEncoder root_map;
-    BO_COAP_VERIFY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength));
+    BO_COAP_TRY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength), response);
 
     const struct led_user_settings* led_settings = led_get_settings();
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "state"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, led_get_state()));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "state"), response);
+        BO_COAP_TRY(cbor_encode_uint(&root_map, led_get_state()), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "mode"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, led_settings->mode));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "mode"), response);
+        BO_COAP_TRY(cbor_encode_uint(&root_map, led_settings->mode), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "unscheduled"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&root_map, led_get_state() == LED_STATE_TEMPORARY));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "unscheduled"), response);
+        BO_COAP_TRY(cbor_encode_boolean(&root_map, led_get_state() == LED_STATE_TEMPORARY), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "tempRemain"));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "tempRemain"), response);
         int32_t remaining = led_get_temporary_remaining();
         if (remaining < 0) {
             remaining = 0;
         }
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, (uint32_t)remaining));
+        BO_COAP_TRY(cbor_encode_uint(&root_map, (uint32_t)remaining), response);
     }
 
     {
         const struct fan_status fs = fan_get_status();
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "fanPower"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&root_map, fs.power));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "fanPower"), response);
+        BO_COAP_TRY(cbor_encode_uint(&root_map, fs.power), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "currentColor"));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "currentColor"), response);
         led_color_t color;
-        BO_COAP_VERIFY(led_get_color(color));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_color(&root_map, color));
+        BO_COAP_TRY(led_get_color(color), response);
+        BO_COAP_TRY(cbor_encode_color(&root_map, color), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "manualColor"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_color(&root_map, led_get_settings()->manual_color));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "manualColor"), response);
+        BO_COAP_TRY(cbor_encode_color(&root_map, led_get_settings()->manual_color), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "sunColor"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_color(&root_map, led_get_settings()->sun_color));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "sunColor"), response);
+        BO_COAP_TRY(cbor_encode_color(&root_map, led_get_settings()->sun_color), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "acclimationEnabled"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&root_map, led_acclimation_is_enabled()));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "acclimationEnabled"), response);
+        BO_COAP_TRY(cbor_encode_boolean(&root_map, led_acclimation_is_enabled()), response);
     }
 
     {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&root_map, "acclimationActivated"));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&root_map, led_acclimation_is_activated()));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "acclimationActivated"), response);
+        BO_COAP_TRY(cbor_encode_boolean(&root_map, led_acclimation_is_activated()), response);
     }
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encoder_close_container(&encoder, &root_map));
+    BO_COAP_TRY(cbor_encoder_close_container(&encoder, &root_map), response);
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
@@ -363,7 +363,7 @@ static void coap_hnd_state_get(coap_resource_t* resource, coap_session_t* sessio
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&encoder, led_get_state()));
+    BO_COAP_TRY(cbor_encode_uint(&encoder, led_get_state()), response);
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
@@ -381,11 +381,11 @@ static void coap_hnd_state_put(coap_resource_t* resource, coap_session_t* sessio
 
     CborParser parser;
     CborValue value;
-    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
+    BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
     int state;
-    BO_COAP_VERIFY(cbor_value_get_int_checked(&value, &state));
+    BO_COAP_TRY(cbor_value_get_int_checked(&value, &state), response);
 
-    BO_COAP_VERIFY(led_switch_state((uint8_t)state));
+    BO_COAP_TRY(led_switch_state((uint8_t)state), response);
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
@@ -401,7 +401,7 @@ static void coap_hnd_correction_method_get(coap_resource_t* resource, coap_sessi
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&encoder, settings->correction_method));
+    BO_COAP_TRY(cbor_encode_uint(&encoder, settings->correction_method), response);
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
@@ -420,11 +420,11 @@ static void coap_hnd_correction_method_put(coap_resource_t* resource, coap_sessi
     CborParser parser;
     CborValue value;
     // FIXME TODO Check state range
-    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
+    BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
     int correction_method;
-    BO_COAP_VERIFY(cbor_value_get_int_checked(&value, &correction_method));
+    BO_COAP_TRY(cbor_value_get_int_checked(&value, &correction_method), response);
 
-    BO_COAP_VERIFY(led_set_correction_method((uint8_t)correction_method));
+    BO_COAP_TRY(led_set_correction_method((uint8_t)correction_method), response);
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
@@ -439,7 +439,7 @@ static void coap_hnd_mode_get(coap_resource_t* resource, coap_session_t* session
     uint8_t buf[128];
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&encoder, settings->mode));
+    BO_COAP_TRY(cbor_encode_uint(&encoder, settings->mode), response);
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
@@ -457,11 +457,11 @@ static void coap_hnd_mode_put(coap_resource_t* resource, coap_session_t* session
 
     CborParser parser;
     CborValue value;
-    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
+    BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
     uint64_t mode;
-    BO_COAP_VERIFY(cbor_value_get_uint64(&value, &mode));
+    BO_COAP_TRY(cbor_value_get_uint64(&value, &mode), response);
 
-    BO_COAP_VERIFY(led_switch_mode((uint8_t)mode));
+    BO_COAP_TRY(led_switch_mode((uint8_t)mode), response);
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
 
@@ -475,7 +475,7 @@ static void coap_hnd_temporary_duration_get(coap_resource_t* resource, coap_sess
     uint8_t buf[32];
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_uint(&encoder, settings->temporary_duration));
+    BO_COAP_TRY(cbor_encode_uint(&encoder, settings->temporary_duration), response);
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
@@ -493,15 +493,15 @@ static void coap_hnd_temporary_duration_put(coap_resource_t* resource, coap_sess
 
     CborParser parser;
     CborValue value;
-    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
+    BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
     int duration;
-    BO_COAP_VERIFY(cbor_value_get_int_checked(&value, &duration));
+    BO_COAP_TRY(cbor_value_get_int_checked(&value, &duration), response);
 
     if (duration <= 0 || duration > INT32_MAX - 1) {
         coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
         return;
     }
-    BO_COAP_TRY(led_set_temporary_duration((uint32_t)duration), COAP_RESPONSE_CODE_INTERNAL_ERROR);
+    BO_COAP_TRY(led_set_temporary_duration((uint32_t)duration), response);
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
 
@@ -518,18 +518,18 @@ static void coap_hnd_geo_location_get(coap_resource_t* resource, coap_session_t*
 
     if (led_has_geo_location()) {
         CborEncoder root_map;
-        BO_COAP_VERIFY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength));
+        BO_COAP_TRY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength), response);
 
-        BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "lat"));
-        BO_COAP_VERIFY(cbor_encode_float(&root_map, _led.settings.location.lat));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "lat"), response);
+        BO_COAP_TRY(cbor_encode_float(&root_map, _led.settings.location.lat), response);
 
-        BO_COAP_VERIFY(cbor_encode_text_stringz(&root_map, "lng"));
-        BO_COAP_VERIFY(cbor_encode_float(&root_map, _led.settings.location.lng));
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "lng"), response);
+        BO_COAP_TRY(cbor_encode_float(&root_map, _led.settings.location.lng), response);
 
-        BO_COAP_VERIFY(cbor_encoder_close_container(&encoder, &root_map));
+        BO_COAP_TRY(cbor_encoder_close_container(&encoder, &root_map), response);
     }
     else {
-        BO_COAP_VERIFY(cbor_encode_null(&encoder));
+        BO_COAP_TRY(cbor_encode_null(&encoder), response);
     }
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
@@ -548,7 +548,7 @@ static void coap_hnd_geo_location_put(coap_resource_t* resource, coap_session_t*
 
     CborParser parser;
     CborValue iter;
-    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &iter));
+    BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &iter), response);
     if (!cbor_value_is_map(&iter)) {
         coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
         return;
@@ -557,13 +557,13 @@ static void coap_hnd_geo_location_put(coap_resource_t* resource, coap_session_t*
     CborValue value;
     struct geo_location location;
 
-    BO_COAP_VERIFY(cbor_value_map_find_value(&iter, "lat", &value));
-    BO_COAP_VERIFY(cbor_value_get_float(&value, &location.lat));
+    BO_COAP_TRY(cbor_value_map_find_value(&iter, "lat", &value), response);
+    BO_COAP_TRY(cbor_value_get_float(&value, &location.lat), response);
 
-    BO_COAP_VERIFY(cbor_value_map_find_value(&iter, "lng", &value));
-    BO_COAP_VERIFY(cbor_value_get_float(&value, &location.lng));
+    BO_COAP_TRY(cbor_value_map_find_value(&iter, "lng", &value), response);
+    BO_COAP_TRY(cbor_value_get_float(&value, &location.lng), response);
 
-    BO_COAP_TRY(led_set_geo_location(&location), COAP_RESPONSE_CODE_INTERNAL_ERROR);
+    BO_COAP_TRY(led_set_geo_location(&location), response);
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
@@ -577,7 +577,7 @@ static void coap_hnd_tz_enabled_get(coap_resource_t* resource, coap_session_t* s
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_boolean(&encoder, _led.settings.flags & LED_OPTION_TZ_ENABLED));
+    BO_COAP_TRY(cbor_encode_boolean(&encoder, _led.settings.flags & LED_OPTION_TZ_ENABLED), response);
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
@@ -595,11 +595,11 @@ static void coap_hnd_tz_enabled_put(coap_resource_t* resource, coap_session_t* s
 
     CborParser parser;
     CborValue value;
-    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
+    BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
     bool enabled = false;
-    BO_COAP_VERIFY(cbor_value_get_boolean(&value, &enabled));
+    BO_COAP_TRY(cbor_value_get_boolean(&value, &enabled), response);
 
-    BO_COAP_TRY(led_tz_enable(enabled), COAP_RESPONSE_CODE_INTERNAL_ERROR);
+    BO_COAP_TRY(led_tz_enable(enabled), response);
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
@@ -613,7 +613,7 @@ static void coap_hnd_tz_offset_get(coap_resource_t* resource, coap_session_t* se
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
 
-    BO_COAP_TRY_ENCODE_CBOR(cbor_encode_int(&encoder, _led.settings.tz_offset));
+    BO_COAP_TRY(cbor_encode_int(&encoder, _led.settings.tz_offset), response);
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
@@ -631,11 +631,11 @@ static void coap_hnd_tz_offset_put(coap_resource_t* resource, coap_session_t* se
 
     CborParser parser;
     CborValue value;
-    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
+    BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
     int offset = 0;
-    BO_COAP_VERIFY(cbor_value_get_int_checked(&value, &offset));
+    BO_COAP_TRY(cbor_value_get_int_checked(&value, &offset), response);
 
-    BO_COAP_TRY(led_tz_set_offset(offset), COAP_RESPONSE_CODE_INTERNAL_ERROR);
+    BO_COAP_TRY(led_tz_set_offset(offset), response);
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }

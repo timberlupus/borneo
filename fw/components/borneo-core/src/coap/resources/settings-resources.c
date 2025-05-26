@@ -30,11 +30,10 @@ static void coap_hnd_borneo_settings_timezone_get(coap_resource_t* resource, coa
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
     const char* tz = bo_rtc_get_tz();
     if (tz != NULL) {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&encoder, tz));
+        BO_COAP_TRY(cbor_encode_text_stringz(&encoder, tz), response);
     }
     else {
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_null(&encoder));
-        BO_COAP_TRY_ENCODE_CBOR(cbor_encode_text_stringz(&encoder, ""));
+        BO_COAP_TRY(cbor_encode_null(&encoder), response);
     }
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
@@ -56,12 +55,12 @@ static void coap_hnd_borneo_settings_timezone_put(coap_resource_t* resource, coa
 
     CborParser parser;
     CborValue value;
-    BO_COAP_VERIFY(cbor_parser_init(data, data_size, 0, &parser, &value));
+    BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
 
     char tz[256] = { 0 };
     size_t tz_len = sizeof(tz);
 
-    BO_COAP_VERIFY(cbor_value_copy_text_string(&value, tz, &tz_len, NULL));
+    BO_COAP_TRY(cbor_value_copy_text_string(&value, tz, &tz_len, NULL), response);
     if (tz_len > 128 || tz_len == 0) {
         coap_pdu_set_code(response, COAP_RESPONSE_CODE(500));
         return;

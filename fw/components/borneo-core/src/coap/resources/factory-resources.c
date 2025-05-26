@@ -23,10 +23,10 @@ static void coap_hnd_borneo_factory_reset_post(coap_resource_t* resource, coap_s
                                                const coap_pdu_t* request, const coap_string_t* query,
                                                coap_pdu_t* response)
 {
-    BO_COAP_TRY(bo_power_shutdown(0), BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
-    BO_COAP_TRY(bo_wifi_forget(), BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
+    BO_COAP_TRY(bo_power_shutdown(0), response);
+    BO_COAP_TRY(bo_wifi_forget(), response);
 
-    BO_COAP_TRY(bo_system_factory_reset(), BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
+    BO_COAP_TRY(bo_system_factory_reset(), response);
 
     // First, return the result, wait for three seconds, and then restart.
     bo_system_reboot_later(5000);
