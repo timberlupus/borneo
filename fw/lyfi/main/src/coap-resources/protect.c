@@ -20,12 +20,11 @@ static void _coap_hnd_overheated_temp_get(coap_resource_t* resource, coap_sessio
 {
     CborEncoder encoder;
     size_t encoded_size = 0;
-    const struct thermal_settings* settings = thermal_get_settings();
 
-    uint8_t buf[128];
+    uint8_t buf[32];
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
-    BO_COAP_TRY(cbor_encode_uint(&encoder, settings->overheated_temp), response);
+    BO_COAP_TRY(cbor_encode_uint(&encoder, bo_protect_get_overheated_temp()), response);
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);

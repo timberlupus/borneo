@@ -432,12 +432,21 @@ menu "Borneo LyFi"
 
         config LYFI_PROTECTION_ENABLED
             bool "Enable the protection feature"
-            default n
-            depends on BORNEO_MEAS_VOLTAGE_ENABLED && BORNEO_MEAS_CURRENT_ENABLED
+            default y
 
-        config LYFI_PROTECTION_OPP_DEFAULT_VALUE
+        config LYFI_PROTECTION_OVER_HEATED_ENABLED
+            bool "Enable the over-power protection"
+            default y
+            depends on  LYFI_PROTECTION_ENABLED && BORNEO_NTC_ENABLED
+
+        config LYFI_PROTECTION_OVER_POWER_ENABLED
+            bool "Enable the over-power protection"
+            default n
+            depends on  LYFI_PROTECTION_ENABLED && BORNEO_MEAS_CURRENT_ENABLED && BORNEO_MEAS_VOLTAGE_ENABLED
+
+        config LYFI_PROTECTION_OVER_POWER_DEFAULT_VALUE
             int "Over-power protection default value"
-            depends on  LYFI_PROTECTION_ENABLED
+            depends on LYFI_PROTECTION_OVER_POWER_ENABLED
     endmenu
 
 

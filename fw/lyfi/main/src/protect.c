@@ -39,12 +39,21 @@ static void protect_task();
 #define TAG "protect"
 
 struct bo_protect_settings {
+
+#if CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
     int32_t over_power_mw; // Over-Power Protection value
+#endif // CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
+
+#if CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
     uint8_t overheated_temp; // Overheated temperature threshold
+#endif // CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
 };
 
 struct bo_protect_status {
+
+#if CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
     volatile int overheated_count; // Count of overheated events
+#endif // CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
 };
 
 static struct bo_protect_status _protect = { 0 };
@@ -57,9 +66,7 @@ int bo_protect_init()
     ESP_LOGI(TAG, "Loading factory settings...");
     BO_TRY(load_factory_settings());
 
-    if (_settings.over_power_mw > 0) {
-        xTaskCreate(protect_task, "protect_task", 2048, NULL, 5, NULL);
-    }
+    xTaskCreate(&protect_task, "protect_task", 2048, NULL, 5, NULL);
 
     ESP_LOGI(TAG, "Over-power protection initialized");
     return 0;
@@ -73,17 +80,20 @@ int load_factory_settings()
     int rc;
     BO_TRY(nvs_open(PROTECT_NVS_NAMESPACE, NVS_READWRITE, &nvs_handle));
 
+#if CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
     {
         rc = nvs_get_i32(nvs_handle, NVS_KEY_ENABLED, &_settings.over_power_mw);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
-            _settings.over_power_mw = CONFIG_LYFI_PROTECTION_OPP_DEFAULT_VALUE;
+            _settings.over_power_mw = CONFIG_LYFI_PROTECTION_OVER_POWER_DEFAULT_VALUE;
             rc = 0;
         }
         if (rc) {
             goto _EXIT_CLOSE;
         }
     }
+#endif // CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
 
+#if CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
     {
         rc = nvs_get_u8(nvs_handle, NVS_KEY_OVERHEATED_TEMP, &_settings.overheated_temp);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
@@ -94,6 +104,7 @@ int load_factory_settings()
             goto _EXIT_CLOSE;
         }
     }
+#endif // CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
 
 _EXIT_CLOSE:
     nvs_close(nvs_handle);
@@ -103,15 +114,19 @@ _EXIT_CLOSE:
 void protect_task()
 {
     for (;;) {
-        int32_t power_mw;
-        BO_MUST(bo_power_read(&power_mw));
         if (bo_power_is_on()) {
+
+#if CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
+            int32_t power_mw;
+            BO_MUST(bo_power_read(&power_mw));
             if (_settings.over_power_mw > 0 && power_mw > _settings.over_power_mw) {
                 ESP_LOGE(TAG, "Over-power protection triggered! Shutdown in progress...");
                 ESP_LOGE(TAG, "%ld mW >= %ld mW", power_mw, _settings.over_power_mw);
                 BO_MUST(bo_power_shutdown(BO_SHUTDOWN_REASON_OVER_POWER));
             }
+#endif // CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
 
+#if CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
             // Continuous detection of high temperatures multiple times will trigger an emergency shutdown of the
             // lights.
             int current_temp = thermal_get_current_temp();
@@ -130,7 +145,9 @@ void protect_task()
             else {
                 _protect.overheated_count = 0;
             }
+#endif // CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
         }
+
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }

@@ -81,3 +81,7 @@ CONFIG_LYFI_THERMAL_ENABLED=y
 ############################### Button ###################################
 CONFIG_LYFI_PRESS_BUTTON_ENABLED=y
 CONFIG_LYFI_PRESS_BUTTON_GPIO=9
+
+################################## PROTECTION ##################################
+CONFIG_LYFI_PROTECTION_ENABLED=y
+CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED=y
