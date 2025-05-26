@@ -79,11 +79,10 @@ void protect_task()
     for (;;) {
         int32_t power_mw;
         BO_MUST(bo_power_read(&power_mw));
-        if (_settings.over_power_mw > 0 && power_mw > _settings.over_power_mw) {
+        if (_settings.over_power_mw > 0 && power_mw > _settings.over_power_mw && bo_power_is_on()) {
             ESP_LOGE(TAG, "Over-power protection triggered! Shutdown in progress...");
             ESP_LOGE(TAG, "%ld mW >= %ld mW", power_mw, _settings.over_power_mw);
             BO_MUST(bo_power_shutdown(BO_SHUTDOWN_REASON_OVER_POWER));
-            break;
         }
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
