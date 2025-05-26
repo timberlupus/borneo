@@ -96,7 +96,9 @@ int bo_power_shutdown(uint32_t reason)
         BO_TRY(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_SHUTDOWN_SCHEDULED, NULL, 0, portMAX_DELAY));
     }
     bo_system_set_shutdown_reason(reason);
-    BO_TRY(update_settings());
+    if (reason == BO_SHUTDOWN_REASON_SCHEDULED) {
+        BO_TRY(update_settings());
+    }
     return 0;
 }
 
