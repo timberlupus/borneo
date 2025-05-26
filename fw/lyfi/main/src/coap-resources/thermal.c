@@ -61,9 +61,9 @@ static void _coap_hnd_thermal_pid_put(coap_resource_t* resource, coap_session_t*
 
     CborValue array;
     size_t array_length = 0;
-    BO_COAP_TRY(cbor_value_enter_container(&iter, &array), response);
+    BO_COAP_TRY_DECODE(cbor_value_enter_container(&iter, &array), response);
 
-    BO_COAP_TRY(cbor_value_get_array_length(&iter, &array_length), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_array_length(&iter, &array_length), response);
     if (array_length != 3) {
         coap_pdu_set_code(response, COAP_RESPONSE_CODE_BAD_REQUEST);
         return;
@@ -73,16 +73,16 @@ static void _coap_hnd_thermal_pid_put(coap_resource_t* resource, coap_session_t*
     int ki;
     int kd;
 
-    BO_COAP_TRY(cbor_value_get_int_checked(&array, &kp), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_int_checked(&array, &kp), response);
 
-    BO_COAP_TRY(cbor_value_advance(&array), response);
-    BO_COAP_TRY(cbor_value_get_int_checked(&array, &ki), response);
+    BO_COAP_TRY_DECODE(cbor_value_advance(&array), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_int_checked(&array, &ki), response);
 
-    BO_COAP_TRY(cbor_value_advance(&array), response);
-    BO_COAP_TRY(cbor_value_get_int_checked(&array, &kd), response);
+    BO_COAP_TRY_DECODE(cbor_value_advance(&array), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_int_checked(&array, &kd), response);
 
-    BO_COAP_TRY(cbor_value_advance(&array), response);
-    BO_COAP_TRY(cbor_value_leave_container(&iter, &array), response);
+    BO_COAP_TRY_DECODE(cbor_value_advance(&array), response);
+    BO_COAP_TRY_DECODE(cbor_value_leave_container(&iter, &array), response);
 
     BO_COAP_TRY(thermal_set_pid(kp, ki, kd), response);
 

@@ -36,7 +36,7 @@ static void coap_hnd_rtc_local_get(coap_resource_t* resource, coap_session_t* se
         CborValue value;
         BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
 
-        BO_COAP_TRY(cbor_value_get_int64_checked(&value, &t1), response);
+        BO_COAP_TRY_DECODE(cbor_value_get_int64_checked(&value, &t1), response);
 
         if (t1 <= 0LL) {
             coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
@@ -86,7 +86,7 @@ static void coap_hnd_rtc_local_post(coap_resource_t* resource, coap_session_t* s
 
     int64_t time_skew_us;
 
-    BO_COAP_TRY(cbor_value_get_int64_checked(&value, &time_skew_us), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_int64_checked(&value, &time_skew_us), response);
 
     if (time_skew_us < 1000LL) {
 

@@ -52,7 +52,7 @@ static void coap_hnd_borneo_power_put(coap_resource_t* resource, coap_session_t*
     BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
     bool power_value;
 
-    BO_COAP_TRY(cbor_value_get_boolean(&value, &power_value), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_boolean(&value, &power_value), response);
 
     if (power_value == bo_power_is_on()) {
         coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
@@ -103,7 +103,7 @@ static void coap_hnd_borneo_power_behavior_put(coap_resource_t* resource, coap_s
 
     int behavior_value;
 
-    BO_COAP_TRY(cbor_value_get_int_checked(&value, &behavior_value), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_int_checked(&value, &behavior_value), response);
 
     if (behavior_value < 0 || behavior_value >= POWER_INVALID_BEHAVIOR) {
         coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);

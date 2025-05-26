@@ -62,8 +62,8 @@ static void coap_hnd_color_put(coap_resource_t* resource, coap_session_t* sessio
     CborParser parser;
     CborValue value;
     BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
-    BO_COAP_TRY(cbor_value_get_led_color(&value, color), response);
-    BO_COAP_TRY(led_set_color(color), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_led_color(&value, color), response);
+    BO_COAP_TRY_DECODE(led_set_color(color), response);
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
@@ -111,24 +111,24 @@ static void coap_hnd_schedule_put(coap_resource_t* resource, coap_session_t* ses
     BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &it), response);
 
     CborValue root_array;
-    BO_COAP_TRY(cbor_value_enter_container(&it, &root_array), response);
-    BO_COAP_TRY(cbor_value_get_array_length(&it, &item_count), response);
+    BO_COAP_TRY_DECODE(cbor_value_enter_container(&it, &root_array), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_array_length(&it, &item_count), response);
     scheduler.item_count = item_count;
     ESP_LOGI(TAG, "received schedule, item count: %u", item_count);
     for (size_t i = 0; i < item_count; i++) {
         CborValue item_array;
-        BO_COAP_TRY(cbor_value_enter_container(&root_array, &item_array), response);
+        BO_COAP_TRY_DECODE(cbor_value_enter_container(&root_array, &item_array), response);
         struct led_scheduler_item* sch_item = &scheduler.items[i];
 
         int instant;
-        BO_COAP_TRY(cbor_value_get_int(&item_array, &instant), response);
+        BO_COAP_TRY_DECODE(cbor_value_get_int(&item_array, &instant), response);
         sch_item->instant = (uint32_t)instant;
-        BO_COAP_TRY(cbor_value_advance(&item_array), response);
+        BO_COAP_TRY_DECODE(cbor_value_advance(&item_array), response);
 
-        BO_COAP_TRY(cbor_value_get_led_color(&item_array, sch_item->color), response);
-        BO_COAP_TRY(cbor_value_leave_container(&root_array, &item_array), response);
+        BO_COAP_TRY_DECODE(cbor_value_get_led_color(&item_array, sch_item->color), response);
+        BO_COAP_TRY_DECODE(cbor_value_leave_container(&root_array, &item_array), response);
     }
-    BO_COAP_TRY(cbor_value_leave_container(&it, &root_array), response);
+    BO_COAP_TRY_DECODE(cbor_value_leave_container(&it, &root_array), response);
 
     BO_COAP_TRY(led_set_schedule(scheduler.items, scheduler.item_count), response);
 
@@ -459,7 +459,7 @@ static void coap_hnd_mode_put(coap_resource_t* resource, coap_session_t* session
     CborValue value;
     BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
     uint64_t mode;
-    BO_COAP_TRY(cbor_value_get_uint64(&value, &mode), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_uint64(&value, &mode), response);
 
     BO_COAP_TRY(led_switch_mode((uint8_t)mode), response);
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
@@ -495,7 +495,7 @@ static void coap_hnd_temporary_duration_put(coap_resource_t* resource, coap_sess
     CborValue value;
     BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
     int duration;
-    BO_COAP_TRY(cbor_value_get_int_checked(&value, &duration), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_int_checked(&value, &duration), response);
 
     if (duration <= 0 || duration > INT32_MAX - 1) {
         coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
@@ -557,13 +557,13 @@ static void coap_hnd_geo_location_put(coap_resource_t* resource, coap_session_t*
     CborValue value;
     struct geo_location location;
 
-    BO_COAP_TRY(cbor_value_map_find_value(&iter, "lat", &value), response);
-    BO_COAP_TRY(cbor_value_get_float(&value, &location.lat), response);
+    BO_COAP_TRY_DECODE(cbor_value_map_find_value(&iter, "lat", &value), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_float(&value, &location.lat), response);
 
-    BO_COAP_TRY(cbor_value_map_find_value(&iter, "lng", &value), response);
-    BO_COAP_TRY(cbor_value_get_float(&value, &location.lng), response);
+    BO_COAP_TRY_DECODE(cbor_value_map_find_value(&iter, "lng", &value), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_float(&value, &location.lng), response);
 
-    BO_COAP_TRY(led_set_geo_location(&location), response);
+    BO_COAP_TRY_DECODE(led_set_geo_location(&location), response);
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
@@ -597,7 +597,7 @@ static void coap_hnd_tz_enabled_put(coap_resource_t* resource, coap_session_t* s
     CborValue value;
     BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
     bool enabled = false;
-    BO_COAP_TRY(cbor_value_get_boolean(&value, &enabled), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_boolean(&value, &enabled), response);
 
     BO_COAP_TRY(led_tz_enable(enabled), response);
 
@@ -633,7 +633,7 @@ static void coap_hnd_tz_offset_put(coap_resource_t* resource, coap_session_t* se
     CborValue value;
     BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
     int offset = 0;
-    BO_COAP_TRY(cbor_value_get_int_checked(&value, &offset), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_int_checked(&value, &offset), response);
 
     BO_COAP_TRY(led_tz_set_offset(offset), response);
 

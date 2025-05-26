@@ -75,17 +75,17 @@ static void coap_hnd_acclimation_post(coap_resource_t* resource, coap_session_t*
     time_t start_time;
     int duration, start_percent;
 
-    BO_COAP_TRY(cbor_value_map_find_value(&iter, "enabled", &value), response);
-    BO_COAP_TRY(cbor_value_get_boolean(&value, &enabled), response);
+    BO_COAP_TRY_DECODE(cbor_value_map_find_value(&iter, "enabled", &value), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_boolean(&value, &enabled), response);
 
-    BO_COAP_TRY(cbor_value_map_find_value(&iter, "startTimestamp", &value), response);
-    BO_COAP_TRY(cbor_value_get_int64_checked(&value, &start_time), response);
+    BO_COAP_TRY_DECODE(cbor_value_map_find_value(&iter, "startTimestamp", &value), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_int64_checked(&value, &start_time), response);
 
-    BO_COAP_TRY(cbor_value_map_find_value(&iter, "days", &value), response);
-    BO_COAP_TRY(cbor_value_get_int_checked(&value, &duration), response);
+    BO_COAP_TRY_DECODE(cbor_value_map_find_value(&iter, "days", &value), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_int_checked(&value, &duration), response);
 
-    BO_COAP_TRY(cbor_value_map_find_value(&iter, "startPercent", &value), response);
-    BO_COAP_TRY(cbor_value_get_int_checked(&value, &start_percent), response);
+    BO_COAP_TRY_DECODE(cbor_value_map_find_value(&iter, "startPercent", &value), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_int_checked(&value, &start_percent), response);
 
     if (start_time <= 0) {
         coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);

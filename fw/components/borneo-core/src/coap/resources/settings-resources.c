@@ -60,7 +60,7 @@ static void coap_hnd_borneo_settings_timezone_put(coap_resource_t* resource, coa
     char tz[256] = { 0 };
     size_t tz_len = sizeof(tz);
 
-    BO_COAP_TRY(cbor_value_copy_text_string(&value, tz, &tz_len, NULL), response);
+    BO_COAP_TRY_DECODE(cbor_value_copy_text_string(&value, tz, &tz_len, NULL), response);
     if (tz_len > 128 || tz_len == 0) {
         coap_pdu_set_code(response, COAP_RESPONSE_CODE(500));
         return;

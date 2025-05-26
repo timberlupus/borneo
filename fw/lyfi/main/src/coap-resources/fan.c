@@ -47,7 +47,7 @@ static void _coap_hnd_fan_power_put(coap_resource_t* resource, coap_session_t* s
     CborValue it;
     BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &it), response);
     int power;
-    BO_COAP_TRY(cbor_value_get_int(&it, &power), response);
+    BO_COAP_TRY_DECODE(cbor_value_get_int(&it, &power), response);
     if (power > 100 || power < 0) {
         goto _BAD_REQUEST;
     }
