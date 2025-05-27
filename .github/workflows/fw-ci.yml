@@ -20,7 +20,8 @@ jobs:
 
     - name: Build LyFi firmware in Docker
       run: |
-        docker run -t -v "${GITHUB_WORKSPACE}:/app/${{ github.repository }}" -w "/app/${{ github.repository }}/fw/lyfi" espressif/idf:v5.4 /bin/bash -c 'git config --global --add safe.directory "*" && idf.py build -DPRODUCT_ID=bst/ulva6'
+        docker run -t -v "${GITHUB_WORKSPACE}:/app/${{ github.repository }}" -w "/app/${{ github.repository }}/fw/lyfi" espressif/idf:v5.4 /bin/bash -c 'git config --global --add safe.directory "*" && idf.py build -DPRODUCT_ID=bst/ulva6 -DCMAKE_BUILD_TYPE=Release'
+        docker run -t -v "${GITHUB_WORKSPACE}:/app/${{ github.repository }}" -w "/app/${{ github.repository }}/fw/lyfi" espressif/idf:v5.4 /bin/bash -c 'git config --global --add safe.directory "*" && idf.py build -DPRODUCT_ID=bst/blc06mk1 -DCMAKE_BUILD_TYPE=Release'
 
 #    - name: Build Doser firmware in Docker
 #      run: |
