@@ -20,9 +20,11 @@ set(BORNEO_BOARD_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/boards/${BORNEO_BOARD_ID}")
 
 
 if(CMAKE_BUILD_TYPE AND (CMAKE_BUILD_TYPE STREQUAL "Release"))
-    set(SDKCONFIG_DEFAULTS "${CMAKE_CURRENT_SOURCE_DIR}/sdkconfig.common; ${CMAKE_CURRENT_SOURCE_DIR}/sdkconfig.release;${BORNEO_BOARD_DIR}/sdkconfig.board;${CMAKE_CURRENT_SOURCE_DIR}/products/${BORNEO_PRODUCT_ID}/sdkconfig.product")
+    message("[BORNEO] > Building RELEASE profile")
+    set(SDKCONFIG_DEFAULTS "${CMAKE_CURRENT_SOURCE_DIR}/sdkconfig.common;${CMAKE_CURRENT_SOURCE_DIR}/sdkconfig.release;${BORNEO_BOARD_DIR}/sdkconfig.board;${CMAKE_CURRENT_SOURCE_DIR}/products/${BORNEO_PRODUCT_ID}/sdkconfig.product")
 else()
-    set(SDKCONFIG_DEFAULTS "${CMAKE_CURRENT_SOURCE_DIR}/sdkconfig.common;${BORNEO_BOARD_DIR}/sdkconfig.board;${CMAKE_CURRENT_SOURCE_DIR}/products/${BORNEO_PRODUCT_ID}/sdkconfig.product")
+    message("[BORNEO] > Building DEBUG profile")
+    set(SDKCONFIG_DEFAULTS "${CMAKE_CURRENT_SOURCE_DIR}/sdkconfig.common;${CMAKE_CURRENT_SOURCE_DIR}/sdkconfig.debug;${BORNEO_BOARD_DIR}/sdkconfig.board;${CMAKE_CURRENT_SOURCE_DIR}/products/${BORNEO_PRODUCT_ID}/sdkconfig.product")
 endif()
 
 

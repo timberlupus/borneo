@@ -245,7 +245,7 @@ static void coap_hnd_info_get(coap_resource_t* resource, coap_session_t* session
     {
         BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "isStandaloneController"), response);
 #if CONFIG_LYFI_STANDALONE_CONTROLLER
-        BO_COAP_TRY(cbor_encode_boolean(&root_map, true));
+        BO_COAP_TRY(cbor_encode_boolean(&root_map, true), response);
 #else
         BO_COAP_TRY(cbor_encode_boolean(&root_map, false), response);
 #endif // CONFIG_LYFI_STANDALONE_CONTROLLER

@@ -15,7 +15,7 @@ set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../components")
 if(CMAKE_BUILD_TYPE AND (CMAKE_BUILD_TYPE STREQUAL "Release"))
     set(SDKCONFIG_DEFAULTS "sdkconfig.common;sdkconfig.release;${CMAKE_CURRENT_SOURCE_DIR}/boards/${BORNEO_BOARD}/sdkconfig")
 else()
-    set(SDKCONFIG_DEFAULTS "sdkconfig.common;${CMAKE_CURRENT_SOURCE_DIR}/boards/${BORNEO_BOARD}/sdkconfig")
+    set(SDKCONFIG_DEFAULTS "sdkconfig.common;sdkconfig.debug;${CMAKE_CURRENT_SOURCE_DIR}/boards/${BORNEO_BOARD}/sdkconfig")
 endif()
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/boards/${BORNEO_BOARD}/board.cmake")
