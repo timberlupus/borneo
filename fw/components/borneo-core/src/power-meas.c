@@ -69,6 +69,8 @@ int bo_power_read(int32_t* mw)
     }
 
     // TODO Add lock
+    uint16_t last_v_adc = 0;
+    uint16_t last_c_adc = 0;
     uint16_t v_adc_window[BO_ADC_WINDOW_SIZE];
     uint16_t c_adc_window[BO_ADC_WINDOW_SIZE];
     for (size_t i = 0; i < BO_ADC_WINDOW_SIZE; i++) {
@@ -76,10 +78,16 @@ int bo_power_read(int32_t* mw)
         BO_TRY(bo_adc_read_mv(CONFIG_BORNEO_MEAS_VOLTAGE_ADC_CHANNEL, &adc_v));
         BO_TRY(bo_adc_read_mv(CONFIG_BORNEO_MEAS_CURRENT_ADC_CHANNEL, &adc_c));
         if (adc_v == 0 || adc_v == 4095) {
-            return -EIO;
+            adc_v = last_v_adc; // Ignore outliers
+        }
+        else {
+            last_v_adc = adc_v;
         }
         if (adc_c == 0 || adc_c == 4095) {
-            return -EIO;
+            adc_c = last_c_adc; // Ignore outliers
+        }
+        else {
+            last_c_adc = adc_c;
         }
         v_adc_window[i] = (uint16_t)adc_v;
         c_adc_window[i] = (uint16_t)adc_c;

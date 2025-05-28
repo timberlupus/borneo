@@ -9,7 +9,6 @@
 #include <esp_wifi.h>
 #include <driver/gpio.h>
 
-
 #include <esp_adc/adc_oneshot.h>
 #include <esp_adc/adc_cali.h>
 #include <esp_adc/adc_cali_scheme.h>
@@ -25,7 +24,7 @@ static int bo_adc_cali(adc_cali_handle_t* out_handle);
 #if CONFIG_IDF_TARGET_ESP32C3
 #define AVAILABLE_ADC_UNIT ADC_UNIT_1
 #else
-#error("Not implemented!")
+#error ("Not implemented!")
 #endif
 
 static adc_oneshot_unit_handle_t s_adc_handle = NULL;
@@ -55,11 +54,15 @@ int bo_adc_read_mv_filtered(adc_channel_t channel, int* value_mv)
 {
     // TODO Add lock
     uint16_t adc_window[BO_ADC_WINDOW_SIZE];
+    int last_adc_mv = 0;
     for (size_t i = 0; i < BO_ADC_WINDOW_SIZE; i++) {
         int adc_mv;
         BO_TRY(bo_adc_read_mv(channel, &adc_mv));
         if (adc_mv == 0 || adc_mv == 4095) {
-            return -EIO;
+            adc_mv = last_adc_mv; // Ignore outliers
+        }
+        else {
+            last_adc_mv = adc_mv;
         }
         adc_window[i] = (uint16_t)adc_mv;
     }
