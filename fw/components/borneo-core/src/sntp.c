@@ -212,7 +212,7 @@ static void bo_sntp_task(void* param)
     while (true) {
 
         uint64_t diff = esp_timer_get_time() - last_sntp_time;
-        // every one hour
+        // every 12 hours
         if (_can_sync || diff >= (24ULL * 3600ULL * 1000ULL * 1000ULL)) {
             vTaskDelay(pdMS_TO_TICKS(5000));
             _can_sync = false;
