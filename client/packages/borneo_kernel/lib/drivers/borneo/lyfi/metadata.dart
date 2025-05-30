@@ -15,6 +15,6 @@ final DriverDescriptor borneoLyfiDriverDescriptor = DriverDescriptor(
   name: kLyfiDriverName,
   heartbeatMethod: HeartbeatMethod.poll,
   discoveryMethod: MdnsDeviceDiscoveryMethod(kBorneoDeviceMdnsServiceType),
-  matches: BorneoLyfiDriver.matches,
-  factory: BorneoLyfiDriver.new,
+  matches: BorneoLyfiCoapDriver.matches,
+  factory: BorneoLyfiCoapDriver.new,
 );

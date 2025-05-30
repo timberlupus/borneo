@@ -2,6 +2,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/brightness_slider_list.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/color_chart.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fl_chart/fl_chart.dart';

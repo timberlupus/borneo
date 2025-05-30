@@ -277,7 +277,7 @@ abstract class BorneoDriverData {
   }
 }
 
-mixin BorneoDeviceApiImpl implements IBorneoDeviceApi {
+mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   @override
   Future<String> getCompatible(Device dev) async {
     final dd = dev.driverData as BorneoDriverData;

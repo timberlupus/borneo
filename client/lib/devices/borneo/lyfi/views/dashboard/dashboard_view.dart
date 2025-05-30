@@ -9,6 +9,7 @@ import 'package:borneo_app/widgets/power_switch.dart';
 import 'package:borneo_app/widgets/rounded_icon_text_button.dart';
 import 'package:borneo_app/widgets/value_listenable_builders.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:flutter/material.dart';
 
 import 'package:gauge_indicator/gauge_indicator.dart';
