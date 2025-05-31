@@ -6,8 +6,7 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 
 abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
-  GeneralBorneoDeviceInfo? _borneoDeviceInfo;
-  GeneralBorneoDeviceInfo? get borneoDeviceInfo => _borneoDeviceInfo;
+  GeneralBorneoDeviceInfo? get borneoDeviceInfo => borneoDeviceApi.getGeneralDeviceInfo(boundDevice!.device);
 
   GeneralBorneoDeviceStatus? _borneoDeviceStatus;
   GeneralBorneoDeviceStatus? get borneoDeviceStatus => isOnline ? _borneoDeviceStatus : null;
@@ -24,11 +23,6 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
     required super.globalEventBus,
     super.logger,
   });
-
-  @override
-  Future<void> loadDeviceInfo({CancellationToken? cancelToken}) async {
-    _borneoDeviceInfo = await borneoDeviceApi.getGeneralDeviceInfo(super.boundDevice!.device);
-  }
 
   @override
   Future<void> refreshStatus({CancellationToken? cancelToken}) async {

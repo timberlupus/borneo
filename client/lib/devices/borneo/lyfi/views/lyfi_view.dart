@@ -304,10 +304,10 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                 return FadeTransition(opacity: animation, child: child);
               },
               child: switch ((vm.isOnline, vm.isOn, vm.isLocked)) {
-                (true, true, false) => DimmingView(),
-                (true, _, true) => DashboardView(),
-                (false, _, _) => DeviceOfflineView(),
-                (true, false, false) => DashboardView(),
+                (true, true, false) => DimmingView(key: ValueKey('dimming')),
+                (true, _, true) => DashboardView(key: ValueKey('dashboard')),
+                (false, _, _) => DeviceOfflineView(key: ValueKey('offline')),
+                (true, false, false) => DashboardView(key: ValueKey('dashboard')),
               },
             );
           },

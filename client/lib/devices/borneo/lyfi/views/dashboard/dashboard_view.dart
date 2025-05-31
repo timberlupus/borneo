@@ -21,7 +21,12 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(context.read<LyfiViewModel>().isOnline);
+    // 移除 assert，避免 offline 时崩溃
+    final isOnline = context.read<LyfiViewModel>().isOnline;
+    if (!isOnline) {
+      // offline 时直接返回空内容，防止 AnimatedSwitcher 动画期间 build
+      return const SizedBox.shrink();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.max,
@@ -43,9 +48,21 @@ class DashboardView extends StatelessWidget {
                             padding: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
                             child: Stack(
                               children: [
-                                Selector<LyfiViewModel, ({LedRunningMode mode, LedState? state, bool isOn})>(
-                                  selector: (_, props) => (mode: props.mode, state: props.ledState, isOn: props.isOn),
+                                Selector<
+                                  LyfiViewModel,
+                                  ({bool isOnline, LedRunningMode mode, LedState? state, bool isOn})
+                                >(
+                                  selector:
+                                      (_, vm) => (
+                                        isOnline: vm.isOnline,
+                                        mode: vm.mode,
+                                        state: vm.ledState,
+                                        isOn: vm.isOn,
+                                      ),
                                   builder: (context, props, _) {
+                                    if (!props.isOnline) {
+                                      return const SizedBox.shrink();
+                                    }
                                     final Widget widget = switch (props.mode) {
                                       LedRunningMode.manual => ManualRunningChart(),
                                       LedRunningMode.scheduled => ScheduleRunningChart(),
@@ -144,70 +161,74 @@ class DashboardView extends StatelessWidget {
                               (context, vm, _) => MultiValueListenableBuilder<int>(
                                 valueNotifiers: vm.channels,
                                 builder: (context, values, _) {
-                                  return DashboardToufu(
-                                    title: 'Power',
-                                    icon: Icons.power_outlined,
-                                    foregroundColor: Theme.of(context).colorScheme.onSurface,
-                                    backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                                    arcColor: Theme.of(context).colorScheme.outlineVariant,
-                                    progressColor: Theme.of(context).colorScheme.tertiary,
-                                    minValue: 0.0,
-                                    maxValue: vm.lyfiDeviceInfo.nominalPower ?? 9999,
-                                    value: vm.isOn ? vm.currentWatts : 0,
-                                    center: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      mainAxisSize: MainAxisSize.max,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Row(
-                                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          textBaseline: TextBaseline.alphabetic,
-                                          children: [
-                                            Text(
-                                              vm.canMeasurePower ? vm.currentWatts.toStringAsFixed(0) : "N/A",
-                                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                                color: Theme.of(context).colorScheme.primary,
-                                                fontFeatures: [FontFeature.tabularFigures()],
-                                                fontSize: 23,
-                                              ),
-                                            ),
-                                            if (vm.canMeasurePower)
+                                  if (vm.isOnline) {
+                                    return DashboardToufu(
+                                      title: 'Power',
+                                      icon: Icons.power_outlined,
+                                      foregroundColor: Theme.of(context).colorScheme.onSurface,
+                                      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                                      arcColor: Theme.of(context).colorScheme.outlineVariant,
+                                      progressColor: Theme.of(context).colorScheme.tertiary,
+                                      minValue: 0.0,
+                                      maxValue: vm.lyfiDeviceInfo.nominalPower ?? 9999,
+                                      value: vm.isOn ? vm.currentWatts : 0,
+                                      center: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.max,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Row(
+                                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            textBaseline: TextBaseline.alphabetic,
+                                            children: [
                                               Text(
-                                                'W',
-                                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                                  fontFeatures: [FontFeature.tabularFigures()],
+                                                vm.canMeasurePower ? vm.currentWatts.toStringAsFixed(0) : "N/A",
+                                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                                   color: Theme.of(context).colorScheme.primary,
-                                                  fontSize: 11,
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            if (vm.canMeasureVoltage)
-                                              Text(
-                                                '${vm.borneoDeviceStatus!.powerVoltage!.toStringAsFixed(1)}V',
-                                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                                  color: Theme.of(context).colorScheme.onSurface,
                                                   fontFeatures: [FontFeature.tabularFigures()],
+                                                  fontSize: 23,
                                                 ),
                                               ),
-                                            if (vm.canMeasureCurrent) SizedBox(width: 4),
-                                            if (vm.canMeasureCurrent)
-                                              Text(
-                                                '${vm.borneoDeviceStatus!.powerCurrent!.toStringAsFixed(1)}A',
-                                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                                  color: Theme.of(context).colorScheme.onSurface,
-                                                  fontFeatures: [FontFeature.tabularFigures()],
+                                              if (vm.canMeasurePower)
+                                                Text(
+                                                  'W',
+                                                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                                    fontFeatures: [FontFeature.tabularFigures()],
+                                                    color: Theme.of(context).colorScheme.primary,
+                                                    fontSize: 11,
+                                                  ),
                                                 ),
-                                              ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  );
+                                            ],
+                                          ),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              if (vm.canMeasureVoltage)
+                                                Text(
+                                                  '${vm.borneoDeviceStatus!.powerVoltage!.toStringAsFixed(1)}V',
+                                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                                    color: Theme.of(context).colorScheme.onSurface,
+                                                    fontFeatures: [FontFeature.tabularFigures()],
+                                                  ),
+                                                ),
+                                              if (vm.canMeasureCurrent) SizedBox(width: 4),
+                                              if (vm.canMeasureCurrent)
+                                                Text(
+                                                  '${vm.borneoDeviceStatus!.powerCurrent!.toStringAsFixed(1)}A',
+                                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                                    color: Theme.of(context).colorScheme.onSurface,
+                                                    fontFeatures: [FontFeature.tabularFigures()],
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  } else {
+                                    return Text("ERROR!!!! FIXME");
+                                  }
                                 },
                               ),
                         ),

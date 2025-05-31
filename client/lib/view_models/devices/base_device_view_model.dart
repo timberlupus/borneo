@@ -69,6 +69,9 @@ abstract class BaseDeviceViewModel extends BaseViewModel with WidgetsBindingObse
         if (isTimerRunning) {
           stopTimer();
         }
+        if (taskQueue.size > 0) {
+          taskQueueCancelToken.cancel();
+        }
         onDeviceRemoved();
         notifyListeners();
       }
@@ -105,7 +108,11 @@ abstract class BaseDeviceViewModel extends BaseViewModel with WidgetsBindingObse
   @override
   void dispose() {
     assert(!isDisposed);
-    stopTimer();
+    if (isTimerRunning) {
+      stopTimer();
+    }
+    _onDeviceBoundEventSub.cancel();
+    _onDeviceRemovedEventSub.cancel();
     if (!isInitialized) {
       initializationCancelToken.cancel();
     }
@@ -195,9 +202,13 @@ abstract class BaseDeviceViewModel extends BaseViewModel with WidgetsBindingObse
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      stopTimer();
+      if (isTimerRunning) {
+        stopTimer();
+      }
     } else if (state == AppLifecycleState.resumed) {
-      startTimer();
+      if (isOnline && !isTimerRunning) {
+        startTimer();
+      }
     }
   }
 }

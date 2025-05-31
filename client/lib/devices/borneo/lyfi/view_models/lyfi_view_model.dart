@@ -4,7 +4,6 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_vie
 import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_model.dart';
 import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_coap_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
@@ -12,7 +11,6 @@ import 'package:intl/intl.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/manual_editor_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/schedule_editor_view_model.dart';
-import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
 
 import 'editor/ieditor.dart';
 
@@ -99,10 +97,6 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
   @override
   Future<void> onInitialize() async {
-    for (int i = 0; i < lyfiDeviceInfo.channels.length; i++) {
-      _channels.add(ValueNotifier(0));
-    }
-
     _temporaryDuration = await _deviceApi.getTemporaryDuration(boundDevice!.device);
 
     //_channels.length * lyfiBrightnessMax.toDouble();
@@ -132,6 +126,9 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   @override
   void dispose() {
     //
+    for (final cvn in _channels) {
+      cvn.dispose();
+    }
     if (!_isLocked && super.isOnline) {
       try {
         _deviceApi.switchState(boundDevice!.device, LedState.normal).then((_) {
@@ -147,10 +144,6 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   @override
   Future<void> onDeviceBound() async {
     super.onDeviceBound();
-
-    for (int i = 0; i < lyfiDeviceInfo.channels.length; i++) {
-      _channels.add(ValueNotifier(0));
-    }
 
     _temporaryDuration = await _deviceApi.getTemporaryDuration(boundDevice!.device); // TODO add cancallabne
 
@@ -177,13 +170,16 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     if (!_isLocked) {
       _toggleEditor(_mode);
     }
-
-    await refreshStatus();
   }
 
   @override
   void onDeviceRemoved() {
     super.onDeviceRemoved();
+
+    for (final cvn in _channels) {
+      cvn.dispose();
+    }
+    _channels.clear();
 
     _isOn = false;
     _mode = LedRunningMode.manual;
@@ -234,9 +230,14 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
     _temporaryRemaining.value = lyfiDeviceStatus!.temporaryRemaining;
 
+    bool emptyChannels = _channels.isEmpty;
     double ob = 0;
     for (int i = 0; i < lyfiDeviceStatus!.currentColor.length; i++) {
-      _channels[i].value = lyfiDeviceStatus!.currentColor[i];
+      if (emptyChannels) {
+        _channels.add(ValueNotifier<int>(lyfiDeviceStatus!.currentColor[i]));
+      } else {
+        _channels[i].value = lyfiDeviceStatus!.currentColor[i];
+      }
       ob += lyfiDeviceInfo.channels[i].brightnessRatio * _channels[i].value / lyfiBrightnessMax;
     }
     _overallBrightness = ob;

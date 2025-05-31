@@ -12,7 +12,8 @@ import 'package:provider/provider.dart';
 class ManualRunningChart extends StatelessWidget {
   const ManualRunningChart({super.key});
 
-  List<BarChartGroupData> buildGroupDataItems(BuildContext context, LyfiViewModel vm) {
+  List<BarChartGroupData> buildGroupDataItems(BuildContext context) {
+    final vm = context.read<LyfiViewModel>();
     int index = 0;
     return vm.lyfiDeviceInfo.channels.map((ch) {
       final channel = vm.channels[index];
@@ -47,7 +48,8 @@ class ManualRunningChart extends StatelessWidget {
     );
   }
 
-  Widget buildTitles(BuildContext context, LyfiViewModel vm, double value) {
+  Widget buildTitles(BuildContext context, double value) {
+    final vm = context.read<LyfiViewModel>();
     final index = value.toInt();
     final ch = vm.lyfiDeviceInfo.channels[index];
     return Text(
@@ -58,43 +60,33 @@ class ManualRunningChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Consumer<LyfiViewModel>(
+    final vm = context.read<LyfiViewModel>();
+    assert(vm.isOnline);
+    return MultiValueListenableBuilder<int>(
+      valueNotifiers: vm.channels,
       builder:
-          (context, vm, _) => MultiValueListenableBuilder<int>(
-            valueNotifiers: vm.channels,
-            builder:
-                (context, values, _) => Padding(
-                  padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
-                  child:
-                      vm.isOnline
-                          ? LyfiColorChart(
-                            BarChartData(
-                              barGroups: buildGroupDataItems(context, vm),
-                              titlesData: FlTitlesData(
-                                show: true,
-                                bottomTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                    showTitles: true,
-                                    getTitlesWidget: (value, _) => buildTitles(context, vm, value),
-                                  ),
-                                ),
-                                leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                              ),
-                              borderData: FlBorderData(show: false),
-                              barTouchData: BarTouchData(enabled: true),
-                              gridData: FlGridData(show: false),
-                            ),
-                          )
-                          : Center(
-                            child: Text(
-                              "Device Offline.",
-                              style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.error),
-                            ),
-                          ),
+          (context, values, _) => Padding(
+            padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
+            child: LyfiColorChart(
+              BarChartData(
+                barGroups: buildGroupDataItems(context),
+                titlesData: FlTitlesData(
+                  show: true,
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, _) => buildTitles(context, value),
+                    ),
+                  ),
+                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
+                borderData: FlBorderData(show: false),
+                barTouchData: BarTouchData(enabled: true),
+                gridData: FlGridData(show: false),
+              ),
+            ),
           ),
     );
   }
