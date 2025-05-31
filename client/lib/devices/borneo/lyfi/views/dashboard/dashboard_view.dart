@@ -21,6 +21,7 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(context.read<LyfiViewModel>().isOnline);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.max,
@@ -454,7 +455,7 @@ class DashboardView extends StatelessWidget {
                                 props.canGo
                                     ? () async {
                                       if (context.mounted) {
-                                        final vm = Provider.of<LyfiViewModel>(context, listen: false);
+                                        final vm = context.read<LyfiViewModel>();
                                         final route = MaterialPageRoute(
                                           builder: (context) => AcclimationScreen(deviceID: vm.deviceID),
                                         );

@@ -14,7 +14,7 @@ class GroupEditScreen extends StatelessWidget {
   GroupEditScreen({super.key});
 
   List<Widget> makePropertyTiles(BuildContext context) {
-    final vm = Provider.of<GroupEditViewModel>(context);
+    final vm = context.read<GroupEditViewModel>();
     return [
       TextFormField(
         initialValue: vm.name,
@@ -76,7 +76,7 @@ class GroupEditScreen extends StatelessWidget {
   }
 
   FutureBuilder buildBody(BuildContext context) {
-    final vm = Provider.of<GroupEditViewModel>(context, listen: false);
+    final vm = context.read<GroupEditViewModel>();
     return FutureBuilder(
       future: vm.isInitialized ? null : vm.initialize(),
       builder: (context, snapshot) {
@@ -96,7 +96,7 @@ class GroupEditScreen extends StatelessWidget {
   }
 
   List<Widget> buildActions(BuildContext context, GroupEditArguments args) {
-    final vm = Provider.of<GroupEditViewModel>(context, listen: false);
+    final vm = context.read<GroupEditViewModel>();
     return [
       if (!args.isCreation)
         IconButton(

@@ -93,7 +93,9 @@ abstract class BaseDeviceViewModel extends BaseViewModel with WidgetsBindingObse
       logger?.e('Failed to initialize device(${deviceEntity.toString()}): $e', error: e, stackTrace: stackTrace);
       super.notifyAppError('Failed to initialize device: $e', stackTrace: stackTrace);
     } finally {
-      startTimer();
+      if (isOnline) {
+        startTimer();
+      }
       isInitialized = true;
     }
   }
