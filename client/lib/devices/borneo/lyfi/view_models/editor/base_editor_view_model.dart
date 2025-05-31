@@ -3,7 +3,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/ieditor.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_common/async/async_rate_limiter.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_coap_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:flutter/material.dart';
 

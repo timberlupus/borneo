@@ -18,16 +18,17 @@ abstract class BaseViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    assert(!_isDisposed);
-    taskQueueCancelToken.cancel();
-    taskQueue.stop();
-    taskQueue.close();
-    super.dispose();
-    _isDisposed = true;
+    if (!_isDisposed) {
+      taskQueueCancelToken.cancel();
+      taskQueue.stop();
+      taskQueue.close();
+      super.dispose();
+      _isDisposed = true;
+    }
   }
 
   setBusy(bool value, {bool notify = true}) {
-    assert(!_isDisposed);
+    assertNotDisposed(this);
     isBusy = value;
     if (notify) {
       notifyListeners();
@@ -36,11 +37,12 @@ abstract class BaseViewModel extends ChangeNotifier {
 
   @override
   void notifyListeners() {
-    assert(!_isDisposed);
+    assertNotDisposed(this);
     super.notifyListeners();
   }
 
   void enqueueJob(Future<void> Function() job, {int retryTime = 1, bool reportError = true}) {
+    assertNotDisposed(this);
     taskQueue.addJob(retryTime: retryTime, (args) async {
       try {
         await job().asCancellable(taskQueueCancelToken);
@@ -57,6 +59,8 @@ abstract class BaseViewModel extends ChangeNotifier {
   }
 
   void enqueueUIJob(Future<void> Function() job, {int retryTime = 1, bool notify = true}) {
+    assertNotDisposed(this);
+
     taskQueue.addJob((args) async {
       if (isBusy) {
         return;
@@ -82,6 +86,20 @@ abstract class BaseViewModel extends ChangeNotifier {
   }
 
   void notifyAppError(String message, {Object? error, StackTrace? stackTrace});
+
+  static bool assertNotDisposed(BaseViewModel vm) {
+    assert(() {
+      if (vm._isDisposed) {
+        throw FlutterError(
+          'A ${vm.runtimeType} was used after being disposed.\n'
+          'Once you have called dispose() on a ${vm.runtimeType}, it '
+          'can no longer be used.',
+        );
+      }
+      return true;
+    }());
+    return true;
+  }
 }
 
 mixin ViewModelEventBusMixin on BaseViewModel {

@@ -8,7 +8,6 @@ import 'package:borneo_app/widgets/icon_progress.dart';
 import 'package:borneo_app/widgets/power_switch.dart';
 import 'package:borneo_app/widgets/rounded_icon_text_button.dart';
 import 'package:borneo_app/widgets/value_listenable_builders.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:flutter/material.dart';
 
@@ -44,13 +43,11 @@ class DashboardView extends StatelessWidget {
                             child: Stack(
                               children: [
                                 Selector<LyfiViewModel, ({LedRunningMode mode, LedState? state, bool isOn})>(
-                                  selector: (_, vm) => (mode: vm.mode, state: vm.ledState, isOn: vm.isOn),
-                                  builder: (context, vm, _) {
-                                    Widget chart = switch (vm.mode) {
+                                  selector: (_, props) => (mode: props.mode, state: props.ledState, isOn: props.isOn),
+                                  builder: (context, props, _) {
+                                    final Widget widget = switch (props.mode) {
                                       LedRunningMode.manual => ManualRunningChart(),
-
                                       LedRunningMode.scheduled => ScheduleRunningChart(),
-
                                       LedRunningMode.sun => Selector<
                                         LyfiViewModel,
                                         ({List<LyfiChannelInfo> channels, List<ScheduledInstant> instants})
@@ -67,12 +64,13 @@ class DashboardView extends StatelessWidget {
                                             ),
                                       ),
                                     };
+
                                     return AnimatedSwitcher(
                                       duration: Duration(milliseconds: 300),
                                       transitionBuilder: (Widget child, Animation<double> animation) {
                                         return FadeTransition(opacity: animation, child: child);
                                       },
-                                      child: chart,
+                                      child: widget,
                                     );
                                   },
                                 ),
@@ -153,8 +151,8 @@ class DashboardView extends StatelessWidget {
                                     arcColor: Theme.of(context).colorScheme.outlineVariant,
                                     progressColor: Theme.of(context).colorScheme.tertiary,
                                     minValue: 0.0,
-                                    maxValue: vm.isOnline ? vm.lyfiDeviceInfo.nominalPower ?? 9999 : 9999,
-                                    value: vm.isOn && vm.isOnline ? vm.currentWatts : 0,
+                                    maxValue: vm.lyfiDeviceInfo.nominalPower ?? 9999,
+                                    value: vm.isOn ? vm.currentWatts : 0,
                                     center: Column(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       mainAxisSize: MainAxisSize.max,
@@ -335,12 +333,11 @@ class DashboardView extends StatelessWidget {
               children: [
                 _buildIconButtonsRow(
                   children: [
-                    Selector<LyfiViewModel, ({bool isOn, bool isOnline, bool isBusy, bool isLocked})>(
-                      selector:
-                          (_, vm) => (isOn: vm.isOn, isOnline: vm.isOnline, isBusy: vm.isBusy, isLocked: vm.isLocked),
+                    Selector<LyfiViewModel, ({bool isOn, bool isBusy, bool isLocked})>(
+                      selector: (_, vm) => (isOn: vm.isOn, isBusy: vm.isBusy, isLocked: vm.isLocked),
                       builder:
                           (context, props, _) => PowerButton(
-                            enabled: props.isOnline,
+                            enabled: true,
                             value: props.isOn,
                             label: Text(
                               props.isOn ? 'ON' : 'OFF',
@@ -349,7 +346,7 @@ class DashboardView extends StatelessWidget {
                               ).textTheme.titleSmall?.copyWith(color: Theme.of(context).hintColor),
                             ),
                             onChanged:
-                                props.isOnline && !props.isBusy && props.isLocked
+                                !props.isBusy && props.isLocked
                                     ? (value) => context.read<LyfiViewModel>().switchPowerOnOff(!props.isOn)
                                     : null,
                           ),
@@ -474,10 +471,9 @@ class DashboardView extends StatelessWidget {
                     ),
 
                     // Settings button
-                    Selector<LyfiViewModel, ({bool isOnline, bool enabled, bool activated})>(
+                    Selector<LyfiViewModel, ({bool enabled, bool activated})>(
                       selector:
                           (_, vm) => (
-                            isOnline: vm.isOnline,
                             enabled: vm.lyfiDeviceStatus?.acclimationEnabled ?? false,
                             activated: vm.lyfiDeviceStatus?.acclimationActivated ?? false,
                           ),
@@ -487,22 +483,19 @@ class DashboardView extends StatelessWidget {
                             text: "Settings",
                             buttonSize: 64,
                             icon: const Icon(Icons.settings_outlined, size: 40),
-                            onPressed:
-                                props.isOnline
-                                    ? () async {
-                                      final lyfi = context.read<LyfiViewModel>();
-                                      final vm = await lyfi.loadSettings();
-                                      final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
-                                      if (context.mounted) {
-                                        lyfi.stopTimer();
-                                        try {
-                                          await Navigator.push(context, route);
-                                        } finally {
-                                          lyfi.startTimer();
-                                        }
-                                      }
-                                    }
-                                    : null,
+                            onPressed: () async {
+                              final lyfi = context.read<LyfiViewModel>();
+                              final vm = await lyfi.loadSettings();
+                              final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
+                              if (context.mounted) {
+                                lyfi.stopTimer();
+                                try {
+                                  await Navigator.push(context, route);
+                                } finally {
+                                  lyfi.startTimer();
+                                }
+                              }
+                            },
                           ),
                     ),
                   ],

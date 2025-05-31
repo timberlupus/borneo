@@ -2,7 +2,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.d
 import 'package:borneo_app/widgets/map_location_picker.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_coap_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

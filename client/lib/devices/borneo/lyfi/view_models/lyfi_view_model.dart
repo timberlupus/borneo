@@ -4,8 +4,9 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_vie
 import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_model.dart';
 import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_coap_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
@@ -37,8 +38,8 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   LedState? _ledState;
   LedState? get ledState => _ledState;
 
-  bool get canMeasureCurrent => isOnline && isOn && borneoDeviceStatus?.powerCurrent != null;
-  bool get canMeasureVoltage => isOnline && isOn && borneoDeviceStatus?.powerVoltage != null;
+  bool get canMeasureCurrent => super.isOnline && isOn && borneoDeviceStatus?.powerCurrent != null;
+  bool get canMeasureVoltage => super.isOnline && isOn && borneoDeviceStatus?.powerVoltage != null;
   bool get canMeasurePower => canMeasureCurrent && canMeasureVoltage;
   double get currentWatts => (borneoDeviceStatus?.powerCurrent ?? 0) * (borneoDeviceStatus?.powerVoltage ?? 0);
 
@@ -50,15 +51,16 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
   bool get canLockOrUnlock => !isBusy && isOn;
   bool get canUnlock =>
-      !isBusy && isOnline && isOn && isLocked && (_ledState == LedState.normal || _ledState == LedState.temporary);
+      !isBusy &&
+      super.isOnline &&
+      isOn &&
+      isLocked &&
+      (_ledState == LedState.normal || _ledState == LedState.temporary);
   bool get canTimedOn => !isBusy && (!isOn || _mode == LedRunningMode.scheduled);
 
   IEditor? currentEditor;
   final List<ScheduledInstant> scheduledInstants = [];
   final List<ScheduledInstant> sunInstants = [];
-
-  // Borneo device general status and info
-  GeneralBorneoDeviceInfo get borneoDeviceInfo => _deviceApi.getGeneralDeviceInfo(super.boundDevice!.device);
 
   LyfiDeviceStatus? _lyfiDeviceStatus;
   LyfiDeviceStatus? get lyfiDeviceStatus => _lyfiDeviceStatus;
@@ -130,7 +132,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   @override
   void dispose() {
     //
-    if (!_isLocked && isOnline) {
+    if (!_isLocked && super.isOnline) {
       try {
         _deviceApi.switchState(boundDevice!.device, LedState.normal).then((_) {
           _isLocked = true;
@@ -143,8 +145,63 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   }
 
   @override
-  Future<void> refreshStatus() async {
-    if (!isOnline) {
+  Future<void> onDeviceBound() async {
+    super.onDeviceBound();
+
+    for (int i = 0; i < lyfiDeviceInfo.channels.length; i++) {
+      _channels.add(ValueNotifier(0));
+    }
+
+    _temporaryDuration = await _deviceApi.getTemporaryDuration(boundDevice!.device); // TODO add cancallabne
+
+    await refreshStatus();
+
+    switch (mode) {
+      case LedRunningMode.scheduled:
+        if (scheduledInstants.isEmpty) {
+          scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
+        }
+        break;
+
+      case LedRunningMode.sun:
+        if (sunInstants.isEmpty) {
+          sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    // Update schedule
+    if (!_isLocked) {
+      _toggleEditor(_mode);
+    }
+
+    await refreshStatus();
+  }
+
+  @override
+  void onDeviceRemoved() {
+    super.onDeviceRemoved();
+
+    _isOn = false;
+    _mode = LedRunningMode.manual;
+    _ledState = LedState.normal;
+
+    _overallBrightness = 0.0;
+    _fanPowerRatio = 0.0;
+
+    _isLocked = true;
+    if (currentEditor != null) {
+      currentEditor!.dispose();
+      currentEditor = null;
+    }
+  }
+
+  @override
+  Future<void> refreshStatus({CancellationToken? cancelToken}) async {
+    if (!super.isOnline) {
       return;
     }
     await super.refreshStatus();
@@ -161,7 +218,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   }
 
   Future<void> _fetchDeviceStatus() async {
-    if (!isOnline) {
+    if (!super.isOnline) {
       return;
     }
 
@@ -308,7 +365,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
       notification: notification,
       address: deviceEntity.address,
       borneoStatus: borneoDeviceStatus!,
-      borneoInfo: borneoDeviceInfo,
+      borneoInfo: super.borneoDeviceInfo!,
       ledInfo: lyfiDeviceInfo,
       ledStatus: lyfiDeviceStatus!,
       powerBehavior: await _deviceApi.getPowerBehavior(boundDevice!.device),

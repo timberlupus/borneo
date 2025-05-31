@@ -1,8 +1,9 @@
+import 'package:borneo_app/devices/borneo/lyfi/views/device_offline_view.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/editor/sun_editor_view.dart';
 import 'package:borneo_app/models/devices/device_entity.dart';
 import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_common/io/net/rssi.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_driver.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_coap_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
@@ -293,16 +294,23 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
             SizedBox(width: 16),
           ],
         ),
-        body: Selector<LyfiViewModel, ({bool isLocked})>(
-          selector: (_, vm) => (isLocked: vm.isLocked),
-          builder:
-              (context, vm, _) => AnimatedSwitcher(
-                duration: Duration(milliseconds: 300),
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-                child: vm.isLocked ? DashboardView() : DimmingView(),
-              ),
+        body: Selector<LyfiViewModel, ({bool isOnline, bool isLocked})>(
+          selector: (_, props) => (isOnline: props.isOnline, isLocked: props.isLocked),
+          builder: (context, props, _) {
+            final vm = context.read<LyfiViewModel>();
+            return AnimatedSwitcher(
+              duration: Duration(milliseconds: 500),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              child: switch ((vm.isOnline, vm.isOn, vm.isLocked)) {
+                (true, true, false) => DimmingView(),
+                (true, _, true) => DashboardView(),
+                (false, _, _) => DeviceOfflineView(),
+                (true, false, false) => DashboardView(),
+              },
+            );
+          },
         ),
       ),
     );

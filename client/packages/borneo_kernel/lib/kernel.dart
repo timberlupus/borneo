@@ -179,7 +179,7 @@ final class DefaultKernel implements IKernel {
     final driver = _ensureDriverActivated(driverID);
 
     final driverInitialized = await driver
-        .probe(device, cancelToken: cancelToken)
+        .probe(device, _events, cancelToken: cancelToken)
         .timeout(timeout ?? kLocalProbeTimeOut);
 
     if (driverInitialized) {
