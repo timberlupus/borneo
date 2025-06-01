@@ -6,7 +6,7 @@ import argparse
 import sys
 
 __LANGUAGES = [
-    'en',
+    'en_US',
     'zh_CN',
 ]
 

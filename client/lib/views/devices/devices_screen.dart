@@ -325,7 +325,7 @@ class DevicesScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    InGroupDeviceListView(),
+                    const InGroupDeviceListView(),
                   ],
                 );
               }

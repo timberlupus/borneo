@@ -2,12 +2,12 @@
 # Copyright (C) 2024 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # Automatically generated, 2024.
-#
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-22 20:34+0800\n"
+"POT-Creation-Date: 2025-06-01 20:57+0800\n"
 "PO-Revision-Date: 2024-12-22 15:38+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -20,28 +20,28 @@ msgstr ""
 msgid "My Home"
 msgstr "我的家"
 
-#: services\scene_manager.dart:70
+#: services\scene_manager.dart:69
 msgid "My Office"
 msgstr "我的办公室"
 
-#: views\about_screen.dart:74
+#: views\about_screen.dart:69
 #, python-brace-format
 msgid "Version: {verText} Build: {buildNumberText}"
 msgstr "版本：{verText} 构建号：{buildNumberText}"
 
-#: views\about_screen.dart:104
+#: views\about_screen.dart:92
 msgid "Copyright © Li Wei. All rights reserved."
 msgstr "版权所有 © 李维。保留所有权利。"
 
-#: views\about_screen.dart:117
+#: views\about_screen.dart:108
 msgid "Website"
 msgstr "网站"
 
-#: views\about_screen.dart:151
+#: views\about_screen.dart:142
 msgid "Documentation"
 msgstr "文档"
 
-#: views\about_screen.dart:182
+#: views\about_screen.dart:173
 msgid ""
 "This mobile application is free software licensed under GNU General Public "
 "License version 3 or later, with no warranty.\n"
@@ -51,105 +51,115 @@ msgstr ""
 "此移动端应用程序是基于 GPL 3 或更新版本协议授权的自由软件，不提供任何担保。\n"
 "作者不对使用此软件造成的任何直接和间接后果负责。\n"
 
-#: views\app_settings_screen.dart:28
+#: views\app_settings_screen.dart:27
 #, fuzzy
 #| msgid "Settings"
 msgid "App Settings"
 msgstr "设置"
 
-#: views\app_settings_screen.dart:36
+#: views\app_settings_screen.dart:37
 msgid "APPEARANCE"
 msgstr "外观"
 
-#: views\app_settings_screen.dart:39
+#: views\app_settings_screen.dart:41
 msgid "Theme"
 msgstr "主题"
 
-#: views\app_settings_screen.dart:44
+#: views\app_settings_screen.dart:50
 msgid "System"
 msgstr "系统"
 
-#: views\app_settings_screen.dart:48
+#: views\app_settings_screen.dart:54
 msgid "Light"
 msgstr "亮色"
 
-#: views\app_settings_screen.dart:52
+#: views\app_settings_screen.dart:58
 msgid "Dark"
 msgstr "暗色"
 
-#: views\app_settings_screen.dart:64
+#: views\app_settings_screen.dart:73
 msgid "FEEDBACK"
 msgstr "反馈"
 
-#: views\app_settings_screen.dart:67
+#: views\app_settings_screen.dart:75
 msgid "Rate in application store"
 msgstr "在应用商店里给我评分"
 
-#: views\app_settings_screen.dart:71
+#: views\app_settings_screen.dart:78
 msgid "Report an issue on GitHub"
 msgstr "在 GitHub 上报告问题"
 
-#: views\devices\devices_screen.dart:55
+#: views\devices\device_discovery_screen.dart:257
+#, fuzzy
+#| msgid "Add New Devices"
+msgid "A new device has been added."
+msgstr "添加新设备"
+
+#: views\devices\device_discovery_screen.dart:358
+msgid "Discovered Devices:"
+msgstr ""
+
+#: views\devices\devices_screen.dart:54
 msgid "There are no devices or device groups in the current scene."
 msgstr "当前场景中没有设备和设备组。"
 
-#: views\devices\devices_screen.dart:63
+#: views\devices\devices_screen.dart:60
 #, fuzzy
 #| msgid "Add New Devices"
 msgid "Add new devices"
 msgstr "添加新设备"
 
-#: views\devices\devices_screen.dart:184 views\scenes\scene_edit_screen.dart:32
-#: views\scenes\scenes_screen.dart:53
+#: views\devices\devices_screen.dart:177 views\scenes\scene_edit_screen.dart:33
+#: views\scenes\scenes_screen.dart:54
 #, python-brace-format
 msgid "Error: {errMsg}"
 msgstr "错误：{errMsg}"
 
-#: views\devices\devices_screen.dart:238 views\main_screen.dart:131
+#: views\devices\devices_screen.dart:228 views\main_screen.dart:142
 msgid "Add New Devices"
 msgstr "添加新设备"
 
-#: views\devices\devices_screen.dart:242 views\main_screen.dart:140
+#: views\devices\devices_screen.dart:232 views\main_screen.dart:148
 msgid "Add Devices Group"
 msgstr "新建设备组"
 
-#: views\devices\devices_screen.dart:254
+#: views\devices\devices_screen.dart:245
 #, python-brace-format
 msgid "Devices in {currentScene}"
 msgstr "{currentScene}中的设备"
 
 #: views\devices\group_edit_screen.dart:22
-#: views\scenes\scene_edit_screen.dart:66
+#: views\scenes\scene_edit_screen.dart:155
 msgid "Name"
 msgstr "名称"
 
-#: views\devices\group_edit_screen.dart:27
-#: views\scenes\scene_edit_screen.dart:71
+#: views\devices\group_edit_screen.dart:24
+#: views\scenes\scene_edit_screen.dart:157
 msgid "Enter the required scene name"
 msgstr "输入必须的场景名称"
 
-#: views\devices\group_edit_screen.dart:31
-#: views\scenes\scene_edit_screen.dart:75
+#: views\devices\group_edit_screen.dart:28
+#: views\scenes\scene_edit_screen.dart:161
 msgid "Please enter the scene name"
 msgstr "请输入场景名称"
 
-#: views\devices\group_edit_screen.dart:50
-#: views\scenes\scene_edit_screen.dart:94
+#: views\devices\group_edit_screen.dart:43
+#: views\scenes\scene_edit_screen.dart:176
 msgid "Enter the optional notes for this scene"
 msgstr "输入该场景的备注文字（可选）"
 
-#: views\devices\group_edit_screen.dart:51
-#: views\scenes\scene_edit_screen.dart:95
+#: views\devices\group_edit_screen.dart:44
+#: views\scenes\scene_edit_screen.dart:177
 msgid "Notes"
 msgstr "备注"
 
-#: views\devices\group_edit_screen.dart:70
-#: views\scenes\scene_edit_screen.dart:114
+#: views\devices\group_edit_screen.dart:64
+#: views\scenes\scene_edit_screen.dart:199
 msgid "Submit"
 msgstr "提交"
 
-#: views\devices\group_edit_screen.dart:112
-#: views\scenes\scene_edit_screen.dart:147
+#: views\devices\group_edit_screen.dart:109
+#: views\scenes\scene_edit_screen.dart:240
 msgid ""
 "Are you sure you want to delete this device group? The devices within this "
 "group will not be deleted but will be moved to the \"Ungrouped\" group."
@@ -161,26 +171,26 @@ msgstr "你确定要删除该设备组？该组中的设备将会移动到“未
 msgid "New Device Group"
 msgstr "新建设备组"
 
-#: views\devices\group_edit_screen.dart:146
+#: views\devices\group_edit_screen.dart:145
 #, fuzzy
 #| msgid "Add Devices Group"
 msgid "Edit Device Group"
 msgstr "新建设备组"
 
-#: views\main_screen.dart:73 views\main_screen.dart:226
+#: views\main_screen.dart:88 views\main_screen.dart:222
 #: views\scenes\scenes_screen.dart:62
 msgid "Scenes"
 msgstr "场景"
 
-#: views\main_screen.dart:75 views\main_screen.dart:234
+#: views\main_screen.dart:90 views\main_screen.dart:224
 msgid "My"
 msgstr "我的"
 
-#: views\main_screen.dart:136
+#: views\main_screen.dart:145
 msgid "Add Scene"
 msgstr "新建场景"
 
-#: views\main_screen.dart:230
+#: views\main_screen.dart:223
 msgid "Devices"
 msgstr "设备"
 
@@ -188,15 +198,15 @@ msgstr "设备"
 msgid "Settings"
 msgstr "设置"
 
-#: views\my_screen.dart:31
+#: views\my_screen.dart:28
 msgid "About"
 msgstr "关于"
 
-#: views\routines\routine_card.dart:52
+#: views\routines\routine_card.dart:49
 msgid "ACTIVE"
 msgstr "激活"
 
-#: views\routines\routine_card.dart:56
+#: views\routines\routine_card.dart:54
 msgid "INACTIVE"
 msgstr "未激活"
 
@@ -204,18 +214,28 @@ msgstr "未激活"
 msgid "Routines"
 msgstr "日常养护"
 
-#: views\routines\routine_list.dart:68
+#: views\routines\routine_list.dart:36
+#, fuzzy
+#| msgid "Routines"
+msgid "No routines"
+msgstr "日常养护"
+
+#: views\routines\routine_list.dart:87
 msgid "New Routine"
 msgstr "新建日常养护"
 
-#: views\scenes\scene_edit_screen.dart:40
+#: views\scenes\scene_edit_screen.dart:38
 #, fuzzy
 #| msgid "Add Scene"
 msgid "New Scene"
 msgstr "新建场景"
 
-#: views\scenes\scene_edit_screen.dart:41
+#: views\scenes\scene_edit_screen.dart:38
 #, fuzzy
 #| msgid "Add Scene"
 msgid "Edit Scene"
 msgstr "新建场景"
+
+#: views\scenes\scene_edit_screen.dart:67
+msgid "Scene Image"
+msgstr ""
