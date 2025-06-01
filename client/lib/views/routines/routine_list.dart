@@ -25,10 +25,7 @@ class RoutineList extends StatelessWidget {
               builder: (context, _) {
                 if (vm.isRoutinesLoading.value) {
                   return Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 32),
-                      child: CircularProgressIndicator(),
-                    ),
+                    child: Padding(padding: EdgeInsets.symmetric(vertical: 32), child: CircularProgressIndicator()),
                   );
                 }
                 final routines = vm.routines.value;

@@ -112,19 +112,20 @@ class SceneEditScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                         color: Theme.of(context).colorScheme.surfaceVariant,
                       ),
-                      child: vm.imagePath != null && vm.imagePath!.isNotEmpty && File(vm.imagePath!).existsSync()
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.file(
-                                File(vm.imagePath!),
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: 120,
+                      child:
+                          vm.imagePath != null && vm.imagePath!.isNotEmpty && File(vm.imagePath!).existsSync()
+                              ? ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(
+                                  File(vm.imagePath!),
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: 120,
+                                ),
+                              )
+                              : Center(
+                                child: Icon(Icons.add_a_photo_outlined, size: 40, color: Theme.of(context).hintColor),
                               ),
-                            )
-                          : Center(
-                              child: Icon(Icons.add_a_photo_outlined, size: 40, color: Theme.of(context).hintColor),
-                            ),
                     ),
                   ),
                   // 删除图片按钮
