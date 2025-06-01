@@ -1,5 +1,4 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/base_editor_view_model.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_coap_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 
 class ManualEditorViewModel extends BaseEditorViewModel {

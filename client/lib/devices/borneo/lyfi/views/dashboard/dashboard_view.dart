@@ -21,10 +21,8 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 移除 assert，避免 offline 时崩溃
     final isOnline = context.read<LyfiViewModel>().isOnline;
     if (!isOnline) {
-      // offline 时直接返回空内容，防止 AnimatedSwitcher 动画期间 build
       return const SizedBox.shrink();
     }
     return Column(

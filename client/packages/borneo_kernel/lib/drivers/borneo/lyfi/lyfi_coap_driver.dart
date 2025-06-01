@@ -100,8 +100,9 @@ class BorneoLyfiCoapDriver
         offlineDetectionEnabled: true,
       );
       final lyfiInfo = await _getLyfiInfo(coapClient);
-      dev.driverData = LyfiCoapDriverData(
+      final driverData = LyfiCoapDriverData(
           coapClient, probeCoapClient, generalDeviceInfo, lyfiInfo);
+      await dev.setDriverData(driverData, cancelToken: cancelToken);
       succeed = true;
     } on CoapRequestTimeoutException catch (_) {
       succeed = false;
@@ -117,7 +118,7 @@ class BorneoLyfiCoapDriver
   Future<bool> remove(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as LyfiCoapDriverData;
     dd.dispose();
-    dev.driverData = null;
+    await dev.setDriverData(null, cancelToken: cancelToken);
     return true;
   }
 

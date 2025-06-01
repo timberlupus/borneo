@@ -1,7 +1,6 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/views/common/hex_color.dart';
 import 'package:borneo_common/duration_ext.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_coap_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';

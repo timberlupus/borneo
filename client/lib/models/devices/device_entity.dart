@@ -1,5 +1,7 @@
 import 'package:borneo_app/models/base_entity.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
+import 'package:cancellation_token/cancellation_token.dart';
+import 'package:synchronized/synchronized.dart';
 
 class DeviceEntity extends Device with BaseEntity {
   static final String kNameFieldName = "name";
@@ -7,6 +9,9 @@ class DeviceEntity extends Device with BaseEntity {
   static final String kGroupIDFieldName = "groupID";
   static final String kFngerprintFieldName = "fingerprint";
   static final String kAddressFieldName = "address";
+
+  final _lock = Lock();
+  dynamic _driverData;
 
   final String sceneID;
   final String? groupID;
@@ -53,6 +58,18 @@ class DeviceEntity extends Device with BaseEntity {
       kNameFieldName: name,
       'model': model,
     };
+  }
+
+  @override
+  dynamic get driverData => _driverData;
+
+  @override
+  Future<void> setDriverData(dynamic driverData, {CancellationToken? cancelToken}) async {
+    await _lock
+        .synchronized(() async {
+          _driverData = driverData;
+        })
+        .asCancellable(cancelToken);
   }
 
   @override

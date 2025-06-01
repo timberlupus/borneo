@@ -1,7 +1,7 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_view_model.dart';
-import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_model.dart';
 import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
@@ -14,7 +14,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/schedule_edito
 
 import 'editor/ieditor.dart';
 
-class LyfiViewModel extends BaseBorneoDeviceViewModel {
+class LyfiViewModel extends BaseLyfiDeviceViewModel {
   static const initializationTimeout = Duration(seconds: 5);
   static const int tempMax = 105;
   static final int tempSetpoint = 45;
@@ -25,11 +25,12 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
 
   ILyfiDeviceApi get _deviceApi => super.borneoDeviceApi as ILyfiDeviceApi;
 
-  bool _isOn = false;
   LedRunningMode _mode = LedRunningMode.manual;
   bool _isLocked = true;
 
+  bool _isOn = false;
   bool get isOn => _isOn;
+
   LedRunningMode get mode => _mode;
   bool get isLocked => _isLocked;
 
@@ -60,15 +61,10 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   final List<ScheduledInstant> scheduledInstants = [];
   final List<ScheduledInstant> sunInstants = [];
 
-  LyfiDeviceStatus? _lyfiDeviceStatus;
-  LyfiDeviceStatus? get lyfiDeviceStatus => _lyfiDeviceStatus;
-
   int? get currentTemp => borneoDeviceStatus?.temperature;
   double get currentTempRatio => (borneoDeviceStatus?.temperature ?? 0).toDouble() / tempMax;
 
   // LyFi device status and info
-  LyfiDeviceInfo get lyfiDeviceInfo => _deviceApi.getLyfiInfo(super.boundDevice!.device);
-
   double _fanPowerRatio = 0.0;
   double get fanPowerRatio => _fanPowerRatio;
 
@@ -91,9 +87,7 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
     required super.globalEventBus,
     required this.notification,
     super.logger,
-  }) {
-    //
-  }
+  });
 
   @override
   Future<void> onInitialize() async {
@@ -218,15 +212,11 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
       return;
     }
 
-    _lyfiDeviceStatus = await _deviceApi.getLyfiStatus(super.boundDevice!.device);
-
     _isOn = borneoDeviceStatus!.power;
-    if (_lyfiDeviceStatus != null) {
-      _ledState = _lyfiDeviceStatus!.state;
-      _isLocked = lyfiDeviceStatus!.state.isLocked;
-      _fanPowerRatio = lyfiDeviceStatus!.fanPower.toDouble();
-      _mode = lyfiDeviceStatus!.mode;
-    }
+    _ledState = super.lyfiDeviceStatus.state;
+    _isLocked = lyfiDeviceStatus.state.isLocked;
+    _fanPowerRatio = lyfiDeviceStatus.fanPower.toDouble();
+    _mode = lyfiDeviceStatus.mode;
 
     _temporaryRemaining.value = lyfiDeviceStatus!.temporaryRemaining;
 
@@ -250,7 +240,6 @@ class LyfiViewModel extends BaseBorneoDeviceViewModel {
   Future<void> _switchPowerOnOff(bool onOff) async {
     _deviceApi.setOnOff(super.boundDevice!.device, onOff);
     await refreshStatus();
-    _isOn = onOff;
   }
 
   bool get canSwitchTemporaryState =>

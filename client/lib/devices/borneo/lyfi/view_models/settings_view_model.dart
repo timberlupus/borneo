@@ -8,7 +8,6 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_coap_driver.dart';
 import 'package:latlong2/latlong.dart';
 
 class SettingsViewModel extends BaseLyfiDeviceViewModel {

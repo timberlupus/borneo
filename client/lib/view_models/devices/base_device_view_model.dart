@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
 import 'package:borneo_kernel_abstractions/device_capability.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:cancellation_token/cancellation_token.dart';

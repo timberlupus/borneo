@@ -3,7 +3,6 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart'
 import 'package:borneo_app/devices/borneo/lyfi/views/color_chart.dart';
 import 'package:borneo_app/views/common/hex_color.dart';
 import 'package:borneo_app/widgets/value_listenable_builders.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_coap_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +13,9 @@ class ManualRunningChart extends StatelessWidget {
 
   List<BarChartGroupData> buildGroupDataItems(BuildContext context) {
     final vm = context.read<LyfiViewModel>();
+    if (vm.lyfiDeviceInfo.channels.isEmpty || vm.channels.isEmpty) {
+      return [];
+    }
     int index = 0;
     return vm.lyfiDeviceInfo.channels.map((ch) {
       final channel = vm.channels[index];

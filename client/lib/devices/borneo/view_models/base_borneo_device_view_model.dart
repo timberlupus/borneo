@@ -1,15 +1,15 @@
 import 'package:borneo_app/view_models/devices/base_device_view_model.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
-import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:cancellation_token/cancellation_token.dart';
-import 'package:event_bus/event_bus.dart';
+import 'package:synchronized/synchronized.dart';
 
 abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   GeneralBorneoDeviceInfo? get borneoDeviceInfo => borneoDeviceApi.getGeneralDeviceInfo(boundDevice!.device);
 
+  final _lock = Lock();
   GeneralBorneoDeviceStatus? _borneoDeviceStatus;
-  GeneralBorneoDeviceStatus? get borneoDeviceStatus => isOnline ? _borneoDeviceStatus : null;
+  GeneralBorneoDeviceStatus? get borneoDeviceStatus => !_lock.locked && isOnline ? _borneoDeviceStatus : null;
 
   IBorneoDeviceApi get borneoDeviceApi => super.boundDevice!.driver as IBorneoDeviceApi;
 
@@ -26,6 +26,10 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
 
   @override
   Future<void> refreshStatus({CancellationToken? cancelToken}) async {
-    _borneoDeviceStatus = await borneoDeviceApi.getGeneralDeviceStatus(super.boundDevice!.device);
+    await _lock
+        .synchronized(() async {
+          _borneoDeviceStatus = await borneoDeviceApi.getGeneralDeviceStatus(super.boundDevice!.device);
+        })
+        .asCancellable(cancelToken);
   }
 }

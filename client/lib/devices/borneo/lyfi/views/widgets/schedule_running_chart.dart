@@ -78,7 +78,7 @@ class ScheduleRunningChart extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 8),
                 alignment: const Alignment(0, -1.6),
                 show: true,
-                labelResolver: (vl) => Duration(seconds: vl.x.toInt()).toHHMM(),
+                labelResolver: (vl) => Duration(seconds: vl.x.toInt()).toHHMMSS(),
               ),
             ),
         ],
