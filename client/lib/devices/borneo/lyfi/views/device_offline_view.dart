@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 class DeviceOfflineView extends StatelessWidget {
   const DeviceOfflineView({super.key});
@@ -17,12 +18,12 @@ class DeviceOfflineView extends StatelessWidget {
             Icon(Icons.cloud_off, size: 80, color: theme.colorScheme.primary),
             const SizedBox(height: 24),
             Text(
-              'Device is offline',
+              context.translate('Device is offline'),
               style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.onBackground),
             ),
             const SizedBox(height: 12),
             Text(
-              'The device is currently offline. Please check the network or power connection.',
+              context.translate('The device is currently offline. Please check the network or power connection.'),
               style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onBackground.withOpacity(0.7)),
               textAlign: TextAlign.center,
             ),
@@ -32,7 +33,7 @@ class DeviceOfflineView extends StatelessWidget {
                 // TODO: handle reconnect event externally
               },
               icon: const Icon(Icons.refresh),
-              label: const Text('Reconnect'),
+              label: Text(context.translate('Reconnect')),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimary,

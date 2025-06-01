@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 class CapsuleLabel extends StatelessWidget {
   final String label;
@@ -30,7 +31,10 @@ class CapsuleLabel extends StatelessWidget {
         children: [
           if (icon != null)
             Padding(padding: const EdgeInsets.only(right: 4.0), child: Icon(icon, color: iconColor, size: 16.0)),
-          Text(label, style: TextStyle(color: textColor, fontSize: 14.0, fontWeight: FontWeight.bold)),
+          Text(
+            context.translate(label),
+            style: TextStyle(color: textColor, fontSize: 14.0, fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );

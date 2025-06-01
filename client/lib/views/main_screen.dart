@@ -59,7 +59,7 @@ class NotificationListener extends StatelessWidget {
             */
             toastification.show(
               context: context,
-              title: Text("Error"),
+              title: Text(context.translate("Error")),
               type: ToastificationType.error,
               style: ToastificationStyle.fillColored,
               description: Text(

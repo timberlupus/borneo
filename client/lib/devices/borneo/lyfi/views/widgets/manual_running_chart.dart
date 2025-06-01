@@ -7,6 +7,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 class ManualRunningChart extends StatelessWidget {
   const ManualRunningChart({super.key});
@@ -55,7 +56,7 @@ class ManualRunningChart extends StatelessWidget {
     final index = value.toInt();
     final ch = vm.lyfiDeviceInfo.channels[index];
     return Text(
-      ch.name,
+      context.translate(ch.name),
       style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
     );
   }

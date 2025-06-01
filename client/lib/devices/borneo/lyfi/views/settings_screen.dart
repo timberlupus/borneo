@@ -6,6 +6,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import 'package:provider/provider.dart';
 
@@ -21,7 +22,7 @@ class SettingsScreen extends StatelessWidget {
       builder:
           (context, child) => Scaffold(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            appBar: AppBar(title: Text('Settings')),
+            appBar: AppBar(title: Text(context.translate('Settings'))),
             body: ListView.separated(
               shrinkWrap: true,
               itemBuilder: (context, index) => items[index],
@@ -67,12 +68,15 @@ class SettingsScreen extends StatelessWidget {
     const rightChevron = CupertinoListTileChevron();
     final tileColor = Theme.of(context).colorScheme.surfaceContainer;
     return <Widget>[
-      ListTile(dense: true, title: Text('DEVICE INFORMATION', style: Theme.of(context).textTheme.titleSmall)),
+      ListTile(
+        dense: true,
+        title: Text(context.translate('DEVICE INFORMATION'), style: Theme.of(context).textTheme.titleSmall),
+      ),
       ListTile(
         dense: true,
         tileColor: tileColor,
         leading: Icon(Icons.info_outline),
-        title: Text('Name'),
+        title: Text(context.translate('Name')),
         subtitle: Text(vm.borneoInfo.name),
         trailing: rightChevron,
         onTap: () {},
@@ -81,7 +85,7 @@ class SettingsScreen extends StatelessWidget {
         dense: true,
         tileColor: tileColor,
         leading: Icon(Icons.factory_outlined),
-        title: const Text('Manufacturer & Model'),
+        title: Text(context.translate('Manufacturer & Model')),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [Text(vm.borneoInfo.manufName), Text(vm.borneoInfo.modelName)],
@@ -91,18 +95,21 @@ class SettingsScreen extends StatelessWidget {
         dense: true,
         tileColor: tileColor,
         leading: const Icon(Icons.numbers_outlined),
-        title: Text('Serial number'),
+        title: Text(context.translate('Serial number')),
         trailing: Text(vm.borneoInfo.serno.substring(0, 12)),
       ),
       ListTile(
         dense: true,
         tileColor: tileColor,
         leading: _buildWifiRssiIcon(context),
-        title: Text('Device address'),
+        title: Text(context.translate('Device address')),
         trailing: Text(vm.address.toString()),
       ),
 
-      ListTile(dense: true, title: Text('DEVICE STATUS', style: Theme.of(context).textTheme.titleSmall)),
+      ListTile(
+        dense: true,
+        title: Text(context.translate('DEVICE STATUS'), style: Theme.of(context).textTheme.titleSmall),
+      ),
 
       Selector<SettingsViewModel, ({bool canUpdate, String? tz, DateTime timestamp})>(
         selector: (_, vm) => (canUpdate: vm.canUpdateTimezone, tz: vm.timezone, timestamp: vm.borneoStatus.timestamp),
@@ -111,10 +118,13 @@ class SettingsScreen extends StatelessWidget {
               dense: true,
               tileColor: tileColor,
               leading: const Icon(Icons.access_time_outlined),
-              title: Text('Device time & time zone'),
+              title: Text(context.translate('Device time & time zone')),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [Text(map.timestamp.toString()), Text(map.tz ?? "Unknown time zone")],
+                children: [
+                  Text(map.timestamp.toString()),
+                  Text(map.tz != null ? map.tz! : context.translate('Unknown time zone')),
+                ],
               ),
               trailing: rightChevron,
               onTap: map.canUpdate ? vm.updateTimezone : null,
@@ -128,7 +138,7 @@ class SettingsScreen extends StatelessWidget {
               dense: true,
               leading: const Icon(Icons.settings_power_outlined),
               tileColor: tileColor,
-              title: Text('Power status at startup'),
+              title: Text(context.translate('Power status at startup')),
               trailing: DropdownButton<PowerBehavior>(
                 value: map.behavior,
                 items: [

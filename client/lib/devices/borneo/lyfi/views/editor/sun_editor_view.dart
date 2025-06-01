@@ -2,6 +2,7 @@ import 'package:borneo_app/devices/borneo/lyfi/views/brightness_slider_list.dart
 import 'package:borneo_app/devices/borneo/lyfi/views/widgets/sun_running_chart.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import 'package:provider/provider.dart';
 
@@ -34,7 +35,7 @@ class SunEditorView extends StatelessWidget {
       final ch = vm.deviceInfo.channels[index];
       return Text(ch.name, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor));
     } else {
-      return Text("N/A");
+      return Text(context.translate("N/A"));
     }
   }
 

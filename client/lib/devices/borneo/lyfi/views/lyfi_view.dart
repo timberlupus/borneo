@@ -6,6 +6,7 @@ import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
@@ -147,17 +148,17 @@ class HeroPanel extends StatelessWidget {
                   segments: [
                     ButtonSegment<LedRunningMode>(
                       value: LedRunningMode.manual,
-                      label: Text('MANU'),
+                      label: Text(context.translate('MANU')),
                       icon: Icon(Icons.bar_chart_outlined, size: 24),
                     ),
                     ButtonSegment<LedRunningMode>(
                       value: LedRunningMode.scheduled,
-                      label: Text('SCHED'),
+                      label: Text(context.translate('SCHED')),
                       icon: Icon(Icons.alarm_outlined, size: 24),
                     ),
                     ButtonSegment<LedRunningMode>(
                       value: LedRunningMode.sun,
-                      label: Text('SUN'),
+                      label: Text(context.translate('SUN')),
                       icon: Icon(Icons.wb_sunny_outlined, size: 24),
                     ),
                   ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 class GenericSettingsScreen extends StatelessWidget {
   final String title;
@@ -10,7 +11,7 @@ class GenericSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title), actions: appBarActions),
+      appBar: AppBar(title: Text(context.translate(title)), actions: appBarActions),
       body: ListView.builder(
         shrinkWrap: true,
         itemCount: children.length,
@@ -28,7 +29,10 @@ class GenericSettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final allChildren =
-        <Widget>[ListTile(tileColor: Theme.of(context).scaffoldBackgroundColor, title: Text(title))] + children;
+        <Widget>[
+          ListTile(tileColor: Theme.of(context).scaffoldBackgroundColor, title: Text(context.translate(title))),
+        ] +
+        children;
     return Wrap(
       children: [
         ListView.separated(
@@ -38,6 +42,30 @@ class GenericSettingsGroup extends StatelessWidget {
           itemCount: allChildren.length,
         ),
       ],
+    );
+  }
+}
+
+class SaveButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(context.translate('Save')),
+      onTap: () {
+        // Save action
+      },
+    );
+  }
+}
+
+class CancelButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(context.translate('Cancel')),
+      onTap: () {
+        // Cancel action
+      },
     );
   }
 }

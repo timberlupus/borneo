@@ -7,6 +7,7 @@ import 'package:borneo_common/duration_ext.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/schedule_editor_view_model.dart';
 import 'package:borneo_app/views/common/hex_color.dart';
@@ -22,7 +23,7 @@ class ScheduleEditorView extends StatelessWidget {
     final selectedTime = await showTimePicker(
       initialTime: initialTime,
       context: context,
-      confirmText: 'Add time point',
+      confirmText: context.translate('Add time point'),
       builder:
           (context, child) =>
               MediaQuery(data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true), child: child!),
