@@ -1,4 +1,4 @@
-import 'package:borneo_app/devices/borneo/lyfi/views/device_offline_view.dart';
+import 'package:borneo_app/devices/views/device_offline_view.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/editor/sun_editor_view.dart';
 import 'package:borneo_app/models/devices/device_entity.dart';
 import 'package:borneo_app/services/i_app_notification_service.dart';
@@ -284,7 +284,7 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
               builder:
                   (content, rssi, _) => Center(
                     child: switch (rssi) {
-                      null => Icon(Icons.wifi_off_rounded, size: 24, color: Theme.of(context).colorScheme.error),
+                      null => Icon(Icons.link_off, size: 24, color: Theme.of(context).colorScheme.error),
                       RssiLevel.strong => Icon(Icons.wifi_rounded, size: 24),
                       RssiLevel.medium => Icon(Icons.wifi_2_bar_rounded, size: 24),
                       RssiLevel.weak => Icon(Icons.wifi_1_bar_rounded, size: 24),

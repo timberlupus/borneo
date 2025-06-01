@@ -15,25 +15,25 @@ class DeviceOfflineView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_off, size: 80, color: theme.colorScheme.primary),
-            const SizedBox(height: 24),
+            Icon(Icons.link_off, size: 80, color: theme.colorScheme.primary),
+            const SizedBox(height: 12),
             Text(
               context.translate('Device is offline'),
-              style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.onBackground),
+              style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.onSurface),
             ),
             const SizedBox(height: 12),
             Text(
               context.translate('The device is currently offline. Please check the network or power connection.'),
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onBackground.withOpacity(0.7)),
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () {
-                // TODO: handle reconnect event externally
+                Navigator.pop(context);
               },
-              icon: const Icon(Icons.refresh),
-              label: Text(context.translate('Reconnect')),
+              icon: const Icon(Icons.arrow_back, size: 24),
+              label: Text(context.translate('Close')),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimary,

@@ -8,7 +8,6 @@ import 'package:borneo_app/services/scene_manager.dart';
 import 'package:borneo_app/view_models/base_view_model.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
-import 'package:logger/logger.dart';
 
 enum TabIndices { scenes, devices, my }
 
@@ -18,7 +17,6 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
   final SceneManager _sceneManager;
   final GroupManager _groupManager;
   final DeviceManager _deviceManager;
-  final Logger? logger;
   TabIndices _currentIndex = TabIndices.scenes;
   bool _isInitialized = false;
 
@@ -52,7 +50,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
     this._sceneManager,
     this._groupManager,
     this._deviceManager, {
-    this.logger,
+    super.logger,
   }) {
     this.globalEventBus = globalEventBus;
     _appErrorEventSub = globalEventBus.on<AppErrorEvent>().listen(_onAppError);

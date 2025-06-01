@@ -19,7 +19,7 @@ class SunEditorView extends StatelessWidget {
           return Selector<SunEditorViewModel, bool>(
             selector: (_, editor) => editor.canChangeColor,
             builder:
-                (_, canChangeColor, __) =>
+                (_, canChangeColor, _) =>
                     BrightnessSliderList(context.read<SunEditorViewModel>(), disabled: !canChangeColor),
           );
         } else {

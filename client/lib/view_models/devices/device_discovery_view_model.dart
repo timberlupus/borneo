@@ -5,7 +5,6 @@ import 'package:borneo_app/models/devices/device_group_entity.dart';
 import 'package:borneo_app/services/group_manager.dart';
 import 'package:borneo_app/view_models/abstract_screen_view_model.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
-import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -72,8 +71,13 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel with ViewModelEve
   int get newDeviceCount => _newDeviceCount;
   int get discoveredCount => _discoveredCount;
 
-  DeviceDiscoveryViewModel(this._logger, EventBus bus, this._groupManager, this._deviceManager) {
-    super.globalEventBus = bus;
+  DeviceDiscoveryViewModel(
+    this._logger,
+    this._groupManager,
+    this._deviceManager, {
+    required super.globalEventBus,
+    super.logger,
+  }) {
     _deviceAddedEventSub = _deviceManager.deviceEvents.on<NewDeviceEntityAddedEvent>().listen(
       (event) => _onNewDeviceEntityAdded(event),
     );

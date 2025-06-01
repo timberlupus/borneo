@@ -1,7 +1,6 @@
 import 'package:borneo_app/models/scene_entity.dart';
 import 'package:borneo_app/services/scene_manager.dart';
 import 'package:borneo_app/view_models/abstract_screen_view_model.dart';
-import 'package:event_bus/event_bus.dart';
 
 import '../base_view_model.dart';
 
@@ -24,8 +23,8 @@ class SceneEditViewModel extends AbstractScreenViewModel with ViewModelEventBusM
   bool get deletionAvailable => _deletionAvailable;
 
   SceneEditViewModel(
-    EventBus globalEventBus,
     this._sceneManager, {
+    required super.globalEventBus,
     required this.isCreation,
     SceneEntity? model,
     super.logger,

@@ -27,7 +27,7 @@ abstract class BaseViewModel extends ChangeNotifier {
     }
   }
 
-  setBusy(bool value, {bool notify = true}) {
+  void setBusy(bool value, {bool notify = true}) {
     assertNotDisposed(this);
     isBusy = value;
     if (notify) {

@@ -66,7 +66,7 @@ class DeviceTile extends StatelessWidget {
                     vm.isOnline
                         ? Icon(Icons.line_axis_outlined, size: 24)
                         : FlashingIcon(
-                          icon: Icon(Icons.wifi_off_outlined, size: 24, color: Theme.of(context).colorScheme.error),
+                          icon: Icon(Icons.link_off, size: 24, color: Theme.of(context).colorScheme.error),
                         ),
                   ],
                 ),

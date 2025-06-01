@@ -47,6 +47,8 @@ class GenericSettingsGroup extends StatelessWidget {
 }
 
 class SaveButton extends StatelessWidget {
+  const SaveButton({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -59,6 +61,8 @@ class SaveButton extends StatelessWidget {
 }
 
 class CancelButton extends StatelessWidget {
+  const CancelButton({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ListTile(

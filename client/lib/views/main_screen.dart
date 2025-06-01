@@ -171,7 +171,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
           selector:
               (_, vm) => (isInit: vm.isInitialized, isScanningDevices: vm.isScanningDevices, index: vm.currentTabIndex),
           builder:
-              (_, vm, __) =>
+              (_, vm, _) =>
                   !vm.isInit || vm.isScanningDevices
                       ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator())
                       : buildAddButtons(context),

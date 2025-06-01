@@ -53,13 +53,13 @@ class RoutineCard extends StatelessWidget {
                                 style: TextStyle(fontSize: 14.0, color: fgColor),
                               ),
                         ),
-                        Divider(height: 16, thickness: 1, color: fgColor.withOpacity(0.2)),
+                        Divider(height: 16, thickness: 1, color: fgColor.withValues(alpha: 0.2)),
                         Row(
                           mainAxisSize: MainAxisSize.max,
                           children: [
                             Text(
                               isActive ? context.translate('ACTIVE') : context.translate('INACTIVE'),
-                              style: TextStyle(fontSize: 12, color: fgColor.withOpacity(0.7)),
+                              style: TextStyle(fontSize: 12, color: fgColor.withValues(alpha: 0.7)),
                             ),
                             Spacer(),
                             Switch(
@@ -88,7 +88,7 @@ class RoutineCard extends StatelessWidget {
                 if (isBusy)
                   Positioned.fill(
                     child: Container(
-                      color: bgColor.withOpacity(0.6),
+                      color: bgColor.withValues(alpha: 0.6),
                       child: Center(child: CircularProgressIndicator()),
                     ),
                   ),

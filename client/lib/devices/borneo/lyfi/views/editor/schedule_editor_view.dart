@@ -159,7 +159,7 @@ class ScheduleEditorView extends StatelessWidget {
               child: Selector<ScheduleEditorViewModel, bool>(
                 selector: (_, editor) => editor.canChangeColor,
                 builder:
-                    (_, canChangeColor, __) =>
+                    (_, canChangeColor, _) =>
                         BrightnessSliderList(context.read<ScheduleEditorViewModel>(), disabled: !canChangeColor),
               ),
             ),

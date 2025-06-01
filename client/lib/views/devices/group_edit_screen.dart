@@ -130,10 +130,10 @@ class GroupEditScreen extends StatelessWidget {
     return ChangeNotifierProvider<GroupEditViewModel>(
       create:
           (context) => GroupEditViewModel(
-            context.read<EventBus>(),
             context.read<GroupManager>(),
             isCreation: args.isCreation,
             model: args.model,
+            globalEventBus: context.read<EventBus>(),
             logger: context.read<Logger>(),
           ),
       builder:

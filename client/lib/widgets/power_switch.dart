@@ -7,7 +7,7 @@ class PowerButton extends StatefulWidget {
   final void Function(bool)? onChanged;
   final Widget label;
 
-  const PowerButton({required this.enabled, required this.value, required this.label, this.onChanged});
+  const PowerButton({super.key, required this.enabled, required this.value, required this.label, this.onChanged});
 
   @override
   _PowerButtonState createState() => _PowerButtonState();

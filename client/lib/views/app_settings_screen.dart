@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'package:borneo_app/view_models/app_settings_view_model.dart';
 import 'package:borneo_app/widgets/generic_settings_screen.dart';
+import 'package:borneo_app/app.dart';
 
 class AppSettingsScreen extends StatelessWidget {
   const AppSettingsScreen({super.key});
@@ -42,28 +43,37 @@ class AppSettingsScreen extends StatelessWidget {
           trailing: Selector<AppSettingsViewModel, ThemeMode>(
             selector: (_, vm) => vm.themeMode,
             builder:
-                (context, themeMode, child) => DropdownButton<ThemeMode>(
-                  value: themeMode,
-                  items: [
-                    DropdownMenuItem<ThemeMode>(
-                      value: ThemeMode.system,
-                      child: Text(context.translate("System"), style: Theme.of(context).textTheme.bodySmall),
-                    ),
-                    DropdownMenuItem<ThemeMode>(
-                      value: ThemeMode.light,
-                      child: Text(context.translate("Light"), style: Theme.of(context).textTheme.bodySmall),
-                    ),
-                    DropdownMenuItem<ThemeMode>(
-                      value: ThemeMode.dark,
-                      child: Text(context.translate("Dark"), style: Theme.of(context).textTheme.bodySmall),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    final vm = context.read<AppSettingsViewModel>();
-                    if (value != null && vm.themeMode != value) {
-                      vm.changeBrightness(value);
-                    }
+                (context, mode, _) => DropdownButton<ThemeMode>(
+                  value: mode,
+                  onChanged: (val) {
+                    if (val != null) context.read<AppSettingsViewModel>().changeBrightness(val);
                   },
+                  items: [
+                    DropdownMenuItem(value: ThemeMode.system, child: Text(context.translate('System'))),
+                    DropdownMenuItem(value: ThemeMode.light, child: Text(context.translate('Light'))),
+                    DropdownMenuItem(value: ThemeMode.dark, child: Text(context.translate('Dark'))),
+                  ],
+                ),
+          ),
+        ),
+        ListTile(
+          leading: Icon(Icons.language_outlined),
+          title: Text(context.translate('Language')),
+          trailing: Selector<AppSettingsViewModel, Locale?>(
+            selector: (_, vm) => vm.locale,
+            builder:
+                (context, locale, _) => DropdownButton<Locale>(
+                  value: locale ?? const Locale('en', 'US'),
+                  onChanged: (val) {
+                    if (val != null) context.read<AppSettingsViewModel>().changeLocale(val);
+                  },
+                  items:
+                      kSupportedLocales.map((loc) {
+                        return DropdownMenuItem(
+                          value: loc,
+                          child: Text(loc.languageCode == 'zh' ? '中文 (简体)' : 'English (US)'),
+                        );
+                      }).toList(),
                 ),
           ),
         ),

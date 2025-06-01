@@ -1,8 +1,6 @@
 import 'package:borneo_app/models/devices/device_group_entity.dart';
 import 'package:borneo_app/services/group_manager.dart';
 import 'package:borneo_app/view_models/abstract_screen_view_model.dart';
-import 'package:event_bus/event_bus.dart';
-import 'package:logger/logger.dart';
 
 import '../base_view_model.dart';
 
@@ -14,7 +12,6 @@ final class GroupEditArguments {
 }
 
 class GroupEditViewModel extends AbstractScreenViewModel with ViewModelEventBusMixin {
-  final Logger? logger;
   final GroupManager _groupManager;
   final bool isCreation;
   late final String? id;
@@ -22,11 +19,11 @@ class GroupEditViewModel extends AbstractScreenViewModel with ViewModelEventBusM
   late String notes;
 
   GroupEditViewModel(
-    EventBus globalEventBus,
     this._groupManager, {
+    required super.globalEventBus,
     required this.isCreation,
     DeviceGroupEntity? model,
-    this.logger,
+    super.logger,
   }) {
     super.globalEventBus = globalEventBus;
     if (isCreation) {

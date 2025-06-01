@@ -282,9 +282,9 @@ class DeviceDiscoveryScreen extends StatelessWidget {
 
   DeviceDiscoveryViewModel createViewModel(BuildContext context) => DeviceDiscoveryViewModel(
     context.read<Logger>(),
-    context.read<EventBus>(),
     context.read<GroupManager>(),
     context.read<DeviceManager>(),
+    globalEventBus: context.read<EventBus>(),
   );
 
   @override

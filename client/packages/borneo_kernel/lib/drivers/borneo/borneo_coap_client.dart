@@ -29,7 +29,7 @@ class BorneoCoapClient extends CoapClient {
       {final CoapMulticastResponseHandler? onMulticastResponse}) async {
     try {
       return await super.send(request);
-    } catch (IOException) {
+    } on IOException {
       if (offlineDetectionEnabled && deviceEvents != null) {
         // Emit an event to notify that the device is offline
         if (logger != null) {

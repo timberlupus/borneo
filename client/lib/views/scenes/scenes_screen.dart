@@ -23,7 +23,7 @@ class SceneList extends StatelessWidget {
               height: screenHeight / 4.0,
               child: ListView.separated(
                 padding: EdgeInsets.symmetric(horizontal: 16),
-                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                separatorBuilder: (_, _) => const SizedBox(width: 16),
                 scrollDirection: Axis.horizontal,
                 itemCount: vm.scenes.length,
                 itemBuilder: (context, index) {

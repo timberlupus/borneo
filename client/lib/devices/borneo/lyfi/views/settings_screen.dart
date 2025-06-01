@@ -42,7 +42,7 @@ class SettingsScreen extends StatelessWidget {
         RssiLevel.weak => Icon(Icons.wifi_1_bar),
       };
     } else {
-      return Icon(Icons.wifi_off_outlined, color: Theme.of(bc).colorScheme.error);
+      return Icon(Icons.link_off, color: Theme.of(bc).colorScheme.error);
     }
   }
 

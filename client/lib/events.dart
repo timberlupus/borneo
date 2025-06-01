@@ -11,3 +11,8 @@ class ThemeChangedEvent {
   final ThemeMode themeMode;
   ThemeChangedEvent(this.themeMode);
 }
+
+class AppLocaleChangedEvent {
+  final Locale locale;
+  AppLocaleChangedEvent(this.locale);
+}

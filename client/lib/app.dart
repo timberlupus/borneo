@@ -23,111 +23,37 @@ import 'services/routine_manager.dart';
 import 'services/scene_manager.dart';
 import 'theme/app_theme.dart';
 
-const _kSupportedLocales = [Locale('en', 'US'), Locale('zh', 'CN')];
+const kSupportedLocales = [Locale('en', 'US'), Locale('zh', 'CN')];
 
-class BorneoApp extends StatelessWidget {
+class BorneoApp extends StatefulWidget {
   final EventBus _globalEventBus = EventBus();
-
   BorneoApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<ThemeMode>(
-      future: _loadThemeMode(),
-      builder: (context, snapshot) {
-        final themeMode = snapshot.data ?? ThemeMode.system;
-        return MultiProvider(
-          providers: [
-            Provider<EventBus>(create: (_) => _globalEventBus),
-            Provider<IBlobManager>(create: (_) => FlutterAppBlobManager()),
-            // 不在这里实例化 AppSettingsViewModel
-          ],
-          child: ToastificationWrapper(
-            config: ToastificationConfig(animationDuration: Duration(milliseconds: 300)),
-            child: _ThemeEventListener(
-              initialThemeMode: themeMode,
-              child: Builder(
-                builder: (context) {
-                  return MaterialApp(
-                    title: 'Borneo-IoT',
-                    theme: BorneoTheme(Theme.of(context).textTheme).light(),
-                    darkTheme: BorneoTheme(Theme.of(context).textTheme).dark(),
-                    themeMode: ThemeMode.system, // 由 _ThemeEventListener 控制
-                    onGenerateRoute: context.read<RouteManager>().onGenerateRoute,
-                    supportedLocales: _kSupportedLocales,
-                    localizationsDelegates: [
-                      GettextLocalizationsDelegate(),
-                      GlobalMaterialLocalizations.delegate,
-                      GlobalCupertinoLocalizations.delegate,
-                      GlobalWidgetsLocalizations.delegate,
-                    ],
-                    builder: (context, child) {
-                      final gt = GettextLocalizations.of(context);
-                      return MultiProvider(
-                        providers: [
-                          Provider<IAppNotificationService>(create: (context) => DefaultAppNotificationService()),
-                          // Here >>> register all providers that need to access the gettext interface <<<
-                          // SceneManager
-                          Provider<SceneManager>(
-                            create:
-                                (context) => SceneManager(
-                                  gt,
-                                  context.read<Database>(),
-                                  context.read<EventBus>(),
-                                  context.read<IBlobManager>(),
-                                  logger: context.read<Logger>(),
-                                ),
-                          ),
+  State<BorneoApp> createState() => _BorneoAppState();
+}
 
-                          // GroupManager
-                          Provider<GroupManager>(
-                            create:
-                                (context) => GroupManager(
-                                  context.read<Logger>(),
-                                  context.read<EventBus>(),
-                                  context.read<Database>(),
-                                  context.read<SceneManager>(),
-                                ),
-                          ),
+class _BorneoAppState extends State<BorneoApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+  Locale? _locale;
+  late StreamSubscription _localeSub;
 
-                          // DeviceManager
-                          Provider<DeviceManager>(
-                            create:
-                                (context) => DeviceManager(
-                                  context.read<Database>(),
-                                  context.read<IKernel>(),
-                                  context.read<EventBus>(),
-                                  context.read<SceneManager>(),
-                                  context.read<GroupManager>(),
-                                  logger: context.read<Logger>(),
-                                ),
-                            dispose: (context, dm) => dm.dispose(),
-                          ),
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeMode().then((mode) => setState(() => _themeMode = mode));
+    _loadLocale().then((loc) => setState(() => _locale = loc));
+    _localeSub = widget._globalEventBus.on<AppLocaleChangedEvent>().listen((event) {
+      setState(() {
+        _locale = event.locale;
+      });
+    });
+  }
 
-                          // RoutineManager
-                          Provider<RoutineManager>(
-                            create:
-                                (context) => RoutineManager(
-                                  context.read<EventBus>(),
-                                  context.read<Database>(),
-                                  context.read<DeviceManager>(),
-                                  logger: context.read<Logger>(),
-                                ),
-                            dispose: (context, rm) => rm.dispose(),
-                          ),
-                        ],
-                        child: child,
-                      );
-                    },
-                    home: MainScreen(),
-                  );
-                },
-              ),
-            ),
-          ),
-        );
-      },
-    );
+  @override
+  void dispose() {
+    _localeSub.cancel();
+    super.dispose();
   }
 
   Future<ThemeMode> _loadThemeMode() async {
@@ -137,6 +63,109 @@ class BorneoApp extends StatelessWidget {
       return ThemeMode.values[idx];
     }
     return ThemeMode.system;
+  }
+
+  Future<Locale?> _loadLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    final localeStr = prefs.getString('app.locale');
+    return switch (localeStr) {
+      'zh_CN' => const Locale('zh', 'CN'),
+      'en_US' => const Locale('en', 'US'),
+      _ => const Locale('en', 'US'),
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        Provider<EventBus>(create: (_) => widget._globalEventBus),
+        Provider<IBlobManager>(create: (_) => FlutterAppBlobManager()),
+      ],
+      child: ToastificationWrapper(
+        config: ToastificationConfig(animationDuration: Duration(milliseconds: 300)),
+        child: _ThemeEventListener(
+          initialThemeMode: _themeMode,
+          child: Builder(
+            builder: (context) {
+              return MaterialApp(
+                title: 'Borneo-IoT',
+                theme: BorneoTheme(Theme.of(context).textTheme).light(),
+                darkTheme: BorneoTheme(Theme.of(context).textTheme).dark(),
+                themeMode: ThemeMode.system,
+                locale: _locale,
+                supportedLocales: kSupportedLocales,
+                onGenerateRoute: context.read<RouteManager>().onGenerateRoute,
+                localizationsDelegates: [
+                  GettextLocalizationsDelegate(),
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                ],
+                builder: (context, child) {
+                  final gt = GettextLocalizations.of(context);
+                  return MultiProvider(
+                    providers: [
+                      Provider<IAppNotificationService>(create: (context) => DefaultAppNotificationService()),
+                      // Here >>> register all providers that need to access the gettext interface <<<
+                      // SceneManager
+                      Provider<SceneManager>(
+                        create:
+                            (context) => SceneManager(
+                              gt,
+                              context.read<Database>(),
+                              context.read<EventBus>(),
+                              context.read<IBlobManager>(),
+                              logger: context.read<Logger>(),
+                            ),
+                      ),
+
+                      // GroupManager
+                      Provider<GroupManager>(
+                        create:
+                            (context) => GroupManager(
+                              context.read<Logger>(),
+                              context.read<EventBus>(),
+                              context.read<Database>(),
+                              context.read<SceneManager>(),
+                            ),
+                      ),
+
+                      // DeviceManager
+                      Provider<DeviceManager>(
+                        create:
+                            (context) => DeviceManager(
+                              context.read<Database>(),
+                              context.read<IKernel>(),
+                              context.read<EventBus>(),
+                              context.read<SceneManager>(),
+                              context.read<GroupManager>(),
+                              logger: context.read<Logger>(),
+                            ),
+                        dispose: (context, dm) => dm.dispose(),
+                      ),
+
+                      // RoutineManager
+                      Provider<RoutineManager>(
+                        create:
+                            (context) => RoutineManager(
+                              context.read<EventBus>(),
+                              context.read<Database>(),
+                              context.read<DeviceManager>(),
+                              logger: context.read<Logger>(),
+                            ),
+                        dispose: (context, rm) => rm.dispose(),
+                      ),
+                    ],
+                    child: child,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -181,7 +210,7 @@ class _ThemeEventListenerState extends State<_ThemeEventListener> {
             darkTheme: BorneoTheme(Theme.of(context).textTheme).dark(),
             themeMode: _themeMode,
             onGenerateRoute: context.read<RouteManager>().onGenerateRoute,
-            supportedLocales: _kSupportedLocales,
+            supportedLocales: kSupportedLocales,
             localizationsDelegates: [
               GettextLocalizationsDelegate(),
               GlobalMaterialLocalizations.delegate,

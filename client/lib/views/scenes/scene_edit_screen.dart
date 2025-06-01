@@ -48,10 +48,10 @@ class SceneEditScreen extends StatelessWidget {
 
   SceneEditViewModel createViewModel(BuildContext context) {
     return SceneEditViewModel(
-      context.read<EventBus>(),
       context.read<SceneManager>(),
       isCreation: args.isCreation,
       model: args.model,
+      globalEventBus: context.read<EventBus>(),
       logger: context.read<Logger>(),
     );
   }
