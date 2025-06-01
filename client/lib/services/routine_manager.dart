@@ -1,6 +1,7 @@
 import 'package:borneo_app/models/routines/abstract_routine.dart';
 import 'package:borneo_app/models/routines/builtin_routines.dart';
 import 'package:borneo_app/services/device_manager.dart';
+import 'package:borneo_app/services/routine_history_store.dart';
 import 'package:borneo_common/borneo_common.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
@@ -17,9 +18,12 @@ class RoutineManager implements IDisposable {
 
   final DeviceManager _deviceManager;
 
+  final RoutineHistoryStore _historyStore;
+
   final List<AbstractRoutine> allRoutines = [];
 
-  RoutineManager(this._globalBus, this._db, this._deviceManager, {this.logger}) {
+  RoutineManager(this._globalBus, this._db, this._deviceManager, {this.logger})
+    : _historyStore = RoutineHistoryStore(_db) {
     allRoutines.addAll([PowerOffAllRoutine(), FeedModeRoutine(), WaterChangeModeRoutine(), DryScapeModeRoutine()]);
   }
 
@@ -34,7 +38,21 @@ class RoutineManager implements IDisposable {
   }
 
   Future<void> executeRoutine(String routineID) async {
-    await allRoutines.singleWhere((r) => r.id == routineID).execute(_deviceManager);
+    final routine = allRoutines.singleWhere((r) => r.id == routineID);
+    if (routine is PersistentRoutineMixin) {
+      await routine.executeAndPersist(_deviceManager, _historyStore, routineID);
+    } else {
+      await routine.execute(_deviceManager);
+    }
+  }
+
+  Future<void> undoRoutine(String routineID) async {
+    final routine = allRoutines.singleWhere((r) => r.id == routineID);
+    if (routine is PersistentRoutineMixin) {
+      await routine.undoFromHistory(_deviceManager, _historyStore, routineID);
+    } else {
+      await routine.undo(_deviceManager);
+    }
   }
 
   @override

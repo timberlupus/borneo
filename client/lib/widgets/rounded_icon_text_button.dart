@@ -63,7 +63,7 @@ class _RoundedIconTextButtonState extends State<RoundedIconTextButton> with Sing
             icon: widget.icon,
           ),
           SizedBox(height: widget.spacing),
-          Text(widget.text, style: TextStyle(color: widget.textColor, fontSize: 12)),
+          Text(widget.text, style: Theme.of(context).textTheme.labelSmall),
         ],
       ),
     );

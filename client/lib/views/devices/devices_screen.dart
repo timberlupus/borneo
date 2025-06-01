@@ -45,7 +45,7 @@ class NoDataHintView extends StatelessWidget {
       hasScrollBody: false,
       child: Container(
         color: Theme.of(context).colorScheme.surface,
-        padding: EdgeInsets.fromLTRB(16, 40, 16, 40),
+        padding: const EdgeInsets.fromLTRB(16, 40, 16, 40),
         child: Center(
           child: Column(
             children: [
@@ -317,8 +317,8 @@ class DevicesScreen extends StatelessWidget {
                           const Spacer(),
                           if (!gvm.isDummy)
                             IconButton(
-                              icon: Icon(Icons.more_horiz_outlined, size: 24),
-                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                              icon: const Icon(Icons.edit, size: 24),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                               constraints: null,
                               onPressed: gvm.isDummy || gvm.isBusy ? null : () => _showEditGroupPage(context, g.model),
                             ),
