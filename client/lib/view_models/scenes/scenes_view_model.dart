@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:borneo_app/models/events.dart';
 import 'package:borneo_app/services/device_manager.dart';
+import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_app/services/routine_manager.dart';
 import 'package:borneo_app/services/scene_manager.dart';
 import 'package:borneo_app/view_models/base_view_model.dart';
@@ -15,6 +16,7 @@ class ScenesViewModel extends BaseViewModel with ViewModelEventBusMixin {
   final SceneManager _sceneManager;
   final DeviceManager _deviceManager;
   final RoutineManager _routineManager;
+  final IAppNotificationService _notification;
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
@@ -32,7 +34,14 @@ class ScenesViewModel extends BaseViewModel with ViewModelEventBusMixin {
   final ValueNotifier<bool> _isRoutinesLoading = ValueNotifier<bool>(false);
   ValueNotifier<bool> get isRoutinesLoading => _isRoutinesLoading;
 
-  ScenesViewModel(EventBus globalEventBus, this._sceneManager, this._deviceManager, this._routineManager) {
+  ScenesViewModel(
+    EventBus globalEventBus,
+    this._sceneManager,
+    this._deviceManager,
+    this._routineManager,
+    this._notification, {
+    super.logger,
+  }) {
     super.globalEventBus = globalEventBus;
 
     //event subscriptions
@@ -102,7 +111,8 @@ class ScenesViewModel extends BaseViewModel with ViewModelEventBusMixin {
     for (final r in _routines.value) {
       r.dispose();
     }
-    _routines.value = routines.map((r) => RoutineSummaryViewModel(r, _deviceManager)).toList();
+    _routines.value =
+        routines.map((r) => RoutineSummaryViewModel(r, _deviceManager, _notification, logger: super.logger)).toList();
     _isRoutinesLoading.value = false;
   }
 

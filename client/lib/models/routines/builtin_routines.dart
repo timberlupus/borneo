@@ -25,8 +25,10 @@ final class PowerOffAllRoutine extends AbstractBuiltinRoutine with PersistentRou
     for (final bound in deviceManager.boundDevices) {
       final api = bound.api<IPowerOnOffCapability>();
       final prevState = await api.getOnOff(bound.device);
-      await api.setOnOff(bound.device, false);
-      steps.add({'deviceId': bound.device.id, 'prevState': prevState});
+      if (prevState) {
+        await api.setOnOff(bound.device, false);
+        steps.add({'deviceId': bound.device.id, 'prevState': prevState});
+      }
     }
     if (store != null) {
       await store.addRecord(RoutineHistoryRecord(routineId: routineId, timestamp: DateTime.now(), steps: steps));
@@ -70,12 +72,7 @@ final class FeedModeRoutine extends AbstractBuiltinRoutine {
   }
 
   @override
-  Future<void> execute(DeviceManager deviceManager) async {
-    for (final bound in deviceManager.boundDevices) {
-      final api = bound.api<IPowerOnOffCapability>();
-      api.setOnOff(bound.device, false);
-    }
-  }
+  Future<void> execute(DeviceManager deviceManager) async {}
 }
 
 final class WaterChangeModeRoutine extends AbstractBuiltinRoutine {
@@ -92,10 +89,6 @@ final class WaterChangeModeRoutine extends AbstractBuiltinRoutine {
     // Water change mode operations:
     // * Set the lights to around 20% to avoid burning plants/corals.
     // * Stop or power off all dosers, pumps, heaters, and coolers.
-    for (final bound in deviceManager.boundDevices) {
-      final api = bound.api<IPowerOnOffCapability>();
-      api.setOnOff(bound.device, false);
-    }
   }
 }
 
@@ -112,9 +105,5 @@ final class DryScapeModeRoutine extends AbstractBuiltinRoutine {
     // Dry scape mode operations:
     // * Set the lights to around 20% to avoid burning plants/corals.
     // * Power off everything else.
-    for (final bound in deviceManager.boundDevices) {
-      final api = bound.api<IPowerOnOffCapability>();
-      api.setOnOff(bound.device, false);
-    }
   }
 }

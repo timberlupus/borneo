@@ -1,6 +1,7 @@
 import 'package:borneo_app/routes/app_routes.dart';
 import 'package:borneo_app/services/blob_manager.dart';
 import 'package:borneo_app/services/group_manager.dart';
+import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_app/services/routine_manager.dart';
 import 'package:borneo_app/view_models/devices/group_edit_view_model.dart';
 import 'package:borneo_app/view_models/scenes/scene_edit_view_model.dart';
@@ -329,6 +330,8 @@ class MainScreen extends StatelessWidget {
                 context.read<SceneManager>(),
                 context.read<DeviceManager>(),
                 context.read<RoutineManager>(),
+                context.read<IAppNotificationService>(),
+                logger: context.read<Logger>(),
               ),
           lazy: true,
         ),
