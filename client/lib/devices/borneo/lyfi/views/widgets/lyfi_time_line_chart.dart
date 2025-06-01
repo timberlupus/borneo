@@ -11,6 +11,7 @@ class LyfiTimeLineChart extends StatelessWidget {
   final String? Function(double value)? leftTitleBuilder;
   final Duration animationDuration;
   final DateTime currentTime;
+  final bool allowZoom;
 
   const LyfiTimeLineChart({
     super.key,
@@ -23,6 +24,7 @@ class LyfiTimeLineChart extends StatelessWidget {
     this.extraVerticalLines,
     this.leftTitleBuilder,
     this.animationDuration = const Duration(milliseconds: 200),
+    this.allowZoom = false,
   });
 
   @override
@@ -91,6 +93,16 @@ class LyfiTimeLineChart extends StatelessWidget {
         extraLinesData: ExtraLinesData(extraLinesOnTop: true, verticalLines: verticalLines),
       ),
       duration: animationDuration,
+      transformationConfig:
+          allowZoom
+              ? FlTransformationConfig(
+                scaleAxis: FlScaleAxis.horizontal,
+                minScale: 1.0,
+                maxScale: 2.5,
+                panEnabled: true,
+                scaleEnabled: true,
+              )
+              : const FlTransformationConfig(),
     );
   }
 

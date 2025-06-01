@@ -32,6 +32,7 @@ class ScheduleRunningChart extends StatelessWidget {
             minY: 0,
             maxY: lyfiBrightnessMax.toDouble(),
             currentTime: clock,
+            allowZoom: true,
           );
         },
       ),

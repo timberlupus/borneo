@@ -12,6 +12,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/schedule_edito
 import 'package:borneo_app/views/common/hex_color.dart';
 import '../../view_models/lyfi_view_model.dart';
 import '../brightness_slider_list.dart';
+import '../widgets/lyfi_time_line_chart.dart';
 
 class ScheduleEditorView extends StatelessWidget {
   const ScheduleEditorView({super.key});
@@ -94,94 +95,60 @@ class ScheduleEditorView extends StatelessWidget {
               child: AspectRatio(
                 aspectRatio: 2.75,
                 child: Consumer<ScheduleEditorViewModel>(
-                  builder:
-                      (context, vm, child) => Padding(
-                        padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
-                        child: LineChart(
-                          transformationConfig: FlTransformationConfig(
-                            scaleAxis: FlScaleAxis.horizontal,
-                            minScale: 1.0,
-                            maxScale: 2.5,
-                            panEnabled: true,
-                            scaleEnabled: true,
-                          ),
-                          duration: Duration.zero,
-                          LineChartData(
-                            lineTouchData: const LineTouchData(enabled: true),
-                            lineBarsData: buildLineDatas(vm),
-                            // minX: 0,
-                            // maxX: 24 * 3600,
-                            minX: vm.entries.isNotEmpty ? vm.entries.first.instant.inHours.toDouble() * 3600.0 : 0.0,
-                            maxX:
-                                vm.entries.isNotEmpty
-                                    ? (vm.entries.last.instant.inSeconds.toDouble() / 3600.0).ceilToDouble() * 3600
-                                    : 24 * 3600,
-                            minY: 0,
-                            maxY: lyfiBrightnessMax.toDouble(),
-                            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                            borderData: FlBorderData(
-                              show: true,
-                              border: Border.all(color: Theme.of(context).colorScheme.surface),
-                            ),
-                            titlesData: FlTitlesData(
-                              leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  interval: 3600 * 3,
-                                  reservedSize: 16,
-                                  getTitlesWidget: (v, m) => bottomTitleWidgets(context, v, m),
-                                ),
-                              ),
-                            ),
-                            gridData: FlGridData(
-                              show: true,
-                              drawVerticalLine: true,
-                              drawHorizontalLine: true,
-                              horizontalInterval: lyfiBrightnessMax.toDouble() * 0.25,
-                              verticalInterval: 3600 * 3,
-                              checkToShowVerticalLine: (value) => value.toInt() % 1800 == 0,
-                              getDrawingHorizontalLine:
-                                  (value) => FlLine(color: Theme.of(context).scaffoldBackgroundColor, strokeWidth: 1.5),
-                              getDrawingVerticalLine:
-                                  (value) => FlLine(color: Theme.of(context).scaffoldBackgroundColor, strokeWidth: 1.5),
-                            ),
-                            extraLinesData:
-                                vm.currentEntry == null
-                                    ? null
-                                    : ExtraLinesData(
-                                      extraLinesOnTop: true,
-                                      verticalLines: [
-                                        VerticalLine(
-                                          x: vm.currentEntry!.instant.inSeconds.toDouble(),
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors: [
-                                              Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
-                                              Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.75),
-                                            ],
-                                          ),
-                                          strokeWidth: 8,
-                                          label: VerticalLineLabel(
-                                            show: true,
-                                            padding: const EdgeInsets.only(bottom: 8),
-                                            direction: LabelDirection.horizontal,
-                                            alignment: Alignment(0, -1.6),
-                                            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                              fontFeatures: [FontFeature.tabularFigures()],
-                                              color: Theme.of(context).colorScheme.primary,
-                                            ),
-                                            labelResolver: (line) => Duration(seconds: line.x.toInt()).toHHMM(),
-                                          ),
-                                        ),
-                                      ],
+                  builder: (context, vm, child) {
+                    final minX = vm.entries.isNotEmpty ? vm.entries.first.instant.inHours.toDouble() * 3600.0 : 0.0;
+                    final maxX =
+                        vm.entries.isNotEmpty
+                            ? ((vm.entries.last.instant.inSeconds.toDouble() / 3600.0).ceilToDouble() * 3600.0)
+                            : 24 * 3600.0;
+                    return LyfiTimeLineChart(
+                      lineBarsData: buildLineDatas(vm),
+                      minX: minX,
+                      maxX: maxX,
+                      minY: 0,
+                      maxY: lyfiBrightnessMax.toDouble(),
+                      currentTime:
+                          vm.currentEntry?.instant != null
+                              ? DateTime(
+                                0,
+                                1,
+                                1,
+                                vm.currentEntry!.instant.inHours,
+                                vm.currentEntry!.instant.inMinutes % 60,
+                              )
+                              : DateTime(0, 1, 1, 0, 0),
+                      allowZoom: true,
+                      // 可选: 你可以传 leftTitleBuilder，如果需要左侧Y轴标题
+                      extraVerticalLines:
+                          vm.currentEntry == null
+                              ? null
+                              : [
+                                VerticalLine(
+                                  x: vm.currentEntry!.instant.inSeconds.toDouble(),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
+                                      Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.75),
+                                    ],
+                                  ),
+                                  strokeWidth: 8,
+                                  label: VerticalLineLabel(
+                                    show: true,
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    direction: LabelDirection.horizontal,
+                                    alignment: Alignment(0, -1.6),
+                                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                      fontFeatures: [FontFeature.tabularFigures()],
+                                      color: Theme.of(context).colorScheme.primary,
                                     ),
-                          ),
-                        ),
-                      ),
+                                    labelResolver: (line) => Duration(seconds: line.x.toInt()).toHHMM(),
+                                  ),
+                                ),
+                              ],
+                    );
+                  },
                 ),
               ),
             ),
