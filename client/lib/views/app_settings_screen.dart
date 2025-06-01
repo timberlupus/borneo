@@ -1,5 +1,7 @@
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 import 'package:borneo_app/view_models/app_settings_view_model.dart';
@@ -11,7 +13,7 @@ class AppSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (cb) => AppSettingsViewModel(),
+      create: (cb) => AppSettingsViewModel(globalEventBus: cb.read<EventBus>(), logger: cb.read<Logger>()),
       builder: (context, child) {
         final vm = context.read<AppSettingsViewModel>();
         return FutureBuilder(
@@ -37,27 +39,32 @@ class AppSettingsScreen extends StatelessWidget {
         ListTile(
           leading: Icon(Icons.settings_brightness_outlined),
           title: Text(context.translate('Theme')),
-          trailing: DropdownButton<ThemeMode>(
-            items: [
-              DropdownMenuItem<ThemeMode>(
-                value: ThemeMode.system,
-                child: Text(context.translate("System"), style: Theme.of(context).textTheme.bodySmall),
-              ),
-              DropdownMenuItem<ThemeMode>(
-                value: ThemeMode.light,
-                child: Text(context.translate("Light"), style: Theme.of(context).textTheme.bodySmall),
-              ),
-              DropdownMenuItem<ThemeMode>(
-                value: ThemeMode.dark,
-                child: Text(context.translate("Dark"), style: Theme.of(context).textTheme.bodySmall),
-              ),
-            ],
-            onChanged: (value) {
-              final vm = context.read<AppSettingsViewModel>();
-              if (value != null && vm.themeMode != value) {
-                vm.changeBrightness(value);
-              }
-            },
+          trailing: Selector<AppSettingsViewModel, ThemeMode>(
+            selector: (_, vm) => vm.themeMode,
+            builder:
+                (context, themeMode, child) => DropdownButton<ThemeMode>(
+                  value: themeMode,
+                  items: [
+                    DropdownMenuItem<ThemeMode>(
+                      value: ThemeMode.system,
+                      child: Text(context.translate("System"), style: Theme.of(context).textTheme.bodySmall),
+                    ),
+                    DropdownMenuItem<ThemeMode>(
+                      value: ThemeMode.light,
+                      child: Text(context.translate("Light"), style: Theme.of(context).textTheme.bodySmall),
+                    ),
+                    DropdownMenuItem<ThemeMode>(
+                      value: ThemeMode.dark,
+                      child: Text(context.translate("Dark"), style: Theme.of(context).textTheme.bodySmall),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    final vm = context.read<AppSettingsViewModel>();
+                    if (value != null && vm.themeMode != value) {
+                      vm.changeBrightness(value);
+                    }
+                  },
+                ),
           ),
         ),
       ],
