@@ -117,9 +117,6 @@ class SceneSummaryViewModel extends BaseViewModel {
   }
 
   void _onSceneUpdated(SceneUpdatedEvent event) {
-    if (isBusy) {
-      return;
-    }
     if (event.scene.id == id) {
       _model = event.scene;
       notifyListeners();
