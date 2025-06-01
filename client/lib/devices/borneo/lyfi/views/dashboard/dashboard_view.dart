@@ -448,8 +448,8 @@ class DashboardView extends StatelessWidget {
                       selector:
                           (_, vm) => (
                             canGo: vm.canLockOrUnlock,
-                            enabled: vm.lyfiDeviceStatus?.acclimationEnabled ?? false,
-                            activated: vm.lyfiDeviceStatus?.acclimationActivated ?? false,
+                            enabled: vm.lyfiDeviceStatus.acclimationEnabled,
+                            activated: vm.lyfiDeviceStatus.acclimationActivated,
                           ),
                       builder:
                           (context, props, _) => RoundedIconTextButton(
@@ -494,8 +494,8 @@ class DashboardView extends StatelessWidget {
                     Selector<LyfiViewModel, ({bool enabled, bool activated})>(
                       selector:
                           (_, vm) => (
-                            enabled: vm.lyfiDeviceStatus?.acclimationEnabled ?? false,
-                            activated: vm.lyfiDeviceStatus?.acclimationActivated ?? false,
+                            enabled: vm.lyfiDeviceStatus.acclimationEnabled,
+                            activated: vm.lyfiDeviceStatus.acclimationActivated,
                           ),
                       builder:
                           (context, props, _) => RoundedIconTextButton(

@@ -218,15 +218,15 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     _fanPowerRatio = lyfiDeviceStatus.fanPower.toDouble();
     _mode = lyfiDeviceStatus.mode;
 
-    _temporaryRemaining.value = lyfiDeviceStatus!.temporaryRemaining;
+    _temporaryRemaining.value = lyfiDeviceStatus.temporaryRemaining;
 
     bool emptyChannels = _channels.isEmpty;
     double ob = 0;
-    for (int i = 0; i < lyfiDeviceStatus!.currentColor.length; i++) {
+    for (int i = 0; i < lyfiDeviceStatus.currentColor.length; i++) {
       if (emptyChannels) {
-        _channels.add(ValueNotifier<int>(lyfiDeviceStatus!.currentColor[i]));
+        _channels.add(ValueNotifier<int>(lyfiDeviceStatus.currentColor[i]));
       } else {
-        _channels[i].value = lyfiDeviceStatus!.currentColor[i];
+        _channels[i].value = lyfiDeviceStatus.currentColor[i];
       }
       ob += lyfiDeviceInfo.channels[i].brightnessRatio * _channels[i].value / lyfiBrightnessMax;
     }
@@ -357,7 +357,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       borneoStatus: borneoDeviceStatus!,
       borneoInfo: super.borneoDeviceInfo!,
       ledInfo: lyfiDeviceInfo,
-      ledStatus: lyfiDeviceStatus!,
+      ledStatus: lyfiDeviceStatus,
       powerBehavior: await _deviceApi.getPowerBehavior(boundDevice!.device),
       location: await _deviceApi.getLocation(boundDevice!.device),
     );
