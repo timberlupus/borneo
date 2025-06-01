@@ -1,6 +1,7 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_app/views/common/hex_color.dart';
+import 'package:borneo_common/datetime_ext.dart';
 import 'package:borneo_common/duration_ext.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -12,24 +13,33 @@ class ScheduleRunningChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LyfiViewModel vm = context.read<LyfiViewModel>();
+    if (!vm.isOnline) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: LineChart(
-        _buildChartData(context, vm),
-        duration: const Duration(milliseconds: 250),
-        transformationConfig: FlTransformationConfig(
-          scaleAxis: FlScaleAxis.horizontal,
-          minScale: 1.0,
-          maxScale: 2.5,
-          panEnabled: true,
-          scaleEnabled: true,
-        ),
+      child: Selector<LyfiViewModel, DateTime>(
+        selector: (context, vm) => vm.deviceClock,
+        shouldRebuild: (previous, next) => !previous.isEqualToMinute(next),
+        builder:
+            (context, clock, _) => LineChart(
+              _buildChartData(context, vm),
+              duration: const Duration(milliseconds: 250),
+              transformationConfig: FlTransformationConfig(
+                scaleAxis: FlScaleAxis.horizontal,
+                minScale: 1.0,
+                maxScale: 2.5,
+                panEnabled: true,
+                scaleEnabled: true,
+              ),
+            ),
       ),
     );
   }
 
   LineChartData _buildChartData(BuildContext context, LyfiViewModel vm) {
-    final now = DateTime.now();
+    final now = vm.deviceClock;
     final borderSide = BorderSide(color: Theme.of(context).scaffoldBackgroundColor, width: 1.5);
     return LineChartData(
       lineTouchData: lineTouchData1,
@@ -74,11 +84,14 @@ class ScheduleRunningChart extends StatelessWidget {
               dashArray: const [3, 2],
               strokeWidth: 1.5,
               label: VerticalLineLabel(
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
                 padding: const EdgeInsets.only(bottom: 8),
                 alignment: const Alignment(0, -1.6),
                 show: true,
-                labelResolver: (vl) => Duration(seconds: vl.x.toInt()).toHHMMSS(),
+                labelResolver: (vl) => Duration(seconds: vl.x.toInt()).toHHMM(),
               ),
             ),
         ],

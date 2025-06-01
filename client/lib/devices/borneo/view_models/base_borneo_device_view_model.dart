@@ -9,9 +9,11 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
 
   final _lock = Lock();
   GeneralBorneoDeviceStatus? _borneoDeviceStatus;
-  GeneralBorneoDeviceStatus? get borneoDeviceStatus => !_lock.locked && isOnline ? _borneoDeviceStatus : null;
+  GeneralBorneoDeviceStatus? get borneoDeviceStatus => isOnline ? _borneoDeviceStatus : null;
 
   IBorneoDeviceApi get borneoDeviceApi => super.boundDevice!.driver as IBorneoDeviceApi;
+
+  DateTime get deviceClock => borneoDeviceStatus!.timestamp.toLocal();
 
   @override
   RssiLevel? get rssiLevel =>

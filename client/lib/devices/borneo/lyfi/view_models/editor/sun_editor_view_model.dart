@@ -47,6 +47,7 @@ class SunEditorViewModel extends BaseEditorViewModel {
         _sunInstants[i].color[index] = (value * _sunCurve[i].brightness).round();
       }
     }
+    notifyListeners();
   }
 
   @override

@@ -1,9 +1,12 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
+import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_app/views/common/hex_color.dart';
+import 'package:borneo_common/datetime_ext.dart';
 import 'package:borneo_common/duration_ext.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SunRunningChart extends StatelessWidget {
   final List<ScheduledInstant> sunInstants;
@@ -12,9 +15,19 @@ class SunRunningChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LyfiViewModel vm = context.read<LyfiViewModel>();
+    if (!vm.isOnline) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
-      child: LineChart(_buildChartData(context), duration: const Duration(milliseconds: 200)),
+      child: Selector<LyfiViewModel, DateTime>(
+        selector: (context, vm) => vm.deviceClock,
+        shouldRebuild: (previous, next) => !previous.isEqualToSecond(next),
+        builder:
+            (context, clock, _) => LineChart(_buildChartData(context), duration: const Duration(milliseconds: 200)),
+      ),
     );
   }
 
@@ -53,7 +66,7 @@ class SunRunningChart extends StatelessWidget {
       ExtraLinesData(extraLinesOnTop: true, verticalLines: [_buildNowLine(context)]);
 
   VerticalLine _buildNowLine(BuildContext context) {
-    final now = DateTime.now();
+    final now = context.read<LyfiViewModel>().deviceClock;
     return VerticalLine(
       x:
           Duration(
@@ -72,7 +85,10 @@ class SunRunningChart extends StatelessWidget {
       dashArray: const [3, 2],
       strokeWidth: 1.5,
       label: VerticalLineLabel(
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+          fontFeatures: [FontFeature.tabularFigures()],
+        ),
         padding: const EdgeInsets.only(bottom: 8),
         alignment: const Alignment(0, -1.6),
         show: true,

@@ -61,7 +61,7 @@ class SunEditorView extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: AspectRatio(
                   aspectRatio: 2.75,
-                  child: Consumer<LyfiViewModel>(builder: (conterxt, vm, _) => buildGraph(context)),
+                  child: Consumer<SunEditorViewModel>(builder: (conterxt, vm, _) => buildGraph(context)),
                 ),
               ),
               Expanded(child: buildSliders(context)),
