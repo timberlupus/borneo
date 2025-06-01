@@ -173,7 +173,7 @@ class SceneManager {
     });
   }
 
-  Future<SceneEntity> create({required String name, required String notes}) async {
+  Future<SceneEntity> create({required String name, required String notes, String? imagePath}) async {
     final store = stringMapStoreFactory.store(StoreNames.scenes);
     return await _db.transaction((tx) async {
       // TODO make it current
@@ -183,6 +183,7 @@ class SceneManager {
         isCurrent: false,
         lastAccessTime: DateTime.now(),
         notes: notes,
+        imagePath: imagePath,
       );
       await store.record(scene.id).put(tx, scene.toMap());
       _globalEventBus.fire(SceneCreatedEvent(scene));
@@ -190,14 +191,21 @@ class SceneManager {
     });
   }
 
-  Future<SceneEntity> update({required String id, required String name, required String notes, Transaction? tx}) async {
+  Future<SceneEntity> update({
+    required String id,
+    required String name,
+    required String notes,
+    String? imagePath,
+    Transaction? tx,
+  }) async {
     if (tx == null) {
-      return await _db.transaction((tx) => update(id: id, name: name, notes: notes, tx: tx));
+      return await _db.transaction((tx) => update(id: id, name: name, notes: notes, imagePath: imagePath, tx: tx));
     } else {
       final store = stringMapStoreFactory.store(StoreNames.scenes);
       final record = await store.record(id).update(tx, {
         SceneEntity.kNameField: name,
         SceneEntity.kNotesFieldName: notes,
+        SceneEntity.kImagePathFieldName: imagePath,
       });
       if (record == null) {
         throw InvalidOperationException(message: 'Failed to update record');

@@ -18,6 +18,7 @@ class SceneEditViewModel extends AbstractScreenViewModel with ViewModelEventBusM
   late final String? id;
   late String name;
   late String notes;
+  String? imagePath;
 
   final bool _deletionAvailable;
   bool get deletionAvailable => _deletionAvailable;
@@ -33,11 +34,19 @@ class SceneEditViewModel extends AbstractScreenViewModel with ViewModelEventBusM
     if (isCreation) {
       name = '';
       notes = '';
+      imagePath = null;
     } else {
       name = model!.name;
       notes = model.notes;
+      imagePath = model.imagePath;
     }
     id = model?.id;
+  }
+
+  // 新增：设置图片路径
+  void setImagePath(String? path) {
+    imagePath = path;
+    notifyListeners();
   }
 
   @override
@@ -51,9 +60,9 @@ class SceneEditViewModel extends AbstractScreenViewModel with ViewModelEventBusM
     setBusy(true);
     try {
       if (isCreation) {
-        await _sceneManager.create(name: name, notes: notes);
+        await _sceneManager.create(name: name, notes: notes, imagePath: imagePath);
       } else {
-        await _sceneManager.update(id: id!, name: name, notes: notes);
+        await _sceneManager.update(id: id!, name: name, notes: notes, imagePath: imagePath);
       }
     } catch (e, stackTrace) {
       notifyAppError('Failed to update scene `$name`', error: e, stackTrace: stackTrace);
