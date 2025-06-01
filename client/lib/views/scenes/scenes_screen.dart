@@ -19,9 +19,10 @@ class SceneList extends StatelessWidget {
       child: Consumer<ScenesViewModel>(
         builder:
             (context, vm, child) => Container(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(0),
               height: screenHeight / 4.0,
               child: ListView.separated(
+                padding: EdgeInsets.symmetric(horizontal: 16),
                 separatorBuilder: (_, __) => const SizedBox(width: 16),
                 scrollDirection: Axis.horizontal,
                 itemCount: vm.scenes.length,

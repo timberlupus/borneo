@@ -10,7 +10,7 @@ class RoutineList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.read<ScenesViewModel>();
+    final vm = context.watch<ScenesViewModel>();
     return SliverToBoxAdapter(
       child: Container(
         padding: EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -20,10 +20,30 @@ class RoutineList extends StatelessWidget {
           children: [
             Text(context.translate('Routines'), style: Theme.of(context).textTheme.titleMedium),
             SizedBox(height: 16),
-            ValueListenableBuilder(
-              valueListenable: vm.routines,
-              builder:
-                  (context, scenes, child) => GridView.builder(
+            AnimatedBuilder(
+              animation: Listenable.merge([vm.isRoutinesLoading, vm.routines]),
+              builder: (context, _) {
+                if (vm.isRoutinesLoading.value) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 32),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+                final routines = vm.routines.value;
+                if (routines.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 32),
+                      child: Text(context.translate('No routines'), style: TextStyle(color: Colors.grey)),
+                    ),
+                  );
+                }
+                return AnimatedSwitcher(
+                  duration: Duration(milliseconds: 500),
+                  child: GridView.builder(
+                    key: ValueKey(routines.length),
                     shrinkWrap: true,
                     primary: true,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -32,15 +52,17 @@ class RoutineList extends StatelessWidget {
                       mainAxisSpacing: 16.0,
                     ),
                     padding: EdgeInsets.all(0.0),
-                    itemCount: vm.routines.value.length,
+                    itemCount: routines.length,
                     itemBuilder: (context, index) {
-                      if (index < vm.routines.value.length) {
-                        return RoutineCard(vm.routines.value[index]);
+                      if (index < routines.length) {
+                        return RoutineCard(routines[index]);
                       } else {
                         return _buildAddItem(context);
                       }
                     },
                   ),
+                );
+              },
             ),
           ],
         ),

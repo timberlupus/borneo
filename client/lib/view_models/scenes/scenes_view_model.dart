@@ -29,6 +29,9 @@ class ScenesViewModel extends BaseViewModel with ViewModelEventBusMixin {
   final ValueNotifier<List<RoutineSummaryViewModel>> _routines = ValueNotifier<List<RoutineSummaryViewModel>>([]);
   ValueNotifier<List<RoutineSummaryViewModel>> get routines => _routines;
 
+  final ValueNotifier<bool> _isRoutinesLoading = ValueNotifier<bool>(false);
+  ValueNotifier<bool> get isRoutinesLoading => _isRoutinesLoading;
+
   ScenesViewModel(EventBus globalEventBus, this._sceneManager, this._deviceManager, this._routineManager) {
     super.globalEventBus = globalEventBus;
 
@@ -93,12 +96,14 @@ class ScenesViewModel extends BaseViewModel with ViewModelEventBusMixin {
     _scenes.addAll(sceneViewModels);
   }
 
-  void _reloadRoutines() {
+  void _reloadRoutines() async {
+    _isRoutinesLoading.value = true;
     final routines = _routineManager.getAvailableRoutines();
     for (final r in _routines.value) {
       r.dispose();
     }
     _routines.value = routines.map((r) => RoutineSummaryViewModel(r)).toList();
+    _isRoutinesLoading.value = false;
   }
 
   Future<void> switchCurrentScene(String newSceneID) async {
