@@ -167,10 +167,10 @@ class HeroPanel extends StatelessWidget {
                   onSelectionChanged:
                       vm.isOn && !vm.isBusy && !vm.isLocked
                           ? (Set<LedRunningMode> newSelection) {
-                              if (mode != newSelection.single) {
-                                vm.switchMode(newSelection.single);
-                              }
+                            if (mode != newSelection.single) {
+                              vm.switchMode(newSelection.single);
                             }
+                          }
                           : null,
                 );
               },
@@ -328,8 +328,20 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
   }
 }
 
-class LyfiView extends StatelessWidget {
+class LyfiView extends StatefulWidget {
   const LyfiView({super.key});
+
+  @override
+  State<LyfiView> createState() => _LyfiViewState();
+}
+
+class _LyfiViewState extends State<LyfiView> {
+  Future<void>? _initFuture;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -345,13 +357,14 @@ class LyfiView extends StatelessWidget {
           ),
       builder: (context, child) {
         final vm = context.read<LyfiViewModel>();
+        _initFuture ??= vm.isInitialized ? Future.value() : vm.initialize();
         return FutureBuilder(
-          future: vm.isInitialized ? null : vm.initialize(),
+          future: _initFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Scaffold(body: Center(child: CircularProgressIndicator()));
             } else if (snapshot.hasError) {
-              return Scaffold(body: Center(child: Text('Error: ${snapshot.error}')));
+              return Scaffold(body: Center(child: Text('Error: [${snapshot.error}]')));
             } else {
               return _LyfiDeviceDetailsScreen();
             }
