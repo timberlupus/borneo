@@ -169,7 +169,10 @@ class SceneCard extends StatelessWidget {
                                   ],
                                 )
                                 : TweenAnimationBuilder<double>(
-                                  tween: Tween<double>(begin: scene.isSelected ? 0.0 : 1.0, end: scene.isSelected ? 0.0 : 1.0),
+                                  tween: Tween<double>(
+                                    begin: scene.isSelected ? 0.0 : 1.0,
+                                    end: scene.isSelected ? 0.0 : 1.0,
+                                  ),
                                   duration: const Duration(milliseconds: 300),
                                   builder: (context, value, child) {
                                     // value: 0.0（选中）~ 1.0（未选中）
@@ -177,10 +180,26 @@ class SceneCard extends StatelessWidget {
                                     final double s = 1.0 - 0.4 * value; // 饱和度 1.0~0.6
                                     final double b = 1.0 - 0.2 * value; // 亮度 1.0~0.8
                                     final matrix = <double>[
-                                      s * b, (1 - s) * b, (1 - s) * b, 0, 0,
-                                      (1 - s) * b, s * b, (1 - s) * b, 0, 0,
-                                      (1 - s) * b, (1 - s) * b, s * b, 0, 0,
-                                      0, 0, 0, 1, 0,
+                                      s * b,
+                                      (1 - s) * b,
+                                      (1 - s) * b,
+                                      0,
+                                      0,
+                                      (1 - s) * b,
+                                      s * b,
+                                      (1 - s) * b,
+                                      0,
+                                      0,
+                                      (1 - s) * b,
+                                      (1 - s) * b,
+                                      s * b,
+                                      0,
+                                      0,
+                                      0,
+                                      0,
+                                      0,
+                                      1,
+                                      0,
                                     ];
                                     return ColorFiltered(
                                       colorFilter: ColorFilter.matrix(matrix),
@@ -195,7 +214,10 @@ class SceneCard extends StatelessWidget {
                                             ),
                                           if (!scene.isSelected && vm.model.imagePath == null)
                                             ColorFiltered(
-                                              colorFilter: ColorFilter.mode(Colors.black.withAlpha(128), BlendMode.srcATop),
+                                              colorFilter: ColorFilter.mode(
+                                                Colors.black.withAlpha(128),
+                                                BlendMode.srcATop,
+                                              ),
                                               child: Image.asset(
                                                 'assets/images/scenes/scene-default-noimage.jpg',
                                                 fit: BoxFit.cover,
@@ -210,7 +232,10 @@ class SceneCard extends StatelessWidget {
                                             ),
                                           if (!scene.isSelected && vm.model.imagePath != null)
                                             ColorFiltered(
-                                              colorFilter: ColorFilter.mode(Colors.black.withAlpha(97), BlendMode.srcATop),
+                                              colorFilter: ColorFilter.mode(
+                                                Colors.black.withAlpha(97),
+                                                BlendMode.srcATop,
+                                              ),
                                               child: Image.file(
                                                 File(vm.model.imagePath!),
                                                 fit: BoxFit.cover,
