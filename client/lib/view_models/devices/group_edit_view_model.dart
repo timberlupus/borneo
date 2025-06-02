@@ -11,7 +11,7 @@ final class GroupEditArguments {
   const GroupEditArguments({required this.isCreation, this.model});
 }
 
-class GroupEditViewModel extends AbstractScreenViewModel with ViewModelEventBusMixin {
+class GroupEditViewModel extends AbstractScreenViewModel {
   final GroupManager _groupManager;
   final bool isCreation;
   late final String? id;
@@ -25,7 +25,6 @@ class GroupEditViewModel extends AbstractScreenViewModel with ViewModelEventBusM
     DeviceGroupEntity? model,
     super.logger,
   }) {
-    super.globalEventBus = globalEventBus;
     if (isCreation) {
       name = '';
       notes = '';

@@ -39,20 +39,25 @@ class RoutineManager implements IDisposable {
 
   Future<void> executeRoutine(String routineID) async {
     final routine = allRoutines.singleWhere((r) => r.id == routineID);
-    if (routine is PersistentRoutineMixin) {
-      await routine.executeAndPersist(_deviceManager, _historyStore, routineID);
-    } else {
-      await routine.execute(_deviceManager);
+    final steps = await routine.execute(_deviceManager);
+    if (steps.isNotEmpty) {
+      await _historyStore.addRecord(
+        RoutineHistoryRecord(routineId: routineID, timestamp: DateTime.now(), steps: steps),
+      );
     }
   }
 
   Future<void> undoRoutine(String routineID) async {
     final routine = allRoutines.singleWhere((r) => r.id == routineID);
-    if (routine is PersistentRoutineMixin) {
-      await routine.undoFromHistory(_deviceManager, _historyStore, routineID);
-    } else {
-      await routine.undo(_deviceManager);
+    final records = await _historyStore.getAllRecords();
+    final last = records.where((r) => r.routineId == routineID).lastOrNull;
+    if (last == null) return;
+    final stepObjs = last.steps.map(routine.createAction).toList();
+    for (final step in stepObjs.reversed) {
+      await step.undo(_deviceManager);
     }
+    // 清除该 routine 的所有历史记录
+    await _historyStore.clearByRoutineId(routineID);
   }
 
   @override

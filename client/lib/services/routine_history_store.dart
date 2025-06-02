@@ -34,4 +34,14 @@ class RoutineHistoryStore {
   Future<void> clear() async {
     await _store.delete(db);
   }
+
+  Future<void> clearByRoutineId(String routineId) async {
+    final snapshots = await _store.find(db);
+    for (final snap in snapshots) {
+      final value = snap.value;
+      if (value['routineId'] == routineId) {
+        await _store.record(snap.key).delete(db);
+      }
+    }
+  }
 }

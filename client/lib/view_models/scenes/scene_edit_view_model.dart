@@ -2,8 +2,6 @@ import 'package:borneo_app/models/scene_entity.dart';
 import 'package:borneo_app/services/scene_manager.dart';
 import 'package:borneo_app/view_models/abstract_screen_view_model.dart';
 
-import '../base_view_model.dart';
-
 final class SceneEditArguments {
   final bool isCreation;
   final SceneEntity? model;
@@ -11,7 +9,7 @@ final class SceneEditArguments {
   const SceneEditArguments({required this.isCreation, this.model});
 }
 
-class SceneEditViewModel extends AbstractScreenViewModel with ViewModelEventBusMixin {
+class SceneEditViewModel extends AbstractScreenViewModel {
   final SceneManager _sceneManager;
   final bool isCreation;
   late final String? id;
@@ -29,7 +27,6 @@ class SceneEditViewModel extends AbstractScreenViewModel with ViewModelEventBusM
     SceneEntity? model,
     super.logger,
   }) : _deletionAvailable = !isCreation {
-    super.globalEventBus = globalEventBus;
     if (isCreation) {
       name = '';
       notes = '';
