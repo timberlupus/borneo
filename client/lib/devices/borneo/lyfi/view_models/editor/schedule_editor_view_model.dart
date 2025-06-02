@@ -43,6 +43,7 @@ class ScheduleEntryViewModel extends ChangeNotifier {
 
 class ScheduleEditorViewModel extends BaseEditorViewModel {
   static const Duration defaultInstantSpan = Duration(minutes: 30);
+  static const int maxEntries = 48;
 
   final EasySetupViewModel easySetupViewModel;
 
@@ -174,10 +175,11 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
     }
   }
 
-  Future<void> addInstant(Duration instant) async {
-    // TODO check the existed one
-    int insertPos = _findInstantInsertPosition(instant);
+  bool get canAddInstant => isInitialized && _entries.length < maxEntries;
 
+  Future<void> addInstant(Duration instant) async {
+    if (_entries.length >= maxEntries) return;
+    int insertPos = _findInstantInsertPosition(instant);
     if (_currentEntryIndex != null) {
       _insertInstant(insertPos, instant, _entries[_currentEntryIndex!].channels);
     } else {

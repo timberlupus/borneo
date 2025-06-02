@@ -85,7 +85,6 @@ class ScheduleEditorView extends StatelessWidget {
     return ChangeNotifierProvider.value(
       value: editorVM,
       builder: (context, child) {
-        final vm = context.read<ScheduleEditorViewModel>();
         return Column(
           spacing: 16,
           children: [
@@ -94,7 +93,7 @@ class ScheduleEditorView extends StatelessWidget {
               color: Theme.of(context).colorScheme.surfaceContainer,
               padding: EdgeInsets.fromLTRB(24, 16, 24, 8),
               child: AspectRatio(
-                aspectRatio: 2.75,
+                aspectRatio: 2.5,
                 child: Consumer<ScheduleEditorViewModel>(
                   builder: (context, vm, child) {
                     final minX = vm.entries.isNotEmpty ? vm.entries.first.instant.inHours.toDouble() * 3600.0 : 0.0;
@@ -119,35 +118,21 @@ class ScheduleEditorView extends StatelessWidget {
                               )
                               : DateTime(0, 1, 1, 0, 0),
                       allowZoom: true,
-                      // 可选: 你可以传 leftTitleBuilder，如果需要左侧Y轴标题
-                      extraVerticalLines:
-                          vm.currentEntry == null
-                              ? null
-                              : [
-                                VerticalLine(
-                                  x: vm.currentEntry!.instant.inSeconds.toDouble(),
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
-                                      Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.75),
-                                    ],
-                                  ),
-                                  strokeWidth: 8,
-                                  label: VerticalLineLabel(
-                                    show: true,
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    direction: LabelDirection.horizontal,
-                                    alignment: Alignment(0, -1.6),
-                                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                      fontFeatures: [FontFeature.tabularFigures()],
-                                      color: Theme.of(context).colorScheme.primary,
-                                    ),
-                                    labelResolver: (line) => Duration(seconds: line.x.toInt()).toHHMM(),
-                                  ),
-                                ),
-                              ],
+                      lineTouchData: LineTouchData(
+                        handleBuiltInTouches: true,
+                        touchTooltipData: LineTouchTooltipData(getTooltipItems: (_) => []),
+                        touchCallback: (event, response) async {
+                          if (response == null || response.lineBarSpots == null || response.lineBarSpots!.isEmpty) {
+                            return;
+                          }
+                          final spot = response.lineBarSpots!.first;
+                          final x = spot.x.toInt();
+                          final idx = vm.entries.indexWhere((e) => e.instant.inSeconds == x);
+                          if (idx != -1) {
+                            await vm.setCurrentEntryAndSyncDimmingColor(idx);
+                          }
+                        },
+                      ),
                     );
                   },
                 ),
@@ -167,17 +152,23 @@ class ScheduleEditorView extends StatelessWidget {
             // Bottom buttons
             Consumer<ScheduleEditorViewModel>(
               builder:
-                  (context, value, child) => Material(
-                    elevation: 4,
-                    color: Theme.of(context).colorScheme.primaryContainer,
+                  (context, vm, child) => Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainer,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                      boxShadow: [
+                        BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8, offset: Offset(0, -2)),
+                      ],
+                    ),
+                    padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
                     child: Row(
-                      mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.auto_fix_high_outlined),
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          tooltip: 'Easy setup',
+                        // Easy Setup
+                        _BottomActionButton(
+                          icon: Icons.auto_fix_high_outlined,
+                          label: 'Easy',
+                          color: Theme.of(context).colorScheme.primary,
                           onPressed: () async {
                             if (context.mounted) {
                               bool proceed = true;
@@ -199,43 +190,66 @@ class ScheduleEditorView extends StatelessWidget {
                             }
                           },
                         ),
-                        IconButton(
-                          icon: Icon(Icons.play_arrow),
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          onPressed: vm.isOnline && !vm.isPreviewMode ? vm.togglePreviewMode : null,
+                        // Add
+                        _BottomActionButton(
+                          icon: Icons.add_outlined,
+                          label: 'Add',
+                          color:
+                              vm.canAddInstant
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).disabledColor,
+                          onPressed:
+                              vm.canAddInstant
+                                  ? () async {
+                                    final initialTime =
+                                        (vm.currentEntry?.instant ?? Duration(hours: 6, minutes: 30)) +
+                                        ScheduleEditorViewModel.defaultInstantSpan;
+                                    final selectedTime = await showNewInstantDialog(context, initialTime.toTimeOfDay());
+                                    if (selectedTime != null) {
+                                      vm.addInstant(selectedTime);
+                                    }
+                                  }
+                                  : null,
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.add_outlined),
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          onPressed: () async {
-                            final initialTime =
-                                (vm.currentEntry?.instant ?? Duration(hours: 6, minutes: 30)) +
-                                ScheduleEditorViewModel.defaultInstantSpan;
-                            final selectedTime = await showNewInstantDialog(context, initialTime.toTimeOfDay());
-                            if (selectedTime != null) {
-                              vm.addInstant(selectedTime);
-                            }
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.remove_outlined),
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        // Remove
+                        _BottomActionButton(
+                          icon: Icons.remove,
+                          label: 'Remove',
+                          color:
+                              vm.canRemoveCurrentInstant
+                                  ? Theme.of(context).colorScheme.secondary
+                                  : Theme.of(context).disabledColor,
                           onPressed: vm.canRemoveCurrentInstant ? vm.removeCurrentInstant : null,
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.clear_outlined),
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        // Clear
+                        _BottomActionButton(
+                          icon: Icons.clear,
+                          label: 'Clear',
+                          color:
+                              vm.canClearInstants
+                                  ? Theme.of(context).colorScheme.error
+                                  : Theme.of(context).disabledColor,
                           onPressed: vm.canClearInstants ? () => _confirmClearEntries(context, vm) : null,
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.skip_previous_outlined),
+                        // Prev
+                        _BottomActionButton(
+                          icon: Icons.skip_previous_outlined,
+                          label: 'Prev',
+                          color:
+                              vm.canPrevInstant
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).disabledColor,
                           onPressed: vm.canPrevInstant ? vm.prevInstant : null,
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.skip_next_outlined),
+                        // Next
+                        _BottomActionButton(
+                          icon: Icons.skip_next_outlined,
+                          label: 'Next',
+                          color:
+                              vm.canNextInstant
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).disabledColor,
                           onPressed: vm.canNextInstant ? vm.nextInstant : null,
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
                         ),
                       ],
                     ),
@@ -288,5 +302,53 @@ class ScheduleEditorView extends StatelessWidget {
         //
       }
     });
+  }
+}
+
+class _BottomActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback? onPressed;
+  const _BottomActionButton({required this.icon, required this.label, required this.color, required this.onPressed});
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isEnabled = onPressed != null;
+    final Color sysDisabled = theme.colorScheme.onSurface.withValues(alpha: 0.38);
+    final Color borderColor = isEnabled ? color : sysDisabled;
+    final Color iconColor = isEnabled ? color : sysDisabled;
+    final Color labelColor = isEnabled ? Theme.of(context).colorScheme.onSurface : sysDisabled;
+    final TextStyle? labelStyle = theme.textTheme.labelSmall?.copyWith(color: labelColor);
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 48,
+              width: 48,
+              child: OutlinedButton(
+                onPressed: onPressed,
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  side: BorderSide(color: borderColor, width: 1.5),
+                  foregroundColor: iconColor,
+                  backgroundColor: Colors.transparent,
+                  padding: EdgeInsets.zero,
+                  shadowColor: Colors.transparent,
+                  disabledForegroundColor: sysDisabled,
+                  disabledBackgroundColor: Colors.transparent,
+                ),
+                child: Icon(icon, size: 24, color: iconColor),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(label, style: labelStyle, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ],
+        ),
+      ),
+    );
   }
 }
