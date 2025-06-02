@@ -140,11 +140,13 @@ class HeroPanel extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Consumer<LyfiViewModel>(
-              builder: (context, vm, _) {
+            Selector<LyfiViewModel, LedRunningMode>(
+              selector: (context, vm) => vm.mode,
+              builder: (context, mode, _) {
+                final vm = context.read<LyfiViewModel>();
                 return SegmentedButton<LedRunningMode>(
                   showSelectedIcon: false,
-                  selected: <LedRunningMode>{vm.mode},
+                  selected: <LedRunningMode>{mode},
                   segments: [
                     ButtonSegment<LedRunningMode>(
                       value: LedRunningMode.manual,
@@ -165,10 +167,10 @@ class HeroPanel extends StatelessWidget {
                   onSelectionChanged:
                       vm.isOn && !vm.isBusy && !vm.isLocked
                           ? (Set<LedRunningMode> newSelection) {
-                            if (vm.mode != newSelection.single) {
-                              vm.switchMode(newSelection.single);
+                              if (mode != newSelection.single) {
+                                vm.switchMode(newSelection.single);
+                              }
                             }
-                          }
                           : null,
                 );
               },
