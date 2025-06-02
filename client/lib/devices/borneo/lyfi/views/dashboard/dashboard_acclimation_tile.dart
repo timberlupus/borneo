@@ -18,6 +18,19 @@ class DashboardAcclimationTile extends StatelessWidget {
       builder: (context, props, _) {
         final theme = Theme.of(context);
         final isActive = props.enabled || props.activated;
+        final isDisabled = !props.canGo;
+        final iconColor =
+            isDisabled
+                ? (isActive
+                    ? theme.colorScheme.onPrimaryContainer.withOpacity(0.38)
+                    : theme.colorScheme.primary.withOpacity(0.38))
+                : (isActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.primary);
+        final textColor =
+            isDisabled
+                ? (isActive
+                    ? theme.colorScheme.onPrimaryContainer.withOpacity(0.38)
+                    : theme.colorScheme.primary.withOpacity(0.38))
+                : (isActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.primary);
         return AspectRatio(
           aspectRatio: 1,
           child: Container(
@@ -44,19 +57,21 @@ class DashboardAcclimationTile extends StatelessWidget {
                         }
                       }
                       : null,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.calendar_month_outlined,
-                      size: 40,
-                      color: isActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.primary,
-                    ),
-                    SizedBox(height: 8),
-                    Text('Acclimation', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.primary)),
-                  ],
-                ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final iconSize = constraints.maxHeight * 0.42;
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: Center(child: Icon(Icons.calendar_month_outlined, size: iconSize, color: iconColor)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text('Acclimation', style: theme.textTheme.titleMedium?.copyWith(color: textColor)),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),

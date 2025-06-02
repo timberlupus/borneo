@@ -21,34 +21,29 @@ class DashboardView extends StatelessWidget {
     if (!isOnline) {
       return const SizedBox.shrink();
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        // Chart
-        LayoutBuilder(
-          builder:
-              (context, constraints) => AspectRatio(
-                aspectRatio: 2.5,
-                child: Container(
-                  color: Theme.of(context).colorScheme.surfaceContainer,
-                  child: Container(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    margin: EdgeInsets.all(0),
-                    child: const DashboardChart(),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Chart
+            LayoutBuilder(
+              builder:
+                  (context, constraints) => AspectRatio(
+                    aspectRatio: 2.5,
+                    child: Container(
+                      color: Theme.of(context).colorScheme.surfaceContainer,
+                      margin: EdgeInsets.all(0),
+                      child: const DashboardChart(),
+                    ),
                   ),
-                ),
-              ),
-        ),
-
-        // 豆腐块区域，滚动列表
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
-            child: SingleChildScrollView(
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
               child: Column(
                 children: [
-                  // 第一行：两个半高长方形豆腐块
                   Row(
                     children: [
                       Expanded(flex: 1, child: DashboardPowerSwitchTile()),
@@ -57,7 +52,6 @@ class DashboardView extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 16),
-                  // 后续全高正方形豆腐块
                   Row(
                     children: [
                       Expanded(child: DashboardPowerTile()),
@@ -81,12 +75,13 @@ class DashboardView extends StatelessWidget {
                       Expanded(child: DashboardSettingsTile()),
                     ],
                   ),
+                  SizedBox(height: 24),
                 ],
               ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

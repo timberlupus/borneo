@@ -11,6 +11,9 @@ class DashboardDimmingTile extends StatelessWidget {
       selector: (_, vm) => vm.canUnlock,
       builder: (context, canUnlock, _) {
         final theme = Theme.of(context);
+        final isDisabled = !canUnlock;
+        final iconColor = isDisabled ? theme.colorScheme.primary.withOpacity(0.38) : theme.colorScheme.primary;
+        final textColor = isDisabled ? theme.colorScheme.primary.withOpacity(0.38) : theme.colorScheme.primary;
         return AspectRatio(
           aspectRatio: 1,
           child: Container(
@@ -21,15 +24,21 @@ class DashboardDimmingTile extends StatelessWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
               onTap: canUnlock ? () async => context.read<LyfiViewModel>().toggleLock(false) : null,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.tips_and_updates_outlined, size: 40, color: theme.colorScheme.primary),
-                    SizedBox(height: 8),
-                    Text('Dimming', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.primary)),
-                  ],
-                ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final iconSize = constraints.maxHeight * 0.42;
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: Center(child: Icon(Icons.tips_and_updates_outlined, size: iconSize, color: iconColor)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text('Dimming', style: theme.textTheme.titleMedium?.copyWith(color: textColor)),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:borneo_app/widgets/icon_progress.dart';
 
 class DashboardTemporaryTile extends StatelessWidget {
   const DashboardTemporaryTile({super.key});
@@ -26,61 +27,91 @@ class DashboardTemporaryTile extends StatelessWidget {
           final sec = (remainSeconds % 60).toString().padLeft(2, '0');
           remainText = '$min:$sec';
         }
+        final isDisabled = !props.canSwitch;
+        final Color bgColor = isActive ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainer;
+        final Color fgColor = isActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurface;
+        final double disabledAlpha = 0.38;
+        final Color effectiveFgColor = isDisabled ? fgColor.withOpacity(disabledAlpha) : fgColor;
+        final Color iconColor = isActive ? theme.colorScheme.onPrimary : theme.colorScheme.primary;
+        final Color effectiveIconColor = isDisabled ? iconColor.withOpacity(disabledAlpha) : iconColor;
         return AspectRatio(
-          aspectRatio: 2.1,
+          aspectRatio: 2.0,
           child: Container(
-            decoration: BoxDecoration(
-              color: isActive ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(16),
-            ),
+            decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16)),
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
               onTap: props.canSwitch ? () => context.read<LyfiViewModel>().switchTemporaryState() : null,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                  child: Row(
-                    key: ValueKey(isActive.toString() + remainText),
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isActive ? theme.colorScheme.primary : theme.colorScheme.outlineVariant,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Stack(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                          child:
+                              isActive
+                                  ? SizedBox(
+                                    key: const ValueKey('active'),
+                                    width: 40,
+                                    height: 40,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(4),
+                                      child: CircularProgressIndicator(
+                                        value:
+                                            props.total.inSeconds > 0
+                                                ? props.remain.inSeconds / props.total.inSeconds
+                                                : 0.0,
+                                        backgroundColor: theme.colorScheme.shadow,
+                                        valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimaryContainer),
+                                      ),
+                                    ),
+                                  )
+                                  : Container(
+                                    key: const ValueKey('inactive'),
+                                    alignment: Alignment.center,
+                                    child: Icon(Icons.flashlight_on, size: 40, color: effectiveIconColor),
+                                  ),
                         ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Temporary',
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  color: effectiveFgColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (isActive && remainText.isNotEmpty)
+                                Text(
+                                  remainText,
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    color: effectiveFgColor,
+                                    fontFeatures: [FontFeature.tabularFigures()],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (isActive)
+                      Positioned(
+                        right: -16,
+                        bottom: -16,
                         child: Icon(
                           Icons.flashlight_on,
-                          size: 20,
-                          color: isActive ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
+                          size: 64,
+                          color: theme.colorScheme.onSurface.withOpacity(0.15),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Temporary',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: isActive ? theme.colorScheme.primary : theme.colorScheme.onSurface,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            if (isActive && remainText.isNotEmpty)
-                              Text(
-                                remainText,
-                                style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
             ),

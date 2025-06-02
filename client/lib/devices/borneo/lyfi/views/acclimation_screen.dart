@@ -47,12 +47,14 @@ class AcclimationScreen extends StatelessWidget {
                     Padding(
                       padding: EdgeInsets.all(24),
                       child: Consumer<AcclimationViewModel>(
-                        builder:
-                            (context, vm, child) => ElevatedButton.icon(
-                              onPressed: vm.canSubmit ? () => onSubmit(vm) : null,
-                              label: child!,
-                              icon: const Icon(Icons.upload),
-                            ),
+                        builder: (context, vm, child) => SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: vm.canSubmit ? () => onSubmit(vm, context) : null,
+                            label: child!,
+                            icon: const Icon(Icons.upload),
+                          ),
+                        ),
                         child: Text("Submit"),
                       ),
                     ),
@@ -153,7 +155,7 @@ class AcclimationScreen extends StatelessWidget {
     ];
   }
 
-  void onSubmit(AcclimationViewModel vm) {
+  void onSubmit(AcclimationViewModel vm, BuildContext context) {
     vm.enqueueUIJob(() async {
       await vm.submitToDevice();
       toastification.show(
@@ -163,6 +165,7 @@ class AcclimationScreen extends StatelessWidget {
         style: ToastificationStyle.fillColored,
         type: ToastificationType.success,
       );
+      Navigator.of(context).pop();
     });
   }
 }
