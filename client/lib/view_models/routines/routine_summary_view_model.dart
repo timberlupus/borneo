@@ -1,5 +1,4 @@
 import 'package:borneo_app/models/routines/abstract_routine.dart';
-import 'package:borneo_app/services/device_manager.dart';
 import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_app/services/routine_manager.dart';
 import 'package:borneo_app/view_models/base_view_model.dart';
