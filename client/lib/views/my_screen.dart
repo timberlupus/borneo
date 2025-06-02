@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +16,7 @@ class MyScreen extends StatelessWidget {
       ListTile(
         title: Text(context.translate('Settings')),
         leading: Icon(Icons.settings_outlined),
-        trailing: Icon(Icons.chevron_right_outlined, color: Theme.of(context).hintColor),
+        trailing: const CupertinoListTileChevron(),
         tileColor: Theme.of(context).colorScheme.surfaceContainer,
         onTap: () {
           final route = MaterialPageRoute(builder: (context) => AppSettingsScreen());
@@ -27,7 +28,7 @@ class MyScreen extends StatelessWidget {
       ListTile(
         title: Text(context.translate('About')),
         leading: Icon(Icons.info_outline),
-        trailing: Icon(Icons.chevron_right_outlined, color: Theme.of(context).hintColor),
+        trailing: const CupertinoListTileChevron(),
         tileColor: Theme.of(context).colorScheme.surfaceContainer,
         onTap: () {
           Future.delayed(Duration(milliseconds: 300), () {
