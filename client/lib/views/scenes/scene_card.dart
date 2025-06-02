@@ -168,138 +168,149 @@ class SceneCard extends StatelessWidget {
                                     ),
                                   ],
                                 )
-                                : ColorFiltered(
-                                  colorFilter: const ColorFilter.matrix(<double>[
-                                    0.6, 0.4, 0.4, 0, 0, // R
-                                    0.4, 0.6, 0.4, 0, 0, // G
-                                    0.4, 0.4, 0.6, 0, 0, // B
-                                    0, 0, 0, 1, 0, // A
-                                  ]),
-                                  child: Stack(
-                                    alignment: Alignment.topRight,
-                                    children: [
-                                      if (scene.isSelected && vm.model.imagePath == null)
-                                        Image.asset(
-                                          'assets/images/scenes/scene-default-noimage.jpg',
-                                          fit: BoxFit.cover,
-                                          width: double.infinity,
-                                        ),
-                                      if (!scene.isSelected && vm.model.imagePath == null)
-                                        ColorFiltered(
-                                          colorFilter: ColorFilter.mode(Colors.black.withAlpha(128), BlendMode.srcATop),
-                                          child: Image.asset(
-                                            'assets/images/scenes/scene-default-noimage.jpg',
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                          ),
-                                        ),
-                                      if (scene.isSelected && vm.model.imagePath != null)
-                                        Image.file(
-                                          File(vm.model.imagePath!),
-                                          fit: BoxFit.cover,
-                                          width: double.infinity,
-                                        ),
-                                      if (!scene.isSelected && vm.model.imagePath != null)
-                                        ColorFiltered(
-                                          colorFilter: ColorFilter.mode(Colors.black.withAlpha(97), BlendMode.srcATop),
-                                          child: Image.file(
-                                            File(vm.model.imagePath!),
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                          ),
-                                        ),
-                                      Positioned(
-                                        left: 16,
-                                        bottom: 16,
-                                        child: Row(
-                                          children: [
-                                            Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                : TweenAnimationBuilder<double>(
+                                  tween: Tween<double>(begin: scene.isSelected ? 0.0 : 1.0, end: scene.isSelected ? 0.0 : 1.0),
+                                  duration: const Duration(milliseconds: 300),
+                                  builder: (context, value, child) {
+                                    // value: 0.0（选中）~ 1.0（未选中）
+                                    // 插值 matrix
+                                    final double s = 1.0 - 0.4 * value; // 饱和度 1.0~0.6
+                                    final double b = 1.0 - 0.2 * value; // 亮度 1.0~0.8
+                                    final matrix = <double>[
+                                      s * b, (1 - s) * b, (1 - s) * b, 0, 0,
+                                      (1 - s) * b, s * b, (1 - s) * b, 0, 0,
+                                      (1 - s) * b, (1 - s) * b, s * b, 0, 0,
+                                      0, 0, 0, 1, 0,
+                                    ];
+                                    return ColorFiltered(
+                                      colorFilter: ColorFilter.matrix(matrix),
+                                      child: Stack(
+                                        alignment: Alignment.topRight,
+                                        children: [
+                                          if (scene.isSelected && vm.model.imagePath == null)
+                                            Image.asset(
+                                              'assets/images/scenes/scene-default-noimage.jpg',
+                                              fit: BoxFit.cover,
+                                              width: double.infinity,
+                                            ),
+                                          if (!scene.isSelected && vm.model.imagePath == null)
+                                            ColorFiltered(
+                                              colorFilter: ColorFilter.mode(Colors.black.withAlpha(128), BlendMode.srcATop),
+                                              child: Image.asset(
+                                                'assets/images/scenes/scene-default-noimage.jpg',
+                                                fit: BoxFit.cover,
+                                                width: double.infinity,
+                                              ),
+                                            ),
+                                          if (scene.isSelected && vm.model.imagePath != null)
+                                            Image.file(
+                                              File(vm.model.imagePath!),
+                                              fit: BoxFit.cover,
+                                              width: double.infinity,
+                                            ),
+                                          if (!scene.isSelected && vm.model.imagePath != null)
+                                            ColorFiltered(
+                                              colorFilter: ColorFilter.mode(Colors.black.withAlpha(97), BlendMode.srcATop),
+                                              child: Image.file(
+                                                File(vm.model.imagePath!),
+                                                fit: BoxFit.cover,
+                                                width: double.infinity,
+                                              ),
+                                            ),
+                                          Positioned(
+                                            left: 16,
+                                            bottom: 16,
+                                            child: Row(
                                               children: [
-                                                Text(
-                                                  scene.name,
-                                                  textAlign: TextAlign.start,
-                                                  style: TextStyle(
-                                                    fontSize: 26,
-                                                    color: Colors.white,
-                                                    shadows: [
-                                                      Shadow(
-                                                        offset: Offset(2.0, 2.0),
-                                                        blurRadius: 4.0,
-                                                        color: Colors.black.withAlpha(97),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                Row(
+                                                Column(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      '${scene.totalDeviceCount} devices',
+                                                      scene.name,
                                                       textAlign: TextAlign.start,
                                                       style: TextStyle(
-                                                        fontSize: 14,
+                                                        fontSize: 26,
                                                         color: Colors.white,
-                                                        shadows: const [_smallShadow],
+                                                        shadows: [
+                                                          Shadow(
+                                                            offset: Offset(2.0, 2.0),
+                                                            blurRadius: 4.0,
+                                                            color: Colors.black.withAlpha(97),
+                                                          ),
+                                                        ],
                                                       ),
                                                     ),
-                                                    const SizedBox(width: 8),
-                                                    Icon(
-                                                      Icons.circle,
-                                                      size: 4,
-                                                      color: Colors.white,
-                                                      shadows: const [_smallShadow],
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    Text(
-                                                      '${scene.activeDeviceCount} active',
-                                                      textAlign: TextAlign.start,
-                                                      style: TextStyle(
-                                                        fontSize: 14,
-                                                        color: Colors.white,
-                                                        shadows: const [_smallShadow],
-                                                      ),
+                                                    const SizedBox(height: 8),
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                          '${scene.totalDeviceCount} devices',
+                                                          textAlign: TextAlign.start,
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            color: Colors.white,
+                                                            shadows: const [_smallShadow],
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 8),
+                                                        Icon(
+                                                          Icons.circle,
+                                                          size: 4,
+                                                          color: Colors.white,
+                                                          shadows: const [_smallShadow],
+                                                        ),
+                                                        const SizedBox(width: 8),
+                                                        Text(
+                                                          '${scene.activeDeviceCount} active',
+                                                          textAlign: TextAlign.start,
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            color: Colors.white,
+                                                            shadows: const [_smallShadow],
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ],
                                                 ),
                                               ],
                                             ),
-                                          ],
-                                        ),
-                                      ),
-                                      if (scene.isSelected)
-                                        Positioned.fill(
-                                          child: ShaderMask(
-                                            shaderCallback: (Rect bounds) {
-                                              return RadialGradient(
-                                                center: Alignment.center,
-                                                radius: 0.5,
-                                                colors: [Colors.white.withAlpha(200), Colors.white],
-                                                stops: [0.0, 1.0],
-                                                tileMode: TileMode.clamp,
-                                              ).createShader(bounds);
-                                            },
-                                            blendMode: BlendMode.srcATop,
-                                            child: Container(color: Colors.transparent),
                                           ),
-                                        ),
-                                      Positioned(
-                                        top: 8.0,
-                                        right: 8.0,
-                                        child: IconButton(
-                                          onPressed: () {
-                                            _showEditSceneScreen(context);
-                                          },
-                                          icon: Icon(
-                                            Icons.edit_outlined,
-                                            color: Colors.white,
-                                            shadows: const [_smallShadow],
+                                          if (scene.isSelected)
+                                            Positioned.fill(
+                                              child: ShaderMask(
+                                                shaderCallback: (Rect bounds) {
+                                                  return RadialGradient(
+                                                    center: Alignment.center,
+                                                    radius: 0.5,
+                                                    colors: [Colors.white.withAlpha(200), Colors.white],
+                                                    stops: [0.0, 1.0],
+                                                    tileMode: TileMode.clamp,
+                                                  ).createShader(bounds);
+                                                },
+                                                blendMode: BlendMode.srcATop,
+                                                child: Container(color: Colors.transparent),
+                                              ),
+                                            ),
+                                          Positioned(
+                                            top: 8.0,
+                                            right: 8.0,
+                                            child: IconButton(
+                                              onPressed: () {
+                                                _showEditSceneScreen(context);
+                                              },
+                                              icon: Icon(
+                                                Icons.edit_outlined,
+                                                color: Colors.white,
+                                                shadows: const [_smallShadow],
+                                              ),
+                                            ),
                                           ),
-                                        ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    );
+                                  },
                                 ),
                       ),
                     ),

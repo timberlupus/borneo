@@ -112,7 +112,7 @@ class ScenesViewModel extends BaseViewModel with ViewModelEventBusMixin {
       r.dispose();
     }
     _routines.value =
-        routines.map((r) => RoutineSummaryViewModel(r, _deviceManager, _notification, logger: super.logger)).toList();
+        routines.map((r) => RoutineSummaryViewModel(r, _routineManager, _notification, logger: super.logger)).toList();
     _isRoutinesLoading.value = false;
   }
 

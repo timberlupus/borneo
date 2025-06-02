@@ -20,9 +20,7 @@ abstract class AbstractRoutine with BaseEntity {
     _ => throw UnimplementedError('Unknown routine action type: \'${e['type']}\''),
   };
 
-  /// 历史存取由 RoutineManager 统一管理
   Future<List<Map<String, dynamic>>> execute(DeviceManager deviceManager);
-  Future<List<Map<String, dynamic>>> undo(DeviceManager deviceManager);
 }
 
 abstract class AbstractBuiltinRoutine extends AbstractRoutine {

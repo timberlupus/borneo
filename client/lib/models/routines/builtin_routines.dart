@@ -27,18 +27,6 @@ final class PowerOffAllRoutine extends AbstractBuiltinRoutine {
     }
     return steps.map((e) => e.toJson()).toList();
   }
-
-  /// Undo routine
-  @override
-  Future<List<Map<String, dynamic>>> undo(DeviceManager deviceManager) async {
-    // 由 RoutineManager 传入历史记录
-    // 这里只负责执行 undo
-    // 返回已撤销的步骤
-    // RoutineManager 会在 undo 完成后清理历史
-    // 这里假设 RoutineManager 会传入最新的历史记录
-    // 你可以根据实际需要调整参数
-    return [];
-  }
 }
 
 final class FeedModeRoutine extends AbstractBuiltinRoutine {
@@ -52,12 +40,6 @@ final class FeedModeRoutine extends AbstractBuiltinRoutine {
   @override
   Future<List<Map<String, dynamic>>> execute(DeviceManager deviceManager) async {
     // TODO: implement execute
-    return [];
-  }
-
-  @override
-  Future<List<Map<String, dynamic>>> undo(DeviceManager deviceManager) async {
-    // TODO: implement undo
     return [];
   }
 }
@@ -76,12 +58,6 @@ final class WaterChangeModeRoutine extends AbstractBuiltinRoutine {
     // TODO: implement execute
     return [];
   }
-
-  @override
-  Future<List<Map<String, dynamic>>> undo(DeviceManager deviceManager) async {
-    // TODO: implement undo
-    return [];
-  }
 }
 
 final class DryScapeModeRoutine extends AbstractBuiltinRoutine {
@@ -95,12 +71,6 @@ final class DryScapeModeRoutine extends AbstractBuiltinRoutine {
   @override
   Future<List<Map<String, dynamic>>> execute(DeviceManager deviceManager) async {
     // TODO: implement execute
-    return [];
-  }
-
-  @override
-  Future<List<Map<String, dynamic>>> undo(DeviceManager deviceManager) async {
-    // TODO: implement undo
     return [];
   }
 }

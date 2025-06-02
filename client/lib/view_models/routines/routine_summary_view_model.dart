@@ -1,6 +1,7 @@
 import 'package:borneo_app/models/routines/abstract_routine.dart';
 import 'package:borneo_app/services/device_manager.dart';
 import 'package:borneo_app/services/i_app_notification_service.dart';
+import 'package:borneo_app/services/routine_manager.dart';
 import 'package:borneo_app/view_models/base_view_model.dart';
 
 class RoutineSummaryViewModel extends BaseViewModel {
@@ -11,16 +12,16 @@ class RoutineSummaryViewModel extends BaseViewModel {
   String get iconAssetPath => _model.iconAssetPath;
 
   final AbstractRoutine _model;
-  final DeviceManager _deviceManager;
   final IAppNotificationService _notification;
-  RoutineSummaryViewModel(this._model, this._deviceManager, this._notification, {super.logger});
+  final RoutineManager _routineManager;
+  RoutineSummaryViewModel(this._model, this._routineManager, this._notification, {super.logger});
 
   Future<void> executeRoutine() async {
     if (super.isBusy) return;
     isBusy = true;
     notifyListeners();
     try {
-      await _model.execute(_deviceManager);
+      await _routineManager.executeRoutine(_model.id);
       _isActive = true;
     } catch (e, stackTrace) {
       super.logger?.e(e.toString(), error: e, stackTrace: stackTrace);
@@ -38,7 +39,7 @@ class RoutineSummaryViewModel extends BaseViewModel {
     isBusy = true;
     notifyListeners();
     try {
-      await _model.undo(_deviceManager);
+      await _routineManager.undoRoutine(_model.id);
       _isActive = false;
     } catch (e, stackTrace) {
       super.logger?.e(e.toString(), error: e, stackTrace: stackTrace);
