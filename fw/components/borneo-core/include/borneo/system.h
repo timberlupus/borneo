@@ -64,6 +64,7 @@ enum {
     BO_EVENT_REBOOTING, ///< Rebooting
     BO_EVENT_SHUTDOWN_SCHEDULED, ///< Scheduled a shutdown
     BO_EVENT_SHUTDOWN_FAULT, ///< Fault shutdown event
+    BO_EVENT_TEMPERATURE_CHANGED, ///< Temperature changed event
 
     BO_EVENT_ENTRY_FACTORY_MODE, ///< Entry the Factory Mode
 

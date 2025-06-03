@@ -187,7 +187,7 @@ int notify_init()
 
     BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &_system_event_handler, NULL));
 
-    BaseType_t rc = xTaskCreate(&notify_task, "coap.notify", 2 * 1024, NULL, tskIDLE_PRIORITY + 1, NULL);
+    BaseType_t rc = xTaskCreate(&notify_task, "coap.notify", 1024, NULL, tskIDLE_PRIORITY + 1, NULL);
     if (rc != pdPASS) {
         return -ENOMEM;
     }
