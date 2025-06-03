@@ -13,19 +13,32 @@
 
 #define COAP_TASK_PRIO 5
 
+static int notify_init();
+static void notify_task();
+static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
+
+#define NOTIFY_QUEUE_LENGTH 32
+#define NOTIFY_QUEUE_ITEM_SIZE sizeof(const char*)
+
 unsigned int coap_adjust_basetime(coap_context_t* ctx, coap_tick_t now);
 
 static void bo_coap_deinit();
 static int register_resource(coap_context_t* ctx, const struct coap_resource_desc* res);
 static void _bo_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 
-const static char* TAG = "coap-server";
+#define TAG "coap-server"
+
+#define URI_HEARTBEAT "borneo/heartbeat"
 
 static coap_context_t* _ctx = NULL;
 static coap_address_t _serv_addr;
 static coap_endpoint_t* _ep_udp = NULL;
 static TaskHandle_t _coap_server_task = NULL;
 static volatile bool _should_stop = false;
+
+static StaticQueue_t s_notify_queue_struct;
+static uint8_t s_notify_queue_storage[NOTIFY_QUEUE_LENGTH * NOTIFY_QUEUE_ITEM_SIZE];
+static QueueHandle_t s_notify_queue = NULL;
 
 static void _coap_server_proc(void* p)
 {
@@ -112,6 +125,8 @@ static int _coap_init()
         goto _DEINIT_AND_EXIT;
     }
 
+    BO_TRY(notify_init());
+
     ESP_LOGI(TAG, "CoAP module has been initialized successfully.");
     return 0;
 
@@ -137,17 +152,11 @@ static int register_resource(coap_context_t* ctx, const struct coap_resource_des
     }
     int rc = 0;
 
-    ESP_LOGI(TAG, "Registering CoAP resource `%s`", res->path);
-    coap_str_const_t* uri = coap_new_str_const((const uint8_t*)res->path, strlen(res->path));
-    if (uri == NULL) {
-        ESP_LOGE(TAG, "Failed to allocate URI memory");
-        return -ENOMEM;
-    }
-    coap_resource_t* resource = coap_resource_init(uri, COAP_RESOURCE_FLAGS_RELEASE_URI);
+    ESP_LOGI(TAG, "Registering CoAP resource `%s`", res->path.s);
+    coap_resource_t* resource = coap_resource_init((coap_str_const_t*)&res->path, COAP_RESOURCE_FLAGS_RELEASE_URI);
     if (resource == NULL) {
         ESP_LOGE(TAG, "coap_resource_init() failed");
-        rc = -EINVAL;
-        goto _FAILED_AND_DELETE_URI;
+        return -EINVAL;
     }
 
     if (res->get_handler != NULL) {
@@ -165,11 +174,67 @@ static int register_resource(coap_context_t* ctx, const struct coap_resource_des
     coap_resource_set_get_observable(resource, res->is_observable ? 1 : 0);
     coap_add_resource(ctx, resource);
     return 0;
+}
 
-_FAILED_AND_DELETE_URI:
-    coap_delete_str_const(uri);
-    uri = NULL;
-    return rc;
+int notify_init()
+{
+    // 初始化队列
+    s_notify_queue = xQueueCreateStatic(NOTIFY_QUEUE_LENGTH, NOTIFY_QUEUE_ITEM_SIZE, s_notify_queue_storage,
+                                        &s_notify_queue_struct);
+    if (!s_notify_queue) {
+        return -ENOMEM;
+    }
+
+    BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &_system_event_handler, NULL));
+
+    BaseType_t rc = xTaskCreate(&notify_task, "coap.notify", 2 * 1024, NULL, tskIDLE_PRIORITY + 1, NULL);
+    if (rc != pdPASS) {
+        return -ENOMEM;
+    }
+
+    return 0;
+}
+
+void notify_task()
+{
+    static const coap_str_const_t coap_uri_heartbeat = {
+        .s = (const uint8_t*)URI_HEARTBEAT,
+        .length = sizeof(URI_HEARTBEAT) - 1,
+    };
+    coap_resource_t* res_heartbeat = coap_get_resource_from_uri_path(_ctx, &coap_uri_heartbeat);
+    assert(res_heartbeat != NULL);
+
+    for (;;) {
+        const char* uri = NULL;
+        // TODO configurable heart-beat interval
+        if (xQueueReceive(s_notify_queue, &uri, pdMS_TO_TICKS(BO_COAP_HEARTBEAT_INTERVAL_MS)) == pdTRUE) {
+            coap_str_const_t coap_uri = { .s = (const uint8_t*)uri, .length = strlen(uri) };
+            coap_resource_t* res = coap_get_resource_from_uri_path(_ctx, &coap_uri);
+            if (res) {
+                coap_resource_notify_observers(res, NULL);
+            }
+        }
+        else {
+            if (res_heartbeat) {
+                coap_resource_notify_observers(res_heartbeat, NULL);
+            }
+        }
+    }
+}
+
+void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
+{
+    switch (event_id) {
+
+    case BO_EVENT_POWER_ON:
+    case BO_EVENT_POWER_OFF: {
+        static const char* uri_power = "borneo/power";
+        xQueueSendToBackFromISR(s_notify_queue, &uri_power, NULL);
+    } break;
+
+    default:
+        break;
+    }
 }
 
 DRVFX_SYS_INIT(_coap_init, APPLICATION, DRVFX_INIT_APP_DEFAULT_PRIORITY);

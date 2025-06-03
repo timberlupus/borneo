@@ -6,8 +6,10 @@ extern "C" {
 
 #include "common.h"
 
+#define BO_COAP_HEARTBEAT_INTERVAL_MS (5000)
+
 struct coap_resource_desc {
-    const char* path;
+    coap_str_const_t path;
     coap_method_handler_t get_handler;
     coap_method_handler_t post_handler;
     coap_method_handler_t put_handler;
@@ -22,7 +24,10 @@ struct coap_resource_desc {
         __attribute__((section(".coap_resource_desc"), used)) __COAP_MAKE_UNIQUE_TOKEN(__coap_resource_desc_,          \
                                                                                        __LINE__)                       \
         = {                                                                                                            \
-              .path = res_path,                                                                                        \
+              .path = {                                                                                                  \
+                  .s = (const uint8_t *)res_path,                                                                                       \
+                  .length = sizeof(res_path) - 1,                                                                      \
+              },                                                                                                       \
               .is_observable = (res_is_observable),                                                                    \
               .get_handler = (res_get),                                                                                \
               .post_handler = (res_post),                                                                              \

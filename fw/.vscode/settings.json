@@ -18,6 +18,7 @@
     "*.h": "c",
     "*.cpp": "cpp",
     "*.inc": "c",
-    "*_config.h": "c"
-  }
+    "*_config.h": "c",
+    "cstdint": "c"
+}
 }

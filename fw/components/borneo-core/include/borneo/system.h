@@ -60,6 +60,7 @@ enum {
     BO_EVENT_INITIALIZING = 0, ///< Power-on start initialization
     BO_EVENT_READY, ///< Power-on initialization completed
     BO_EVENT_POWER_ON, ///< Soft power on
+    BO_EVENT_POWER_OFF, ///< Soft power off
     BO_EVENT_REBOOTING, ///< Rebooting
     BO_EVENT_SHUTDOWN_SCHEDULED, ///< Scheduled a shutdown
     BO_EVENT_SHUTDOWN_FAULT, ///< Fault shutdown event
