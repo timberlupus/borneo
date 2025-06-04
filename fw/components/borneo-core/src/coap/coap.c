@@ -18,7 +18,7 @@ static void notify_task();
 static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 
 #define NOTIFY_QUEUE_LENGTH 32
-#define NOTIFY_QUEUE_ITEM_SIZE sizeof(const char*)
+#define NOTIFY_QUEUE_ITEM_SIZE (sizeof(coap_str_const_t))
 
 unsigned int coap_adjust_basetime(coap_context_t* ctx, coap_tick_t now);
 
@@ -28,7 +28,7 @@ static void _bo_event_handler(void* arg, esp_event_base_t event_base, int32_t ev
 
 #define TAG "coap-server"
 
-#define URI_HEARTBEAT "borneo/heartbeat"
+// Known resources
 
 static coap_context_t* _ctx = NULL;
 static coap_address_t _serv_addr;
@@ -147,11 +147,9 @@ void bo_coap_deinit()
 
 static int register_resource(coap_context_t* ctx, const struct coap_resource_desc* res)
 {
-    if (res == NULL) {
+    if (ctx == NULL || res == NULL) {
         return -EINVAL;
     }
-    int rc = 0;
-
     ESP_LOGI(TAG, "Registering CoAP resource `%s`", res->path.s);
     coap_resource_t* resource = coap_resource_init((coap_str_const_t*)&res->path, COAP_RESOURCE_FLAGS_RELEASE_URI);
     if (resource == NULL) {
@@ -176,9 +174,17 @@ static int register_resource(coap_context_t* ctx, const struct coap_resource_des
     return 0;
 }
 
+int bo_coap_notify_resource_changed(const coap_str_const_t* resource_uri)
+{
+    BaseType_t rc = xQueueSendToBackFromISR(s_notify_queue, resource_uri, NULL);
+    if (rc != pdTRUE) {
+        return -EIO;
+    }
+    return 0;
+}
+
 int notify_init()
 {
-    // 初始化队列
     s_notify_queue = xQueueCreateStatic(NOTIFY_QUEUE_LENGTH, NOTIFY_QUEUE_ITEM_SIZE, s_notify_queue_storage,
                                         &s_notify_queue_struct);
     if (!s_notify_queue) {
@@ -197,19 +203,16 @@ int notify_init()
 
 void notify_task()
 {
-    static const coap_str_const_t coap_uri_heartbeat = {
-        .s = (const uint8_t*)URI_HEARTBEAT,
-        .length = sizeof(URI_HEARTBEAT) - 1,
+    static const coap_str_const_t BO_COAP_URI_HEARTBEAT = {
+        .s = (const uint8_t*)BO_COAP_PATH_HEARTBEAT,
+        .length = sizeof(BO_COAP_PATH_HEARTBEAT) - 1,
     };
-    coap_resource_t* res_heartbeat = coap_get_resource_from_uri_path(_ctx, &coap_uri_heartbeat);
-    assert(res_heartbeat != NULL);
+    coap_resource_t* res_heartbeat = coap_get_resource_from_uri_path(_ctx, (coap_str_const_t*)&BO_COAP_URI_HEARTBEAT);
 
     for (;;) {
-        const char* uri = NULL;
-        // TODO configurable heart-beat interval
-        if (xQueueReceive(s_notify_queue, &uri, pdMS_TO_TICKS(BO_COAP_HEARTBEAT_INTERVAL_MS)) == pdTRUE) {
-            coap_str_const_t coap_uri = { .s = (const uint8_t*)uri, .length = strlen(uri) };
-            coap_resource_t* res = coap_get_resource_from_uri_path(_ctx, &coap_uri);
+        coap_str_const_t path;
+        if (xQueueReceive(s_notify_queue, &path, pdMS_TO_TICKS(BO_COAP_HEARTBEAT_INTERVAL_MS)) == pdTRUE) {
+            coap_resource_t* res = coap_get_resource_from_uri_path(_ctx, &path);
             if (res) {
                 coap_resource_notify_observers(res, NULL);
             }
@@ -227,9 +230,10 @@ void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event
     switch (event_id) {
 
     case BO_EVENT_POWER_ON:
-    case BO_EVENT_POWER_OFF: {
-        static const char* uri_power = "borneo/power";
-        xQueueSendToBackFromISR(s_notify_queue, &uri_power, NULL);
+    case BO_EVENT_SHUTDOWN_SCHEDULED:
+    case BO_EVENT_SHUTDOWN_FAULT: {
+        coap_str_const_t uri = { .s = (const uint8_t*)BO_COAP_PATH_POWER, .length = sizeof(BO_COAP_PATH_POWER) - 1 };
+        BO_MUST(bo_coap_notify_resource_changed(&uri));
     } break;
 
     default:

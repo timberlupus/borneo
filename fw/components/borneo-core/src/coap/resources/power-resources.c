@@ -134,7 +134,7 @@ static void coap_hnd_power_meas_power_get(coap_resource_t* resource, coap_sessio
 }
 #endif // CONFIG_BORNEO_MEAS_VOLTAGE_ENABLED && CONFIG_BORNEO_MEAS_CURRENT_ENABLED
 
-COAP_RESOURCE_DEFINE("borneo/power", true, coap_hnd_borneo_power_get, NULL, coap_hnd_borneo_power_put, NULL);
+COAP_RESOURCE_DEFINE(BO_COAP_PATH_POWER, true, coap_hnd_borneo_power_get, NULL, coap_hnd_borneo_power_put, NULL);
 COAP_RESOURCE_DEFINE("borneo/power/behavior", false, coap_hnd_borneo_power_behavior_get, NULL,
                      coap_hnd_borneo_power_behavior_put, NULL);
 

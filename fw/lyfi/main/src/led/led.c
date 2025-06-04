@@ -68,7 +68,7 @@ static int led_mode_manual_entry();
 static int led_mode_scheduled_entry();
 static int led_mode_sun_entry();
 
-ESP_EVENT_DEFINE_BASE(LYFI_LED_EVENTS);
+ESP_EVENT_DEFINE_BASE(LYFI_EVENTS);
 /*
     LED_STATE_NORMAL = 0,
     LED_STATE_DIMMING = 1,
@@ -215,7 +215,7 @@ int led_init()
 
     smf_set_initial(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_NORMAL]);
 
-    BO_TRY(esp_event_handler_register(LYFI_LED_EVENTS, ESP_EVENT_ANY_ID, led_events_handler, NULL));
+    BO_TRY(esp_event_handler_register(LYFI_EVENTS, ESP_EVENT_ANY_ID, led_events_handler, NULL));
     BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, system_events_handler, NULL));
 
     ESP_LOGI(TAG, "Starting LED controller...");
@@ -481,7 +481,7 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
 {
     switch (event_id) {
 
-    case LYFI_LED_NOTIFY_TEMPORARY_STATE: {
+    case LYFI_EVENT_LED_NOTIFY_TEMPORARY_STATE: {
         assert(bo_power_is_on());
         if (led_get_state() == LED_STATE_NORMAL
             && (_led.settings.mode == LED_MODE_SCHEDULED || _led.settings.mode == LED_MODE_SUN)) {
@@ -640,7 +640,7 @@ int led_switch_state(uint8_t state)
         return -1;
     }
 
-    BO_TRY(esp_event_post(LYFI_LED_EVENTS, LYFI_LED_STATE_CHANGED, NULL, 0, portMAX_DELAY));
+    BO_TRY(esp_event_post(LYFI_EVENTS, LYFI_EVENT_LED_STATE_CHANGED, NULL, 0, portMAX_DELAY));
 
     return 0;
 }
@@ -678,6 +678,7 @@ int led_switch_mode(uint8_t mode)
     }
 
     _led.settings.mode = mode;
+    BO_TRY(esp_event_post(LYFI_EVENTS, LYFI_EVENT_LED_MODE_CHANGED, NULL, 0, portMAX_DELAY));
 
     return 0;
 }

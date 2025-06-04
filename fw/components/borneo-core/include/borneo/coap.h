@@ -78,6 +78,13 @@ struct coap_resource_desc {
 #define BO_COAP_CODE_500_INTERNAL_SERVER_ERROR COAP_RESPONSE_CODE(500)
 #define BO_COAP_CODE_501_NOT_IMPLEMENTED COAP_RESPONSE_CODE(501)
 
+// Known resource paths
+
+#define BO_COAP_PATH_HEARTBEAT "borneo/heartbeat"
+#define BO_COAP_PATH_POWER "borneo/power"
+
+int bo_coap_notify_resource_changed(const coap_str_const_t* resource_uri);
+
 #ifdef __cplusplus
 }
 #endif

@@ -63,7 +63,7 @@ int button_init()
 static void button_single_click_cb(void* arg, void* usr_data)
 {
     if (bo_power_is_on()) {
-        BO_MUST(esp_event_post(LYFI_LED_EVENTS, LYFI_LED_NOTIFY_TEMPORARY_STATE, NULL, 0, portMAX_DELAY));
+        BO_MUST(esp_event_post(LYFI_EVENTS, LYFI_EVENT_LED_NOTIFY_TEMPORARY_STATE, NULL, 0, portMAX_DELAY));
     }
     else {
         // Turn the power on

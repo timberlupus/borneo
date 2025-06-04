@@ -16,6 +16,7 @@
 
 #include "../led/led.h"
 #include "../fan.h"
+#include "../coap-paths.h"
 #include "cbor-common.h"
 
 #define TAG "lyfi-coap"
@@ -648,12 +649,12 @@ COAP_RESOURCE_DEFINE("borneo/lyfi/info", false, coap_hnd_info_get, NULL, NULL, N
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/status", false, coap_hnd_status_get, NULL, NULL, NULL);
 
-COAP_RESOURCE_DEFINE("borneo/lyfi/state", false, coap_hnd_state_get, NULL, coap_hnd_state_put, NULL);
+COAP_RESOURCE_DEFINE(LYFI_COAP_PATH_LED_STATE, true, coap_hnd_state_get, NULL, coap_hnd_state_put, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/correction-method", false, coap_hnd_correction_method_get, NULL,
                      coap_hnd_correction_method_put, NULL);
 
-COAP_RESOURCE_DEFINE("borneo/lyfi/mode", false, coap_hnd_mode_get, NULL, coap_hnd_mode_put, NULL);
+COAP_RESOURCE_DEFINE(LYFI_COAP_PATH_LED_MODE, true, coap_hnd_mode_get, NULL, coap_hnd_mode_put, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/temporary-duration", false, coap_hnd_temporary_duration_get, NULL,
                      coap_hnd_temporary_duration_put, NULL);
