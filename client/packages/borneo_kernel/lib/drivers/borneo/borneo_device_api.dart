@@ -14,6 +14,7 @@ import 'package:borneo_kernel_abstractions/device.dart';
 const String kBorneoDeviceMdnsServiceType = '_borneo._udp';
 
 class BorneoPaths {
+  static final Uri heartbeat = Uri(path: '/borneo/heartbeat');
   static final Uri deviceInfo = Uri(path: '/borneo/info');
   static final Uri power = Uri(path: '/borneo/power');
   static final Uri powerBehavior = Uri(path: '/borneo/power/behavior');
@@ -230,6 +231,8 @@ abstract class IBorneoDeviceApi implements IDeviceApi, IPowerOnOffCapability {
   GeneralBorneoDeviceInfo getGeneralDeviceInfo(Device dev);
   Future<GeneralBorneoDeviceStatus> getGeneralDeviceStatus(Device dev);
 
+  Future<DateTime> getHeartbeat(Device dev);
+
   Future<PowerBehavior> getPowerBehavior(Device dev);
   Future setPowerBehavior(Device dev, PowerBehavior behavior);
 
@@ -323,6 +326,13 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
     final dd = dev.driverData as BorneoCoapDriverData;
     final value = await dd.coap.getCbor<int>(BorneoPaths.powerBehavior);
     return PowerBehavior.values[value];
+  }
+
+  @override
+  Future<DateTime> getHeartbeat(Device dev) async {
+    final dd = dev.driverData as BorneoCoapDriverData;
+    final timestamp = await dd.coap.getCbor<int>(BorneoPaths.heartbeat);
+    return DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
   }
 
   @override
