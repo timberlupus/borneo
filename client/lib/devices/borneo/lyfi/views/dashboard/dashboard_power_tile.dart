@@ -31,23 +31,59 @@ class DashboardPowerTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Text(
-                      vm.canMeasurePower ? vm.currentWatts.toStringAsFixed(0) : "N/A",
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontFeatures: [FontFeature.tabularFigures()],
-                        fontSize: 23,
-                      ),
-                    ),
                     if (vm.canMeasurePower)
+                      ...() {
+                        final double watts = vm.currentWatts;
+                        final int intPart = watts.floor();
+                        final int decimalPart = ((watts - intPart) * 10).round();
+                        final bool isZero = watts == 0;
+                        return [
+                          Text(
+                            isZero ? '0' : intPart.toString(),
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontFeatures: [FontFeature.tabularFigures()],
+                              fontSize: 23,
+                            ),
+                          ),
+                          if (!isZero) ...[
+                            Text(
+                              '.',
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontFeatures: [FontFeature.tabularFigures()],
+                                fontSize: 23,
+                              ),
+                            ),
+                            Text(
+                              decimalPart.toString(),
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontFeatures: [FontFeature.tabularFigures()],
+                                color: Theme.of(context).colorScheme.primary,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                          Text(
+                            'W',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontFeatures: [FontFeature.tabularFigures()],
+                              color: Theme.of(context).colorScheme.primary,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ];
+                      }()
+                    else ...[
                       Text(
-                        'W',
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          fontFeatures: [FontFeature.tabularFigures()],
+                        'N/A',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: Theme.of(context).colorScheme.primary,
-                          fontSize: 11,
+                          fontFeatures: [FontFeature.tabularFigures()],
+                          fontSize: 23,
                         ),
                       ),
+                    ],
                   ],
                 ),
                 Row(
