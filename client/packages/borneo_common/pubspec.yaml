@@ -9,7 +9,7 @@ environment:
   sdk: ^3.6.0
 
 dependencies:
-  coap: ^9.0.7
+  coap: ^9.1.0
   cbor: ^6.3.0
   cancellation_token: ^2.0.1
 
