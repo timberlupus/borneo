@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:borneo_app/models/devices/device_entity.dart';
 import 'package:borneo_app/models/scene_entity.dart';
+import 'package:borneo_app/services/devices/device_module_registry.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 import 'package:cancellation_token/cancellation_token.dart';
@@ -23,6 +24,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin 
   final SceneManager _sceneManager;
   final GroupManager _groupManager;
   final DeviceManager _deviceManager;
+  final IDeviceModuleRegistry _deviceModuleRegistry;
   final CancellationToken _cancellationToken = CancellationToken();
   bool _isInitialized = false;
 
@@ -53,7 +55,8 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin 
     EventBus globalEventBus,
     this._sceneManager,
     this._groupManager,
-    this._deviceManager, {
+    this._deviceManager,
+    this._deviceModuleRegistry, {
     this.logger,
   }) {
     super.globalEventBus = globalEventBus;
@@ -146,6 +149,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin 
         deviceEntity,
         await _deviceManager.getDeviceState(deviceEntity.id),
         _deviceManager,
+        _deviceModuleRegistry,
         globalEventBus,
       );
       if (deviceEntity.groupID != null) {

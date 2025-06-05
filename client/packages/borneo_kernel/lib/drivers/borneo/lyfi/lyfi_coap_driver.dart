@@ -1,16 +1,15 @@
 import 'dart:convert';
 import 'package:borneo_kernel/drivers/borneo/borneo_coap_client.dart';
 import 'package:borneo_kernel/drivers/borneo/borneo_coap_config.dart';
-import 'package:borneo_kernel/drivers/borneo/borneo_coap_driver_data.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_coap_driver_data.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel/drivers/borneo/probe_coap_config.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:coap/coap.dart';
 import 'package:cbor/cbor.dart';
 
-import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_common/io/net/coap_client.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/metadata.dart';
 import 'package:borneo_kernel_abstractions/errors.dart';
@@ -40,21 +39,6 @@ class LyfiPaths {
 
   static final Uri sunSchedule = Uri(path: '/borneo/lyfi/sun/schedule');
   static final Uri sunCurve = Uri(path: '/borneo/lyfi/sun/curve');
-}
-
-class LyfiCoapDriverData extends BorneoCoapDriverData {
-  int debugCounter = 0;
-  final LyfiDeviceInfo _lyfiDeviceInfo;
-
-  LyfiCoapDriverData(super._coap, super._probeCoap, super._generalDeviceInfo,
-      this._lyfiDeviceInfo, super._deviceEventBus);
-
-  LyfiDeviceInfo get lyfiDeviceInfo {
-    if (super.isDisposed) {
-      ObjectDisposedException(message: 'The object has been disposed.');
-    }
-    return _lyfiDeviceInfo;
-  }
 }
 
 class BorneoLyfiCoapDriver
@@ -100,8 +84,9 @@ class BorneoLyfiCoapDriver
         offlineDetectionEnabled: true,
       );
       final lyfiInfo = await _getLyfiInfo(coapClient);
-      final driverData = LyfiCoapDriverData(coapClient, probeCoapClient,
+      final driverData = LyfiCoapDriverData(dev, coapClient, probeCoapClient,
           generalDeviceInfo, lyfiInfo, deviceEvents);
+      driverData.load();
       await dev.setDriverData(driverData, cancelToken: cancelToken);
       succeed = true;
     } on CoapRequestTimeoutException catch (_) {

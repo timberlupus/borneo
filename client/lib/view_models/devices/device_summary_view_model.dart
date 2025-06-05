@@ -7,11 +7,13 @@ import 'package:borneo_app/services/device_manager.dart';
 import 'package:event_bus/event_bus.dart';
 
 import '/view_models/base_view_model.dart';
+import 'package:borneo_app/services/devices/device_module_registry.dart';
+import 'package:borneo_app/models/devices/device_module_metadata.dart';
 
 class DeviceSummaryViewModel extends BaseViewModel with ViewModelEventBusMixin {
   final DeviceEntity deviceEntity;
-
   final DeviceManager _deviceManager;
+  final IDeviceModuleRegistry _deviceModuleRegistry;
 
   bool _isOnline;
   bool get isOnline => _isOnline;
@@ -22,11 +24,18 @@ class DeviceSummaryViewModel extends BaseViewModel with ViewModelEventBusMixin {
   String get id => deviceEntity.id;
   String get name => deviceEntity.name;
 
+  DeviceModuleMetadata? get deviceModuleMetadata => _deviceModuleRegistry.metaModules[deviceEntity.driverID];
+
   late final StreamSubscription<DeviceBoundEvent> _boundEventSub;
   late final StreamSubscription<DeviceRemovedEvent> _removedEventSub;
 
-  DeviceSummaryViewModel(this.deviceEntity, DeviceState initialState, this._deviceManager, EventBus globalEventBus)
-    : _isOnline = _deviceManager.isBound(deviceEntity.id),
+  DeviceSummaryViewModel(
+    this.deviceEntity,
+    DeviceState initialState,
+    this._deviceManager,
+    this._deviceModuleRegistry,
+    EventBus globalEventBus,
+  ) : _isOnline = _deviceManager.isBound(deviceEntity.id),
       _state = initialState {
     super.globalEventBus = globalEventBus;
     _boundEventSub = _deviceManager.deviceEvents.on<DeviceBoundEvent>().listen(_onBound);

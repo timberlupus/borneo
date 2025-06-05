@@ -1,5 +1,6 @@
 import 'package:borneo_kernel_abstractions/events.dart';
 
-sealed class DevicePowerOnOffChangedEvent extends KnownDeviceEvent {
-  const DevicePowerOnOffChangedEvent(super.device);
+class DevicePowerOnOffChangedEvent extends KnownDeviceEvent {
+  final bool onOff;
+  const DevicePowerOnOffChangedEvent(super.device, this.onOff);
 }

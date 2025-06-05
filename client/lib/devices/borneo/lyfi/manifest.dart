@@ -26,6 +26,17 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
               notification: context.read<IAppNotificationService>(),
               logger: context.read<Logger>(),
             ),
-        deviceIconBuilder: (BuildContext context) => Icon(Icons.lightbulb_outline),
+        deviceIconBuilder: _buildDeviceIcon,
       );
+
+  static Widget _buildDeviceIcon(BuildContext context, double iconSize, bool isOnline) {
+    return Icon(
+      Icons.lightbulb_outline,
+      size: iconSize,
+      color:
+          isOnline
+              ? Theme.of(context).colorScheme.onPrimaryContainer
+              : Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.38),
+    );
+  }
 }

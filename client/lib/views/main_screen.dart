@@ -1,5 +1,6 @@
 import 'package:borneo_app/routes/app_routes.dart';
 import 'package:borneo_app/services/blob_manager.dart';
+import 'package:borneo_app/services/devices/device_module_registry.dart';
 import 'package:borneo_app/services/group_manager.dart';
 import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_app/services/routine_manager.dart';
@@ -343,7 +344,8 @@ class MainScreen extends StatelessWidget {
             final sm = context.read<SceneManager>();
             final gm = context.read<GroupManager>();
             final dm = context.read<DeviceManager>();
-            return GroupedDevicesViewModel(globalEventBus, sm, gm, dm, logger: logger);
+            final dmr = context.read<IDeviceModuleRegistry>();
+            return GroupedDevicesViewModel(globalEventBus, sm, gm, dm, dmr, logger: logger);
           },
           lazy: true,
         ),

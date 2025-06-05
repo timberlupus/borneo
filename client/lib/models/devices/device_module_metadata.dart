@@ -10,7 +10,7 @@ abstract class DeviceModuleMetadata {
   final DriverDescriptor driverDescriptor;
   final Widget Function(BuildContext context) detailsViewBuilder;
   final BaseDeviceViewModel Function(BuildContext context, String deviceID) detailsViewModelBuilder;
-  final Widget Function(BuildContext context) deviceIconBuilder;
+  final Widget Function(BuildContext context, double iconSize, bool isOnline) deviceIconBuilder;
 
   const DeviceModuleMetadata({
     required this.id,

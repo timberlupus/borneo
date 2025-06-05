@@ -45,14 +45,16 @@ class DeviceTile extends StatelessWidget {
                       side: BorderSide(width: 1.5, color: Theme.of(context).colorScheme.primaryContainer),
                     ),
                   ),
-                  child: Icon(
-                    Icons.light_outlined,
-                    color:
-                        vm.isOnline
-                            ? Theme.of(context).colorScheme.onPrimaryContainer
-                            : Theme.of(context).disabledColor,
-                    size: 40,
-                  ),
+                  child:
+                      vm.deviceModuleMetadata?.deviceIconBuilder(context, 40, vm.isOnline) ??
+                      Icon(
+                        Icons.device_unknown,
+                        color:
+                            vm.isOnline
+                                ? Theme.of(context).colorScheme.onPrimaryContainer
+                                : Theme.of(context).disabledColor,
+                        size: 40,
+                      ),
                 ),
                 title: Text(vm.deviceEntity.name),
                 subtitle: Text(
