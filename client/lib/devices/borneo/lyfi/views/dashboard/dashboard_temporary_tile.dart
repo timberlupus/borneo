@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
-import 'package:borneo_app/widgets/icon_progress.dart';
 
 class DashboardTemporaryTile extends StatelessWidget {
   const DashboardTemporaryTile({super.key});
@@ -31,9 +30,9 @@ class DashboardTemporaryTile extends StatelessWidget {
         final Color bgColor = isActive ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainer;
         final Color fgColor = isActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurface;
         final double disabledAlpha = 0.38;
-        final Color effectiveFgColor = isDisabled ? fgColor.withOpacity(disabledAlpha) : fgColor;
+        final Color effectiveFgColor = isDisabled ? fgColor.withValues(alpha: disabledAlpha) : fgColor;
         final Color iconColor = isActive ? theme.colorScheme.onPrimary : theme.colorScheme.primary;
-        final Color effectiveIconColor = isDisabled ? iconColor.withOpacity(disabledAlpha) : iconColor;
+        final Color effectiveIconColor = isDisabled ? iconColor.withValues(alpha: disabledAlpha) : iconColor;
         return AspectRatio(
           aspectRatio: 2.0,
           child: Container(

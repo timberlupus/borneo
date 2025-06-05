@@ -1,4 +1,4 @@
-import 'package:borneo_kernel/drivers/borneo/borneo_coap_client.dart';
+import 'package:borneo_kernel/drivers/borneo/borneo_coap_driver_data.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 import 'package:borneo_common/io/net/coap_client.dart';
@@ -8,7 +8,6 @@ import 'package:cbor/cbor.dart';
 import 'package:coap/coap.dart';
 import 'package:cbor/simple.dart' as simple_cbor;
 
-import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 
 const String kBorneoDeviceMdnsServiceType = '_borneo._udp';
@@ -248,46 +247,6 @@ abstract class IBorneoDeviceApi implements IDeviceApi, IPowerOnOffCapability {
   Future<BorneoDeviceUpgradeInfo> getNewVersion();
   Future<void> beginUpgrade();
   Future<bool> isUpgrading();
-}
-
-abstract class BorneoCoapDriverData {
-  bool _disposed = false;
-  final BorneoCoapClient _probeCoap;
-  final BorneoCoapClient _coap;
-  final GeneralBorneoDeviceInfo _generalDeviceInfo;
-
-  bool get isDisposed => _disposed;
-
-  BorneoCoapDriverData(this._coap, this._probeCoap, this._generalDeviceInfo);
-
-  CoapClient get coap {
-    if (_disposed) {
-      ObjectDisposedException(message: 'The object has been disposed.');
-    }
-    return _coap;
-  }
-
-  CoapClient get probeCoap {
-    if (_disposed) {
-      ObjectDisposedException(message: 'The object has been disposed.');
-    }
-    return _probeCoap;
-  }
-
-  GeneralBorneoDeviceInfo get generalDeviceInfo {
-    if (_disposed) {
-      ObjectDisposedException(message: 'The object has been disposed.');
-    }
-    return _generalDeviceInfo;
-  }
-
-  void dispose() {
-    if (!_disposed) {
-      _probeCoap.close();
-      _coap.close();
-      _disposed = true;
-    }
-  }
 }
 
 mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {

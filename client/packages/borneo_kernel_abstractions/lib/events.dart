@@ -13,26 +13,27 @@ class UnboundDeviceDiscoveredEvent {
   const UnboundDeviceDiscoveredEvent(this.matched);
 }
 
-class DeviceBoundEvent {
+abstract class KnownDeviceEvent {
   final Device device;
-  const DeviceBoundEvent(this.device);
+  const KnownDeviceEvent(this.device);
 }
 
-class DeviceRemovedEvent {
-  final Device device;
-  const DeviceRemovedEvent(this.device);
+class DeviceBoundEvent extends KnownDeviceEvent {
+  const DeviceBoundEvent(super.device);
 }
 
-class DeviceOfflineEvent {
-  final Device device;
-  const DeviceOfflineEvent(this.device);
+class DeviceRemovedEvent extends KnownDeviceEvent {
+  const DeviceRemovedEvent(super.device);
 }
 
-class LoadingDriverFailedEvent {
-  final Device device;
+class DeviceOfflineEvent extends KnownDeviceEvent {
+  const DeviceOfflineEvent(super.device);
+}
+
+class LoadingDriverFailedEvent extends KnownDeviceEvent {
   final Object? error;
   final String? message;
-  const LoadingDriverFailedEvent(this.device, {this.error, this.message});
+  const LoadingDriverFailedEvent(super.device, {this.error, this.message});
 }
 
 class DeviceDiscoveringStartedEvent {

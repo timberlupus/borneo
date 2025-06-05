@@ -1,4 +1,4 @@
-import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
+import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 

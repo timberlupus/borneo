@@ -1,9 +1,9 @@
+import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 import 'package:borneo_kernel_abstractions/models/driver_descriptor.dart';
 import 'package:borneo_kernel_abstractions/models/heartbeat_method.dart';
 
-import '../borneo_device_api.dart';
 import 'lyfi_coap_driver.dart';
 
 const kLyfiDriverID = "borneo.lyfi";

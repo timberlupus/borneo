@@ -2,12 +2,12 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view
 import 'package:borneo_app/infrastructure/timezone.dart';
 import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_common/exceptions.dart' as bo_ex;
+import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:geolocator/geolocator.dart';
 
-import 'package:borneo_kernel/drivers/borneo/borneo_device_api.dart';
 import 'package:latlong2/latlong.dart';
 
 class SettingsViewModel extends BaseLyfiDeviceViewModel {
