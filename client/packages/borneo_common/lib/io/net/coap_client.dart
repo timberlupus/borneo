@@ -75,7 +75,8 @@ extension CoapClientExtensions on CoapClient {
 
   /// Sends a POST request with CBOR-encoded [payload] to the given [uri].
   /// Throws [CoapException] if the response is not successful.
-  Future<void> postCbor<T>(Uri uri, T payload, {bool confirmable = true}) async {
+  Future<void> postCbor<T>(Uri uri, T payload,
+      {bool confirmable = true}) async {
     final bytes = simple_cbor.cbor.encode(payload);
     final response = await postBytes(uri,
         payload: bytes,
