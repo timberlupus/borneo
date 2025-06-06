@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:borneo_app/models/devices/device_entity.dart';
 import 'package:borneo_app/models/scene_entity.dart';
 import 'package:borneo_app/services/devices/device_module_registry.dart';
+import 'package:borneo_kernel_abstractions/device_capability.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 import 'package:cancellation_token/cancellation_token.dart';
@@ -145,12 +146,21 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin 
 
     final deviceEntities = await _deviceManager.fetchAllDevicesInScene().asCancellable(_cancellationToken);
     for (final deviceEntity in deviceEntities) {
+      var isPowerOn = false;
+      if (_deviceManager.isBound(deviceEntity.id)) {
+        final bound = _deviceManager.getBoundDevice(deviceEntity.id);
+        if (bound.api() is IPowerOnOffCapability) {
+          isPowerOn = await bound.api<IPowerOnOffCapability>().getOnOff(deviceEntity); // TODO cancellable
+        }
+      }
+
       final deviceVM = DeviceSummaryViewModel(
         deviceEntity,
         await _deviceManager.getDeviceState(deviceEntity.id),
         _deviceManager,
         _deviceModuleRegistry,
         globalEventBus,
+        isPowerOn,
       );
       if (deviceEntity.groupID != null) {
         final g = _groups.singleWhere((x) => x.id == deviceEntity.groupID);

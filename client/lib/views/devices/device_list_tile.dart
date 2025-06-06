@@ -1,8 +1,10 @@
+import 'package:borneo_app/services/device_manager.dart';
 import 'package:borneo_app/view_models/devices/grouped_devices_view_model.dart';
 import 'package:borneo_app/views/devices/state_icons.dart';
 import 'package:borneo_app/widgets/confirmation_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import '../../models/devices/device_entity.dart';
 import '../../routes/app_routes.dart';
@@ -57,21 +59,8 @@ class DeviceTile extends StatelessWidget {
                       ),
                 ),
                 title: Text(vm.deviceEntity.name),
-                subtitle: Text(
-                  vm.deviceEntity.model,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor),
-                ),
-                trailing: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    vm.isOnline
-                        ? Icon(Icons.line_axis_outlined, size: 24)
-                        : FlashingIcon(
-                          icon: Icon(Icons.link_off, size: 24, color: Theme.of(context).colorScheme.error),
-                        ),
-                  ],
-                ),
+                subtitle: _buildSubtitle(context),
+                trailing: _buildPrimaryStateIcon(context),
               ),
               if (!isLast) const Divider(height: 1, indent: 72),
             ],
@@ -79,7 +68,66 @@ class DeviceTile extends StatelessWidget {
     );
   }
 
-  _showDevicePopMenu(BuildContext context) {
+  Widget _buildSubtitle(BuildContext context) {
+    final vm = context.read<DeviceSummaryViewModel>();
+    final status = (isOnline: vm.isOnline, isPowerOn: vm.isPowerOn);
+    if (!status.isOnline) {
+      return Text(
+        context.translate('Off-line'),
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
+      );
+    }
+    if (!status.isPowerOn) {
+      return Text(
+        context.translate('OFF'),
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
+      );
+    }
+    if (vm.deviceModuleMetadata != null) {
+      final bound = context.read<DeviceManager>().getBoundDevice(vm.id);
+      final widgets = vm.deviceModuleMetadata!.secondaryStatesBuilder(context, bound, vm.deviceEvents);
+      if (widgets.isEmpty) return const SizedBox.shrink();
+      List<Widget> separated = [];
+      for (int i = 0; i < widgets.length; i++) {
+        separated.add(widgets[i]);
+        if (i != widgets.length - 1) {
+          separated.add(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Icon(Icons.fiber_manual_record, size: 4, color: Theme.of(context).colorScheme.onSurface),
+            ),
+          );
+        }
+      }
+      return Row(mainAxisSize: MainAxisSize.min, children: separated);
+    } else {
+      return Text(
+        vm.deviceEntity.model,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
+      );
+    }
+  }
+
+  Widget _buildPrimaryStateIcon(BuildContext context) {
+    return Selector<DeviceSummaryViewModel, ({bool isOnline, bool isPowerOn})>(
+      selector: (_, vm) => (isOnline: vm.isOnline, isPowerOn: vm.isPowerOn),
+      builder: (context, status, child) {
+        if (!status.isOnline) {
+          return FlashingIcon(icon: Icon(Icons.link_off, size: 24, color: Theme.of(context).colorScheme.error));
+        }
+        if (!status.isPowerOn) {
+          return Icon(Icons.power_settings_new, size: 24, color: Theme.of(context).colorScheme.error);
+        }
+        final vm = context.read<DeviceSummaryViewModel>();
+        if (vm.deviceModuleMetadata?.primaryStateIconBuilder != null) {
+          return vm.deviceModuleMetadata!.primaryStateIconBuilder(context, 24);
+        }
+        return Icon(Icons.error, size: 24, color: Theme.of(context).colorScheme.error);
+      },
+    );
+  }
+
+  void _showDevicePopMenu(BuildContext context) {
     //final vm = context.read<DeviceSummaryViewModel>();
     Rect? rect;
     RenderBox? overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
