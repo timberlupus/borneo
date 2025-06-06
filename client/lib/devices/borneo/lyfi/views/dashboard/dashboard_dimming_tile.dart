@@ -26,7 +26,7 @@ class DashboardDimmingTile extends StatelessWidget {
               onTap: canUnlock ? () async => context.read<LyfiViewModel>().toggleLock(false) : null,
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final iconSize = constraints.maxHeight * 0.42;
+                  final iconSize = constraints.maxHeight * 0.3;
                   return Column(
                     children: [
                       Expanded(

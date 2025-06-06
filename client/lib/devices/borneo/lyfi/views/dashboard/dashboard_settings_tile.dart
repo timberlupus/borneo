@@ -37,7 +37,7 @@ class DashboardSettingsTile extends StatelessWidget {
                       },
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final iconSize = constraints.maxHeight * 0.42;
+                  final iconSize = constraints.maxHeight * 0.3;
                   return Column(
                     children: [
                       Expanded(child: Center(child: Icon(Icons.settings, size: iconSize, color: iconColor))),
