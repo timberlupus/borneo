@@ -91,23 +91,27 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
   @override
   Future<void> onInitialize() async {
-    _temporaryDuration = await _deviceApi.getTemporaryDuration(boundDevice!.device);
+    if (super.isOnline) {
+      _temporaryDuration = await _deviceApi.getTemporaryDuration(boundDevice!.device);
+    }
 
     //_channels.length * lyfiBrightnessMax.toDouble();
 
     await refreshStatus();
 
-    switch (mode) {
-      case LedRunningMode.scheduled:
-        scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
-        break;
+    if (super.isOnline) {
+      switch (mode) {
+        case LedRunningMode.scheduled:
+          scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
+          break;
 
-      case LedRunningMode.sun:
-        sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
-        break;
+        case LedRunningMode.sun:
+          sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
+          break;
 
-      default:
-        break;
+        default:
+          break;
+      }
     }
 
     // Update schedule
