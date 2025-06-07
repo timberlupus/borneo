@@ -22,14 +22,14 @@ class DashboardAcclimationTile extends StatelessWidget {
         final iconColor =
             isDisabled
                 ? (isActive
-                    ? theme.colorScheme.onPrimaryContainer.withOpacity(0.38)
-                    : theme.colorScheme.primary.withOpacity(0.38))
+                    ? theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.38)
+                    : theme.colorScheme.primary.withValues(alpha: 0.38))
                 : (isActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.primary);
         final textColor =
             isDisabled
                 ? (isActive
-                    ? theme.colorScheme.onPrimaryContainer.withOpacity(0.38)
-                    : theme.colorScheme.primary.withOpacity(0.38))
+                    ? theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.38)
+                    : theme.colorScheme.primary.withValues(alpha: 0.38))
                 : (isActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.primary);
         return AspectRatio(
           aspectRatio: 1,

@@ -18,7 +18,7 @@ class GenericDeviceScreen<TDeviceViewModel extends BaseDeviceViewModel> extends 
       builder: (context, child) {
         final vm = context.read<TDeviceViewModel>();
         return FutureBuilder(
-          future: vm.initialize(),
+          future: vm.initFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());

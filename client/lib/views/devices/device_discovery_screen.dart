@@ -293,10 +293,7 @@ class DeviceDiscoveryScreen extends StatelessWidget {
       create: createViewModel,
       builder:
           (context, child) => FutureBuilder(
-            future:
-                context.read<DeviceDiscoveryViewModel>().isInitialized
-                    ? null
-                    : context.read<DeviceDiscoveryViewModel>().initialize(),
+            future: context.read<DeviceDiscoveryViewModel>().initFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Scaffold(body: Center(child: CircularProgressIndicator()));

@@ -18,7 +18,7 @@ class AppSettingsScreen extends StatelessWidget {
       builder: (context, child) {
         final vm = context.read<AppSettingsViewModel>();
         return FutureBuilder(
-          future: vm.isInitialized ? null : vm.initialize(),
+          future: vm.initFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Scaffold(body: Center(child: CircularProgressIndicator()));

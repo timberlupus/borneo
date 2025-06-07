@@ -12,7 +12,8 @@ import 'package:event_bus/event_bus.dart';
 
 import '/view_models/base_view_model.dart';
 
-abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewModelEventBusMixin {
+abstract class AbstractDeviceSummaryViewModel extends BaseViewModel
+    with ViewModelEventBusMixin, ViewModelInitFutureMixin {
   final DeviceManager deviceManager;
   final DeviceEntity deviceEntity;
   var isInitialized = false;

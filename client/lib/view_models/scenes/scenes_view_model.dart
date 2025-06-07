@@ -11,7 +11,7 @@ import 'package:borneo_app/view_models/scenes/scene_summary_view_model.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/foundation.dart';
 
-class ScenesViewModel extends BaseViewModel with ViewModelEventBusMixin {
+class ScenesViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModelInitFutureMixin {
   final List<SceneSummaryViewModel> _scenes = [];
   final SceneManager _sceneManager;
   final DeviceManager _deviceManager;

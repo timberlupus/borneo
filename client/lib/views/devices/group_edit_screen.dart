@@ -78,7 +78,7 @@ class GroupEditScreen extends StatelessWidget {
   FutureBuilder buildBody(BuildContext context) {
     final vm = context.read<GroupEditViewModel>();
     return FutureBuilder(
-      future: vm.isInitialized ? null : vm.initialize(),
+      future: vm.initFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());

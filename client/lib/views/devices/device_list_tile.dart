@@ -29,7 +29,7 @@ class DeviceTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.read<AbstractDeviceSummaryViewModel>(); // 只读，不侦听
     return FutureBuilder<void>(
-      future: vm.isInitialized ? null : vm.initialize(),
+      future: vm.initFuture,
       builder: (context, snapshot) {
         if (!vm.isInitialized || snapshot.connectionState == ConnectionState.waiting) {
           return ListTile(

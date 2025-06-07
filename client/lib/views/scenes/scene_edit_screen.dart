@@ -22,8 +22,7 @@ class SceneEditScreen extends StatelessWidget {
     create: createViewModel,
     builder:
         (context, child) => FutureBuilder(
-          future:
-              context.read<SceneEditViewModel>().isInitialized ? null : context.read<SceneEditViewModel>().initialize(),
+          future: context.read<SceneEditViewModel>().initFuture,
           builder: (context, snapshot) {
             final vm = context.read<SceneEditViewModel>();
             if (snapshot.connectionState == ConnectionState.waiting) {

@@ -300,7 +300,7 @@ class MainScreen extends StatelessWidget {
               selector: (context, vm) => vm.isInitialized,
               builder: (context, isInitialized, child) {
                 return FutureBuilder(
-                  future: isInitialized ? null : vm.initialize(),
+                  future: isInitialized ? null : vm.initFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Scaffold(body: Center(child: CircularProgressIndicator()));

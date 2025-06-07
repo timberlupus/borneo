@@ -167,7 +167,7 @@ class DevicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.read<GroupedDevicesViewModel>();
     return FutureBuilder(
-      future: vm.isInitialized ? null : vm.initialize(),
+      future: vm.initFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(body: Center(child: CircularProgressIndicator()));

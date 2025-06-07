@@ -13,8 +13,8 @@ class DashboardSettingsTile extends StatelessWidget {
       selector: (_, vm) => vm.canUnlock, // 或根据实际逻辑选择
       builder: (context, canUnlock, _) {
         final isDisabled = !canUnlock;
-        final iconColor = isDisabled ? theme.colorScheme.primary.withOpacity(0.38) : theme.colorScheme.primary;
-        final textColor = isDisabled ? theme.colorScheme.primary.withOpacity(0.38) : theme.colorScheme.primary;
+        final iconColor = isDisabled ? theme.colorScheme.primary.withValues(alpha: 0.38) : theme.colorScheme.primary;
+        final textColor = isDisabled ? theme.colorScheme.primary.withValues(alpha: 0.38) : theme.colorScheme.primary;
         return AspectRatio(
           aspectRatio: 1,
           child: Container(

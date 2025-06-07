@@ -11,7 +11,7 @@ import 'package:event_bus/event_bus.dart';
 
 enum TabIndices { scenes, devices, my }
 
-class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
+class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModelInitFutureMixin {
   static final Duration kStartupScanningDuration = Duration(seconds: 5);
   final IBlobManager _blobManager;
   final SceneManager _sceneManager;
@@ -44,8 +44,6 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
 
   bool get isScanningDevices => _deviceManager.isDiscoverying;
 
-  Future<void>? _initFuture;
-
   MainViewModel(
     EventBus globalEventBus,
     this._blobManager,
@@ -64,16 +62,8 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
     );
   }
 
-  Future<void> initialize() {
-    if (_initFuture != null) return _initFuture!;
-    _initFuture = _doInitialize();
-    return _initFuture!;
-  }
-
-  Future<void> _doInitialize() async {
-    if (isInitialized) {
-      return;
-    }
+  Future<void> initialize() async {
+    assert(!isInitialized);
     logger?.i('Starting to initialize MainViewModel...');
     try {
       await _blobManager.initialize();

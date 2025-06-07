@@ -12,7 +12,8 @@ import 'package:borneo_app/models/devices/device_entity.dart';
 import 'package:borneo_app/services/device_manager.dart';
 import 'package:borneo_app/view_models/base_view_model.dart';
 
-abstract class BaseDeviceViewModel extends BaseViewModel with WidgetsBindingObserver, ViewModelEventBusMixin {
+abstract class BaseDeviceViewModel extends BaseViewModel
+    with WidgetsBindingObserver, ViewModelEventBusMixin, ViewModelInitFutureMixin {
   static const Duration timerDuration = Duration(seconds: 1);
 
   bool _isOnline = false;

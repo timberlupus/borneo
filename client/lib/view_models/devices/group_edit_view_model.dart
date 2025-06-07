@@ -33,6 +33,12 @@ class GroupEditViewModel extends AbstractScreenViewModel {
     id = model?.id;
   }
 
+  Future<void>? _initFuture;
+  Future<void>? get initFuture {
+    if (isInitialized) return null;
+    return _initFuture ??= initialize();
+  }
+
   @override
   Future<void> onInitialize() async {
     // nothing to do

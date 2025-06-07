@@ -2,7 +2,6 @@ import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/toufu_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
-import 'dart:ui';
 
 class DashboardFanTile extends StatelessWidget {
   const DashboardFanTile({super.key});

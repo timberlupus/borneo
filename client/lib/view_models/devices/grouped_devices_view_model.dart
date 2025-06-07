@@ -18,7 +18,7 @@ import 'package:borneo_app/view_models/base_view_model.dart';
 
 import '../../models/events.dart';
 
-class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin {
+class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModelInitFutureMixin {
   final Logger? logger;
   final SceneManager _sceneManager;
   final GroupManager _groupManager;

@@ -24,7 +24,7 @@ class AcclimationScreen extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: Text('Acclimation Mode')),
       body: FutureBuilder(
-        future: vm.isInitialized ? null : vm.initialize(),
+        future: vm.initFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -166,7 +166,9 @@ class AcclimationScreen extends StatelessWidget {
         style: ToastificationStyle.fillColored,
         type: ToastificationType.success,
       );
-      Navigator.of(context).pop();
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
     });
   }
 }
