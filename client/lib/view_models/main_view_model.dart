@@ -73,7 +73,6 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
       await _groupManager.initialize();
       await _deviceManager.initialize();
       logger?.i('MainViewModel initialized.');
-      await _deviceManager.kernel.startDevicesScanning(timeout: kStartupScanningDuration);
     } finally {
       _isInitialized = true;
     }

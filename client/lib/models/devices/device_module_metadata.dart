@@ -1,5 +1,7 @@
+import 'package:borneo_app/devices/view_models/abstract_device_summary_view_model.dart';
+import 'package:borneo_app/models/devices/device_entity.dart';
+import 'package:borneo_app/services/device_manager.dart';
 import 'package:borneo_app/view_models/devices/base_device_view_model.dart';
-import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/widgets.dart';
 
@@ -14,7 +16,8 @@ abstract class DeviceModuleMetadata {
   final BaseDeviceViewModel Function(BuildContext context, String deviceID) detailsViewModelBuilder;
   final Widget Function(BuildContext context, double iconSize, bool isOnline) deviceIconBuilder;
   final Widget Function(BuildContext context, double iconSize) primaryStateIconBuilder;
-  final List<Widget> Function(BuildContext context, BoundDevice device, EventBus deviceEventBus) secondaryStatesBuilder;
+  final List<Widget> Function(BuildContext, AbstractDeviceSummaryViewModel) secondaryStatesBuilder;
+  final AbstractDeviceSummaryViewModel Function(DeviceEntity, DeviceManager, EventBus) createSummaryVM;
 
   const DeviceModuleMetadata({
     required this.id,
@@ -25,5 +28,6 @@ abstract class DeviceModuleMetadata {
     required this.deviceIconBuilder,
     required this.primaryStateIconBuilder,
     required this.secondaryStatesBuilder,
+    required this.createSummaryVM,
   });
 }

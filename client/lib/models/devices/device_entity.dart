@@ -1,5 +1,6 @@
 import 'package:borneo_app/models/base_entity.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
+import 'package:borneo_kernel_abstractions/models/driver_data.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -11,7 +12,7 @@ class DeviceEntity extends Device with BaseEntity {
   static final String kAddressFieldName = "address";
 
   final _lock = Lock();
-  dynamic _driverData;
+  DriverData? _driverData;
 
   final String sceneID;
   final String? groupID;

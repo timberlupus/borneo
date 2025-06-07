@@ -1,18 +1,14 @@
 import 'dart:async';
 
-import 'package:borneo_common/borneo_common.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_common/io/net/coap_client.dart';
 import 'package:borneo_kernel/drivers/borneo/coap_client.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/events.dart';
-import 'package:borneo_kernel_abstractions/device.dart';
-import 'package:event_bus/event_bus.dart';
+import 'package:borneo_kernel_abstractions/models/driver_data.dart';
 
-abstract class BorneoCoapDriverData extends IDisposable {
+abstract class BorneoCoapDriverData extends DriverData {
   bool _disposed = false;
-  final Device device;
-  final EventBus deviceEventBus;
   final BorneoCoapClient probeCoap;
   final BorneoCoapClient coap;
   final GeneralBorneoDeviceInfo _generalDeviceInfo;
@@ -20,8 +16,8 @@ abstract class BorneoCoapDriverData extends IDisposable {
 
   bool get isDisposed => _disposed;
 
-  BorneoCoapDriverData(this.device, this.coap, this.probeCoap,
-      this._generalDeviceInfo, this.deviceEventBus);
+  BorneoCoapDriverData(super.device, super.deviceEventBus, this.coap,
+      this.probeCoap, this._generalDeviceInfo);
 
   void load() {
     _powerOnOffSub = coap.observeCborNon<bool>(BorneoPaths.power).listen(
