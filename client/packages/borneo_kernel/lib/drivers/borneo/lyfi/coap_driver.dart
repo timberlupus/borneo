@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:borneo_kernel/drivers/borneo/borneo_coap_client.dart';
-import 'package:borneo_kernel/drivers/borneo/borneo_coap_config.dart';
+import 'package:borneo_kernel/drivers/borneo/coap_client.dart';
+import 'package:borneo_kernel/drivers/borneo/coap_config.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_coap_driver_data.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/coap_driver_data.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel/drivers/borneo/probe_coap_config.dart';
 import 'package:cancellation_token/cancellation_token.dart';

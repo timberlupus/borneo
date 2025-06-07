@@ -11,9 +11,9 @@ class DeviceError extends IOException {
   String toString() => message;
 }
 
-class DeviceCommuncationError extends DeviceError {
+class DeviceIOError extends DeviceError {
   Exception? innerException;
-  DeviceCommuncationError(super.message, super.device, {this.innerException});
+  DeviceIOError(super.message, super.device, {this.innerException});
 }
 
 class UncompatibleDeviceError extends DeviceError {

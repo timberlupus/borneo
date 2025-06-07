@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:borneo_common/borneo_common.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_common/io/net/coap_client.dart';
-import 'package:borneo_kernel/drivers/borneo/borneo_coap_client.dart';
+import 'package:borneo_kernel/drivers/borneo/coap_client.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/events.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
