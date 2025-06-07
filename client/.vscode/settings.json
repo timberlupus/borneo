@@ -1,8 +1,6 @@
 {
     "dart.flutterSdkPath": null,
-    "dart.lineLength": 80,
-    "editor.formatOnSave": true,
-    "editor.formatOnPaste": false,
+    "dart.lineLength": 120,
     "editor.defaultFormatter": "Dart-Code.dart-code",
     "files.exclude": {
         "**/.dart_tool": true,

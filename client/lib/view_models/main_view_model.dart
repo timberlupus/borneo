@@ -44,6 +44,8 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
 
   bool get isScanningDevices => _deviceManager.isDiscoverying;
 
+  Future<void>? _initFuture;
+
   MainViewModel(
     EventBus globalEventBus,
     this._blobManager,
@@ -62,7 +64,13 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin {
     );
   }
 
-  Future<void> initialize() async {
+  Future<void> initialize() {
+    if (_initFuture != null) return _initFuture!;
+    _initFuture = _doInitialize();
+    return _initFuture!;
+  }
+
+  Future<void> _doInitialize() async {
     if (isInitialized) {
       return;
     }

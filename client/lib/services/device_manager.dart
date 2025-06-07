@@ -4,6 +4,7 @@ import 'dart:core';
 import 'package:borneo_common/borneo_common.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/device_capability.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
@@ -53,9 +54,8 @@ final class DeviceManager implements IDisposable {
   }
 
   Future<void> initialize() async {
-    if (_isInitialized) {
-      return;
-    }
+    assert(!_isInitialized);
+
     logger?.i('Initializing DeviceManager...');
     try {
       final devices = await fetchAllDevicesInScene();
@@ -270,9 +270,9 @@ final class DeviceManager implements IDisposable {
 
   bool get isDiscoverying => _kernel.isScanning;
 
-  Future<void> startDiscovery({Duration? timeout}) async {
+  Future<void> startDiscovery({Duration? timeout, CancellationToken? cancelToken}) async {
     assert(!_kernel.isScanning);
-    await _kernel.startDevicesScanning(timeout: timeout);
+    await _kernel.startDevicesScanning(timeout: timeout, cancelToken: cancelToken);
   }
 
   Future<void> stopDiscovery() async {

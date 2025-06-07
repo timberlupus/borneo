@@ -1,5 +1,4 @@
 import 'package:borneo_app/devices/view_models/abstract_device_summary_view_model.dart';
-import 'package:borneo_app/models/devices/device_module_metadata.dart';
 import 'package:borneo_app/services/devices/device_module_registry.dart';
 import 'package:borneo_app/view_models/devices/grouped_devices_view_model.dart';
 import 'package:borneo_app/views/devices/state_icons.dart';
