@@ -64,7 +64,7 @@ class BorneoClient {
         format: CoapMediaType.applicationCbor,
         confirmable: confirmable);
     if (!response.isSuccess) {
-      throw CoapException("Failed to request uri `{uri}`", response);
+      throw CoapException("Failed to put uri `{uri}`", response);
     }
   }
 
@@ -79,7 +79,7 @@ class BorneoClient {
         format: CoapMediaType.applicationCbor,
         confirmable: confirmable);
     if (!response.isSuccess) {
-      throw CoapException("Failed to request uri `{uri}`", response);
+      throw CoapException("Failed to post uri `{uri}`", response);
     }
     if (TResult != Null) {
       return simple_cbor.cbor.decode(response.payload) as TResult;

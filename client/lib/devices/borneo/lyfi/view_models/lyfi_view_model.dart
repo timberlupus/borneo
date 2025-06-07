@@ -328,7 +328,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
 
     await _deviceApi.switchMode(boundDevice!.device, mode);
-    _toggleEditor(mode);
+    await _toggleEditor(mode);
     _mode = mode;
     await refreshStatus();
   }

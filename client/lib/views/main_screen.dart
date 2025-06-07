@@ -14,7 +14,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
-import 'package:toastification/toastification.dart';
 import '../services/device_manager.dart';
 import '../services/scene_manager.dart';
 import '../view_models/devices/grouped_devices_view_model.dart';
@@ -59,18 +58,10 @@ class NotificationListener extends StatelessWidget {
               ),
             );
             */
-            toastification.show(
-              context: context,
-              title: Text(context.translate("Error")),
-              type: ToastificationType.error,
-              style: ToastificationStyle.fillColored,
-              description: Text(
-                vm.errorMessage,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onErrorContainer),
-              ),
-            );
+            Provider.of<IAppNotificationService>(
+              context,
+              listen: false,
+            ).showError(context.translate("Error"), body: vm.errorMessage);
           });
         }
         return child!;
@@ -279,15 +270,7 @@ class MainScreen extends StatelessWidget {
 
               final shouldPop = await vm.handleWillPop();
               if (!shouldPop) {
-                toastification.show(
-                  title: const Text('Press back again to exit'),
-                  animationDuration: Duration(milliseconds: 300),
-                  style: ToastificationStyle.flatColored,
-                  autoCloseDuration: const Duration(seconds: 5),
-                  closeOnClick: true,
-                  closeButton: ToastCloseButton(showType: CloseButtonShowType.none),
-                  type: ToastificationType.info,
-                );
+                Provider.of<IAppNotificationService>(context, listen: false).showInfo('Press back again to exit');
               } else if (context.mounted) {
                 if (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();

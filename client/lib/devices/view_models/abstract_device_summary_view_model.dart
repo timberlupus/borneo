@@ -47,15 +47,10 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel
       if (deviceManager.isBound(deviceEntity.id)) {
         final bound = deviceManager.getBoundDevice(deviceEntity.id);
         if (bound.api() is IPowerOnOffCapability) {
-          _isPowerOn = await bound.api<IPowerOnOffCapability>().getOnOff(deviceEntity);
+          _isPowerOn = await bound.api<IPowerOnOffCapability>().getOnOff(bound.device);
         }
       }
       await onInitialize(cancelToken: cancelToken);
-      await Future.delayed(Duration(seconds: 3));
-
-      if (isOnline) {
-        // await refreshStatus();
-      }
     } on IOException catch (ioex, stackTrace) {
       logger?.e(ioex.toString(), error: ioex, stackTrace: stackTrace);
       if (isOnline) {

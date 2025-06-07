@@ -69,7 +69,7 @@ extension CoapClientExtensions on CoapClient {
         format: CoapMediaType.applicationCbor,
         confirmable: confirmable);
     if (!response.isSuccess) {
-      throw CoapException("Failed to request uri `$uri`", response);
+      throw CoapException("Failed to put uri `$uri`", response);
     }
   }
 
@@ -84,7 +84,7 @@ extension CoapClientExtensions on CoapClient {
         format: CoapMediaType.applicationCbor,
         confirmable: confirmable);
     if (!response.isSuccess) {
-      throw CoapException("Failed to request uri `$uri`", response);
+      throw CoapException("Failed to post uri `$uri`", response);
     }
   }
 }

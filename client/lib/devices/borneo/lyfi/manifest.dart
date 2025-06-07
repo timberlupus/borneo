@@ -65,7 +65,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
       case LedRunningMode.scheduled:
         return context.translate('Scheduled');
       case LedRunningMode.sun:
-        return context.translate('Sun');
+        return context.translate('Sun Simulation');
       default:
         return '-';
     }
@@ -74,7 +74,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
   static String _stateText(BuildContext context, LedState? state) {
     switch (state) {
       case LedState.normal:
-        return context.translate('Normal');
+        return context.translate('Running');
       case LedState.dimming:
         return context.translate('Dimming');
       case LedState.temporary:

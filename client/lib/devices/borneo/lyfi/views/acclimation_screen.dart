@@ -1,12 +1,12 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/acclimation_view_model.dart';
 import 'package:borneo_app/services/device_manager.dart';
+import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:provider/provider.dart';
-import 'package:toastification/toastification.dart';
 
 class AcclimationScreen extends StatelessWidget {
   final String deviceID;
@@ -159,13 +159,7 @@ class AcclimationScreen extends StatelessWidget {
   void onSubmit(AcclimationViewModel vm, BuildContext context) {
     vm.enqueueUIJob(() async {
       await vm.submitToDevice();
-      toastification.show(
-        title: Text('Update acclimation settings succeed.'),
-        autoCloseDuration: const Duration(seconds: 5),
-        closeOnClick: true,
-        style: ToastificationStyle.fillColored,
-        type: ToastificationType.success,
-      );
+      Provider.of<IAppNotificationService>(context, listen: false).showSuccess('Update acclimation settings succeed.');
       if (context.mounted) {
         Navigator.of(context).pop();
       }

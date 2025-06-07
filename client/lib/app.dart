@@ -90,7 +90,7 @@ class _BorneoAppState extends State<BorneoApp> {
         Provider<IBlobManager>(create: (_) => FlutterAppBlobManager()),
       ],
       child: ToastificationWrapper(
-        config: ToastificationConfig(animationDuration: Duration(milliseconds: 300)),
+        config: ToastificationConfig(animationDuration: Duration(milliseconds: 300), maxToastLimit: 3),
         child: Builder(
           builder: (context) {
             return MaterialApp(

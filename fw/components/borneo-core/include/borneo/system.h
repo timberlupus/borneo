@@ -16,40 +16,40 @@ extern "C" {
 #define BO_DEVICE_MODEL_MAX 32
 
 #define BO_MUST(expr)                                                                                                  \
-    ({                                                                                                                 \
-        int _rc = (expr);                                                                                              \
-        if (unlikely(_rc != 0)) {                                                                                      \
-            ESP_LOGE("borneo-system", "errcode=%d, %s(%d): ", _rc, __FUNCTION__, __LINE__);                            \
+    do {                                                                                                               \
+        int __bo_rc = (expr);                                                                                          \
+        if (unlikely(__bo_rc != 0)) {                                                                                  \
+            ESP_LOGE("borneo-system", "errcode=%d, %s(%d): ", __bo_rc, __FUNCTION__, __LINE__);                        \
             bo_panic();                                                                                                \
         }                                                                                                              \
-    })
+    } while (0)
 
 #define BO_MUST_WITH(expr, log_tag, format, ...)                                                                       \
-    ({                                                                                                                 \
-        int _rc = (expr);                                                                                              \
-        if (unlikely(_rc != 0)) {                                                                                      \
-            ESP_LOGE(log_tag, "errcode=%d, %s(%d): " format, _rc, __FUNCTION__, __LINE__, ##__VA_ARGS__);              \
+    do {                                                                                                               \
+        int __bo_rc = (expr);                                                                                          \
+        if (unlikely(__bo_rc != 0)) {                                                                                  \
+            ESP_LOGE(log_tag, "errcode=%d, %s(%d): " format, __bo_rc, __FUNCTION__, __LINE__, ##__VA_ARGS__);          \
             bo_panic();                                                                                                \
         }                                                                                                              \
-    })
+    } while (0)
 
 #define BO_TRY(expression)                                                                                             \
-    ({                                                                                                                 \
-        int _rc = (expression);                                                                                        \
-        if (unlikely(_rc != 0)) {                                                                                      \
-            ESP_LOGE("borneo-system", "errcode=%d, %s(%d)", _rc, __FUNCTION__, __LINE__);                              \
-            return _rc;                                                                                                \
+    do {                                                                                                               \
+        int __bo_rc = (expression);                                                                                    \
+        if (unlikely(__bo_rc != 0)) {                                                                                  \
+            ESP_LOGE("borneo-system", "errcode=%d, %s(%d)", __bo_rc, __FUNCTION__, __LINE__);                          \
+            return __bo_rc;                                                                                            \
         }                                                                                                              \
-    })
+    } while (0)
 
 #define BO_TRY_WITH(expression, log_tag, format, ...)                                                                  \
-    ({                                                                                                                 \
-        int _rc = (expression);                                                                                        \
-        if (unlikely(_rc != 0)) {                                                                                      \
+    do {                                                                                                               \
+        int _bo_rc = (expression);                                                                                     \
+        if (unlikely(__bo_rc != 0)) {                                                                                  \
             ESP_LOGE(log_tag, "%s(%d): " format, __FUNCTION__, __LINE__, ##__VA_ARGS__);                               \
-            return _rc;                                                                                                \
+            return __bo_rc;                                                                                            \
         }                                                                                                              \
-    })
+    } while (0);
 
 #define BO_SEM_AUTO_RELEASE(sem_expr)                                                                                  \
     __attribute__((cleanup(bo_sem_release))) SemaphoreHandle_t sem##_##__LINE__ = sem_expr

@@ -117,12 +117,23 @@ void protect_task()
         if (bo_power_is_on()) {
 
 #if CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
+            static int power_read_fail_count = 0;
             int32_t power_mw;
-            BO_MUST(bo_power_read(&power_mw));
-            if (_settings.over_power_mw > 0 && power_mw > _settings.over_power_mw) {
-                ESP_LOGE(TAG, "Over-power protection triggered! Shutdown in progress...");
-                ESP_LOGE(TAG, "%ld mW >= %ld mW", power_mw, _settings.over_power_mw);
-                BO_MUST(bo_power_shutdown(BO_SHUTDOWN_REASON_OVER_POWER));
+            int ret = bo_power_read(&power_mw);
+            if (ret != 0) {
+                power_read_fail_count++;
+                if (power_read_fail_count >= 5) {
+                    ESP_LOGE(TAG, "bo_power_read failed 5 times, panic!");
+                    bo_panic();
+                }
+            }
+            else {
+                power_read_fail_count = 0;
+                if (_settings.over_power_mw > 0 && power_mw > _settings.over_power_mw) {
+                    ESP_LOGE(TAG, "Over-power protection triggered! Shutdown in progress...");
+                    ESP_LOGE(TAG, "%ld mW >= %ld mW", power_mw, _settings.over_power_mw);
+                    BO_MUST(bo_power_shutdown(BO_SHUTDOWN_REASON_OVER_POWER));
+                }
             }
 #endif // CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
 

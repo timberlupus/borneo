@@ -1,5 +1,6 @@
 import 'package:borneo_app/models/devices/device_entity.dart';
 import 'package:borneo_app/services/group_manager.dart';
+import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_app/views/devices/device_group_selection_sheet.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:event_bus/event_bus.dart';
@@ -250,15 +251,10 @@ class NewDeviceAddedSnackBarListener extends StatelessWidget {
         if (lastestAdded != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             toastification.dismissAll();
-            toastification.show(
-              context: context,
-              type: ToastificationType.success,
-              style: ToastificationStyle.fillColored,
-              title: Text(context.translate('A new device has been added.')),
-              description: Text(lastestAdded.name),
-              autoCloseDuration: const Duration(seconds: 3),
-              icon: const Icon(Icons.device_hub),
-            );
+            Provider.of<IAppNotificationService>(
+              context,
+              listen: false,
+            ).showSuccess(context.translate('A new device has been added.'), body: lastestAdded.name);
 
             // 在 toast 关闭后清除状态
             /*

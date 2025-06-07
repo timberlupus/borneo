@@ -79,6 +79,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   }
 
   Future<void> initialize() async {
+    assert(!isInitialized);
     try {
       deviceEntity = await deviceManager.getDevice(deviceID);
       _isLoaded = true;

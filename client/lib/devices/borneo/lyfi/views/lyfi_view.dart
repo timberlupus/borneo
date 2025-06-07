@@ -328,20 +328,8 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
   }
 }
 
-class LyfiView extends StatefulWidget {
+class LyfiView extends StatelessWidget {
   const LyfiView({super.key});
-
-  @override
-  State<LyfiView> createState() => _LyfiViewState();
-}
-
-class _LyfiViewState extends State<LyfiView> {
-  Future<void>? _initFuture;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -357,9 +345,8 @@ class _LyfiViewState extends State<LyfiView> {
           ),
       builder: (context, child) {
         final vm = context.read<LyfiViewModel>();
-        _initFuture ??= vm.isInitialized ? Future.value() : vm.initialize();
         return FutureBuilder(
-          future: _initFuture,
+          future: vm.initFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Scaffold(body: Center(child: CircularProgressIndicator()));
