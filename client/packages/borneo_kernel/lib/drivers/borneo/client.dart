@@ -1,5 +1,5 @@
 import 'package:borneo_common/io/net/coap_client.dart';
-import 'package:borneo_kernel/drivers/borneo/borneo_coap_config.dart';
+import 'package:borneo_kernel/drivers/borneo/coap_config.dart';
 import 'package:coap/coap.dart';
 import 'package:cbor/simple.dart' as simple_cbor;
 

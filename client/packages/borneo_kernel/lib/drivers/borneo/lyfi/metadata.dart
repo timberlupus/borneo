@@ -4,7 +4,7 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:borneo_kernel_abstractions/models/driver_descriptor.dart';
 import 'package:borneo_kernel_abstractions/models/heartbeat_method.dart';
 
-import 'lyfi_coap_driver.dart';
+import 'coap_driver.dart';
 
 const kLyfiDriverID = "borneo.lyfi";
 const kLyfiDriverName = "Borneo LyFi Aquarium LED";
