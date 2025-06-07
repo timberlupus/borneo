@@ -246,11 +246,11 @@ final class DefaultKernel implements IKernel {
     });
   }
 
-  Future<bool> _tryDoHeartBeat(BoundDevice bd) async {
+  Future<bool> _tryDoHeartBeat(BoundDevice bd, Duration timeout) async {
     try {
       await bd.driver
           .heartbeat(bd.device, cancelToken: _heartbeatPollingTaskCancelToken)
-          .timeout(kHeartbeatPollingInterval)
+          .timeout(timeout)
           .asCancellable(_heartbeatPollingTaskCancelToken);
       return true;
     } catch (e, stackTrace) {
@@ -264,56 +264,66 @@ final class DefaultKernel implements IKernel {
     if (!isInitialized) {
       return;
     }
-    // 心跳检测加锁，若已锁定则跳过本轮
     if (_deviceOpLock.locked) {
       _logger.t('Heartbeat polling skipped due to device operation lock.');
       return;
     }
-    _deviceOpLock.synchronized(() async {
-      final futures = <Future<bool>>[];
+    try {
+      await _deviceOpLock.synchronized(() async {
+        final futures = <Future<bool>>[];
 
-      // BoundDevices
-      {
-        final devices = <BoundDevice>[];
-        for (final bd in _boundDevices.values) {
-          if (_pollIDList.contains(bd.device.id)) {
-            futures.add(_tryDoHeartBeat(bd));
-            devices.add(bd);
+        // BoundDevices
+        {
+          final devices = <BoundDevice>[];
+          for (final bd in _boundDevices.values) {
+            if (_pollIDList.contains(bd.device.id)) {
+              futures.add(_tryDoHeartBeat(bd, kHeartbeatPollingInterval)
+                  .asCancellable(_heartbeatPollingTaskCancelToken));
+              devices.add(bd);
+            }
+          }
+
+          _logger
+              .i('Polling heartbeat for (${devices.length}) bound devices...');
+          final results = await Future.wait(futures)
+              .timeout(kHeartbeatPollingInterval)
+              .asCancellable(_heartbeatPollingTaskCancelToken);
+          for (int i = 0; i < results.length; i++) {
+            if (!results[i]) {
+              _logger.w('The device(${devices[i].device}) is not responding.');
+              _events.fire(DeviceOfflineEvent(devices[i].device));
+            }
           }
         }
 
-        _logger.i('Polling heartbeat for (${devices.length}) bound devices...');
-        final results = await Future.wait(futures);
-        for (int i = 0; i < results.length; i++) {
-          if (!results[i]) {
-            _logger.w('The device(${devices[i].device}) is not responding.');
-            _events.fire(DeviceOfflineEvent(devices[i].device));
-          }
+        // UnboundDevices
+        futures.clear();
+        final unboundDeviceDescriptors = _registeredDevices.values
+            .where((x) => !isBound(x.device.id))
+            .toList();
+        for (final descriptor in unboundDeviceDescriptors) {
+          futures.add(tryBind(descriptor.device, descriptor.driverID,
+              timeout: kLocalProbeTimeOut,
+              cancelToken: _heartbeatPollingTaskCancelToken));
         }
-      }
-
-      // UnboundDevices
-      futures.clear();
-      final unboundDeviceDescriptors = _registeredDevices.values
-          .where((x) => !isBound(x.device.id))
-          .toList();
-      for (final descriptor in unboundDeviceDescriptors) {
-        futures.add(tryBind(descriptor.device, descriptor.driverID,
-            timeout: kLocalProbeTimeOut,
-            cancelToken: _heartbeatPollingTaskCancelToken));
-      }
-      _logger.i(
-          'Polling heartbeat for (${unboundDeviceDescriptors.length}) unbound devices...');
-      final boundResults = await Future.wait(futures);
-      for (int i = 0; i < boundResults.length; i++) {
-        /*
+        _logger.i(
+            'Polling heartbeat for (${unboundDeviceDescriptors.length}) unbound devices...');
+        final boundResults = await Future.wait(futures)
+            .timeout(kHeartbeatPollingInterval)
+            .asCancellable(_heartbeatPollingTaskCancelToken);
+        for (int i = 0; i < boundResults.length; i++) {
+          /*
       if (!boundResults[i]) {
         _logger
               .w('Failed to bind device()');
       }
             */
-      }
-    }).asCancellable(cancelToken);
+        }
+      }, timeout: kHeartbeatPollingInterval).asCancellable(cancelToken);
+    } catch (e, stackTrace) {
+      _logger.w("Failed to do the heartbeat: $e",
+          error: e, stackTrace: stackTrace);
+    }
   }
 
   void _ensureStarted() {

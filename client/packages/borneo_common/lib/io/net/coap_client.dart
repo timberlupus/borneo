@@ -22,7 +22,8 @@ extension CoapClientExtensions on CoapClient {
     if (!response.isSuccess) {
       throw CoapException("Failed to request uri `$uri`", response);
     }
-    return simple_cbor.cbor.decode(response.payload) as T;
+    final cborPayload = simple_cbor.cbor.decode(response.payload) as T;
+    return cborPayload;
   }
 
   /// Observes the given [uri] using a confirmable CoAP GET request and yields each CBOR-decoded payload as type [T].

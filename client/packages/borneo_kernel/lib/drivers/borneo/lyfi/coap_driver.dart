@@ -19,6 +19,7 @@ import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.da
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/idriver.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:logger/logger.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 class LyfiPaths {
@@ -39,12 +40,17 @@ class LyfiPaths {
 
   static final Uri sunSchedule = Uri(path: '/borneo/lyfi/sun/schedule');
   static final Uri sunCurve = Uri(path: '/borneo/lyfi/sun/curve');
+
+  static final Uri keepTemp = Uri(path: '/borneo/lyfi/thermal/keep-temp');
 }
 
 class BorneoLyfiCoapDriver
     with BorneoDeviceCoapApi
     implements IDriver, ILyfiDeviceApi {
   static const String lyfiCompatibleString = 'bst,borneo-lyfi';
+  final Logger? logger;
+
+  BorneoLyfiCoapDriver({this.logger});
 
   @override
   Future<bool> probe(Device dev, EventBus deviceEvents,
@@ -89,7 +95,9 @@ class BorneoLyfiCoapDriver
       driverData.load();
       await dev.setDriverData(driverData, cancelToken: cancelToken);
       succeed = true;
-    } on CoapRequestTimeoutException catch (_) {
+    } on CoapRequestTimeoutException catch (e, stackTrace) {
+      logger?.w("Failed to probe device($dev): $e",
+          error: e, stackTrace: stackTrace);
       succeed = false;
     } finally {
       if (!succeed) {
@@ -135,20 +143,13 @@ class BorneoLyfiCoapDriver
   }
 
   Future<GeneralBorneoDeviceInfo> _getGeneralDeviceInfo(CoapClient coap) async {
-    final response = await coap.get(
-      BorneoPaths.deviceInfo,
-      accept: CoapMediaType.applicationCbor,
-    );
-    return GeneralBorneoDeviceInfo.fromMap(
-        cbor.decode(response.payload) as CborMap);
+    final payload = await coap.getCbor<Map>(BorneoPaths.deviceInfo);
+    return GeneralBorneoDeviceInfo.fromMap(payload);
   }
 
   Future<LyfiDeviceInfo> _getLyfiInfo(CoapClient coap) async {
-    final response = await coap.get(
-      LyfiPaths.info,
-      accept: CoapMediaType.applicationCbor,
-    );
-    return LyfiDeviceInfo.fromMap(cbor.decode(response.payload) as CborMap);
+    final payload = await coap.getCbor<Map>(LyfiPaths.info);
+    return LyfiDeviceInfo.fromMap(payload);
   }
 
   static SupportedDeviceDescriptor? matches(DiscoveredDevice discovered) {
@@ -179,11 +180,7 @@ class BorneoLyfiCoapDriver
   @override
   Future<int> getKeepTemp(Device dev) async {
     final dd = dev.driverData! as LyfiCoapDriverData;
-    final response = await dd.coap.get(
-      Uri(path: '/borneo/lyfi/thermal/keep-temp'),
-      accept: CoapMediaType.applicationCbor,
-    );
-    return cbor.decode(response.payload).toObject() as int;
+    return await dd.coap.getCbor<int>(LyfiPaths.keepTemp);
   }
 
   @override
@@ -195,15 +192,8 @@ class BorneoLyfiCoapDriver
   @override
   Future<LyfiDeviceStatus> getLyfiStatus(Device dev) async {
     final dd = dev.driverData! as LyfiCoapDriverData;
-    dd.debugCounter += 1;
-    final response = await dd.coap.get(
-      Uri(path: '/borneo/lyfi/status'),
-      accept: CoapMediaType.applicationCbor,
-    );
-    if (dd.debugCounter >= 3) {
-      //throw DeviceBusyError('surprise!', dev);
-    }
-    return LyfiDeviceStatus.fromMap(cbor.decode(response.payload) as CborMap);
+    final payload = await dd.coap.getCbor<Map>(LyfiPaths.status);
+    return LyfiDeviceStatus.fromMap(payload);
   }
 
   @override

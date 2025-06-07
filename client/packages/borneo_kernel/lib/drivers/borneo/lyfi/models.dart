@@ -34,8 +34,7 @@ class LyfiDeviceInfo {
     required this.channels,
   });
 
-  factory LyfiDeviceInfo.fromMap(CborMap cborMap) {
-    final dynamic map = cborMap.toObject();
+  factory LyfiDeviceInfo.fromMap(Map map) {
     return LyfiDeviceInfo(
         isStandaloneController: map['isStandaloneController'],
         nominalPower: map['nominalPower']?.toDouble(),
@@ -197,8 +196,7 @@ class LyfiDeviceStatus {
     this.acclimationActivated = false,
   });
 
-  factory LyfiDeviceStatus.fromMap(CborMap cborMap) {
-    final dynamic map = cborMap.toObject();
+  factory LyfiDeviceStatus.fromMap(Map map) {
     return LyfiDeviceStatus(
       state: LedState.values[map['state']],
       mode: LedRunningMode.values[map['mode']],
@@ -239,7 +237,7 @@ class SunCurveItem {
   final double brightness;
   const SunCurveItem({required this.instant, required this.brightness});
 
-  factory SunCurveItem.fromMap(dynamic map) {
+  factory SunCurveItem.fromMap(Map map) {
     final secs = map['time'] as double;
     return SunCurveItem(
       instant: Duration(seconds: (secs * 3600.0).round()),

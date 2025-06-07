@@ -111,8 +111,7 @@ class GeneralBorneoDeviceInfo {
     required this.fwVer,
   });
 
-  factory GeneralBorneoDeviceInfo.fromMap(CborMap cborMap) {
-    final dynamic map = cborMap.toObject();
+  factory GeneralBorneoDeviceInfo.fromMap(Map map) {
     return GeneralBorneoDeviceInfo(
       id: map['id'],
       compatible: map['compatible'],
@@ -164,8 +163,7 @@ class GeneralBorneoDeviceStatus {
     this.powerCurrent,
   });
 
-  factory GeneralBorneoDeviceStatus.fromMap(CborMap cborMap) {
-    final dynamic map = cborMap.toObject();
+  factory GeneralBorneoDeviceStatus.fromMap(Map map) {
     return GeneralBorneoDeviceStatus(
       power: map['power'],
       timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] * 1000,
@@ -213,8 +211,7 @@ class BorneoRtcLocalNtpResponse {
     required this.t3,
   });
 
-  factory BorneoRtcLocalNtpResponse.fromMap(CborMap cborMap) {
-    final dynamic map = cborMap.toObject();
+  factory BorneoRtcLocalNtpResponse.fromMap(Map map) {
     return BorneoRtcLocalNtpResponse(
       t1: map['t1'] as int,
       t2: map['t2'] as int,
@@ -308,8 +305,8 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
       payload: simple_cbor.cbor.encode(timestampUS),
     );
     final response = await dd.coap.send(request);
-    return BorneoRtcLocalNtpResponse.fromMap(
-        cbor.decode(response.payload) as CborMap);
+    final payload = simple_cbor.cbor.decode(response.payload) as Map;
+    return BorneoRtcLocalNtpResponse.fromMap(payload);
   }
 
   @override
@@ -339,10 +336,8 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   @override
   Future<GeneralBorneoDeviceStatus> getGeneralDeviceStatus(Device dev) async {
     final dd = dev.driverData! as BorneoCoapDriverData;
-    final response = await dd.coap
-        .get(BorneoPaths.status, accept: CoapMediaType.applicationCbor);
-    return GeneralBorneoDeviceStatus.fromMap(
-        cbor.decode(response.payload) as CborMap);
+    final payload = await dd.coap.getCbor<Map>(BorneoPaths.status);
+    return GeneralBorneoDeviceStatus.fromMap(payload);
   }
 
   @override

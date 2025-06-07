@@ -8,7 +8,6 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/coap_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 
 class LyfiCoapDriverData extends BorneoCoapDriverData {
-  int debugCounter = 0;
   final LyfiDeviceInfo _lyfiDeviceInfo;
   bool _disposed = false;
 
