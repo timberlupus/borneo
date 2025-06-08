@@ -1,0 +1,24 @@
+// Event class to represent device events
+class MetaEvent {
+  final String name;
+  final String? description;
+  final String? type;
+  final Map<String, dynamic>? dataSchema;
+  final dynamic data;
+
+  MetaEvent({
+    required this.name,
+    this.description,
+    this.type,
+    this.dataSchema,
+    this.data,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        if (description != null) 'description': description,
+        if (type != null) 'type': type,
+        if (dataSchema != null) 'data': dataSchema,
+        if (data != null) 'value': data,
+      };
+}
