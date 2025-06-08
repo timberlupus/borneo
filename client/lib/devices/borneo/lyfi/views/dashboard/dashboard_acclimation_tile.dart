@@ -8,17 +8,18 @@ class DashboardAcclimationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<LyfiViewModel, ({bool canGo, bool enabled, bool activated})>(
+    return Selector<LyfiViewModel, ({bool isOnline, bool isOn, bool enabled, bool activated})>(
       selector:
           (_, vm) => (
-            canGo: vm.canLockOrUnlock,
-            enabled: vm.lyfiDeviceStatus.acclimationEnabled,
-            activated: vm.lyfiDeviceStatus.acclimationActivated,
+            isOnline: vm.isOnline,
+            isOn: vm.isOn,
+            enabled: vm.isOnline ? vm.lyfiDeviceStatus?.acclimationEnabled ?? false : false,
+            activated: vm.isOnline ? vm.lyfiDeviceStatus?.acclimationActivated ?? false : false,
           ),
       builder: (context, props, _) {
         final theme = Theme.of(context);
         final isActive = props.enabled || props.activated;
-        final isDisabled = !props.canGo;
+        final isDisabled = !props.isOnline || !props.isOn;
         final iconColor =
             isDisabled
                 ? (isActive
@@ -41,7 +42,7 @@ class DashboardAcclimationTile extends StatelessWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
               onTap:
-                  props.canGo
+                  props.isOnline && props.isOn
                       ? () async {
                         if (context.mounted) {
                           final vm = context.read<LyfiViewModel>();

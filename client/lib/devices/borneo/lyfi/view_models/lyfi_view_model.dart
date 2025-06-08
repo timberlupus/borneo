@@ -28,19 +28,11 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   LedRunningMode _mode = LedRunningMode.manual;
   bool _isLocked = true;
 
-  bool _isOn = false;
-  bool get isOn => _isOn;
-
   LedRunningMode get mode => _mode;
   bool get isLocked => _isLocked;
 
   LedState? _ledState;
   LedState? get ledState => _ledState;
-
-  bool get canMeasureCurrent => super.isOnline && isOn && borneoDeviceStatus?.powerCurrent != null;
-  bool get canMeasureVoltage => super.isOnline && isOn && borneoDeviceStatus?.powerVoltage != null;
-  bool get canMeasurePower => canMeasureCurrent && canMeasureVoltage;
-  double get currentWatts => (borneoDeviceStatus?.powerCurrent ?? 0) * (borneoDeviceStatus?.powerVoltage ?? 0);
 
   Duration _temporaryDuration = Duration.zero;
   Duration get temporaryDuration => _temporaryDuration;
@@ -136,6 +128,9 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         logger?.e('Failed to setMode of the device(${super.deviceEntity})', error: e, stackTrace: stackTrace);
       }
     }
+    for (final ch in _channels) {
+      ch.dispose();
+    }
     super.dispose();
   }
 
@@ -179,7 +174,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
     _channels.clear();
 
-    _isOn = false;
     _mode = LedRunningMode.manual;
     _ledState = LedState.normal;
 
@@ -216,25 +210,26 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       return;
     }
 
-    _isOn = borneoDeviceStatus!.power;
-    _ledState = super.lyfiDeviceStatus.state;
-    _isLocked = lyfiDeviceStatus.state.isLocked;
-    _fanPowerRatio = lyfiDeviceStatus.fanPower.toDouble();
-    _mode = lyfiDeviceStatus.mode;
+    _ledState = super.lyfiDeviceStatus?.state;
+    _isLocked = super.lyfiDeviceStatus?.state.isLocked ?? true;
+    _fanPowerRatio = super.lyfiDeviceStatus?.fanPower.toDouble() ?? 0;
+    _mode = super.lyfiDeviceStatus?.mode ?? LedRunningMode.manual;
 
-    _temporaryRemaining.value = lyfiDeviceStatus.temporaryRemaining;
+    _temporaryRemaining.value = lyfiDeviceStatus?.temporaryRemaining ?? Duration.zero;
 
     bool emptyChannels = _channels.isEmpty;
-    double ob = 0;
-    for (int i = 0; i < lyfiDeviceStatus.currentColor.length; i++) {
-      if (emptyChannels) {
-        _channels.add(ValueNotifier<int>(lyfiDeviceStatus.currentColor[i]));
-      } else {
-        _channels[i].value = lyfiDeviceStatus.currentColor[i];
+    if (super.lyfiDeviceStatus != null) {
+      double ob = 0;
+      for (int i = 0; i < lyfiDeviceStatus!.currentColor.length; i++) {
+        if (emptyChannels) {
+          _channels.add(ValueNotifier<int>(super.lyfiDeviceStatus!.currentColor[i]));
+        } else {
+          _channels[i].value = super.lyfiDeviceStatus!.currentColor[i];
+        }
+        ob += lyfiDeviceInfo.channels[i].brightnessRatio * _channels[i].value / lyfiBrightnessMax;
       }
-      ob += lyfiDeviceInfo.channels[i].brightnessRatio * _channels[i].value / lyfiBrightnessMax;
+      _overallBrightness = ob;
     }
-    _overallBrightness = ob;
   }
 
   void switchPowerOnOff(bool onOff) {
@@ -248,7 +243,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
   bool get canSwitchTemporaryState =>
       !isBusy &&
-      _isOn &&
+      super.isOn &&
       (_mode == LedRunningMode.scheduled || _mode == LedRunningMode.sun) &&
       (ledState == LedState.temporary || ledState == LedState.normal);
 
@@ -361,7 +356,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       borneoStatus: borneoDeviceStatus!,
       borneoInfo: super.borneoDeviceInfo!,
       ledInfo: lyfiDeviceInfo,
-      ledStatus: lyfiDeviceStatus,
+      ledStatus: lyfiDeviceStatus!,
       powerBehavior: await _deviceApi.getPowerBehavior(boundDevice!.device),
       location: await _deviceApi.getLocation(boundDevice!.device),
     );

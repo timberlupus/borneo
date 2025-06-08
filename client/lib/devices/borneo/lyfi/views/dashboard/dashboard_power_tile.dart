@@ -8,108 +8,126 @@ class DashboardPowerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LyfiViewModel>(
-      builder:
-          (context, vm, _) => DashboardToufu(
-            title: 'Power',
-            icon: Icons.power_outlined,
-            foregroundColor: Theme.of(context).colorScheme.onSurface,
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-            arcColor: Theme.of(context).colorScheme.outlineVariant,
-            progressColor: Theme.of(context).colorScheme.tertiary,
-            minValue: 0.0,
-            maxValue: vm.lyfiDeviceInfo.nominalPower ?? 9999,
-            value: vm.isOn ? vm.currentWatts : 0,
-            center: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
+    return Selector<
+      LyfiViewModel,
+      ({bool isOnline, bool isOn, bool canMeasureVoltage, bool canMeasureCurrent, bool canMeasurePower})
+    >(
+      selector:
+          (_, vm) => (
+            isOnline: vm.isOnline,
+            isOn: vm.isOn,
+            canMeasureVoltage: vm.canMeasureVoltage,
+            canMeasureCurrent: vm.canMeasureCurrent,
+            canMeasurePower: vm.canMeasurePower,
+          ),
+      builder: (context, props, _) {
+        final vm = context.read<LyfiViewModel>();
+        final mergedListenable = Listenable.merge([vm.currentVoltage, vm.currentCurrent, vm.currentWatts]);
+        return ListenableBuilder(
+          listenable: mergedListenable,
+          builder:
+              (context, _) => DashboardToufu(
+                title: 'Power',
+                icon: Icons.power_outlined,
+                foregroundColor: Theme.of(context).colorScheme.onSurface,
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                arcColor: Theme.of(context).colorScheme.outlineVariant,
+                progressColor: Theme.of(context).colorScheme.tertiary,
+                minValue: 0.0,
+                maxValue: props.isOnline ? vm.nominalPower ?? 99999 : 99999,
+                value: props.canMeasurePower ? vm.currentWatts.value ?? 0 : 0,
+                center: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  textBaseline: TextBaseline.alphabetic,
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    if (vm.canMeasurePower)
-                      ...() {
-                        final double watts = vm.currentWatts;
-                        final int intPart = watts.floor();
-                        final int decimalPart = ((watts - intPart) * 10).round();
-                        final bool isZero = watts == 0;
-                        return [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        if (props.canMeasurePower)
+                          ...() {
+                            final double watts = vm.currentWatts.value!;
+                            final int intPart = watts.floor();
+                            final int decimalPart = ((watts - intPart) * 10).round();
+                            final bool isZero = watts == 0;
+                            return [
+                              Text(
+                                isZero ? '0' : intPart.toString(),
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontFeatures: [FontFeature.tabularFigures()],
+                                  fontSize: 23,
+                                ),
+                              ),
+                              if (!isZero) ...[
+                                Text(
+                                  '.',
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontFeatures: [FontFeature.tabularFigures()],
+                                    fontSize: 23,
+                                  ),
+                                ),
+                                Text(
+                                  decimalPart.toString(),
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontFeatures: [FontFeature.tabularFigures()],
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                              Text(
+                                'W',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontFeatures: [FontFeature.tabularFigures()],
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ];
+                          }()
+                        else ...[
                           Text(
-                            isZero ? '0' : intPart.toString(),
+                            'N/A',
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: Theme.of(context).colorScheme.primary,
                               fontFeatures: [FontFeature.tabularFigures()],
                               fontSize: 23,
                             ),
                           ),
-                          if (!isZero) ...[
-                            Text(
-                              '.',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontFeatures: [FontFeature.tabularFigures()],
-                                fontSize: 23,
-                              ),
-                            ),
-                            Text(
-                              decimalPart.toString(),
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontFeatures: [FontFeature.tabularFigures()],
-                                color: Theme.of(context).colorScheme.primary,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
+                        ],
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (props.canMeasureVoltage)
                           Text(
-                            'W',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            '${vm.currentVoltage.value!.toStringAsFixed(1)}V',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontFeatures: [FontFeature.tabularFigures()],
-                              color: Theme.of(context).colorScheme.primary,
-                              fontSize: 11,
                             ),
                           ),
-                        ];
-                      }()
-                    else ...[
-                      Text(
-                        'N/A',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                          fontSize: 23,
-                        ),
-                      ),
-                    ],
+                        if (props.canMeasureCurrent) SizedBox(width: 4),
+                        if (vm.canMeasureCurrent)
+                          Text(
+                            '${vm.currentCurrent.value!.toStringAsFixed(1)}A',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontFeatures: [FontFeature.tabularFigures()],
+                            ),
+                          ),
+                      ],
+                    ),
                   ],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (vm.canMeasureVoltage)
-                      Text(
-                        '${vm.borneoDeviceStatus!.powerVoltage!.toStringAsFixed(1)}V',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                        ),
-                      ),
-                    if (vm.canMeasureCurrent) SizedBox(width: 4),
-                    if (vm.canMeasureCurrent)
-                      Text(
-                        '${vm.borneoDeviceStatus!.powerCurrent!.toStringAsFixed(1)}A',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+              ),
+        );
+      },
     );
   }
 }
