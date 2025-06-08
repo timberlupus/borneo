@@ -15,7 +15,7 @@ class PowerAction extends RoutineAction {
     if (bound == null) {
       return;
     }
-    final onProp = bound.wotDevice.properties["on"]!;
+    final onProp = bound.wotAdapter.device.properties["on"]!;
     final isOn = onProp.value as bool;
 
     if (isOn) {
@@ -28,7 +28,7 @@ class PowerAction extends RoutineAction {
     final bound = deviceManager.boundDevices.where((d) => d.device.id == deviceId).lastOrNull;
     if (bound == null) return;
 
-    final onProp = bound.wotDevice.properties["on"]!;
+    final onProp = bound.wotAdapter.device.properties["on"]!;
     final isOn = onProp.value as bool;
     if (isOn != prevState) {
       onProp.setValue(prevState);

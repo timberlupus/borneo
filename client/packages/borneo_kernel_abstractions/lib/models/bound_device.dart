@@ -1,8 +1,7 @@
 import 'package:borneo_common/borneo_common.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/idevice_api.dart';
-import 'package:borneo_kernel_abstractions/models/wot/device.dart';
-import 'package:event_bus/event_bus.dart';
+import 'package:borneo_kernel_abstractions/models/wot/adapter.dart';
 
 import '../device.dart';
 import '../idriver.dart';
@@ -19,11 +18,9 @@ final class BoundDevice implements IDisposable {
   final String driverID;
   final Device device;
   final IDriver driver;
-  final WotDevice wotDevice;
-  final EventBus events;
+  final WotAdapter wotAdapter;
 
-  BoundDevice(
-      this.driverID, this.device, this.driver, this.wotDevice, this.events);
+  BoundDevice(this.driverID, this.device, this.driver, this.wotAdapter);
 
   T api<T extends IDeviceApi>() {
     if (_isDisposed) {
@@ -35,8 +32,7 @@ final class BoundDevice implements IDisposable {
   @override
   void dispose() {
     if (!_isDisposed) {
-      wotDevice.dispose();
-      events.destroy();
+      wotAdapter.dispose();
       _isDisposed = true;
     }
   }

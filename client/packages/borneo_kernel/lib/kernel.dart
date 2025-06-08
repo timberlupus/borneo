@@ -5,7 +5,6 @@ import 'package:borneo_kernel_abstractions/models/heartbeat_method.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:logger/logger.dart';
 import 'package:cancellation_token/cancellation_token.dart';
-import 'package:event_bus/event_bus.dart';
 import 'package:synchronized/synchronized.dart';
 
 import 'package:borneo_common/exceptions.dart';
@@ -190,11 +189,11 @@ final class DefaultKernel implements IKernel {
 
       if (driverInitialized) {
         // Try to activate device
-        final deviceEvents = DeviceEventBus();
-        final wotDevice = await driver.createWotDevice(device, deviceEvents,
+        final driverData = device.data();
+        final wotAdapter = await driver.createWotAdapter(
+            device, driverData.deviceEvents,
             cancelToken: cancelToken);
-        final bound =
-            BoundDevice(driverID, device, driver, wotDevice, deviceEvents);
+        final bound = BoundDevice(driverID, device, driver, wotAdapter);
 
         _boundDevices[device.id] = bound;
 

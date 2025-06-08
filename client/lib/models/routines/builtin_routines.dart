@@ -7,7 +7,7 @@ final class PowerOffAllRoutine extends AbstractBuiltinRoutine {
 
   @override
   bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices.any((d) => d.wotDevice.hasCapability("OnOffSwitch"));
+    return deviceManager.boundDevices.any((d) => d.wotAdapter.device.hasCapability("OnOffSwitch"));
   }
 
   /// Execute routine
@@ -15,7 +15,7 @@ final class PowerOffAllRoutine extends AbstractBuiltinRoutine {
   Future<List<Map<String, dynamic>>> execute(DeviceManager deviceManager) async {
     final steps = <PowerAction>[];
     for (final bound in deviceManager.boundDevices) {
-      final onProp = bound.wotDevice.properties["on"]!;
+      final onProp = bound.wotAdapter.device.properties["on"]!;
       final prevState = onProp.value as bool;
       if (prevState) {
         onProp.setValue(false);
@@ -31,7 +31,7 @@ final class FeedModeRoutine extends AbstractBuiltinRoutine {
 
   @override
   bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices.any((d) => d.wotDevice.hasCapability("OnOffSwitch"));
+    return deviceManager.boundDevices.any((d) => d.wotAdapter.device.hasCapability("OnOffSwitch"));
   }
 
   @override
@@ -47,7 +47,7 @@ final class WaterChangeModeRoutine extends AbstractBuiltinRoutine {
 
   @override
   bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices.any((d) => d.wotDevice.hasCapability("OnOffSwitch"));
+    return deviceManager.boundDevices.any((d) => d.wotAdapter.device.hasCapability("OnOffSwitch"));
   }
 
   @override
@@ -62,7 +62,7 @@ final class DryScapeModeRoutine extends AbstractBuiltinRoutine {
 
   @override
   bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices.any((d) => d.wotDevice.hasCapability("OnOffSwitch"));
+    return deviceManager.boundDevices.any((d) => d.wotAdapter.device.hasCapability("OnOffSwitch"));
   }
 
   @override

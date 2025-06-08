@@ -41,8 +41,9 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel
     try {
       if (deviceManager.isBound(deviceEntity.id)) {
         final bound = deviceManager.getBoundDevice(deviceEntity.id);
-        if (bound.wotDevice.hasCapability("OnOffSwitch")) {
-          final onProp = bound.wotDevice.properties["on"]!;
+        final wotDevice = bound.wotAdapter.device;
+        if (wotDevice.hasCapability("OnOffSwitch")) {
+          final onProp = wotDevice.properties["on"]!;
           _isPowerOn = onProp.value as bool;
         }
       }

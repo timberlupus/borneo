@@ -1,7 +1,7 @@
 import 'package:borneo_common/borneo_common.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
-import 'package:borneo_kernel_abstractions/models/wot/device.dart';
+import 'package:borneo_kernel_abstractions/models/wot/adapter.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 
 abstract class IDriver implements IDisposable {
@@ -14,6 +14,7 @@ abstract class IDriver implements IDisposable {
 
   Future<bool> heartbeat(Device dev, {CancellationToken? cancelToken});
 
-  Future<WotDevice> createWotDevice(Device device, DeviceEventBus deviceEvents,
+  Future<WotAdapter> createWotAdapter(
+      Device device, DeviceEventBus deviceEvents,
       {CancellationToken? cancelToken});
 }
