@@ -76,7 +76,7 @@ class DashboardPowerSwitchTile extends StatelessWidget {
                                 children: [
                                   Text(
                                     isOn ? 'ON' : 'OFF',
-                                    style: theme.textTheme.labelLarge?.copyWith(
+                                    style: theme.textTheme.titleSmall?.copyWith(
                                       color: isOn ? theme.colorScheme.onSurface : Colors.red,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -84,7 +84,7 @@ class DashboardPowerSwitchTile extends StatelessWidget {
                                   if (isOn)
                                     Text(
                                       '$brightness%',
-                                      style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary),
+                                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
                                     ),
                                 ],
                               ),

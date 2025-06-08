@@ -107,16 +107,24 @@ class DashboardPowerTile extends StatelessWidget {
                         if (props.canMeasureVoltage)
                           Text(
                             '${vm.currentVoltage.value!.toStringAsFixed(1)}V',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(context).colorScheme.onSurface,
                               fontFeatures: [FontFeature.tabularFigures()],
                             ),
                           ),
-                        if (props.canMeasureCurrent) SizedBox(width: 4),
+                        if (props.canMeasureCurrent) const SizedBox(width: 4),
+                        if (props.canMeasureCurrent)
+                          Text(
+                            "·",
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
+                          ),
+                        if (props.canMeasureCurrent) const SizedBox(width: 4),
                         if (vm.canMeasureCurrent)
                           Text(
                             '${vm.currentCurrent.value!.toStringAsFixed(1)}A',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(context).colorScheme.onSurface,
                               fontFeatures: [FontFeature.tabularFigures()],
                             ),

@@ -86,17 +86,11 @@ class DashboardTemporaryTile extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Temporary',
-                                  style: theme.textTheme.labelLarge?.copyWith(
-                                    color: effectiveFgColor,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                Text('Temporary', style: theme.textTheme.titleSmall?.copyWith(color: effectiveFgColor)),
                                 if (isActive && remainText.isNotEmpty)
                                   Text(
                                     remainText,
-                                    style: theme.textTheme.labelMedium?.copyWith(
+                                    style: theme.textTheme.bodySmall?.copyWith(
                                       color: effectiveFgColor,
                                       fontFeatures: [FontFeature.tabularFigures()],
                                     ),
