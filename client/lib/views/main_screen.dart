@@ -27,50 +27,6 @@ import '../view_models/main_view_model.dart';
 
 enum PlusMenuIndexes { addScene, addGroup, addDevice }
 
-class NotificationListener extends StatelessWidget {
-  final Widget child;
-  const NotificationListener({super.key, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<MainViewModel>(
-      builder: (context, vm, child) {
-        if (vm.hasError) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            /*
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  vm.errorMessage,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onErrorContainer),
-                ),
-                backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                action: SnackBarAction(
-                  label: 'Dismiss',
-                  onPressed: () {
-                    if (!vm.isDisposed) {
-                      vm.clearError();
-                    }
-                  },
-                ),
-              ),
-            );
-            */
-            Provider.of<IAppNotificationService>(
-              context,
-              listen: false,
-            ).showError(context.translate("Error"), body: vm.errorMessage);
-          });
-        }
-        return child!;
-      },
-      child: child,
-    );
-  }
-}
-
 class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   const MyAppBar({super.key});
   String _getTitle(BuildContext context, MainViewModel vm) {
@@ -189,16 +145,14 @@ class MainScreen extends StatelessWidget {
             appBar: null,
 
             // page body
-            body: NotificationListener(
-              child: Selector<MainViewModel, TabIndices>(
-                selector: (context, vm) => vm.currentTabIndex,
-                builder:
-                    (context, index, child) => switch (index) {
-                      TabIndices.devices => const DevicesScreen(),
-                      TabIndices.scenes => const ScenesScreen(),
-                      TabIndices.my => const MyScreen(),
-                    },
-              ),
+            body: Selector<MainViewModel, TabIndices>(
+              selector: (context, vm) => vm.currentTabIndex,
+              builder:
+                  (context, index, child) => switch (index) {
+                    TabIndices.devices => const DevicesScreen(),
+                    TabIndices.scenes => const ScenesScreen(),
+                    TabIndices.my => const MyScreen(),
+                  },
             ),
 
             // bottom
