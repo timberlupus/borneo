@@ -4,11 +4,12 @@ import 'dart:async';
 import 'package:borneo_common/borneo_common.dart';
 import 'package:borneo_common/exceptions.dart';
 
-class WotProperty<T> implements IDisposable {
+abstract class WotProperty<T> implements IDisposable {
   bool _isDisposed = false;
 
   final String name;
   final String title;
+  final String atType;
   final String type;
   final String? unit;
   final String? description;
@@ -20,6 +21,7 @@ class WotProperty<T> implements IDisposable {
   WotProperty({
     required this.name,
     required this.title,
+    required this.atType,
     required this.type,
     this.unit,
     this.description,
@@ -50,7 +52,7 @@ class WotProperty<T> implements IDisposable {
       throw ObjectDisposedException();
     }
     return {
-      '@type': type,
+      '@type': atType,
       'title': title,
       'type': type,
       if (unit != null) 'unit': unit,
@@ -68,4 +70,114 @@ class WotProperty<T> implements IDisposable {
       _isDisposed = true;
     }
   }
+}
+
+class WotBooleanProperty extends WotProperty<bool> {
+  WotBooleanProperty({
+    required super.name,
+    required super.title,
+    required super.value,
+    super.readOnly,
+    super.unit,
+    super.description,
+    super.schema,
+  }) : super(atType: 'BooleanProperty', type: 'boolean');
+}
+
+class WotOptionalBooleanProperty extends WotProperty<bool?> {
+  WotOptionalBooleanProperty({
+    required super.name,
+    required super.title,
+    required super.value,
+    super.readOnly,
+    super.unit,
+    super.description,
+    super.schema,
+  }) : super(atType: 'OptionalBooleanProperty', type: 'boolean?');
+}
+
+class WotIntegerProperty extends WotProperty<int> {
+  WotIntegerProperty({
+    required super.name,
+    required super.title,
+    required super.value,
+    super.readOnly,
+    super.unit,
+    super.description,
+    super.schema,
+  }) : super(atType: 'IntegerProperty', type: 'integer');
+}
+
+class WotOptionalIntegerProperty extends WotProperty<int?> {
+  WotOptionalIntegerProperty({
+    required super.name,
+    required super.title,
+    required super.value,
+    super.readOnly,
+    super.unit,
+    super.description,
+    super.schema,
+  }) : super(atType: 'OptionalIntegerProperty', type: 'integer?');
+}
+
+class WotNumberProperty extends WotProperty<double> {
+  WotNumberProperty({
+    required super.name,
+    required super.title,
+    required super.value,
+    super.readOnly,
+    super.unit,
+    super.description,
+    super.schema,
+  }) : super(atType: 'NumberProperty', type: 'number');
+}
+
+class WotOptionalNumberProperty extends WotProperty<double?> {
+  WotOptionalNumberProperty({
+    required super.name,
+    required super.title,
+    required super.value,
+    super.readOnly,
+    super.unit,
+    super.description,
+    super.schema,
+  }) : super(atType: 'OptionalNumberProperty', type: 'number?');
+}
+
+class WotStringProperty extends WotProperty<String> {
+  WotStringProperty({
+    required super.name,
+    required super.title,
+    required super.value,
+    super.readOnly,
+    super.unit,
+    super.description,
+    super.schema,
+  }) : super(atType: 'StringProperty', type: 'string');
+}
+
+class WotOptionalStringProperty extends WotProperty<String?> {
+  WotOptionalStringProperty({
+    required super.name,
+    required super.title,
+    required super.value,
+    super.readOnly,
+    super.unit,
+    super.description,
+    super.schema,
+  }) : super(atType: 'OptionalStringProperty', type: 'string?');
+}
+
+class WotOnOffProperty extends WotProperty<bool> {
+  WotOnOffProperty({
+    required super.value,
+    super.readOnly,
+    super.unit,
+    super.description,
+    super.schema,
+  }) : super(
+            name: "on",
+            title: "On/Off",
+            atType: "OnOffProperty",
+            type: "boolean");
 }

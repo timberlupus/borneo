@@ -1,5 +1,6 @@
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/events.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_kernel_abstractions/idriver.dart';
@@ -14,26 +15,46 @@ abstract class BaseLyfiDriver extends IDriver {
       Device device, DeviceEventBus deviceEvents,
       {CancellationToken? cancelToken}) async {
     final borneoApi = this as IBorneoDeviceApi;
+    final lyfiApi = this as ILyfiDeviceApi;
     final borneoDeviceInfo = borneoApi.getGeneralDeviceInfo(device);
+    final lyfiDeviecInfo = lyfiApi.getLyfiInfo(device);
 
     final generalStatus = await borneoApi.getGeneralDeviceStatus(device);
 
     final wotDevice = WotDevice(
         id: device.id, title: borneoDeviceInfo.name, type: ["OnOffSwitch"]);
 
-    wotDevice.addProperty(WotProperty<bool>(
-        name: 'on',
-        title: 'Power',
-        type: 'boolean',
-        value: generalStatus.power));
+    wotDevice.addProperty(WotOnOffProperty(value: generalStatus.power));
 
     if (generalStatus.temperature != null) {
-      wotDevice.addProperty(WotProperty(
+      wotDevice.addProperty(WotOptionalIntegerProperty(
           name: 'temperature',
           title: 'Temperature',
-          type: 'integer',
-          value: generalStatus.temperature));
+          value: generalStatus.temperature,
+          unit: '℃',
+          readOnly: true));
     }
+
+    wotDevice.addProperty(WotBooleanProperty(
+      name: 'isStandaloneController',
+      title: 'Is Standalone Controller',
+      value: lyfiDeviecInfo.isStandaloneController,
+      readOnly: true,
+    ));
+
+    wotDevice.addProperty(WotOptionalNumberProperty(
+      name: 'nominalPower',
+      title: 'Nominal Power in Watts',
+      value: lyfiDeviecInfo.nominalPower,
+      readOnly: true,
+    ));
+
+    wotDevice.addProperty(WotIntegerProperty(
+      name: 'channelCount',
+      title: 'Channel Count',
+      value: lyfiDeviecInfo.channelCount,
+      readOnly: true,
+    ));
 
     final adapter = WotAdapter(wotDevice, deviceEvents: deviceEvents);
 
