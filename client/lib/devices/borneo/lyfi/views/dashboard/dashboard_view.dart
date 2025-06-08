@@ -32,7 +32,7 @@ class DashboardView extends StatelessWidget {
             LayoutBuilder(
               builder:
                   (context, constraints) => AspectRatio(
-                    aspectRatio: 2.5,
+                    aspectRatio: 2.75,
                     child: Container(
                       color: Theme.of(context).colorScheme.surfaceContainer,
                       margin: EdgeInsets.all(0),

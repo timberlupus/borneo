@@ -328,13 +328,13 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
 
     await _deviceApi.switchMode(boundDevice!.device, mode);
+    mode = await _deviceApi.getMode(boundDevice!.device);
     await _toggleEditor(mode);
     _mode = mode;
     await refreshStatus();
   }
 
   Future<void> _toggleEditor(LedRunningMode mode) async {
-    assert(!isLocked);
     switch (mode) {
       case LedRunningMode.manual:
         currentEditor = ManualEditorViewModel(this);

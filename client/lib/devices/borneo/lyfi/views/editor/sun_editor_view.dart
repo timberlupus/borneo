@@ -59,7 +59,7 @@ class SunEditorView extends StatelessWidget {
             children: [
               Container(
                 color: Theme.of(context).colorScheme.surfaceContainer,
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                padding: const EdgeInsets.all(0),
                 child: AspectRatio(
                   aspectRatio: 2.75,
                   child: Consumer<SunEditorViewModel>(builder: (conterxt, vm, _) => buildGraph(context)),

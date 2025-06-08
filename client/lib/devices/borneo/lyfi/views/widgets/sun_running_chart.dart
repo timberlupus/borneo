@@ -20,7 +20,7 @@ class SunRunningChart extends StatelessWidget {
       return const SizedBox.shrink();
     }
     return Container(
-      padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
+      padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
       child: Selector<LyfiViewModel, DateTime>(
         selector: (context, vm) => vm.deviceClock,
         shouldRebuild: (previous, next) => !previous.isEqualToSecond(next),

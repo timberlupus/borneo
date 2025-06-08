@@ -91,9 +91,9 @@ class ScheduleEditorView extends StatelessWidget {
             // The chart
             Container(
               color: Theme.of(context).colorScheme.surfaceContainer,
-              padding: EdgeInsets.fromLTRB(24, 16, 24, 8),
+              padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
               child: AspectRatio(
-                aspectRatio: 2.5,
+                aspectRatio: 2.75,
                 child: Consumer<ScheduleEditorViewModel>(
                   builder: (context, vm, child) {
                     final minX = vm.entries.isNotEmpty ? vm.entries.first.instant.inHours.toDouble() * 3600.0 : 0.0;

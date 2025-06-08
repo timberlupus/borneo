@@ -20,7 +20,7 @@ class ScheduleRunningChart extends StatelessWidget {
     }
 
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
       child: Selector<LyfiViewModel, DateTime>(
         selector: (context, vm) => vm.deviceClock,
         shouldRebuild: (previous, next) => !previous.isEqualToMinute(next),

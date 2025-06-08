@@ -125,8 +125,7 @@ class LyfiTimeLineChart extends StatelessWidget {
     );
   }
 
-  LineTouchData get _defaultLineTouchData =>
-      LineTouchData(handleBuiltInTouches: true, touchTooltipData: LineTouchTooltipData(getTooltipItems: (_) => []));
+  LineTouchData get _defaultLineTouchData => LineTouchData(handleBuiltInTouches: true);
 
   VerticalLine _buildNowLine(BuildContext context, DateTime now, double labelHeight) {
     return VerticalLine(
