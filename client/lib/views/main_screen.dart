@@ -138,6 +138,7 @@ class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 
   Widget buildScaffold(BuildContext context) {
+    final mainVM = context.read<MainViewModel>();
     return Selector<MainViewModel, TabIndices>(
       selector: (context, vm) => vm.currentTabIndex,
       builder:
@@ -145,33 +146,25 @@ class MainScreen extends StatelessWidget {
             appBar: null,
 
             // page body
-            body: Selector<MainViewModel, TabIndices>(
-              selector: (context, vm) => vm.currentTabIndex,
-              builder:
-                  (context, index, child) => switch (index) {
-                    TabIndices.devices => const DevicesScreen(),
-                    TabIndices.scenes => const ScenesScreen(),
-                    TabIndices.my => const MyScreen(),
-                  },
-            ),
+            body: switch (tabIndex) {
+              TabIndices.devices => const DevicesScreen(),
+              TabIndices.scenes => const ScenesScreen(),
+              TabIndices.my => const MyScreen(),
+            },
 
             // bottom
-            bottomNavigationBar: Consumer<MainViewModel>(
-              builder: (context, viewModel, child) {
-                return BottomNavigationBar(
-                  currentIndex: viewModel.currentTabIndex.index,
-                  onTap: (index) {
-                    if (index != viewModel.currentTabIndex.index) {
-                      viewModel.setIndex(TabIndices.values[index]);
-                    }
-                  },
-                  items: [
-                    BottomNavigationBarItem(icon: Icon(Icons.house_outlined), label: context.translate('Scenes')),
-                    BottomNavigationBarItem(icon: Icon(Icons.device_hub), label: context.translate('Devices')),
-                    BottomNavigationBarItem(icon: Icon(Icons.person), label: context.translate('My')),
-                  ],
-                );
+            bottomNavigationBar: BottomNavigationBar(
+              currentIndex: tabIndex.index,
+              onTap: (index) {
+                if (index != tabIndex.index) {
+                  mainVM.setIndex(TabIndices.values[index]);
+                }
               },
+              items: [
+                BottomNavigationBarItem(icon: Icon(Icons.house_outlined), label: context.translate('Scenes')),
+                BottomNavigationBarItem(icon: Icon(Icons.device_hub), label: context.translate('Devices')),
+                BottomNavigationBarItem(icon: Icon(Icons.person), label: context.translate('My')),
+              ],
             ),
           ),
     );
