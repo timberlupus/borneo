@@ -1,14 +1,14 @@
 // Action class to represent device actions
 import 'dart:async';
 
-class MetaAction {
+class WotAction {
   final String name;
   final String? title;
   final String? description;
   final Map<String, dynamic>? inputSchema;
   final Completer<void> _completer = Completer();
 
-  MetaAction({
+  WotAction({
     required this.name,
     this.title,
     this.description,

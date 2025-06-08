@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:borneo_kernel_abstractions/device_capability.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
+import 'package:borneo_kernel_abstractions/idevice_api.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/widgets.dart';

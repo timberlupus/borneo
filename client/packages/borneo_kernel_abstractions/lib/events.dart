@@ -1,7 +1,12 @@
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
+import 'package:event_bus/event_bus.dart';
 
 import 'models/discovered_device.dart';
+
+class DeviceEventBus extends EventBus {}
+
+class GlobalDevicesEventBus extends EventBus {}
 
 class FoundDeviceEvent {
   final DiscoveredDevice discovered;

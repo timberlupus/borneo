@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:borneo_kernel/drivers/borneo/base_lyfi_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/coap_client.dart';
 import 'package:borneo_kernel/drivers/borneo/coap_config.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
@@ -6,9 +7,9 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/coap_driver_data.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel/drivers/borneo/probe_coap_config.dart';
+import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:coap/coap.dart';
-import 'package:cbor/cbor.dart';
 
 import 'package:borneo_common/io/net/coap_client.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/metadata.dart';
@@ -18,7 +19,6 @@ import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/idriver.dart';
-import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 import 'package:pub_semver/pub_semver.dart';
 
@@ -44,7 +44,7 @@ class LyfiPaths {
   static final Uri keepTemp = Uri(path: '/borneo/lyfi/thermal/keep-temp');
 }
 
-class BorneoLyfiCoapDriver
+class BorneoLyfiCoapDriver extends BaseLyfiDriver
     with BorneoDeviceCoapApi
     implements IDriver, ILyfiDeviceApi {
   static const String lyfiCompatibleString = 'bst,borneo-lyfi';
@@ -53,7 +53,7 @@ class BorneoLyfiCoapDriver
   BorneoLyfiCoapDriver({this.logger});
 
   @override
-  Future<bool> probe(Device dev, EventBus deviceEvents,
+  Future<bool> probe(Device dev, GlobalDevicesEventBus globalBus,
       {CancellationToken? cancelToken}) async {
     final probeCoapClient = BorneoCoapClient(
       dev.address,
@@ -86,11 +86,10 @@ class BorneoLyfiCoapDriver
         dev.address,
         config: BorneoCoapConfig.coapConfig,
         device: dev,
-        deviceEvents: deviceEvents,
         offlineDetectionEnabled: true,
       );
       final lyfiInfo = await _getLyfiInfo(coapClient);
-      final driverData = LyfiCoapDriverData(dev, deviceEvents, coapClient,
+      final driverData = LyfiCoapDriverData(dev, globalBus, coapClient,
           probeCoapClient, generalDeviceInfo, lyfiInfo);
       driverData.load();
       await dev.setDriverData(driverData, cancelToken: cancelToken);

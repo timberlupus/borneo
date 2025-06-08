@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:borneo_app/models/devices/device_entity.dart';
-import 'package:borneo_app/models/devices/device_state.dart';
 import 'package:borneo_kernel/drivers/borneo/events.dart';
-import 'package:borneo_kernel_abstractions/device_capability.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_app/services/device_manager.dart';
 import 'package:cancellation_token/cancellation_token.dart';
@@ -20,9 +18,6 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel
 
   bool _isOnline;
   bool get isOnline => _isOnline;
-
-  final DeviceState _state = DeviceState.offline;
-  DeviceState get state => _state;
 
   String get name => deviceEntity.name;
 
@@ -46,8 +41,9 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel
     try {
       if (deviceManager.isBound(deviceEntity.id)) {
         final bound = deviceManager.getBoundDevice(deviceEntity.id);
-        if (bound.api() is IPowerOnOffCapability) {
-          _isPowerOn = await bound.api<IPowerOnOffCapability>().getOnOff(bound.device);
+        if (bound.wotDevice.hasCapability("OnOffSwitch")) {
+          final onProp = bound.wotDevice.properties["on"]!;
+          _isPowerOn = onProp.value as bool;
         }
       }
       await onInitialize(cancelToken: cancelToken);

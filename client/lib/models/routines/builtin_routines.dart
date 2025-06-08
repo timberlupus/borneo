@@ -1,5 +1,4 @@
 import 'package:borneo_app/models/routines/actions/power_action.dart';
-import 'package:borneo_kernel_abstractions/device_capability.dart';
 import 'package:borneo_app/models/routines/abstract_routine.dart';
 import 'package:borneo_app/services/device_manager.dart';
 
@@ -8,7 +7,7 @@ final class PowerOffAllRoutine extends AbstractBuiltinRoutine {
 
   @override
   bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices.any((d) => d.api() is IPowerOnOffCapability);
+    return deviceManager.boundDevices.any((d) => d.wotDevice.hasCapability("OnOffSwitch"));
   }
 
   /// Execute routine
@@ -16,10 +15,10 @@ final class PowerOffAllRoutine extends AbstractBuiltinRoutine {
   Future<List<Map<String, dynamic>>> execute(DeviceManager deviceManager) async {
     final steps = <PowerAction>[];
     for (final bound in deviceManager.boundDevices) {
-      final api = bound.api<IPowerOnOffCapability>();
-      final prevState = await api.getOnOff(bound.device);
+      final onProp = bound.wotDevice.properties["on"]!;
+      final prevState = onProp.value as bool;
       if (prevState) {
-        await api.setOnOff(bound.device, false);
+        onProp.setValue(false);
         steps.add(PowerAction(deviceId: bound.device.id, prevState: prevState));
       }
     }
@@ -32,7 +31,7 @@ final class FeedModeRoutine extends AbstractBuiltinRoutine {
 
   @override
   bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices.any((d) => d.api() is IPowerOnOffCapability);
+    return deviceManager.boundDevices.any((d) => d.wotDevice.hasCapability("OnOffSwitch"));
   }
 
   @override
@@ -48,7 +47,7 @@ final class WaterChangeModeRoutine extends AbstractBuiltinRoutine {
 
   @override
   bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices.any((d) => d.api() is IPowerOnOffCapability);
+    return deviceManager.boundDevices.any((d) => d.wotDevice.hasCapability("OnOffSwitch"));
   }
 
   @override
@@ -63,7 +62,7 @@ final class DryScapeModeRoutine extends AbstractBuiltinRoutine {
 
   @override
   bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices.any((d) => d.api() is IPowerOnOffCapability);
+    return deviceManager.boundDevices.any((d) => d.wotDevice.hasCapability("OnOffSwitch"));
   }
 
   @override

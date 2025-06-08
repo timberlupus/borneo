@@ -1,10 +1,9 @@
 import 'package:borneo_kernel/drivers/borneo/coap_driver_data.dart';
+import 'package:borneo_kernel_abstractions/idevice_api.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 import 'package:borneo_common/io/net/coap_client.dart';
 import 'package:borneo_kernel_abstractions/errors.dart';
-import 'package:borneo_kernel_abstractions/device_capability.dart';
-import 'package:cbor/cbor.dart';
 import 'package:coap/coap.dart';
 import 'package:cbor/simple.dart' as simple_cbor;
 
@@ -220,7 +219,7 @@ class BorneoRtcLocalNtpResponse {
   }
 }
 
-abstract class IBorneoDeviceApi implements IDeviceApi, IPowerOnOffCapability {
+abstract class IBorneoDeviceApi extends IDeviceApi {
   Future<String> getCompatible(Device dev);
   Future<Version> getFirmwareVersion(Device dev);
 
@@ -228,6 +227,9 @@ abstract class IBorneoDeviceApi implements IDeviceApi, IPowerOnOffCapability {
   Future<GeneralBorneoDeviceStatus> getGeneralDeviceStatus(Device dev);
 
   Future<DateTime> getHeartbeat(Device dev);
+
+  Future<bool> getOnOff(Device dev);
+  Future setOnOff(Device dev, bool on);
 
   Future<PowerBehavior> getPowerBehavior(Device dev);
   Future setPowerBehavior(Device dev, PowerBehavior behavior);

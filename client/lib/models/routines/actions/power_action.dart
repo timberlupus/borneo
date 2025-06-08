@@ -1,6 +1,5 @@
 import 'package:borneo_app/models/routines/actions/routine_action.dart';
 import 'package:borneo_app/services/device_manager.dart';
-import 'package:borneo_kernel_abstractions/device_capability.dart';
 
 class PowerAction extends RoutineAction {
   static const String type = "common.power";
@@ -16,10 +15,11 @@ class PowerAction extends RoutineAction {
     if (bound == null) {
       return;
     }
-    final api = bound.api<IPowerOnOffCapability>();
-    final isOn = await api.getOnOff(bound.device);
+    final onProp = bound.wotDevice.properties["on"]!;
+    final isOn = onProp.value as bool;
+
     if (isOn) {
-      await api.setOnOff(bound.device, false);
+      onProp.setValue(false);
     }
   }
 
@@ -27,11 +27,11 @@ class PowerAction extends RoutineAction {
   Future<void> undo(DeviceManager deviceManager) async {
     final bound = deviceManager.boundDevices.where((d) => d.device.id == deviceId).lastOrNull;
     if (bound == null) return;
-    final api = bound.api<IPowerOnOffCapability>();
 
-    final isOn = await api.getOnOff(bound.device);
+    final onProp = bound.wotDevice.properties["on"]!;
+    final isOn = onProp.value as bool;
     if (isOn != prevState) {
-      await api.setOnOff(bound.device, prevState);
+      onProp.setValue(prevState);
     }
   }
 

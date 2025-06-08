@@ -1,11 +1,28 @@
-import 'package:event_bus/event_bus.dart';
+import 'dart:async';
+
+import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_common/utils/disposable.dart';
 
 import '../device.dart';
 
 abstract class DriverData extends IDisposable {
-  final Device device;
-  final EventBus deviceEventBus;
+  bool _isDisposed = false;
 
-  DriverData(this.device, this.deviceEventBus);
+  final Device device;
+  final GlobalDevicesEventBus globalEvents;
+  final DeviceEventBus deviceEvents = DeviceEventBus();
+  late final StreamSubscription _relaySub;
+
+  DriverData(this.device, this.globalEvents) {
+    _relaySub = deviceEvents.on().listen((event) => globalEvents.fire(event));
+  }
+
+  @override
+  void dispose() {
+    if (_isDisposed) {
+      _relaySub.cancel();
+      deviceEvents.destroy();
+      _isDisposed = true;
+    }
+  }
 }

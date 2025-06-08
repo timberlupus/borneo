@@ -1,12 +1,12 @@
 // Event class to represent device events
-class MetaEvent {
+class WotEvent {
   final String name;
   final String? description;
   final String? type;
   final Map<String, dynamic>? dataSchema;
   final dynamic data;
 
-  MetaEvent({
+  WotEvent({
     required this.name,
     this.description,
     this.type,

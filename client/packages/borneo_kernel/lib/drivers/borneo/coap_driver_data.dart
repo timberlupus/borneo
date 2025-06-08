@@ -12,17 +12,18 @@ abstract class BorneoCoapDriverData extends DriverData {
   final BorneoCoapClient probeCoap;
   final BorneoCoapClient coap;
   final GeneralBorneoDeviceInfo _generalDeviceInfo;
-  StreamSubscription<bool>? _powerOnOffSub;
+  StreamSubscription<bool>? _coapPowerOnOffSub;
 
   bool get isDisposed => _disposed;
 
-  BorneoCoapDriverData(super.device, super.deviceEventBus, this.coap,
+  BorneoCoapDriverData(super.device, super.globalEvents, this.coap,
       this.probeCoap, this._generalDeviceInfo);
 
   void load() {
-    _powerOnOffSub = coap.observeCborNon<bool>(BorneoPaths.power).listen(
-        (onOff) =>
-            deviceEventBus.fire(DevicePowerOnOffChangedEvent(device, onOff)));
+    _coapPowerOnOffSub = coap.observeCborNon<bool>(BorneoPaths.power).listen(
+        (onOff) => super
+            .deviceEvents
+            .fire(DevicePowerOnOffChangedEvent(device, onOff)));
   }
 
   GeneralBorneoDeviceInfo get generalDeviceInfo {
@@ -35,10 +36,13 @@ abstract class BorneoCoapDriverData extends DriverData {
   @override
   void dispose() {
     if (!_disposed) {
-      _powerOnOffSub?.cancel();
+      _coapPowerOnOffSub?.cancel();
 
       probeCoap.close();
       coap.close();
+
+      super.dispose();
+
       _disposed = true;
     }
   }

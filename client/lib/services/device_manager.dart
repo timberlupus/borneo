@@ -3,7 +3,6 @@ import 'dart:core';
 
 import 'package:borneo_common/borneo_common.dart';
 import 'package:borneo_common/exceptions.dart';
-import 'package:borneo_kernel_abstractions/device_capability.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
@@ -21,8 +20,6 @@ import 'package:borneo_kernel_abstractions/ikernel.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 import 'package:borneo_app/models/devices/device_entity.dart';
 
-import '../models/devices/device_state.dart';
-
 final class DeviceManager implements IDisposable {
   bool _isDisposed = false;
   final Logger? logger;
@@ -39,7 +36,7 @@ final class DeviceManager implements IDisposable {
   late final StreamSubscription<UnboundDeviceDiscoveredEvent> _unboundDeviceDiscoveredEventSub;
 
   bool get isInitialized => _isInitialized;
-  EventBus get deviceEvents => _kernel.events;
+  GlobalDevicesEventBus get deviceEvents => _kernel.events;
 
   final IKernel _kernel;
   IKernel get kernel => _kernel;
@@ -187,21 +184,6 @@ final class DeviceManager implements IDisposable {
       }
       final device = DeviceEntity.fromMap(record.key, record.value);
       return device;
-    }
-  }
-
-  Future<DeviceState> getDeviceState(String deviceID) async {
-    if (isBound(deviceID)) {
-      final bound = _kernel.getBoundDevice(deviceID);
-      if (bound.driver is IReadOnlyPowerOnOffCapability) {
-        // TODO adding lastValue to avoid async
-        final isOn = await bound.api<IReadOnlyPowerOnOffCapability>().getOnOff(bound.device);
-        return isOn ? DeviceState.operational : DeviceState.powerOff;
-      } else {
-        return DeviceState.powerOff;
-      }
-    } else {
-      return DeviceState.offline;
     }
   }
 

@@ -38,7 +38,7 @@ final class DefaultKernel implements IKernel {
   final Map<String, BoundDeviceDescriptor> _registeredDevices = {};
   final Map<String, IDriver> _activatedDrivers = {};
   final Map<String, BoundDevice> _boundDevices = {};
-  final EventBus _events = EventBus();
+  final GlobalDevicesEventBus _events = GlobalDevicesEventBus();
   final Set<String> _pollIDList = {};
   final CancellationToken _heartbeatPollingTaskCancelToken =
       CancellationToken();
@@ -51,7 +51,7 @@ final class DefaultKernel implements IKernel {
   bool get isInitialized => _isInitialized;
 
   @override
-  EventBus get events => _events;
+  GlobalDevicesEventBus get events => _events;
 
   @override
   Iterable<IDriver> get activatedDrivers => _activatedDrivers.values;
@@ -190,7 +190,12 @@ final class DefaultKernel implements IKernel {
 
       if (driverInitialized) {
         // Try to activate device
-        final bound = BoundDevice(driverID, device, driver);
+        final deviceEvents = DeviceEventBus();
+        final wotDevice = await driver.createWotDevice(device, deviceEvents,
+            cancelToken: cancelToken);
+        final bound =
+            BoundDevice(driverID, device, driver, wotDevice, deviceEvents);
+
         _boundDevices[device.id] = bound;
 
         if (!_pollIDList.contains(device.id) &&
