@@ -22,32 +22,35 @@ class DashboardSettingsTile extends StatelessWidget {
               color: theme.colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap:
-                  isDisabled
-                      ? null
-                      : () async {
-                        final lyfi = context.read<LyfiViewModel>();
-                        final vm = await lyfi.loadSettings();
-                        final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
-                        if (context.mounted) {
-                          Navigator.push(context, route);
-                        }
-                      },
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final iconSize = constraints.maxHeight * 0.3;
-                  return Column(
-                    children: [
-                      Expanded(child: Center(child: Icon(Icons.settings, size: iconSize, color: iconColor))),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Text('Settings', style: theme.textTheme.titleMedium?.copyWith(color: textColor)),
-                      ),
-                    ],
-                  );
-                },
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap:
+                    isDisabled
+                        ? null
+                        : () async {
+                          final lyfi = context.read<LyfiViewModel>();
+                          final vm = await lyfi.loadSettings();
+                          final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
+                          if (context.mounted) {
+                            Navigator.push(context, route);
+                          }
+                        },
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final iconSize = constraints.maxHeight * 0.3;
+                    return Column(
+                      children: [
+                        Expanded(child: Center(child: Icon(Icons.settings, size: iconSize, color: iconColor))),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Text('Settings', style: theme.textTheme.titleMedium?.copyWith(color: textColor)),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ),

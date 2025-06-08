@@ -35,12 +35,12 @@ class DashboardView extends StatelessWidget {
                     aspectRatio: 2.75,
                     child: Container(
                       color: Theme.of(context).colorScheme.surfaceContainer,
-                      margin: EdgeInsets.all(0),
+                      margin: const EdgeInsets.all(0),
                       child: const DashboardChart(),
                     ),
                   ),
             ),
-            Padding(
+            const Padding(
               padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
               child: Column(
                 children: [

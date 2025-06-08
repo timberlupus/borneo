@@ -39,40 +39,43 @@ class DashboardAcclimationTile extends StatelessWidget {
               color: isActive ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap:
-                  props.isOnline && props.isOn
-                      ? () async {
-                        if (context.mounted) {
-                          final vm = context.read<LyfiViewModel>();
-                          final route = MaterialPageRoute(
-                            builder: (context) => AcclimationScreen(deviceID: vm.deviceID),
-                          );
-                          try {
-                            vm.stopTimer();
-                            await Navigator.push(context, route);
-                          } finally {
-                            vm.startTimer();
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap:
+                    props.isOnline && props.isOn
+                        ? () async {
+                          if (context.mounted) {
+                            final vm = context.read<LyfiViewModel>();
+                            final route = MaterialPageRoute(
+                              builder: (context) => AcclimationScreen(deviceID: vm.deviceID),
+                            );
+                            try {
+                              vm.stopTimer();
+                              await Navigator.push(context, route);
+                            } finally {
+                              vm.startTimer();
+                            }
                           }
                         }
-                      }
-                      : null,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final iconSize = constraints.maxHeight * 0.3;
-                  return Column(
-                    children: [
-                      Expanded(
-                        child: Center(child: Icon(Icons.calendar_month_outlined, size: iconSize, color: iconColor)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Text('Acclimation', style: theme.textTheme.titleMedium?.copyWith(color: textColor)),
-                      ),
-                    ],
-                  );
-                },
+                        : null,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final iconSize = constraints.maxHeight * 0.3;
+                    return Column(
+                      children: [
+                        Expanded(
+                          child: Center(child: Icon(Icons.calendar_month_outlined, size: iconSize, color: iconColor)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Text('Acclimation', style: theme.textTheme.titleMedium?.copyWith(color: textColor)),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ),

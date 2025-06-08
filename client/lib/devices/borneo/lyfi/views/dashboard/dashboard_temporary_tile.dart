@@ -37,82 +37,87 @@ class DashboardTemporaryTile extends StatelessWidget {
           aspectRatio: 2.0,
           child: Container(
             decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16)),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: props.canSwitch ? () => context.read<LyfiViewModel>().switchTemporaryState() : null,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Stack(
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                          child:
-                              isActive
-                                  ? SizedBox(
-                                    key: const ValueKey('active'),
-                                    width: 24,
-                                    height: 24,
-                                    child: Padding(
-                                      padding: EdgeInsets.all(4),
-                                      child: CircularProgressIndicator(
-                                        strokeAlign: 1,
-                                        strokeWidth: 2,
-                                        value:
-                                            props.total.inSeconds > 0
-                                                ? props.remain.inSeconds / props.total.inSeconds
-                                                : 0.0,
-                                        backgroundColor: theme.colorScheme.shadow,
-                                        valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimaryContainer),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: props.canSwitch ? () => context.read<LyfiViewModel>().switchTemporaryState() : null,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Stack(
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                            child:
+                                isActive
+                                    ? SizedBox(
+                                      key: const ValueKey('active'),
+                                      width: 24,
+                                      height: 24,
+                                      child: Padding(
+                                        padding: EdgeInsets.all(4),
+                                        child: CircularProgressIndicator(
+                                          strokeAlign: 1,
+                                          strokeWidth: 2,
+                                          value:
+                                              props.total.inSeconds > 0
+                                                  ? props.remain.inSeconds / props.total.inSeconds
+                                                  : 0.0,
+                                          backgroundColor: theme.colorScheme.shadow,
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                            theme.colorScheme.onPrimaryContainer,
+                                          ),
+                                        ),
                                       ),
+                                    )
+                                    : Container(
+                                      key: const ValueKey('inactive'),
+                                      alignment: Alignment.center,
+                                      child: Icon(Icons.flashlight_on, size: 24, color: effectiveIconColor),
                                     ),
-                                  )
-                                  : Container(
-                                    key: const ValueKey('inactive'),
-                                    alignment: Alignment.center,
-                                    child: Icon(Icons.flashlight_on, size: 24, color: effectiveIconColor),
-                                  ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Temporary',
-                                style: theme.textTheme.labelLarge?.copyWith(
-                                  color: effectiveFgColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              if (isActive && remainText.isNotEmpty)
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Text(
-                                  remainText,
-                                  style: theme.textTheme.labelMedium?.copyWith(
+                                  'Temporary',
+                                  style: theme.textTheme.labelLarge?.copyWith(
                                     color: effectiveFgColor,
-                                    fontFeatures: [FontFeature.tabularFigures()],
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                            ],
+                                if (isActive && remainText.isNotEmpty)
+                                  Text(
+                                    remainText,
+                                    style: theme.textTheme.labelMedium?.copyWith(
+                                      color: effectiveFgColor,
+                                      fontFeatures: [FontFeature.tabularFigures()],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (isActive)
+                        Positioned(
+                          right: -16,
+                          bottom: -16,
+                          child: Icon(
+                            Icons.flashlight_on,
+                            size: 64,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.15),
                           ),
                         ),
-                      ],
-                    ),
-                    if (isActive)
-                      Positioned(
-                        right: -16,
-                        bottom: -16,
-                        child: Icon(
-                          Icons.flashlight_on,
-                          size: 64,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.15),
-                        ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

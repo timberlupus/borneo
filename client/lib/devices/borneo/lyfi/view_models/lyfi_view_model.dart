@@ -128,9 +128,11 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         logger?.e('Failed to setMode of the device(${super.deviceEntity})', error: e, stackTrace: stackTrace);
       }
     }
+    /*
     for (final ch in _channels) {
       ch.dispose();
     }
+    */
     super.dispose();
   }
 
