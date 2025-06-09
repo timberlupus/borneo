@@ -11,6 +11,7 @@ import 'package:borneo_app/view_models/devices/group_edit_view_model.dart';
 import 'package:borneo_app/view_models/devices/group_view_model.dart';
 import 'package:borneo_app/views/devices/device_list_tile.dart';
 import 'package:borneo_app/view_models/devices/grouped_devices_view_model.dart';
+import 'package:borneo_app/devices/view_models/abstract_device_summary_view_model.dart';
 import 'group_edit_screen.dart';
 
 enum PlusMenuIndexes { addGroup, addDevice }
@@ -20,17 +21,17 @@ class InGroupDeviceListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<GroupViewModel>(
-      builder: (context, gvm, child) {
+    return Selector<GroupViewModel, List<AbstractDeviceSummaryViewModel>>(
+      selector: (_, gvm) => gvm.devices,
+      builder: (context, devices, child) {
         var index = 0;
-        final List<Widget> devices =
-            gvm.devices
+        final List<Widget> deviceWidgets =
+            devices
                 .map(
-                  (dvm) =>
-                      ChangeNotifierProvider.value(value: dvm, child: DeviceTile(index++ == gvm.devices.length - 1)),
+                  (dvm) => ChangeNotifierProvider.value(value: dvm, child: DeviceTile(index++ == devices.length - 1)),
                 )
                 .toList();
-        return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: devices);
+        return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: deviceWidgets);
       },
     );
   }
@@ -182,17 +183,29 @@ class DevicesScreen extends StatelessWidget {
             body: CustomScrollView(
               slivers: <Widget>[
                 _buildAppBar(context),
-                Consumer<GroupedDevicesViewModel>(
-                  builder: (context, groupedDevicesVM, child) {
-                    return !groupedDevicesVM.isEmpty
-                        ? SliverList.builder(
-                          itemCount: groupedDevicesVM.groups.length,
+                Selector<GroupedDevicesViewModel, List<GroupViewModel>>(
+                  selector: (_, vm) => vm.groups,
+                  shouldRebuild:
+                      (previous, current) =>
+                          previous.length != current.length ||
+                          previous.any(
+                            (preGroup) => current.any(
+                              (curGroup) =>
+                                  preGroup.id == curGroup.id &&
+                                  (preGroup.name != curGroup.name || preGroup.isEmpty != curGroup.isEmpty),
+                            ),
+                          ),
+                  builder: (context, groups, child) {
+                    final groupedDevicesVM = context.read<GroupedDevicesViewModel>();
+                    return groupedDevicesVM.isEmpty
+                        ? NoDataHintView()
+                        : SliverList.builder(
+                          itemCount: groups.length,
                           itemBuilder: (context, index) {
-                            final gvm = groupedDevicesVM.groups[index];
+                            final gvm = groups[index];
                             return _buildGroupSection(context, gvm);
                           },
-                        )
-                        : NoDataHintView();
+                        );
                   },
                 ),
               ],
@@ -299,9 +312,10 @@ class DevicesScreen extends StatelessWidget {
     return ChangeNotifierProvider<GroupViewModel>.value(
       value: g,
       builder:
-          (context, child) => Consumer<GroupViewModel>(
-            builder: (context, gvm, child) {
-              if (gvm.isDummy && gvm.isEmpty) {
+          (context, child) => Selector<GroupViewModel, ({String name, bool isEmpty, bool isDummy, bool isBusy})>(
+            selector: (_, gvm) => (name: gvm.name, isEmpty: gvm.isEmpty, isDummy: gvm.isDummy, isBusy: gvm.isBusy),
+            builder: (context, groupData, child) {
+              if (groupData.isDummy && groupData.isEmpty) {
                 return SizedBox(height: 0);
               } else {
                 return Column(
@@ -313,14 +327,21 @@ class DevicesScreen extends StatelessWidget {
                       height: 32,
                       child: Row(
                         children: [
-                          Text(gvm.name, textAlign: TextAlign.start, style: Theme.of(context).textTheme.titleMedium),
+                          Text(
+                            groupData.name,
+                            textAlign: TextAlign.start,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                           const Spacer(),
-                          if (!gvm.isDummy)
+                          if (!groupData.isDummy)
                             IconButton(
                               icon: const Icon(Icons.edit, size: 24),
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                               constraints: null,
-                              onPressed: gvm.isDummy || gvm.isBusy ? null : () => _showEditGroupPage(context, g.model),
+                              onPressed:
+                                  groupData.isDummy || groupData.isBusy
+                                      ? null
+                                      : () => _showEditGroupPage(context, g.model),
                             ),
                         ],
                       ),

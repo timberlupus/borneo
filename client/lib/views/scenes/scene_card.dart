@@ -20,7 +20,7 @@ class SceneCard extends StatelessWidget {
       value: scene,
       builder:
           (context, child) => Card(
-            margin: EdgeInsets.symmetric(vertical: 8), // 只保留上下间距，横向间距交给 ListView 控制
+            margin: EdgeInsets.symmetric(vertical: 8),
             clipBehavior: Clip.antiAlias,
             borderOnForeground: true,
             elevation: 2,
