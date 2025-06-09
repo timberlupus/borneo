@@ -91,7 +91,6 @@ int bo_power_read(int32_t* mw)
         }
         v_adc_window[i] = (uint16_t)adc_v;
         c_adc_window[i] = (uint16_t)adc_c;
-        vTaskDelay(1);
     }
 
     int value_mv;

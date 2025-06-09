@@ -29,11 +29,15 @@ static int bo_adc_cali(adc_cali_handle_t* out_handle);
 
 static adc_oneshot_unit_handle_t s_adc_handle = NULL;
 static adc_cali_handle_t s_adc_cali_handle = NULL;
+static SemaphoreHandle_t s_adc_mutex = NULL;
 
 adc_cali_handle_t bo_adc_get_cali()
 {
-    //
-    return s_adc_cali_handle;
+    adc_cali_handle_t handle;
+    xSemaphoreTake(s_adc_mutex, portMAX_DELAY);
+    handle = s_adc_cali_handle;
+    xSemaphoreGive(s_adc_mutex);
+    return handle;
 }
 
 int bo_adc_channel_config(adc_channel_t channel)
@@ -42,17 +46,24 @@ int bo_adc_channel_config(adc_channel_t channel)
         .bitwidth = ADC_BITWIDTH_12,
         .atten = ADC_ATTEN_DB_12,
     };
-    return adc_oneshot_config_channel(s_adc_handle, channel, &adc_config);
+    int ret;
+    xSemaphoreTake(s_adc_mutex, portMAX_DELAY);
+    ret = adc_oneshot_config_channel(s_adc_handle, channel, &adc_config);
+    xSemaphoreGive(s_adc_mutex);
+    return ret;
 }
 
 int bo_adc_read_mv(adc_channel_t channel, int* value_mv)
 {
-    return adc_oneshot_get_calibrated_result(s_adc_handle, s_adc_cali_handle, channel, value_mv);
+    int ret;
+    xSemaphoreTake(s_adc_mutex, portMAX_DELAY);
+    ret = adc_oneshot_get_calibrated_result(s_adc_handle, s_adc_cali_handle, channel, value_mv);
+    xSemaphoreGive(s_adc_mutex);
+    return ret;
 }
 
 int bo_adc_read_mv_filtered(adc_channel_t channel, int* value_mv)
 {
-    // TODO Add lock
     uint16_t adc_window[BO_ADC_WINDOW_SIZE];
     int last_adc_mv = 0;
     for (size_t i = 0; i < BO_ADC_WINDOW_SIZE; i++) {
@@ -67,7 +78,6 @@ int bo_adc_read_mv_filtered(adc_channel_t channel, int* value_mv)
         adc_window[i] = (uint16_t)adc_mv;
     }
     *value_mv = median_filter_u16(adc_window, BO_ADC_WINDOW_SIZE);
-
     return 0;
 }
 
@@ -76,6 +86,7 @@ int bo_adc_cali(adc_cali_handle_t* out_handle)
     adc_cali_handle_t handle = NULL;
     esp_err_t ret = ESP_FAIL;
     bool calibrated = false;
+    xSemaphoreTake(s_adc_mutex, portMAX_DELAY);
 
 #if ADC_CALI_SCHEME_CURVE_FITTING_SUPPORTED
     if (!calibrated) {
@@ -110,6 +121,7 @@ int bo_adc_cali(adc_cali_handle_t* out_handle)
     *out_handle = handle;
     if (ret == ESP_OK) {
         ESP_LOGI(TAG, "Calibration Success");
+        s_adc_cali_handle = handle;
     }
     else if (ret == ESP_ERR_NOT_SUPPORTED || !calibrated) {
         ESP_LOGW(TAG, "eFuse not burnt, skip software calibration");
@@ -117,23 +129,25 @@ int bo_adc_cali(adc_cali_handle_t* out_handle)
     else {
         ESP_LOGE(TAG, "Invalid arg or no memory");
     }
-
+    xSemaphoreGive(s_adc_mutex);
     return ret;
 }
 
 static int adc_init()
 {
-
-    //
     ESP_LOGI(TAG, "Initializing ADC...");
-
+    if (s_adc_mutex == NULL) {
+        s_adc_mutex = xSemaphoreCreateMutex();
+        if (s_adc_mutex == NULL) {
+            ESP_LOGE(TAG, "Failed to create ADC mutex");
+            return -1;
+        }
+    }
     adc_oneshot_unit_init_cfg_t unit_config = { 0 };
     unit_config.unit_id = 0;
     BO_TRY(adc_oneshot_new_unit(&unit_config, &s_adc_handle));
-
     ESP_LOGI(TAG, "Calibrating ADC...");
     BO_TRY(bo_adc_cali(&s_adc_cali_handle));
-
     return 0;
 }
 
