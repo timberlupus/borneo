@@ -343,45 +343,91 @@ class DeviceDiscoveryScreen extends StatelessWidget {
                 ],
               ),
             ),
-            ValueListenableBuilder<List<SupportedDeviceDescriptor>>(
-              valueListenable: vm.discoveredDevices,
-              builder: (context, devices, child) => devices.isNotEmpty ? child! : const SizedBox(height: 0),
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: Text(context.translate('Discovered Devices:'), style: Theme.of(context).textTheme.titleMedium),
-              ),
-            ),
+
             Expanded(
-              child: ValueListenableBuilder<List<SupportedDeviceDescriptor>>(
-                valueListenable: vm.discoveredDevices,
-                builder:
-                    (context, value, child) => ListView.separated(
-                      separatorBuilder:
-                          (BuildContext context, int index) => DecoratedBox(
-                            decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer),
-                            child: Divider(height: 1, indent: 16, color: Theme.of(context).colorScheme.surface),
-                          ),
-                      itemCount: vm.discoveredDevices.value.length,
-                      itemBuilder: (context, index) {
-                        final user = vm.discoveredDevices.value[index];
-                        return ListTile(
-                          tileColor: Theme.of(context).colorScheme.surfaceContainer,
-                          title: Text(user.name, style: Theme.of(context).textTheme.bodyLarge),
-                          subtitle: Text(user.address.toString(), style: Theme.of(context).textTheme.bodySmall),
-                          trailing: Consumer<DeviceDiscoveryViewModel>(
-                            builder:
-                                (context, vm, child) => IconButton.filledTonal(
-                                  onPressed:
-                                      vm.isBusy || vm.isDiscovering
-                                          ? null
-                                          : () => _showAddDeviceSheet(context, vm, vm.discoveredDevices.value[index]),
-                                  icon: child as Icon,
-                                ),
-                            child: Icon(Icons.add_outlined),
-                          ),
-                        );
-                      },
+              child: Card(
+                elevation: 0,
+                margin: EdgeInsets.zero,
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ValueListenableBuilder<List<SupportedDeviceDescriptor>>(
+                      valueListenable: vm.discoveredDevices,
+                      builder: (context, devices, child) => devices.isNotEmpty ? child! : const SizedBox(height: 0),
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        child: Text(
+                          context.translate('Discovered Devices:'),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
                     ),
+                    Expanded(
+                      child: ValueListenableBuilder<List<SupportedDeviceDescriptor>>(
+                        valueListenable: vm.discoveredDevices,
+                        builder:
+                            (context, value, child) => ListView.separated(
+                              separatorBuilder: (BuildContext context, int index) => SizedBox(height: 12),
+                              itemCount: vm.discoveredDevices.value.length,
+                              itemBuilder: (context, index) {
+                                final user = vm.discoveredDevices.value[index];
+                                return Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 8),
+                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.horizontal(
+                                      left: Radius.circular(16),
+                                      right: Radius.circular(16),
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.04),
+                                        blurRadius: 4,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Padding(padding: EdgeInsets.fromLTRB(16, 0,0,0), child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(user.name, style: Theme.of(context).textTheme.bodyMedium),
+                                            SizedBox(height: 4),
+                                            Text(user.address.toString(), style: Theme.of(context).textTheme.bodySmall,),
+                                          ],
+                                        )),
+                                      ),
+                                      Consumer<DeviceDiscoveryViewModel>(
+                                        builder:
+                                            (context, vm, child) => SizedBox(
+                                              height: 48,
+                                              width: 48,
+                                              child: IconButton.filledTonal(
+                                                onPressed:
+                                                    vm.isBusy || vm.isDiscovering
+                                                        ? null
+                                                        : () => _showAddDeviceSheet(
+                                                          context,
+                                                          vm,
+                                                          vm.discoveredDevices.value[index],
+                                                        ),
+                                                icon: const Icon(Icons.add_outlined, size: 32),
+                                              ),
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             NewDeviceAddedSnackBarListener(child: SizedBox()),
