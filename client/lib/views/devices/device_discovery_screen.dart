@@ -13,73 +13,6 @@ import 'package:toastification/toastification.dart';
 import '../../services/device_manager.dart';
 import '../../view_models/devices/device_discovery_view_model.dart';
 
-class HeroPanel extends StatelessWidget {
-  const HeroPanel({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Card(
-              margin: const EdgeInsets.all(0),
-              color: Theme.of(context).colorScheme.surface,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Column(
-                  children: [
-                    Selector<DeviceDiscoveryViewModel, int>(
-                      selector: (_, vm) => vm.discoveredCount,
-                      builder:
-                          (context, value, child) => Text(
-                            value.toString(),
-                            style: Theme.of(
-                              context,
-                            ).textTheme.headlineLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
-                            textAlign: TextAlign.center,
-                          ),
-                    ),
-                    Text(
-                      'Responding Devices',
-                      style: Theme.of(context).textTheme.labelSmall,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Card(
-              margin: const EdgeInsets.all(0),
-              color: Theme.of(context).colorScheme.surface,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Column(
-                  children: [
-                    Consumer<DeviceDiscoveryViewModel>(
-                      builder:
-                          (context, vm, child) => Text(
-                            vm.newDeviceCount.toString(),
-                            style: Theme.of(
-                              context,
-                            ).textTheme.headlineLarge?.copyWith(color: Theme.of(context).colorScheme.secondary),
-                            textAlign: TextAlign.center,
-                          ),
-                    ),
-                    Text('New Devices', style: Theme.of(context).textTheme.labelSmall, textAlign: TextAlign.center),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class StartStopButton extends StatelessWidget {
   const StartStopButton({super.key});
 
@@ -392,14 +325,20 @@ class DeviceDiscoveryScreen extends StatelessWidget {
                                   child: Row(
                                     children: [
                                       Expanded(
-                                        child: Padding(padding: EdgeInsets.fromLTRB(16, 0,0,0), child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(user.name, style: Theme.of(context).textTheme.bodyMedium),
-                                            SizedBox(height: 4),
-                                            Text(user.address.toString(), style: Theme.of(context).textTheme.bodySmall,),
-                                          ],
-                                        )),
+                                        child: Padding(
+                                          padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(user.name, style: Theme.of(context).textTheme.bodyMedium),
+                                              SizedBox(height: 4),
+                                              Text(
+                                                user.address.toString(),
+                                                style: Theme.of(context).textTheme.bodySmall,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ),
                                       Consumer<DeviceDiscoveryViewModel>(
                                         builder:
