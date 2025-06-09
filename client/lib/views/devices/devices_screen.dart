@@ -25,12 +25,24 @@ class InGroupDeviceListView extends StatelessWidget {
       selector: (_, gvm) => gvm.devices,
       builder: (context, devices, child) {
         var index = 0;
-        final List<Widget> deviceWidgets =
-            devices
-                .map(
-                  (dvm) => ChangeNotifierProvider.value(value: dvm, child: DeviceTile(index++ == devices.length - 1)),
-                )
-                .toList();
+        final List<Widget> deviceWidgets = <Widget>[];
+        for (var dvm in devices) {
+          deviceWidgets.add(ChangeNotifierProvider.value(value: dvm, child: DeviceTile(index == devices.length - 1)));
+          if (index < devices.length - 1) {
+            deviceWidgets.add(
+              Container(
+                color: Theme.of(context).colorScheme.surfaceContainer,
+                child: Row(
+                  children: [
+                    const SizedBox(width: 72), // 48 icon + 16 ListTile padding + 8
+                    Expanded(child: Divider(height: 1, thickness: 1, color: Theme.of(context).colorScheme.surface)),
+                  ],
+                ),
+              ),
+            );
+          }
+          index++;
+        }
         return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: deviceWidgets);
       },
     );
@@ -71,79 +83,6 @@ class NoDataHintView extends StatelessWidget {
     );
   }
 }
-
-/*
-class GroupedDevicesListView extends StatelessWidget {
-  const GroupedDevicesListView({super.key});
-
-  void _showEditGroupPage(BuildContext context, DeviceGroupEntity group) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => GroupEditScreen(),
-        settings: RouteSettings(
-            arguments: GroupEditArguments(isCreation: false, model: group)),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<GroupedDevicesViewModel>(builder: (context, vm, child) {
-      final items = vm.groups
-          .where((gvm) => !(gvm.isDummy && gvm.isEmpty))
-          .map((gvm) => _buildGroupSection(context, gvm))
-          .toList();
-      return RefreshIndicator(
-        onRefresh: vm.refresh,
-        child: Column(children: items),
-      );
-    });
-  }
-
-  Widget _buildGroupSection(BuildContext context, GroupViewModel g) =>
-      ChangeNotifierProvider<GroupViewModel>.value(
-        value: g,
-        builder: (context, child) => Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                height: 40,
-                margin: EdgeInsets.all(0),
-                padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
-                child: Consumer<GroupViewModel>(
-                  builder: (context, gvm, child) => Row(children: [
-                    Text(gvm.name,
-                        textAlign: TextAlign.start,
-                        style: Theme.of(context).textTheme.titleSmall),
-                    const Spacer(),
-                    if (!gvm.isDummy)
-                      InkWell(
-                        onTap: gvm.isDummy || gvm.isBusy
-                            ? null
-                            : () => _showEditGroupPage(context, g.model),
-                        child: Ink(
-                            child: Row(children: [
-                          Icon(Icons.edit_outlined, size: 16),
-                          SizedBox(width: 4),
-                          Text(
-                            'Edit...',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.secondary,
-                            ),
-                          ),
-                        ])),
-                      )
-                  ]),
-                ),
-              ),
-              if (child != null) child,
-            ]),
-        child: InGroupDeviceListView(),
-      );
-}
-*/
 
 class DevicesScreen extends StatelessWidget {
   const DevicesScreen({super.key});

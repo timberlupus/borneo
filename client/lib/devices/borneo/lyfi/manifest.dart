@@ -38,7 +38,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
 
   static Widget _buildDeviceIcon(BuildContext context, double iconSize, bool isOnline) {
     return Icon(
-      Icons.lightbulb_outline,
+      Icons.light_outlined,
       size: iconSize,
       color:
           isOnline

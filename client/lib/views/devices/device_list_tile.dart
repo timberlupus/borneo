@@ -54,77 +54,72 @@ class DeviceTile extends StatelessWidget {
             selector: (_, vm) => (vm.isOnline, vm.isPowerOn),
             builder: (context, status, child) {
               final vm = context.watch<AbstractDeviceSummaryViewModel>();
-              return Column(
-                children: [
-                  ListTile(
-                    dense: false,
-                    tileColor: Theme.of(context).colorScheme.surfaceContainer,
-                    onTap: vm.isBusy ? null : () => openDevicePage(context, vm.deviceEntity),
-                    onLongPress: () => _showDevicePopMenu(context),
-                    leading: Container(
-                      height: 48,
-                      width: 48,
-                      decoration: ShapeDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5.0),
-                          side: BorderSide(width: 1.5, color: Theme.of(context).colorScheme.primaryContainer),
-                        ),
-                      ),
-                      child: moduleMeta.deviceIconBuilder(context, 40, vm.isOnline),
+              return ListTile(
+                dense: false,
+                tileColor: Theme.of(context).colorScheme.surfaceContainer,
+                onTap: vm.isBusy ? null : () => openDevicePage(context, vm.deviceEntity),
+                onLongPress: () => _showDevicePopMenu(context),
+                leading: Container(
+                  height: 48,
+                  width: 48,
+                  decoration: ShapeDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                      side: BorderSide(width: 1.5, color: Theme.of(context).colorScheme.primaryContainer),
                     ),
-                    title: Text(vm.deviceEntity.name),
-                    subtitle: () {
-                      if (!status.$1) {
-                        return Text(
-                          context.translate('Off-line'),
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
-                        );
-                      }
-                      if (!status.$2) {
-                        return Text(
-                          context.translate('OFF'),
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
-                        );
-                      }
-                      final widgets = moduleMeta.secondaryStatesBuilder(context, vm);
-                      if (widgets.isEmpty) return const SizedBox.shrink();
-                      List<Widget> separated = [];
-                      for (int i = 0; i < widgets.length; i++) {
-                        separated.add(widgets[i]);
-                        if (i != widgets.length - 1) {
-                          separated.add(
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
-                              child: Icon(
-                                Icons.fiber_manual_record,
-                                size: 4,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                            ),
-                          );
-                        }
-                      }
-                      return Row(mainAxisSize: MainAxisSize.min, children: separated);
-                    }(),
-                    trailing: () {
-                      if (!status.$1) {
-                        return FlashingIcon(
-                          icon: Icon(Icons.link_off, size: 24, color: Theme.of(context).colorScheme.error),
-                        );
-                      }
-                      if (!status.$2) {
-                        return Icon(Icons.power_settings_new, size: 24, color: Theme.of(context).colorScheme.error);
-                      }
-                      return moduleMeta.primaryStateIconBuilder(context, 24);
-                    }(),
                   ),
-                  if (!isLast) const Divider(height: 1, indent: 72),
-                ],
+                  child: moduleMeta.deviceIconBuilder(context, 40, vm.isOnline),
+                ),
+                title: Text(vm.deviceEntity.name),
+                subtitle: () {
+                  if (!status.$1) {
+                    return Text(
+                      context.translate('Off-line'),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
+                    );
+                  }
+                  if (!status.$2) {
+                    return Text(
+                      context.translate('OFF'),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
+                    );
+                  }
+                  final widgets = moduleMeta.secondaryStatesBuilder(context, vm);
+                  if (widgets.isEmpty) return const SizedBox.shrink();
+                  List<Widget> separated = [];
+                  for (int i = 0; i < widgets.length; i++) {
+                    separated.add(widgets[i]);
+                    if (i != widgets.length - 1) {
+                      separated.add(
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Icon(
+                            Icons.fiber_manual_record,
+                            size: 4,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                  return Row(mainAxisSize: MainAxisSize.min, children: separated);
+                }(),
+                trailing: () {
+                  if (!status.$1) {
+                    return FlashingIcon(
+                      icon: Icon(Icons.link_off, size: 24, color: Theme.of(context).colorScheme.error),
+                    );
+                  }
+                  if (!status.$2) {
+                    return Icon(Icons.power_settings_new, size: 24, color: Theme.of(context).colorScheme.error);
+                  }
+                  return moduleMeta.primaryStateIconBuilder(context, 24);
+                }(),
               );
             },
           );
