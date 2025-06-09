@@ -30,9 +30,16 @@ class DashboardChart extends StatelessWidget {
         };
 
         return AnimatedSwitcher(
-          duration: Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 100), // 减少动画时间，让图表快速出现
           transitionBuilder: (Widget child, Animation<double> animation) {
-            return FadeTransition(opacity: animation, child: child);
+            // 使用SlideTransition而不是FadeTransition，避免透明度变化影响背景
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0.0, 0.1),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutQuart)),
+              child: child,
+            );
           },
           child: widget,
         );

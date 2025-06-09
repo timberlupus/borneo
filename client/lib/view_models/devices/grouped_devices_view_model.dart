@@ -126,6 +126,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
 
   void _clearAllItems() {
     for (final g in _groups) {
+      g.clearDevices();
       g.dispose();
     }
     _groups.clear();
@@ -146,12 +147,11 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     for (final deviceEntity in deviceEntities) {
       final metaModule = _deviceModuleRegistry.metaModules[deviceEntity.driverID];
       final deviceVM = metaModule!.createSummaryVM(deviceEntity, _deviceManager, globalEventBus);
-
       if (deviceEntity.groupID != null) {
         final g = _groups.singleWhere((x) => x.id == deviceEntity.groupID);
-        g.devices.add(deviceVM);
+        g.addDevice(deviceVM);
       } else {
-        dummyGroup.devices.add(deviceVM);
+        dummyGroup.addDevice(deviceVM);
       }
     }
   }
@@ -166,19 +166,36 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     }
     try {
       await _deviceManager.moveToGroup(device.id, newGroupVM.id);
-      newGroupVM.devices.insert(0, deviceVM);
-      originalGroupVM.devices.removeWhere((d) => d.deviceEntity.id == device.id);
+      newGroupVM.insertDevice(0, deviceVM);
+      originalGroupVM.removeDevice(deviceVM);
     } catch (e, stackTrace) {
       notifyAppError('Failed to change the group for device "${device.name}"', error: e, stackTrace: stackTrace);
     } finally {
-      newGroupVM.notifyListeners();
-      originalGroupVM.notifyListeners();
       setBusy(false, notify: false);
     }
   }
 
   Future<void> _onNewDeviceEntityAdded(NewDeviceEntityAddedEvent event) async {
-    await _tryReloadAll();
+    try {
+      final metaModule = _deviceModuleRegistry.metaModules[event.device.driverID];
+      if (metaModule != null) {
+        final deviceVM = metaModule.createSummaryVM(event.device, _deviceManager, globalEventBus);
+
+        GroupViewModel targetGroup;
+        if (event.device.groupID != null) {
+          targetGroup = _groups.singleWhere((g) => g.id == event.device.groupID);
+        } else {
+          targetGroup = dummyGroup;
+        }
+
+        targetGroup.addDevice(deviceVM);
+
+        logger?.i('Device ${event.device.name} added to group ${targetGroup.name}');
+      }
+    } catch (e, stackTrace) {
+      logger?.e('Failed to add device incrementally, falling back to full reload', error: e, stackTrace: stackTrace);
+      await _tryReloadAll();
+    }
     notifyListeners();
   }
 
@@ -187,11 +204,9 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     // Remove the deleted device from UI
     if (changedGroupIndex != -1) {
       final changedGroup = _groups[changedGroupIndex];
-      final deviceIndexToRemove = changedGroup.devices.indexWhere((d) => d.deviceEntity.id == event.id);
-      final deviceToRemove = changedGroup.devices[deviceIndexToRemove];
+      final deviceToRemove = changedGroup.devices.firstWhere((d) => d.deviceEntity.id == event.id);
       deviceToRemove.dispose();
-      changedGroup.devices.removeAt(deviceIndexToRemove);
-      changedGroup.notifyListeners();
+      changedGroup.removeDeviceById(event.id);
     }
     if (isEmpty) {
       notifyListeners();

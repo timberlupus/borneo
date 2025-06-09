@@ -59,8 +59,7 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
   bool get isPreviewMode => parent.ledState == LedState.preview;
 
   @override
-  bool get canEdit =>
-      parent.isOnline && parent.isOn && parent.mode == LedRunningMode.scheduled && parent.ledState == LedState.dimming;
+  bool get canEdit => parent.isOnline && parent.isOn && parent.mode == LedRunningMode.scheduled;
 
   bool get canChangeColor => canEdit && currentEntry != null;
 

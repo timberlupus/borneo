@@ -6,8 +6,7 @@ class SunEditorViewModel extends BaseEditorViewModel {
   ILyfiDeviceApi get _deviceApi => parent.boundDevice!.driver as ILyfiDeviceApi;
 
   @override
-  bool get canEdit =>
-      parent.isOnline && parent.isOn && parent.mode == LedRunningMode.sun && parent.ledState == LedState.dimming;
+  bool get canEdit => parent.isOnline && parent.isOn && parent.mode == LedRunningMode.sun;
 
   bool get canChangeColor => canEdit;
 

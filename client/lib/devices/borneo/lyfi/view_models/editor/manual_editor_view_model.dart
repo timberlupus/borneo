@@ -3,8 +3,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 
 class ManualEditorViewModel extends BaseEditorViewModel {
   @override
-  bool get canEdit =>
-      parent.isOnline && parent.isOn && parent.mode == LedRunningMode.manual && parent.ledState == LedState.dimming;
+  bool get canEdit => parent.isOnline && parent.isOn && parent.mode == LedRunningMode.manual;
 
   bool get canChangeColor => canEdit;
 

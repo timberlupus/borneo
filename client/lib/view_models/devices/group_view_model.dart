@@ -4,29 +4,53 @@ import 'package:borneo_app/models/devices/device_group_entity.dart';
 import '/view_models/base_view_model.dart';
 
 class GroupViewModel extends BaseViewModel {
-  final List<AbstractDeviceSummaryViewModel> _devices = [];
+  List<AbstractDeviceSummaryViewModel> _devices = [];
 
-  String get id => _model.id;
-  String get name => _model.name;
+  String get id => model.id;
+  String get name => model.name;
   List<AbstractDeviceSummaryViewModel> get devices => _devices;
-  bool get isDummy => _model.isDummy;
+  bool get isDummy => model.isDummy;
 
-  DeviceGroupEntity _model;
-  DeviceGroupEntity get model => _model;
-  set model(groupEntity) => _model = groupEntity;
+  DeviceGroupEntity model;
 
   bool get isEmpty => _devices.isEmpty;
 
-  GroupViewModel(this._model);
+  void addDevice(AbstractDeviceSummaryViewModel device) {
+    _devices = [..._devices, device];
+    notifyListeners();
+  }
 
+  void insertDevice(int index, AbstractDeviceSummaryViewModel device) {
+    _devices = [..._devices];
+    _devices.insert(index, device);
+    notifyListeners();
+  }
+
+  void removeDevice(AbstractDeviceSummaryViewModel device) {
+    _devices = _devices.where((d) => d != device).toList();
+    notifyListeners();
+  }
+
+  void removeDeviceById(String deviceId) {
+    _devices = _devices.where((d) => d.deviceEntity.id != deviceId).toList();
+    notifyListeners();
+  }
+
+  void clearDevices() {
+    for (final device in _devices) {
+      if (!device.isDisposed) {
+        device.dispose();
+      }
+    }
+    _devices = [];
+    notifyListeners();
+  }
+
+  GroupViewModel(this.model);
   @override
   void dispose() {
     if (!isDisposed) {
-      for (final device in _devices) {
-        if (!device.isDisposed) {
-          device.dispose();
-        }
-      }
+      clearDevices();
       super.dispose();
     }
   }

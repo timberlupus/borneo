@@ -109,7 +109,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     // Update schedule
     // final schedule = await _deviceApi.getSchedule(boundDevice.device);
     if (!_isLocked) {
-      _toggleEditor(_mode);
+      await _toggleEditor(_mode);
     }
   }
 
@@ -163,7 +163,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
     // Update schedule
     if (!_isLocked) {
-      _toggleEditor(_mode);
+      await _toggleEditor(_mode);
     }
   }
 
@@ -235,7 +235,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   }
 
   void switchPowerOnOff(bool onOff) {
-    super.enqueueUIJob(() => _switchPowerOnOff(onOff));
+    super.enqueueUIJob(() async => await _switchPowerOnOff(onOff));
   }
 
   Future<void> _switchPowerOnOff(bool onOff) async {
@@ -251,7 +251,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
   void switchTemporaryState() {
     assert(_ledState == LedState.normal || _ledState == LedState.temporary);
-    super.enqueueUIJob(() => _switchTemporaryState());
+    super.enqueueUIJob(() async => await _switchTemporaryState());
   }
 
   Future<void> _switchTemporaryState() async {
@@ -266,7 +266,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   }
 
   void toggleLock(bool isLocked) {
-    super.enqueueUIJob(() => _toggleLock(isLocked));
+    super.enqueueUIJob(() async => await _toggleLock(isLocked));
   }
 
   Future<void> toggleLockAsync(bool isLocked) async {
@@ -297,14 +297,14 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
     if (!isLocked) {
       //Entering edit mode
-      _toggleEditor(_mode);
+      await _toggleEditor(_mode);
     } else {
       await refreshStatus();
     }
   }
 
   void switchMode(LedRunningMode mode) {
-    super.enqueueUIJob(() => _switchMode(mode));
+    super.enqueueUIJob(() async => await _switchMode(mode));
   }
 
   Future<void> _switchMode(LedRunningMode mode) async {

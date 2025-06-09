@@ -22,7 +22,7 @@ class DashboardView extends StatelessWidget {
       return const SizedBox.shrink();
     }
     return Padding(
-      padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -36,7 +36,7 @@ class DashboardView extends StatelessWidget {
                     child: Container(
                       color: Theme.of(context).colorScheme.surfaceContainer,
                       margin: const EdgeInsets.all(0),
-                      child: const DashboardChart(),
+                      child: const ClipRect(child: DashboardChart()),
                     ),
                   ),
             ),
