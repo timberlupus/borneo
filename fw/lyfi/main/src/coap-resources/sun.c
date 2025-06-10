@@ -20,16 +20,11 @@
 
 #define TAG "lyfi-coap"
 
-extern struct led_status _led;
-
 static void coap_hnd_sun_schedule_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
                                       const coap_string_t* query, coap_pdu_t* response)
 {
     size_t encoded_size = 0;
     uint8_t buf[1024];
-
-    // TODO lock
-    extern struct led_status _led;
 
     CborEncoder encoder;
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);

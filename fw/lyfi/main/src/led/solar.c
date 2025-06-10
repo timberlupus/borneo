@@ -27,8 +27,6 @@
 
 #define TAG "led.solar"
 
-extern struct led_status _led;
-
 int led_sun_init()
 {
     if (_led.settings.mode != LED_MODE_SUN) {
@@ -41,6 +39,7 @@ int led_sun_init()
 
 int led_sun_update_scheduler()
 {
+    // TODO lock!!!
     if (!led_sun_can_active()) {
         return -EINVAL;
     }
@@ -93,19 +92,29 @@ bool led_sun_is_in_progress(const struct tm* local_tm)
     if (!led_has_geo_location()) {
         return false;
     }
+
+    portENTER_CRITICAL(&g_led_spinlock);
     if (_led.settings.mode != LED_MODE_SUN) {
+        portEXIT_CRITICAL(&g_led_spinlock);
         return false;
     }
+
     if (_led.sun_scheduler.item_count == 0) {
+        portEXIT_CRITICAL(&g_led_spinlock);
         return false;
     }
+
     uint32_t local_instant = (local_tm->tm_hour * 3600) + (local_tm->tm_min * 60) + local_tm->tm_sec;
-    return _led.sun_scheduler.items[0].instant >= local_instant
+    bool result = _led.sun_scheduler.items[0].instant >= local_instant
         && _led.sun_scheduler.items[_led.sun_scheduler.item_count - 1].instant <= local_instant;
+    portEXIT_CRITICAL(&g_led_spinlock);
+
+    return result;
 }
 
 void led_sun_drive(time_t utc_now, led_color_t color)
 {
+    // TODO lock!!!
     assert(led_sun_can_active());
     assert(_led.settings.mode == LED_MODE_SUN && led_get_state() == LED_STATE_NORMAL);
     assert(_led.sun_scheduler.item_count == SOLAR_INSTANTS_COUNT);

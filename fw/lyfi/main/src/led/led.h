@@ -6,6 +6,7 @@
 #include <smf/smf.h>
 
 #include <borneo/algo/astronomy.h>
+#include <freertos/portmacro.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -121,6 +122,9 @@ struct led_status {
     bool acclimation_activated;
 };
 
+extern struct led_status _led;
+extern portMUX_TYPE g_led_spinlock;
+
 extern const led_duty_t LED_CORLUT_CIE1931[LED_BRIGHTNESS_MAX + 1];
 extern const led_duty_t LED_CORLUT_LOG[LED_BRIGHTNESS_MAX + 1];
 extern const led_duty_t LED_CORLUT_GAMMA[LED_BRIGHTNESS_MAX + 1];
@@ -149,10 +153,9 @@ const struct led_scheduler* led_get_schedule();
 
 const struct led_user_settings* led_get_settings();
 
-// TODO
-// int led_switch_mode(uint8_t mode);
-
 const struct led_status* led_get_status();
+
+portMUX_TYPE* led_get_lock();
 
 uint8_t led_get_state();
 uint8_t led_get_previous_state();

@@ -140,6 +140,8 @@ static const led_color_t LED_COLOR_BLANK = { 0 };
 
 struct led_status _led;
 
+portMUX_TYPE g_led_spinlock = portMUX_INITIALIZER_UNLOCKED;
+
 static ledc_channel_config_t _ledc_channels[LYFI_LED_CHANNEL_COUNT];
 /**
  * Initialize the LED controller
@@ -151,6 +153,8 @@ int led_init()
 
     memset(&_led, 0, sizeof(_led));
     memset(_ledc_channels, 0, sizeof(_ledc_channels));
+
+    _led.settings_lock = xSemaphoreCreateMutex();
 
     struct led_factory_settings factory_settings;
     BO_TRY(led_load_factory_settings(&factory_settings));
@@ -218,8 +222,6 @@ int led_init()
     BO_TRY(esp_event_handler_register(LYFI_EVENTS, ESP_EVENT_ANY_ID, led_events_handler, NULL));
     BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, system_events_handler, NULL));
 
-    _led.settings_lock = xSemaphoreCreateMutex();
-
     ESP_LOGI(TAG, "Starting LED controller...");
 
     if (_led.settings.mode == LED_MODE_SUN) {
@@ -241,6 +243,8 @@ inline uint8_t led_get_previous_state()
     return _led.ctx.previous - &LED_STATE_TABLE[0];
 }
 
+inline portMUX_TYPE* led_get_lock() { return &g_led_spinlock; }
+
 void led_blank()
 {
     if (memcmp(_led.color, LED_COLOR_BLANK, sizeof(led_color_t)) != 0) {
@@ -260,19 +264,18 @@ int led_set_color(const led_color_t color)
         }
     }
 
+    portENTER_CRITICAL(&g_led_spinlock);
     switch (_led.settings.mode) {
-
     case LED_MODE_MANUAL:
         memcpy(_led.settings.manual_color, color, sizeof(led_color_t));
         break;
-
     case LED_MODE_SUN:
         memcpy(_led.settings.sun_color, color, sizeof(led_color_t));
         break;
-
     default:
         break;
     }
+    portEXIT_CRITICAL(&g_led_spinlock);
 
     BO_TRY(led_update_color(color));
 
@@ -281,15 +284,19 @@ int led_set_color(const led_color_t color)
 
 int led_get_color(led_color_t color)
 {
+    portENTER_CRITICAL(&g_led_spinlock);
     memcpy(color, _led.color, sizeof(led_color_t));
+    portEXIT_CRITICAL(&g_led_spinlock);
     return ESP_OK;
 }
 
 led_brightness_t led_get_channel_power(uint8_t ch)
 {
-    //
     assert(ch < LYFI_LED_CHANNEL_COUNT);
-    return _led.color[ch];
+    portENTER_CRITICAL(&g_led_spinlock);
+    led_brightness_t value = _led.color[ch];
+    portEXIT_CRITICAL(&g_led_spinlock);
+    return value;
 }
 
 inline led_duty_t channel_brightness_to_duty(led_brightness_t brightness)
@@ -383,10 +390,15 @@ int led_set_channel_brightness(uint8_t ch, led_brightness_t brightness)
 
 int led_update_color(const led_color_t color)
 {
+    portENTER_CRITICAL(&g_led_spinlock);
+
     if (memcmp(color, _led.color, sizeof(led_color_t)) == 0) {
-        return 0;
+        goto __EXIT;
     }
     memcpy(_led.color, color, sizeof(led_color_t));
+
+__EXIT:
+    portEXIT_CRITICAL(&g_led_spinlock);
     return 0;
 }
 
@@ -412,6 +424,7 @@ int led_set_schedule(const struct led_scheduler_item* items, size_t count)
         return -EINVAL;
     }
 
+    portENTER_CRITICAL(&g_led_spinlock);
     if (count > 0) {
         memcpy(_led.settings.scheduler.items, items, sizeof(struct led_scheduler_item) * count);
         _led.settings.scheduler.item_count = count;
@@ -419,6 +432,7 @@ int led_set_schedule(const struct led_scheduler_item* items, size_t count)
     else {
         memset(&_led.settings.scheduler, 0, sizeof(_led.settings.scheduler));
     }
+    portEXIT_CRITICAL(&g_led_spinlock);
 
     return 0;
 }
@@ -431,12 +445,16 @@ const struct led_status* led_get_status() { return &_led; }
 
 bool led_is_blank()
 {
+    bool blank = true;
+    portENTER_CRITICAL(&g_led_spinlock);
     for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
         if (_led.color[ch] > 0) {
-            return false;
+            blank = false;
+            break;
         }
     }
-    return true;
+    portEXIT_CRITICAL(&g_led_spinlock);
+    return blank;
 }
 
 static void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data)
@@ -576,13 +594,21 @@ void led_render_task()
         }
 
         // Sync color to hardware
-        if (memcmp(last_color, _led.color, sizeof(led_color_t))) {
+        portENTER_CRITICAL(&g_led_spinlock);
+        bool color_changed = memcmp(last_color, _led.color, sizeof(led_color_t)) != 0;
+        portEXIT_CRITICAL(&g_led_spinlock);
+
+        if (color_changed) {
+            portENTER_CRITICAL(&g_led_spinlock);
             for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-                if (last_color[ch] != _led.color[ch]) {
-                    last_color[ch] = _led.color[ch];
+                led_brightness_t new_val = _led.color[ch];
+
+                if (last_color[ch] != new_val) {
+                    last_color[ch] = new_val;
                     BO_MUST(led_set_channel_brightness(ch, last_color[ch]));
                 }
             }
+            portEXIT_CRITICAL(&g_led_spinlock);
         }
 
         vTaskDelay(pdMS_TO_TICKS(10));
@@ -803,9 +829,6 @@ static void preview_state_entry()
     if (_led.settings.scheduler.item_count <= 1) {
         return;
     }
-
-    memcpy(_led.color_to_resume, _led.color, sizeof(led_color_t));
-
     time_t utc_now = time(NULL);
     struct tm local_today = { 0 };
     localtime_r(&utc_now, &local_today);
@@ -813,7 +836,10 @@ static void preview_state_entry()
     local_today.tm_min = 0;
     local_today.tm_sec = 0;
 
+    portENTER_CRITICAL(&g_led_spinlock);
+    memcpy(_led.color_to_resume, _led.color, sizeof(led_color_t));
     _led.preview_state_clock = mktime(&local_today) + _led.settings.scheduler.items[0].instant;
+    portEXIT_CRITICAL(&g_led_spinlock);
 
     ESP_LOGI(TAG, "Preview state started.");
 }
@@ -844,7 +870,9 @@ static void preview_state_exit()
 
 int led_set_temporary_duration(uint32_t duration)
 {
+    portENTER_CRITICAL(&g_led_spinlock);
     _led.settings.temporary_duration = duration;
+    portEXIT_CRITICAL(&g_led_spinlock);
     BO_TRY(led_save_user_settings());
     return 0;
 }
@@ -865,23 +893,22 @@ void led_temporary_state_entry()
     if (!bo_power_is_on()) {
         return;
     }
-
     if (_led.settings.mode != LED_MODE_SUN && _led.settings.mode != LED_MODE_SCHEDULED) {
         return;
     }
-
     int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
-
+    portENTER_CRITICAL(&g_led_spinlock);
     _led.temporary_off_time = now + (_led.settings.temporary_duration * 60 * 1000) - TEMPORARY_FADE_PERIOD_MS;
-
+    portEXIT_CRITICAL(&g_led_spinlock);
     BO_MUST(led_fade_to_color(_led.settings.manual_color, TEMPORARY_FADE_PERIOD_MS));
 }
 
 void led_temporary_state_exit()
 {
     assert(led_get_state() == LED_STATE_TEMPORARY);
-
+    portENTER_CRITICAL(&g_led_spinlock);
     _led.temporary_off_time = 0;
+    portEXIT_CRITICAL(&g_led_spinlock);
 }
 
 void led_temporary_state_run()

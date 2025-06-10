@@ -28,8 +28,6 @@
 
 #define SECS_PER_DAY 86400
 
-extern struct led_status _led;
-
 bool led_acclimation_is_enabled() { return _led.settings.flags & LED_OPTION_ACCLIMATION_ENABLED; }
 
 bool led_acclimation_is_activated() { return led_acclimation_is_enabled() && _led.acclimation_activated; }

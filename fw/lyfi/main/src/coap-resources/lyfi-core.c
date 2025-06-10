@@ -25,8 +25,6 @@ static int _encode_channel_info_entry(CborEncoder* parent, const char* name, con
                                       uint32_t brightness_percent, uint32_t power);
 static int _encode_channel_info_array(CborEncoder* parent);
 
-extern struct led_status _led;
-
 static void coap_hnd_color_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
                                const coap_string_t* query, coap_pdu_t* response)
 {

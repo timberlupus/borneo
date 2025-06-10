@@ -30,8 +30,6 @@
 #define FADE_ON_PERIOD_MS 5000
 #define FADE_OFF_PERIOD_MS 3000
 
-extern struct led_status _led;
-
 int led_fade_to_color(const led_color_t color, uint32_t duration_ms)
 {
     if (led_is_fading()) {
@@ -47,10 +45,14 @@ int led_fade_to_color(const led_color_t color, uint32_t duration_ms)
     }
 
     int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
+    portENTER_CRITICAL(&g_led_spinlock);
     _led.fade_start_time_ms = now;
     _led.fade_duration_ms = duration_ms;
+    portEXIT_CRITICAL(&g_led_spinlock);
     BO_TRY(led_get_color(_led.fade_start_color));
+    portENTER_CRITICAL(&g_led_spinlock);
     memcpy(_led.fade_end_color, color, sizeof(led_color_t));
+    portEXIT_CRITICAL(&g_led_spinlock);
     return 0;
 }
 
@@ -65,9 +67,8 @@ int led_fade_to_normal()
     localtime_r(&now, &local_tm);
 
     if (bo_power_is_on()) {
-
+        portENTER_CRITICAL(&g_led_spinlock);
         switch (_led.settings.mode) {
-
         case LED_MODE_MANUAL: {
             memcpy(end_color, _led.settings.manual_color, sizeof(led_color_t));
         } break;
@@ -84,6 +85,7 @@ int led_fade_to_normal()
             assert(false);
             break;
         }
+        portEXIT_CRITICAL(&g_led_spinlock);
     }
     else {
         memset(end_color, 0, sizeof(led_color_t));
@@ -96,7 +98,9 @@ int led_fade_to_normal()
 
 int led_fade_stop()
 {
+    portENTER_CRITICAL(&g_led_spinlock);
     _led.fade_start_time_ms = 0LL;
+    portEXIT_CRITICAL(&g_led_spinlock);
     return 0;
 }
 
@@ -115,21 +119,35 @@ void led_fade_drive()
     }
 
     int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
-    if (now >= _led.fade_start_time_ms + _led.fade_duration_ms) {
+    portENTER_CRITICAL(&g_led_spinlock);
+    int64_t fade_start_time_ms = _led.fade_start_time_ms;
+    int64_t fade_duration_ms = _led.fade_duration_ms;
+    led_color_t fade_start_color;
+    led_color_t fade_end_color;
+    memcpy(fade_start_color, _led.fade_start_color, sizeof(led_color_t));
+    memcpy(fade_end_color, _led.fade_end_color, sizeof(led_color_t));
+    portEXIT_CRITICAL(&g_led_spinlock);
+    if (now >= fade_start_time_ms + fade_duration_ms) {
         BO_MUST(led_fade_stop());
-        BO_MUST(led_update_color(_led.fade_end_color));
+        BO_MUST(led_update_color(fade_end_color));
         return;
     }
 
-    uint32_t elapsed_time_ms = (uint32_t)(now - _led.fade_start_time_ms);
-    uint32_t progress = (elapsed_time_ms * 65536ULL + (_led.fade_duration_ms / 2)) / _led.fade_duration_ms;
+    uint32_t elapsed_time_ms = (uint32_t)(now - fade_start_time_ms);
+    uint32_t progress = (elapsed_time_ms * 65536ULL + (fade_duration_ms / 2)) / fade_duration_ms;
 
     led_color_t color;
     for (size_t ich = 0; ich < LYFI_LED_CHANNEL_COUNT; ich++) {
-        int32_t delta = (int32_t)(_led.fade_end_color[ich] - _led.fade_start_color[ich]) * progress;
-        color[ich] = _led.fade_start_color[ich] + ((delta + (1 << 15)) >> 16);
+        int32_t delta = (int32_t)(fade_end_color[ich] - fade_start_color[ich]) * progress;
+        color[ich] = fade_start_color[ich] + ((delta + (1 << 15)) >> 16);
     }
     BO_MUST(led_update_color(color));
 }
 
-inline bool led_is_fading() { return _led.fade_start_time_ms > 0LL; }
+inline bool led_is_fading()
+{
+    portENTER_CRITICAL(&g_led_spinlock);
+    bool fading = _led.fade_start_time_ms > 0LL;
+    portEXIT_CRITICAL(&g_led_spinlock);
+    return fading;
+}

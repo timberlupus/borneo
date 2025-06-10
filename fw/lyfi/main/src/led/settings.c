@@ -99,8 +99,6 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
 }
 ;
 
-extern struct led_status _led;
-
 int led_load_factory_settings(struct led_factory_settings* factory_settings)
 {
     nvs_handle_t handle;
@@ -343,13 +341,15 @@ int led_save_user_settings()
 
 bool led_has_geo_location()
 {
-    // TODO lock
-    return _led.settings.flags & LED_OPTION_HAS_GEO_LOCATION;
+    bool has_location;
+    portENTER_CRITICAL(&g_led_spinlock);
+    has_location = _led.settings.flags & LED_OPTION_HAS_GEO_LOCATION;
+    portEXIT_CRITICAL(&g_led_spinlock);
+    return has_location;
 }
 
 int led_set_geo_location(const struct geo_location* location)
 {
-    // TODO lock
     if (location == NULL) {
         return -EINVAL;
     }
@@ -366,9 +366,11 @@ int led_set_geo_location(const struct geo_location* location)
     if (location->lng < -180.0f || location->lng > 180.0f) {
         return -EINVAL;
     }
+    portENTER_CRITICAL(&g_led_spinlock);
     _led.settings.location.lat = location->lat;
     _led.settings.location.lng = location->lng;
     _led.settings.flags |= LED_OPTION_HAS_GEO_LOCATION;
+    portEXIT_CRITICAL(&g_led_spinlock);
 
     BO_TRY(led_save_user_settings());
 
@@ -379,9 +381,10 @@ int led_set_geo_location(const struct geo_location* location)
 
 int led_tz_enable(bool enabled)
 {
-    // TODO lock
+    portENTER_CRITICAL(&g_led_spinlock);
     if (enabled) {
         if (_led.settings.tz_offset < -43200 || _led.settings.tz_offset > 50400) {
+            portEXIT_CRITICAL(&g_led_spinlock);
             return -EINVAL;
         }
         _led.settings.flags |= LED_OPTION_TZ_ENABLED;
@@ -389,20 +392,20 @@ int led_tz_enable(bool enabled)
     else {
         _led.settings.flags &= ~LED_OPTION_TZ_ENABLED;
     }
+    portEXIT_CRITICAL(&g_led_spinlock);
     BO_TRY(led_save_user_settings());
     return 0;
 }
 
 int led_tz_set_offset(int32_t offset)
 {
-    // TODO lock
-
     // -12*3600 ~ +14*3600（-43200 ~ +50400），UTC-12:00 ~ UTC+14:00
     if (offset < -43200 || offset > 50400) {
         return -EINVAL;
     }
-
+    portENTER_CRITICAL(&g_led_spinlock);
     _led.settings.tz_offset = offset;
+    portEXIT_CRITICAL(&g_led_spinlock);
     BO_TRY(led_save_user_settings());
     return 0;
 }

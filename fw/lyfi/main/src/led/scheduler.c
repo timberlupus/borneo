@@ -34,8 +34,6 @@ struct sch_time_pair {
 
 static int sch_find_closest_time_range(const struct led_scheduler* sch, uint32_t instant, struct sch_time_pair* result);
 
-extern struct led_status _led;
-
 void led_sch_compute_color_in_range(led_color_t color, const struct tm* tm_local,
                                     const struct led_scheduler_item* range_begin,
                                     const struct led_scheduler_item* range_end)
@@ -137,11 +135,13 @@ int sch_find_closest_time_range(const struct led_scheduler* sch, uint32_t instan
 
 void led_sch_drive(time_t utc_now, led_color_t color)
 {
-    assert((led_get_state() == LED_STATE_PREVIEW || led_get_state() == LED_STATE_NORMAL)
-           && _led.settings.mode == LED_MODE_SCHEDULED);
 
     struct tm local_tm;
     localtime_r(&utc_now, &local_tm);
 
+    portENTER_CRITICAL(&g_led_spinlock);
+    assert((led_get_state() == LED_STATE_PREVIEW || led_get_state() == LED_STATE_NORMAL)
+           && _led.settings.mode == LED_MODE_SCHEDULED);
     led_sch_compute_color(&_led.settings.scheduler, &local_tm, color);
+    portEXIT_CRITICAL(&g_led_spinlock);
 }

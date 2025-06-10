@@ -26,7 +26,6 @@ static void coap_hnd_acclimation_get(coap_resource_t* resource, coap_session_t* 
     uint8_t buf[128];
 
     // TODO lock
-    extern struct led_status _led;
 
     CborEncoder encoder;
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
