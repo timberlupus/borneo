@@ -111,6 +111,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     if (!_isLocked) {
       await _toggleEditor(_mode);
     }
+
+    await Future.delayed(Duration(milliseconds: 300));
   }
 
   @override
