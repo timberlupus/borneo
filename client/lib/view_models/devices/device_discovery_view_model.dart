@@ -11,11 +11,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:esp_smartconfig/esp_smartconfig.dart';
 
 import '../../models/devices/events.dart';
-import '/view_models/base_view_model.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_app/services/device_manager.dart';
 
-class DeviceDiscoveryViewModel extends AbstractScreenViewModel with ViewModelEventBusMixin {
+class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   // TODO move this to device manager
   final Logger _logger;
   final _provisioner = Provisioner.espTouch();

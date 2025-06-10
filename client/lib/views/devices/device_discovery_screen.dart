@@ -60,8 +60,9 @@ class _SmartConfigFormPanelState extends State<SmartConfigFormPanel> {
   @override
   void initState() {
     super.initState();
-    _ssidController = TextEditingController();
-    _passwordController = TextEditingController();
+    final vm = context.read<DeviceDiscoveryViewModel>();
+    _ssidController = TextEditingController(text: vm.ssid);
+    _passwordController = TextEditingController(text: vm.password);
   }
 
   @override
@@ -106,7 +107,6 @@ class _SmartConfigFormPanelState extends State<SmartConfigFormPanel> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Consumer<DeviceDiscoveryViewModel>(
                         builder: (context, vm, child) {
-                          _ssidController.text = vm.ssid;
                           return TextField(
                             controller: _ssidController,
                             onChanged: (value) {
