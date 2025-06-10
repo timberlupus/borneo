@@ -2,6 +2,9 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
+
 #include "led.h"
 
 // CIE 1931 brightness curve lookup table (perceptual uniform)

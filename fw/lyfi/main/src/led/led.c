@@ -218,6 +218,8 @@ int led_init()
     BO_TRY(esp_event_handler_register(LYFI_EVENTS, ESP_EVENT_ANY_ID, led_events_handler, NULL));
     BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, system_events_handler, NULL));
 
+    _led.settings_lock = xSemaphoreCreateMutex();
+
     ESP_LOGI(TAG, "Starting LED controller...");
 
     if (_led.settings.mode == LED_MODE_SUN) {

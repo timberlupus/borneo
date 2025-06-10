@@ -8,6 +8,7 @@
 #include <esp_timer.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <freertos/semphr.h>
 #include <driver/ledc.h>
 #include <esp_err.h>
 #include <esp_log.h>
@@ -102,38 +103,35 @@ extern struct led_status _led;
 
 int led_load_factory_settings(struct led_factory_settings* factory_settings)
 {
-    int rc;
     nvs_handle_t handle;
-    rc = bo_nvs_factory_open(LED_NVS_NS, NVS_READWRITE, &handle);
-    if (rc) {
-        goto _EXIT_WITHOUT_CLOSE;
+    BO_TRY(bo_nvs_factory_open(LED_NVS_NS, NVS_READWRITE, &handle));
+    BO_NVS_AUTO_CLOSE(handle);
+
+    int rc;
+    {
+        rc = nvs_get_u16(handle, LED_NVS_KEY_PWM_FREQ, &factory_settings->pwm_freq);
+        if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            factory_settings->pwm_freq = CONFIG_LYFI_DEFAULT_PWM_FREQ;
+            rc = 0;
+        }
+        if (rc) {
+            return rc;
+        }
     }
 
-    rc = nvs_get_u16(handle, LED_NVS_KEY_PWM_FREQ, &factory_settings->pwm_freq);
-    if (rc == ESP_ERR_NVS_NOT_FOUND) {
-        factory_settings->pwm_freq = CONFIG_LYFI_DEFAULT_PWM_FREQ;
-        rc = 0;
-    }
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-_EXIT_CLOSE:
-    bo_nvs_close(handle);
-_EXIT_WITHOUT_CLOSE:
     return rc;
 }
 
 int led_load_user_settings()
 {
     struct led_user_settings* settings = &_led.settings;
-    int rc;
     size_t size;
+
     nvs_handle_t handle;
-    rc = bo_nvs_user_open(LED_NVS_NS, NVS_READWRITE, &handle);
-    if (rc) {
-        goto _EXIT_WITHOUT_CLOSE;
-    }
+    BO_TRY(bo_nvs_user_open(LED_NVS_NS, NVS_READWRITE, &handle));
+    BO_NVS_AUTO_CLOSE(handle);
+
+    int rc;
 
     {
         rc = nvs_get_u8(handle, LED_NVS_KEY_RUNNING_MODE, &settings->mode);
@@ -142,7 +140,7 @@ int led_load_user_settings()
             rc = 0;
         }
         if (rc) {
-            goto _EXIT_CLOSE;
+            return rc;
         }
     }
 
@@ -153,7 +151,7 @@ int led_load_user_settings()
             rc = 0;
         }
         if (rc) {
-            goto _EXIT_CLOSE;
+            return rc;
         }
     }
 
@@ -165,7 +163,7 @@ int led_load_user_settings()
             rc = 0;
         }
         if (rc) {
-            goto _EXIT_CLOSE;
+            return rc;
         }
     }
 
@@ -177,7 +175,7 @@ int led_load_user_settings()
             rc = 0;
         }
         if (rc) {
-            goto _EXIT_CLOSE;
+            return rc;
         }
     }
 
@@ -189,7 +187,7 @@ int led_load_user_settings()
             rc = 0;
         }
         if (rc) {
-            goto _EXIT_CLOSE;
+            return rc;
         }
     }
 
@@ -200,7 +198,7 @@ int led_load_user_settings()
             rc = 0;
         }
         if (rc) {
-            goto _EXIT_CLOSE;
+            return rc;
         }
     }
 
@@ -215,7 +213,7 @@ int led_load_user_settings()
             rc = 0;
         }
         if (rc) {
-            goto _EXIT_CLOSE;
+            return rc;
         }
     }
 
@@ -234,7 +232,7 @@ int led_load_user_settings()
             settings->flags &= ~LED_OPTION_TZ_ENABLED;
         }
         else if (rc) {
-            goto _EXIT_CLOSE;
+            return rc;
         }
     }
 
@@ -244,7 +242,7 @@ int led_load_user_settings()
             settings->tz_offset = LED_DEFAULT_SETTINGS.tz_offset;
         }
         else if (rc) {
-            goto _EXIT_CLOSE;
+            return rc;
         }
     }
 
@@ -263,7 +261,7 @@ int led_load_user_settings()
             settings->flags &= ~LED_OPTION_ACCLIMATION_ENABLED;
         }
         else if (rc) {
-            goto _EXIT_CLOSE;
+            return rc;
         }
     }
 
@@ -273,7 +271,7 @@ int led_load_user_settings()
             settings->acclimation.start_utc = LED_DEFAULT_SETTINGS.acclimation.start_utc;
         }
         else if (rc) {
-            goto _EXIT_CLOSE;
+            return rc;
         }
     }
 
@@ -284,7 +282,7 @@ int led_load_user_settings()
             rc = 0;
         }
         else if (rc) {
-            goto _EXIT_CLOSE;
+            return rc;
         }
     }
 
@@ -295,7 +293,7 @@ int led_load_user_settings()
             rc = 0;
         }
         else if (rc) {
-            goto _EXIT_CLOSE;
+            return rc;
         }
     }
 
@@ -304,98 +302,43 @@ int led_load_user_settings()
 #ifdef CONFIG_LYFI_STANDALONE_CONTROLLER
 #endif // CONFIG_LYFI_STANDALONE_CONTROLLER
 
-_EXIT_CLOSE:
-    bo_nvs_close(handle);
-_EXIT_WITHOUT_CLOSE:
     return rc;
 }
 
 int led_save_user_settings()
 {
+    xSemaphoreTake(_led.settings_lock, portMAX_DELAY);
+    BO_SEM_AUTO_RELEASE(_led.settings_lock);
+
     ESP_LOGI(TAG, "Saving dimming settings...");
 
     const struct led_user_settings* settings = &_led.settings;
-    int rc;
     nvs_handle_t handle;
-    rc = bo_nvs_user_open(LED_NVS_NS, NVS_READWRITE, &handle);
-    if (rc) {
-        goto _EXIT_WITHOUT_CLOSE;
-    }
+    BO_TRY(bo_nvs_user_open(LED_NVS_NS, NVS_READWRITE, &handle));
+    BO_NVS_AUTO_CLOSE(handle);
 
-    rc = nvs_set_u8(handle, LED_NVS_KEY_RUNNING_MODE, settings->mode);
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_set_u32(handle, LED_NVS_KEY_TEMPORARY_DURATION, settings->temporary_duration);
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_set_u8(handle, LED_NVS_KEY_CORRECTION_METHOD, settings->correction_method);
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_set_blob(handle, LED_NVS_KEY_SCHEDULER, &settings->scheduler, sizeof(struct led_scheduler));
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_set_blob(handle, LED_NVS_KEY_MANUAL_COLOR, settings->manual_color, sizeof(led_color_t));
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_set_blob(handle, LED_NVS_KEY_SUN_COLOR, settings->sun_color, sizeof(led_color_t));
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
+    BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_RUNNING_MODE, settings->mode));
+    BO_TRY(nvs_set_u32(handle, LED_NVS_KEY_TEMPORARY_DURATION, settings->temporary_duration));
+    BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_CORRECTION_METHOD, settings->correction_method));
+    BO_TRY(nvs_set_blob(handle, LED_NVS_KEY_SCHEDULER, &settings->scheduler, sizeof(struct led_scheduler)));
+    BO_TRY(nvs_set_blob(handle, LED_NVS_KEY_MANUAL_COLOR, settings->manual_color, sizeof(led_color_t)));
+    BO_TRY(nvs_set_blob(handle, LED_NVS_KEY_SUN_COLOR, settings->sun_color, sizeof(led_color_t)));
 
     if (led_has_geo_location()) {
-        rc = nvs_set_blob(handle, LED_NVS_KEY_LOC, &settings->location, sizeof(struct geo_location));
-        if (rc) {
-            goto _EXIT_CLOSE;
-        }
+        BO_TRY(nvs_set_blob(handle, LED_NVS_KEY_LOC, &settings->location, sizeof(struct geo_location)));
     }
 
-    rc = nvs_set_u8(handle, LED_NVS_KEY_TZ_ENABLED, (uint8_t)(settings->flags & LED_OPTION_TZ_ENABLED));
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
+    BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_TZ_ENABLED, (uint8_t)(settings->flags & LED_OPTION_TZ_ENABLED)));
+    BO_TRY(nvs_set_i32(handle, LED_NVS_KEY_TZ_OFFSET, settings->tz_offset));
+    BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_ENABLED, (uint8_t)led_acclimation_is_enabled()));
+    BO_TRY(nvs_set_i64(handle, LED_NVS_KEY_ACCLIMATION_START, settings->acclimation.start_utc));
+    BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_DURATION, settings->acclimation.duration));
+    BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_START_PERCENT, settings->acclimation.start_percent));
 
-    rc = nvs_set_i32(handle, LED_NVS_KEY_TZ_OFFSET, settings->tz_offset);
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_ENABLED, (uint8_t)led_acclimation_is_enabled());
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_set_i64(handle, LED_NVS_KEY_ACCLIMATION_START, settings->acclimation.start_utc);
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_DURATION, settings->acclimation.duration);
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_START_PERCENT, settings->acclimation.start_percent);
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_commit(handle);
+    BO_TRY(nvs_commit(handle));
     ESP_LOGI(TAG, "Dimming settings updated.");
 
-_EXIT_CLOSE:
-    bo_nvs_close(handle);
-_EXIT_WITHOUT_CLOSE:
-    return rc;
+    return 0;
 }
 
 bool led_has_geo_location()
@@ -411,9 +354,6 @@ int led_set_geo_location(const struct geo_location* location)
         return -EINVAL;
     }
 
-    if (location->lat == NAN || location->lng == NAN) {
-        return -EINVAL;
-    }
     if (isnan(location->lat) || isnan(location->lng) || isinf(location->lat) || isinf(location->lng)) {
         return -EINVAL;
     }

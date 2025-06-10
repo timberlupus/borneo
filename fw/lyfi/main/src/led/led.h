@@ -99,7 +99,8 @@ struct led_user_settings {
 };
 
 struct led_status {
-    struct smf_ctx ctx; ///< SMF context
+    struct smf_ctx ctx; ///< SMF context, must be the first member
+
     led_color_t color; ///< Current hardware LED power percentage for each channel
     int64_t temporary_off_time; ///< Time point after temporary lighting state to turn off, this time point is when
                                 ///< fading out starts
@@ -115,6 +116,7 @@ struct led_status {
     struct led_scheduler sun_scheduler; ///< The scheduler of sun simulation for today
 
     struct led_user_settings settings;
+    SemaphoreHandle_t settings_lock;
 
     bool acclimation_activated;
 };
