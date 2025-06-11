@@ -29,6 +29,12 @@ class WotDevice implements IDisposable {
     return type.contains(capabilityType);
   }
 
+  bool hasAction(String actionName) => actions.containsKey(actionName);
+
+  bool hasProperty(String propertyName) => properties.containsKey(propertyName);
+
+  bool hasEvent(String eventName) => events.containsKey(eventName);
+
   Map<String, dynamic> toJson() => {
         '@context': 'device.borneoiot.com',
         'id': id,
