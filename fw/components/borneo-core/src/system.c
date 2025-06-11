@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
@@ -52,25 +51,25 @@ int bo_system_init()
 {
     BO_TRY(load_factory_settings());
 
-    // Make the device ID
+    // Make the device ID (EUI-64 from MAC)
     uint8_t mac[6];
     BO_TRY(esp_read_mac(mac, ESP_MAC_WIFI_STA));
 
-    uint64_t flash_id;
-    BO_TRY(esp_flash_read_unique_chip_id(NULL, &flash_id));
+    // EUI-64: insert 0xFFFE in the middle, flip U/L bit
+    _sysinfo.id[0] = mac[0] ^ 0x02; // flip U/L bit
+    _sysinfo.id[1] = mac[1];
+    _sysinfo.id[2] = mac[2];
+    _sysinfo.id[3] = 0xFF;
+    _sysinfo.id[4] = 0xFE;
+    _sysinfo.id[5] = mac[3];
+    _sysinfo.id[6] = mac[4];
+    _sysinfo.id[7] = mac[5];
 
-    mbedtls_sha256_context sha256_ctx;
-    mbedtls_sha256_init(&sha256_ctx);
-    mbedtls_sha256_starts(&sha256_ctx, 0);
-    mbedtls_sha256_update(&sha256_ctx, (const uint8_t*)(mac), 6);
-    mbedtls_sha256_update(&sha256_ctx, (const uint8_t*)(&flash_id), sizeof(flash_id));
-    mbedtls_sha256_finish(&sha256_ctx, _sysinfo.id);
-    mbedtls_sha256_free(&sha256_ctx);
-
-    for (size_t i = 0; i < BO_DEVICE_ID_LENGTH; ++i) {
+    for (size_t i = 0; i < 8; ++i) {
         _sysinfo.hex_id[2 * i] = to_hex_digit_upper(_sysinfo.id[i] >> 4);
         _sysinfo.hex_id[2 * i + 1] = to_hex_digit_upper(_sysinfo.id[i] & 0xf);
     }
+    _sysinfo.hex_id[16] = '\0';
 
     BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &_system_event_handler, NULL));
 

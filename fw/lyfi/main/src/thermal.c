@@ -197,20 +197,17 @@ _EXIT_WITHOUT_CLOSE:
 
 int load_user_settings()
 {
-    int rc;
     nvs_handle_t handle;
-    rc = bo_nvs_user_open(THERMAL_NVS_USER_NS, NVS_READWRITE, &handle);
-    if (rc) {
-        goto _EXIT_WITHOUT_CLOSE;
-    }
+    BO_TRY(bo_nvs_user_open(THERMAL_NVS_USER_NS, NVS_READWRITE, &handle));
+    BO_NVS_AUTO_CLOSE(handle);
 
-    rc = nvs_get_u8(handle, THERMAL_NVS_KEY_FAN_MODE, &_settings.fan_mode);
+    int rc = nvs_get_u8(handle, THERMAL_NVS_KEY_FAN_MODE, &_settings.fan_mode);
     if (rc == ESP_ERR_NVS_NOT_FOUND) {
         _settings.fan_mode = THERMAL_DEFAULT_SETTINGS.fan_mode;
         rc = 0;
     }
     if (rc) {
-        goto _EXIT_CLOSE;
+        return rc;
     }
 
     rc = nvs_get_u8(handle, THERMAL_NVS_KEY_FAN_MANUAL_POWER, &_settings.fan_manual_power);
@@ -219,12 +216,9 @@ int load_user_settings()
         rc = 0;
     }
     if (rc) {
-        goto _EXIT_CLOSE;
+        return rc;
     }
 
-_EXIT_CLOSE:
-    bo_nvs_close(handle);
-_EXIT_WITHOUT_CLOSE:
     return rc;
 }
 
