@@ -15,8 +15,8 @@ class LedSwitchTemporaryModeAction extends RoutineAction {
     final api = bound.api<ILyfiDeviceApi>();
     final state = await api.getState(bound.device);
     final isOn = await api.getOnOff(bound.device);
-    if (isOn && state == LedState.normal) {
-      await api.switchState(bound.device, LedState.temporary);
+    if (isOn && state == LyfiState.normal) {
+      await api.switchState(bound.device, LyfiState.temporary);
     }
   }
 
@@ -29,8 +29,8 @@ class LedSwitchTemporaryModeAction extends RoutineAction {
     final api = bound.api<ILyfiDeviceApi>();
     final state = await api.getState(bound.device);
     final isOn = await api.getOnOff(bound.device);
-    if (isOn && state == LedState.temporary) {
-      await api.switchState(bound.device, LedState.normal);
+    if (isOn && state == LyfiState.temporary) {
+      await api.switchState(bound.device, LyfiState.normal);
     }
   }
 

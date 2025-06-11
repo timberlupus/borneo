@@ -3,6 +3,9 @@
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/wot.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_kernel_abstractions/idriver.dart';
@@ -21,10 +24,23 @@ abstract class BaseLyfiDriver extends IDriver {
     final lyfiDeviecInfo = lyfiApi.getLyfiInfo(device);
 
     final generalStatus = await borneoApi.getGeneralDeviceStatus(device);
+    final lyfiStatus = await lyfiApi.getLyfiStatus(device);
 
     final wotDevice = WotDevice(id: device.id, title: borneoDeviceInfo.name, type: ["OnOffSwitch"]);
 
-    wotDevice.addProperty(WotOnOffProperty(value: generalStatus.power));
+    wotDevice.addProperty(
+      WotOnOffProperty(value: generalStatus.power, valueForwarder: (update) => borneoApi.setOnOff(device, update)),
+    );
+    wotDevice.addProperty(
+      WotLyfiStateProperty(
+          value: lyfiStatus.state.name,
+          valueForwarder: (update) => lyfiApi.switchMode(device, LyfiMode.fromString(update))),
+    );
+    wotDevice.addProperty(
+      WotLyfiModeProperty(
+          value: lyfiStatus.mode.name,
+          valueForwarder: (update) => lyfiApi.switchState(device, LyfiState.fromString(update))),
+    );
 
     if (generalStatus.temperature != null) {
       wotDevice.addProperty(WotOptionalIntegerProperty(
@@ -54,7 +70,11 @@ abstract class BaseLyfiDriver extends IDriver {
 
     final adapter = WotAdapter(wotDevice, deviceEvents: deviceEvents);
 
-    adapter.addPropertyEventSubscription<DevicePowerOnOffChangedEvent>("on", (e) => e.onOff);
+    adapter.addDevicePropertyEventSubscription<DevicePowerOnOffChangedEvent>("on", (e) => e.onOff);
+
+    adapter.addDevicePropertyEventSubscription<LyfiStateChangedEvent>("state", (e) => e.state.name);
+
+    adapter.addDevicePropertyEventSubscription<LyfiModeChangedEvent>("mode", (e) => e.mode.name);
 
     return adapter;
   }

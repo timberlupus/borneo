@@ -140,33 +140,33 @@ class HeroPanel extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Selector<LyfiViewModel, LedRunningMode>(
+            Selector<LyfiViewModel, LyfiMode>(
               selector: (context, vm) => vm.mode,
               builder: (context, mode, _) {
                 final vm = context.read<LyfiViewModel>();
-                return SegmentedButton<LedRunningMode>(
+                return SegmentedButton<LyfiMode>(
                   showSelectedIcon: false,
-                  selected: <LedRunningMode>{mode},
+                  selected: <LyfiMode>{mode},
                   segments: [
-                    ButtonSegment<LedRunningMode>(
-                      value: LedRunningMode.manual,
+                    ButtonSegment<LyfiMode>(
+                      value: LyfiMode.manual,
                       label: Text(context.translate('MANU')),
                       icon: Icon(Icons.bar_chart_outlined, size: 24),
                     ),
-                    ButtonSegment<LedRunningMode>(
-                      value: LedRunningMode.scheduled,
+                    ButtonSegment<LyfiMode>(
+                      value: LyfiMode.scheduled,
                       label: Text(context.translate('SCHED')),
                       icon: Icon(Icons.alarm_outlined, size: 24),
                     ),
-                    ButtonSegment<LedRunningMode>(
-                      value: LedRunningMode.sun,
+                    ButtonSegment<LyfiMode>(
+                      value: LyfiMode.sun,
                       label: Text(context.translate('SUN')),
                       icon: Icon(Icons.wb_sunny_outlined, size: 24),
                     ),
                   ],
                   onSelectionChanged:
                       vm.isOn && !vm.isBusy && !vm.isLocked
-                          ? (Set<LedRunningMode> newSelection) {
+                          ? (Set<LyfiMode> newSelection) {
                             if (mode != newSelection.single) {
                               vm.switchMode(newSelection.single);
                             }
@@ -195,7 +195,7 @@ class DimmingView extends StatelessWidget {
       children: [
         HeroPanel(),
         Expanded(
-          child: Selector<LyfiViewModel, ({bool isLocked, LedRunningMode mode})>(
+          child: Selector<LyfiViewModel, ({bool isLocked, LyfiMode mode})>(
             selector: (context, vm) => (isLocked: vm.isLocked, mode: vm.mode),
             builder: (context, vm, child) {
               return AnimatedSwitcher(
@@ -204,9 +204,9 @@ class DimmingView extends StatelessWidget {
                   return FadeTransition(opacity: animation, child: child);
                 },
                 child: switch (vm.mode) {
-                  LedRunningMode.manual => ManualEditorView(),
-                  LedRunningMode.scheduled => ScheduleEditorView(),
-                  LedRunningMode.sun => SunEditorView(),
+                  LyfiMode.manual => ManualEditorView(),
+                  LyfiMode.scheduled => ScheduleEditorView(),
+                  LyfiMode.sun => SunEditorView(),
                 },
               );
             },

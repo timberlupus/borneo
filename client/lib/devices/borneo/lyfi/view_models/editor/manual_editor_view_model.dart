@@ -3,7 +3,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 
 class ManualEditorViewModel extends BaseEditorViewModel {
   @override
-  bool get canEdit => parent.isOnline && parent.isOn && parent.mode == LedRunningMode.manual;
+  bool get canEdit => parent.isOnline && parent.isOn && parent.mode == LyfiMode.manual;
 
   bool get canChangeColor => canEdit;
 
@@ -12,8 +12,8 @@ class ManualEditorViewModel extends BaseEditorViewModel {
   @override
   Future<void> onInitialize() async {
     final lyfiStatus = await super.deviceApi.getLyfiStatus(parent.boundDevice!.device);
-    assert(lyfiStatus.state == LedState.dimming);
-    assert(lyfiStatus.mode == LedRunningMode.manual);
+    assert(lyfiStatus.state == LyfiState.dimming);
+    assert(lyfiStatus.mode == LyfiMode.manual);
     for (int i = 0; i < parent.lyfiDeviceInfo.channels.length; i++) {
       channels[i].value = lyfiStatus.manualColor[i];
     }

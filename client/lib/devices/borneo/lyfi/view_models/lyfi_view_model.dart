@@ -25,14 +25,14 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
   ILyfiDeviceApi get _deviceApi => super.borneoDeviceApi as ILyfiDeviceApi;
 
-  LedRunningMode _mode = LedRunningMode.manual;
+  LyfiMode _mode = LyfiMode.manual;
   bool _isLocked = true;
 
-  LedRunningMode get mode => _mode;
+  LyfiMode get mode => _mode;
   bool get isLocked => _isLocked;
 
-  LedState? _ledState;
-  LedState? get ledState => _ledState;
+  LyfiState? _ledState;
+  LyfiState? get ledState => _ledState;
 
   Duration _temporaryDuration = Duration.zero;
   Duration get temporaryDuration => _temporaryDuration;
@@ -46,8 +46,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       super.isOnline &&
       isOn &&
       isLocked &&
-      (_ledState == LedState.normal || _ledState == LedState.temporary);
-  bool get canTimedOn => !isBusy && (!isOn || _mode == LedRunningMode.scheduled);
+      (_ledState == LyfiState.normal || _ledState == LyfiState.temporary);
+  bool get canTimedOn => !isBusy && (!isOn || _mode == LyfiMode.scheduled);
 
   IEditor? currentEditor;
   final List<ScheduledInstant> scheduledInstants = [];
@@ -93,11 +93,11 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
     if (super.isOnline) {
       switch (mode) {
-        case LedRunningMode.scheduled:
+        case LyfiMode.scheduled:
           scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
           break;
 
-        case LedRunningMode.sun:
+        case LyfiMode.sun:
           sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
           break;
 
@@ -123,7 +123,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
     if (!_isLocked && super.isOnline) {
       try {
-        _deviceApi.switchState(boundDevice!.device, LedState.normal).then((_) {
+        _deviceApi.switchState(boundDevice!.device, LyfiState.normal).then((_) {
           _isLocked = true;
         });
       } catch (e, stackTrace) {
@@ -147,13 +147,13 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     await refreshStatus();
 
     switch (mode) {
-      case LedRunningMode.scheduled:
+      case LyfiMode.scheduled:
         if (scheduledInstants.isEmpty) {
           scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
         }
         break;
 
-      case LedRunningMode.sun:
+      case LyfiMode.sun:
         if (sunInstants.isEmpty) {
           sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
         }
@@ -178,8 +178,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
     _channels.clear();
 
-    _mode = LedRunningMode.manual;
-    _ledState = LedState.normal;
+    _mode = LyfiMode.manual;
+    _ledState = LyfiState.normal;
 
     _overallBrightness = 0.0;
     _fanPowerRatio = 0.0;
@@ -199,7 +199,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     await super.refreshStatus();
     await _fetchDeviceStatus();
 
-    if (_mode == LedRunningMode.sun) {
+    if (_mode == LyfiMode.sun) {
       final sunSchedule = await _deviceApi.getSunSchedule(boundDevice!.device);
       if (sunSchedule.length == sunInstants.length) {
         for (int i = 0; i < sunSchedule.length; i++) {
@@ -217,7 +217,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     _ledState = super.lyfiDeviceStatus?.state;
     _isLocked = super.lyfiDeviceStatus?.state.isLocked ?? true;
     _fanPowerRatio = super.lyfiDeviceStatus?.fanPower.toDouble() ?? 0;
-    _mode = super.lyfiDeviceStatus?.mode ?? LedRunningMode.manual;
+    _mode = super.lyfiDeviceStatus?.mode ?? LyfiMode.manual;
 
     _temporaryRemaining.value = lyfiDeviceStatus?.temporaryRemaining ?? Duration.zero;
 
@@ -248,21 +248,21 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   bool get canSwitchTemporaryState =>
       !isBusy &&
       super.isOn &&
-      (_mode == LedRunningMode.scheduled || _mode == LedRunningMode.sun) &&
-      (ledState == LedState.temporary || ledState == LedState.normal);
+      (_mode == LyfiMode.scheduled || _mode == LyfiMode.sun) &&
+      (ledState == LyfiState.temporary || ledState == LyfiState.normal);
 
   void switchTemporaryState() {
-    assert(_ledState == LedState.normal || _ledState == LedState.temporary);
+    assert(_ledState == LyfiState.normal || _ledState == LyfiState.temporary);
     super.enqueueUIJob(() async => await _switchTemporaryState());
   }
 
   Future<void> _switchTemporaryState() async {
     // Turn the temp mode on
-    if (_ledState == LedState.normal) {
-      _deviceApi.switchState(super.boundDevice!.device, LedState.temporary);
+    if (_ledState == LyfiState.normal) {
+      _deviceApi.switchState(super.boundDevice!.device, LyfiState.temporary);
     } else {
       // Restore running mode
-      _deviceApi.switchState(super.boundDevice!.device, LedState.normal);
+      _deviceApi.switchState(super.boundDevice!.device, LyfiState.normal);
     }
     await refreshStatus();
   }
@@ -293,7 +293,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       }
     }
 
-    final state = isLocked ? LedState.normal : LedState.dimming;
+    final state = isLocked ? LyfiState.normal : LyfiState.dimming;
     await _deviceApi.switchState(super.boundDevice!.device, state);
     _ledState = state;
 
@@ -305,16 +305,16 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
   }
 
-  void switchMode(LedRunningMode mode) {
+  void switchMode(LyfiMode mode) {
     super.enqueueUIJob(() async => await _switchMode(mode));
   }
 
-  Future<void> _switchMode(LedRunningMode mode) async {
+  Future<void> _switchMode(LyfiMode mode) async {
     if (isLocked) {
       return;
     }
 
-    if (mode == LedRunningMode.sun) {
+    if (mode == LyfiMode.sun) {
       if (borneoDeviceStatus?.timezone.isEmpty ?? true) {
         notifyAppError("Unable to switch to Sun Simulation mode, the device's timezone is not set.");
         return;
@@ -333,17 +333,17 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     await refreshStatus();
   }
 
-  Future<void> _toggleEditor(LedRunningMode mode) async {
+  Future<void> _toggleEditor(LyfiMode mode) async {
     switch (mode) {
-      case LedRunningMode.manual:
+      case LyfiMode.manual:
         currentEditor = ManualEditorViewModel(this);
         break;
 
-      case LedRunningMode.scheduled:
+      case LyfiMode.scheduled:
         currentEditor = ScheduleEditorViewModel(this);
         break;
 
-      case LedRunningMode.sun:
+      case LyfiMode.sun:
         currentEditor = SunEditorViewModel(this);
         break;
     }

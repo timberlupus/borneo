@@ -1,3 +1,4 @@
+import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_common/utils/float.dart';
 import 'package:cbor/cbor.dart';
 
@@ -45,21 +46,36 @@ class LyfiDeviceInfo {
   }
 }
 
-enum LedState {
+enum LyfiState {
   normal,
   dimming,
   temporary,
   preview;
 
   bool get isLocked => !(this == preview || this == dimming);
+
+  factory LyfiState.fromString(String item) => switch (item) {
+        "normal" => LyfiState.normal,
+        "dimming" => LyfiState.dimming,
+        "temporary" => LyfiState.temporary,
+        "preview" => LyfiState.preview,
+        _ => throw InvalidDataException(),
+      };
 }
 
-enum LedRunningMode {
+enum LyfiMode {
   manual,
   scheduled,
   sun;
 
   bool get isSchedulerEnabled => this == scheduled;
+
+  factory LyfiMode.fromString(String item) => switch (item) {
+        "manual" => LyfiMode.manual,
+        "scheduled" => LyfiMode.scheduled,
+        "sun" => LyfiMode.sun,
+        _ => throw InvalidDataException(),
+      };
 }
 
 enum LedCorrectionMethod {
@@ -159,8 +175,8 @@ class AcclimationSettings {
 }
 
 class LyfiDeviceStatus {
-  final LedState state;
-  final LedRunningMode mode;
+  final LyfiState state;
+  final LyfiMode mode;
   final bool unscheduled;
   final Duration temporaryRemaining;
   final int fanPower;
@@ -187,8 +203,8 @@ class LyfiDeviceStatus {
 
   factory LyfiDeviceStatus.fromMap(Map map) {
     return LyfiDeviceStatus(
-      state: LedState.values[map['state']],
-      mode: LedRunningMode.values[map['mode']],
+      state: LyfiState.values[map['state']],
+      mode: LyfiMode.values[map['mode']],
       unscheduled: map['unscheduled'],
       temporaryRemaining: Duration(seconds: map['tempRemain']),
       fanPower: map['fanPower'],

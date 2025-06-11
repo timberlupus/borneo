@@ -56,10 +56,10 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
 
   List<ScheduleEntryViewModel> get entries => _entries;
   Iterable<int> get instants => _entries.map((x) => x.instant.inSeconds);
-  bool get isPreviewMode => parent.ledState == LedState.preview;
+  bool get isPreviewMode => parent.ledState == LyfiState.preview;
 
   @override
-  bool get canEdit => parent.isOnline && parent.isOn && parent.mode == LedRunningMode.scheduled;
+  bool get canEdit => parent.isOnline && parent.isOn && parent.mode == LyfiMode.scheduled;
 
   bool get canChangeColor => canEdit && currentEntry != null;
 
@@ -226,9 +226,9 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
   void togglePreviewMode() {
     parent.enqueueJob(() async {
       if (isPreviewMode) {
-        _deviceApi.switchState(parent.boundDevice!.device, LedState.dimming);
+        _deviceApi.switchState(parent.boundDevice!.device, LyfiState.dimming);
       } else {
-        _deviceApi.switchState(parent.boundDevice!.device, LedState.preview);
+        _deviceApi.switchState(parent.boundDevice!.device, LyfiState.preview);
       }
       notifyListeners();
     });

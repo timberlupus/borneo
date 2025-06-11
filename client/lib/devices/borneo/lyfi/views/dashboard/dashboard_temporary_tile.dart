@@ -8,7 +8,7 @@ class DashboardTemporaryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<LyfiViewModel, ({LedState? state, bool canSwitch, Duration total, Duration remain})>(
+    return Selector<LyfiViewModel, ({LyfiState? state, bool canSwitch, Duration total, Duration remain})>(
       selector:
           (context, vm) => (
             state: vm.ledState,
@@ -18,7 +18,7 @@ class DashboardTemporaryTile extends StatelessWidget {
           ),
       builder: (context, props, _) {
         final theme = Theme.of(context);
-        final isActive = props.state == LedState.temporary;
+        final isActive = props.state == LyfiState.temporary;
         final remainSeconds = props.remain.inSeconds;
         String remainText = '';
         if (isActive && props.total.inSeconds > 0) {

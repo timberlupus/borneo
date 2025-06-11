@@ -6,11 +6,11 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   LyfiDeviceInfo getLyfiInfo(Device dev);
   Future<LyfiDeviceStatus> getLyfiStatus(Device dev);
 
-  Future<LedState> getState(Device dev);
-  Future<void> switchState(Device dev, LedState state);
+  Future<LyfiState> getState(Device dev);
+  Future<void> switchState(Device dev, LyfiState state);
 
-  Future<LedRunningMode> getMode(Device dev);
-  Future<void> switchMode(Device dev, LedRunningMode mode);
+  Future<LyfiMode> getMode(Device dev);
+  Future<void> switchMode(Device dev, LyfiMode mode);
 
   Future<List<ScheduledInstant>> getSchedule(Device dev);
   Future<void> setSchedule(Device dev, Iterable<ScheduledInstant> schedule);

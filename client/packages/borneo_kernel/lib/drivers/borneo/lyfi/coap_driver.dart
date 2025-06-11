@@ -195,27 +195,27 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   }
 
   @override
-  Future<LedState> getState(Device dev) async {
+  Future<LyfiState> getState(Device dev) async {
     final dd = dev.driverData! as LyfiCoapDriverData;
     final value = await dd.coap.getCbor<int>(LyfiPaths.state);
-    return LedState.values[value];
+    return LyfiState.values[value];
   }
 
   @override
-  Future<void> switchState(Device dev, LedState state) async {
+  Future<void> switchState(Device dev, LyfiState state) async {
     final dd = dev.driverData! as LyfiCoapDriverData;
     await dd.coap.putCbor(LyfiPaths.state, state.index);
   }
 
   @override
-  Future<LedRunningMode> getMode(Device dev) async {
+  Future<LyfiMode> getMode(Device dev) async {
     final dd = dev.driverData! as LyfiCoapDriverData;
     final value = await dd.coap.getCbor<int>(LyfiPaths.mode);
-    return LedRunningMode.values[value];
+    return LyfiMode.values[value];
   }
 
   @override
-  Future<void> switchMode(Device dev, LedRunningMode mode) async {
+  Future<void> switchMode(Device dev, LyfiMode mode) async {
     final dd = dev.driverData! as LyfiCoapDriverData;
     return await dd.coap.putCbor(LyfiPaths.mode, mode.index);
   }

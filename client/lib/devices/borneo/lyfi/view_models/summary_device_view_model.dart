@@ -7,8 +7,8 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 
 class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
-  LedState? ledState;
-  LedRunningMode? ledMode;
+  LyfiState? ledState;
+  LyfiMode? ledMode;
 
   late final StreamSubscription<LyfiModeChangedEvent> _modeChangedSub;
   late final StreamSubscription<LyfiStateChangedEvent> _stateChangedSub;

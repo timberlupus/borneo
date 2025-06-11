@@ -15,8 +15,10 @@ abstract class WotProperty<T> implements IDisposable {
   final String? description;
   final bool readOnly;
   final Map<String, dynamic>? schema;
-  T value;
+  T _lastValue;
   final StreamController<T> _valueStream = StreamController.broadcast();
+  final void Function(T)? valueForwarder;
+  final bool Function(T a, T b)? equals;
 
   WotProperty({
     required this.name,
@@ -27,8 +29,10 @@ abstract class WotProperty<T> implements IDisposable {
     this.description,
     this.readOnly = false,
     this.schema,
-    required this.value,
-  });
+    required T value,
+    this.valueForwarder,
+    this.equals,
+  }) : _lastValue = value;
 
   Stream<T> get onValueChanged {
     if (_isDisposed) {
@@ -41,8 +45,18 @@ abstract class WotProperty<T> implements IDisposable {
     if (_isDisposed) {
       throw ObjectDisposedException();
     }
-    if (!readOnly) {
-      value = newValue;
+    if (valueForwarder != null) {
+      valueForwarder!(newValue);
+    }
+    this.notifyOfExternalUpdate(newValue);
+  }
+
+  T? get value => _lastValue;
+
+  void notifyOfExternalUpdate(T newValue) {
+    final isEqual = equals != null ? equals!(newValue, _lastValue) : newValue == _lastValue;
+    if (newValue != null && !isEqual) {
+      _lastValue = newValue;
       _valueStream.add(newValue);
     }
   }
@@ -168,6 +182,21 @@ class WotOptionalStringProperty extends WotProperty<String?> {
   }) : super(atType: 'OptionalStringProperty', type: 'string?');
 }
 
+class WotEnumProperty extends WotProperty<String> {
+  final List<String> enumeration;
+
+  WotEnumProperty({
+    required super.name,
+    required super.title,
+    required super.atType,
+    required super.value,
+    required this.enumeration,
+    super.readOnly,
+    super.description,
+    super.valueForwarder,
+  }) : super(type: 'string', schema: null, unit: null);
+}
+
 class WotOnOffProperty extends WotProperty<bool> {
   WotOnOffProperty({
     required super.value,
@@ -175,5 +204,6 @@ class WotOnOffProperty extends WotProperty<bool> {
     super.unit,
     super.description,
     super.schema,
+    super.valueForwarder,
   }) : super(name: "on", title: "On/Off", atType: "OnOffProperty", type: "boolean");
 }
