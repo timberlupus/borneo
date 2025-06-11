@@ -34,12 +34,12 @@ abstract class BaseLyfiDriver extends IDriver {
     wotDevice.addProperty(
       WotLyfiStateProperty(
           value: lyfiStatus.state.name,
-          valueForwarder: (update) => lyfiApi.switchMode(device, LyfiMode.fromString(update))),
+          valueForwarder: (update) => lyfiApi.switchState(device, LyfiState.fromString(update))),
     );
     wotDevice.addProperty(
       WotLyfiModeProperty(
           value: lyfiStatus.mode.name,
-          valueForwarder: (update) => lyfiApi.switchState(device, LyfiState.fromString(update))),
+          valueForwarder: (update) => lyfiApi.switchMode(device, LyfiMode.fromString(update))),
     );
 
     if (generalStatus.temperature != null) {
