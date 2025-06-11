@@ -33,8 +33,7 @@ class BorneoCoapClient extends CoapClient {
       if (offlineDetectionEnabled && deviceEvents != null) {
         // Emit an event to notify that the device is offline
         if (logger != null) {
-          logger!.w(
-              'Device ${device.id} is offline. Emitting DeviceOfflineEvent.');
+          logger!.w('Device ${device.id} is offline. Emitting DeviceOfflineEvent.');
         }
         deviceEvents!.fire(DeviceOfflineEvent(device));
       }

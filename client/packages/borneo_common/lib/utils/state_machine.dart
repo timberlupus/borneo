@@ -4,13 +4,11 @@ class StateMachine<T> {
 
   StateMachine(this._currentState);
 
-  void addState(T state,
-      {Future Function()? onEnter, Future Function()? onExit}) {
+  void addState(T state, {Future Function()? onEnter, Future Function()? onExit}) {
     _states[state] = State(state, onEnter: onEnter, onExit: onExit);
   }
 
-  void addTransition(T from, String event, T to, Future Function() action,
-      {bool Function()? guard}) {
+  void addTransition(T from, String event, T to, Future Function() action, {bool Function()? guard}) {
     if (_states[from] != null) {
       _states[from]!.transitions[event] = Transition(to, action, guard);
     }
@@ -22,8 +20,7 @@ class StateMachine<T> {
       final transition = currentState.transitions[event];
       if (transition != null) {
         // check guard
-        if (transition.guard == null ||
-            (transition.guard != null && transition.guard!())) {
+        if (transition.guard == null || (transition.guard != null && transition.guard!())) {
           if (currentState.onExit != null) {
             await currentState.onExit!();
           }
@@ -35,14 +32,11 @@ class StateMachine<T> {
 
           _currentState = transition.to;
         } else {
-          throw ArgumentError(
-              'Guard condition failed for event $event on state $_currentState',
-              'event');
+          throw ArgumentError('Guard condition failed for event $event on state $_currentState', 'event');
         }
       }
     } else {
-      throw ArgumentError(
-          'No transition for $_currentState on event $event', 'event');
+      throw ArgumentError('No transition for $_currentState on event $event', 'event');
     }
   }
 

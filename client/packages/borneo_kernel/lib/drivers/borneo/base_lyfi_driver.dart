@@ -1,3 +1,5 @@
+// dart format width=120
+
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
@@ -11,8 +13,7 @@ import 'package:cancellation_token/cancellation_token.dart';
 
 abstract class BaseLyfiDriver extends IDriver {
   @override
-  Future<WotAdapter> createWotAdapter(
-      Device device, DeviceEventBus deviceEvents,
+  Future<WotAdapter> createWotAdapter(Device device, DeviceEventBus deviceEvents,
       {CancellationToken? cancelToken}) async {
     final borneoApi = this as IBorneoDeviceApi;
     final lyfiApi = this as ILyfiDeviceApi;
@@ -21,18 +22,13 @@ abstract class BaseLyfiDriver extends IDriver {
 
     final generalStatus = await borneoApi.getGeneralDeviceStatus(device);
 
-    final wotDevice = WotDevice(
-        id: device.id, title: borneoDeviceInfo.name, type: ["OnOffSwitch"]);
+    final wotDevice = WotDevice(id: device.id, title: borneoDeviceInfo.name, type: ["OnOffSwitch"]);
 
     wotDevice.addProperty(WotOnOffProperty(value: generalStatus.power));
 
     if (generalStatus.temperature != null) {
       wotDevice.addProperty(WotOptionalIntegerProperty(
-          name: 'temperature',
-          title: 'Temperature',
-          value: generalStatus.temperature,
-          unit: '℃',
-          readOnly: true));
+          name: 'temperature', title: 'Temperature', value: generalStatus.temperature, unit: '℃', readOnly: true));
     }
 
     wotDevice.addProperty(WotBooleanProperty(
@@ -58,8 +54,7 @@ abstract class BaseLyfiDriver extends IDriver {
 
     final adapter = WotAdapter(wotDevice, deviceEvents: deviceEvents);
 
-    adapter.addPropertyEventSubscription<DevicePowerOnOffChangedEvent>(
-        "on", (e) => e.onOff);
+    adapter.addPropertyEventSubscription<DevicePowerOnOffChangedEvent>("on", (e) => e.onOff);
 
     return adapter;
   }

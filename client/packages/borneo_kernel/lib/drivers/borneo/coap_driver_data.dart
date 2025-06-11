@@ -16,14 +16,12 @@ abstract class BorneoCoapDriverData extends DriverData {
 
   bool get isDisposed => _disposed;
 
-  BorneoCoapDriverData(super.device, super.globalEvents, this.coap,
-      this.probeCoap, this._generalDeviceInfo);
+  BorneoCoapDriverData(super.device, super.globalEvents, this.coap, this.probeCoap, this._generalDeviceInfo);
 
   void load() {
-    _coapPowerOnOffSub = coap.observeCborNon<bool>(BorneoPaths.power).listen(
-        (onOff) => super
-            .deviceEvents
-            .fire(DevicePowerOnOffChangedEvent(device, onOff)));
+    _coapPowerOnOffSub = coap
+        .observeCborNon<bool>(BorneoPaths.power)
+        .listen((onOff) => super.deviceEvents.fire(DevicePowerOnOffChangedEvent(device, onOff)));
   }
 
   GeneralBorneoDeviceInfo get generalDeviceInfo {

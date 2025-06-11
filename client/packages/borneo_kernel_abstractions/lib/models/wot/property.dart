@@ -175,9 +175,5 @@ class WotOnOffProperty extends WotProperty<bool> {
     super.unit,
     super.description,
     super.schema,
-  }) : super(
-            name: "on",
-            title: "On/Off",
-            atType: "OnOffProperty",
-            type: "boolean");
+  }) : super(name: "on", title: "On/Off", atType: "OnOffProperty", type: "boolean");
 }

@@ -165,8 +165,7 @@ class GeneralBorneoDeviceStatus {
   factory GeneralBorneoDeviceStatus.fromMap(Map map) {
     return GeneralBorneoDeviceStatus(
       power: map['power'],
-      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] * 1000,
-          isUtc: true),
+      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] * 1000, isUtc: true),
       bootDuration: Duration(milliseconds: map['bootDuration']),
       timezone: map['timezone'] ?? '',
       wifiStatus: map['wifiStatus'],
@@ -175,14 +174,11 @@ class GeneralBorneoDeviceStatus {
       error: map['error'],
       shutdownReason: map['shutdownReason'],
       shutdownTimestamp: map['shutdownTimestamp'] > 0
-          ? DateTime.fromMillisecondsSinceEpoch(map['shutdownTimestamp'] * 1000,
-              isUtc: true)
+          ? DateTime.fromMillisecondsSinceEpoch(map['shutdownTimestamp'] * 1000, isUtc: true)
           : null,
       temperature: map['temperature'],
-      powerVoltage:
-          map['powerVoltage'] != null ? map['powerVoltage'] / 1000.0 : null,
-      powerCurrent:
-          map['powerCurrent'] != null ? map['powerCurrent'] / 1000.0 : null,
+      powerVoltage: map['powerVoltage'] != null ? map['powerVoltage'] / 1000.0 : null,
+      powerCurrent: map['powerCurrent'] != null ? map['powerCurrent'] / 1000.0 : null,
     );
   }
 }
@@ -271,9 +267,8 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   @override
   Future setOnOff(Device dev, bool on) async {
     final dd = dev.driverData! as BorneoCoapDriverData;
-    final response = await dd.coap.putBytes(BorneoPaths.power,
-        payload: simple_cbor.cbor.encode(on),
-        accept: CoapMediaType.applicationCbor);
+    final response = await dd.coap
+        .putBytes(BorneoPaths.power, payload: simple_cbor.cbor.encode(on), accept: CoapMediaType.applicationCbor);
     if (!response.isSuccess) {
       throw DeviceError("Failed to post to `${response.location}`", dev);
     }
@@ -294,12 +289,9 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   }
 
   @override
-  Future<BorneoRtcLocalNtpResponse> getRtcLocal(
-      Device dev, DateTime timestamp) async {
+  Future<BorneoRtcLocalNtpResponse> getRtcLocal(Device dev, DateTime timestamp) async {
     final dd = dev.driverData! as BorneoCoapDriverData;
-    final timestampUS = timestamp.isUtc
-        ? timestamp.microsecondsSinceEpoch
-        : timestamp.toUtc().microsecondsSinceEpoch;
+    final timestampUS = timestamp.isUtc ? timestamp.microsecondsSinceEpoch : timestamp.toUtc().microsecondsSinceEpoch;
     final request = CoapRequest.get(
       BorneoPaths.rtcLocal,
       confirmable: true,
@@ -346,8 +338,7 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   Future<void> factoryReset(Device dev) async {
     final dd = dev.driverData! as BorneoCoapDriverData;
     final response = await dd.coap.postBytes(BorneoPaths.factoryReset,
-        payload: simple_cbor.cbor.encode(null),
-        accept: CoapMediaType.applicationCbor);
+        payload: simple_cbor.cbor.encode(null), accept: CoapMediaType.applicationCbor);
     if (!response.isSuccess) {
       throw DeviceError("Failed to put `${response.location}`", dev);
     }
@@ -393,8 +384,7 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   Future<void> setTimeZone(Device dev, String timezone) async {
     final dd = dev.driverData! as BorneoCoapDriverData;
     final response = await dd.coap.putBytes(BorneoPaths.timezone,
-        payload: simple_cbor.cbor.encode(timezone),
-        accept: CoapMediaType.applicationCbor);
+        payload: simple_cbor.cbor.encode(timezone), accept: CoapMediaType.applicationCbor);
     if (!response.isSuccess) {
       throw DeviceError("Failed to put to `${response.location}`", dev);
     }

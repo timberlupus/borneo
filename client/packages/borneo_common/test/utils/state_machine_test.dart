@@ -9,8 +9,7 @@ void main() {
       fsm = StateMachine<String>('idle');
 
       fsm!.addState('idle',
-          onEnter: () async => print('Entering idle state...'),
-          onExit: () async => print('Exiting idle state...'));
+          onEnter: () async => print('Entering idle state...'), onExit: () async => print('Exiting idle state...'));
 
       fsm!.addState('working',
           onEnter: () async => print('Entering working state...'),

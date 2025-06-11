@@ -12,6 +12,5 @@ abstract class Device {
 
   T data<T extends DriverData>() => driverData! as T;
 
-  Future<void> setDriverData(dynamic driverData,
-      {CancellationToken? cancelToken});
+  Future<void> setDriverData(dynamic driverData, {CancellationToken? cancelToken});
 }

@@ -14,22 +14,20 @@ class LyfiCoapDriverData extends BorneoCoapDriverData {
   StreamSubscription? _modeChangedSub;
   StreamSubscription? _stateChangedSub;
 
-  LyfiCoapDriverData(super.device, super.globalEvents, super.coap,
-      super.probeCoap, super._generalDeviceInfo, this._lyfiDeviceInfo);
+  LyfiCoapDriverData(
+      super.device, super.globalEvents, super.coap, super.probeCoap, super._generalDeviceInfo, this._lyfiDeviceInfo);
 
   @override
   void load() {
     super.load();
 
-    _modeChangedSub = coap.observeCborNon<int>(LyfiPaths.mode).listen((mode) =>
-        super
-            .deviceEvents
-            .fire(LyfiModeChangedEvent(device, LedRunningMode.values[mode])));
+    _modeChangedSub = coap
+        .observeCborNon<int>(LyfiPaths.mode)
+        .listen((mode) => super.deviceEvents.fire(LyfiModeChangedEvent(device, LedRunningMode.values[mode])));
 
-    _stateChangedSub = coap.observeCborNon<int>(LyfiPaths.state).listen(
-        (state) => super
-            .deviceEvents
-            .fire(LyfiStateChangedEvent(device, LedState.values[state])));
+    _stateChangedSub = coap
+        .observeCborNon<int>(LyfiPaths.state)
+        .listen((state) => super.deviceEvents.fire(LyfiStateChangedEvent(device, LedState.values[state])));
   }
 
   LyfiDeviceInfo get lyfiDeviceInfo {

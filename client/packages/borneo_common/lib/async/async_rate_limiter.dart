@@ -32,8 +32,7 @@ class AsyncRateLimiter<T> {
     _isExecuting = true;
     while (_pendingValue != null && !_cancel.isCancelled) {
       final now = DateTime.now();
-      if (_lastExecutionTime == null ||
-          now.difference(_lastExecutionTime!) >= interval) {
+      if (_lastExecutionTime == null || now.difference(_lastExecutionTime!) >= interval) {
         _lastExecutionTime = now;
         final valueToExecute = _pendingValue;
         _pendingValue = null; // Clear pending value before executing

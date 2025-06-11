@@ -21,8 +21,7 @@ class WotDevice implements IDisposable {
     this.type = const [],
   });
 
-  void addProperty(WotProperty property) =>
-      properties[property.name] = property;
+  void addProperty(WotProperty property) => properties[property.name] = property;
   void addEvent(WotEvent event) => events[event.name] = event;
   void addAction(WotAction action) => actions[action.name] = action;
 
@@ -36,9 +35,7 @@ class WotDevice implements IDisposable {
         'title': title,
         if (description != null) 'description': description,
         '@type': type,
-        'properties': {
-          for (var prop in properties.values) prop.name: prop.toJson()
-        },
+        'properties': {for (var prop in properties.values) prop.name: prop.toJson()},
         'events': {for (var evt in events.values) evt.name: evt.toJson()},
         'actions': {for (var act in actions.values) act.name: act.toJson()},
       };

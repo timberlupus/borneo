@@ -20,10 +20,8 @@ class WotAdapter implements IDisposable {
     subscriptions.add(deviceEvents.on<T>().listen(notifier));
   }
 
-  void addPropertyEventSubscription<TEvent>(
-      String property, dynamic Function(TEvent) selector) {
-    addSubscription<TEvent>(
-        (e) => device.properties[property]!.setValue(selector(e)));
+  void addPropertyEventSubscription<TEvent>(String property, dynamic Function(TEvent) selector) {
+    addSubscription<TEvent>((e) => device.properties[property]!.setValue(selector(e)));
   }
 
   @override

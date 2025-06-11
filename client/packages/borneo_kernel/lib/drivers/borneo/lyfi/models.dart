@@ -87,8 +87,7 @@ class GeoLocation {
       return false;
     }
     const double tolerance = 0.00001;
-    return (lat - other.lat).abs() < tolerance &&
-        (lng - other.lng).abs() < tolerance;
+    return (lat - other.lat).abs() < tolerance && (lng - other.lng).abs() < tolerance;
   }
 
   @override
@@ -130,9 +129,7 @@ class AcclimationSettings {
   factory AcclimationSettings.fromMap(dynamic map) {
     return AcclimationSettings(
       enabled: map["enabled"],
-      startTimestamp: DateTime.fromMillisecondsSinceEpoch(
-          map['startTimestamp'] * 1000,
-          isUtc: true),
+      startTimestamp: DateTime.fromMillisecondsSinceEpoch(map['startTimestamp'] * 1000, isUtc: true),
       days: map["days"],
       startPercent: map["startPercent"],
     );
@@ -141,8 +138,7 @@ class AcclimationSettings {
   CborMap toCbor() {
     return CborMap({
       CborString("enabled"): CborBool(enabled),
-      CborString("startTimestamp"):
-          CborValue((startTimestamp.millisecondsSinceEpoch / 1000.0).round()),
+      CborString("startTimestamp"): CborValue((startTimestamp.millisecondsSinceEpoch / 1000.0).round()),
       CborString("startPercent"): CborSmallInt(startPercent),
       CborString("days"): CborSmallInt(days),
     });
@@ -159,11 +155,7 @@ class AcclimationSettings {
           days == other.days;
 
   @override
-  int get hashCode =>
-      enabled.hashCode ^
-      startTimestamp.hashCode ^
-      startPercent.hashCode ^
-      days.hashCode;
+  int get hashCode => enabled.hashCode ^ startTimestamp.hashCode ^ startPercent.hashCode ^ days.hashCode;
 }
 
 class LyfiDeviceStatus {
@@ -178,10 +170,7 @@ class LyfiDeviceStatus {
   final bool acclimationEnabled;
   final bool acclimationActivated;
 
-  double get brightness =>
-      currentColor.fold(0, (p, v) => p + v).toDouble() *
-      100.0 /
-      (currentColor.length * 100.0);
+  double get brightness => currentColor.fold(0, (p, v) => p + v).toDouble() * 100.0 / (currentColor.length * 100.0);
 
   const LyfiDeviceStatus({
     required this.state,
@@ -254,8 +243,7 @@ class SunCurveItem {
       return false;
     }
     const double tolerance = 0.00001;
-    return instant == other.instant &&
-        (brightness - other.brightness).abs() < tolerance;
+    return instant == other.instant && (brightness - other.brightness).abs() < tolerance;
   }
 
   @override

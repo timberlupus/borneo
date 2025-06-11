@@ -26,16 +26,14 @@ abstract class IKernel implements IDisposable {
     CancellationToken? cancelToken,
   });
 
-  Future<void> bind(Device device, String driverID,
-      {Duration? timeout, CancellationToken? cancelToken});
+  Future<void> bind(Device device, String driverID, {Duration? timeout, CancellationToken? cancelToken});
 
   Future<void> unbind(String deviceID, {CancellationToken? cancelToken});
   Future<void> unbindAll({CancellationToken? cancelToken});
 
   bool get isScanning;
 
-  Future<void> startDevicesScanning(
-      {Duration? timeout, CancellationToken? cancelToken});
+  Future<void> startDevicesScanning({Duration? timeout, CancellationToken? cancelToken});
   Future<void> stopDevicesScanning();
 
   void registerDevice(BoundDeviceDescriptor device);

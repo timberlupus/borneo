@@ -29,14 +29,12 @@ class LyfiPaths {
   static final Uri color = Uri(path: '/borneo/lyfi/color');
   static final Uri schedule = Uri(path: '/borneo/lyfi/schedule');
   static final Uri mode = Uri(path: '/borneo/lyfi/mode');
-  static final Uri correctionMethod =
-      Uri(path: '/borneo/lyfi/correction-method');
+  static final Uri correctionMethod = Uri(path: '/borneo/lyfi/correction-method');
   static final Uri geoLocation = Uri(path: '/borneo/lyfi/geo-location');
   static final Uri tzEnabled = Uri(path: '/borneo/lyfi/tz/enabled');
   static final Uri tzOffset = Uri(path: '/borneo/lyfi/tz/offset');
   static final Uri acclimation = Uri(path: '/borneo/lyfi/acclimation');
-  static final Uri temporaryDuration =
-      Uri(path: '/borneo/lyfi/temporary-duration');
+  static final Uri temporaryDuration = Uri(path: '/borneo/lyfi/temporary-duration');
 
   static final Uri sunSchedule = Uri(path: '/borneo/lyfi/sun/schedule');
   static final Uri sunCurve = Uri(path: '/borneo/lyfi/sun/curve');
@@ -44,17 +42,14 @@ class LyfiPaths {
   static final Uri keepTemp = Uri(path: '/borneo/lyfi/thermal/keep-temp');
 }
 
-class BorneoLyfiCoapDriver extends BaseLyfiDriver
-    with BorneoDeviceCoapApi
-    implements IDriver, ILyfiDeviceApi {
+class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi implements IDriver, ILyfiDeviceApi {
   static const String lyfiCompatibleString = 'bst,borneo-lyfi';
   final Logger? logger;
 
   BorneoLyfiCoapDriver({this.logger});
 
   @override
-  Future<bool> probe(Device dev, GlobalDevicesEventBus globalBus,
-      {CancellationToken? cancelToken}) async {
+  Future<bool> probe(Device dev, GlobalDevicesEventBus globalBus, {CancellationToken? cancelToken}) async {
     final probeCoapClient = BorneoCoapClient(
       dev.address,
       config: BorneoProbeCoapConfig.coapConfig,
@@ -66,8 +61,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver
       // Verify compatible string
       final compatible = await _getCompatible(probeCoapClient);
       if (compatible != lyfiCompatibleString) {
-        throw UncompatibleDeviceError(
-            "Uncompatible device: `$compatible`", dev);
+        throw UncompatibleDeviceError("Uncompatible device: `$compatible`", dev);
       }
 
       // Verify firmware version
@@ -89,14 +83,12 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver
         offlineDetectionEnabled: true,
       );
       final lyfiInfo = await _getLyfiInfo(coapClient);
-      final driverData = LyfiCoapDriverData(dev, globalBus, coapClient,
-          probeCoapClient, generalDeviceInfo, lyfiInfo);
+      final driverData = LyfiCoapDriverData(dev, globalBus, coapClient, probeCoapClient, generalDeviceInfo, lyfiInfo);
       driverData.load();
       await dev.setDriverData(driverData, cancelToken: cancelToken);
       succeed = true;
     } on CoapRequestTimeoutException catch (e, stackTrace) {
-      logger?.w("Failed to probe device($dev): $e",
-          error: e, stackTrace: stackTrace);
+      logger?.w("Failed to probe device($dev): $e", error: e, stackTrace: stackTrace);
       succeed = false;
     } finally {
       if (!succeed) {
@@ -153,22 +145,16 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver
 
   static SupportedDeviceDescriptor? matches(DiscoveredDevice discovered) {
     if (discovered is MdnsDiscoveredDevice) {
-      final compatible = utf8.decode(discovered.txt?['compatible'] ?? [],
-          allowMalformed: true);
+      final compatible = utf8.decode(discovered.txt?['compatible'] ?? [], allowMalformed: true);
       if (compatible == lyfiCompatibleString) {
         final matched = SupportedDeviceDescriptor(
           driverDescriptor: borneoLyfiDriverDescriptor,
-          address:
-              Uri(scheme: 'coap', host: discovered.host, port: discovered.port),
-          name:
-              utf8.decode(discovered.txt?['name'] ?? [], allowMalformed: true),
+          address: Uri(scheme: 'coap', host: discovered.host, port: discovered.port),
+          name: utf8.decode(discovered.txt?['name'] ?? [], allowMalformed: true),
           compatible: compatible,
-          model: utf8.decode(discovered.txt?['model_name'] ?? [],
-              allowMalformed: true),
-          fingerprint:
-              utf8.decode(discovered.txt?['serno'] ?? [], allowMalformed: true),
-          manuf: utf8.decode(discovered.txt?['manuf_name'] ?? [],
-              allowMalformed: true),
+          model: utf8.decode(discovered.txt?['model_name'] ?? [], allowMalformed: true),
+          fingerprint: utf8.decode(discovered.txt?['serno'] ?? [], allowMalformed: true),
+          manuf: utf8.decode(discovered.txt?['manuf_name'] ?? [], allowMalformed: true),
         );
         return matched;
       }
@@ -242,8 +228,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver
   }
 
   @override
-  Future<void> setSchedule(
-      Device dev, Iterable<ScheduledInstant> schedule) async {
+  Future<void> setSchedule(Device dev, Iterable<ScheduledInstant> schedule) async {
     final dd = dev.driverData! as LyfiCoapDriverData;
     final payload = schedule.map((x) => x.toPayload());
     return await dd.coap.putCbor(LyfiPaths.schedule, payload);
@@ -257,11 +242,9 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver
   }
 
   @override
-  Future<void> setCorrectionMethod(
-      Device dev, LedCorrectionMethod correctionMethod) async {
+  Future<void> setCorrectionMethod(Device dev, LedCorrectionMethod correctionMethod) async {
     final dd = dev.driverData! as LyfiCoapDriverData;
-    return await dd.coap
-        .putCbor(LyfiPaths.correctionMethod, correctionMethod.index);
+    return await dd.coap.putCbor(LyfiPaths.correctionMethod, correctionMethod.index);
   }
 
   @override
