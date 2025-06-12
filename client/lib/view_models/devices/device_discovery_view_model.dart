@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:borneo_app/models/devices/device_entity.dart';
 import 'package:borneo_app/models/devices/device_group_entity.dart';
+import 'package:borneo_app/services/devices/device_module_registry.dart';
 import 'package:borneo_app/services/group_manager.dart';
 import 'package:borneo_app/view_models/abstract_screen_view_model.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
@@ -16,10 +17,12 @@ import 'package:borneo_app/services/device_manager.dart';
 
 class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   // TODO move this to device manager
+  bool _disposed = false;
   final Logger _logger;
   final _provisioner = Provisioner.espTouch();
   final GroupManager _groupManager;
   final DeviceManager _deviceManager;
+  final IDeviceModuleRegistry deviceMdoules;
   bool get _isDiscovering => _deviceManager.isDiscoverying;
 
   late final StreamSubscription<NewDeviceEntityAddedEvent> _deviceAddedEventSub;
@@ -73,7 +76,8 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   DeviceDiscoveryViewModel(
     this._logger,
     this._groupManager,
-    this._deviceManager, {
+    this._deviceManager,
+    this.deviceMdoules, {
     required super.globalEventBus,
     super.logger,
   }) {
@@ -95,20 +99,21 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
 
   @override
   void dispose() {
-    if (!super.isDisposed) {
+    if (!_disposed) {
       if (_isDiscovering) {
         stopDiscovery().then((_) {
           _deviceAddedEventSub.cancel();
           _newDeviceFoundEventSub.cancel();
           _discoveredDevices.dispose();
-          super.dispose();
         });
       }
+      super.dispose();
+      _disposed = true;
     }
   }
 
   void toggleSmartConfigSwitch(bool? value) async {
-    isBusy = true;
+    super.isBusy = true;
     notifyListeners();
     try {
       _isSmartConfigEnabled = value ?? false;
@@ -121,7 +126,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     } catch (e, stackTrace) {
       notifyAppError("$e", error: e, stackTrace: stackTrace);
     } finally {
-      isBusy = false;
+      super.isBusy = false;
       notifyListeners();
     }
   }
@@ -140,16 +145,16 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   }
 
   Future<void> startDiscovery() async {
-    if (!(!isSmartConfigEnabled || isFormValid) || isDiscovering || super.isBusy) {
-      return;
-    }
+    assert(!isDiscovering);
+    assert(!super.isBusy);
+    assert(isSmartConfigEnabled ? isFormValid : true);
 
     _newDeviceCount = 0;
     _discoveredCount = 0;
     _discoveredDevices.value = [];
-    notifyListeners();
 
     try {
+      super.isBusy = true;
       await _deviceManager.startDiscovery();
 
       if (isSmartConfigEnabled) {
@@ -161,10 +166,12 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
           ),
         );
       }
+      notifyListeners();
     } catch (e, stackTrace) {
       super.notifyAppError('Error occurred while discovering devices: $e', error: e, stackTrace: stackTrace);
       _logger.e('Failed to discovering devices', error: e, stackTrace: stackTrace);
     } finally {
+      super.isBusy = false;
       notifyListeners();
     }
   }
@@ -174,6 +181,8 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
       return;
     }
 
+    super.isBusy = true;
+    notifyListeners();
     try {
       if (isSmartConfigEnabled) {
         _provisioner.stop();
@@ -182,6 +191,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     } catch (e, stackTrace) {
       super.notifyAppError('Error occurred while stopping discovery: $e', error: e, stackTrace: stackTrace);
     } finally {
+      super.isBusy = false;
       notifyListeners();
     }
   }

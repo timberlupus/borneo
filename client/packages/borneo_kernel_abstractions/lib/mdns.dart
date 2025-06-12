@@ -5,7 +5,7 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 
 abstract class IMdnsDiscovery extends IDisposable {
-  Future<void> stop();
+  Future<void> stop({CancellationToken? cancelToken});
   String get serviceType;
 }
 
@@ -25,7 +25,7 @@ final class NullMdnsDiscovery implements IMdnsDiscovery {
   String get serviceType => _serviceType;
 
   @override
-  Future<void> stop() async {}
+  Future<void> stop({CancellationToken? cancelToken}) async {}
 }
 
 final class NullMdnsProvider implements IMdnsProvider {

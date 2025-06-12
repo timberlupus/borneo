@@ -1,4 +1,5 @@
 import 'package:borneo_app/models/devices/device_entity.dart';
+import 'package:borneo_app/services/devices/device_module_registry.dart';
 import 'package:borneo_app/services/group_manager.dart';
 import 'package:borneo_app/services/i_app_notification_service.dart';
 import 'package:borneo_app/views/devices/device_group_selection_sheet.dart';
@@ -18,16 +19,19 @@ class StartStopButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DeviceDiscoveryViewModel>(
-      builder: (context, vm, child) {
+    return Selector<DeviceDiscoveryViewModel, (bool, bool, bool, bool)>(
+      selector: (context, vm) => (vm.isBusy, vm.isSmartConfigEnabled, vm.isFormValid, vm.isDiscovering),
+      builder: (context, tuple, child) {
+        final (isBusy, isSmartConfigEnabled, isFormValid, isDiscovering) = tuple;
+        final vm = context.read<DeviceDiscoveryViewModel>();
         return ElevatedButton(
-          onPressed: (!vm.isBusy && (!vm.isSmartConfigEnabled || vm.isFormValid)) ? vm.startStopDiscovery : null,
+          onPressed: (!isBusy && (!isSmartConfigEnabled || isFormValid)) ? vm.startStopDiscovery : null,
           child:
-              vm.isDiscovering
+              isDiscovering
                   ? Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (vm.isDiscovering)
+                      if (isDiscovering)
                         SizedBox(
                           width: 16,
                           height: 16,
@@ -36,10 +40,10 @@ class StartStopButton extends StatelessWidget {
                           ),
                         ),
                       SizedBox(width: 16),
-                      Text('Stop'),
+                      Text(context.translate('Stop')),
                     ],
                   )
-                  : Text('Start'),
+                  : Text(context.translate('Start')),
         );
       },
     );
@@ -189,7 +193,6 @@ class NewDeviceAddedSnackBarListener extends StatelessWidget {
               listen: false,
             ).showSuccess(context.translate('A new device has been added.'), body: lastestAdded.name);
 
-            // 在 toast 关闭后清除状态
             /*
             Future.delayed(const Duration(seconds: 3), () {
               if (!vm.isDisposed) {
@@ -213,6 +216,7 @@ class DeviceDiscoveryScreen extends StatelessWidget {
     context.read<Logger>(),
     context.read<GroupManager>(),
     context.read<DeviceManager>(),
+    context.read<IDeviceModuleRegistry>(),
     globalEventBus: context.read<EventBus>(),
   );
 
@@ -227,11 +231,22 @@ class DeviceDiscoveryScreen extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Scaffold(body: Center(child: CircularProgressIndicator()));
               } else if (snapshot.hasError) {
-                return Scaffold(body: Center(child: Text('Error: ${snapshot.error}')));
+                return Scaffold(body: Center(child: Text('Error: ︀{snapshot.error}')));
               } else {
-                return Scaffold(
-                  appBar: AppBar(title: Text('Add new device'), backgroundColor: Theme.of(context).colorScheme.surface),
-                  body: buildBody(context),
+                return Selector<DeviceDiscoveryViewModel, bool>(
+                  selector: (_, vm) => vm.isBusy,
+                  builder:
+                      (context, isBusy, _) => Scaffold(
+                        appBar: AppBar(
+                          title: Text('Add new device'),
+                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          leading: IconButton(
+                            icon: Icon(Icons.arrow_back),
+                            onPressed: isBusy ? null : () => Navigator.of(context).maybePop(),
+                          ),
+                        ),
+                        body: buildBody(context, isBusy),
+                      ),
                 );
               }
             },
@@ -239,11 +254,10 @@ class DeviceDiscoveryScreen extends StatelessWidget {
     );
   }
 
-  Widget buildBody(BuildContext context) {
+  Widget buildBody(BuildContext context, bool isBusy) {
     final vm = context.read<DeviceDiscoveryViewModel>();
-    //final screenSize = MediaQuery.of(context).size;
     return PopScope(
-      canPop: true,
+      canPop: !isBusy,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) {
           return;
@@ -304,7 +318,8 @@ class DeviceDiscoveryScreen extends StatelessWidget {
                               separatorBuilder: (BuildContext context, int index) => SizedBox(height: 12),
                               itemCount: vm.discoveredDevices.value.length,
                               itemBuilder: (context, index) {
-                                final user = vm.discoveredDevices.value[index];
+                                final deviceDesc = vm.discoveredDevices.value[index];
+                                Widget deviceIcon = _buildDeviceIcon(context, vm, deviceDesc);
                                 return Container(
                                   margin: EdgeInsets.symmetric(horizontal: 8),
                                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -324,16 +339,17 @@ class DeviceDiscoveryScreen extends StatelessWidget {
                                   ),
                                   child: Row(
                                     children: [
+                                      SizedBox(width: 48, height: 48, child: Center(child: deviceIcon)),
                                       Expanded(
                                         child: Padding(
                                           padding: EdgeInsets.fromLTRB(16, 0, 0, 0),
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(user.name, style: Theme.of(context).textTheme.bodyMedium),
+                                              Text(deviceDesc.name, style: Theme.of(context).textTheme.bodyMedium),
                                               SizedBox(height: 4),
                                               Text(
-                                                user.address.toString(),
+                                                deviceDesc.address.toString(),
                                                 style: Theme.of(context).textTheme.bodySmall,
                                               ),
                                             ],
@@ -373,6 +389,32 @@ class DeviceDiscoveryScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDeviceIcon(BuildContext context, DeviceDiscoveryViewModel vm, SupportedDeviceDescriptor deviceDesc) {
+    final meta =
+        vm.deviceMdoules.metaModules.containsKey(deviceDesc.driverDescriptor.id)
+            ? vm.deviceMdoules.metaModules[deviceDesc.driverDescriptor.id]
+            : null;
+    Widget iconWidget;
+    if (meta != null) {
+      iconWidget = meta.deviceIconBuilder(context, 40, true);
+    } else {
+      iconWidget = Icon(Icons.device_unknown, size: 40, color: Theme.of(context).colorScheme.outline);
+    }
+    // 增加边框和背景，参考 DeviceTile
+    return Container(
+      height: 48,
+      width: 48,
+      decoration: ShapeDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+          side: BorderSide(width: 1.5, color: Theme.of(context).colorScheme.primaryContainer),
+        ),
+      ),
+      child: Center(child: iconWidget),
     );
   }
 

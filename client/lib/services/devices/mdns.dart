@@ -21,12 +21,12 @@ class NsdMdnsDiscovery implements IMdnsDiscovery {
   }
 
   @override
-  Future<void> stop() async {
+  Future<void> stop({CancellationToken? cancelToken}) async {
     assert(!_isStopped);
     if (_isDisposed) {
       throw ObjectDisposedException(message: 'The object has been disposed!');
     }
-    await nsd.stopDiscovery(_discovery);
+    await nsd.stopDiscovery(_discovery).asCancellable(cancelToken);
     _isStopped = true;
   }
 
@@ -48,9 +48,7 @@ class NsdMdnsDiscovery implements IMdnsDiscovery {
 
   @override
   void dispose() {
-    if (!_isStopped) {
-      stop();
-    }
+    assert(_isStopped);
     if (!_isDisposed) {
       _discovery.removeServiceListener(_onServiceDiscovered);
       _isDisposed = true;

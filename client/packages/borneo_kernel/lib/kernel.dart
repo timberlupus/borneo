@@ -390,9 +390,8 @@ final class DefaultKernel implements IKernel {
           final mdnsMethod = metaDriver.discoveryMethod as MdnsDeviceDiscoveryMethod;
           if (!allSupportedMdnsServiceTypes.contains(mdnsMethod.serviceType)) {
             _logger.i('Starting mDNS discovery for service type `${mdnsMethod.serviceType}`...');
-            final discovery = await mdnsProvider!
-                .startDiscovery(mdnsMethod.serviceType, _events, cancelToken: cancelToken)
-                .asCancellable(cancelToken);
+            final discovery = await mdnsProvider!.startDiscovery(mdnsMethod.serviceType, _events,
+                cancelToken: MergedCancellationToken([if (cancelToken != null) cancelToken, _masterCancelToken]));
             allSupportedMdnsServiceTypes.add(mdnsMethod.serviceType);
             _mdnsDiscoveryList.add(discovery);
           }
@@ -404,7 +403,7 @@ final class DefaultKernel implements IKernel {
   Future<void> _stopMdnsDiscovery({CancellationToken? cancelToken}) async {
     if (mdnsProvider != null) {
       for (final disc in _mdnsDiscoveryList) {
-        await disc.stop().asCancellable(cancelToken);
+        await disc.stop(cancelToken: cancelToken);
         disc.dispose();
       }
       _mdnsDiscoveryList.clear();
