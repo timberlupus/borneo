@@ -175,10 +175,8 @@ class SceneCard extends StatelessWidget {
                                   ),
                                   duration: const Duration(milliseconds: 300),
                                   builder: (context, value, child) {
-                                    // value: 0.0（选中）~ 1.0（未选中）
-                                    // 插值 matrix
-                                    final double s = 1.0 - 0.4 * value; // 饱和度 1.0~0.6
-                                    final double b = 1.0 - 0.2 * value; // 亮度 1.0~0.8
+                                    final double s = 1.0 - 0.1 * value;
+                                    final double b = 1.0 - 0.1 * value;
                                     final matrix = <double>[
                                       s * b,
                                       (1 - s) * b,
