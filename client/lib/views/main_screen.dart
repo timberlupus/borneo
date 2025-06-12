@@ -146,11 +146,15 @@ class MainScreen extends StatelessWidget {
             appBar: null,
 
             // page body
-            body: switch (tabIndex) {
-              TabIndices.devices => const DevicesScreen(),
-              TabIndices.scenes => const ScenesScreen(),
-              TabIndices.my => const MyScreen(),
-            },
+            body: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+              child: switch (tabIndex) {
+                TabIndices.devices => const DevicesScreen(key: ValueKey('devices')),
+                TabIndices.scenes => const ScenesScreen(key: ValueKey('scenes')),
+                TabIndices.my => const MyScreen(key: ValueKey('my')),
+              },
+            ),
 
             // bottom
             bottomNavigationBar: BottomNavigationBar(
