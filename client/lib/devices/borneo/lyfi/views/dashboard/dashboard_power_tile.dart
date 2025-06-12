@@ -27,7 +27,7 @@ class DashboardPowerTile extends StatelessWidget {
           listenable: mergedListenable,
           builder:
               (context, _) => DashboardToufu(
-                title: 'Power',
+                title: 'LED Power',
                 icon: Icons.power_outlined,
                 foregroundColor: Theme.of(context).colorScheme.onSurface,
                 backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
@@ -58,33 +58,29 @@ class DashboardPowerTile extends StatelessWidget {
                                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                   color: Theme.of(context).colorScheme.primary,
                                   fontFeatures: [FontFeature.tabularFigures()],
-                                  fontSize: 23,
                                 ),
                               ),
                               if (!isZero) ...[
                                 Text(
                                   '.',
-                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                     color: Theme.of(context).colorScheme.primary,
                                     fontFeatures: [FontFeature.tabularFigures()],
-                                    fontSize: 23,
                                   ),
                                 ),
                                 Text(
                                   decimalPart.toString(),
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                     fontFeatures: [FontFeature.tabularFigures()],
                                     color: Theme.of(context).colorScheme.primary,
-                                    fontSize: 11,
                                   ),
                                 ),
                               ],
                               Text(
                                 'W',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                   fontFeatures: [FontFeature.tabularFigures()],
                                   color: Theme.of(context).colorScheme.primary,
-                                  fontSize: 11,
                                 ),
                               ),
                             ];
@@ -95,12 +91,12 @@ class DashboardPowerTile extends StatelessWidget {
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: Theme.of(context).colorScheme.primary,
                               fontFeatures: [FontFeature.tabularFigures()],
-                              fontSize: 23,
                             ),
                           ),
                         ],
                       ],
                     ),
+                    const Divider(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

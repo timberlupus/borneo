@@ -100,12 +100,11 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   @override
   void dispose() {
     if (!_disposed) {
+      _deviceAddedEventSub.cancel();
+      _newDeviceFoundEventSub.cancel();
+      _discoveredDevices.dispose();
       if (_isDiscovering) {
-        stopDiscovery().then((_) {
-          _deviceAddedEventSub.cancel();
-          _newDeviceFoundEventSub.cancel();
-          _discoveredDevices.dispose();
-        });
+        stopDiscovery();
       }
       super.dispose();
       _disposed = true;
