@@ -6,7 +6,7 @@ homepage:
 resolution: workspace
 
 environment:
-  sdk: ^3.6.0
+  sdk: ^3.8.0
 
 dependencies:
   coap: ^9.1.0

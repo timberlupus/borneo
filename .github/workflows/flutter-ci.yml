@@ -96,7 +96,6 @@ jobs:
           path: ~/.pub-cache
           key: ${{ runner.os }}-pub-cache-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: ${{ runner.os }}-pub-cache-
-          restore-only: true
 
       - name: Install Melos
         run: dart pub global activate melos
