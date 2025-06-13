@@ -2,16 +2,13 @@ name: Flutter CI
 
 on:
   push:
-    branches: [master, dev]
+    branches: [master, dev, dev-*]
     paths:
       - 'client/**'
   pull_request:
-    branches: [master, dev]
+    branches: [master, dev, dev-*]
     paths:
       - 'client/**'
-
-env:
-  FLUTTER_VERSION: 3.32.0
 
 jobs:
   setup:
@@ -25,6 +22,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Read Flutter version
+        id: read-flutter-version
+        run: |
+          echo "FLUTTER_VERSION=$(cat flutter_version)" >> $GITHUB_ENV
+          echo "::set-output name=FLUTTER_VERSION::$(cat flutter_version)"
+        working-directory: client
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -36,7 +40,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          flutter-version: ${{ steps.read-flutter-version.outputs.FLUTTER_VERSION }}
           cache: true
 
       - name: Cache pub dependencies
@@ -72,18 +76,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Read Flutter version
+        id: read-flutter-version
+        run: |
+          echo "FLUTTER_VERSION=$(cat flutter_version)" >> $GITHUB_ENV
+          echo "::set-output name=FLUTTER_VERSION::$(cat flutter_version)"
+        working-directory: client
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          flutter-version: ${{ steps.read-flutter-version.outputs.FLUTTER_VERSION }}
           cache: true
 
-      - name: Restore pub cache
-        uses: actions/cache/restore@v4
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml') }}
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock') }}
           restore-keys: ${{ runner.os }}-pub-cache-
 
       - name: Install Melos
@@ -109,22 +120,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Read Flutter version
+        id: read-flutter-version
+        run: |
+          echo "FLUTTER_VERSION=$(cat flutter_version)" >> $GITHUB_ENV
+          echo "::set-output name=FLUTTER_VERSION::$(cat flutter_version)"
+        working-directory: client
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          flutter-version: ${{ steps.read-flutter-version.outputs.FLUTTER_VERSION }}
           cache: true
 
-      - name: Restore pub cache
-        uses: actions/cache/restore@v4
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml') }}
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock') }}
           restore-keys: ${{ runner.os }}-pub-cache-
 
-      - name: Restore Gradle cache
-        uses: actions/cache/restore@v4
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
