@@ -1,4 +1,4 @@
-import 'package:borneo_app/models/base_entity.dart';
+import 'package:borneo_app/shared/models/base_entity.dart';
 
 class User with BaseEntity {
   final int id;

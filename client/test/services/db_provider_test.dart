@@ -1,4 +1,4 @@
-import 'package:borneo_app/services/db.dart';
+import 'package:borneo_app/core/services/db.dart';
 import 'package:test/test.dart';
 
 void main() {

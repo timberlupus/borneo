@@ -1,5 +1,5 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
-import 'package:borneo_app/widgets/map_location_picker.dart';
+import 'package:borneo_app/shared/widgets/map_location_picker.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';

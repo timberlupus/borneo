@@ -1,4 +1,4 @@
-import 'package:borneo_app/models/devices/device_group_entity.dart';
+import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 import 'package:borneo_app/models/scene_entity.dart';
 
 final class CurrentSceneChangedEvent {

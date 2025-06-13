@@ -1,8 +1,8 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/easy_setup_screen.dart';
-import 'package:borneo_app/infrastructure/duration.dart';
-import 'package:borneo_app/infrastructure/time_of_day.dart';
-import 'package:borneo_app/widgets/confirmation_sheet.dart';
+import 'package:borneo_app/core/infrastructure/duration.dart';
+import 'package:borneo_app/core/infrastructure/time_of_day.dart';
+import 'package:borneo_app/shared/widgets/confirmation_sheet.dart';
 import 'package:borneo_common/duration_ext.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/schedule_editor_view_model.dart';
-import 'package:borneo_app/views/common/hex_color.dart';
+import 'package:borneo_app/core/utils/hex_color.dart';
 import '../../view_models/lyfi_view_model.dart';
 import '../brightness_slider_list.dart';
 import '../widgets/lyfi_time_line_chart.dart';

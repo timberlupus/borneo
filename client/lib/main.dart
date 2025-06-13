@@ -1,9 +1,9 @@
-import 'package:borneo_app/infrastructure/logging.dart';
-import 'package:borneo_app/services/clock.dart';
-import 'package:borneo_app/services/devices/device_module_harvesters.dart';
-import 'package:borneo_app/services/devices/device_module_registry.dart';
-import 'package:borneo_app/services/devices/mdns.dart';
-import 'package:borneo_app/services/devices/static_modular_driver_registry.dart';
+import 'package:borneo_app/core/infrastructure/logging.dart';
+import 'package:borneo_app/core/services/clock.dart';
+import 'package:borneo_app/core/services/devices/device_module_harvesters.dart';
+import 'package:borneo_app/core/services/devices/device_module_registry.dart';
+import 'package:borneo_app/core/services/devices/mdns.dart';
+import 'package:borneo_app/core/services/devices/static_modular_driver_registry.dart';
 import 'package:borneo_kernel/kernel.dart';
 import 'package:borneo_kernel_abstractions/idriver_registry.dart';
 import 'package:borneo_kernel_abstractions/ikernel.dart';
@@ -16,10 +16,10 @@ import 'package:provider/provider.dart';
 
 import 'package:sembast/sembast.dart';
 
-import 'app.dart';
+import 'app/app.dart';
 import 'routes/route_manager.dart';
 
-import 'services/db.dart';
+import 'core/services/db.dart';
 
 Future<Database> openDatabase() async {
   final appDir = await getApplicationDocumentsDirectory();

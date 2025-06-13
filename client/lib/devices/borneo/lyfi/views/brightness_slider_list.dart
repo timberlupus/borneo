@@ -1,7 +1,7 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:flutter/material.dart';
 
-import 'package:borneo_app/views/common/hex_color.dart';
+import 'package:borneo_app/core/utils/hex_color.dart';
 import '../view_models/editor/ieditor.dart';
 import 'brightness_slider_list_tile.dart';
 

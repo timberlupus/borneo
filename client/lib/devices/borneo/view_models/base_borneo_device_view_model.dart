@@ -1,4 +1,4 @@
-import 'package:borneo_app/view_models/devices/base_device_view_model.dart';
+import 'package:borneo_app/features/devices/view_models/base_device_view_model.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:cancellation_token/cancellation_token.dart';
