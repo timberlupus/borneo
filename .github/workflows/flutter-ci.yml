@@ -47,7 +47,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml') }}
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: ${{ runner.os }}-pub-cache-
 
       - name: Cache Gradle dependencies
@@ -94,8 +94,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock') }}
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: ${{ runner.os }}-pub-cache-
+          restore-only: true
 
       - name: Install Melos
         run: dart pub global activate melos
@@ -138,8 +139,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock') }}
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: ${{ runner.os }}-pub-cache-
+          restore-only: true
 
       - name: Cache Gradle dependencies
         uses: actions/cache@v4
