@@ -26,7 +26,6 @@ jobs:
         id: read-flutter-version
         run: |
           echo "FLUTTER_VERSION=$(cat flutter_version)" >> $GITHUB_ENV
-          echo "::set-output name=FLUTTER_VERSION::$(cat flutter_version)"
         working-directory: client
 
       - name: Set up Java
@@ -80,7 +79,6 @@ jobs:
         id: read-flutter-version
         run: |
           echo "FLUTTER_VERSION=$(cat flutter_version)" >> $GITHUB_ENV
-          echo "::set-output name=FLUTTER_VERSION::$(cat flutter_version)"
         working-directory: client
 
       - name: Setup Flutter
@@ -124,7 +122,6 @@ jobs:
         id: read-flutter-version
         run: |
           echo "FLUTTER_VERSION=$(cat flutter_version)" >> $GITHUB_ENV
-          echo "::set-output name=FLUTTER_VERSION::$(cat flutter_version)"
         working-directory: client
 
       - name: Setup Flutter
@@ -140,7 +137,6 @@ jobs:
           path: ~/.pub-cache
           key: ${{ runner.os }}-pub-cache-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: ${{ runner.os }}-pub-cache-
-          restore-only: true
 
       - name: Cache Gradle dependencies
         uses: actions/cache@v4
