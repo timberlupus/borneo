@@ -121,14 +121,13 @@ class EasySetupScreen extends StatelessWidget {
                 children: [
                   AnimatedBuilder(
                     animation: listenableDuration,
-                    builder:
-                        (context, child) => Text(
-                          (editor.easySetupViewModel.duration.inMinutes ~/ 60).toString().padLeft(2, '0'),
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontFeatures: [FontFeature.tabularFigures()],
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
+                    builder: (context, child) => Text(
+                      (editor.easySetupViewModel.duration.inMinutes ~/ 60).toString().padLeft(2, '0'),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontFeatures: [FontFeature.tabularFigures()],
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
                   ),
                   Text(
                     "Hrs",
@@ -139,14 +138,13 @@ class EasySetupScreen extends StatelessWidget {
                   SizedBox(width: 4),
                   AnimatedBuilder(
                     animation: listenableDuration,
-                    builder:
-                        (context, child) => Text(
-                          (editor.easySetupViewModel.duration.inMinutes % 60).toString().padLeft(2, '0'),
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontFeatures: [FontFeature.tabularFigures()],
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
+                    builder: (context, child) => Text(
+                      (editor.easySetupViewModel.duration.inMinutes % 60).toString().padLeft(2, '0'),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontFeatures: [FontFeature.tabularFigures()],
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
                   ),
                   Text(
                     "Mins",

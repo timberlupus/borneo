@@ -14,12 +14,7 @@ class WotDevice implements IDisposable {
   final Map<String, WotEvent> events = {};
   final Map<String, WotAction> actions = {};
 
-  WotDevice({
-    required this.id,
-    required this.title,
-    this.description,
-    this.type = const [],
-  });
+  WotDevice({required this.id, required this.title, this.description, this.type = const []});
 
   void addProperty(WotProperty property) => properties[property.name] = property;
   void addEvent(WotEvent event) => events[event.name] = event;
@@ -36,15 +31,15 @@ class WotDevice implements IDisposable {
   bool hasEvent(String eventName) => events.containsKey(eventName);
 
   Map<String, dynamic> toJson() => {
-        '@context': 'device.borneoiot.com',
-        'id': id,
-        'title': title,
-        if (description != null) 'description': description,
-        '@type': type,
-        'properties': {for (var prop in properties.values) prop.name: prop.toJson()},
-        'events': {for (var evt in events.values) evt.name: evt.toJson()},
-        'actions': {for (var act in actions.values) act.name: act.toJson()},
-      };
+    '@context': 'device.borneoiot.com',
+    'id': id,
+    'title': title,
+    if (description != null) 'description': description,
+    '@type': type,
+    'properties': {for (var prop in properties.values) prop.name: prop.toJson()},
+    'events': {for (var evt in events.values) evt.name: evt.toJson()},
+    'actions': {for (var act in actions.values) act.name: act.toJson()},
+  };
 
   @override
   void dispose() {

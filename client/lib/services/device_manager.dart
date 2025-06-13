@@ -190,10 +190,9 @@ final class DeviceManager implements IDisposable {
   Future<DeviceEntity> addNewDevice(SupportedDeviceDescriptor discovered, {String? groupID, Transaction? tx}) async {
     assert(isInitialized);
 
-    final device =
-        tx == null
-            ? await _db.transaction((tx) async => await _addNewDeviceToStore(discovered, groupID: groupID, tx: tx))
-            : await _addNewDeviceToStore(discovered, tx: tx);
+    final device = tx == null
+        ? await _db.transaction((tx) async => await _addNewDeviceToStore(discovered, groupID: groupID, tx: tx))
+        : await _addNewDeviceToStore(discovered, tx: tx);
 
     _kernel.registerDevice(BoundDeviceDescriptor(device: device, driverID: device.driverID));
     final bindResult = await tryBind(device);

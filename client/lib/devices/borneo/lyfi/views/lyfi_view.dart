@@ -164,14 +164,13 @@ class HeroPanel extends StatelessWidget {
                       icon: Icon(Icons.wb_sunny_outlined, size: 24),
                     ),
                   ],
-                  onSelectionChanged:
-                      vm.isOn && !vm.isBusy && !vm.isLocked
-                          ? (Set<LyfiMode> newSelection) {
-                            if (mode != newSelection.single) {
-                              vm.switchMode(newSelection.single);
-                            }
+                  onSelectionChanged: vm.isOn && !vm.isBusy && !vm.isLocked
+                      ? (Set<LyfiMode> newSelection) {
+                          if (mode != newSelection.single) {
+                            vm.switchMode(newSelection.single);
                           }
-                          : null,
+                        }
+                      : null,
                 );
               },
             ),
@@ -246,9 +245,8 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
           ),
           leading: Selector<LyfiViewModel, bool>(
             selector: (context, vm) => vm.isBusy,
-            builder:
-                (context, isBusy, child) =>
-                    IconButton(icon: Icon(Icons.arrow_back), onPressed: isBusy ? null : () => goBack(context)),
+            builder: (context, isBusy, child) =>
+                IconButton(icon: Icon(Icons.arrow_back), onPressed: isBusy ? null : () => goBack(context)),
           ),
           actions: [
             Container(
@@ -283,15 +281,14 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
             */
             Selector<LyfiViewModel, RssiLevel?>(
               selector: (_, vm) => vm.rssiLevel,
-              builder:
-                  (content, rssi, _) => Center(
-                    child: switch (rssi) {
-                      null => Icon(Icons.link_off, size: 24, color: Theme.of(context).colorScheme.error),
-                      RssiLevel.strong => Icon(Icons.wifi_rounded, size: 24),
-                      RssiLevel.medium => Icon(Icons.wifi_2_bar_rounded, size: 24),
-                      RssiLevel.weak => Icon(Icons.wifi_1_bar_rounded, size: 24),
-                    },
-                  ),
+              builder: (content, rssi, _) => Center(
+                child: switch (rssi) {
+                  null => Icon(Icons.link_off, size: 24, color: Theme.of(context).colorScheme.error),
+                  RssiLevel.strong => Icon(Icons.wifi_rounded, size: 24),
+                  RssiLevel.medium => Icon(Icons.wifi_2_bar_rounded, size: 24),
+                  RssiLevel.weak => Icon(Icons.wifi_1_bar_rounded, size: 24),
+                },
+              ),
             ),
             SizedBox(width: 16),
           ],
@@ -335,14 +332,13 @@ class LyfiView extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = ModalRoute.of(context)!.settings.arguments as DeviceEntity;
     return ChangeNotifierProvider(
-      create:
-          (cb) => LyfiViewModel(
-            deviceID: device.id,
-            deviceManager: cb.read<DeviceManager>(),
-            globalEventBus: cb.read<EventBus>(),
-            notification: cb.read<IAppNotificationService>(),
-            logger: cb.read<Logger>(),
-          ),
+      create: (cb) => LyfiViewModel(
+        deviceID: device.id,
+        deviceManager: cb.read<DeviceManager>(),
+        globalEventBus: cb.read<EventBus>(),
+        notification: cb.read<IAppNotificationService>(),
+        logger: cb.read<Logger>(),
+      ),
       builder: (context, child) {
         final vm = context.read<LyfiViewModel>();
         return FutureBuilder(

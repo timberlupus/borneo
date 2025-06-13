@@ -82,9 +82,8 @@ Future<void> main() async {
 
         // IKernel
         ProxyProvider3<Logger, IDriverRegistry, IMdnsProvider, IKernel>(
-          update:
-              (_, logger, driverReg, nsdMdns, kernel) =>
-                  kernel ?? DefaultKernel(logger, driverReg, mdnsProvider: nsdMdns),
+          update: (_, logger, driverReg, nsdMdns, kernel) =>
+              kernel ?? DefaultKernel(logger, driverReg, mdnsProvider: nsdMdns),
           dispose: (context, kernel) => kernel.dispose(),
           lazy: true,
         ),

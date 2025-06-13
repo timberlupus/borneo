@@ -34,8 +34,9 @@ class TimezoneConverter {
 
     // Reverse lookup for POSIX string in zones.json
     if (_zonesData != null) {
-      final ianaTimezone =
-          _zonesData!.entries.firstWhere((entry) => entry.value == posixTimezone, orElse: () => MapEntry('', '')).key;
+      final ianaTimezone = _zonesData!.entries
+          .firstWhere((entry) => entry.value == posixTimezone, orElse: () => MapEntry('', ''))
+          .key;
       return ianaTimezone.isNotEmpty ? ianaTimezone : null;
     } else {
       // Fallback if timezone not found

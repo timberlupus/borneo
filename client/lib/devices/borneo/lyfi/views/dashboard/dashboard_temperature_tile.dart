@@ -31,47 +31,46 @@ class DashboardTemperatureTile extends StatelessWidget {
     }
 
     return Consumer<LyfiViewModel>(
-      builder:
-          (context, vm, _) => DashboardToufu(
-            title: 'Temperature',
-            icon: Icons.thermostat,
-            foregroundColor: theme.colorScheme.onSurface,
-            backgroundColor: theme.colorScheme.surfaceContainer,
-            arcColor: null,
-            progressColor: progressColor,
-            value: vm.currentTemp?.toDouble() ?? 0.0,
-            minValue: 0,
-            maxValue: 105,
-            center: Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              mainAxisAlignment: MainAxisAlignment.center,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  vm.currentTemp != null ? '${vm.currentTemp}' : "N/A",
-                  style: theme.textTheme.headlineLarge?.copyWith(
-                    fontFeatures: [FontFeature.tabularFigures()],
-                    color: progressColor,
-                    fontSize: 24,
-                  ),
-                ),
-                if (vm.currentTemp != null)
-                  Text(
-                    '℃',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontFeatures: [FontFeature.tabularFigures()],
-                      color: progressColor,
-                      fontSize: 12,
-                    ),
-                  ),
-              ],
+      builder: (context, vm, _) => DashboardToufu(
+        title: 'Temperature',
+        icon: Icons.thermostat,
+        foregroundColor: theme.colorScheme.onSurface,
+        backgroundColor: theme.colorScheme.surfaceContainer,
+        arcColor: null,
+        progressColor: progressColor,
+        value: vm.currentTemp?.toDouble() ?? 0.0,
+        minValue: 0,
+        maxValue: 105,
+        center: Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          mainAxisAlignment: MainAxisAlignment.center,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              vm.currentTemp != null ? '${vm.currentTemp}' : "N/A",
+              style: theme.textTheme.headlineLarge?.copyWith(
+                fontFeatures: [FontFeature.tabularFigures()],
+                color: progressColor,
+                fontSize: 24,
+              ),
             ),
-            segments: [
-              GaugeSegment(from: 0, to: 45, color: greenBg),
-              GaugeSegment(from: 45, to: 65, color: yellowBg),
-              GaugeSegment(from: 65, to: 105, color: redBg),
-            ],
-          ),
+            if (vm.currentTemp != null)
+              Text(
+                '℃',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontFeatures: [FontFeature.tabularFigures()],
+                  color: progressColor,
+                  fontSize: 12,
+                ),
+              ),
+          ],
+        ),
+        segments: [
+          GaugeSegment(from: 0, to: 45, color: greenBg),
+          GaugeSegment(from: 45, to: 65, color: yellowBg),
+          GaugeSegment(from: 65, to: 105, color: redBg),
+        ],
+      ),
     );
   }
 }

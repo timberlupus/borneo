@@ -14,10 +14,9 @@ class EasySetupViewModel extends ChangeNotifier {
   final ValueNotifier<Duration> _endTime = ValueNotifier(defaultEndTime);
   ValueNotifier<Duration> get endTime => _endTime;
 
-  Duration get duration =>
-      _endTime.value > _startTime.value
-          ? _endTime.value - _startTime.value
-          : const Duration(hours: 24) - _startTime.value + _endTime.value;
+  Duration get duration => _endTime.value > _startTime.value
+      ? _endTime.value - _startTime.value
+      : const Duration(hours: 24) - _startTime.value + _endTime.value;
 
   EasySetupViewModel();
 

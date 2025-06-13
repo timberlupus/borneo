@@ -123,12 +123,11 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
             child: FilledButton.icon(
               icon: Icon(Icons.check, size: 28),
               label: Text("Apply"),
-              onPressed:
-                  (_selectedLocation == null || _isSameLocation(_selectedLocation, widget.initialLocation))
-                      ? null
-                      : () {
-                        Navigator.pop(context, _selectedLocation);
-                      },
+              onPressed: (_selectedLocation == null || _isSameLocation(_selectedLocation, widget.initialLocation))
+                  ? null
+                  : () {
+                      Navigator.pop(context, _selectedLocation);
+                    },
             ),
           ),
         ],
@@ -176,18 +175,17 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
               heroTag: 'locate',
               backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
               foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-              onPressed:
-                  _userLocation == null
-                      ? null
-                      : () {
-                        setState(() {
-                          _selectedLocation = _userLocation;
-                        });
-                        if (_userLocation != null) {
-                          _mapController.move(_userLocation!, _mapController.camera.zoom);
-                          _updateTimeZone(_userLocation!);
-                        }
-                      },
+              onPressed: _userLocation == null
+                  ? null
+                  : () {
+                      setState(() {
+                        _selectedLocation = _userLocation;
+                      });
+                      if (_userLocation != null) {
+                        _mapController.move(_userLocation!, _mapController.camera.zoom);
+                        _updateTimeZone(_userLocation!);
+                      }
+                    },
               tooltip: 'Current location',
               child: Icon(Icons.my_location, color: Theme.of(context).colorScheme.onSecondaryContainer),
             ),

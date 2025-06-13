@@ -24,9 +24,8 @@ class ScheduleEditorView extends StatelessWidget {
       initialTime: initialTime,
       context: context,
       confirmText: context.translate('Add time point'),
-      builder:
-          (context, child) =>
-              MediaQuery(data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true), child: child!),
+      builder: (context, child) =>
+          MediaQuery(data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true), child: child!),
     );
     return selectedTime?.toDuration();
   }
@@ -48,7 +47,10 @@ class ScheduleEditorView extends StatelessWidget {
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
     const style = TextStyle(fontSize: 10, color: Colors.white54);
-    return SideTitleWidget(meta: meta, child: Text('${value + 0.5}', style: style));
+    return SideTitleWidget(
+      meta: meta,
+      child: Text('${value + 0.5}', style: style),
+    );
   }
 
   List<LineChartBarData> buildLineDatas(ScheduleEditorViewModel vm) {
@@ -97,26 +99,18 @@ class ScheduleEditorView extends StatelessWidget {
                 child: Consumer<ScheduleEditorViewModel>(
                   builder: (context, vm, child) {
                     final minX = vm.entries.isNotEmpty ? vm.entries.first.instant.inHours.toDouble() * 3600.0 : 0.0;
-                    final maxX =
-                        vm.entries.isNotEmpty
-                            ? ((vm.entries.last.instant.inSeconds.toDouble() / 3600.0).ceilToDouble() * 3600.0)
-                            : 24 * 3600.0;
+                    final maxX = vm.entries.isNotEmpty
+                        ? ((vm.entries.last.instant.inSeconds.toDouble() / 3600.0).ceilToDouble() * 3600.0)
+                        : 24 * 3600.0;
                     return LyfiTimeLineChart(
                       lineBarsData: buildLineDatas(vm),
                       minX: minX,
                       maxX: maxX,
                       minY: 0,
                       maxY: lyfiBrightnessMax.toDouble(),
-                      currentTime:
-                          vm.currentEntry?.instant != null
-                              ? DateTime(
-                                0,
-                                1,
-                                1,
-                                vm.currentEntry!.instant.inHours,
-                                vm.currentEntry!.instant.inMinutes % 60,
-                              )
-                              : DateTime(0, 1, 1, 0, 0),
+                      currentTime: vm.currentEntry?.instant != null
+                          ? DateTime(0, 1, 1, vm.currentEntry!.instant.inHours, vm.currentEntry!.instant.inMinutes % 60)
+                          : DateTime(0, 1, 1, 0, 0),
                       allowZoom: true,
                       lineTouchData: LineTouchData(
                         handleBuiltInTouches: true,
@@ -143,117 +137,107 @@ class ScheduleEditorView extends StatelessWidget {
             Expanded(
               child: Selector<ScheduleEditorViewModel, bool>(
                 selector: (_, editor) => editor.canChangeColor,
-                builder:
-                    (_, canChangeColor, _) =>
-                        BrightnessSliderList(context.read<ScheduleEditorViewModel>(), disabled: !canChangeColor),
+                builder: (_, canChangeColor, _) =>
+                    BrightnessSliderList(context.read<ScheduleEditorViewModel>(), disabled: !canChangeColor),
               ),
             ),
 
             // Bottom buttons
             Consumer<ScheduleEditorViewModel>(
-              builder:
-                  (context, vm, child) => Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainer,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8, offset: Offset(0, -2)),
-                      ],
-                    ),
-                    padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        // Easy Setup
-                        _BottomActionButton(
-                          icon: Icons.auto_fix_high_outlined,
-                          label: 'Easy',
-                          color: Theme.of(context).colorScheme.primary,
-                          onPressed: () async {
+              builder: (context, vm, child) => Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainer,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8, offset: Offset(0, -2)),
+                  ],
+                ),
+                padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Easy Setup
+                    _BottomActionButton(
+                      icon: Icons.auto_fix_high_outlined,
+                      label: 'Easy',
+                      color: Theme.of(context).colorScheme.primary,
+                      onPressed: () async {
+                        if (context.mounted) {
+                          bool proceed = true;
+                          if (vm.isNotEmpty) {
+                            proceed = await AsyncConfirmationSheet.show(
+                              context,
+                              message:
+                                  'Using Easy Setup will clear your current dimming settings. Are you sure you want to proceed?',
+                            );
+                          }
+                          if (proceed && context.mounted) {
+                            await vm.easySetupEnter();
+                            final route = MaterialPageRoute(builder: (context) => EasySetupScreen(vm));
                             if (context.mounted) {
-                              bool proceed = true;
-                              if (vm.isNotEmpty) {
-                                proceed = await AsyncConfirmationSheet.show(
-                                  context,
-                                  message:
-                                      'Using Easy Setup will clear your current dimming settings. Are you sure you want to proceed?',
-                                );
-                              }
-                              if (proceed && context.mounted) {
-                                await vm.easySetupEnter();
-                                final route = MaterialPageRoute(builder: (context) => EasySetupScreen(vm));
-                                if (context.mounted) {
-                                  await Navigator.push(context, route);
-                                  await vm.easySetupFinish();
-                                }
+                              await Navigator.push(context, route);
+                              await vm.easySetupFinish();
+                            }
+                          }
+                        }
+                      },
+                    ),
+                    // Add
+                    _BottomActionButton(
+                      icon: Icons.add_outlined,
+                      label: 'Add',
+                      color: vm.canAddInstant ? Theme.of(context).colorScheme.primary : Theme.of(context).disabledColor,
+                      onPressed: vm.canAddInstant
+                          ? () async {
+                              final initialTime =
+                                  (vm.currentEntry?.instant ?? Duration(hours: 6, minutes: 30)) +
+                                  ScheduleEditorViewModel.defaultInstantSpan;
+                              final selectedTime = await showNewInstantDialog(context, initialTime.toTimeOfDay());
+                              if (selectedTime != null) {
+                                vm.addInstant(selectedTime);
                               }
                             }
-                          },
-                        ),
-                        // Add
-                        _BottomActionButton(
-                          icon: Icons.add_outlined,
-                          label: 'Add',
-                          color:
-                              vm.canAddInstant
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).disabledColor,
-                          onPressed:
-                              vm.canAddInstant
-                                  ? () async {
-                                    final initialTime =
-                                        (vm.currentEntry?.instant ?? Duration(hours: 6, minutes: 30)) +
-                                        ScheduleEditorViewModel.defaultInstantSpan;
-                                    final selectedTime = await showNewInstantDialog(context, initialTime.toTimeOfDay());
-                                    if (selectedTime != null) {
-                                      vm.addInstant(selectedTime);
-                                    }
-                                  }
-                                  : null,
-                        ),
-                        // Remove
-                        _BottomActionButton(
-                          icon: Icons.remove,
-                          label: 'Remove',
-                          color:
-                              vm.canRemoveCurrentInstant
-                                  ? Theme.of(context).colorScheme.secondary
-                                  : Theme.of(context).disabledColor,
-                          onPressed: vm.canRemoveCurrentInstant ? vm.removeCurrentInstant : null,
-                        ),
-                        // Clear
-                        _BottomActionButton(
-                          icon: Icons.clear,
-                          label: 'Clear',
-                          color:
-                              vm.canClearInstants
-                                  ? Theme.of(context).colorScheme.error
-                                  : Theme.of(context).disabledColor,
-                          onPressed: vm.canClearInstants ? () => _confirmClearEntries(context, vm) : null,
-                        ),
-                        // Prev
-                        _BottomActionButton(
-                          icon: Icons.skip_previous_outlined,
-                          label: 'Prev',
-                          color:
-                              vm.canPrevInstant
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).disabledColor,
-                          onPressed: vm.canPrevInstant ? vm.prevInstant : null,
-                        ),
-                        // Next
-                        _BottomActionButton(
-                          icon: Icons.skip_next_outlined,
-                          label: 'Next',
-                          color:
-                              vm.canNextInstant
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).disabledColor,
-                          onPressed: vm.canNextInstant ? vm.nextInstant : null,
-                        ),
-                      ],
+                          : null,
                     ),
-                  ),
+                    // Remove
+                    _BottomActionButton(
+                      icon: Icons.remove,
+                      label: 'Remove',
+                      color: vm.canRemoveCurrentInstant
+                          ? Theme.of(context).colorScheme.secondary
+                          : Theme.of(context).disabledColor,
+                      onPressed: vm.canRemoveCurrentInstant ? vm.removeCurrentInstant : null,
+                    ),
+                    // Clear
+                    _BottomActionButton(
+                      icon: Icons.clear,
+                      label: 'Clear',
+                      color: vm.canClearInstants
+                          ? Theme.of(context).colorScheme.error
+                          : Theme.of(context).disabledColor,
+                      onPressed: vm.canClearInstants ? () => _confirmClearEntries(context, vm) : null,
+                    ),
+                    // Prev
+                    _BottomActionButton(
+                      icon: Icons.skip_previous_outlined,
+                      label: 'Prev',
+                      color: vm.canPrevInstant
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).disabledColor,
+                      onPressed: vm.canPrevInstant ? vm.prevInstant : null,
+                    ),
+                    // Next
+                    _BottomActionButton(
+                      icon: Icons.skip_next_outlined,
+                      label: 'Next',
+                      color: vm.canNextInstant
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).disabledColor,
+                      onPressed: vm.canNextInstant ? vm.nextInstant : null,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         );

@@ -30,7 +30,10 @@ class CapsuleLabel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null)
-            Padding(padding: const EdgeInsets.only(right: 4.0), child: Icon(icon, color: iconColor, size: 16.0)),
+            Padding(
+              padding: const EdgeInsets.only(right: 4.0),
+              child: Icon(icon, color: iconColor, size: 16.0),
+            ),
           Text(
             context.translate(label),
             style: TextStyle(color: textColor, fontSize: 14.0, fontWeight: FontWeight.bold),

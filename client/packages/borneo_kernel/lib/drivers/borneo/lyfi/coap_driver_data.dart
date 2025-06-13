@@ -15,7 +15,13 @@ class LyfiCoapDriverData extends BorneoCoapDriverData {
   StreamSubscription? _stateChangedSub;
 
   LyfiCoapDriverData(
-      super.device, super.globalEvents, super.coap, super.probeCoap, super._generalDeviceInfo, this._lyfiDeviceInfo);
+    super.device,
+    super.globalEvents,
+    super.coap,
+    super.probeCoap,
+    super._generalDeviceInfo,
+    this._lyfiDeviceInfo,
+  );
 
   @override
   void load() {

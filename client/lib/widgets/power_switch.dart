@@ -20,12 +20,11 @@ class _PowerButtonState extends State<PowerButton> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final iconColor =
-        widget.enabled
-            ? widget.value
-                ? Colors.green
-                : colorScheme.error
-            : null;
+    final iconColor = widget.enabled
+        ? widget.value
+              ? Colors.green
+              : colorScheme.error
+        : null;
     final loadingColor = colorScheme.onSurface;
 
     return RoundedIconTextButton(
@@ -35,15 +34,14 @@ class _PowerButtonState extends State<PowerButton> {
       buttonSize: 64,
       icon: AnimatedSwitcher(
         duration: Duration(milliseconds: 300),
-        child:
-            _isLoading
-                ? CircularProgressIndicator(color: loadingColor, key: ValueKey('loading'))
-                : Icon(
-                  widget.value ? Icons.power_settings_new_outlined : Icons.power_settings_new,
-                  key: ValueKey<bool>(widget.value),
-                  size: 40,
-                  color: iconColor,
-                ),
+        child: _isLoading
+            ? CircularProgressIndicator(color: loadingColor, key: ValueKey('loading'))
+            : Icon(
+                widget.value ? Icons.power_settings_new_outlined : Icons.power_settings_new,
+                key: ValueKey<bool>(widget.value),
+                size: 40,
+                color: iconColor,
+              ),
       ),
     );
   }

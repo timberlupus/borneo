@@ -16,11 +16,11 @@ class WotCapability {
   });
 
   Map<String, dynamic> toJson() => {
-        'type': type,
-        'description': description,
-        'supportedProperties': supportedProperties,
-        'supportedActions': supportedActions,
-      };
+    'type': type,
+    'description': description,
+    'supportedProperties': supportedProperties,
+    'supportedActions': supportedActions,
+  };
 }
 
 const List<WotCapability> wellknownWotCapabilities = [

@@ -115,50 +115,46 @@ class _BorneoAppState extends State<BorneoApp> {
                     // Here >>> register all providers that need to access the gettext interface <<<
                     // SceneManager
                     Provider<SceneManager>(
-                      create:
-                          (context) => SceneManager(
-                            gt,
-                            context.read<Database>(),
-                            context.read<EventBus>(),
-                            context.read<IBlobManager>(),
-                            logger: context.read<Logger>(),
-                          ),
+                      create: (context) => SceneManager(
+                        gt,
+                        context.read<Database>(),
+                        context.read<EventBus>(),
+                        context.read<IBlobManager>(),
+                        logger: context.read<Logger>(),
+                      ),
                     ),
 
                     // GroupManager
                     Provider<GroupManager>(
-                      create:
-                          (context) => GroupManager(
-                            context.read<Logger>(),
-                            context.read<EventBus>(),
-                            context.read<Database>(),
-                            context.read<SceneManager>(),
-                          ),
+                      create: (context) => GroupManager(
+                        context.read<Logger>(),
+                        context.read<EventBus>(),
+                        context.read<Database>(),
+                        context.read<SceneManager>(),
+                      ),
                     ),
 
                     // DeviceManager
                     Provider<DeviceManager>(
-                      create:
-                          (context) => DeviceManager(
-                            context.read<Database>(),
-                            context.read<IKernel>(),
-                            context.read<EventBus>(),
-                            context.read<SceneManager>(),
-                            context.read<GroupManager>(),
-                            logger: context.read<Logger>(),
-                          ),
+                      create: (context) => DeviceManager(
+                        context.read<Database>(),
+                        context.read<IKernel>(),
+                        context.read<EventBus>(),
+                        context.read<SceneManager>(),
+                        context.read<GroupManager>(),
+                        logger: context.read<Logger>(),
+                      ),
                       dispose: (context, dm) => dm.dispose(),
                     ),
 
                     // RoutineManager
                     Provider<RoutineManager>(
-                      create:
-                          (context) => RoutineManager(
-                            context.read<EventBus>(),
-                            context.read<Database>(),
-                            context.read<DeviceManager>(),
-                            logger: context.read<Logger>(),
-                          ),
+                      create: (context) => RoutineManager(
+                        context.read<EventBus>(),
+                        context.read<Database>(),
+                        context.read<DeviceManager>(),
+                        logger: context.read<Logger>(),
+                      ),
                       dispose: (context, rm) => rm.dispose(),
                     ),
                   ],

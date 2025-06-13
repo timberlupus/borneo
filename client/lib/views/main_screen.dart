@@ -117,13 +117,11 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Column(children: [Text(_getTitle(context, vm))]),
       actions: [
         Selector<MainViewModel, ({bool isInit, bool isScanningDevices, TabIndices index})>(
-          selector:
-              (_, vm) => (isInit: vm.isInitialized, isScanningDevices: vm.isScanningDevices, index: vm.currentTabIndex),
-          builder:
-              (_, vm, _) =>
-                  !vm.isInit || vm.isScanningDevices
-                      ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator())
-                      : buildAddButtons(context),
+          selector: (_, vm) =>
+              (isInit: vm.isInitialized, isScanningDevices: vm.isScanningDevices, index: vm.currentTabIndex),
+          builder: (_, vm, _) => !vm.isInit || vm.isScanningDevices
+              ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator())
+              : buildAddButtons(context),
         ),
       ],
     );
@@ -141,36 +139,35 @@ class MainScreen extends StatelessWidget {
     final mainVM = context.read<MainViewModel>();
     return Selector<MainViewModel, TabIndices>(
       selector: (context, vm) => vm.currentTabIndex,
-      builder:
-          (context, tabIndex, child) => Scaffold(
-            appBar: null,
+      builder: (context, tabIndex, child) => Scaffold(
+        appBar: null,
 
-            // page body
-            body: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-              child: switch (tabIndex) {
-                TabIndices.devices => const DevicesScreen(key: ValueKey('devices')),
-                TabIndices.scenes => const ScenesScreen(key: ValueKey('scenes')),
-                TabIndices.my => const MyScreen(key: ValueKey('my')),
-              },
-            ),
+        // page body
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+          child: switch (tabIndex) {
+            TabIndices.devices => const DevicesScreen(key: ValueKey('devices')),
+            TabIndices.scenes => const ScenesScreen(key: ValueKey('scenes')),
+            TabIndices.my => const MyScreen(key: ValueKey('my')),
+          },
+        ),
 
-            // bottom
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex: tabIndex.index,
-              onTap: (index) {
-                if (index != tabIndex.index) {
-                  mainVM.setIndex(TabIndices.values[index]);
-                }
-              },
-              items: [
-                BottomNavigationBarItem(icon: Icon(Icons.house_outlined), label: context.translate('Scenes')),
-                BottomNavigationBarItem(icon: Icon(Icons.device_hub), label: context.translate('Devices')),
-                BottomNavigationBarItem(icon: Icon(Icons.person), label: context.translate('My')),
-              ],
-            ),
-          ),
+        // bottom
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: tabIndex.index,
+          onTap: (index) {
+            if (index != tabIndex.index) {
+              mainVM.setIndex(TabIndices.values[index]);
+            }
+          },
+          items: [
+            BottomNavigationBarItem(icon: Icon(Icons.house_outlined), label: context.translate('Scenes')),
+            BottomNavigationBarItem(icon: Icon(Icons.device_hub), label: context.translate('Devices')),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: context.translate('My')),
+          ],
+        ),
+      ),
     );
   }
 
@@ -259,15 +256,14 @@ class MainScreen extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<ScenesViewModel>(
-          create:
-              (context) => ScenesViewModel(
-                context.read<EventBus>(),
-                context.read<SceneManager>(),
-                context.read<DeviceManager>(),
-                context.read<RoutineManager>(),
-                context.read<IAppNotificationService>(),
-                logger: context.read<Logger>(),
-              ),
+          create: (context) => ScenesViewModel(
+            context.read<EventBus>(),
+            context.read<SceneManager>(),
+            context.read<DeviceManager>(),
+            context.read<RoutineManager>(),
+            context.read<IAppNotificationService>(),
+            logger: context.read<Logger>(),
+          ),
           lazy: true,
         ),
         ChangeNotifierProvider(create: (_) => MyViewModel(), lazy: true),

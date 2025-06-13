@@ -43,7 +43,10 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(padding: EdgeInsets.fromLTRB(16, 16, 16, 8), child: Text(title, textAlign: TextAlign.center)),
+        Container(
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(title, textAlign: TextAlign.center),
+        ),
         if (subtitle != null)
           Container(
             padding: EdgeInsets.fromLTRB(16, 8, 16, 0),

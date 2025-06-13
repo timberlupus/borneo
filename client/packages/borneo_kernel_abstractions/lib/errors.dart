@@ -24,12 +24,7 @@ class UnsupportedVersionError extends DeviceError {
   final Version currentVersion;
   final VersionConstraint? versionRange;
 
-  UnsupportedVersionError(
-    super.message,
-    super.device, {
-    required this.currentVersion,
-    required this.versionRange,
-  });
+  UnsupportedVersionError(super.message, super.device, {required this.currentVersion, required this.versionRange});
 
   @override
   String toString() {
@@ -41,10 +36,7 @@ class UnsupportedVersionError extends DeviceError {
 }
 
 class DeviceBusyError extends DeviceError {
-  DeviceBusyError(
-    super.message,
-    super.device,
-  );
+  DeviceBusyError(super.message, super.device);
 
   @override
   String toString() {
@@ -55,10 +47,7 @@ class DeviceBusyError extends DeviceError {
 }
 
 class DeviceNotFoundError extends DeviceError {
-  DeviceNotFoundError(
-    super.message,
-    super.device,
-  );
+  DeviceNotFoundError(super.message, super.device);
 
   @override
   String toString() {

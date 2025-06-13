@@ -173,13 +173,12 @@ class DeviceTile extends StatelessWidget {
                   final groupEntites = parentVM.groups.where((gvm) => !gvm.isDummy).map((gvm) => gvm.model).toList();
                   showModalBottomSheet(
                     context: context,
-                    builder:
-                        (BuildContext context) => DeviceGroupSelectionSheet(
-                          availableGroups: groupEntites,
-                          onTapGroup: (g) => parentVM.changeDeviceGroup(selectedDeviceVM.deviceEntity, g?.id),
-                          title: 'Change Device Group',
-                          subtitle: 'Select the group to which device "${selectedDeviceVM.name}" belongs:',
-                        ),
+                    builder: (BuildContext context) => DeviceGroupSelectionSheet(
+                      availableGroups: groupEntites,
+                      onTapGroup: (g) => parentVM.changeDeviceGroup(selectedDeviceVM.deviceEntity, g?.id),
+                      title: 'Change Device Group',
+                      subtitle: 'Select the group to which device "${selectedDeviceVM.name}" belongs:',
+                    ),
                   );
 
                   break;

@@ -67,30 +67,26 @@ class ManualRunningChart extends StatelessWidget {
     assert(vm.isOnline);
     return MultiValueListenableBuilder<int>(
       valueNotifiers: vm.channels,
-      builder:
-          (context, values, _) => Padding(
-            padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
-            child: LyfiColorChart(
-              BarChartData(
-                barGroups: buildGroupDataItems(context),
-                titlesData: FlTitlesData(
-                  show: true,
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, _) => buildTitles(context, value),
-                    ),
-                  ),
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                ),
-                borderData: FlBorderData(show: false),
-                barTouchData: BarTouchData(enabled: true),
-                gridData: FlGridData(show: false),
+      builder: (context, values, _) => Padding(
+        padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
+        child: LyfiColorChart(
+          BarChartData(
+            barGroups: buildGroupDataItems(context),
+            titlesData: FlTitlesData(
+              show: true,
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(showTitles: true, getTitlesWidget: (value, _) => buildTitles(context, value)),
               ),
+              leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
             ),
+            borderData: FlBorderData(show: false),
+            barTouchData: BarTouchData(enabled: true),
+            gridData: FlGridData(show: false),
           ),
+        ),
+      ),
     );
   }
 }

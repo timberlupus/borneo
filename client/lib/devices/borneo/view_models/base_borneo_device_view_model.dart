@@ -47,10 +47,9 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
 
           currentVoltage.value = _borneoDeviceStatus?.powerVoltage;
           currentCurrent.value = _borneoDeviceStatus?.powerCurrent;
-          currentWatts.value =
-              currentVoltage.value != null && currentCurrent.value != null
-                  ? currentVoltage.value! * currentCurrent.value!
-                  : null;
+          currentWatts.value = currentVoltage.value != null && currentCurrent.value != null
+              ? currentVoltage.value! * currentCurrent.value!
+              : null;
         })
         .asCancellable(cancelToken);
   }

@@ -6,19 +6,13 @@ class WotEvent {
   final Map<String, dynamic>? dataSchema;
   final dynamic data;
 
-  WotEvent({
-    required this.name,
-    this.description,
-    this.type,
-    this.dataSchema,
-    this.data,
-  });
+  WotEvent({required this.name, this.description, this.type, this.dataSchema, this.data});
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        if (description != null) 'description': description,
-        if (type != null) 'type': type,
-        if (dataSchema != null) 'data': dataSchema,
-        if (data != null) 'value': data,
-      };
+    'name': name,
+    if (description != null) 'description': description,
+    if (type != null) 'type': type,
+    if (dataSchema != null) 'data': dataSchema,
+    if (data != null) 'value': data,
+  };
 }

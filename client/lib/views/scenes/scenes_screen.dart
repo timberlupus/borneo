@@ -17,20 +17,19 @@ class SceneList extends StatelessWidget {
     double screenHeight = MediaQuery.of(context).size.height;
     return SliverToBoxAdapter(
       child: Consumer<ScenesViewModel>(
-        builder:
-            (context, vm, child) => Container(
-              padding: EdgeInsets.all(0),
-              height: screenHeight / 4.0,
-              child: ListView.separated(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                separatorBuilder: (_, _) => const SizedBox(width: 16),
-                scrollDirection: Axis.horizontal,
-                itemCount: vm.scenes.length,
-                itemBuilder: (context, index) {
-                  return SceneCard(vm.scenes[index]);
-                },
-              ),
-            ),
+        builder: (context, vm, child) => Container(
+          padding: EdgeInsets.all(0),
+          height: screenHeight / 4.0,
+          child: ListView.separated(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            separatorBuilder: (_, _) => const SizedBox(width: 16),
+            scrollDirection: Axis.horizontal,
+            itemCount: vm.scenes.length,
+            itemBuilder: (context, index) {
+              return SceneCard(vm.scenes[index]);
+            },
+          ),
+        ),
       ),
     );
   }

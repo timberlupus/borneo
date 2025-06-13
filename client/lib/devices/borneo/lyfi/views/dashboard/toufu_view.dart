@@ -49,58 +49,57 @@ class DashboardToufu extends StatelessWidget {
         child: SizedBox(
           height: 200, // Provide bounded height
           child: LayoutBuilder(
-            builder:
-                (context, constraints) => Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
-                  child: Stack(
-                    clipBehavior: Clip.hardEdge, // Prevent overflow
-                    children: [
-                      if (icon != null)
-                        Positioned(
-                          bottom: -constraints.maxHeight * 0.2,
-                          right: -constraints.maxWidth * 0.2,
-                          child: ClipRect(
-                            child: Icon(icon!, size: constraints.maxWidth * 0.75, color: fgColor.withAlpha(8)),
+            builder: (context, constraints) => Padding(
+              padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
+              child: Stack(
+                clipBehavior: Clip.hardEdge, // Prevent overflow
+                children: [
+                  if (icon != null)
+                    Positioned(
+                      bottom: -constraints.maxHeight * 0.2,
+                      right: -constraints.maxWidth * 0.2,
+                      child: ClipRect(
+                        child: Icon(icon!, size: constraints.maxWidth * 0.75, color: fgColor.withAlpha(8)),
+                      ),
+                    ),
+                  Positioned.fill(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: AnimatedRadialGauge(
+                            initialValue: minValue.roundToDouble(),
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.decelerate,
+                            value: value.roundToDouble(),
+                            radius: null,
+                            axis: GaugeAxis(
+                              min: minValue.roundToDouble(),
+                              max: maxValue.roundToDouble(),
+                              degrees: 270,
+                              style: GaugeAxisStyle(
+                                thickness: 13,
+                                segmentSpacing: 0,
+                                background: segments.isEmpty ? arcColor : null,
+                                cornerRadius: Radius.zero,
+                              ),
+                              pointer: null,
+                              progressBar: GaugeProgressBar.basic(color: progColor),
+                              segments: segments,
+                            ),
+                            builder: (context, label, value) => Center(child: label),
+                            child: center,
                           ),
                         ),
-                      Positioned.fill(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: AnimatedRadialGauge(
-                                initialValue: minValue.roundToDouble(),
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.decelerate,
-                                value: value.roundToDouble(),
-                                radius: null,
-                                axis: GaugeAxis(
-                                  min: minValue.roundToDouble(),
-                                  max: maxValue.roundToDouble(),
-                                  degrees: 270,
-                                  style: GaugeAxisStyle(
-                                    thickness: 13,
-                                    segmentSpacing: 0,
-                                    background: segments.isEmpty ? arcColor : null,
-                                    cornerRadius: Radius.zero,
-                                  ),
-                                  pointer: null,
-                                  progressBar: GaugeProgressBar.basic(color: progColor),
-                                  segments: segments,
-                                ),
-                                builder: (context, label, value) => Center(child: label),
-                                child: center,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: fgColor)),
-                          ],
-                        ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: fgColor)),
+                      ],
+                    ),
                   ),
-                ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

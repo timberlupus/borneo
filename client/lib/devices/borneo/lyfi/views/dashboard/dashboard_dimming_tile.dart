@@ -32,7 +32,9 @@ class DashboardDimmingTile extends StatelessWidget {
                     return Column(
                       children: [
                         Expanded(
-                          child: Center(child: Icon(Icons.tips_and_updates_outlined, size: iconSize, color: iconColor)),
+                          child: Center(
+                            child: Icon(Icons.tips_and_updates_outlined, size: iconSize, color: iconColor),
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),

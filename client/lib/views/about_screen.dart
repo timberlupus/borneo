@@ -51,30 +51,26 @@ class AboutScreen extends StatelessWidget {
                   Image.asset('assets/images/main-logo.png', height: 80),
                   const SizedBox(height: 8),
                   Consumer<AboutViewModel>(
-                    builder:
-                        (context, vm, child) =>
-                            vm.isInitialized
-                                ? Text(
-                                  vm.packageInfo.appName,
-                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
-                                )
-                                : Container(),
+                    builder: (context, vm, child) => vm.isInitialized
+                        ? Text(
+                            vm.packageInfo.appName,
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
+                          )
+                        : Container(),
                   ),
                   Consumer<AboutViewModel>(
-                    builder:
-                        (context, vm, child) =>
-                            vm.isInitialized
-                                ? Text(
-                                  context.translate(
-                                    'Version: {verText} Build: {buildNumberText}',
-                                    nArgs: {
-                                      'verText': vm.packageInfo.version.toString(),
-                                      'buildNumberText': vm.packageInfo.buildNumber.toString(),
-                                    },
-                                  ),
-                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white30),
-                                )
-                                : Container(),
+                    builder: (context, vm, child) => vm.isInitialized
+                        ? Text(
+                            context.translate(
+                              'Version: {verText} Build: {buildNumberText}',
+                              nArgs: {
+                                'verText': vm.packageInfo.version.toString(),
+                                'buildNumberText': vm.packageInfo.buildNumber.toString(),
+                              },
+                            ),
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white30),
+                          )
+                        : Container(),
                   ),
                 ],
               ),

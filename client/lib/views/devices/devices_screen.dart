@@ -124,27 +124,26 @@ class DevicesScreen extends StatelessWidget {
                 _buildAppBar(context),
                 Selector<GroupedDevicesViewModel, List<GroupViewModel>>(
                   selector: (_, vm) => vm.groups,
-                  shouldRebuild:
-                      (previous, current) =>
-                          previous.length != current.length ||
-                          previous.any(
-                            (preGroup) => current.any(
-                              (curGroup) =>
-                                  preGroup.id == curGroup.id &&
-                                  (preGroup.name != curGroup.name || preGroup.isEmpty != curGroup.isEmpty),
-                            ),
-                          ),
+                  shouldRebuild: (previous, current) =>
+                      previous.length != current.length ||
+                      previous.any(
+                        (preGroup) => current.any(
+                          (curGroup) =>
+                              preGroup.id == curGroup.id &&
+                              (preGroup.name != curGroup.name || preGroup.isEmpty != curGroup.isEmpty),
+                        ),
+                      ),
                   builder: (context, groups, child) {
                     final groupedDevicesVM = context.read<GroupedDevicesViewModel>();
                     return groupedDevicesVM.isEmpty
                         ? NoDataHintView()
                         : SliverList.builder(
-                          itemCount: groups.length,
-                          itemBuilder: (context, index) {
-                            final gvm = groups[index];
-                            return _buildGroupSection(context, gvm);
-                          },
-                        );
+                            itemCount: groups.length,
+                            itemBuilder: (context, index) {
+                              final gvm = groups[index];
+                              return _buildGroupSection(context, gvm);
+                            },
+                          );
                   },
                 ),
               ],
@@ -223,22 +222,21 @@ class DevicesScreen extends StatelessWidget {
           blendMode: BlendMode.srcATop,
           child: ImageFiltered(
             imageFilter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
-            child:
-                context.read<GroupedDevicesViewModel>().currentScene.imagePath != null
-                    ? Image.file(
-                      File(context.read<GroupedDevicesViewModel>().currentScene.imagePath!),
-                      fit: BoxFit.cover,
-                      height: double.infinity,
-                      width: double.infinity,
-                      alignment: Alignment.center,
-                    )
-                    : Image.asset(
-                      'assets/images/scenes/scene-default-noimage.jpg',
-                      fit: BoxFit.cover,
-                      height: double.infinity,
-                      width: double.infinity,
-                      alignment: Alignment.center,
-                    ),
+            child: context.read<GroupedDevicesViewModel>().currentScene.imagePath != null
+                ? Image.file(
+                    File(context.read<GroupedDevicesViewModel>().currentScene.imagePath!),
+                    fit: BoxFit.cover,
+                    height: double.infinity,
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                  )
+                : Image.asset(
+                    'assets/images/scenes/scene-default-noimage.jpg',
+                    fit: BoxFit.cover,
+                    height: double.infinity,
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                  ),
           ),
         ),
         stretchModes: [StretchMode.zoomBackground],
@@ -250,47 +248,41 @@ class DevicesScreen extends StatelessWidget {
   Widget _buildGroupSection(BuildContext context, GroupViewModel g) {
     return ChangeNotifierProvider<GroupViewModel>.value(
       value: g,
-      builder:
-          (context, child) => Selector<GroupViewModel, ({String name, bool isEmpty, bool isDummy, bool isBusy})>(
-            selector: (_, gvm) => (name: gvm.name, isEmpty: gvm.isEmpty, isDummy: gvm.isDummy, isBusy: gvm.isBusy),
-            builder: (context, groupData, child) {
-              if (groupData.isDummy && groupData.isEmpty) {
-                return SizedBox(height: 0);
-              } else {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                      height: 32,
-                      child: Row(
-                        children: [
-                          Text(
-                            groupData.name,
-                            textAlign: TextAlign.start,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const Spacer(),
-                          if (!groupData.isDummy)
-                            IconButton(
-                              icon: const Icon(Icons.edit, size: 24),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                              constraints: null,
-                              onPressed:
-                                  groupData.isDummy || groupData.isBusy
-                                      ? null
-                                      : () => _showEditGroupPage(context, g.model),
-                            ),
-                        ],
-                      ),
-                    ),
-                    const InGroupDeviceListView(),
-                  ],
-                );
-              }
-            },
-          ),
+      builder: (context, child) => Selector<GroupViewModel, ({String name, bool isEmpty, bool isDummy, bool isBusy})>(
+        selector: (_, gvm) => (name: gvm.name, isEmpty: gvm.isEmpty, isDummy: gvm.isDummy, isBusy: gvm.isBusy),
+        builder: (context, groupData, child) {
+          if (groupData.isDummy && groupData.isEmpty) {
+            return SizedBox(height: 0);
+          } else {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  height: 32,
+                  child: Row(
+                    children: [
+                      Text(groupData.name, textAlign: TextAlign.start, style: Theme.of(context).textTheme.titleMedium),
+                      const Spacer(),
+                      if (!groupData.isDummy)
+                        IconButton(
+                          icon: const Icon(Icons.edit, size: 24),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                          constraints: null,
+                          onPressed: groupData.isDummy || groupData.isBusy
+                              ? null
+                              : () => _showEditGroupPage(context, g.model),
+                        ),
+                    ],
+                  ),
+                ),
+                const InGroupDeviceListView(),
+              ],
+            );
+          }
+        },
+      ),
     );
   }
 

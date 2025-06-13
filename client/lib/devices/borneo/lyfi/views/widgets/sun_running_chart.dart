@@ -25,10 +25,12 @@ class SunRunningChart extends StatelessWidget {
         selector: (context, vm) => vm.deviceClock,
         shouldRebuild: (previous, next) => !previous.isEqualToSecond(next),
         builder: (context, clock, _) {
-          final double sunriseInstant =
-              sunInstants.isNotEmpty ? (sunInstants.first.instant.inSeconds / 3600.0).floorToDouble() * 3600 : 0;
-          final double sunsetInstant =
-              sunInstants.isNotEmpty ? (sunInstants.last.instant.inSeconds / 3600.0).ceilToDouble() * 3600 : 0;
+          final double sunriseInstant = sunInstants.isNotEmpty
+              ? (sunInstants.first.instant.inSeconds / 3600.0).floorToDouble() * 3600
+              : 0;
+          final double sunsetInstant = sunInstants.isNotEmpty
+              ? (sunInstants.last.instant.inSeconds / 3600.0).ceilToDouble() * 3600
+              : 0;
           return LyfiTimeLineChart(
             lineBarsData: buildLineData(),
             minX: sunriseInstant,

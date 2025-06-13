@@ -49,18 +49,17 @@ class GroupEditScreen extends StatelessWidget {
       ),
       SizedBox(height: 24),
       ElevatedButton(
-        onPressed:
-            vm.isBusy
-                ? null
-                : () async {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    _formKey.currentState!.save();
-                    await vm.submit();
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                    }
+        onPressed: vm.isBusy
+            ? null
+            : () async {
+                if (_formKey.currentState?.validate() ?? false) {
+                  _formKey.currentState!.save();
+                  await vm.submit();
+                  if (context.mounted) {
+                    Navigator.pop(context);
                   }
-                },
+                }
+              },
         child: Text(context.translate('Submit')),
       ),
     ];
@@ -128,26 +127,22 @@ class GroupEditScreen extends StatelessWidget {
     final GroupEditArguments args = ModalRoute.of(context)!.settings.arguments as GroupEditArguments;
 
     return ChangeNotifierProvider<GroupEditViewModel>(
-      create:
-          (context) => GroupEditViewModel(
-            context.read<GroupManager>(),
-            isCreation: args.isCreation,
-            model: args.model,
-            globalEventBus: context.read<EventBus>(),
-            logger: context.read<Logger>(),
-          ),
-      builder:
-          (context, child) => Scaffold(
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              title: Text(
-                args.isCreation ? context.translate('New Device Group') : context.translate('Edit Device Group'),
-              ),
-              actions: buildActions(context, args),
-            ),
-            body: buildBody(context),
-          ),
+      create: (context) => GroupEditViewModel(
+        context.read<GroupManager>(),
+        isCreation: args.isCreation,
+        model: args.model,
+        globalEventBus: context.read<EventBus>(),
+        logger: context.read<Logger>(),
+      ),
+      builder: (context, child) => Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          title: Text(args.isCreation ? context.translate('New Device Group') : context.translate('Edit Device Group')),
+          actions: buildActions(context, args),
+        ),
+        body: buildBody(context),
+      ),
     );
   }
 }

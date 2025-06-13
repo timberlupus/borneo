@@ -18,9 +18,8 @@ class SunEditorView extends StatelessWidget {
         if (vm.isInitialized) {
           return Selector<SunEditorViewModel, bool>(
             selector: (_, editor) => editor.canChangeColor,
-            builder:
-                (_, canChangeColor, _) =>
-                    BrightnessSliderList(context.read<SunEditorViewModel>(), disabled: !canChangeColor),
+            builder: (_, canChangeColor, _) =>
+                BrightnessSliderList(context.read<SunEditorViewModel>(), disabled: !canChangeColor),
           );
         } else {
           return Container();
@@ -42,8 +41,8 @@ class SunEditorView extends StatelessWidget {
   Widget buildGraph(BuildContext context) {
     return Selector<SunEditorViewModel, ({List<LyfiChannelInfo> channels, List<ScheduledInstant> instants})>(
       selector: (context, vm) => (channels: vm.parent.lyfiDeviceInfo.channels, instants: vm.sunInstants),
-      builder:
-          (context, selected, _) => SunRunningChart(sunInstants: selected.instants, channelInfoList: selected.channels),
+      builder: (context, selected, _) =>
+          SunRunningChart(sunInstants: selected.instants, channelInfoList: selected.channels),
     );
   }
 
@@ -53,21 +52,20 @@ class SunEditorView extends StatelessWidget {
 
     return ChangeNotifierProvider.value(
       value: currentEditor as SunEditorViewModel,
-      builder:
-          (context, child) => Column(
-            spacing: 16,
-            children: [
-              Container(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                padding: const EdgeInsets.all(0),
-                child: AspectRatio(
-                  aspectRatio: 2.75,
-                  child: Consumer<SunEditorViewModel>(builder: (conterxt, vm, _) => buildGraph(context)),
-                ),
-              ),
-              Expanded(child: buildSliders(context)),
-            ],
+      builder: (context, child) => Column(
+        spacing: 16,
+        children: [
+          Container(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            padding: const EdgeInsets.all(0),
+            child: AspectRatio(
+              aspectRatio: 2.75,
+              child: Consumer<SunEditorViewModel>(builder: (conterxt, vm, _) => buildGraph(context)),
+            ),
           ),
+          Expanded(child: buildSliders(context)),
+        ],
+      ),
     );
   }
 }

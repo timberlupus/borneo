@@ -115,12 +115,11 @@ class _RoutineCardContentState extends State<_RoutineCardContent> {
                 ),
                 Selector<RoutineSummaryViewModel, String>(
                   selector: (context, vm) => vm.name,
-                  builder:
-                      (_, routineName, child) => Text(
-                        routineName,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 14.0, color: fgColor),
-                      ),
+                  builder: (_, routineName, child) => Text(
+                    routineName,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 14.0, color: fgColor),
+                  ),
                 ),
                 Divider(height: 16, thickness: 1, color: fgColor.withValues(alpha: 0.2)),
                 Row(
@@ -133,16 +132,15 @@ class _RoutineCardContentState extends State<_RoutineCardContent> {
                     Spacer(),
                     Switch(
                       value: isActive,
-                      onChanged:
-                          widget.isBusy
-                              ? null
-                              : (v) async {
-                                if (v) {
-                                  await vm.executeRoutine();
-                                } else {
-                                  await vm.undoRoutine();
-                                }
-                              },
+                      onChanged: widget.isBusy
+                          ? null
+                          : (v) async {
+                              if (v) {
+                                await vm.executeRoutine();
+                              } else {
+                                await vm.undoRoutine();
+                              }
+                            },
                       activeColor: colorScheme.primary,
                       inactiveThumbColor: colorScheme.primary,
                       inactiveTrackColor: colorScheme.surfaceBright,
@@ -156,7 +154,10 @@ class _RoutineCardContentState extends State<_RoutineCardContent> {
         ),
         if (_showProgress && widget.isBusy)
           Positioned.fill(
-            child: Container(color: bgColor.withValues(alpha: 0.6), child: Center(child: CircularProgressIndicator())),
+            child: Container(
+              color: bgColor.withValues(alpha: 0.6),
+              child: Center(child: CircularProgressIndicator()),
+            ),
           ),
       ],
     );

@@ -16,8 +16,11 @@ import 'package:cancellation_token/cancellation_token.dart';
 
 abstract class BaseLyfiDriver extends IDriver {
   @override
-  Future<WotAdapter> createWotAdapter(Device device, DeviceEventBus deviceEvents,
-      {CancellationToken? cancelToken}) async {
+  Future<WotAdapter> createWotAdapter(
+    Device device,
+    DeviceEventBus deviceEvents, {
+    CancellationToken? cancelToken,
+  }) async {
     final borneoApi = this as IBorneoDeviceApi;
     final lyfiApi = this as ILyfiDeviceApi;
     final borneoDeviceInfo = borneoApi.getGeneralDeviceInfo(device);
@@ -33,40 +36,55 @@ abstract class BaseLyfiDriver extends IDriver {
     );
     wotDevice.addProperty(
       WotLyfiStateProperty(
-          value: lyfiStatus.state.name,
-          valueForwarder: (update) => lyfiApi.switchState(device, LyfiState.fromString(update))),
+        value: lyfiStatus.state.name,
+        valueForwarder: (update) => lyfiApi.switchState(device, LyfiState.fromString(update)),
+      ),
     );
     wotDevice.addProperty(
       WotLyfiModeProperty(
-          value: lyfiStatus.mode.name,
-          valueForwarder: (update) => lyfiApi.switchMode(device, LyfiMode.fromString(update))),
+        value: lyfiStatus.mode.name,
+        valueForwarder: (update) => lyfiApi.switchMode(device, LyfiMode.fromString(update)),
+      ),
     );
 
     if (generalStatus.temperature != null) {
-      wotDevice.addProperty(WotOptionalIntegerProperty(
-          name: 'temperature', title: 'Temperature', value: generalStatus.temperature, unit: '℃', readOnly: true));
+      wotDevice.addProperty(
+        WotOptionalIntegerProperty(
+          name: 'temperature',
+          title: 'Temperature',
+          value: generalStatus.temperature,
+          unit: '℃',
+          readOnly: true,
+        ),
+      );
     }
 
-    wotDevice.addProperty(WotBooleanProperty(
-      name: 'isStandaloneController',
-      title: 'Is Standalone Controller',
-      value: lyfiDeviecInfo.isStandaloneController,
-      readOnly: true,
-    ));
+    wotDevice.addProperty(
+      WotBooleanProperty(
+        name: 'isStandaloneController',
+        title: 'Is Standalone Controller',
+        value: lyfiDeviecInfo.isStandaloneController,
+        readOnly: true,
+      ),
+    );
 
-    wotDevice.addProperty(WotOptionalNumberProperty(
-      name: 'nominalPower',
-      title: 'Nominal Power in Watts',
-      value: lyfiDeviecInfo.nominalPower,
-      readOnly: true,
-    ));
+    wotDevice.addProperty(
+      WotOptionalNumberProperty(
+        name: 'nominalPower',
+        title: 'Nominal Power in Watts',
+        value: lyfiDeviecInfo.nominalPower,
+        readOnly: true,
+      ),
+    );
 
-    wotDevice.addProperty(WotIntegerProperty(
-      name: 'channelCount',
-      title: 'Channel Count',
-      value: lyfiDeviecInfo.channelCount,
-      readOnly: true,
-    ));
+    wotDevice.addProperty(
+      WotIntegerProperty(
+        name: 'channelCount',
+        title: 'Channel Count',
+        value: lyfiDeviecInfo.channelCount,
+        readOnly: true,
+      ),
+    );
 
     final adapter = WotAdapter(wotDevice, deviceEvents: deviceEvents);
 

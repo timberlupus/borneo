@@ -188,11 +188,7 @@ class BorneoDeviceUpgradeInfo {
   final Version newVersion;
   final bool canUpgrade;
 
-  const BorneoDeviceUpgradeInfo({
-    required this.runningVersion,
-    required this.newVersion,
-    required this.canUpgrade,
-  });
+  const BorneoDeviceUpgradeInfo({required this.runningVersion, required this.newVersion, required this.canUpgrade});
 }
 
 class BorneoRtcLocalNtpResponse {
@@ -200,18 +196,10 @@ class BorneoRtcLocalNtpResponse {
   final int t2;
   final int t3;
 
-  const BorneoRtcLocalNtpResponse({
-    required this.t1,
-    required this.t2,
-    required this.t3,
-  });
+  const BorneoRtcLocalNtpResponse({required this.t1, required this.t2, required this.t3});
 
   factory BorneoRtcLocalNtpResponse.fromMap(Map map) {
-    return BorneoRtcLocalNtpResponse(
-      t1: map['t1'] as int,
-      t2: map['t2'] as int,
-      t3: map['t3'] as int,
-    );
+    return BorneoRtcLocalNtpResponse(t1: map['t1'] as int, t2: map['t2'] as int, t3: map['t3'] as int);
   }
 }
 
@@ -267,8 +255,11 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   @override
   Future setOnOff(Device dev, bool on) async {
     final dd = dev.driverData! as BorneoCoapDriverData;
-    final response = await dd.coap
-        .putBytes(BorneoPaths.power, payload: simple_cbor.cbor.encode(on), accept: CoapMediaType.applicationCbor);
+    final response = await dd.coap.putBytes(
+      BorneoPaths.power,
+      payload: simple_cbor.cbor.encode(on),
+      accept: CoapMediaType.applicationCbor,
+    );
     if (!response.isSuccess) {
       throw DeviceError("Failed to post to `${response.location}`", dev);
     }
@@ -337,8 +328,11 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   @override
   Future<void> factoryReset(Device dev) async {
     final dd = dev.driverData! as BorneoCoapDriverData;
-    final response = await dd.coap.postBytes(BorneoPaths.factoryReset,
-        payload: simple_cbor.cbor.encode(null), accept: CoapMediaType.applicationCbor);
+    final response = await dd.coap.postBytes(
+      BorneoPaths.factoryReset,
+      payload: simple_cbor.cbor.encode(null),
+      accept: CoapMediaType.applicationCbor,
+    );
     if (!response.isSuccess) {
       throw DeviceError("Failed to put `${response.location}`", dev);
     }
@@ -383,8 +377,11 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   @override
   Future<void> setTimeZone(Device dev, String timezone) async {
     final dd = dev.driverData! as BorneoCoapDriverData;
-    final response = await dd.coap.putBytes(BorneoPaths.timezone,
-        payload: simple_cbor.cbor.encode(timezone), accept: CoapMediaType.applicationCbor);
+    final response = await dd.coap.putBytes(
+      BorneoPaths.timezone,
+      payload: simple_cbor.cbor.encode(timezone),
+      accept: CoapMediaType.applicationCbor,
+    );
     if (!response.isSuccess) {
       throw DeviceError("Failed to put to `${response.location}`", dev);
     }

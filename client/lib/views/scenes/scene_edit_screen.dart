@@ -20,29 +20,28 @@ class SceneEditScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ChangeNotifierProvider<SceneEditViewModel>(
     create: createViewModel,
-    builder:
-        (context, child) => FutureBuilder(
-          future: context.read<SceneEditViewModel>().initFuture,
-          builder: (context, snapshot) {
-            final vm = context.read<SceneEditViewModel>();
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text(context.translate('Error: {errMsg}', nArgs: {'errMsg': snapshot.error.toString()})),
-              );
-            } else {
-              return Scaffold(
-                appBar: AppBar(
-                  title: Text(vm.isCreation ? context.translate('New Scene') : context.translate('Edit Scene')),
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                  actions: buildActions(context, args),
-                ),
-                body: buildBody(context),
-              );
-            }
-          },
-        ),
+    builder: (context, child) => FutureBuilder(
+      future: context.read<SceneEditViewModel>().initFuture,
+      builder: (context, snapshot) {
+        final vm = context.read<SceneEditViewModel>();
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(
+            child: Text(context.translate('Error: {errMsg}', nArgs: {'errMsg': snapshot.error.toString()})),
+          );
+        } else {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(vm.isCreation ? context.translate('New Scene') : context.translate('Edit Scene')),
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              actions: buildActions(context, args),
+            ),
+            body: buildBody(context),
+          );
+        }
+      },
+    ),
   );
 
   SceneEditViewModel createViewModel(BuildContext context) {
@@ -111,20 +110,19 @@ class SceneEditScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                         color: Theme.of(context).colorScheme.surfaceVariant,
                       ),
-                      child:
-                          vm.imagePath != null && vm.imagePath!.isNotEmpty && File(vm.imagePath!).existsSync()
-                              ? ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.file(
-                                  File(vm.imagePath!),
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  height: 120,
-                                ),
-                              )
-                              : Center(
-                                child: Icon(Icons.add_a_photo_outlined, size: 40, color: Theme.of(context).hintColor),
+                      child: vm.imagePath != null && vm.imagePath!.isNotEmpty && File(vm.imagePath!).existsSync()
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.file(
+                                File(vm.imagePath!),
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: 120,
                               ),
+                            )
+                          : Center(
+                              child: Icon(Icons.add_a_photo_outlined, size: 40, color: Theme.of(context).hintColor),
+                            ),
                     ),
                   ),
                   // 删除图片按钮
@@ -183,18 +181,17 @@ class SceneEditScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed:
-                      vm.isBusy
-                          ? null
-                          : () async {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              _formKey.currentState!.save();
-                              await vm.submit();
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                              }
+                  onPressed: vm.isBusy
+                      ? null
+                      : () async {
+                          if (_formKey.currentState?.validate() ?? false) {
+                            _formKey.currentState!.save();
+                            await vm.submit();
+                            if (context.mounted) {
+                              Navigator.pop(context);
                             }
-                          },
+                          }
+                        },
                   child: Text(context.translate('Submit')),
                 ),
               ),
@@ -227,27 +224,26 @@ class SceneEditScreen extends StatelessWidget {
     return [
       if (vm.deletionAvailable)
         IconButton(
-          onPressed:
-              vm.isBusy
-                  ? null
-                  : () {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return ConfirmationSheet(
-                          message: context.translate(
-                            'Are you sure you want to delete this device group? The devices within this group will not be deleted but will be moved to the "Ungrouped" group.',
-                          ),
-                          okPressed: () async {
-                            await vm.delete();
-                            if (context.mounted) {
-                              Navigator.of(context).pop(true);
-                            }
-                          },
-                        );
-                      },
-                    );
-                  },
+          onPressed: vm.isBusy
+              ? null
+              : () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return ConfirmationSheet(
+                        message: context.translate(
+                          'Are you sure you want to delete this device group? The devices within this group will not be deleted but will be moved to the "Ungrouped" group.',
+                        ),
+                        okPressed: () async {
+                          await vm.delete();
+                          if (context.mounted) {
+                            Navigator.of(context).pop(true);
+                          }
+                        },
+                      );
+                    },
+                  );
+                },
           icon: Icon(Icons.delete_outline),
         ),
     ];

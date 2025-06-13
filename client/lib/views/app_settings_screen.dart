@@ -42,18 +42,17 @@ class AppSettingsScreen extends StatelessWidget {
           title: Text(context.translate('Theme')),
           trailing: Selector<AppSettingsViewModel, ThemeMode>(
             selector: (_, vm) => vm.themeMode,
-            builder:
-                (context, mode, _) => DropdownButton<ThemeMode>(
-                  value: mode,
-                  onChanged: (val) {
-                    if (val != null) context.read<AppSettingsViewModel>().changeBrightness(val);
-                  },
-                  items: [
-                    DropdownMenuItem(value: ThemeMode.system, child: Text(context.translate('System'))),
-                    DropdownMenuItem(value: ThemeMode.light, child: Text(context.translate('Light'))),
-                    DropdownMenuItem(value: ThemeMode.dark, child: Text(context.translate('Dark'))),
-                  ],
-                ),
+            builder: (context, mode, _) => DropdownButton<ThemeMode>(
+              value: mode,
+              onChanged: (val) {
+                if (val != null) context.read<AppSettingsViewModel>().changeBrightness(val);
+              },
+              items: [
+                DropdownMenuItem(value: ThemeMode.system, child: Text(context.translate('System'))),
+                DropdownMenuItem(value: ThemeMode.light, child: Text(context.translate('Light'))),
+                DropdownMenuItem(value: ThemeMode.dark, child: Text(context.translate('Dark'))),
+              ],
+            ),
           ),
         ),
         ListTile(
@@ -61,20 +60,15 @@ class AppSettingsScreen extends StatelessWidget {
           title: Text(context.translate('Language')),
           trailing: Selector<AppSettingsViewModel, Locale?>(
             selector: (_, vm) => vm.locale,
-            builder:
-                (context, locale, _) => DropdownButton<Locale>(
-                  value: locale ?? const Locale('en', 'US'),
-                  onChanged: (val) {
-                    if (val != null) context.read<AppSettingsViewModel>().changeLocale(val);
-                  },
-                  items:
-                      kSupportedLocales.map((loc) {
-                        return DropdownMenuItem(
-                          value: loc,
-                          child: Text(loc.languageCode == 'zh' ? '中文 (简体)' : 'English (US)'),
-                        );
-                      }).toList(),
-                ),
+            builder: (context, locale, _) => DropdownButton<Locale>(
+              value: locale ?? const Locale('en', 'US'),
+              onChanged: (val) {
+                if (val != null) context.read<AppSettingsViewModel>().changeLocale(val);
+              },
+              items: kSupportedLocales.map((loc) {
+                return DropdownMenuItem(value: loc, child: Text(loc.languageCode == 'zh' ? '中文 (简体)' : 'English (US)'));
+              }).toList(),
+            ),
           ),
         ),
       ],

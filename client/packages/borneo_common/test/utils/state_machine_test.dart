@@ -8,12 +8,17 @@ void main() {
     setUp(() {
       fsm = StateMachine<String>('idle');
 
-      fsm!.addState('idle',
-          onEnter: () async => print('Entering idle state...'), onExit: () async => print('Exiting idle state...'));
+      fsm!.addState(
+        'idle',
+        onEnter: () async => print('Entering idle state...'),
+        onExit: () async => print('Exiting idle state...'),
+      );
 
-      fsm!.addState('working',
-          onEnter: () async => print('Entering working state...'),
-          onExit: () async => print('Exiting working state...'));
+      fsm!.addState(
+        'working',
+        onEnter: () async => print('Entering working state...'),
+        onExit: () async => print('Exiting working state...'),
+      );
 
       fsm!.addTransition('idle', 'start', 'working', () async {
         await Future.delayed(Duration(milliseconds: 100));
@@ -47,8 +52,10 @@ void main() {
       }, guard: () => false); // Guard always fails
 
       await fsm!.trigger('start'); // Transition to working
-      expect(() async => await fsm!.trigger('guardedFinish'),
-          throwsA(isA<ArgumentError>())); // Attempt to use guarded transition
+      expect(
+        () async => await fsm!.trigger('guardedFinish'),
+        throwsA(isA<ArgumentError>()),
+      ); // Attempt to use guarded transition
 
       expect(fsm!.currentState, 'working'); // Should still be in working state
     });

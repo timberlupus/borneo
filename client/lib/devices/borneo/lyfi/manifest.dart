@@ -22,14 +22,13 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         name: kLyfiDriverName,
         driverDescriptor: borneoLyfiDriverDescriptor,
         detailsViewBuilder: (_) => LyfiView(),
-        detailsViewModelBuilder:
-            (context, deviceID) => LyfiViewModel(
-              deviceID: deviceID,
-              deviceManager: context.read<DeviceManager>(),
-              globalEventBus: context.read<EventBus>(),
-              notification: context.read<IAppNotificationService>(),
-              logger: context.read<Logger>(),
-            ),
+        detailsViewModelBuilder: (context, deviceID) => LyfiViewModel(
+          deviceID: deviceID,
+          deviceManager: context.read<DeviceManager>(),
+          globalEventBus: context.read<EventBus>(),
+          notification: context.read<IAppNotificationService>(),
+          logger: context.read<Logger>(),
+        ),
         deviceIconBuilder: _buildDeviceIcon,
         primaryStateIconBuilder: _buildPrimaryStateIcon,
         secondaryStatesBuilder: _secondaryStatesBuilder,
@@ -40,10 +39,9 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
     return Icon(
       Icons.light_outlined,
       size: iconSize,
-      color:
-          isOnline
-              ? Theme.of(context).colorScheme.onPrimaryContainer
-              : Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.38),
+      color: isOnline
+          ? Theme.of(context).colorScheme.onPrimaryContainer
+          : Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.38),
     );
   }
 

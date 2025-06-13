@@ -19,17 +19,16 @@ class SettingsScreen extends StatelessWidget {
     final items = _buildSettingItems(context);
     return ChangeNotifierProvider.value(
       value: vm,
-      builder:
-          (context, child) => Scaffold(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            appBar: AppBar(title: Text(context.translate('Settings'))),
-            body: ListView.separated(
-              shrinkWrap: true,
-              itemBuilder: (context, index) => items[index],
-              itemCount: items.length,
-              separatorBuilder: (context, index) => SizedBox(height: 1),
-            ),
-          ),
+      builder: (context, child) => Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(title: Text(context.translate('Settings'))),
+        body: ListView.separated(
+          shrinkWrap: true,
+          itemBuilder: (context, index) => items[index],
+          itemCount: items.length,
+          separatorBuilder: (context, index) => SizedBox(height: 1),
+        ),
+      ),
     );
   }
 
@@ -48,10 +47,8 @@ class SettingsScreen extends StatelessWidget {
 
   Future<void> _pickLocation(BuildContext context, SettingsViewModel vm) async {
     final route = MaterialPageRoute(
-      builder:
-          (context) => MapLocationPicker(
-            initialLocation: vm.location != null ? LatLng(vm.location!.lat, vm.location!.lng) : null,
-          ),
+      builder: (context) =>
+          MapLocationPicker(initialLocation: vm.location != null ? LatLng(vm.location!.lat, vm.location!.lng) : null),
     );
     try {
       final selectedLocation = await Navigator.push(context, route);
@@ -113,53 +110,51 @@ class SettingsScreen extends StatelessWidget {
 
       Selector<SettingsViewModel, ({bool canUpdate, String? tz, DateTime timestamp})>(
         selector: (_, vm) => (canUpdate: vm.canUpdateTimezone, tz: vm.timezone, timestamp: vm.borneoStatus.timestamp),
-        builder:
-            (context, map, _) => ListTile(
-              dense: true,
-              tileColor: tileColor,
-              leading: const Icon(Icons.access_time_outlined),
-              title: Text(context.translate('Device time & time zone')),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(map.timestamp.toString()),
-                  Text(map.tz != null ? map.tz! : context.translate('Unknown time zone')),
-                ],
-              ),
-              trailing: rightChevron,
-              onTap: map.canUpdate ? vm.updateTimezone : null,
-            ),
+        builder: (context, map, _) => ListTile(
+          dense: true,
+          tileColor: tileColor,
+          leading: const Icon(Icons.access_time_outlined),
+          title: Text(context.translate('Device time & time zone')),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(map.timestamp.toString()),
+              Text(map.tz != null ? map.tz! : context.translate('Unknown time zone')),
+            ],
+          ),
+          trailing: rightChevron,
+          onTap: map.canUpdate ? vm.updateTimezone : null,
+        ),
       ),
 
       Selector<SettingsViewModel, ({bool canUpdate, PowerBehavior behavior})>(
         selector: (_, vm) => (canUpdate: vm.canUpdatePowerBehavior, behavior: vm.powerBehavior),
-        builder:
-            (context, map, _) => ListTile(
-              dense: true,
-              leading: const Icon(Icons.settings_power_outlined),
-              tileColor: tileColor,
-              title: Text(context.translate('Power status at startup')),
-              trailing: DropdownButton<PowerBehavior>(
-                value: map.behavior,
-                items: [
-                  DropdownMenuItem<PowerBehavior>(
-                    value: PowerBehavior.autoPowerOn,
-                    child: Text("Keep on", style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<PowerBehavior>(
-                    value: PowerBehavior.maintainPowerOff,
-                    child: Text("Keep off", style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<PowerBehavior>(
-                    value: PowerBehavior.lastPowerState,
-                    child: Text("Maintain last", style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                ],
-                onChanged: (PowerBehavior? newValue) async {
-                  await vm.updatePowerBehavior(newValue!);
-                },
+        builder: (context, map, _) => ListTile(
+          dense: true,
+          leading: const Icon(Icons.settings_power_outlined),
+          tileColor: tileColor,
+          title: Text(context.translate('Power status at startup')),
+          trailing: DropdownButton<PowerBehavior>(
+            value: map.behavior,
+            items: [
+              DropdownMenuItem<PowerBehavior>(
+                value: PowerBehavior.autoPowerOn,
+                child: Text("Keep on", style: Theme.of(context).textTheme.bodySmall),
               ),
-            ),
+              DropdownMenuItem<PowerBehavior>(
+                value: PowerBehavior.maintainPowerOff,
+                child: Text("Keep off", style: Theme.of(context).textTheme.bodySmall),
+              ),
+              DropdownMenuItem<PowerBehavior>(
+                value: PowerBehavior.lastPowerState,
+                child: Text("Maintain last", style: Theme.of(context).textTheme.bodySmall),
+              ),
+            ],
+            onChanged: (PowerBehavior? newValue) async {
+              await vm.updatePowerBehavior(newValue!);
+            },
+          ),
+        ),
       ),
 
       ListTile(
@@ -177,123 +172,116 @@ class SettingsScreen extends StatelessWidget {
       // Location
       Selector<SettingsViewModel, ({bool canUpdate, GeoLocation? location})>(
         selector: (_, vm) => (canUpdate: vm.canUpdateGeoLocation, location: vm.location),
-        builder:
-            (context, map, _) => ListTile(
-              dense: true,
-              tileColor: tileColor,
-              leading: const Icon(Icons.location_pin),
-              title: Text('Location for sun & moon simulation'),
-              subtitle:
-                  map.location != null
-                      ? Text("(${vm.location!.lat.toStringAsFixed(3)}, ${vm.location!.lng.toStringAsFixed(3)})")
-                      : Text('Unknown'),
-              trailing: rightChevron,
-              onTap:
-                  map.canUpdate
-                      ? () async {
-                        if (context.mounted) {
-                          await _pickLocation(context, vm);
-                        }
-                      }
-                      : null,
-            ),
+        builder: (context, map, _) => ListTile(
+          dense: true,
+          tileColor: tileColor,
+          leading: const Icon(Icons.location_pin),
+          title: Text('Location for sun & moon simulation'),
+          subtitle: map.location != null
+              ? Text("(${vm.location!.lat.toStringAsFixed(3)}, ${vm.location!.lng.toStringAsFixed(3)})")
+              : Text('Unknown'),
+          trailing: rightChevron,
+          onTap: map.canUpdate
+              ? () async {
+                  if (context.mounted) {
+                    await _pickLocation(context, vm);
+                  }
+                }
+              : null,
+        ),
       ),
 
       // Curve
       Selector<SettingsViewModel, ({bool canUpdate, LedCorrectionMethod correctionMethod})>(
         selector: (_, vm) => (canUpdate: vm.canUpdateCorrectionMethod, correctionMethod: vm.correctionMethod),
-        builder:
-            (context, map, _) => ListTile(
-              dense: true,
-              tileColor: tileColor,
-              title: Text('Correction curve'),
-              trailing: Selector<SettingsViewModel, LedCorrectionMethod>(
-                selector: (context, map) => map.correctionMethod,
-                builder:
-                    (context, selectedPowerBehavior, child) => DropdownButton<LedCorrectionMethod>(
-                      value: map.correctionMethod,
-                      items: [
-                        DropdownMenuItem<LedCorrectionMethod>(
-                          value: LedCorrectionMethod.log,
-                          child: Text("Logarithmic", style: Theme.of(context).textTheme.bodySmall),
-                        ),
-                        DropdownMenuItem<LedCorrectionMethod>(
-                          value: LedCorrectionMethod.linear,
-                          child: Text("Linear", style: Theme.of(context).textTheme.bodySmall),
-                        ),
-                        DropdownMenuItem<LedCorrectionMethod>(
-                          value: LedCorrectionMethod.exp,
-                          child: Text("Exponential", style: Theme.of(context).textTheme.bodySmall),
-                        ),
-                        DropdownMenuItem<LedCorrectionMethod>(
-                          value: LedCorrectionMethod.gamma,
-                          child: Text("Gamma", style: Theme.of(context).textTheme.bodySmall),
-                        ),
-                        DropdownMenuItem<LedCorrectionMethod>(
-                          value: LedCorrectionMethod.cie1931,
-                          child: Text("CIE1931", style: Theme.of(context).textTheme.bodySmall),
-                        ),
-                      ],
-                      onChanged: (LedCorrectionMethod? newValue) async {
-                        await vm.updateLedCorrectionMethod(newValue!);
-                      },
-                    ),
-              ),
+        builder: (context, map, _) => ListTile(
+          dense: true,
+          tileColor: tileColor,
+          title: Text('Correction curve'),
+          trailing: Selector<SettingsViewModel, LedCorrectionMethod>(
+            selector: (context, map) => map.correctionMethod,
+            builder: (context, selectedPowerBehavior, child) => DropdownButton<LedCorrectionMethod>(
+              value: map.correctionMethod,
+              items: [
+                DropdownMenuItem<LedCorrectionMethod>(
+                  value: LedCorrectionMethod.log,
+                  child: Text("Logarithmic", style: Theme.of(context).textTheme.bodySmall),
+                ),
+                DropdownMenuItem<LedCorrectionMethod>(
+                  value: LedCorrectionMethod.linear,
+                  child: Text("Linear", style: Theme.of(context).textTheme.bodySmall),
+                ),
+                DropdownMenuItem<LedCorrectionMethod>(
+                  value: LedCorrectionMethod.exp,
+                  child: Text("Exponential", style: Theme.of(context).textTheme.bodySmall),
+                ),
+                DropdownMenuItem<LedCorrectionMethod>(
+                  value: LedCorrectionMethod.gamma,
+                  child: Text("Gamma", style: Theme.of(context).textTheme.bodySmall),
+                ),
+                DropdownMenuItem<LedCorrectionMethod>(
+                  value: LedCorrectionMethod.cie1931,
+                  child: Text("CIE1931", style: Theme.of(context).textTheme.bodySmall),
+                ),
+              ],
+              onChanged: (LedCorrectionMethod? newValue) async {
+                await vm.updateLedCorrectionMethod(newValue!);
+              },
             ),
+          ),
+        ),
       ),
 
       Selector<SettingsViewModel, ({bool canUpdate, Duration duration})>(
         selector: (_, vm) => (canUpdate: vm.canUpdateTemporaryDuration, duration: vm.temporaryDuration),
-        builder:
-            (context, map, _) => ListTile(
-              dense: true,
-              tileColor: tileColor,
-              title: Text('Temporary light on duration'),
-              trailing: Selector<SettingsViewModel, Duration>(
-                selector: (context, map) => map.temporaryDuration,
-                builder:
-                    (context, selectedPowerBehavior, child) => DropdownButton<Duration>(
-                      value: map.duration,
-                      items: [
-                        DropdownMenuItem<Duration>(
-                          value: Duration(minutes: 5),
-                          child: Text("5 minutes", style: Theme.of(context).textTheme.bodySmall),
-                        ),
-                        DropdownMenuItem<Duration>(
-                          value: Duration(minutes: 10),
-                          child: Text("10 minutes", style: Theme.of(context).textTheme.bodySmall),
-                        ),
-                        DropdownMenuItem<Duration>(
-                          value: Duration(minutes: 20),
-                          child: Text("20 minutes", style: Theme.of(context).textTheme.bodySmall),
-                        ),
-                        DropdownMenuItem<Duration>(
-                          value: Duration(hours: 1),
-                          child: Text("1 hour", style: Theme.of(context).textTheme.bodySmall),
-                        ),
-                        DropdownMenuItem<Duration>(
-                          value: Duration(hours: 2),
-                          child: Text("2 hour", style: Theme.of(context).textTheme.bodySmall),
-                        ),
-                        DropdownMenuItem<Duration>(
-                          value: Duration(hours: 4),
-                          child: Text("4 hour", style: Theme.of(context).textTheme.bodySmall),
-                        ),
-                        DropdownMenuItem<Duration>(
-                          value: Duration(hours: 8),
-                          child: Text("8 hour", style: Theme.of(context).textTheme.bodySmall),
-                        ),
-                        DropdownMenuItem<Duration>(
-                          value: Duration(hours: 12),
-                          child: Text("12 hour", style: Theme.of(context).textTheme.bodySmall),
-                        ),
-                      ],
-                      onChanged: (Duration? newValue) async {
-                        await vm.updateTemporaryDuration(newValue!);
-                      },
-                    ),
-              ),
+        builder: (context, map, _) => ListTile(
+          dense: true,
+          tileColor: tileColor,
+          title: Text('Temporary light on duration'),
+          trailing: Selector<SettingsViewModel, Duration>(
+            selector: (context, map) => map.temporaryDuration,
+            builder: (context, selectedPowerBehavior, child) => DropdownButton<Duration>(
+              value: map.duration,
+              items: [
+                DropdownMenuItem<Duration>(
+                  value: Duration(minutes: 5),
+                  child: Text("5 minutes", style: Theme.of(context).textTheme.bodySmall),
+                ),
+                DropdownMenuItem<Duration>(
+                  value: Duration(minutes: 10),
+                  child: Text("10 minutes", style: Theme.of(context).textTheme.bodySmall),
+                ),
+                DropdownMenuItem<Duration>(
+                  value: Duration(minutes: 20),
+                  child: Text("20 minutes", style: Theme.of(context).textTheme.bodySmall),
+                ),
+                DropdownMenuItem<Duration>(
+                  value: Duration(hours: 1),
+                  child: Text("1 hour", style: Theme.of(context).textTheme.bodySmall),
+                ),
+                DropdownMenuItem<Duration>(
+                  value: Duration(hours: 2),
+                  child: Text("2 hour", style: Theme.of(context).textTheme.bodySmall),
+                ),
+                DropdownMenuItem<Duration>(
+                  value: Duration(hours: 4),
+                  child: Text("4 hour", style: Theme.of(context).textTheme.bodySmall),
+                ),
+                DropdownMenuItem<Duration>(
+                  value: Duration(hours: 8),
+                  child: Text("8 hour", style: Theme.of(context).textTheme.bodySmall),
+                ),
+                DropdownMenuItem<Duration>(
+                  value: Duration(hours: 12),
+                  child: Text("12 hour", style: Theme.of(context).textTheme.bodySmall),
+                ),
+              ],
+              onChanged: (Duration? newValue) async {
+                await vm.updateTemporaryDuration(newValue!);
+              },
             ),
+          ),
+        ),
       ),
 
       // Version & upgrade group

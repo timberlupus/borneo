@@ -120,16 +120,12 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   void dispose() {}
 
   Future<String> _getCompatible(CoapClient coap) async {
-    final compatible = await coap.getCbor<String>(
-      BorneoPaths.compatible,
-    );
+    final compatible = await coap.getCbor<String>(BorneoPaths.compatible);
     return compatible;
   }
 
   Future<Version> _getFirmwareVersion(CoapClient coap) async {
-    final fwver = await coap.getCbor<String>(
-      BorneoPaths.firmwareVersion,
-    );
+    final fwver = await coap.getCbor<String>(BorneoPaths.firmwareVersion);
     return Version.parse(fwver);
   }
 
