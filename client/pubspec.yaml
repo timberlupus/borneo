@@ -24,7 +24,7 @@ workspace:
   - packages/borneo_kernel_abstractions
 
 environment:
-  sdk: ^3.7.0
+  sdk: ^3.8.1
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -74,7 +74,7 @@ dependencies:
   shared_preferences: ^2.5.2
   datetime_picker_formfield_new: ^2.1.0
   flutter_skeleton_ui: ^0.0.6
-  flutter_gettext: ^2.0.1
+  flutter_gettext: ^2.1.0
   progressive_time_picker: ^1.0.3
   flutter_timezone: ^4.1.0
   geolocator: ^14.0.0

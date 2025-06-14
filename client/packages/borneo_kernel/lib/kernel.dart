@@ -131,12 +131,7 @@ final class DefaultKernel implements IKernel {
   }
 
   @override
-  Future<bool> tryBind(
-    Device device,
-    String driverID, {
-    Duration? timeout,
-    CancellationToken? cancelToken,
-  }) async {
+  Future<bool> tryBind(Device device, String driverID, {Duration? timeout, CancellationToken? cancelToken}) async {
     if (isBound(device.id)) {
       return true;
     }
@@ -175,8 +170,9 @@ final class DefaultKernel implements IKernel {
       // Load unused the driver
       final driver = _ensureDriverActivated(driverID);
 
-      final driverInitialized =
-          await driver.probe(device, _events, cancelToken: cancelToken).timeout(timeout ?? kLocalProbeTimeOut);
+      final driverInitialized = await driver
+          .probe(device, _events, cancelToken: cancelToken)
+          .timeout(timeout ?? kLocalProbeTimeOut);
 
       if (driverInitialized) {
         // Try to activate device
@@ -258,52 +254,61 @@ final class DefaultKernel implements IKernel {
       return;
     }
     try {
-      await _deviceOpLock.synchronized(() async {
-        final futures = <Future<bool>>[];
+      await _deviceOpLock
+          .synchronized(() async {
+            final futures = <Future<bool>>[];
 
-        // BoundDevices
-        {
-          final devices = <BoundDevice>[];
-          for (final bd in _boundDevices.values) {
-            if (_pollIDList.contains(bd.device.id)) {
-              futures
-                  .add(_tryDoHeartBeat(bd, kHeartbeatPollingInterval).asCancellable(_heartbeatPollingTaskCancelToken));
-              devices.add(bd);
+            // BoundDevices
+            {
+              final devices = <BoundDevice>[];
+              for (final bd in _boundDevices.values) {
+                if (_pollIDList.contains(bd.device.id)) {
+                  futures.add(
+                    _tryDoHeartBeat(bd, kHeartbeatPollingInterval).asCancellable(_heartbeatPollingTaskCancelToken),
+                  );
+                  devices.add(bd);
+                }
+              }
+
+              _logger.i('Polling heartbeat for (${devices.length}) bound devices...');
+              final results = await Future.wait(
+                futures,
+              ).timeout(kHeartbeatPollingInterval).asCancellable(_heartbeatPollingTaskCancelToken);
+              for (int i = 0; i < results.length; i++) {
+                if (!results[i]) {
+                  _logger.w('The device(${devices[i].device}) is not responding.');
+                  _events.fire(DeviceOfflineEvent(devices[i].device));
+                }
+              }
             }
-          }
 
-          _logger.i('Polling heartbeat for (${devices.length}) bound devices...');
-          final results = await Future.wait(futures)
-              .timeout(kHeartbeatPollingInterval)
-              .asCancellable(_heartbeatPollingTaskCancelToken);
-          for (int i = 0; i < results.length; i++) {
-            if (!results[i]) {
-              _logger.w('The device(${devices[i].device}) is not responding.');
-              _events.fire(DeviceOfflineEvent(devices[i].device));
+            // UnboundDevices
+            futures.clear();
+            final unboundDeviceDescriptors = _registeredDevices.values.where((x) => !isBound(x.device.id)).toList();
+            for (final descriptor in unboundDeviceDescriptors) {
+              futures.add(
+                tryBind(
+                  descriptor.device,
+                  descriptor.driverID,
+                  timeout: kLocalProbeTimeOut,
+                  cancelToken: _heartbeatPollingTaskCancelToken,
+                ),
+              );
             }
-          }
-        }
-
-        // UnboundDevices
-        futures.clear();
-        final unboundDeviceDescriptors = _registeredDevices.values.where((x) => !isBound(x.device.id)).toList();
-        for (final descriptor in unboundDeviceDescriptors) {
-          futures.add(tryBind(descriptor.device, descriptor.driverID,
-              timeout: kLocalProbeTimeOut, cancelToken: _heartbeatPollingTaskCancelToken));
-        }
-        _logger.i('Polling heartbeat for (${unboundDeviceDescriptors.length}) unbound devices...');
-        final boundResults = await Future.wait(futures)
-            .timeout(kHeartbeatPollingInterval)
-            .asCancellable(_heartbeatPollingTaskCancelToken);
-        for (int i = 0; i < boundResults.length; i++) {
-          /*
+            _logger.i('Polling heartbeat for (${unboundDeviceDescriptors.length}) unbound devices...');
+            final boundResults = await Future.wait(
+              futures,
+            ).timeout(kHeartbeatPollingInterval).asCancellable(_heartbeatPollingTaskCancelToken);
+            for (int i = 0; i < boundResults.length; i++) {
+              /*
       if (!boundResults[i]) {
         _logger
               .w('Failed to bind device()');
       }
             */
-        }
-      }, timeout: kHeartbeatPollingInterval).asCancellable(cancelToken);
+            }
+          }, timeout: kHeartbeatPollingInterval)
+          .asCancellable(cancelToken);
     } catch (e, stackTrace) {
       _logger.w("Failed to do the heartbeat: $e", error: e, stackTrace: stackTrace);
     }
@@ -343,14 +348,13 @@ final class DefaultKernel implements IKernel {
   void _onDeviceFound(FoundDeviceEvent event) {
     _ensureStarted();
     _logger.d(
-        'Found mDNS service: , name=`${event.discovered.name}`, host=`${event.discovered.host}`, port=`${event.discovered.port}`');
+      'Found mDNS service: , name=`${event.discovered.name}`, host=`${event.discovered.host}`, port=`${event.discovered.port}`',
+    );
     final matched = _matchesDriver(event.discovered);
     if (matched != null) {
       if (!_boundDevices.values.any((x) => x.device.fingerprint == matched.fingerprint)) {
         _logger.i('Unbound device found: `${matched.address}`');
-        _events.fire(UnboundDeviceDiscoveredEvent(
-          matched,
-        ));
+        _events.fire(UnboundDeviceDiscoveredEvent(matched));
       }
     }
   }
@@ -360,7 +364,8 @@ final class DefaultKernel implements IKernel {
     assert(!_isScanning);
     _isScanning = true;
     await _startMdnsDiscovery(
-        cancelToken: MergedCancellationToken([if (cancelToken != null) cancelToken, _masterCancelToken]));
+      cancelToken: MergedCancellationToken([if (cancelToken != null) cancelToken, _masterCancelToken]),
+    );
     _events.fire(DeviceDiscoveringStartedEvent());
 
     if (timeout != null) {
@@ -372,8 +377,9 @@ final class DefaultKernel implements IKernel {
   Future<void> stopDevicesScanning({CancellationToken? cancelToken}) async {
     assert(_isScanning);
     try {
-      await _stopMdnsDiscovery()
-          .asCancellable(MergedCancellationToken([if (cancelToken != null) cancelToken, _masterCancelToken]));
+      await _stopMdnsDiscovery().asCancellable(
+        MergedCancellationToken([if (cancelToken != null) cancelToken, _masterCancelToken]),
+      );
     } finally {
       _isScanning = false;
       _events.fire(DeviceDiscoveringStoppedEvent());
@@ -390,8 +396,11 @@ final class DefaultKernel implements IKernel {
           final mdnsMethod = metaDriver.discoveryMethod as MdnsDeviceDiscoveryMethod;
           if (!allSupportedMdnsServiceTypes.contains(mdnsMethod.serviceType)) {
             _logger.i('Starting mDNS discovery for service type `${mdnsMethod.serviceType}`...');
-            final discovery = await mdnsProvider!.startDiscovery(mdnsMethod.serviceType, _events,
-                cancelToken: MergedCancellationToken([if (cancelToken != null) cancelToken, _masterCancelToken]));
+            final discovery = await mdnsProvider!.startDiscovery(
+              mdnsMethod.serviceType,
+              _events,
+              cancelToken: MergedCancellationToken([if (cancelToken != null) cancelToken, _masterCancelToken]),
+            );
             allSupportedMdnsServiceTypes.add(mdnsMethod.serviceType);
             _mdnsDiscoveryList.add(discovery);
           }

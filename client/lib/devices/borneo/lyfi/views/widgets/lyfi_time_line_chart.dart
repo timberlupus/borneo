@@ -62,8 +62,8 @@ class LyfiTimeLineChart extends StatelessWidget {
           drawHorizontalLine: true,
           horizontalInterval: (maxY - minY) * 0.25,
           verticalInterval: 3600 * 6,
-          getDrawingHorizontalLine:
-              (value) => FlLine(color: Theme.of(context).colorScheme.surfaceDim, strokeWidth: 1.5),
+          getDrawingHorizontalLine: (value) =>
+              FlLine(color: Theme.of(context).colorScheme.surfaceDim, strokeWidth: 1.5),
           getDrawingVerticalLine: (value) => FlLine(color: Theme.of(context).colorScheme.surfaceDim, strokeWidth: 1.5),
         ),
         titlesData: FlTitlesData(
@@ -93,7 +93,10 @@ class LyfiTimeLineChart extends StatelessWidget {
               reservedSize: 24,
               getTitlesWidget: (value, meta) {
                 final text = leftTitleBuilder?.call(value) ?? '';
-                return SideTitleWidget(meta: meta, child: Text(text, style: Theme.of(context).textTheme.labelSmall));
+                return SideTitleWidget(
+                  meta: meta,
+                  child: Text(text, style: Theme.of(context).textTheme.labelSmall),
+                );
               },
             ),
           ),
@@ -112,16 +115,15 @@ class LyfiTimeLineChart extends StatelessWidget {
         extraLinesData: ExtraLinesData(extraLinesOnTop: true, verticalLines: verticalLines),
       ),
       duration: animationDuration,
-      transformationConfig:
-          allowZoom
-              ? FlTransformationConfig(
-                scaleAxis: FlScaleAxis.horizontal,
-                minScale: 1.0,
-                maxScale: 2.5,
-                panEnabled: true,
-                scaleEnabled: true,
-              )
-              : const FlTransformationConfig(),
+      transformationConfig: allowZoom
+          ? FlTransformationConfig(
+              scaleAxis: FlScaleAxis.horizontal,
+              minScale: 1.0,
+              maxScale: 2.5,
+              panEnabled: true,
+              scaleEnabled: true,
+            )
+          : const FlTransformationConfig(),
     );
   }
 

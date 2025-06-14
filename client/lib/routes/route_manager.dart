@@ -1,15 +1,15 @@
 // lib/routes/route_manager.dart
 
-import 'package:borneo_app/models/devices/device_module_metadata.dart';
-import 'package:borneo_app/services/devices/device_module_registry.dart';
-import 'package:borneo_app/views/devices/device_discovery_screen.dart';
+import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
+import 'package:borneo_app/core/services/devices/device_module_registry.dart';
+import 'package:borneo_app/features/devices/views/device_discovery_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../routes/app_routes.dart';
-import '../views/scenes/scenes_screen.dart';
-import '../views/main_screen.dart';
-import '../views/devices/devices_screen.dart';
-import '../views/my_screen.dart';
+import '../features/scenes/views/scenes_screen.dart';
+import '../main/views/main_screen.dart';
+import '../features/devices/views/devices_screen.dart';
+import '../features/my/views/my_screen.dart';
 
 class RouteManager {
   final Map<String, WidgetBuilder> _routes = {

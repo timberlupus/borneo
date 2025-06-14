@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:borneo_app/models/devices/device_entity.dart';
+import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_kernel/drivers/borneo/events.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
-import 'package:borneo_app/services/device_manager.dart';
+import 'package:borneo_app/core/services/device_manager.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 
-import '/view_models/base_view_model.dart';
+import '../../shared/view_models/base_view_model.dart';
 
 abstract class AbstractDeviceSummaryViewModel extends BaseViewModel
     with ViewModelEventBusMixin, ViewModelInitFutureMixin {

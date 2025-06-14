@@ -1,15 +1,11 @@
-enum RssiLevel {
-  strong,
-  medium,
-  weak,
-}
+enum RssiLevel { strong, medium, weak }
 
 extension RssiLevelExtension on RssiLevel {
   int get minRssi => switch (this) {
-        RssiLevel.strong => -50,
-        RssiLevel.medium => -70,
-        RssiLevel.weak => -90,
-      };
+    RssiLevel.strong => -50,
+    RssiLevel.medium => -70,
+    RssiLevel.weak => -90,
+  };
 
   static RssiLevel fromRssi(int rssi) {
     if (rssi >= -50) return RssiLevel.strong;

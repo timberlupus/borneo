@@ -1,4 +1,4 @@
-import 'package:borneo_app/models/devices/device_module_metadata.dart';
+import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
 
 import './borneo/lyfi/manifest.dart';
 

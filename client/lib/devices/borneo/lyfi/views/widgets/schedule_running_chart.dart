@@ -1,6 +1,6 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
-import 'package:borneo_app/views/common/hex_color.dart';
+import 'package:borneo_app/core/utils/hex_color.dart';
 import 'package:borneo_common/datetime_ext.dart';
 // import 'package:borneo_common/duration_ext.dart';
 import 'package:fl_chart/fl_chart.dart';

@@ -1,8 +1,8 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/color_chart.dart';
-import 'package:borneo_app/views/common/hex_color.dart';
-import 'package:borneo_app/widgets/value_listenable_builders.dart';
+import 'package:borneo_app/core/utils/hex_color.dart';
+import 'package:borneo_app/shared/widgets/value_listenable_builders.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -67,30 +67,26 @@ class ManualRunningChart extends StatelessWidget {
     assert(vm.isOnline);
     return MultiValueListenableBuilder<int>(
       valueNotifiers: vm.channels,
-      builder:
-          (context, values, _) => Padding(
-            padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
-            child: LyfiColorChart(
-              BarChartData(
-                barGroups: buildGroupDataItems(context),
-                titlesData: FlTitlesData(
-                  show: true,
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, _) => buildTitles(context, value),
-                    ),
-                  ),
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                ),
-                borderData: FlBorderData(show: false),
-                barTouchData: BarTouchData(enabled: true),
-                gridData: FlGridData(show: false),
+      builder: (context, values, _) => Padding(
+        padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
+        child: LyfiColorChart(
+          BarChartData(
+            barGroups: buildGroupDataItems(context),
+            titlesData: FlTitlesData(
+              show: true,
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(showTitles: true, getTitlesWidget: (value, _) => buildTitles(context, value)),
               ),
+              leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
             ),
+            borderData: FlBorderData(show: false),
+            barTouchData: BarTouchData(enabled: true),
+            gridData: FlGridData(show: false),
           ),
+        ),
+      ),
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/widgets/lyfi_time_line_chart.dart';
-import 'package:borneo_app/views/common/hex_color.dart';
+import 'package:borneo_app/core/utils/hex_color.dart';
 import 'package:borneo_common/datetime_ext.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -25,10 +25,12 @@ class SunRunningChart extends StatelessWidget {
         selector: (context, vm) => vm.deviceClock,
         shouldRebuild: (previous, next) => !previous.isEqualToSecond(next),
         builder: (context, clock, _) {
-          final double sunriseInstant =
-              sunInstants.isNotEmpty ? (sunInstants.first.instant.inSeconds / 3600.0).floorToDouble() * 3600 : 0;
-          final double sunsetInstant =
-              sunInstants.isNotEmpty ? (sunInstants.last.instant.inSeconds / 3600.0).ceilToDouble() * 3600 : 0;
+          final double sunriseInstant = sunInstants.isNotEmpty
+              ? (sunInstants.first.instant.inSeconds / 3600.0).floorToDouble() * 3600
+              : 0;
+          final double sunsetInstant = sunInstants.isNotEmpty
+              ? (sunInstants.last.instant.inSeconds / 3600.0).ceilToDouble() * 3600
+              : 0;
           return LyfiTimeLineChart(
             lineBarsData: buildLineData(),
             minX: sunriseInstant,

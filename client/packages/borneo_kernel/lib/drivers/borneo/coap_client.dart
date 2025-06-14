@@ -25,8 +25,10 @@ class BorneoCoapClient extends CoapClient {
   });
 
   @override
-  Future<CoapResponse> send(final CoapRequest request,
-      {final CoapMulticastResponseHandler? onMulticastResponse}) async {
+  Future<CoapResponse> send(
+    final CoapRequest request, {
+    final CoapMulticastResponseHandler? onMulticastResponse,
+  }) async {
     try {
       return await super.send(request);
     } on IOException {

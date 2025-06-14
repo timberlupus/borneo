@@ -8,8 +8,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
-import 'package:borneo_app/views/common/hex_color.dart';
-import 'package:borneo_app/widgets/value_listenable_builders.dart';
+import 'package:borneo_app/core/utils/hex_color.dart';
+import 'package:borneo_app/shared/widgets/value_listenable_builders.dart';
 import '../../view_models/editor/manual_editor_view_model.dart';
 
 class ManualEditorView extends StatelessWidget {
@@ -82,29 +82,28 @@ class ManualEditorView extends StatelessWidget {
       builder: (context, vm, _) {
         return MultiValueListenableBuilder<int>(
           valueNotifiers: vm.channels,
-          builder:
-              (context, values, _) => LyfiColorChart(
-                BarChartData(
-                  barGroups: buildGroupDataItems(context, vm),
-                  titlesData: FlTitlesData(
-                    show: true,
-                    bottomTitles: AxisTitles(
-                      axisNameSize: 24,
-                      sideTitles: SideTitles(
-                        reservedSize: 24,
-                        showTitles: true,
-                        getTitlesWidget: (value, _) => buildTitles(context, vm, value),
-                      ),
-                    ),
-                    leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          builder: (context, values, _) => LyfiColorChart(
+            BarChartData(
+              barGroups: buildGroupDataItems(context, vm),
+              titlesData: FlTitlesData(
+                show: true,
+                bottomTitles: AxisTitles(
+                  axisNameSize: 24,
+                  sideTitles: SideTitles(
+                    reservedSize: 24,
+                    showTitles: true,
+                    getTitlesWidget: (value, _) => buildTitles(context, vm, value),
                   ),
-                  borderData: FlBorderData(show: false),
-                  barTouchData: BarTouchData(enabled: true),
-                  gridData: FlGridData(show: false),
                 ),
+                leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
               ),
+              borderData: FlBorderData(show: false),
+              barTouchData: BarTouchData(enabled: true),
+              gridData: FlGridData(show: false),
+            ),
+          ),
         );
       },
     );
@@ -118,18 +117,17 @@ class ManualEditorView extends StatelessWidget {
     }
     return ChangeNotifierProvider.value(
       value: editor as ManualEditorViewModel,
-      builder:
-          (context, child) => Column(
-            spacing: 16,
-            children: [
-              Container(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: AspectRatio(aspectRatio: 2.75, child: buildGraph(context)),
-              ),
-              Expanded(child: buildSliders(context)),
-            ],
+      builder: (context, child) => Column(
+        spacing: 16,
+        children: [
+          Container(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: AspectRatio(aspectRatio: 2.75, child: buildGraph(context)),
           ),
+          Expanded(child: buildSliders(context)),
+        ],
+      ),
     );
   }
 }

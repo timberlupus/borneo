@@ -1,4 +1,1 @@
-enum HeartbeatMethod {
-  poll,
-  push,
-}
+enum HeartbeatMethod { poll, push }

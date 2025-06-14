@@ -9,13 +9,12 @@ class DashboardTemporaryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Selector<LyfiViewModel, ({LyfiState? state, bool canSwitch, Duration total, Duration remain})>(
-      selector:
-          (context, vm) => (
-            state: vm.ledState,
-            canSwitch: vm.canSwitchTemporaryState,
-            total: vm.temporaryDuration,
-            remain: vm.temporaryRemaining.value,
-          ),
+      selector: (context, vm) => (
+        state: vm.ledState,
+        canSwitch: vm.canSwitchTemporaryState,
+        total: vm.temporaryDuration,
+        remain: vm.temporaryRemaining.value,
+      ),
       builder: (context, props, _) {
         final theme = Theme.of(context);
         final isActive = props.state == LyfiState.temporary;
@@ -52,33 +51,29 @@ class DashboardTemporaryTile extends StatelessWidget {
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 300),
                             transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                            child:
-                                isActive
-                                    ? SizedBox(
-                                      key: const ValueKey('active'),
-                                      width: 24,
-                                      height: 24,
-                                      child: Padding(
-                                        padding: EdgeInsets.all(4),
-                                        child: CircularProgressIndicator(
-                                          strokeAlign: 1,
-                                          strokeWidth: 2,
-                                          value:
-                                              props.total.inSeconds > 0
-                                                  ? props.remain.inSeconds / props.total.inSeconds
-                                                  : 0.0,
-                                          backgroundColor: theme.colorScheme.shadow,
-                                          valueColor: AlwaysStoppedAnimation<Color>(
-                                            theme.colorScheme.onPrimaryContainer,
-                                          ),
-                                        ),
+                            child: isActive
+                                ? SizedBox(
+                                    key: const ValueKey('active'),
+                                    width: 24,
+                                    height: 24,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(4),
+                                      child: CircularProgressIndicator(
+                                        strokeAlign: 1,
+                                        strokeWidth: 2,
+                                        value: props.total.inSeconds > 0
+                                            ? props.remain.inSeconds / props.total.inSeconds
+                                            : 0.0,
+                                        backgroundColor: theme.colorScheme.shadow,
+                                        valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimaryContainer),
                                       ),
-                                    )
-                                    : Container(
-                                      key: const ValueKey('inactive'),
-                                      alignment: Alignment.center,
-                                      child: Icon(Icons.flashlight_on, size: 24, color: effectiveIconColor),
                                     ),
+                                  )
+                                : Container(
+                                    key: const ValueKey('inactive'),
+                                    alignment: Alignment.center,
+                                    child: Icon(Icons.flashlight_on, size: 24, color: effectiveIconColor),
+                                  ),
                           ),
                           const SizedBox(width: 8),
                           Expanded(

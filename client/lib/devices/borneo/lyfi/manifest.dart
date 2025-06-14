@@ -2,9 +2,9 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart'
 import 'package:borneo_app/devices/borneo/lyfi/view_models/summary_device_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/lyfi_view.dart';
 import 'package:borneo_app/devices/view_models/abstract_device_summary_view_model.dart';
-import 'package:borneo_app/models/devices/device_module_metadata.dart';
-import 'package:borneo_app/services/device_manager.dart';
-import 'package:borneo_app/services/i_app_notification_service.dart';
+import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
+import 'package:borneo_app/core/services/device_manager.dart';
+import 'package:borneo_app/core/services/i_app_notification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
@@ -22,14 +22,13 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         name: kLyfiDriverName,
         driverDescriptor: borneoLyfiDriverDescriptor,
         detailsViewBuilder: (_) => LyfiView(),
-        detailsViewModelBuilder:
-            (context, deviceID) => LyfiViewModel(
-              deviceID: deviceID,
-              deviceManager: context.read<DeviceManager>(),
-              globalEventBus: context.read<EventBus>(),
-              notification: context.read<IAppNotificationService>(),
-              logger: context.read<Logger>(),
-            ),
+        detailsViewModelBuilder: (context, deviceID) => LyfiViewModel(
+          deviceID: deviceID,
+          deviceManager: context.read<DeviceManager>(),
+          globalEventBus: context.read<EventBus>(),
+          notification: context.read<IAppNotificationService>(),
+          logger: context.read<Logger>(),
+        ),
         deviceIconBuilder: _buildDeviceIcon,
         primaryStateIconBuilder: _buildPrimaryStateIcon,
         secondaryStatesBuilder: _secondaryStatesBuilder,
@@ -40,10 +39,9 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
     return Icon(
       Icons.light_outlined,
       size: iconSize,
-      color:
-          isOnline
-              ? Theme.of(context).colorScheme.onPrimaryContainer
-              : Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.38),
+      color: isOnline
+          ? Theme.of(context).colorScheme.onPrimaryContainer
+          : Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.38),
     );
   }
 

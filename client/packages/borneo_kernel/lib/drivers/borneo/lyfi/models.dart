@@ -7,11 +7,7 @@ class LyfiChannelInfo {
   final String color;
   final double brightnessRatio;
 
-  const LyfiChannelInfo({
-    required this.name,
-    required this.color,
-    required this.brightnessRatio,
-  });
+  const LyfiChannelInfo({required this.name, required this.color, required this.brightnessRatio});
 
   factory LyfiChannelInfo.fromMap(dynamic map) {
     return LyfiChannelInfo(
@@ -37,12 +33,11 @@ class LyfiDeviceInfo {
 
   factory LyfiDeviceInfo.fromMap(Map map) {
     return LyfiDeviceInfo(
-        isStandaloneController: map['isStandaloneController'],
-        nominalPower: map['nominalPower']?.toDouble(),
-        channelCount: map['channelCount'],
-        channels: List<LyfiChannelInfo>.from(
-          map['channels'].map((x) => LyfiChannelInfo.fromMap(x)),
-        ));
+      isStandaloneController: map['isStandaloneController'],
+      nominalPower: map['nominalPower']?.toDouble(),
+      channelCount: map['channelCount'],
+      channels: List<LyfiChannelInfo>.from(map['channels'].map((x) => LyfiChannelInfo.fromMap(x))),
+    );
   }
 }
 
@@ -55,12 +50,12 @@ enum LyfiState {
   bool get isLocked => !(this == preview || this == dimming);
 
   factory LyfiState.fromString(String item) => switch (item) {
-        "normal" => LyfiState.normal,
-        "dimming" => LyfiState.dimming,
-        "temporary" => LyfiState.temporary,
-        "preview" => LyfiState.preview,
-        _ => throw InvalidDataException(),
-      };
+    "normal" => LyfiState.normal,
+    "dimming" => LyfiState.dimming,
+    "temporary" => LyfiState.temporary,
+    "preview" => LyfiState.preview,
+    _ => throw InvalidDataException(),
+  };
 }
 
 enum LyfiMode {
@@ -71,20 +66,14 @@ enum LyfiMode {
   bool get isSchedulerEnabled => this == scheduled;
 
   factory LyfiMode.fromString(String item) => switch (item) {
-        "manual" => LyfiMode.manual,
-        "scheduled" => LyfiMode.scheduled,
-        "sun" => LyfiMode.sun,
-        _ => throw InvalidDataException(),
-      };
+    "manual" => LyfiMode.manual,
+    "scheduled" => LyfiMode.scheduled,
+    "sun" => LyfiMode.sun,
+    _ => throw InvalidDataException(),
+  };
 }
 
-enum LedCorrectionMethod {
-  log,
-  linear,
-  exp,
-  gamma,
-  cie1931,
-}
+enum LedCorrectionMethod { log, linear, exp, gamma, cie1931 }
 
 class GeoLocation {
   final double lat;
@@ -110,10 +99,7 @@ class GeoLocation {
   int get hashCode => Object.hash(lat, lng);
 
   factory GeoLocation.fromMap(dynamic map) {
-    return GeoLocation(
-      lat: map['lat'],
-      lng: map['lng'],
-    );
+    return GeoLocation(lat: map['lat'], lng: map['lng']);
   }
 
   CborMap toCbor() {
@@ -122,10 +108,7 @@ class GeoLocation {
     final cborLng = CborFloat(convertToFloat32(lng));
     cborLng.floatPrecision();
 
-    return CborMap({
-      CborString("lat"): cborLat,
-      CborString("lng"): cborLng,
-    });
+    return CborMap({CborString("lat"): cborLat, CborString("lng"): cborLng});
   }
 }
 

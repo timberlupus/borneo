@@ -1,6 +1,6 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
-import 'package:borneo_app/infrastructure/timezone.dart';
-import 'package:borneo_app/services/i_app_notification_service.dart';
+import 'package:borneo_app/core/infrastructure/timezone.dart';
+import 'package:borneo_app/core/services/i_app_notification_service.dart';
 import 'package:borneo_common/exceptions.dart' as bo_ex;
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';

@@ -8,14 +8,13 @@ class DashboardPowerSwitchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Selector<LyfiViewModel, ({bool isOn, bool isBusy, bool isLocked, double overallBrightness, bool canUnlock})>(
-      selector:
-          (_, vm) => (
-            isOn: vm.isOn,
-            isBusy: vm.isBusy,
-            isLocked: vm.isLocked,
-            overallBrightness: vm.overallBrightness,
-            canUnlock: vm.canUnlock,
-          ),
+      selector: (_, vm) => (
+        isOn: vm.isOn,
+        isBusy: vm.isBusy,
+        isLocked: vm.isLocked,
+        overallBrightness: vm.overallBrightness,
+        canUnlock: vm.canUnlock,
+      ),
       builder: (context, props, _) {
         final theme = Theme.of(context);
         final isOn = props.isOn;
@@ -48,10 +47,9 @@ class DashboardPowerSwitchTile extends StatelessWidget {
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap:
-                        (!props.isBusy && props.isLocked)
-                            ? () => context.read<LyfiViewModel>().switchPowerOnOff(!isOn)
-                            : null,
+                    onTap: (!props.isBusy && props.isLocked)
+                        ? () => context.read<LyfiViewModel>().switchPowerOnOff(!isOn)
+                        : null,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       child: AnimatedSwitcher(
