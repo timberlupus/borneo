@@ -36,12 +36,17 @@ void main() {
     late WotThing thing;
 
     setUp(() {
-      thing = WotThing('test-thing-id', 'Test Thing', ['TestDevice'], 'A test thing for testing');
+      thing = WotThing(
+        id: 'test-thing-id',
+        title: 'Test Thing',
+        type: ['TestDevice'],
+        description: 'A test thing for testing',
+      );
     });
 
     group('Constructor and Basic Properties', () {
       test('constructor with string type', () {
-        final singleTypeThing = WotThing('id1', 'TestThing', 'SingleType', 'desc');
+        final singleTypeThing = WotThing(id: 'id1', title: 'TestThing', type: 'SingleType', description: 'desc');
         expect(singleTypeThing.getId(), equals('id1'));
         expect(singleTypeThing.getTitle(), equals('TestThing'));
         expect(singleTypeThing.getType(), equals(['SingleType']));
@@ -50,12 +55,17 @@ void main() {
       });
 
       test('constructor with list type', () {
-        final multiTypeThing = WotThing('id2', 'MultiThing', ['TypeA', 'TypeB'], 'multi desc');
+        final multiTypeThing = WotThing(
+          id: 'id2',
+          title: 'MultiThing',
+          type: ['TypeA', 'TypeB'],
+          description: 'multi desc',
+        );
         expect(multiTypeThing.getType(), equals(['TypeA', 'TypeB']));
       });
 
       test('constructor with empty description', () {
-        final noDescThing = WotThing('id3', 'NoDesc', ['Type'], '');
+        final noDescThing = WotThing(id: 'id3', title: 'NoDesc', type: ['Type'], description: '');
         expect(noDescThing.getDescription(), equals(''));
       });
 
@@ -100,7 +110,7 @@ void main() {
       });
 
       test('asThingDescription excludes description when empty', () {
-        final emptyDescThing = WotThing('id', 'title', ['type'], '');
+        final emptyDescThing = WotThing(id: 'id', title: 'title', type: ['type'], description: '');
         final desc = emptyDescThing.asThingDescription();
         expect(desc.containsKey('description'), isFalse);
       });
@@ -539,11 +549,12 @@ void main() {
       });
 
       test('thing with multiple properties and types', () {
-        final smartLight = WotThing('smart-light-001', 'Smart LED Light', [
-          'Light',
-          'OnOffSwitch',
-          'ColorControl',
-        ], 'A smart LED light with color control');
+        final smartLight = WotThing(
+          id: 'smart-light-001',
+          title: 'Smart LED Light',
+          type: ['Light', 'OnOffSwitch', 'ColorControl'],
+          description: 'A smart LED light with color control',
+        );
 
         // Add multiple properties
         final onOffProp = WotProperty<bool>(
@@ -591,7 +602,7 @@ void main() {
     group('Edge Cases and Error Handling', () {
       test('thing with null/empty values', () {
         // Test with minimal constructor
-        final minimalThing = WotThing('min', 'Minimal', [], '');
+        final minimalThing = WotThing(id: 'min', title: 'Minimal', type: [], description: '');
         expect(minimalThing.getType(), isEmpty);
         expect(minimalThing.getDescription(), isEmpty);
 

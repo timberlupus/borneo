@@ -67,10 +67,12 @@ void main() {
     late WotThing thing;
 
     setUp(() {
-      thing = WotThing('test-device-001', 'Test Smart Device', [
-        'TestDevice',
-        'SmartDevice',
-      ], 'A test device with enum properties');
+      thing = WotThing(
+        id: 'test-device-001',
+        title: 'Test Smart Device',
+        type: ['TestDevice', 'SmartDevice'],
+        description: 'A test device with enum properties',
+      );
     });
 
     test('Create property with enum values', () {
@@ -254,9 +256,12 @@ void main() {
 
     test('Complex enum property usage', () {
       // Create a mock smart thermostat device
-      final thermostat = WotThing('thermostat-001', 'Smart Thermostat', [
-        'Thermostat',
-      ], 'A smart thermostat with multiple enum properties');
+      final thermostat = WotThing(
+        id: 'thermostat-001',
+        title: 'Smart Thermostat',
+        type: ['Thermostat'],
+        description: 'A smart thermostat with multiple enum properties',
+      );
 
       // Work mode enum property
       final workModeProperty = WotProperty<String>(

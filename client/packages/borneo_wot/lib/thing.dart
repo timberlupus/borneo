@@ -27,7 +27,7 @@ class WotThing {
   /// [title] The thing's title
   /// [type] The thing's type(s)
   /// [description] Description of the thing
-  WotThing(this.id, this.title, dynamic type, this.description)
+  WotThing({required this.id, required this.title, required dynamic type, required this.description})
     : type = type is List<String> ? type : [if (type is String) type],
       context = 'https://webthings.io/schemas';
 

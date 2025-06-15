@@ -36,7 +36,7 @@ void main() {
     late WotThing thing;
 
     setUp(() {
-      thing = WotThing('test-thing-id', 'Test Thing', ['TestDevice'], 'A test thing');
+      thing = WotThing(id: 'test-thing-id', title: 'Test Thing', type: ['TestDevice'], description: 'A test thing');
     });
 
     test('basic properties', () {
