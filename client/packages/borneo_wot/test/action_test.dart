@@ -8,7 +8,7 @@ class TestAction extends WotAction<Map<String, dynamic>> {
   bool _cancelled = false;
   String? _error;
 
-  TestAction(super.id, super.thing, super.name, super.input);
+  TestAction({required super.id, required super.thing, required super.name, required super.input});
 
   bool get wasPerformed => _performed;
   bool get wasCancelled => _cancelled;
@@ -40,7 +40,7 @@ void main() {
     });
 
     test('basic properties', () {
-      final action = WotAction<String>('aid', thing, 'aname', 'input');
+      final action = WotAction<String>(id: 'aid', thing: thing, name: 'aname', input: 'input');
       expect(action.getId(), equals('aid'));
       expect(action.getName(), equals('aname'));
       expect(action.getStatus(), equals('created'));
@@ -52,14 +52,19 @@ void main() {
     });
 
     test('setHrefPrefix updates href correctly', () {
-      final action = WotAction<String>('aid', thing, 'aname', 'input');
+      final action = WotAction<String>(id: 'aid', thing: thing, name: 'aname', input: 'input');
       action.setHrefPrefix('/prefix');
       expect(action.hrefPrefix, equals('/prefix'));
       expect(action.getHref(), equals('/prefix/actions/aname/aid'));
     });
 
     test('asActionDescription returns correct format', () {
-      final action = WotAction<Map<String, dynamic>>('action-123', thing, 'testAction', {'param': 'value'});
+      final action = WotAction<Map<String, dynamic>>(
+        id: 'action-123',
+        thing: thing,
+        name: 'testAction',
+        input: {'param': 'value'},
+      );
       action.setHrefPrefix('/api/v1');
 
       final description = action.asActionDescription();
@@ -74,14 +79,19 @@ void main() {
     });
 
     test('asActionDescription with null input', () {
-      final action = WotAction<String?>('action-null', thing, 'nullAction', null);
+      final action = WotAction<String?>(id: 'action-null', thing: thing, name: 'nullAction', input: null);
       final description = action.asActionDescription();
 
       expect(description['nullAction']['input'], isNull);
     });
 
     test('action lifecycle - successful execution', () async {
-      final action = TestAction('success-action', thing, 'successAction', {'shouldFail': false});
+      final action = TestAction(
+        id: 'success-action',
+        thing: thing,
+        name: 'successAction',
+        input: {'shouldFail': false},
+      );
 
       expect(action.getStatus(), equals('created'));
       expect(action.wasPerformed, isFalse);
@@ -98,7 +108,7 @@ void main() {
     });
 
     test('action lifecycle - failed execution', () async {
-      final action = TestAction('fail-action', thing, 'failAction', {'shouldFail': true});
+      final action = TestAction(id: 'fail-action', thing: thing, name: 'failAction', input: {'shouldFail': true});
 
       action.start();
       expect(action.getStatus(), equals('pending'));
@@ -113,15 +123,15 @@ void main() {
     });
 
     test('action cancellation', () async {
-      final action = TestAction('cancel-action', thing, 'cancelAction', {});
+      final action = TestAction(id: 'cancel-action', thing: thing, name: 'cancelAction', input: {});
 
       await action.cancel();
       expect(action.wasCancelled, isTrue);
     });
 
     test('multiple actions with same name but different IDs', () {
-      final action1 = WotAction<int>('id1', thing, 'sameName', 42);
-      final action2 = WotAction<int>('id2', thing, 'sameName', 24);
+      final action1 = WotAction<int>(id: 'id1', thing: thing, name: 'sameName', input: 42);
+      final action2 = WotAction<int>(id: 'id2', thing: thing, name: 'sameName', input: 24);
 
       expect(action1.getId(), equals('id1'));
       expect(action2.getId(), equals('id2'));
@@ -141,7 +151,12 @@ void main() {
         'metadata': {'user': 'test-user', 'priority': 'high'},
       };
 
-      final action = WotAction<Map<String, dynamic>>('complex-action', thing, 'complexAction', complexInput);
+      final action = WotAction<Map<String, dynamic>>(
+        id: 'complex-action',
+        thing: thing,
+        name: 'complexAction',
+        input: complexInput,
+      );
 
       expect(action.getInput(), equals(complexInput));
 
@@ -150,7 +165,7 @@ void main() {
     });
 
     test('action status progression', () {
-      final action = WotAction<String>('status-test', thing, 'statusTest', 'test');
+      final action = WotAction<String>(id: 'status-test', thing: thing, name: 'statusTest', input: 'test');
 
       // Initial state
       expect(action.getStatus(), equals('created'));

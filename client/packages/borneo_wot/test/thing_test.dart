@@ -10,7 +10,7 @@ import 'package:borneo_wot/types.dart';
 class TestThingAction extends WotAction<dynamic> {
   bool _executed = false;
 
-  TestThingAction(super.id, super.thing, super.name, super.input);
+  TestThingAction({required super.id, required super.thing, required super.name, required super.input});
 
   bool get wasExecuted => _executed;
 
@@ -227,8 +227,12 @@ void main() {
         thing.addAvailableAction(
           'testAction',
           metadata,
-          (WotThing t, dynamic input) =>
-              TestThingAction('action-1', t, 'testAction', input is Map<String, dynamic> ? input : null),
+          (WotThing t, dynamic input) => TestThingAction(
+            id: 'action-1',
+            thing: t,
+            name: 'testAction',
+            input: input is Map<String, dynamic> ? input : null,
+          ),
         );
         final action = thing.performAction('testAction', {'param': 'value'});
         expect(action, isNotNull);
@@ -244,8 +248,12 @@ void main() {
         thing.addAvailableAction(
           'testAction',
           WotActionMetadata(),
-          (WotThing t, dynamic input) =>
-              TestThingAction('action-1', t, 'testAction', input is Map<String, dynamic> ? input : null),
+          (WotThing t, dynamic input) => TestThingAction(
+            id: 'action-1',
+            thing: t,
+            name: 'testAction',
+            input: input is Map<String, dynamic> ? input : null,
+          ),
         );
 
         final action = thing.performAction('testAction', {});
@@ -269,8 +277,12 @@ void main() {
         thing.addAvailableAction(
           'action1',
           WotActionMetadata(),
-          (WotThing t, dynamic input) =>
-              TestThingAction('action-1', t, 'action1', input is Map<String, dynamic> ? input : null),
+          (WotThing t, dynamic input) => TestThingAction(
+            id: 'action-1',
+            thing: t,
+            name: 'action1',
+            input: input is Map<String, dynamic> ? input : null,
+          ),
         );
 
         final action1 = thing.performAction('action1', {'data': 1});
@@ -421,8 +433,12 @@ void main() {
         thing.addAvailableAction(
           'testAction',
           WotActionMetadata(),
-          (WotThing t, dynamic input) =>
-              TestThingAction('action-1', t, 'testAction', input is Map<String, dynamic> ? input : null),
+          (WotThing t, dynamic input) => TestThingAction(
+            id: 'action-1',
+            thing: t,
+            name: 'testAction',
+            input: input is Map<String, dynamic> ? input : null,
+          ),
         );
 
         final action = thing.performAction('testAction', {})!;
@@ -478,8 +494,12 @@ void main() {
         thing.addAvailableAction(
           'setTemperature',
           WotActionMetadata(title: 'Set Temperature'),
-          (WotThing t, dynamic input) =>
-              TestThingAction('set-temp', t, 'setTemperature', input is Map<String, dynamic> ? input : null),
+          (WotThing t, dynamic input) => TestThingAction(
+            id: 'set-temp',
+            thing: t,
+            name: 'setTemperature',
+            input: input is Map<String, dynamic> ? input : null,
+          ),
         );
 
         thing.addAvailableEvent('temperatureChanged', WotEventMetadata(type: 'number'));
@@ -588,8 +608,12 @@ void main() {
         thing.addAvailableAction(
           'testAction',
           WotActionMetadata(),
-          (WotThing t, dynamic input) =>
-              TestThingAction('test', t, 'testAction', input is Map<String, dynamic> ? input : null),
+          (WotThing t, dynamic input) => TestThingAction(
+            id: 'test',
+            thing: t,
+            name: 'testAction',
+            input: input is Map<String, dynamic> ? input : null,
+          ),
         );
 
         // Test with null input

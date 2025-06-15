@@ -16,7 +16,8 @@ class WotAction<InputType> {
   final String timeRequested;
   String? timeCompleted;
 
-  WotAction(this.id, this.thing, this.name, this.input) : timeRequested = utils.timestamp() {
+  WotAction({required this.id, required this.thing, required this.name, required this.input})
+    : timeRequested = utils.timestamp() {
     href = '/actions/$name/$id';
     timeCompleted = null;
   }
