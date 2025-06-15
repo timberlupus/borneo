@@ -84,12 +84,22 @@ class SceneSummaryViewModel extends BaseViewModel {
   void _onCurrentSceneChanged(CurrentSceneChangedEvent event) {
     if (event.from.id == id) {
       _model = event.from;
-      notifyListeners();
+      _updateDeviceStatistics();
+      // 不再这里调用 notifyListeners
     }
     if (event.to.id == id) {
       _model = event.to;
-      notifyListeners();
+      _updateDeviceStatistics();
+      // 不再这里调用 notifyListeners
     }
+  }
+
+  void _updateDeviceStatistics() {
+    _sceneManager.getDeviceStatistics(id).then((stat) {
+      _totalDeviceCount = stat.totalDeviceCount;
+      _activeDeviceCount = stat.activeDeviceCount;
+      notifyListeners();
+    });
   }
 
   void _onDeviceBound(DeviceBoundEvent event) {

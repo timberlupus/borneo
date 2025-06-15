@@ -235,26 +235,26 @@ abstract class IBorneoDeviceApi extends IDeviceApi {
 mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   @override
   Future<String> getCompatible(Device dev) async {
-    final dd = dev.driverData! as BorneoCoapDriverData;
+    final dd = dev.driverData as BorneoCoapDriverData;
     return await dd.coap.getCbor<String>(BorneoPaths.compatible);
   }
 
   @override
   Future<Version> getFirmwareVersion(Device dev) async {
-    final dd = dev.driverData! as BorneoCoapDriverData;
+    final dd = dev.driverData as BorneoCoapDriverData;
     final verStr = await dd.coap.getCbor<String>(BorneoPaths.firmwareVersion);
     return Version.parse(verStr);
   }
 
   @override
   Future<bool> getOnOff(Device dev) async {
-    final dd = dev.driverData! as BorneoCoapDriverData;
+    final dd = dev.driverData as BorneoCoapDriverData;
     return await dd.coap.getCbor<bool>(BorneoPaths.power);
   }
 
   @override
   Future setOnOff(Device dev, bool on) async {
-    final dd = dev.driverData! as BorneoCoapDriverData;
+    final dd = dev.driverData as BorneoCoapDriverData;
     final response = await dd.coap.putBytes(
       BorneoPaths.power,
       payload: simple_cbor.cbor.encode(on),
@@ -267,21 +267,21 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
 
   @override
   Future<PowerBehavior> getPowerBehavior(Device dev) async {
-    final dd = dev.driverData! as BorneoCoapDriverData;
+    final dd = dev.driverData as BorneoCoapDriverData;
     final value = await dd.coap.getCbor<int>(BorneoPaths.powerBehavior);
     return PowerBehavior.values[value];
   }
 
   @override
   Future<DateTime> getHeartbeat(Device dev) async {
-    final dd = dev.driverData! as BorneoCoapDriverData;
+    final dd = dev.driverData as BorneoCoapDriverData;
     final timestamp = await dd.coap.getCbor<int>(BorneoPaths.heartbeat);
     return DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
   }
 
   @override
   Future<BorneoRtcLocalNtpResponse> getRtcLocal(Device dev, DateTime timestamp) async {
-    final dd = dev.driverData! as BorneoCoapDriverData;
+    final dd = dev.driverData as BorneoCoapDriverData;
     final timestampUS = timestamp.isUtc ? timestamp.microsecondsSinceEpoch : timestamp.toUtc().microsecondsSinceEpoch;
     final request = CoapRequest.get(
       BorneoPaths.rtcLocal,
@@ -302,32 +302,32 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
     if (skew < const Duration(microseconds: 1000)) {
       throw ArgumentError('Skew must be greater than 1ms.');
     }
-    final dd = dev.driverData! as BorneoCoapDriverData;
+    final dd = dev.driverData as BorneoCoapDriverData;
     await dd.coap.postCbor(BorneoPaths.rtcLocal, skew.inMicroseconds);
   }
 
   @override
   Future setPowerBehavior(Device dev, PowerBehavior behavior) async {
-    final dd = dev.driverData! as BorneoCoapDriverData;
+    final dd = dev.driverData as BorneoCoapDriverData;
     await dd.coap.putCbor(BorneoPaths.powerBehavior, behavior.index);
   }
 
   @override
   GeneralBorneoDeviceInfo getGeneralDeviceInfo(Device dev) {
-    final dd = dev.driverData! as BorneoCoapDriverData;
+    final dd = dev.driverData as BorneoCoapDriverData;
     return dd.generalDeviceInfo;
   }
 
   @override
   Future<GeneralBorneoDeviceStatus> getGeneralDeviceStatus(Device dev) async {
-    final dd = dev.driverData! as BorneoCoapDriverData;
+    final dd = dev.driverData as BorneoCoapDriverData;
     final payload = await dd.coap.getCbor<Map>(BorneoPaths.status);
     return GeneralBorneoDeviceStatus.fromMap(payload);
   }
 
   @override
   Future<void> factoryReset(Device dev) async {
-    final dd = dev.driverData! as BorneoCoapDriverData;
+    final dd = dev.driverData as BorneoCoapDriverData;
     final response = await dd.coap.postBytes(
       BorneoPaths.factoryReset,
       payload: simple_cbor.cbor.encode(null),
@@ -370,13 +370,13 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
 
   @override
   Future<String> getTimeZone(Device dev) async {
-    final dd = dev.driverData! as BorneoCoapDriverData;
+    final dd = dev.driverData as BorneoCoapDriverData;
     return await dd.coap.getCbor<String>(BorneoPaths.timezone);
   }
 
   @override
   Future<void> setTimeZone(Device dev, String timezone) async {
-    final dd = dev.driverData! as BorneoCoapDriverData;
+    final dd = dev.driverData as BorneoCoapDriverData;
     final response = await dd.coap.putBytes(
       BorneoPaths.timezone,
       payload: simple_cbor.cbor.encode(timezone),

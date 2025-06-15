@@ -170,7 +170,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
 
   @override
   Future<LyfiDeviceStatus> getLyfiStatus(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     final payload = await dd.coap.getCbor<Map>(LyfiPaths.status);
     return LyfiDeviceStatus.fromMap(payload);
   }
@@ -243,7 +243,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
 
   @override
   Future<Duration> getTemporaryDuration(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     final minutes = await dd.coap.getCbor<int>(LyfiPaths.temporaryDuration);
     return Duration(minutes: minutes);
   }

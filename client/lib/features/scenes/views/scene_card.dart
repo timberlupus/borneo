@@ -4,6 +4,7 @@ import 'package:borneo_app/features/scenes/view_models/scene_edit_view_model.dar
 import 'package:borneo_app/features/scenes/view_models/scene_summary_view_model.dart';
 import 'package:borneo_app/features/scenes/view_models/scenes_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 
 import 'scene_edit_screen.dart';
@@ -45,83 +46,8 @@ class SceneCard extends StatelessWidget {
                     ? Stack(
                         alignment: Alignment.topRight,
                         children: [
-                          if (scene.isSelected && vm.model.imagePath == null)
-                            Image.asset(
-                              'assets/images/scenes/scene-default-noimage.jpg',
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                            ),
-                          if (!scene.isSelected && vm.model.imagePath == null)
-                            ColorFiltered(
-                              colorFilter: ColorFilter.mode(Colors.black.withAlpha(128), BlendMode.srcATop),
-                              child: Image.asset(
-                                'assets/images/scenes/scene-default-noimage.jpg',
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                              ),
-                            ),
-                          if (scene.isSelected && vm.model.imagePath != null)
-                            Image.file(File(vm.model.imagePath!), fit: BoxFit.cover, width: double.infinity),
-                          if (!scene.isSelected && vm.model.imagePath != null)
-                            ColorFiltered(
-                              colorFilter: ColorFilter.mode(Colors.black.withAlpha(97), BlendMode.srcATop),
-                              child: Image.file(File(vm.model.imagePath!), fit: BoxFit.cover, width: double.infinity),
-                            ),
-                          Positioned(
-                            left: 16,
-                            bottom: 16,
-                            child: Row(
-                              children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      scene.name,
-                                      textAlign: TextAlign.start,
-                                      style: TextStyle(
-                                        fontSize: 26,
-                                        color: Colors.white,
-                                        shadows: [
-                                          Shadow(
-                                            offset: Offset(2.0, 2.0),
-                                            blurRadius: 4.0,
-                                            color: Colors.black.withAlpha(97),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          '${scene.totalDeviceCount} devices',
-                                          textAlign: TextAlign.start,
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.white,
-                                            shadows: const [_smallShadow],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Icon(Icons.circle, size: 4, color: Colors.white, shadows: const [_smallShadow]),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          '${scene.activeDeviceCount} active',
-                                          textAlign: TextAlign.start,
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.white,
-                                            shadows: const [_smallShadow],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
+                          _buildSceneImage(context, vm),
+                          _buildSceneInfo(context, vm),
                           if (scene.isSelected)
                             Positioned.fill(
                               child: ShaderMask(
@@ -183,92 +109,8 @@ class SceneCard extends StatelessWidget {
                             child: Stack(
                               alignment: Alignment.topRight,
                               children: [
-                                if (scene.isSelected && vm.model.imagePath == null)
-                                  Image.asset(
-                                    'assets/images/scenes/scene-default-noimage.jpg',
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                  ),
-                                if (!scene.isSelected && vm.model.imagePath == null)
-                                  ColorFiltered(
-                                    colorFilter: ColorFilter.mode(Colors.black.withAlpha(128), BlendMode.srcATop),
-                                    child: Image.asset(
-                                      'assets/images/scenes/scene-default-noimage.jpg',
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                    ),
-                                  ),
-                                if (scene.isSelected && vm.model.imagePath != null)
-                                  Image.file(File(vm.model.imagePath!), fit: BoxFit.cover, width: double.infinity),
-                                if (!scene.isSelected && vm.model.imagePath != null)
-                                  ColorFiltered(
-                                    colorFilter: ColorFilter.mode(Colors.black.withAlpha(97), BlendMode.srcATop),
-                                    child: Image.file(
-                                      File(vm.model.imagePath!),
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                    ),
-                                  ),
-                                Positioned(
-                                  left: 16,
-                                  bottom: 16,
-                                  child: Row(
-                                    children: [
-                                      Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            scene.name,
-                                            textAlign: TextAlign.start,
-                                            style: TextStyle(
-                                              fontSize: 26,
-                                              color: Colors.white,
-                                              shadows: [
-                                                Shadow(
-                                                  offset: Offset(2.0, 2.0),
-                                                  blurRadius: 4.0,
-                                                  color: Colors.black.withAlpha(97),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Row(
-                                            children: [
-                                              Text(
-                                                '${scene.totalDeviceCount} devices',
-                                                textAlign: TextAlign.start,
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Colors.white,
-                                                  shadows: const [_smallShadow],
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Icon(
-                                                Icons.circle,
-                                                size: 4,
-                                                color: Colors.white,
-                                                shadows: const [_smallShadow],
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                '${scene.activeDeviceCount} active',
-                                                textAlign: TextAlign.start,
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Colors.white,
-                                                  shadows: const [_smallShadow],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                _buildSceneImage(context, vm),
+                                _buildSceneInfo(context, vm),
                                 if (scene.isSelected)
                                   Positioned.fill(
                                     child: ShaderMask(
@@ -304,6 +146,75 @@ class SceneCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSceneImage(BuildContext context, SceneSummaryViewModel vm) {
+    if (scene.isSelected && vm.model.imagePath == null) {
+      return Image.asset('assets/images/scenes/scene-default-noimage.jpg', fit: BoxFit.cover, width: double.infinity);
+    }
+    if (!scene.isSelected && vm.model.imagePath == null) {
+      return ColorFiltered(
+        colorFilter: ColorFilter.mode(Colors.black.withAlpha(128), BlendMode.srcATop),
+        child: Image.asset('assets/images/scenes/scene-default-noimage.jpg', fit: BoxFit.cover, width: double.infinity),
+      );
+    }
+    if (scene.isSelected && vm.model.imagePath != null) {
+      return Image.file(File(vm.model.imagePath!), fit: BoxFit.cover, width: double.infinity);
+    }
+    if (!scene.isSelected && vm.model.imagePath != null) {
+      return ColorFiltered(
+        colorFilter: ColorFilter.mode(Colors.black.withAlpha(97), BlendMode.srcATop),
+        child: Image.file(File(vm.model.imagePath!), fit: BoxFit.cover, width: double.infinity),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildSceneInfo(BuildContext context, SceneSummaryViewModel vm) {
+    return Positioned(
+      left: 16,
+      bottom: 16,
+      child: Row(
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                scene.name,
+                textAlign: TextAlign.start,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Colors.white,
+                  shadows: [Shadow(offset: Offset(2.0, 2.0), blurRadius: 4.0, color: Colors.black.withAlpha(97))],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Text(
+                    context.translate('{0} devices', pArgs: ['${scene.totalDeviceCount}']),
+                    textAlign: TextAlign.start,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Colors.white, shadows: const [_smallShadow]),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.circle, size: 4, color: Colors.white, shadows: const [_smallShadow]),
+                  const SizedBox(width: 8),
+                  Text(
+                    context.translate('{0} active', pArgs: ['${scene.activeDeviceCount}']),
+                    textAlign: TextAlign.start,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Colors.white, shadows: const [_smallShadow]),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
