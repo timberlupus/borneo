@@ -36,7 +36,7 @@ class WotEvent<Data> {
   final String time;
   String hrefPrefix = '';
 
-  WotEvent(this.thing, this.name, [this.data]) : time = timestamp();
+  WotEvent({required this.thing, required this.name, this.data}) : time = timestamp();
 
   void setHrefPrefix(String prefix) {
     hrefPrefix = prefix;

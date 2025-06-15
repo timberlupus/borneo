@@ -305,7 +305,7 @@ void main() {
 
         thing.addAvailableEvent('testEvent', metadata);
 
-        final event = WotEvent<Map<String, dynamic>>(thing, 'testEvent', {'data': 'value'});
+        final event = WotEvent<Map<String, dynamic>>(thing: thing, name: 'testEvent', data: {'data': 'value'});
         thing.addEvent(event);
 
         final descriptions = thing.getEventDescriptions('testEvent');
@@ -317,9 +317,9 @@ void main() {
         thing.addAvailableEvent('event1');
         thing.addAvailableEvent('event2');
 
-        final event1 = WotEvent<String>(thing, 'event1', 'data1');
-        final event2a = WotEvent<String>(thing, 'event2', 'data2a');
-        final event2b = WotEvent<String>(thing, 'event2', 'data2b');
+        final event1 = WotEvent<String>(thing: thing, name: 'event1', data: 'data1');
+        final event2a = WotEvent<String>(thing: thing, name: 'event2', data: 'data2a');
+        final event2b = WotEvent<String>(thing: thing, name: 'event2', data: 'data2b');
 
         thing.addEvent(event1);
         thing.addEvent(event2a);
@@ -371,7 +371,7 @@ void main() {
         thing.addEventSubscriber('testEvent', subscriber1);
         thing.addEventSubscriber('testEvent', subscriber2);
 
-        final event = WotEvent<String>(thing, 'testEvent', 'test data');
+        final event = WotEvent<String>(thing: thing, name: 'testEvent', data: 'test data');
         thing.eventNotify(event);
 
         expect(subscriber1.receivedMessages, hasLength(1));
@@ -392,8 +392,8 @@ void main() {
 
         thing.removeSubscriber(subscriber1);
 
-        final event1 = WotEvent<String>(thing, 'event1', 'data');
-        final event2 = WotEvent<String>(thing, 'event2', 'data');
+        final event1 = WotEvent<String>(thing: thing, name: 'event1', data: 'data');
+        final event2 = WotEvent<String>(thing: thing, name: 'event2', data: 'data');
 
         thing.eventNotify(event1);
         thing.eventNotify(event2);
@@ -454,7 +454,7 @@ void main() {
         thing.addAvailableEvent('testEvent');
         thing.addEventSubscriber('testEvent', subscriber);
 
-        final event = WotEvent<String>(thing, 'testEvent', 'test data');
+        final event = WotEvent<String>(thing: thing, name: 'testEvent', data: 'test data');
         thing.eventNotify(event);
 
         expect(subscriber.receivedMessages, hasLength(1));
@@ -465,7 +465,7 @@ void main() {
       });
 
       test('eventNotify with unavailable event does nothing', () {
-        final event = WotEvent<String>(thing, 'unavailableEvent', 'data');
+        final event = WotEvent<String>(thing: thing, name: 'unavailableEvent', data: 'data');
         thing.eventNotify(event);
 
         expect(subscriber.receivedMessages, isEmpty);
@@ -521,7 +521,7 @@ void main() {
         expect(action, isNotNull);
 
         // Test event operation
-        final event = WotEvent<double>(thing, 'temperatureChanged', 22.0);
+        final event = WotEvent<double>(thing: thing, name: 'temperatureChanged', data: 22.0);
         thing.addEvent(event);
 
         // Verify thing description

@@ -56,7 +56,7 @@ void main() {
 
     test('basic event properties', () {
       final eventData = {'temperature': 25.5, 'unit': 'celsius'};
-      final event = WotEvent<Map<String, dynamic>>(thing, 'temperatureChanged', eventData);
+      final event = WotEvent<Map<String, dynamic>>(thing: thing, name: 'temperatureChanged', data: eventData);
 
       expect(event.getName(), equals('temperatureChanged'));
       expect(event.getData(), equals(eventData));
@@ -66,7 +66,7 @@ void main() {
     });
 
     test('event without data', () {
-      final event = WotEvent<String?>(thing, 'buttonPressed');
+      final event = WotEvent<String?>(thing: thing, name: 'buttonPressed');
 
       expect(event.getName(), equals('buttonPressed'));
       expect(event.getData(), isNull);
@@ -75,14 +75,14 @@ void main() {
     });
 
     test('setHrefPrefix updates prefix correctly', () {
-      final event = WotEvent<String>(thing, 'testEvent', 'test-data');
+      final event = WotEvent<String>(thing: thing, name: 'testEvent', data: 'test-data');
       event.setHrefPrefix('/api/v1');
       expect(event.hrefPrefix, equals('/api/v1'));
     });
 
     test('asEventDescription with data', () {
       final eventData = {'sensor': 'temperature', 'value': 23.7, 'timestamp': '2025-06-15T12:00:00Z'};
-      final event = WotEvent<Map<String, dynamic>>(thing, 'sensorReading', eventData);
+      final event = WotEvent<Map<String, dynamic>>(thing: thing, name: 'sensorReading', data: eventData);
 
       final description = event.asEventDescription();
 
@@ -93,7 +93,7 @@ void main() {
     });
 
     test('asEventDescription without data', () {
-      final event = WotEvent<dynamic>(thing, 'alertCleared');
+      final event = WotEvent<dynamic>(thing: thing, name: 'alertCleared');
 
       final description = event.asEventDescription();
 
@@ -103,7 +103,7 @@ void main() {
     });
 
     test('asEventDescription with null data explicitly', () {
-      final event = WotEvent<String?>(thing, 'nullEvent', null);
+      final event = WotEvent<String?>(thing: thing, name: 'nullEvent', data: null);
 
       final description = event.asEventDescription();
 
@@ -113,25 +113,25 @@ void main() {
 
     test('events with different data types', () {
       // String data
-      final stringEvent = WotEvent<String>(thing, 'message', 'Hello World');
+      final stringEvent = WotEvent<String>(thing: thing, name: 'message', data: 'Hello World');
       expect(stringEvent.getData(), equals('Hello World'));
 
       // Numeric data
-      final numberEvent = WotEvent<double>(thing, 'measurement', 42.5);
+      final numberEvent = WotEvent<double>(thing: thing, name: 'measurement', data: 42.5);
       expect(numberEvent.getData(), equals(42.5));
 
       // Boolean data
-      final boolEvent = WotEvent<bool>(thing, 'status', true);
+      final boolEvent = WotEvent<bool>(thing: thing, name: 'status', data: true);
       expect(boolEvent.getData(), isTrue);
 
       // List data
-      final listEvent = WotEvent<List<int>>(thing, 'values', [1, 2, 3, 4, 5]);
+      final listEvent = WotEvent<List<int>>(thing: thing, name: 'values', data: [1, 2, 3, 4, 5]);
       expect(listEvent.getData(), equals([1, 2, 3, 4, 5]));
     });
 
     test('event timestamp is consistent', () {
-      final event1 = WotEvent<String>(thing, 'event1', 'data1');
-      final event2 = WotEvent<String>(thing, 'event2', 'data2');
+      final event1 = WotEvent<String>(thing: thing, name: 'event1', data: 'data1');
+      final event2 = WotEvent<String>(thing: thing, name: 'event2', data: 'data2');
 
       // Events created at nearly the same time should have very close timestamps
       final time1 = DateTime.parse(event1.getTime().replaceAll('+00:00', 'Z'));
@@ -142,10 +142,11 @@ void main() {
     });
 
     test('event description structure matches expected format', () {
-      final event = WotEvent<Map<String, String>>(thing, 'deviceStatusChanged', {
-        'status': 'online',
-        'reason': 'power_restored',
-      });
+      final event = WotEvent<Map<String, String>>(
+        thing: thing,
+        name: 'deviceStatusChanged',
+        data: {'status': 'online', 'reason': 'power_restored'},
+      );
 
       final description = event.asEventDescription();
 
@@ -159,9 +160,9 @@ void main() {
       expect(eventDetails['data'], isA<Map<String, String>>());
     });
     test('multiple events with same name but different data', () {
-      final event1 = WotEvent<int>(thing, 'counter', 1);
-      final event2 = WotEvent<int>(thing, 'counter', 2);
-      final event3 = WotEvent<int>(thing, 'counter', 3);
+      final event1 = WotEvent<int>(thing: thing, name: 'counter', data: 1);
+      final event2 = WotEvent<int>(thing: thing, name: 'counter', data: 2);
+      final event3 = WotEvent<int>(thing: thing, name: 'counter', data: 3);
 
       expect(event1.getName(), equals(event2.getName()));
       expect(event2.getName(), equals(event3.getName()));
@@ -194,7 +195,7 @@ void main() {
         'metadata': {'units': 'celsius', 'accuracy': 0.1, 'calibrated': true},
       };
 
-      final event = WotEvent<Map<String, dynamic>>(thing, 'sensorData', complexData);
+      final event = WotEvent<Map<String, dynamic>>(thing: thing, name: 'sensorData', data: complexData);
 
       expect(event.getData(), equals(complexData));
 
@@ -214,7 +215,7 @@ void main() {
       // Create many events to test performance
       final events = <WotEvent<int>>[];
       for (int i = 0; i < 1000; i++) {
-        events.add(WotEvent<int>(thing, 'perfTest', i));
+        events.add(WotEvent<int>(thing: thing, name: 'perfTest', data: i));
       }
 
       stopwatch.stop();
