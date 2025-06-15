@@ -71,6 +71,23 @@ class AppSettingsScreen extends StatelessWidget {
             ),
           ),
         ),
+        ListTile(
+          leading: Icon(Icons.thermostat_outlined),
+          title: Text(context.translate('Temperature Unit')),
+          trailing: Selector<AppSettingsViewModel, String>(
+            selector: (_, vm) => vm.temperatureUnit,
+            builder: (context, unit, _) => DropdownButton<String>(
+              value: unit,
+              onChanged: (val) {
+                if (val != null) context.read<AppSettingsViewModel>().changeTemperatureUnit(val);
+              },
+              items: [
+                DropdownMenuItem(value: 'C', child: Text(context.translate('℃ (Celsius)'))),
+                DropdownMenuItem(value: 'F', child: Text(context.translate('℉ (Fahrenheit)'))),
+              ],
+            ),
+          ),
+        ),
       ],
     ),
     GenericSettingsGroup(

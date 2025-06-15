@@ -21,3 +21,8 @@ class AppLocaleChangedEvent {
   final Locale locale;
   AppLocaleChangedEvent(this.locale);
 }
+
+class AppTemperatureUnitChangedEvent {
+  final String unit; // 'C' or 'F'
+  AppTemperatureUnitChangedEvent(this.unit);
+}
