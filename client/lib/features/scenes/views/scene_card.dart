@@ -28,20 +28,19 @@ class SceneCard extends StatelessWidget {
         child: AspectRatio(
           aspectRatio: 16.0 / 9.0,
           child: Consumer<SceneSummaryViewModel>(
-            builder: (context, vm, child) => InkWell(
-              onTap: scene.isSelected
-                  ? () {}
-                  : () async {
-                      final scenesVM = context.read<ScenesViewModel>();
-                      await scenesVM.switchCurrentScene(scene.id);
-                    },
-              child: Ink(
-                decoration: BoxDecoration(
-                  color: scene.isSelected
-                      ? Theme.of(context).colorScheme.primaryContainer
-                      : Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16.0),
-                ),
+            builder: (context, vm, child) => Material(
+              color: scene.isSelected
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(16.0),
+              child: InkWell(
+                onTap: scene.isSelected
+                    ? () {}
+                    : () async {
+                        final scenesVM = context.read<ScenesViewModel>();
+                        await scenesVM.switchCurrentScene(scene.id);
+                      },
+
                 child: scene.isSelected
                     ? Stack(
                         alignment: Alignment.topRight,
