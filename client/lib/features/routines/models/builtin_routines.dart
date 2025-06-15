@@ -1,18 +1,19 @@
 import 'package:borneo_app/features/routines/models/actions/power_action.dart';
 import 'package:borneo_app/features/routines/models/abstract_routine.dart';
 import 'package:borneo_app/core/services/device_manager.dart';
+import 'package:borneo_app/models/scene_entity.dart';
 
 final class PowerOffAllRoutine extends AbstractBuiltinRoutine {
-  PowerOffAllRoutine() : super(name: 'Power off all', iconAssetPath: 'assets/images/routines/icons/power-off.svg');
-
-  @override
-  bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices.any((d) => d.wotAdapter.device.hasCapability("OnOffSwitch"));
-  }
+  PowerOffAllRoutine()
+    : super(
+        name: 'Power off all',
+        iconAssetPath: 'assets/images/routines/icons/power-off.svg',
+        requiredCapabilities: ["OnOffSwitch"],
+      );
 
   /// Execute routine
   @override
-  Future<List<Map<String, dynamic>>> execute(DeviceManager deviceManager) async {
+  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, DeviceManager deviceManager) async {
     final steps = <PowerAction>[];
     for (final bound in deviceManager.boundDevices) {
       final onProp = bound.wotAdapter.device.properties["on"]!;
@@ -27,15 +28,16 @@ final class PowerOffAllRoutine extends AbstractBuiltinRoutine {
 }
 
 final class FeedModeRoutine extends AbstractBuiltinRoutine {
-  FeedModeRoutine() : super(name: 'Feed mode', iconAssetPath: 'assets/images/routines/icons/feed.svg');
+  FeedModeRoutine()
+    : super(
+        name: 'Feed mode',
+        iconAssetPath: 'assets/images/routines/icons/feed.svg',
+
+        requiredCapabilities: ["OnOffSwitch"],
+      );
 
   @override
-  bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices.any((d) => d.wotAdapter.device.hasCapability("OnOffSwitch"));
-  }
-
-  @override
-  Future<List<Map<String, dynamic>>> execute(DeviceManager deviceManager) async {
+  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, DeviceManager deviceManager) async {
     // TODO: implement execute
     return [];
   }
@@ -43,30 +45,30 @@ final class FeedModeRoutine extends AbstractBuiltinRoutine {
 
 final class WaterChangeModeRoutine extends AbstractBuiltinRoutine {
   WaterChangeModeRoutine()
-    : super(name: 'Water change mode', iconAssetPath: 'assets/images/routines/icons/water-change.svg');
+    : super(
+        name: 'Water change mode',
+        iconAssetPath: 'assets/images/routines/icons/water-change.svg',
+        requiredCapabilities: ["OnOffSwitch"],
+      );
 
   @override
-  bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices.any((d) => d.wotAdapter.device.hasCapability("OnOffSwitch"));
-  }
-
-  @override
-  Future<List<Map<String, dynamic>>> execute(DeviceManager deviceManager) async {
+  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, DeviceManager deviceManager) async {
     // TODO: implement execute
     return [];
   }
 }
 
 final class DryScapeModeRoutine extends AbstractBuiltinRoutine {
-  DryScapeModeRoutine() : super(name: 'Dry scape mode', iconAssetPath: 'assets/images/routines/icons/dry-scape.svg');
+  DryScapeModeRoutine()
+    : super(
+        name: 'Dry scape mode',
+        iconAssetPath: 'assets/images/routines/icons/dry-scape.svg',
+
+        requiredCapabilities: ["OnOffSwitch"],
+      );
 
   @override
-  bool checkAvailable(DeviceManager deviceManager) {
-    return deviceManager.boundDevices.any((d) => d.wotAdapter.device.hasCapability("OnOffSwitch"));
-  }
-
-  @override
-  Future<List<Map<String, dynamic>>> execute(DeviceManager deviceManager) async {
+  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, DeviceManager deviceManager) async {
     // TODO: implement execute
     return [];
   }

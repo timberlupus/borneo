@@ -85,6 +85,11 @@ final class DeviceManager implements IDisposable {
 
   BoundDevice getBoundDevice(String deviceID) => _kernel.getBoundDevice(deviceID);
 
+  Iterable<BoundDevice> getBoundDevicesInCurrentScene() {
+    final currentScene = _sceneManager.current;
+    return _kernel.boundDevices.where((x) => (x.device as DeviceEntity).sceneID == currentScene.id);
+  }
+
   Future<void> reloadAllDevices() async {
     await _deviceOperLock.synchronized(() async {
       await _kernel.unbindAll();

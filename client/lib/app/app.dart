@@ -152,6 +152,7 @@ class _BorneoAppState extends State<BorneoApp> {
                       create: (context) => RoutineManager(
                         context.read<EventBus>(),
                         context.read<Database>(),
+                        context.read<SceneManager>(),
                         context.read<DeviceManager>(),
                         logger: context.read<Logger>(),
                       ),

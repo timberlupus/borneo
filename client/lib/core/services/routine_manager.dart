@@ -1,3 +1,4 @@
+import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_app/features/routines/models/abstract_routine.dart';
 import 'package:borneo_app/features/routines/models/builtin_routines.dart';
 import 'package:borneo_app/core/services/device_manager.dart';
@@ -16,21 +17,23 @@ class RoutineManager implements IDisposable {
   // ignore: unused_field
   final EventBus _globalBus;
 
+  final SceneManager _sceneManager;
   final DeviceManager _deviceManager;
 
   final RoutineHistoryStore _historyStore;
 
   final List<AbstractRoutine> allRoutines = [];
 
-  RoutineManager(this._globalBus, this._db, this._deviceManager, {this.logger})
+  RoutineManager(this._globalBus, this._db, this._sceneManager, this._deviceManager, {this.logger})
     : _historyStore = RoutineHistoryStore(_db) {
     allRoutines.addAll([PowerOffAllRoutine(), FeedModeRoutine(), WaterChangeModeRoutine(), DryScapeModeRoutine()]);
   }
 
   List<AbstractRoutine> getAvailableRoutines() {
     List<AbstractRoutine> routines = [];
+    final currentScene = _sceneManager.current;
     for (final r in allRoutines) {
-      if (r.checkAvailable(_deviceManager)) {
+      if (r.checkAvailable(currentScene, _deviceManager)) {
         routines.add(r);
       }
     }
@@ -39,7 +42,8 @@ class RoutineManager implements IDisposable {
 
   Future<void> executeRoutine(String routineID) async {
     final routine = allRoutines.singleWhere((r) => r.id == routineID);
-    final steps = await routine.execute(_deviceManager);
+    final currentScene = _sceneManager.current;
+    final steps = await routine.execute(currentScene, _deviceManager);
     if (steps.isNotEmpty) {
       await _historyStore.addRecord(
         RoutineHistoryRecord(routineId: routineID, timestamp: DateTime.now(), steps: steps),
