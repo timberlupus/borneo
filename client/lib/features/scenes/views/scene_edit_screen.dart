@@ -2,6 +2,7 @@ import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_app/features/scenes/view_models/scene_edit_view_model.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
@@ -61,7 +62,6 @@ class SceneEditScreen extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 场景图片选择
               Text(context.translate('Scene Image'), style: Theme.of(context).textTheme.labelMedium),
               const SizedBox(height: 8),
               Stack(
@@ -72,33 +72,37 @@ class SceneEditScreen extends StatelessWidget {
                       final picker = ImagePicker();
                       final picked = await picker.pickImage(source: ImageSource.gallery);
                       if (picked != null) {
-                        final cropped = await ImageCropper().cropImage(
-                          sourcePath: picked.path,
-                          uiSettings: [
-                            AndroidUiSettings(
-                              toolbarTitle: 'Crop Image',
-                              toolbarColor: Theme.of(context).colorScheme.primary,
-                              toolbarWidgetColor: Colors.white,
-                              initAspectRatio: CropAspectRatioPreset.ratio16x9,
-                              lockAspectRatio: false,
-                              aspectRatioPresets: [
-                                CropAspectRatioPreset.ratio16x9,
-                                CropAspectRatioPreset.original,
-                                CropAspectRatioPreset.square,
-                              ],
-                            ),
-                            IOSUiSettings(
-                              title: 'Crop Image',
-                              aspectRatioPresets: [
-                                CropAspectRatioPreset.ratio16x9,
-                                CropAspectRatioPreset.original,
-                                CropAspectRatioPreset.square,
-                              ],
-                            ),
-                          ],
-                        );
-                        if (cropped != null) {
-                          vm.setImagePath(cropped.path);
+                        if (!kIsWeb && Platform.isWindows) {
+                          vm.setImagePath(picked.path);
+                        } else {
+                          final cropped = await ImageCropper().cropImage(
+                            sourcePath: picked.path,
+                            uiSettings: [
+                              AndroidUiSettings(
+                                toolbarTitle: 'Crop Image',
+                                toolbarColor: Theme.of(context).colorScheme.primary,
+                                toolbarWidgetColor: Colors.white,
+                                initAspectRatio: CropAspectRatioPreset.ratio16x9,
+                                lockAspectRatio: false,
+                                aspectRatioPresets: [
+                                  CropAspectRatioPreset.ratio16x9,
+                                  CropAspectRatioPreset.original,
+                                  CropAspectRatioPreset.square,
+                                ],
+                              ),
+                              IOSUiSettings(
+                                title: 'Crop Image',
+                                aspectRatioPresets: [
+                                  CropAspectRatioPreset.ratio16x9,
+                                  CropAspectRatioPreset.original,
+                                  CropAspectRatioPreset.square,
+                                ],
+                              ),
+                            ],
+                          );
+                          if (cropped != null) {
+                            vm.setImagePath(cropped.path);
+                          }
                         }
                       }
                     },
