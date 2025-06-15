@@ -55,10 +55,10 @@ void main() {
 
   // 1. 创建设备状态枚举属性（只读）
   final deviceStateProperty = WotProperty<String>(
-    device,
-    'deviceState',
-    WotValue<String>(DeviceState.standby.toString()),
-    WotPropertyMetadata(
+    thing: device,
+    name: 'deviceState',
+    value: WotValue<String>(DeviceState.standby.toString()),
+    metadata: WotPropertyMetadata(
       type: 'string',
       title: 'Device State',
       description: 'Current state of the device',
@@ -69,10 +69,10 @@ void main() {
 
   // 2. 创建操作模式枚举属性（可读写）
   final operationModeProperty = WotProperty<String>(
-    device,
-    'operationMode',
-    WotValue<String>(OperationMode.automatic.toString()),
-    WotPropertyMetadata(
+    thing: device,
+    name: 'operationMode',
+    value: WotValue<String>(OperationMode.automatic.toString()),
+    metadata: WotPropertyMetadata(
       type: 'string',
       title: 'Operation Mode',
       description: 'How the device operates',
@@ -83,10 +83,10 @@ void main() {
 
   // 3. 创建其他类型的属性作为对比
   final temperatureProperty = WotProperty<double>(
-    device,
-    'temperature',
-    WotValue<double>(22.5),
-    WotPropertyMetadata(
+    thing: device,
+    name: 'temperature',
+    value: WotValue<double>(22.5),
+    metadata: WotPropertyMetadata(
       type: 'number',
       title: 'Temperature',
       description: 'Current temperature reading',
@@ -98,10 +98,10 @@ void main() {
   );
 
   final enabledProperty = WotProperty<bool>(
-    device,
-    'enabled',
-    WotValue<bool>(true),
-    WotPropertyMetadata(
+    thing: device,
+    name: 'enabled',
+    value: WotValue<bool>(true),
+    metadata: WotPropertyMetadata(
       type: 'boolean',
       title: 'Enabled',
       description: 'Whether the device is enabled',

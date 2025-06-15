@@ -75,7 +75,8 @@ class WotProperty<T> {
   late final String href;
   final dynamic thing;
 
-  WotProperty(this.thing, this.name, this.value, this.metadata) {
+  // 修改为命名参数
+  WotProperty({required this.thing, required this.name, required this.value, required this.metadata}) {
     href = '/properties/$name';
     // 监听 value 更新，通知 thing
     value.onUpdate.listen((_) => thing?.propertyNotify(this));

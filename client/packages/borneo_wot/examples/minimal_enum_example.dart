@@ -21,10 +21,10 @@ void main() {
 
   // 创建枚举属性
   final modeProperty = WotProperty<String>(
-    device,
-    'mode',
-    WotValue<String>(DeviceMode.off.toString()),
-    WotPropertyMetadata(
+    thing: device,
+    name: 'mode',
+    value: WotValue<String>(DeviceMode.off.toString()),
+    metadata: WotPropertyMetadata(
       type: 'string',
       title: 'Device Mode',
       description: 'Current mode of the device',

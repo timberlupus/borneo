@@ -117,10 +117,10 @@ class SmartAirConditioner {
 
     // 创建工作模式属性（可读写，枚举类型）
     _workModeProperty = WotProperty<String>(
-      _thing,
-      'workMode',
-      WotValue<String>(_workMode.toString()),
-      WotPropertyMetadata(
+      thing: _thing,
+      name: 'workMode',
+      value: WotValue<String>(_workMode.toString()),
+      metadata: WotPropertyMetadata(
         type: 'string',
         title: 'Work Mode',
         description: 'Current working mode of the air conditioner',
@@ -131,10 +131,10 @@ class SmartAirConditioner {
 
     // 创建健康状态属性（只读，枚举类型）
     _healthStatusProperty = WotProperty<String>(
-      _thing,
-      'healthStatus',
-      WotValue<String>(_healthStatus.toString()),
-      WotPropertyMetadata(
+      thing: _thing,
+      name: 'healthStatus',
+      value: WotValue<String>(_healthStatus.toString()),
+      metadata: WotPropertyMetadata(
         type: 'string',
         title: 'Health Status',
         description: 'Current health status of the device',
@@ -145,10 +145,10 @@ class SmartAirConditioner {
 
     // 创建温度属性（数值类型）
     _temperatureProperty = WotProperty<double>(
-      _thing,
-      'targetTemperature',
-      WotValue<double>(24.0),
-      WotPropertyMetadata(
+      thing: _thing,
+      name: 'targetTemperature',
+      value: WotValue<double>(24.0),
+      metadata: WotPropertyMetadata(
         type: 'number',
         title: 'Target Temperature',
         description: 'Target temperature setting',
@@ -161,10 +161,15 @@ class SmartAirConditioner {
 
     // 创建电源属性（布尔类型）
     _powerProperty = WotProperty<bool>(
-      _thing,
-      'power',
-      WotValue<bool>(false),
-      WotPropertyMetadata(type: 'boolean', title: 'Power', description: 'Power on/off state', readOnly: false),
+      thing: _thing,
+      name: 'power',
+      value: WotValue<bool>(false),
+      metadata: WotPropertyMetadata(
+        type: 'boolean',
+        title: 'Power',
+        description: 'Power on/off state',
+        readOnly: false,
+      ),
     );
 
     // 添加属性到 Thing

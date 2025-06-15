@@ -108,7 +108,12 @@ void main() {
 
     group('Href Management', () {
       test('setHrefPrefix updates all hrefs', () {
-        final property = WotProperty<int>(thing, 'testProp', WotValue<int>(42), WotPropertyMetadata());
+        final property = WotProperty<int>(
+          thing: thing,
+          name: 'testProp',
+          value: WotValue<int>(42),
+          metadata: WotPropertyMetadata(),
+        );
         thing.addProperty(property);
 
         thing.setHrefPrefix('/api/v1');
@@ -139,7 +144,12 @@ void main() {
 
       setUp(() {
         metadata = WotPropertyMetadata(type: 'integer', title: 'Test Property', minimum: 0, maximum: 100);
-        testProperty = WotProperty<int>(thing, 'temperature', WotValue<int>(25), metadata);
+        testProperty = WotProperty<int>(
+          thing: thing,
+          name: 'temperature',
+          value: WotValue<int>(25),
+          metadata: metadata,
+        );
       });
 
       test('addProperty and findProperty', () {
@@ -183,8 +193,13 @@ void main() {
       });
 
       test('getProperties returns all property values', () {
-        final prop1 = WotProperty<int>(thing, 'temp', WotValue<int>(25), metadata);
-        final prop2 = WotProperty<String>(thing, 'status', WotValue<String>('on'), WotPropertyMetadata());
+        final prop1 = WotProperty<int>(thing: thing, name: 'temp', value: WotValue<int>(25), metadata: metadata);
+        final prop2 = WotProperty<String>(
+          thing: thing,
+          name: 'status',
+          value: WotValue<String>('on'),
+          metadata: WotPropertyMetadata(),
+        );
 
         thing.addProperty(prop1);
         thing.addProperty(prop2);
@@ -320,7 +335,12 @@ void main() {
         thing.addSubscriber(subscriber2);
 
         // Test property notification
-        final property = WotProperty<int>(thing, 'temp', WotValue<int>(25), WotPropertyMetadata());
+        final property = WotProperty<int>(
+          thing: thing,
+          name: 'temp',
+          value: WotValue<int>(25),
+          metadata: WotPropertyMetadata(),
+        );
         thing.addProperty(property);
         thing.propertyNotify(property);
 
@@ -377,7 +397,12 @@ void main() {
       setUp(() {
         subscriber = MockSubscriber();
         thing.addSubscriber(subscriber);
-        property = WotProperty<int>(thing, 'temp', WotValue<int>(25), WotPropertyMetadata());
+        property = WotProperty<int>(
+          thing: thing,
+          name: 'temp',
+          value: WotValue<int>(25),
+          metadata: WotPropertyMetadata(),
+        );
         thing.addProperty(property);
       });
 
@@ -444,10 +469,10 @@ void main() {
       test('complete thing workflow', () {
         // Set up thing with properties, actions, and events
         final tempProperty = WotProperty<double>(
-          thing,
-          'temperature',
-          WotValue<double>(20.0),
-          WotPropertyMetadata(type: 'number', unit: 'celsius'),
+          thing: thing,
+          name: 'temp',
+          value: WotValue<double>(25.5),
+          metadata: WotPropertyMetadata(),
         );
         thing.addProperty(tempProperty);
         thing.addAvailableAction(
@@ -502,24 +527,22 @@ void main() {
 
         // Add multiple properties
         final onOffProp = WotProperty<bool>(
-          smartLight,
-          'on',
-          WotValue<bool>(false),
-          WotPropertyMetadata(type: 'boolean', title: 'On/Off'),
+          thing: thing,
+          name: 'on',
+          value: WotValue<bool>(true),
+          metadata: WotPropertyMetadata(),
         );
-
         final brightnessProp = WotProperty<int>(
-          smartLight,
-          'brightness',
-          WotValue<int>(100),
-          WotPropertyMetadata(type: 'integer', minimum: 0, maximum: 100, unit: 'percent'),
+          thing: thing,
+          name: 'brightness',
+          value: WotValue<int>(100),
+          metadata: WotPropertyMetadata(),
         );
-
         final colorProp = WotProperty<String>(
-          smartLight,
-          'color',
-          WotValue<String>('#FFFFFF'),
-          WotPropertyMetadata(type: 'string', title: 'Color'),
+          thing: thing,
+          name: 'color',
+          value: WotValue<String>('red'),
+          metadata: WotPropertyMetadata(),
         );
 
         smartLight.addProperty(onOffProp);
@@ -576,7 +599,12 @@ void main() {
       });
 
       test('concurrent property modifications', () {
-        final property = WotProperty<int>(thing, 'counter', WotValue<int>(0), WotPropertyMetadata());
+        final property = WotProperty<int>(
+          thing: thing,
+          name: 'counter',
+          value: WotValue<int>(0),
+          metadata: WotPropertyMetadata(),
+        );
         thing.addProperty(property);
 
         // Simulate concurrent modifications

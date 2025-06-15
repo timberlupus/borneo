@@ -104,7 +104,7 @@ void main() {
     });
 
     test('basic property creation and getters', () {
-      final property = WotProperty<int>(thing, 'testProp', value, metadata);
+      final property = WotProperty<int>(thing: thing, name: 'testProp', value: value, metadata: metadata);
 
       expect(property.getName(), equals('testProp'));
       expect(property.getValue(), equals(42));
@@ -114,14 +114,14 @@ void main() {
     });
 
     test('setHrefPrefix updates href correctly', () {
-      final property = WotProperty<int>(thing, 'testProp', value, metadata);
+      final property = WotProperty<int>(thing: thing, name: 'testProp', value: value, metadata: metadata);
       property.setHrefPrefix('/api/v1');
 
       expect(property.getHref(), equals('/api/v1/properties/testProp'));
     });
 
     test('setValue updates value correctly', () {
-      final property = WotProperty<int>(thing, 'testProp', value, metadata);
+      final property = WotProperty<int>(thing: thing, name: 'testProp', value: value, metadata: metadata);
 
       property.setValue(75);
       expect(property.getValue(), equals(75));
@@ -130,21 +130,21 @@ void main() {
 
     test('setValue validates read-only property', () {
       final readOnlyMetadata = WotPropertyMetadata(type: 'integer', readOnly: true);
-      final property = WotProperty<int>(thing, 'readOnlyProp', value, readOnlyMetadata);
+      final property = WotProperty<int>(thing: thing, name: 'readOnlyProp', value: value, metadata: readOnlyMetadata);
 
       expect(() => property.setValue(100), throwsException);
     });
 
     test('setValue allows modification of non-read-only property', () {
       final writableMetadata = WotPropertyMetadata(type: 'integer', readOnly: false);
-      final property = WotProperty<int>(thing, 'writableProp', value, writableMetadata);
+      final property = WotProperty<int>(thing: thing, name: 'writableProp', value: value, metadata: writableMetadata);
 
       expect(() => property.setValue(100), returnsNormally);
       expect(property.getValue(), equals(100));
     });
 
     test('asPropertyDescription returns correct format', () {
-      final property = WotProperty<int>(thing, 'tempSensor', value, metadata);
+      final property = WotProperty<int>(thing: thing, name: 'tempSensor', value: value, metadata: metadata);
       property.setHrefPrefix('/api');
 
       final description = property.asPropertyDescription();
@@ -167,7 +167,12 @@ void main() {
         type: 'string',
         links: [WotLink(rel: 'alternate', href: '/ui/prop')],
       );
-      final property = WotProperty<String>(thing, 'prop', WotValue<String>('test'), metadataWithLinks);
+      final property = WotProperty<String>(
+        thing: thing,
+        name: 'prop',
+        value: WotValue<String>('test'),
+        metadata: metadataWithLinks,
+      );
 
       final description = property.asPropertyDescription();
       final links = description['links'] as List;
@@ -181,7 +186,12 @@ void main() {
       var notificationCount = 0;
       final mockThing = _MockThing(() => notificationCount++);
 
-      final property = WotProperty<String>(mockThing, 'notifyProp', WotValue<String>('initial'), metadata);
+      final property = WotProperty<String>(
+        thing: mockThing,
+        name: 'notifyProp',
+        value: WotValue<String>('initial'),
+        metadata: metadata,
+      );
 
       // Direct value update should trigger notification
       value.set(99);
@@ -195,30 +205,40 @@ void main() {
     test('different property types work correctly', () {
       // String property
       final stringProp = WotProperty<String>(
-        thing,
-        'stringProp',
-        WotValue<String>('hello'),
-        WotPropertyMetadata(type: 'string'),
+        thing: thing,
+        name: 'stringProp',
+        value: WotValue<String>('hello'),
+        metadata: WotPropertyMetadata(type: 'string'),
       );
       expect(stringProp.getValue(), equals('hello'));
 
       // Boolean property
-      final boolProp = WotProperty<bool>(thing, 'boolProp', WotValue<bool>(true), WotPropertyMetadata(type: 'boolean'));
+      final boolProp = WotProperty<bool>(
+        thing: thing,
+        name: 'boolProp',
+        value: WotValue<bool>(true),
+        metadata: WotPropertyMetadata(type: 'boolean'),
+      );
       expect(boolProp.getValue(), isTrue);
 
       // Double property
       final doubleProp = WotProperty<double>(
-        thing,
-        'doubleProp',
-        WotValue<double>(3.14),
-        WotPropertyMetadata(type: 'number'),
+        thing: thing,
+        name: 'doubleProp',
+        value: WotValue<double>(3.14),
+        metadata: WotPropertyMetadata(type: 'number'),
       );
       expect(doubleProp.getValue(), equals(3.14));
     });
 
     test('property with enum values in metadata', () {
       final enumMetadata = WotPropertyMetadata(type: 'string', enumValues: ['on', 'off', 'auto']);
-      final property = WotProperty<String>(thing, 'mode', WotValue<String>('on'), enumMetadata);
+      final property = WotProperty<String>(
+        thing: thing,
+        name: 'mode',
+        value: WotValue<String>('on'),
+        metadata: enumMetadata,
+      );
 
       final description = property.asPropertyDescription();
       expect(description['enum'], equals(['on', 'off', 'auto']));
@@ -226,7 +246,7 @@ void main() {
 
     test('property validation with null metadata', () {
       final nullMetadata = WotPropertyMetadata();
-      final property = WotProperty<int>(thing, 'nullMetaProp', value, nullMetadata);
+      final property = WotProperty<int>(thing: thing, name: 'nullMetaProp', value: value, metadata: nullMetadata);
 
       // Should not throw for non-read-only property
       expect(() => property.setValue(123), returnsNormally);
