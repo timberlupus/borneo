@@ -4,8 +4,8 @@ class BorneoProbeCoapConfig extends DefaultCoapConfig {
   static final DefaultCoapConfig coapConfig = BorneoProbeCoapConfig();
 
   @override
-  int get ackTimeout => 100;
+  int get ackTimeout => 500;
 
   @override
-  double get ackTimeoutScale => 1.5;
+  double get ackTimeoutScale => 2;
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 
@@ -20,14 +21,24 @@ class SceneList extends StatelessWidget {
         builder: (context, vm, child) => Container(
           padding: EdgeInsets.all(0),
           height: screenHeight / 4.0,
-          child: ListView.separated(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            separatorBuilder: (_, _) => const SizedBox(width: 16),
-            scrollDirection: Axis.horizontal,
-            itemCount: vm.scenes.length,
-            itemBuilder: (context, index) {
-              return SceneCard(vm.scenes[index]);
-            },
+          child: ScrollConfiguration(
+            behavior: const MaterialScrollBehavior().copyWith(
+              dragDevices: {
+                PointerDeviceKind.touch,
+                PointerDeviceKind.mouse,
+                PointerDeviceKind.stylus,
+                PointerDeviceKind.unknown,
+              },
+            ),
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              separatorBuilder: (_, _) => const SizedBox(width: 16),
+              scrollDirection: Axis.horizontal,
+              itemCount: vm.scenes.length,
+              itemBuilder: (context, index) {
+                return SceneCard(vm.scenes[index]);
+              },
+            ),
           ),
         ),
       ),
