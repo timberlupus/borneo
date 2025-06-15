@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/events/app_events.dart';
+import 'package:borneo_app/core/services/local_service.dart';
 
 const kBrightnessKey = "app.brightness";
 const kLocaleKey = "app.locale";
 
 class AppSettingsViewModel extends AbstractScreenViewModel {
-  AppSettingsViewModel({required super.globalEventBus, super.logger});
+  AppSettingsViewModel({required super.globalEventBus, required super.logger, required this.localeService});
+
+  final LocaleService localeService;
 
   ThemeMode _themeMode = ThemeMode.system;
   ThemeMode get themeMode => _themeMode;
@@ -19,10 +22,8 @@ class AppSettingsViewModel extends AbstractScreenViewModel {
 
   static const _kBrightnessKey = kBrightnessKey;
   static const _kLocaleKey = kLocaleKey;
-  static const _kTemperatureUnitKey = 'app.temperature_unit';
 
-  String _temperatureUnit = 'C'; // 'C' for Celsius, 'F' for Fahrenheit
-  String get temperatureUnit => _temperatureUnit;
+  String get temperatureUnit => localeService.temperatureUnit;
 
   @override
   Future<void> onInitialize() async {
@@ -60,23 +61,7 @@ class AppSettingsViewModel extends AbstractScreenViewModel {
         await prefs.setString(_kLocaleKey, 'en_US');
       }
     }
-    // 温度单位
-    final tempUnit = prefs.getString(_kTemperatureUnitKey);
-    if (tempUnit == 'F') {
-      _temperatureUnit = 'F';
-    } else if (tempUnit == 'C') {
-      _temperatureUnit = 'C';
-    } else {
-      // 根据系统区域自动判断
-      final sysLocale = WidgetsBinding.instance.platformDispatcher.locale;
-      if (sysLocale.countryCode == 'US') {
-        _temperatureUnit = 'F';
-        await prefs.setString(_kTemperatureUnitKey, 'F');
-      } else {
-        _temperatureUnit = 'C';
-        await prefs.setString(_kTemperatureUnitKey, 'C');
-      }
-    }
+    // 温度单位无需再在此初始化，由 LocaleService 负责
     notifyListeners();
   }
 
@@ -99,11 +84,7 @@ class AppSettingsViewModel extends AbstractScreenViewModel {
   }
 
   Future<void> changeTemperatureUnit(String unit) async {
-    if (unit != 'C' && unit != 'F') return;
-    _temperatureUnit = unit;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_kTemperatureUnitKey, unit);
+    await localeService.setTemperatureUnit(unit);
     notifyListeners();
-    globalEventBus.fire(AppTemperatureUnitChangedEvent(unit));
   }
 }

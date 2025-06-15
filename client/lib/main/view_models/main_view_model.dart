@@ -5,6 +5,7 @@ import 'package:borneo_app/core/services/blob_manager.dart';
 import 'package:borneo_app/core/services/device_manager.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/scene_manager.dart';
+import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/shared/view_models/base_view_model.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
@@ -17,6 +18,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   final SceneManager _sceneManager;
   final GroupManager _groupManager;
   final DeviceManager _deviceManager;
+  final LocaleService _localeService;
   TabIndices _currentIndex = TabIndices.scenes;
   bool _isInitialized = false;
 
@@ -49,7 +51,8 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
     this._blobManager,
     this._sceneManager,
     this._groupManager,
-    this._deviceManager, {
+    this._deviceManager,
+    this._localeService, {
     super.logger,
   }) {
     this.globalEventBus = globalEventBus;
@@ -70,6 +73,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
       await _sceneManager.initialize(_groupManager, _deviceManager);
       await _groupManager.initialize();
       await _deviceManager.initialize();
+      await _localeService.initialize();
       logger?.i('MainViewModel initialized.');
     } finally {
       _isInitialized = true;

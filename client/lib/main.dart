@@ -20,6 +20,7 @@ import 'app/app.dart';
 import 'routes/route_manager.dart';
 
 import 'core/services/db.dart';
+import 'core/services/local_service.dart';
 
 Future<Database> openDatabase() async {
   final appDir = await getApplicationDocumentsDirectory();
@@ -87,6 +88,9 @@ Future<void> main() async {
           dispose: (context, kernel) => kernel.dispose(),
           lazy: true,
         ),
+
+        // LocaleService
+        Provider<LocaleService>(create: (_) => AppLocaleService(), lazy: false),
       ],
       child: BorneoApp(),
     ),

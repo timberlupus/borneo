@@ -44,7 +44,6 @@ class _BorneoAppState extends State<BorneoApp> {
     super.initState();
     _loadThemeMode().then((mode) => setState(() => _themeMode = mode));
     _loadLocale().then((loc) => setState(() => _locale = loc));
-    _loadTemperatureUnit(); // 只需保存一次即可
     _localeSub = widget._globalEventBus.on<AppLocaleChangedEvent>().listen((event) {
       setState(() {
         _locale = event.locale;
@@ -81,23 +80,6 @@ class _BorneoAppState extends State<BorneoApp> {
       'en_US' => const Locale('en', 'US'),
       _ => const Locale('en', 'US'),
     };
-  }
-
-  Future<String> _loadTemperatureUnit() async {
-    final prefs = await SharedPreferences.getInstance();
-    final tempUnit = prefs.getString('app.temperature_unit');
-    if (tempUnit == 'F' || tempUnit == 'C') {
-      return tempUnit!;
-    }
-    // 根据系统区域自动判断
-    final sysLocale = WidgetsBinding.instance.platformDispatcher.locale;
-    if (sysLocale.countryCode == 'US') {
-      await prefs.setString('app.temperature_unit', 'F');
-      return 'F';
-    } else {
-      await prefs.setString('app.temperature_unit', 'C');
-      return 'C';
-    }
   }
 
   @override

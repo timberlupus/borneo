@@ -1,3 +1,4 @@
+import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/routes/app_routes.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
@@ -204,7 +205,8 @@ class MainScreen extends StatelessWidget {
         final sm = context.read<SceneManager>();
         final gm = context.read<GroupManager>();
         final dm = context.read<DeviceManager>();
-        return MainViewModel(bus, bm, sm, gm, dm, logger: context.read<Logger>());
+        final ls = context.read<LocaleService>();
+        return MainViewModel(bus, bm, sm, gm, dm, ls, logger: context.read<Logger>());
       },
       lazy: false,
       child: Builder(

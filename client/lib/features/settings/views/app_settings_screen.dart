@@ -1,3 +1,4 @@
+import 'package:borneo_app/core/services/local_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
@@ -14,7 +15,11 @@ class AppSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (cb) => AppSettingsViewModel(globalEventBus: cb.read<EventBus>(), logger: cb.read<Logger>()),
+      create: (cb) => AppSettingsViewModel(
+        globalEventBus: cb.read<EventBus>(),
+        localeService: cb.read<LocaleService>(),
+        logger: cb.read<Logger>(),
+      ),
       builder: (context, child) {
         final vm = context.read<AppSettingsViewModel>();
         return FutureBuilder(
