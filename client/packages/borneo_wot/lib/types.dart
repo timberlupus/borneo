@@ -51,7 +51,7 @@ enum WotPrimitiveJsonType {
   }
 }
 
-typedef WotAnyType = Object?;
+typedef WotAnyType = dynamic;
 
 class WotLink {
   final String rel;
