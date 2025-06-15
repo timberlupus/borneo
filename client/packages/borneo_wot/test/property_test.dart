@@ -93,7 +93,7 @@ void main() {
 
     setUp(() {
       thing = WotThing(id: 'test-thing', title: 'Test Thing', type: ['TestDevice'], description: 'A test thing');
-      value = WotValue<int>(42);
+      value = WotValue<int>(initialValue: 42);
       metadata = WotPropertyMetadata(
         type: 'integer',
         title: 'Test Property',
@@ -170,7 +170,7 @@ void main() {
       final property = WotProperty<String>(
         thing: thing,
         name: 'prop',
-        value: WotValue<String>('test'),
+        value: WotValue<String>(initialValue: 'test'),
         metadata: metadataWithLinks,
       );
 
@@ -189,7 +189,7 @@ void main() {
       final property = WotProperty<String>(
         thing: mockThing,
         name: 'notifyProp',
-        value: WotValue<String>('initial'),
+        value: WotValue<String>(initialValue: 'initial'),
         metadata: metadata,
       );
 
@@ -207,7 +207,7 @@ void main() {
       final stringProp = WotProperty<String>(
         thing: thing,
         name: 'stringProp',
-        value: WotValue<String>('hello'),
+        value: WotValue<String>(initialValue: 'hello'),
         metadata: WotPropertyMetadata(type: 'string'),
       );
       expect(stringProp.getValue(), equals('hello'));
@@ -216,7 +216,7 @@ void main() {
       final boolProp = WotProperty<bool>(
         thing: thing,
         name: 'boolProp',
-        value: WotValue<bool>(true),
+        value: WotValue<bool>(initialValue: true),
         metadata: WotPropertyMetadata(type: 'boolean'),
       );
       expect(boolProp.getValue(), isTrue);
@@ -225,7 +225,7 @@ void main() {
       final doubleProp = WotProperty<double>(
         thing: thing,
         name: 'doubleProp',
-        value: WotValue<double>(3.14),
+        value: WotValue<double>(initialValue: 3.14),
         metadata: WotPropertyMetadata(type: 'number'),
       );
       expect(doubleProp.getValue(), equals(3.14));
@@ -236,7 +236,7 @@ void main() {
       final property = WotProperty<String>(
         thing: thing,
         name: 'mode',
-        value: WotValue<String>('on'),
+        value: WotValue<String>(initialValue: 'on'),
         metadata: enumMetadata,
       );
 

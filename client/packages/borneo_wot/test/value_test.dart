@@ -5,7 +5,7 @@ import 'dart:async';
 void main() {
   group('WotValue', () {
     test('basic set and get operations', () {
-      final value = WotValue<int>(0);
+      final value = WotValue<int>(initialValue: 0);
       expect(value.get(), equals(0));
 
       value.set(1);
@@ -16,7 +16,7 @@ void main() {
     });
 
     test('onUpdate emits when value changes', () async {
-      final value = WotValue<int>(0);
+      final value = WotValue<int>(initialValue: 0);
       final updates = <int>[];
       value.onUpdate.listen(updates.add);
 
@@ -27,7 +27,7 @@ void main() {
     });
 
     test('does not emit if value unchanged', () async {
-      final value = WotValue<int>(5);
+      final value = WotValue<int>(initialValue: 5);
       final updates = <int>[];
       value.onUpdate.listen(updates.add);
 
@@ -37,20 +37,23 @@ void main() {
     });
 
     test('constructor with initial value', () {
-      final stringValue = WotValue<String>('hello');
+      final stringValue = WotValue<String>(initialValue: 'hello');
       expect(stringValue.get(), equals('hello'));
 
-      final boolValue = WotValue<bool>(true);
+      final boolValue = WotValue<bool>(initialValue: true);
       expect(boolValue.get(), isTrue);
 
-      final doubleValue = WotValue<double>(3.14);
+      final doubleValue = WotValue<double>(initialValue: 3.14);
       expect(doubleValue.get(), equals(3.14));
     });
 
     test('constructor with forwarder function', () {
       var forwardedValues = <String>[];
 
-      final value = WotValue<String>('initial', (String newValue) => forwardedValues.add(newValue));
+      final value = WotValue<String>(
+        initialValue: 'initial',
+        valueForwarder: (String newValue) => forwardedValues.add(newValue),
+      );
 
       expect(value.get(), equals('initial'));
       expect(forwardedValues, isEmpty);
@@ -61,7 +64,11 @@ void main() {
     });
     test('constructor with custom equality function', () async {
       // Custom equality that considers case-insensitive strings as equal
-      final value = WotValue<String>('Hello', null, (String a, String b) => a.toLowerCase() == b.toLowerCase());
+      final value = WotValue<String>(
+        initialValue: 'Hello',
+        valueForwarder: null,
+        equality: (String a, String b) => a.toLowerCase() == b.toLowerCase(),
+      );
 
       final updates = <String>[];
       value.onUpdate.listen(updates.add);
@@ -80,7 +87,7 @@ void main() {
     });
 
     test('multiple listeners receive updates', () async {
-      final value = WotValue<int>(0);
+      final value = WotValue<int>(initialValue: 0);
       final updates1 = <int>[];
       final updates2 = <int>[];
       final updates3 = <int>[];
@@ -98,7 +105,7 @@ void main() {
     });
 
     test('stream subscription can be cancelled', () async {
-      final value = WotValue<int>(0);
+      final value = WotValue<int>(initialValue: 0);
       final updates = <int>[];
 
       final subscription = value.onUpdate.listen(updates.add);
@@ -115,7 +122,7 @@ void main() {
     });
 
     test('notifyOfExternalUpdate triggers listeners', () async {
-      final value = WotValue<String>('initial');
+      final value = WotValue<String>(initialValue: 'initial');
       final updates = <String>[];
       value.onUpdate.listen(updates.add);
 
@@ -127,7 +134,7 @@ void main() {
     });
 
     test('notifyOfExternalUpdate with same value does not trigger', () async {
-      final value = WotValue<String>('same');
+      final value = WotValue<String>(initialValue: 'same');
       final updates = <String>[];
       value.onUpdate.listen(updates.add);
 
@@ -138,7 +145,7 @@ void main() {
       expect(value.get(), equals('same'));
     });
     test('notifyOfExternalUpdate with null value', () async {
-      final value = WotValue<String?>('initial');
+      final value = WotValue<String?>(initialValue: 'initial');
       final updates = <String?>[];
       value.onUpdate.listen(updates.add);
 
@@ -150,7 +157,7 @@ void main() {
       expect(value.get(), isNull);
     });
     test('notifyOfExternalUpdate with undefined (null) handling', () async {
-      final value = WotValue<int?>(42);
+      final value = WotValue<int?>(initialValue: 42);
       final updates = <int?>[];
       value.onUpdate.listen(updates.add);
 
@@ -165,7 +172,9 @@ void main() {
       expect(updates, contains(100));
     });
     test('complex object values work correctly', () async {
-      final complexValue = WotValue<Map<String, dynamic>>({'temperature': 25.5, 'humidity': 60, 'status': 'normal'});
+      final complexValue = WotValue<Map<String, dynamic>>(
+        initialValue: {'temperature': 25.5, 'humidity': 60, 'status': 'normal'},
+      );
 
       final updates = <Map<String, dynamic>>[];
       complexValue.onUpdate.listen(updates.add);
@@ -179,7 +188,7 @@ void main() {
       expect(updates.first, equals(newValue));
     });
     test('list values work correctly', () async {
-      final listValue = WotValue<List<int>>([1, 2, 3]);
+      final listValue = WotValue<List<int>>(initialValue: [1, 2, 3]);
       final updates = <List<int>>[];
       listValue.onUpdate.listen(updates.add);
 
@@ -192,10 +201,13 @@ void main() {
       var forwardedCount = 0;
       final forwardedValues = <double>[];
 
-      final value = WotValue<double>(0.0, (double newValue) {
-        forwardedCount++;
-        forwardedValues.add(newValue);
-      });
+      final value = WotValue<double>(
+        initialValue: 0.0,
+        valueForwarder: (double newValue) {
+          forwardedCount++;
+          forwardedValues.add(newValue);
+        },
+      );
 
       final updates = <double>[];
       value.onUpdate.listen(updates.add);
@@ -216,7 +228,11 @@ void main() {
     });
     test('custom equality with numbers', () async {
       // Custom equality that considers numbers within 0.1 as equal
-      final value = WotValue<double>(10.0, null, (double a, double b) => (a - b).abs() < 0.1);
+      final value = WotValue<double>(
+        initialValue: 10.0,
+        valueForwarder: null,
+        equality: (double a, double b) => (a - b).abs() < 0.1,
+      );
 
       final updates = <double>[];
       value.onUpdate.listen(updates.add);
@@ -233,7 +249,7 @@ void main() {
     });
 
     test('stream error handling', () async {
-      final value = WotValue<int>(0);
+      final value = WotValue<int>(initialValue: 0);
       var errorCaught = false;
 
       value.onUpdate.listen(
@@ -252,7 +268,7 @@ void main() {
     });
 
     test('performance with many rapid updates', () async {
-      final value = WotValue<int>(0);
+      final value = WotValue<int>(initialValue: 0);
       final updates = <int>[];
       value.onUpdate.listen(updates.add);
 
@@ -276,7 +292,7 @@ void main() {
       expect(value.get(), equals(100));
     });
     test('stream subscription pause and resume', () async {
-      final value = WotValue<int>(0);
+      final value = WotValue<int>(initialValue: 0);
       final updates = <int>[];
 
       final subscription = value.onUpdate.listen(updates.add);
@@ -302,7 +318,7 @@ void main() {
     });
     test('value with enum type', () async {
       const initialState = DeviceState.off;
-      final value = WotValue<DeviceState>(initialState);
+      final value = WotValue<DeviceState>(initialValue: initialState);
       final updates = <DeviceState>[];
       value.onUpdate.listen(updates.add);
 
@@ -320,9 +336,9 @@ void main() {
     });
 
     test('value type safety', () {
-      final intValue = WotValue<int>(42);
-      final stringValue = WotValue<String>('hello');
-      final boolValue = WotValue<bool>(false);
+      final intValue = WotValue<int>(initialValue: 42);
+      final stringValue = WotValue<String>(initialValue: 'hello');
+      final boolValue = WotValue<bool>(initialValue: false);
 
       // These should compile and work correctly due to type safety
       expect(intValue.get(), isA<int>());
@@ -339,7 +355,7 @@ void main() {
     });
 
     test('concurrent access safety', () async {
-      final value = WotValue<int>(0);
+      final value = WotValue<int>(initialValue: 0);
       final allUpdates = <int>[];
 
       // Multiple concurrent listeners

@@ -80,7 +80,7 @@ void main() {
       final operationModeProperty = WotProperty<String>(
         thing: thing,
         name: 'operationMode',
-        value: WotValue<String>(DeviceOperationMode.idle.toString()),
+        value: WotValue<String>(initialValue: DeviceOperationMode.idle.toString()),
         metadata: WotPropertyMetadata(
           type: 'string',
           title: 'Operation Mode',
@@ -103,7 +103,7 @@ void main() {
       final priorityProperty = WotProperty<String>(
         thing: thing,
         name: 'priority',
-        value: WotValue<String>(Priority.medium.toString()),
+        value: WotValue<String>(initialValue: Priority.medium.toString()),
         metadata: WotPropertyMetadata(
           type: 'string',
           title: 'Priority Level',
@@ -130,7 +130,7 @@ void main() {
       final modeProperty = WotProperty<String>(
         thing: thing,
         name: 'deviceMode',
-        value: WotValue<String>(DeviceOperationMode.active.toString()),
+        value: WotValue<String>(initialValue: DeviceOperationMode.active.toString()),
         metadata: WotPropertyMetadata(
           type: 'string',
           title: 'Device Mode',
@@ -155,7 +155,7 @@ void main() {
       final statusProperty = WotProperty<String>(
         thing: thing,
         name: 'connectionStatus',
-        value: WotValue<String>('connected'),
+        value: WotValue<String>(initialValue: 'connected'),
         metadata: WotPropertyMetadata(
           type: 'string',
           title: 'Connection Status',
@@ -179,7 +179,7 @@ void main() {
       final operationModeProperty = WotProperty<String>(
         thing: thing,
         name: 'operationMode',
-        value: WotValue<String>(DeviceOperationMode.idle.toString()),
+        value: WotValue<String>(initialValue: DeviceOperationMode.idle.toString()),
         metadata: WotPropertyMetadata(
           type: 'string',
           title: 'Operation Mode',
@@ -190,7 +190,7 @@ void main() {
       final priorityProperty = WotProperty<String>(
         thing: thing,
         name: 'priority',
-        value: WotValue<String>(Priority.low.toString()),
+        value: WotValue<String>(initialValue: Priority.low.toString()),
         metadata: WotPropertyMetadata(
           type: 'string',
           title: 'Priority',
@@ -222,7 +222,7 @@ void main() {
       final modeProperty = WotProperty<String>(
         thing: thing,
         name: 'testMode',
-        value: WotValue<String>(DeviceOperationMode.idle.toString()),
+        value: WotValue<String>(initialValue: DeviceOperationMode.idle.toString()),
         metadata: WotPropertyMetadata(
           type: 'string',
           title: 'Test Mode',
@@ -267,7 +267,7 @@ void main() {
       final workModeProperty = WotProperty<String>(
         thing: thermostat,
         name: 'workMode',
-        value: WotValue<String>('auto'),
+        value: WotValue<String>(initialValue: 'auto'),
         metadata: WotPropertyMetadata(
           type: 'string',
           title: 'Work Mode',
@@ -280,7 +280,7 @@ void main() {
       final fanSpeedProperty = WotProperty<String>(
         thing: thermostat,
         name: 'fanSpeed',
-        value: WotValue<String>('medium'),
+        value: WotValue<String>(initialValue: 'medium'),
         metadata: WotPropertyMetadata(
           type: 'string',
           title: 'Fan Speed',
@@ -293,7 +293,7 @@ void main() {
       final systemStatusProperty = WotProperty<String>(
         thing: thermostat,
         name: 'systemStatus',
-        value: WotValue<String>('idle'),
+        value: WotValue<String>(initialValue: 'idle'),
         metadata: WotPropertyMetadata(
           type: 'string',
           title: 'System Status',
@@ -306,7 +306,7 @@ void main() {
       final targetTempProperty = WotProperty<double>(
         thing: thermostat,
         name: 'targetTemperature',
-        value: WotValue<double>(22.0),
+        value: WotValue<double>(initialValue: 22.0),
         metadata: WotPropertyMetadata(
           type: 'number',
           title: 'Target Temperature',

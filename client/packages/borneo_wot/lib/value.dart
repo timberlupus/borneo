@@ -10,7 +10,10 @@ class WotValue<T> {
   final StreamController<T> _controller = StreamController<T>.broadcast();
   final bool Function(T a, T b)? _equality;
 
-  WotValue(this._lastValue, [this._valueForwarder, this._equality]);
+  WotValue({required T initialValue, WotForwarder<T>? valueForwarder, bool Function(T a, T b)? equality})
+    : _lastValue = initialValue,
+      _valueForwarder = valueForwarder,
+      _equality = equality;
 
   void set(T value) {
     if (_valueForwarder != null) {

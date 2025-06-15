@@ -121,7 +121,7 @@ void main() {
         final property = WotProperty<int>(
           thing: thing,
           name: 'testProp',
-          value: WotValue<int>(42),
+          value: WotValue<int>(initialValue: 42),
           metadata: WotPropertyMetadata(),
         );
         thing.addProperty(property);
@@ -157,7 +157,7 @@ void main() {
         testProperty = WotProperty<int>(
           thing: thing,
           name: 'temperature',
-          value: WotValue<int>(25),
+          value: WotValue<int>(initialValue: 25),
           metadata: metadata,
         );
       });
@@ -203,11 +203,16 @@ void main() {
       });
 
       test('getProperties returns all property values', () {
-        final prop1 = WotProperty<int>(thing: thing, name: 'temp', value: WotValue<int>(25), metadata: metadata);
+        final prop1 = WotProperty<int>(
+          thing: thing,
+          name: 'temp',
+          value: WotValue<int>(initialValue: 25),
+          metadata: metadata,
+        );
         final prop2 = WotProperty<String>(
           thing: thing,
           name: 'status',
-          value: WotValue<String>('on'),
+          value: WotValue<String>(initialValue: 'on'),
           metadata: WotPropertyMetadata(),
         );
 
@@ -360,7 +365,7 @@ void main() {
         final property = WotProperty<int>(
           thing: thing,
           name: 'temp',
-          value: WotValue<int>(25),
+          value: WotValue<int>(initialValue: 25),
           metadata: WotPropertyMetadata(),
         );
         thing.addProperty(property);
@@ -422,7 +427,7 @@ void main() {
         property = WotProperty<int>(
           thing: thing,
           name: 'temp',
-          value: WotValue<int>(25),
+          value: WotValue<int>(initialValue: 25),
           metadata: WotPropertyMetadata(),
         );
         thing.addProperty(property);
@@ -497,7 +502,7 @@ void main() {
         final tempProperty = WotProperty<double>(
           thing: thing,
           name: 'temp',
-          value: WotValue<double>(25.5),
+          value: WotValue<double>(initialValue: 25.5),
           metadata: WotPropertyMetadata(),
         );
         thing.addProperty(tempProperty);
@@ -560,19 +565,19 @@ void main() {
         final onOffProp = WotProperty<bool>(
           thing: smartLight,
           name: 'on',
-          value: WotValue<bool>(true),
+          value: WotValue<bool>(initialValue: true),
           metadata: WotPropertyMetadata(),
         );
         final brightnessProp = WotProperty<int>(
           thing: smartLight,
           name: 'brightness',
-          value: WotValue<int>(100),
+          value: WotValue<int>(initialValue: 100),
           metadata: WotPropertyMetadata(minimum: 0, maximum: 100),
         );
         final colorProp = WotProperty<String>(
           thing: smartLight,
           name: 'color',
-          value: WotValue<String>('#FFFFFF'),
+          value: WotValue<String>(initialValue: '#FFFFFF'),
           metadata: WotPropertyMetadata(),
         );
 
@@ -637,7 +642,7 @@ void main() {
         final property = WotProperty<int>(
           thing: thing,
           name: 'counter',
-          value: WotValue<int>(0),
+          value: WotValue<int>(initialValue: 0),
           metadata: WotPropertyMetadata(),
         );
         thing.addProperty(property);
