@@ -1,3 +1,4 @@
+import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/summary_device_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/lyfi_view.dart';
@@ -27,6 +28,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
           deviceManager: context.read<DeviceManager>(),
           globalEventBus: context.read<EventBus>(),
           notification: context.read<IAppNotificationService>(),
+          localeService: context.read<LocaleService>(),
           logger: context.read<Logger>(),
         ),
         deviceIconBuilder: _buildDeviceIcon,

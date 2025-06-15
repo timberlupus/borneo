@@ -1,3 +1,4 @@
+import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
@@ -21,6 +22,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
   static final DateFormat deviceDateFormat = DateFormat('yyyy-MM-dd HH:mm');
 
+  final LocaleService localeService;
   final IAppNotificationService notification;
 
   ILyfiDeviceApi get _deviceApi => super.borneoDeviceApi as ILyfiDeviceApi;
@@ -53,8 +55,12 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   final List<ScheduledInstant> scheduledInstants = [];
   final List<ScheduledInstant> sunInstants = [];
 
-  int? get currentTemp => borneoDeviceStatus?.temperature;
-  double get currentTempRatio => (borneoDeviceStatus?.temperature ?? 0).toDouble() / tempMax;
+  int? get currentTempRaw => borneoDeviceStatus?.temperature;
+  int? get currentTemp => borneoDeviceStatus?.temperature == null
+      ? null
+      : localeService.convertTemperatureValue(borneoDeviceStatus!.temperature!.toDouble()).toInt();
+
+  String get temperatureUnitText => localeService.temperatureUnitText;
 
   // LyFi device status and info
   double _fanPowerRatio = 0.0;
@@ -78,6 +84,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     required super.deviceManager,
     required super.globalEventBus,
     required this.notification,
+    required this.localeService,
     super.logger,
   });
 

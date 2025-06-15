@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 import 'package:gauge_indicator/gauge_indicator.dart';
-import 'dart:ui';
 
 class DashboardTemperatureTile extends StatelessWidget {
   const DashboardTemperatureTile({super.key});
@@ -19,7 +18,7 @@ class DashboardTemperatureTile extends StatelessWidget {
 
     // 当前进度色：和原来一样，主题色
     Color progressColor;
-    final temp = context.select<LyfiViewModel, int?>((vm) => vm.currentTemp);
+    final temp = context.select<LyfiViewModel, int?>((vm) => vm.currentTempRaw);
     if (temp != null && temp <= 45) {
       progressColor = theme.colorScheme.primary;
     } else if (temp != null && temp > 45 && temp < 65) {
@@ -38,7 +37,7 @@ class DashboardTemperatureTile extends StatelessWidget {
         backgroundColor: theme.colorScheme.surfaceContainer,
         arcColor: null,
         progressColor: progressColor,
-        value: vm.currentTemp?.toDouble() ?? 0.0,
+        value: vm.currentTempRaw?.toDouble() ?? 0.0,
         minValue: 0,
         maxValue: 105,
         center: Row(
@@ -56,7 +55,7 @@ class DashboardTemperatureTile extends StatelessWidget {
             ),
             if (vm.currentTemp != null)
               Text(
-                '℃',
+                vm.localeService.temperatureUnitText,
                 style: theme.textTheme.labelMedium?.copyWith(
                   fontFeatures: [FontFeature.tabularFigures()],
                   color: progressColor,
