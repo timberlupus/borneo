@@ -97,7 +97,6 @@ final class DeviceManager implements IDisposable {
       final devices = await fetchAllDevicesInScene();
       _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
       await _rebindAll(devices);
-      await Future.delayed(Duration(seconds: 5));
     });
   }
 
