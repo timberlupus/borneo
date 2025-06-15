@@ -50,8 +50,8 @@ class SceneSummaryViewModel extends BaseViewModel {
 
     _sceneUpdatedEventSub = globalEventBus.on<SceneUpdatedEvent>().listen(_onSceneUpdated);
 
-    _deviceBoundEventSub = dm.deviceEvents.on<DeviceBoundEvent>().listen(_onDeviceBound);
-    _deviceRemovedEventSub = dm.deviceEvents.on<DeviceRemovedEvent>().listen(_onDeviceRemoved);
+    _deviceBoundEventSub = dm.allDeviceEvents.on<DeviceBoundEvent>().listen(_onDeviceBound);
+    _deviceRemovedEventSub = dm.allDeviceEvents.on<DeviceRemovedEvent>().listen(_onDeviceRemoved);
   }
 
   @override

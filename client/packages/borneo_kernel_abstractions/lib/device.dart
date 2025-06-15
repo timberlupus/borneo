@@ -8,9 +8,9 @@ abstract class Device {
 
   Device({required this.id, required this.fingerprint, required this.address});
 
-  dynamic get driverData;
+  DriverData get driverData;
 
-  T data<T extends DriverData>() => driverData! as T;
+  T data<T extends DriverData>() => driverData as T;
 
-  Future<void> setDriverData(dynamic driverData, {CancellationToken? cancelToken});
+  Future<void> setDriverData(DriverData driverData, {CancellationToken? cancelToken});
 }

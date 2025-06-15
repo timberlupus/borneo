@@ -81,11 +81,11 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     required super.globalEventBus,
     super.logger,
   }) {
-    _deviceAddedEventSub = _deviceManager.deviceEvents.on<NewDeviceEntityAddedEvent>().listen(
+    _deviceAddedEventSub = _deviceManager.allDeviceEvents.on<NewDeviceEntityAddedEvent>().listen(
       (event) => _onNewDeviceEntityAdded(event),
     );
 
-    _newDeviceFoundEventSub = _deviceManager.deviceEvents.on<NewDeviceFoundEvent>().listen(
+    _newDeviceFoundEventSub = _deviceManager.allDeviceEvents.on<NewDeviceFoundEvent>().listen(
       (event) => _onNewDeviceFound(event),
     );
   }

@@ -7,7 +7,6 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/coap_driver_data.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel/drivers/borneo/probe_coap_config.dart';
-import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:coap/coap.dart';
 
@@ -49,7 +48,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   BorneoLyfiCoapDriver({this.logger});
 
   @override
-  Future<bool> probe(Device dev, GlobalDevicesEventBus globalBus, {CancellationToken? cancelToken}) async {
+  Future<bool> probe(Device dev, {CancellationToken? cancelToken}) async {
     final probeCoapClient = BorneoCoapClient(
       dev.address,
       config: BorneoProbeCoapConfig.coapConfig,
@@ -83,7 +82,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
         offlineDetectionEnabled: true,
       );
       final lyfiInfo = await _getLyfiInfo(coapClient);
-      final driverData = LyfiCoapDriverData(dev, globalBus, coapClient, probeCoapClient, generalDeviceInfo, lyfiInfo);
+      final driverData = LyfiCoapDriverData(dev, coapClient, probeCoapClient, generalDeviceInfo, lyfiInfo);
       driverData.load();
       await dev.setDriverData(driverData, cancelToken: cancelToken);
       succeed = true;
@@ -100,16 +99,15 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
 
   @override
   Future<bool> remove(Device dev, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     dd.dispose();
-    await dev.setDriverData(null, cancelToken: cancelToken);
     return true;
   }
 
   @override
   Future<bool> heartbeat(Device dev, {CancellationToken? cancelToken}) async {
     try {
-      final dd = dev.driverData! as LyfiCoapDriverData;
+      final dd = dev.driverData as LyfiCoapDriverData;
       return await dd.probeCoap.ping().asCancellable(cancelToken);
     } catch (e) {
       return false;
@@ -160,13 +158,13 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
 
   @override
   Future<int> getKeepTemp(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     return await dd.coap.getCbor<int>(LyfiPaths.keepTemp);
   }
 
   @override
   LyfiDeviceInfo getLyfiInfo(Device dev) {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     return dd.lyfiDeviceInfo;
   }
 
@@ -179,67 +177,67 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
 
   @override
   Future<List<int>> getColor(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     final result = await dd.coap.getCbor<List<Object?>>(LyfiPaths.color);
     return List<int>.from(result, growable: false);
   }
 
   @override
   Future<void> setColor(Device dev, List<int> color) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     await dd.coap.putCbor(LyfiPaths.color, color);
   }
 
   @override
   Future<LyfiState> getState(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     final value = await dd.coap.getCbor<int>(LyfiPaths.state);
     return LyfiState.values[value];
   }
 
   @override
   Future<void> switchState(Device dev, LyfiState state) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     await dd.coap.putCbor(LyfiPaths.state, state.index);
   }
 
   @override
   Future<LyfiMode> getMode(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     final value = await dd.coap.getCbor<int>(LyfiPaths.mode);
     return LyfiMode.values[value];
   }
 
   @override
   Future<void> switchMode(Device dev, LyfiMode mode) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     return await dd.coap.putCbor(LyfiPaths.mode, mode.index);
   }
 
   @override
   Future<List<ScheduledInstant>> getSchedule(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.schedule);
     return items.map((x) => ScheduledInstant.fromMap(x!)).toList();
   }
 
   @override
   Future<void> setSchedule(Device dev, Iterable<ScheduledInstant> schedule) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     final payload = schedule.map((x) => x.toPayload());
     return await dd.coap.putCbor(LyfiPaths.schedule, payload);
   }
 
   @override
   Future<LedCorrectionMethod> getCorrectionMethod(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     final value = await dd.coap.getCbor<int>(LyfiPaths.correctionMethod);
     return LedCorrectionMethod.values[value];
   }
 
   @override
   Future<void> setCorrectionMethod(Device dev, LedCorrectionMethod correctionMethod) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     return await dd.coap.putCbor(LyfiPaths.correctionMethod, correctionMethod.index);
   }
 
@@ -252,14 +250,14 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
 
   @override
   Future<void> setTemporaryDuration(Device dev, Duration duration) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     final minutes = duration.inMinutes;
     return await dd.coap.putCbor(LyfiPaths.temporaryDuration, minutes);
   }
 
   @override
   Future<GeoLocation?> getLocation(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     final result = await dd.coap.getCbor<dynamic>(LyfiPaths.geoLocation);
     if (result != null) {
       return GeoLocation.fromMap(result);
@@ -270,65 +268,65 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
 
   @override
   Future<void> setLocation(Device dev, GeoLocation location) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     return await dd.coap.putCbor(LyfiPaths.geoLocation, location);
   }
 
   @override
   Future<bool> getTimeZoneEnabled(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     final result = await dd.coap.getCbor<bool>(LyfiPaths.tzEnabled);
     return result;
   }
 
   @override
   Future<void> setTimeZoneEnabled(Device dev, bool enabled) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     await dd.coap.putCbor(LyfiPaths.tzEnabled, enabled);
   }
 
   @override
   Future<int> getTimeZoneOffset(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     final result = await dd.coap.getCbor<int>(LyfiPaths.tzOffset);
     return result;
   }
 
   @override
   Future<void> setTimeZoneOffset(Device dev, int offset) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     await dd.coap.putCbor(LyfiPaths.tzOffset, offset);
   }
 
   @override
   Future<AcclimationSettings> getAcclimation(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     final map = await dd.coap.getCbor<dynamic>(LyfiPaths.acclimation);
     return AcclimationSettings.fromMap(map);
   }
 
   @override
   Future<void> setAcclimation(Device dev, AcclimationSettings acc) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     return await dd.coap.postCbor(LyfiPaths.acclimation, acc);
   }
 
   @override
   Future<void> terminateAcclimation(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     await dd.coap.delete(LyfiPaths.acclimation);
   }
 
   @override
   Future<List<ScheduledInstant>> getSunSchedule(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.driverData as LyfiCoapDriverData;
     final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.sunSchedule);
     return items.map((x) => ScheduledInstant.fromMap(x!)).toList();
   }
 
   @override
   Future<List<SunCurveItem>> getSunCurve(Device dev) async {
-    final dd = dev.driverData! as LyfiCoapDriverData;
+    final dd = dev.data<LyfiCoapDriverData>();
     final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.sunCurve);
     return items.map((x) => SunCurveItem.fromMap(x!)).toList();
   }

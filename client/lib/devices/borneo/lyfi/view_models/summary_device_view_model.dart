@@ -7,6 +7,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 
 class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
+  bool _disposed = false;
   LyfiState? ledState;
   LyfiMode? ledMode;
 
@@ -14,13 +15,18 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
   late final StreamSubscription<LyfiStateChangedEvent> _stateChangedSub;
 
   LyfiSummaryDeviceViewModel(super.deviceEntity, super.deviceManager, super.globalEventBus) {
-    _modeChangedSub = super.deviceManager.deviceEvents.on<LyfiModeChangedEvent>().listen((event) {
-      ledMode = event.mode;
-      notifyListeners();
+    _modeChangedSub = deviceManager.allDeviceEvents.on<LyfiModeChangedEvent>().listen((event) {
+      if (super.deviceEntity.id == event.device.id) {
+        ledMode = event.mode;
+        notifyListeners();
+      }
     });
-    _stateChangedSub = super.deviceManager.deviceEvents.on<LyfiStateChangedEvent>().listen((event) {
-      ledState = event.state;
-      notifyListeners();
+
+    _stateChangedSub = deviceManager.allDeviceEvents.on<LyfiStateChangedEvent>().listen((event) {
+      if (super.deviceEntity.id == event.device.id) {
+        ledState = event.state;
+        notifyListeners();
+      }
     });
   }
 
@@ -36,8 +42,11 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
 
   @override
   void dispose() {
-    _modeChangedSub.cancel();
-    _stateChangedSub.cancel();
-    super.dispose();
+    if (!_disposed) {
+      _stateChangedSub.cancel();
+      _modeChangedSub.cancel();
+      super.dispose();
+      _disposed = true;
+    }
   }
 }

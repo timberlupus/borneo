@@ -218,7 +218,9 @@ class MainScreen extends StatelessWidget {
 
               final shouldPop = await vm.handleWillPop();
               if (!shouldPop) {
-                Provider.of<IAppNotificationService>(context, listen: false).showInfo('Press back again to exit');
+                if (context.mounted) {
+                  Provider.of<IAppNotificationService>(context, listen: false).showInfo('Press back again to exit');
+                }
               } else if (context.mounted) {
                 if (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();

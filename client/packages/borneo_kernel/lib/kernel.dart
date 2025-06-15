@@ -5,6 +5,7 @@ import 'package:borneo_kernel_abstractions/models/heartbeat_method.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:logger/logger.dart';
 import 'package:cancellation_token/cancellation_token.dart';
+import 'package:synchronized/extension.dart';
 import 'package:synchronized/synchronized.dart';
 
 import 'package:borneo_common/exceptions.dart';
@@ -37,6 +38,7 @@ final class DefaultKernel implements IKernel {
   final Map<String, BoundDeviceDescriptor> _registeredDevices = {};
   final Map<String, IDriver> _activatedDrivers = {};
   final Map<String, BoundDevice> _boundDevices = {};
+  final Map<String, StreamSubscription> _deviceEventRouters = {};
   final GlobalDevicesEventBus _events = GlobalDevicesEventBus();
   final Set<String> _pollIDList = {};
   final CancellationToken _heartbeatPollingTaskCancelToken = CancellationToken();
@@ -171,7 +173,7 @@ final class DefaultKernel implements IKernel {
       final driver = _ensureDriverActivated(driverID);
 
       final driverInitialized = await driver
-          .probe(device, _events, cancelToken: cancelToken)
+          .probe(device, cancelToken: cancelToken)
           .timeout(timeout ?? kLocalProbeTimeOut);
 
       if (driverInitialized) {
@@ -179,6 +181,9 @@ final class DefaultKernel implements IKernel {
         final driverData = device.data();
         final wotAdapter = await driver.createWotAdapter(device, driverData.deviceEvents, cancelToken: cancelToken);
         final bound = BoundDevice(driverID, device, driver, wotAdapter);
+        _deviceEventRouters[device.id] = bound.device.driverData.deviceEvents.on().listen((event) {
+          _events.fire(event);
+        });
 
         _boundDevices[device.id] = bound;
 
@@ -202,7 +207,12 @@ final class DefaultKernel implements IKernel {
         await boundDevice.driver.remove(boundDevice.device, cancelToken: cancelToken);
         boundDevice.dispose();
         _boundDevices.remove(deviceID);
+
+        _deviceEventRouters[deviceID]?.cancel();
+        _deviceEventRouters.remove(deviceID);
+
         _purgeUnusedDriver();
+
         _events.fire(DeviceRemovedEvent(boundDevice.device));
       }
       if (_pollIDList.contains(deviceID)) {

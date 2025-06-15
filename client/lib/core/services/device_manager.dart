@@ -36,7 +36,7 @@ final class DeviceManager implements IDisposable {
   late final StreamSubscription<UnboundDeviceDiscoveredEvent> _unboundDeviceDiscoveredEventSub;
 
   bool get isInitialized => _isInitialized;
-  GlobalDevicesEventBus get deviceEvents => _kernel.events;
+  GlobalDevicesEventBus get allDeviceEvents => _kernel.events;
 
   final IKernel _kernel;
   IKernel get kernel => _kernel;
@@ -45,7 +45,7 @@ final class DeviceManager implements IDisposable {
 
   DeviceManager(this._db, this._kernel, this._globalBus, this._sceneManager, this._groupManager, {this.logger}) {
     logger?.i("Creating DeviceManager...");
-    _unboundDeviceDiscoveredEventSub = deviceEvents.on<UnboundDeviceDiscoveredEvent>().listen(
+    _unboundDeviceDiscoveredEventSub = allDeviceEvents.on<UnboundDeviceDiscoveredEvent>().listen(
       _onUnboundDeviceDiscovered,
     );
   }
@@ -115,7 +115,7 @@ final class DeviceManager implements IDisposable {
       _kernel.unregisterDevice(id);
       final store = stringMapStoreFactory.store(StoreNames.devices);
       await store.record(id).delete(tx);
-      deviceEvents.fire(DeviceEntityDeletedEvent(id));
+      allDeviceEvents.fire(DeviceEntityDeletedEvent(id));
     }
   }
 
@@ -140,7 +140,7 @@ final class DeviceManager implements IDisposable {
     };
     final updatedRecord = await store.record(id).update(tx, fieldsToUpdate);
     final updatedEntity = DeviceEntity.fromMap(id, updatedRecord!);
-    deviceEvents.fire(DeviceEntityUpdatedEvent(oldEntity, updatedEntity));
+    allDeviceEvents.fire(DeviceEntityUpdatedEvent(oldEntity, updatedEntity));
   }
 
   Future<bool> _groupExists(Transaction tx, String groupID) async {
@@ -222,7 +222,7 @@ final class DeviceManager implements IDisposable {
       model: discovered.model,
     );
     await store.record(device.id).put(tx, device.toMap());
-    deviceEvents.fire(NewDeviceEntityAddedEvent(device));
+    allDeviceEvents.fire(NewDeviceEntityAddedEvent(device));
     return device;
   }
 
@@ -274,7 +274,7 @@ final class DeviceManager implements IDisposable {
           await record.update(tx, {DeviceEntity.kAddressFieldName: event.matched.address.toString()});
         }
       } else {
-        deviceEvents.fire(NewDeviceFoundEvent(event.matched));
+        allDeviceEvents.fire(NewDeviceFoundEvent(event.matched));
       }
     });
   }

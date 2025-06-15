@@ -21,7 +21,7 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel
 
   String get name => deviceEntity.name;
 
-  EventBus get deviceEvents => deviceManager.deviceEvents;
+  EventBus get deviceEvents => deviceManager.allDeviceEvents;
 
   late final StreamSubscription<DeviceBoundEvent> _boundEventSub;
   late final StreamSubscription<DeviceRemovedEvent> _removedEventSub;
@@ -32,9 +32,9 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel
   AbstractDeviceSummaryViewModel(this.deviceEntity, this.deviceManager, EventBus globalEventBus)
     : _isOnline = deviceManager.isBound(deviceEntity.id) {
     super.globalEventBus = globalEventBus;
-    _boundEventSub = deviceManager.deviceEvents.on<DeviceBoundEvent>().listen(_onBound);
-    _removedEventSub = deviceManager.deviceEvents.on<DeviceRemovedEvent>().listen(_onRemoved);
-    _powerEventSub = deviceManager.deviceEvents.on<DevicePowerOnOffChangedEvent>().listen(_onPowerChanged);
+    _boundEventSub = deviceManager.allDeviceEvents.on<DeviceBoundEvent>().listen(_onBound);
+    _removedEventSub = deviceManager.allDeviceEvents.on<DeviceRemovedEvent>().listen(_onRemoved);
+    _powerEventSub = deviceManager.allDeviceEvents.on<DevicePowerOnOffChangedEvent>().listen(_onPowerChanged);
   }
 
   Future<void> initialize({CancellationToken? cancelToken}) async {

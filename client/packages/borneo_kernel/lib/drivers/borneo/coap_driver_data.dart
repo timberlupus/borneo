@@ -16,7 +16,7 @@ abstract class BorneoCoapDriverData extends DriverData {
 
   bool get isDisposed => _disposed;
 
-  BorneoCoapDriverData(super.device, super.globalEvents, this.coap, this.probeCoap, this._generalDeviceInfo);
+  BorneoCoapDriverData(super.device, this.coap, this.probeCoap, this._generalDeviceInfo);
 
   void load() {
     _coapPowerOnOffSub = coap

@@ -7,7 +7,7 @@ import 'package:cancellation_token/cancellation_token.dart';
 abstract class IDriver implements IDisposable {
   const IDriver();
 
-  Future<bool> probe(Device dev, GlobalDevicesEventBus globalBus, {CancellationToken? cancelToken});
+  Future<bool> probe(Device dev, {CancellationToken? cancelToken});
 
   Future<bool> remove(Device dev, {CancellationToken? cancelToken});
 

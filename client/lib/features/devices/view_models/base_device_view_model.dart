@@ -52,7 +52,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     super.globalEventBus = globalEventBus;
     WidgetsBinding.instance.addObserver(this);
 
-    _onDeviceBoundEventSub = deviceManager.deviceEvents.on<DeviceBoundEvent>().listen((event) {
+    _onDeviceBoundEventSub = deviceManager.allDeviceEvents.on<DeviceBoundEvent>().listen((event) {
       if (event.device.id == deviceID) {
         _isOnline = true;
         onDeviceBound();
@@ -63,7 +63,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
       }
     });
 
-    _onDeviceRemovedEventSub = deviceManager.deviceEvents.on<DeviceRemovedEvent>().listen((event) {
+    _onDeviceRemovedEventSub = deviceManager.allDeviceEvents.on<DeviceRemovedEvent>().listen((event) {
       if (event.device.id == deviceID) {
         _isOnline = false;
         if (isTimerRunning) {

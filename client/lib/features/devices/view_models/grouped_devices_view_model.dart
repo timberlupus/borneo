@@ -4,7 +4,6 @@ import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/models/scene_entity.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:event_bus/event_bus.dart';
-import 'package:logger/logger.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
@@ -19,7 +18,6 @@ import 'package:borneo_app/shared/view_models/base_view_model.dart';
 import '../../../models/events.dart';
 
 class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModelInitFutureMixin {
-  final Logger? logger;
   final SceneManager _sceneManager;
   final GroupManager _groupManager;
   final DeviceManager _deviceManager;
@@ -56,13 +54,13 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     this._groupManager,
     this._deviceManager,
     this._deviceModuleRegistry, {
-    this.logger,
+    super.logger,
   }) {
     super.globalEventBus = globalEventBus;
-    _deviceAddedEventSub = _deviceManager.deviceEvents.on<NewDeviceEntityAddedEvent>().listen(
+    _deviceAddedEventSub = _deviceManager.allDeviceEvents.on<NewDeviceEntityAddedEvent>().listen(
       (event) => _onNewDeviceEntityAdded(event),
     );
-    _deviceDeletedEventSub = _deviceManager.deviceEvents.on<DeviceEntityDeletedEvent>().listen(
+    _deviceDeletedEventSub = _deviceManager.allDeviceEvents.on<DeviceEntityDeletedEvent>().listen(
       (event) => _onDeviceDeleted(event),
     );
     _currentSceneChangedEventSub = super.globalEventBus.on<CurrentSceneChangedEvent>().listen(_onCurrentSceneChanged);

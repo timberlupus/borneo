@@ -62,10 +62,15 @@ class DeviceEntity extends Device with BaseEntity {
   }
 
   @override
-  dynamic get driverData => _driverData;
+  DriverData get driverData {
+    if (_driverData == null) {
+      throw StateError('Driver data is not set for device: $id');
+    }
+    return _driverData!;
+  }
 
   @override
-  Future<void> setDriverData(dynamic driverData, {CancellationToken? cancelToken}) async {
+  Future<void> setDriverData(DriverData driverData, {CancellationToken? cancelToken}) async {
     await _lock
         .synchronized(() async {
           _driverData = driverData;

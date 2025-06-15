@@ -114,7 +114,9 @@ mixin ViewModelEventBusMixin on BaseViewModel {
 mixin ViewModelInitFutureMixin on BaseViewModel {
   Future<void>? _initFuture;
   Future<void>? get initFuture {
-    if ((this as dynamic).isInitialized == true) return null;
+    if ((this as dynamic).isInitialized == true) {
+      return null;
+    }
     return _initFuture ??= (this as dynamic).initialize();
   }
 }

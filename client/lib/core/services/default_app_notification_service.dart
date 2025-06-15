@@ -9,6 +9,7 @@ class DefaultAppNotificationService implements IAppNotificationService {
       type: ToastificationType.error,
       title: Text(title),
       description: body != null ? Text(body) : null,
+      autoCloseDuration: Duration(seconds: 5),
     );
   }
 
@@ -18,6 +19,9 @@ class DefaultAppNotificationService implements IAppNotificationService {
       type: ToastificationType.info,
       title: Text(title),
       description: body != null ? Text(body) : null,
+      autoCloseDuration: Duration(seconds: 5),
+      closeOnClick: true,
+      dragToClose: true,
     );
   }
 
@@ -36,7 +40,7 @@ class DefaultAppNotificationService implements IAppNotificationService {
       type: ToastificationType.success,
       title: Text(title),
       description: body != null ? Text(body) : null,
-      autoCloseDuration: Duration(seconds: 5),
+      autoCloseDuration: Duration(seconds: 3),
       closeOnClick: true,
       dragToClose: true,
     );
@@ -48,6 +52,7 @@ class DefaultAppNotificationService implements IAppNotificationService {
       type: ToastificationType.warning,
       title: Text(title),
       description: body != null ? Text(body) : null,
+      autoCloseDuration: Duration(seconds: 5),
     );
   }
 }

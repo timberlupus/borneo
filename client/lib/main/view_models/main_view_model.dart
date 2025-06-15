@@ -54,10 +54,10 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   }) {
     this.globalEventBus = globalEventBus;
     _appErrorEventSub = globalEventBus.on<AppErrorEvent>().listen(_onAppError);
-    _deviceDiscoveringStartedEventSub = _deviceManager.deviceEvents.on<DeviceDiscoveringStartedEvent>().listen(
+    _deviceDiscoveringStartedEventSub = _deviceManager.allDeviceEvents.on<DeviceDiscoveringStartedEvent>().listen(
       _onDeviceDiscoveringStarted,
     );
-    _deviceDiscoveringStoppedEventSub = _deviceManager.deviceEvents.on<DeviceDiscoveringStoppedEvent>().listen(
+    _deviceDiscoveringStoppedEventSub = _deviceManager.allDeviceEvents.on<DeviceDiscoveringStoppedEvent>().listen(
       _onDeviceDiscoveringStopped,
     );
   }
