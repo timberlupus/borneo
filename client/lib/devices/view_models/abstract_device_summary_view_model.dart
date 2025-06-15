@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:borneo_app/devices/borneo/lyfi/core/wot.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
