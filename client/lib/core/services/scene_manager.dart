@@ -151,15 +151,21 @@ class SceneManager {
     final store = stringMapStoreFactory.store(StoreNames.scenes);
     return await _db.transaction((tx) async {
       // Update the old one
-      await store.record(_current.id).update(tx, {
+      final oldUpdate = await store.record(_current.id).update(tx, {
         SceneEntity.kLastAccessTime: DateTime.now().millisecondsSinceEpoch,
         SceneEntity.kIsCurrent: false,
       });
+      if (oldUpdate == null) {
+        throw InvalidOperationException(message: 'Failed to update old scene');
+      }
       // Update the new one
-      await store.record(newSceneID).update(tx, {
+      final newUpdate = await store.record(newSceneID).update(tx, {
         SceneEntity.kLastAccessTime: DateTime.now().millisecondsSinceEpoch,
         SceneEntity.kIsCurrent: true,
       });
+      if (newUpdate == null) {
+        throw InvalidOperationException(message: 'Failed to update new scene');
+      }
       // Load the new one
       final newCurrentRecord = await store.record(newSceneID).get(tx);
       if (newCurrentRecord == null) {

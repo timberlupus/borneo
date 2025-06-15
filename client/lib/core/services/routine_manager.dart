@@ -7,12 +7,15 @@ import 'package:borneo_common/borneo_common.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
+import 'package:synchronized/synchronized.dart';
 
 class RoutineManager implements IDisposable {
   final Logger? logger;
 
   // ignore: unused_field
   final Database _db;
+
+  final _routineOpLock = Lock();
 
   // ignore: unused_field
   final EventBus _globalBus;
@@ -41,27 +44,30 @@ class RoutineManager implements IDisposable {
   }
 
   Future<void> executeRoutine(String routineID) async {
-    final routine = allRoutines.singleWhere((r) => r.id == routineID);
-    final currentScene = _sceneManager.current;
-    final steps = await routine.execute(currentScene, _deviceManager);
-    if (steps.isNotEmpty) {
-      await _historyStore.addRecord(
-        RoutineHistoryRecord(routineId: routineID, timestamp: DateTime.now(), steps: steps),
-      );
-    }
+    await _routineOpLock.synchronized(() async {
+      final routine = allRoutines.singleWhere((r) => r.id == routineID);
+      final currentScene = _sceneManager.current;
+      final steps = await routine.execute(currentScene, _deviceManager);
+      if (steps.isNotEmpty) {
+        await _historyStore.addRecord(
+          RoutineHistoryRecord(routineId: routineID, timestamp: DateTime.now(), steps: steps),
+        );
+      }
+    });
   }
 
   Future<void> undoRoutine(String routineID) async {
-    final routine = allRoutines.singleWhere((r) => r.id == routineID);
-    final records = await _historyStore.getAllRecords();
-    final last = records.where((r) => r.routineId == routineID).lastOrNull;
-    if (last == null) return;
-    final stepObjs = last.steps.map(routine.createAction).toList();
-    for (final step in stepObjs.reversed) {
-      await step.undo(_deviceManager);
-    }
-    // 清除该 routine 的所有历史记录
-    await _historyStore.clearByRoutineId(routineID);
+    await _routineOpLock.synchronized(() async {
+      final routine = allRoutines.singleWhere((r) => r.id == routineID);
+      final records = await _historyStore.getAllRecords();
+      final last = records.where((r) => r.routineId == routineID).lastOrNull;
+      if (last == null) return;
+      final stepObjs = last.steps.map(routine.createAction).toList();
+      for (final step in stepObjs.reversed) {
+        await step.undo(_deviceManager);
+      }
+      await _historyStore.clearByRoutineId(routineID);
+    });
   }
 
   @override

@@ -30,7 +30,7 @@ Future<Database> openDatabase() async {
 
   if (await dbProvider.isExisted()) {
     // For Debug only!
-    //await dbProvider.delete();
+    // await dbProvider.delete();
   }
 
   return await dbProvider.open();

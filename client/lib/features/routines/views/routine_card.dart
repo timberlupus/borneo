@@ -90,85 +90,85 @@ class _RoutineCardContentState extends State<_RoutineCardContent> {
     final fgColor = widget.fgColor;
     final colorScheme = widget.colorScheme;
     final isActive = widget.isActive;
-    return Stack(
-      children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 350),
-          curve: Curves.easeInOut,
-          margin: EdgeInsets.all(0),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Card.filled(
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Stack(
+        children: [
+          Card.filled(
             margin: EdgeInsets.all(0),
             elevation: 0,
-            color: Colors.transparent,
+            color: bgColor,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: LayoutBuilder(
-                      builder: (BuildContext context, BoxConstraints constraints) {
-                        final iconSize = constraints.maxHeight - 16.0;
-                        return Align(
-                          alignment: Alignment.centerLeft,
-                          child: SvgPicture.asset(vm.iconAssetPath, height: iconSize, width: iconSize),
-                        );
-                      },
-                    ),
-                  ),
-                  Selector<RoutineSummaryViewModel, String>(
-                    selector: (context, vm) => vm.name,
-                    builder: (_, routineName, child) => Text(
-                      routineName,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 14.0, color: fgColor),
-                    ),
-                  ),
-                  Divider(height: 16, thickness: 1, color: fgColor.withValues(alpha: 0.2)),
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Text(
-                        isActive ? context.translate('ACTIVE') : context.translate('INACTIVE'),
-                        style: TextStyle(fontSize: 12, color: fgColor.withValues(alpha: 0.7)),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 350),
+                switchInCurve: Curves.easeInOut,
+                switchOutCurve: Curves.easeInOut,
+                child: Column(
+                  key: ValueKey(isActive.toString() + vm.name),
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (BuildContext context, BoxConstraints constraints) {
+                          final iconSize = constraints.maxHeight - 16.0;
+                          return Align(
+                            alignment: Alignment.centerLeft,
+                            child: SvgPicture.asset(vm.iconAssetPath, height: iconSize, width: iconSize),
+                          );
+                        },
                       ),
-                      Spacer(),
-                      Switch(
-                        value: isActive,
-                        onChanged: widget.isBusy
-                            ? null
-                            : (v) async {
-                                if (v) {
-                                  await vm.executeRoutine();
-                                } else {
-                                  await vm.undoRoutine();
-                                }
-                              },
-                        activeColor: colorScheme.primary,
-                        inactiveThumbColor: colorScheme.primary,
-                        inactiveTrackColor: colorScheme.surfaceBright,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    Selector<RoutineSummaryViewModel, String>(
+                      selector: (context, vm) => vm.name,
+                      builder: (_, routineName, child) => Text(
+                        routineName,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 14.0, color: fgColor),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    Divider(height: 16, thickness: 1, color: fgColor.withValues(alpha: 0.2)),
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Text(
+                          isActive ? context.translate('ACTIVE') : context.translate('INACTIVE'),
+                          style: TextStyle(fontSize: 12, color: fgColor.withValues(alpha: 0.7)),
+                        ),
+                        Spacer(),
+                        Switch(
+                          value: isActive,
+                          onChanged: widget.isBusy
+                              ? null
+                              : (v) async {
+                                  if (v) {
+                                    await vm.executeRoutine();
+                                  } else {
+                                    await vm.undoRoutine();
+                                  }
+                                },
+                          activeColor: colorScheme.primary,
+                          inactiveThumbColor: colorScheme.primary,
+                          inactiveTrackColor: colorScheme.surfaceBright,
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        if (_showProgress && widget.isBusy)
-          Positioned.fill(
-            child: Container(
-              color: bgColor.withValues(alpha: 0.6),
-              child: Center(child: CircularProgressIndicator()),
+          if (_showProgress && widget.isBusy)
+            Positioned.fill(
+              child: Container(
+                color: bgColor.withValues(alpha: 0.6),
+                child: Center(child: CircularProgressIndicator()),
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }
