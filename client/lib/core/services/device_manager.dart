@@ -7,6 +7,7 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
+import 'package:synchronized/synchronized.dart';
 
 import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/features/devices/models/events.dart';
@@ -26,6 +27,8 @@ final class DeviceManager implements IDisposable {
   final Database _db;
   bool _isInitialized = false;
   final SceneManager _sceneManager;
+
+  final Lock _deviceOperLock = Lock();
 
   // ignore: unused_field
   final EventBus _globalBus;
@@ -83,20 +86,25 @@ final class DeviceManager implements IDisposable {
   BoundDevice getBoundDevice(String deviceID) => _kernel.getBoundDevice(deviceID);
 
   Future<void> reloadAllDevices() async {
-    await _kernel.unbindAll();
-    _kernel.unregisterAllDevices();
-    final devices = await fetchAllDevicesInScene();
-    _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
-    await _rebindAll(devices);
+    await _deviceOperLock.synchronized(() async {
+      await _kernel.unbindAll();
+      _kernel.unregisterAllDevices();
+      final devices = await fetchAllDevicesInScene();
+      _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
+      await _rebindAll(devices);
+      await Future.delayed(Duration(seconds: 5));
+    });
   }
 
   Future<void> _rebindAll(Iterable<DeviceEntity> devices) async {
-    await _kernel.unbindAll();
-    final futures = <Future>[];
-    for (var device in devices) {
-      futures.add(tryBind(device));
-    }
-    await Future.wait(futures);
+    await _deviceOperLock.synchronized(() async {
+      await _kernel.unbindAll();
+      final futures = <Future>[];
+      for (var device in devices) {
+        futures.add(tryBind(device));
+      }
+      await Future.wait(futures);
+    });
   }
 
   Future<bool> tryBind(DeviceEntity device) async => _kernel.tryBind(device, device.driverID);

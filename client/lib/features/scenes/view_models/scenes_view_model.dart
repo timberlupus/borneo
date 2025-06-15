@@ -139,7 +139,8 @@ class ScenesViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewMod
         scene.notifyListeners();
       }
       _reloadRoutines();
-    }); // TODO move it to event
+      notifyListeners();
+    });
   }
 
   void _onSceneDeleted(SceneDeletedEvent event) {
