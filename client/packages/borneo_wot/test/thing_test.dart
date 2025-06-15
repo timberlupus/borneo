@@ -513,8 +513,8 @@ void main() {
         thing.setHrefPrefix('/api/things/temp-sensor');
 
         // Test property operation
-        thing.setProperty('temperature', 25.5);
-        expect(thing.getProperty('temperature'), equals(25.5));
+        thing.setProperty('temp', 25.5);
+        expect(thing.getProperty('temp'), equals(25.5));
 
         // Test action operation
         final action = thing.performAction('setTemperature', {'value': 22.0});
@@ -547,21 +547,21 @@ void main() {
 
         // Add multiple properties
         final onOffProp = WotProperty<bool>(
-          thing: thing,
+          thing: smartLight,
           name: 'on',
           value: WotValue<bool>(true),
           metadata: WotPropertyMetadata(),
         );
         final brightnessProp = WotProperty<int>(
-          thing: thing,
+          thing: smartLight,
           name: 'brightness',
           value: WotValue<int>(100),
-          metadata: WotPropertyMetadata(),
+          metadata: WotPropertyMetadata(minimum: 0, maximum: 100),
         );
         final colorProp = WotProperty<String>(
-          thing: thing,
+          thing: smartLight,
           name: 'color',
-          value: WotValue<String>('red'),
+          value: WotValue<String>('#FFFFFF'),
           metadata: WotPropertyMetadata(),
         );
 
@@ -571,7 +571,7 @@ void main() {
 
         // Test all properties
         expect(smartLight.getProperties(), hasLength(3));
-        expect(smartLight.getProperty('on'), isFalse);
+        expect(smartLight.getProperty('on'), isTrue);
         expect(smartLight.getProperty('brightness'), equals(100));
         expect(smartLight.getProperty('color'), equals('#FFFFFF'));
 
