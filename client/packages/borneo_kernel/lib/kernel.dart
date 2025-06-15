@@ -279,7 +279,7 @@ final class DefaultKernel implements IKernel {
                 }
               }
 
-              _logger.i('Polling heartbeat for (${devices.length}) bound devices...');
+              _logger.d('Polling heartbeat for (${devices.length}) bound devices...');
               final results = await Future.wait(
                 futures,
               ).timeout(kHeartbeatPollingInterval).asCancellable(_heartbeatPollingTaskCancelToken);
@@ -304,7 +304,7 @@ final class DefaultKernel implements IKernel {
                 ),
               );
             }
-            _logger.i('Polling heartbeat for (${unboundDeviceDescriptors.length}) unbound devices...');
+            _logger.d('Polling heartbeat for (${unboundDeviceDescriptors.length}) unbound devices...');
             final boundResults = await Future.wait(
               futures,
             ).timeout(kHeartbeatPollingInterval).asCancellable(_heartbeatPollingTaskCancelToken);
