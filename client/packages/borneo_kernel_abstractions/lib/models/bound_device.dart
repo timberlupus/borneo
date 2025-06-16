@@ -32,7 +32,6 @@ final class BoundDevice implements IDisposable {
   @override
   void dispose() {
     if (!_isDisposed) {
-      thing.dispose();
       _isDisposed = true;
     }
   }
