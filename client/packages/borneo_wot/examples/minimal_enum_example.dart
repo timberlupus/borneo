@@ -17,13 +17,18 @@ void main() {
   print('Enum Property Example for borneo_wot');
 
   // 创建设备
-  final device = WotThing('test-device', 'Test Device', ['TestDevice'], 'A test device with enum property');
+  final device = WotThing(
+    id: 'test-device',
+    title: 'Test Device',
+    type: ['TestDevice'],
+    description: 'A test device with enum property',
+  );
 
   // 创建枚举属性
   final modeProperty = WotProperty<String>(
     thing: device,
     name: 'mode',
-    value: WotValue<String>(DeviceMode.off.toString()),
+    value: WotValue<String>(initialValue: DeviceMode.off.toString()),
     metadata: WotPropertyMetadata(
       type: 'string',
       title: 'Device Mode',

@@ -48,16 +48,18 @@ void main() {
   print('=== 在 borneo_wot 中使用 Dart Enum 属性的示例 ===\n');
 
   // 创建 WoT Thing
-  final device = WotThing('smart-device-001', 'Smart Device Controller', [
-    'SmartDevice',
-    'Controller',
-  ], 'A smart device demonstrating enum properties');
+  final device = WotThing(
+    id: 'smart-device-001',
+    title: 'Smart Device Controller',
+    type: ['SmartDevice', 'Controller'],
+    description: 'A smart device demonstrating enum properties',
+  );
 
   // 1. 创建设备状态枚举属性（只读）
   final deviceStateProperty = WotProperty<String>(
     thing: device,
     name: 'deviceState',
-    value: WotValue<String>(DeviceState.standby.toString()),
+    value: WotValue<String>(initialValue: DeviceState.standby.toString()),
     metadata: WotPropertyMetadata(
       type: 'string',
       title: 'Device State',
@@ -71,7 +73,7 @@ void main() {
   final operationModeProperty = WotProperty<String>(
     thing: device,
     name: 'operationMode',
-    value: WotValue<String>(OperationMode.automatic.toString()),
+    value: WotValue<String>(initialValue: OperationMode.automatic.toString()),
     metadata: WotPropertyMetadata(
       type: 'string',
       title: 'Operation Mode',
@@ -85,7 +87,7 @@ void main() {
   final temperatureProperty = WotProperty<double>(
     thing: device,
     name: 'temperature',
-    value: WotValue<double>(22.5),
+    value: WotValue<double>(initialValue: 22.5),
     metadata: WotPropertyMetadata(
       type: 'number',
       title: 'Temperature',
@@ -100,7 +102,7 @@ void main() {
   final enabledProperty = WotProperty<bool>(
     thing: device,
     name: 'enabled',
-    value: WotValue<bool>(true),
+    value: WotValue<bool>(initialValue: true),
     metadata: WotPropertyMetadata(
       type: 'boolean',
       title: 'Enabled',
