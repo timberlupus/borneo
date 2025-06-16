@@ -33,9 +33,23 @@ abstract class AbstractRoutine with BaseEntity {
   };
 
   Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, DeviceManager deviceManager);
-
   bool matchAllCapabilities(BoundDevice bound) {
-    return requiredCapabilities.every((capability) => bound.wotAdapter.device.hasCapability(capability));
+    return requiredCapabilities.every((capability) => _hasCapability(bound, capability));
+  }
+
+  bool _hasCapability(BoundDevice bound, String capability) {
+    final types = bound.thing.getType();
+    if (types.contains(capability)) return true;
+
+    // Check for capability-specific properties that indicate the capability
+    switch (capability) {
+      case "OnOffSwitch":
+        return bound.thing.hasProperty("on");
+      case "LyfiDevice":
+        return bound.thing.hasProperty("state") && bound.thing.hasProperty("mode");
+      default:
+        return false;
+    }
   }
 }
 

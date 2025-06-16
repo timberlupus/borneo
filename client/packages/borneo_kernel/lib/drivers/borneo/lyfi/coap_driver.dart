@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:borneo_kernel/drivers/borneo/base_lyfi_driver.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/base_lyfi_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/coap_client.dart';
 import 'package:borneo_kernel/drivers/borneo/coap_config.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';

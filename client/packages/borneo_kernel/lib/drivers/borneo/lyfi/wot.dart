@@ -1,11 +1,3 @@
-import 'package:borneo_kernel_abstractions/models/wot/property.dart';
-
-class WotLyfiStateProperty extends WotEnumProperty {
-  WotLyfiStateProperty({required super.value, super.description, super.valueForwarder})
-    : super(name: "state", title: "State", readOnly: false, atType: "LyfiStateProperty", enumeration: []);
-}
-
-class WotLyfiModeProperty extends WotEnumProperty {
-  WotLyfiModeProperty({required super.value, super.description, super.valueForwarder})
-    : super(name: "mode", title: "Mode", readOnly: false, atType: "LyfiModeProperty", enumeration: []);
-}
+// This file is no longer needed as we now use WotProperty directly with WotThing
+// instead of the old WotDevice + WotAdapter pattern.
+// The properties are now created using WotProperty<String> with WotPropertyMetadata.
