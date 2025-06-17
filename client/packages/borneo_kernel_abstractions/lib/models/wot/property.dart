@@ -51,7 +51,7 @@ abstract class WotProperty<T> implements IDisposable {
     this.notifyOfExternalUpdate(newValue);
   }
 
-  T? get value => _lastValue;
+  T get value => _lastValue;
 
   void notifyOfExternalUpdate(T newValue) {
     final isEqual = equals != null ? equals!(newValue, _lastValue) : newValue == _lastValue;

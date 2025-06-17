@@ -1,17 +1,15 @@
 import 'dart:async';
-import 'dart:io';
 
+import 'package:borneo_app/devices/borneo/lyfi/core/wot.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_kernel/drivers/borneo/events.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_app/core/services/device_manager.dart';
-import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 
 import '../../shared/view_models/base_view_model.dart';
 
-abstract class AbstractDeviceSummaryViewModel extends BaseViewModel
-    with ViewModelEventBusMixin, ViewModelInitFutureMixin {
+abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewModelEventBusMixin {
   final DeviceManager deviceManager;
   final DeviceEntity deviceEntity;
   var isInitialized = false;
@@ -25,9 +23,10 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel
 
   late final StreamSubscription<DeviceBoundEvent> _boundEventSub;
   late final StreamSubscription<DeviceRemovedEvent> _removedEventSub;
+  late final StreamSubscription<DevicePowerOnOffChangedEvent> _powerEventSub;
+
   late bool _isPowerOn = false;
   bool get isPowerOn => _isPowerOn;
-  late final StreamSubscription<DevicePowerOnOffChangedEvent> _powerEventSub;
 
   AbstractDeviceSummaryViewModel(this.deviceEntity, this.deviceManager, EventBus globalEventBus)
     : _isOnline = deviceManager.isBound(deviceEntity.id) {
@@ -35,34 +34,18 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel
     _boundEventSub = deviceManager.allDeviceEvents.on<DeviceBoundEvent>().listen(_onBound);
     _removedEventSub = deviceManager.allDeviceEvents.on<DeviceRemovedEvent>().listen(_onRemoved);
     _powerEventSub = deviceManager.allDeviceEvents.on<DevicePowerOnOffChangedEvent>().listen(_onPowerChanged);
-  }
 
-  Future<void> initialize({CancellationToken? cancelToken}) async {
-    try {
-      if (deviceManager.isBound(deviceEntity.id)) {
-        final bound = deviceManager.getBoundDevice(deviceEntity.id);
-        final wotDevice = bound.wotAdapter.device;
-        if (wotDevice.hasCapability("OnOffSwitch")) {
-          final onProp = wotDevice.properties["on"]!;
+    if (deviceManager.isBound(deviceEntity.id)) {
+      final bound = deviceManager.getBoundDevice(deviceEntity.id);
+      final wotDevice = bound.wotAdapter.device;
+      if (wotDevice.hasCapability("OnOffSwitch")) {
+        final onProp = wotDevice.properties[LyfiKnownProperties.kOn];
+        if (onProp != null) {
           _isPowerOn = onProp.value as bool;
         }
       }
-      await onInitialize(cancelToken: cancelToken);
-    } on IOException catch (ioex, stackTrace) {
-      logger?.e(ioex.toString(), error: ioex, stackTrace: stackTrace);
-      if (isOnline) {
-        super.notifyAppError('Failed to initialize device: $ioex', stackTrace: stackTrace);
-      }
-    } catch (e, stackTrace) {
-      logger?.e('Failed to initialize device(${deviceEntity.toString()}): $e', error: e, stackTrace: stackTrace);
-      super.notifyAppError('Failed to initialize device: $e', error: e, stackTrace: stackTrace);
-    } finally {
-      isInitialized = true;
-      notifyListeners();
     }
   }
-
-  Future<void> onInitialize({CancellationToken? cancelToken});
 
   @override
   void dispose() {

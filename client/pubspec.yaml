@@ -19,6 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 0.3.99+1
 
 workspace:
+  - packages/borneo_wot
   - packages/borneo_common
   - packages/borneo_kernel
   - packages/borneo_kernel_abstractions
@@ -84,12 +85,15 @@ dependencies:
 
 
   # My libraries
+  borneo_wot:
+    path: packages/borneo_wot
   borneo_common:
     path: packages/borneo_common
   borneo_kernel_abstractions:
     path: packages/borneo_kernel_abstractions
   borneo_kernel:
     path: packages/borneo_kernel
+
   flutter_progress_hud: ^2.0.2
   gauge_indicator: ^0.4.3
   toastification: ^3.0.2
