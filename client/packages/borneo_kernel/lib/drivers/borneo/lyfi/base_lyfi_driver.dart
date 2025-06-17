@@ -2,7 +2,7 @@
 
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/lyfi_thing.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/wot.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_kernel_abstractions/idriver.dart';

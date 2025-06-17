@@ -375,6 +375,21 @@ class WotThing {
       }
     }
   }
+
+  void dispose() {
+    // Dispose all properties
+    for (final property in _properties.values) {
+      property.dispose();
+    }
+    _properties.clear();
+
+    // Clear other collections
+    _availableActions.clear();
+    _availableEvents.clear();
+    _actions.clear();
+    _events.clear();
+    _subscribers.clear();
+  }
 }
 
 class _AvailableAction {
