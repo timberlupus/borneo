@@ -303,6 +303,14 @@ void main() {
         final action1 = thing.performAction('action1', {'data': 1});
         final action2 = thing.performAction('action1', {'data': 2});
 
+        // Verify that actions were created successfully
+        expect(action1, isNotNull);
+        expect(action2, isNotNull);
+        expect(action1!.getName(), equals('action1'));
+        expect(action2!.getName(), equals('action1'));
+        expect(action1.getInput(), equals({'data': 1}));
+        expect(action2.getInput(), equals({'data': 2}));
+
         final allDescriptions = thing.getActionDescriptions();
         expect(allDescriptions, hasLength(2));
 
@@ -443,7 +451,6 @@ void main() {
         expect(message, contains('temp'));
         expect(message, contains('25'));
       });
-
       test('actionNotify sends correct message format', () {
         thing.addAvailableAction(
           'testAction',
@@ -457,6 +464,11 @@ void main() {
         );
 
         final action = thing.performAction('testAction', {})!;
+
+        // Verify the action was created successfully
+        expect(action.getName(), equals('testAction'));
+        expect(action.getId(), equals('action-1'));
+        expect(action.getThing(), equals(thing));
 
         // Check if notification was sent (performAction calls actionNotify)
         expect(subscriber.receivedMessages, hasLength(1));

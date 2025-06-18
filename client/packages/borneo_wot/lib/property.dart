@@ -1,5 +1,7 @@
 // Dart port of src/property.ts
 
+import 'package:borneo_wot/thing.dart';
+
 import 'types.dart';
 import 'value.dart';
 
@@ -73,11 +75,11 @@ class WotProperty<T> {
   final WotPropertyMetadata metadata;
   String hrefPrefix = '';
   late final String href;
-  final dynamic thing;
+  final WotThing thing;
 
   WotProperty({required this.thing, required this.name, required this.value, required this.metadata}) {
     href = '/properties/$name';
-    value.onUpdate.listen((_) => thing?.propertyNotify(this));
+    value.onUpdate.listen((_) => thing.propertyNotify(this));
   }
 
   void setHrefPrefix(String prefix) {
@@ -105,5 +107,11 @@ class WotProperty<T> {
     final desc = Map<String, dynamic>.from(metadata.toMap());
     desc['links'] = (desc['links'] ?? [])..add({'rel': 'property', 'href': getHref()});
     return desc;
+  }
+
+  /// Dispose the property and its internal value to prevent memory leaks.
+  /// After calling dispose, this property should not be used anymore.
+  void dispose() {
+    value.dispose();
   }
 }
