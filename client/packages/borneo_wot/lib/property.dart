@@ -99,7 +99,6 @@ class WotProperty<T> {
     if (metadata.readOnly == true) {
       throw Exception('Read-only property');
     }
-    // 可扩展 schema 校验
   }
 
   Map<String, dynamic> asPropertyDescription() {

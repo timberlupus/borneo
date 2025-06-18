@@ -185,7 +185,6 @@ void main() {
     test('property value updates notify thing', () async {
       var notificationCount = 0;
       final mockThing = _MockThing(() => notificationCount++);
-
       final property = WotProperty<String>(
         thing: mockThing,
         name: 'notifyProp',
@@ -193,8 +192,12 @@ void main() {
         metadata: metadata,
       );
 
+      // Verify property is created correctly
+      expect(property.name, equals('notifyProp'));
+      expect(property.value.get(), equals('initial'));
+
       // Direct value update should trigger notification
-      value.set(99);
+      property.value.set('updated');
       await Future.delayed(Duration(milliseconds: 10)); // Allow stream to propagate
 
       // Note: The notification count depends on the implementation
