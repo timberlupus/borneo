@@ -898,7 +898,7 @@ void led_temporary_state_entry()
     }
     int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
     portENTER_CRITICAL(&g_led_spinlock);
-    _led.temporary_off_time = now + (_led.settings.temporary_duration * 60 * 1000) - TEMPORARY_FADE_PERIOD_MS;
+    _led.temporary_off_time = now + (_led.settings.temporary_duration * 60 * 1000);
     portEXIT_CRITICAL(&g_led_spinlock);
     BO_MUST(led_fade_to_color(_led.settings.manual_color, TEMPORARY_FADE_PERIOD_MS));
 }
