@@ -351,4 +351,4 @@ COAP_RESOURCE_DEFINE("borneo/compatible", false, coap_hnd_borneo_compatible_get,
 
 COAP_RESOURCE_DEFINE("borneo/heartbeat", true, coap_hnd_heartbeat_get, NULL, NULL, NULL);
 
-COAP_RESOURCE_DEFINE("borneo/status/temperature", true, coap_hnd_temp_get, NULL, NULL, NULL);
+COAP_RESOURCE_DEFINE(BO_COAP_PATH_STATUS_TEMPERATURE, true, coap_hnd_temp_get, NULL, NULL, NULL);
