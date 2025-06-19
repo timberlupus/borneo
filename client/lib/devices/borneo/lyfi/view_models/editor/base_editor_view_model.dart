@@ -4,6 +4,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart'
 import 'package:borneo_common/async/async_rate_limiter.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/material.dart';
 
 abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
@@ -39,9 +40,9 @@ abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
       blackColor = List.filled(parent.lyfiDeviceInfo.channelCount, 0, growable: false);
 
   @override
-  Future<void> initialize() async {
+  Future<void> initialize({CancellationToken? cancelToken}) async {
     try {
-      await onInitialize();
+      await onInitialize(cancelToken: cancelToken);
       await syncDimmingColor(false);
     } finally {
       _isInitialized = true;
@@ -49,7 +50,7 @@ abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
     }
   }
 
-  Future<void> onInitialize();
+  Future<void> onInitialize({CancellationToken? cancelToken});
 
   @override
   void dispose() {

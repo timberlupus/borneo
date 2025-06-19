@@ -1,6 +1,7 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/base_editor_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -70,7 +71,7 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
   ScheduleEditorViewModel(super.parent) : easySetupViewModel = EasySetupViewModel();
 
   @override
-  Future<void> onInitialize() async {
+  Future<void> onInitialize({CancellationToken? cancelToken}) async {
     final deviceSideInstants = await super.deviceApi.getSchedule(parent.boundDevice!.device);
 
     _entries.addAll(deviceSideInstants.map((x) => ScheduleEntryViewModel(x)));

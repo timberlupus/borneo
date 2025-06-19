@@ -1,10 +1,11 @@
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 
 abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   LyfiDeviceInfo getLyfiInfo(Device dev);
-  Future<LyfiDeviceStatus> getLyfiStatus(Device dev);
+  Future<LyfiDeviceStatus> getLyfiStatus(Device dev, {CancellationToken? cancelToken});
 
   Future<LyfiState> getState(Device dev);
   Future<void> switchState(Device dev, LyfiState state);

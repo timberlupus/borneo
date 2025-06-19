@@ -1,5 +1,6 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/base_editor_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 
 class ManualEditorViewModel extends BaseEditorViewModel {
   @override
@@ -10,8 +11,8 @@ class ManualEditorViewModel extends BaseEditorViewModel {
   ManualEditorViewModel(super.parent);
 
   @override
-  Future<void> onInitialize() async {
-    final lyfiStatus = await super.deviceApi.getLyfiStatus(parent.boundDevice!.device);
+  Future<void> onInitialize({CancellationToken? cancelToken}) async {
+    final lyfiStatus = await super.deviceApi.getLyfiStatus(parent.boundDevice!.device, cancelToken: cancelToken);
     assert(lyfiStatus.state == LyfiState.dimming);
     assert(lyfiStatus.mode == LyfiMode.manual);
     for (int i = 0; i < parent.lyfiDeviceInfo.channels.length; i++) {

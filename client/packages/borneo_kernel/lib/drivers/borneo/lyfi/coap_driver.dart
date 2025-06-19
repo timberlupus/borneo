@@ -163,15 +163,15 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   }
 
   @override
-  LyfiDeviceInfo getLyfiInfo(Device dev) {
+  LyfiDeviceInfo getLyfiInfo(Device dev, {CancellationToken? cancel}) {
     final dd = dev.driverData as LyfiCoapDriverData;
     return dd.lyfiDeviceInfo;
   }
 
   @override
-  Future<LyfiDeviceStatus> getLyfiStatus(Device dev) async {
+  Future<LyfiDeviceStatus> getLyfiStatus(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as LyfiCoapDriverData;
-    final payload = await dd.coap.getCbor<Map>(LyfiPaths.status);
+    final payload = await dd.coap.getCbor<Map>(LyfiPaths.status, cancelToken: cancelToken);
     return LyfiDeviceStatus.fromMap(payload);
   }
 

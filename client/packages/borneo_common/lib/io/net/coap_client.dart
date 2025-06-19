@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:coap/coap.dart';
 import 'package:cbor/simple.dart' as simple_cbor;
 
@@ -16,8 +17,12 @@ class CoapException extends IOException {
 extension CoapClientExtensions on CoapClient {
   /// Sends a GET request to the given [uri] and decodes the CBOR response payload as type [T].
   /// Throws [CoapException] if the response is not successful.
-  Future<T> getCbor<T>(Uri uri, {bool confirmable = true}) async {
-    final response = await get(uri, accept: CoapMediaType.applicationCbor, confirmable: confirmable);
+  Future<T> getCbor<T>(Uri uri, {bool confirmable = true, CancellationToken? cancelToken}) async {
+    final response = await get(
+      uri,
+      accept: CoapMediaType.applicationCbor,
+      confirmable: confirmable,
+    ).asCancellable(cancelToken);
     if (!response.isSuccess) {
       throw CoapException("Failed to request uri `$uri`", response);
     }
@@ -27,9 +32,9 @@ extension CoapClientExtensions on CoapClient {
 
   /// Observes the given [uri] using a confirmable CoAP GET request and yields each CBOR-decoded payload as type [T].
   /// Errors during decoding are emitted as stream errors.
-  Stream<T> observeCbor<T>(Uri uri) async* {
+  Stream<T> observeCbor<T>(Uri uri, {CancellationToken? cancelToken}) async* {
     final request = CoapRequest.get(uri, accept: CoapMediaType.applicationCbor);
-    final obs = await observe(request);
+    final obs = await observe(request).asCancellable(cancelToken);
     await for (final rep in obs) {
       try {
         yield simple_cbor.cbor.decode(rep.payload) as T;
@@ -41,7 +46,7 @@ extension CoapClientExtensions on CoapClient {
 
   /// Observes the given [uri] using a non-confirmable CoAP GET request and yields each CBOR-decoded payload as type [T].
   /// Errors during decoding are emitted as stream errors.
-  Stream<T> observeCborNon<T>(Uri uri) async* {
+  Stream<T> observeCborNon<T>(Uri uri, {CancellationToken? cancelToken}) async* {
     final request = CoapRequest(
       uri,
       RequestMethod.get,
@@ -49,7 +54,7 @@ extension CoapClientExtensions on CoapClient {
       confirmable: false,
       contentFormat: CoapMediaType.applicationCbor,
     );
-    final obs = await observe(request);
+    final obs = await observe(request).asCancellable(cancelToken);
     await for (final rep in obs) {
       try {
         yield simple_cbor.cbor.decode(rep.payload) as T;
@@ -61,7 +66,7 @@ extension CoapClientExtensions on CoapClient {
 
   /// Sends a PUT request with CBOR-encoded [payload] to the given [uri].
   /// Throws [CoapException] if the response is not successful.
-  Future<void> putCbor<T>(Uri uri, T payload, {bool confirmable = true}) async {
+  Future<void> putCbor<T>(Uri uri, T payload, {bool confirmable = true, CancellationToken? cancelToken}) async {
     final bytes = simple_cbor.cbor.encode(payload);
     final response = await putBytes(
       uri,
@@ -69,7 +74,7 @@ extension CoapClientExtensions on CoapClient {
       accept: CoapMediaType.applicationCbor,
       format: CoapMediaType.applicationCbor,
       confirmable: confirmable,
-    );
+    ).asCancellable(cancelToken);
     if (!response.isSuccess) {
       throw CoapException("Failed to put uri `$uri`", response);
     }
@@ -77,7 +82,7 @@ extension CoapClientExtensions on CoapClient {
 
   /// Sends a POST request with CBOR-encoded [payload] to the given [uri].
   /// Throws [CoapException] if the response is not successful.
-  Future<void> postCbor<T>(Uri uri, T payload, {bool confirmable = true}) async {
+  Future<void> postCbor<T>(Uri uri, T payload, {bool confirmable = true, CancellationToken? cancelToken}) async {
     final bytes = simple_cbor.cbor.encode(payload);
     final response = await postBytes(
       uri,
@@ -85,7 +90,7 @@ extension CoapClientExtensions on CoapClient {
       accept: CoapMediaType.applicationCbor,
       format: CoapMediaType.applicationCbor,
       confirmable: confirmable,
-    );
+    ).asCancellable(cancelToken);
     if (!response.isSuccess) {
       throw CoapException("Failed to post uri `$uri`", response);
     }
