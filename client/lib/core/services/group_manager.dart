@@ -1,6 +1,6 @@
 import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
-import 'package:borneo_app/models/events.dart';
+import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_app/core/services/store_names.dart';
 import 'package:borneo_common/exceptions.dart';

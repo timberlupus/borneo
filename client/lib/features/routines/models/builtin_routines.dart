@@ -1,7 +1,7 @@
 import 'package:borneo_app/features/routines/models/actions/power_action.dart';
 import 'package:borneo_app/features/routines/models/abstract_routine.dart';
 import 'package:borneo_app/core/services/device_manager.dart';
-import 'package:borneo_app/models/scene_entity.dart';
+import 'package:borneo_app/core/models/scene_entity.dart';
 
 final class PowerOffAllRoutine extends AbstractBuiltinRoutine {
   PowerOffAllRoutine()

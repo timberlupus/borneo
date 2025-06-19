@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:borneo_app/models/events.dart';
+import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/services/device_manager.dart';
 import 'package:borneo_app/core/services/i_app_notification_service.dart';
 import 'package:borneo_app/core/services/routine_manager.dart';
 import 'package:borneo_app/core/services/scene_manager.dart';
-import 'package:borneo_app/models/scene_entity.dart';
+import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/shared/view_models/base_view_model.dart';
 import 'package:borneo_app/features/routines/view_models/routine_summary_view_model.dart';
 import 'package:borneo_app/features/scenes/view_models/scene_summary_view_model.dart';

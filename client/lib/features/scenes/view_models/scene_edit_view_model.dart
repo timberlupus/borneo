@@ -1,4 +1,4 @@
-import 'package:borneo_app/models/scene_entity.dart';
+import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_app/shared/view_models/abstract_screen_view_model.dart';
 

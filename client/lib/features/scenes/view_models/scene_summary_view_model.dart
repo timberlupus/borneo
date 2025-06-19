@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:borneo_app/models/device_statistics.dart';
-import 'package:borneo_app/models/events.dart';
-import 'package:borneo_app/models/scene_entity.dart';
+import 'package:borneo_app/core/models/device_statistics.dart';
+import 'package:borneo_app/core/models/events.dart';
+import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/device_manager.dart';
 import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_kernel_abstractions/events.dart';

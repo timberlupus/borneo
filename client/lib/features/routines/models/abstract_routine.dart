@@ -2,7 +2,7 @@ import 'package:borneo_app/features/routines/models/actions/led_switch_temporary
 import 'package:borneo_app/features/routines/models/actions/power_action.dart';
 import 'package:borneo_app/features/routines/models/actions/routine_action.dart';
 import 'package:borneo_app/core/services/device_manager.dart';
-import 'package:borneo_app/models/scene_entity.dart';
+import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 
 import '../../../shared/models/base_entity.dart';

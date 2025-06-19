@@ -1,10 +1,10 @@
 import 'package:borneo_app/app/assets.dart';
 import 'package:borneo_app/shared/models/base_entity.dart';
-import 'package:borneo_app/models/device_statistics.dart';
+import 'package:borneo_app/core/models/device_statistics.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
-import 'package:borneo_app/models/events.dart';
-import 'package:borneo_app/models/scene_entity.dart';
+import 'package:borneo_app/core/models/events.dart';
+import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
 import 'package:borneo_app/core/services/device_manager.dart';
 import 'package:borneo_app/core/services/group_manager.dart';

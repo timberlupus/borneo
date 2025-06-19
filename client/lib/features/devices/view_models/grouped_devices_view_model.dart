@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:borneo_app/features/devices/models/device_entity.dart';
-import 'package:borneo_app/models/scene_entity.dart';
+import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:cancellation_token/cancellation_token.dart';
@@ -15,7 +15,7 @@ import 'package:borneo_app/features/devices/view_models/group_view_model.dart';
 import 'package:borneo_app/core/services/device_manager.dart';
 import 'package:borneo_app/shared/view_models/base_view_model.dart';
 
-import '../../../models/events.dart';
+import '../../../core/models/events.dart';
 
 class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModelInitFutureMixin {
   final SceneManager _sceneManager;
