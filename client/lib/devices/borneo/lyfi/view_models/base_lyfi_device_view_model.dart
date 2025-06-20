@@ -1,6 +1,7 @@
 import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/wot.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -13,6 +14,8 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   LyfiDeviceStatus? get lyfiDeviceStatus => _lyfiStatus;
 
   double? get nominalPower => lyfiDeviceInfo.nominalPower;
+
+  LyfiMode get mode => LyfiMode.fromString(super.boundDevice?.thing.getProperty("mode"));
 
   BaseLyfiDeviceViewModel({
     required super.deviceID,

@@ -47,15 +47,14 @@ class LyfiStateProperty extends WotProperty<String> {
 class LyfiModeProperty extends WotProperty<String> {
   StreamSubscription? _eventSubscription;
   final DeviceEventBus deviceEvents;
-  final WotThing thing;
 
   LyfiModeProperty({
-    required this.thing,
+    required super.thing,
     required this.deviceEvents,
     required super.name,
     required super.value,
     required super.metadata,
-  }) : super(thing: thing);
+  });
 
   void subscribeToEvents() {
     _eventSubscription = deviceEvents.on<LyfiModeChangedEvent>().listen((event) {

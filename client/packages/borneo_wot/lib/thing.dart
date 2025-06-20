@@ -197,7 +197,7 @@ class WotThing {
   /// Get a property's value.
   ///
   /// Returns current property value if found, else null
-  WotAnyType getProperty(String propertyName) {
+  dynamic getProperty(String propertyName) {
     final prop = findProperty(propertyName);
     return prop?.getValue();
   }
@@ -205,8 +205,8 @@ class WotThing {
   /// Get a mapping of all properties and their values.
   ///
   /// Returns a map of propertyName -> value.
-  Map<String, WotAnyType> getProperties() {
-    final props = <String, WotAnyType>{};
+  Map<String, dynamic> getProperties() {
+    final props = <String, dynamic>{};
     for (final name in _properties.keys) {
       props[name] = _properties[name]!.getValue();
     }
@@ -219,7 +219,7 @@ class WotThing {
   }
 
   /// Set a property value.
-  void setProperty(String propertyName, WotAnyType value) {
+  void setProperty(String propertyName, dynamic value) {
     final prop = findProperty(propertyName);
     prop?.setValue(value);
   }

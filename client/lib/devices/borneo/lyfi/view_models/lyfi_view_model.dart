@@ -27,10 +27,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
   ILyfiDeviceApi get _deviceApi => super.borneoDeviceApi as ILyfiDeviceApi;
 
-  LyfiMode _mode = LyfiMode.manual;
   bool _isLocked = true;
 
-  LyfiMode get mode => _mode;
   bool get isLocked => _isLocked;
 
   LyfiState? _ledState;
@@ -49,7 +47,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       isOn &&
       isLocked &&
       (_ledState == LyfiState.normal || _ledState == LyfiState.temporary);
-  bool get canTimedOn => !isBusy && (!isOn || _mode == LyfiMode.scheduled);
+  bool get canTimedOn => !isBusy && (!isOn || super.mode == LyfiMode.scheduled);
 
   IEditor? currentEditor;
   final List<ScheduledInstant> scheduledInstants = [];
@@ -116,7 +114,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     // Update schedule
     // final schedule = await _deviceApi.getSchedule(boundDevice.device);
     if (!_isLocked) {
-      await _toggleEditor(_mode);
+      await _toggleEditor(super.mode);
     }
 
     await Future.delayed(Duration(milliseconds: 300));
@@ -172,7 +170,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
     // Update schedule
     if (!_isLocked) {
-      await _toggleEditor(_mode);
+      await _toggleEditor(super.mode);
     }
   }
 
@@ -185,7 +183,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
     _channels.clear();
 
-    _mode = LyfiMode.manual;
     _ledState = LyfiState.normal;
 
     _overallBrightness = 0.0;
@@ -206,7 +203,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     await super.refreshStatus();
     await _fetchDeviceStatus();
 
-    if (_mode == LyfiMode.sun) {
+    if (super.mode == LyfiMode.sun) {
       final sunSchedule = await _deviceApi.getSunSchedule(boundDevice!.device);
       if (sunSchedule.length == sunInstants.length) {
         for (int i = 0; i < sunSchedule.length; i++) {
@@ -224,7 +221,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     _ledState = super.lyfiDeviceStatus?.state;
     _isLocked = super.lyfiDeviceStatus?.state.isLocked ?? true;
     _fanPowerRatio = super.lyfiDeviceStatus?.fanPower.toDouble() ?? 0;
-    _mode = super.lyfiDeviceStatus?.mode ?? LyfiMode.manual;
+    // = super.lyfiDeviceStatus?.mode ?? LyfiMode.manual;
 
     _temporaryRemaining.value = lyfiDeviceStatus?.temporaryRemaining ?? Duration.zero;
 
@@ -255,7 +252,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   bool get canSwitchTemporaryState =>
       !isBusy &&
       super.isOn &&
-      (_mode == LyfiMode.scheduled || _mode == LyfiMode.sun) &&
+      (super.mode == LyfiMode.scheduled || super.mode == LyfiMode.sun) &&
       (ledState == LyfiState.temporary || ledState == LyfiState.normal);
 
   void switchTemporaryState() {
@@ -306,7 +303,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
     if (!isLocked) {
       //Entering edit mode
-      await _toggleEditor(_mode);
+      await _toggleEditor(super.mode);
     } else {
       await refreshStatus();
     }
@@ -336,7 +333,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     await _deviceApi.switchMode(boundDevice!.device, mode);
     mode = await _deviceApi.getMode(boundDevice!.device);
     await _toggleEditor(mode);
-    _mode = mode;
+    super.boundDevice!.thing.getProperty("mode").setValue(mode);
     await refreshStatus();
   }
 
