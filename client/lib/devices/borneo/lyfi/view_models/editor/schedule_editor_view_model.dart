@@ -57,7 +57,7 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
 
   List<ScheduleEntryViewModel> get entries => _entries;
   Iterable<int> get instants => _entries.map((x) => x.instant.inSeconds);
-  bool get isPreviewMode => parent.ledState == LyfiState.preview;
+  bool get isPreviewMode => parent.state == LyfiState.preview;
 
   @override
   bool get canEdit => parent.isOnline && parent.isOn && parent.mode == LyfiMode.scheduled;
