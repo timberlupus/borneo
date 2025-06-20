@@ -12,7 +12,7 @@ class DashboardChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Selector<LyfiViewModel, ({bool isOnline, LyfiMode mode, LyfiState? state, bool isOn})>(
-      selector: (_, vm) => (isOnline: vm.isOnline, mode: vm.mode, state: vm.ledState, isOn: vm.isOn),
+      selector: (_, vm) => (isOnline: vm.isOnline, mode: vm.mode, state: vm.state, isOn: vm.isOn),
       builder: (context, props, _) {
         if (!props.isOnline) {
           return const SizedBox.shrink();

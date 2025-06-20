@@ -10,7 +10,7 @@ class DashboardTemporaryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Selector<LyfiViewModel, ({LyfiState? state, bool canSwitch, Duration total, Duration remain})>(
       selector: (context, vm) => (
-        state: vm.ledState,
+        state: vm.state,
         canSwitch: vm.canSwitchTemporaryState,
         total: vm.temporaryDuration,
         remain: vm.temporaryRemaining.value,

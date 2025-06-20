@@ -31,9 +31,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
   bool get isLocked => _isLocked;
 
-  LyfiState? _ledState;
-  LyfiState? get ledState => _ledState;
-
   Duration _temporaryDuration = Duration.zero;
   Duration get temporaryDuration => _temporaryDuration;
 
@@ -46,7 +43,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       super.isOnline &&
       isOn &&
       isLocked &&
-      (_ledState == LyfiState.normal || _ledState == LyfiState.temporary);
+      (super.state == LyfiState.normal || super.state == LyfiState.temporary);
   bool get canTimedOn => !isBusy && (!isOn || super.mode == LyfiMode.scheduled);
 
   IEditor? currentEditor;
@@ -183,7 +180,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
     _channels.clear();
 
-    _ledState = LyfiState.normal;
+    super.state = LyfiState.normal;
 
     _overallBrightness = 0.0;
     _fanPowerRatio = 0.0;
@@ -218,10 +215,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       return;
     }
 
-    _ledState = super.lyfiDeviceStatus?.state;
     _isLocked = super.lyfiDeviceStatus?.state.isLocked ?? true;
     _fanPowerRatio = super.lyfiDeviceStatus?.fanPower.toDouble() ?? 0;
-    // = super.lyfiDeviceStatus?.mode ?? LyfiMode.manual;
 
     _temporaryRemaining.value = lyfiDeviceStatus?.temporaryRemaining ?? Duration.zero;
 
@@ -253,16 +248,16 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       !isBusy &&
       super.isOn &&
       (super.mode == LyfiMode.scheduled || super.mode == LyfiMode.sun) &&
-      (ledState == LyfiState.temporary || ledState == LyfiState.normal);
+      (super.state == LyfiState.temporary || super.state == LyfiState.normal);
 
   void switchTemporaryState() {
-    assert(_ledState == LyfiState.normal || _ledState == LyfiState.temporary);
+    assert(super.state == LyfiState.normal || super.state == LyfiState.temporary);
     super.enqueueUIJob(() async => await _switchTemporaryState());
   }
 
   Future<void> _switchTemporaryState() async {
     // Turn the temp mode on
-    if (_ledState == LyfiState.normal) {
+    if (super.state == LyfiState.normal) {
       _deviceApi.switchState(super.boundDevice!.device, LyfiState.temporary);
     } else {
       // Restore running mode
@@ -298,8 +293,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
 
     final state = isLocked ? LyfiState.normal : LyfiState.dimming;
-    await _deviceApi.switchState(super.boundDevice!.device, state);
-    _ledState = state;
+    super.state = state;
+    final _ = await _deviceApi.getState(super.boundDevice!.device);
 
     if (!isLocked) {
       //Entering edit mode
