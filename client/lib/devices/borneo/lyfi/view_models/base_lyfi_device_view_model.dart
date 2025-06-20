@@ -16,10 +16,12 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   double? get nominalPower => lyfiDeviceInfo.nominalPower;
 
   LyfiMode get mode => LyfiMode.fromString(super.boundDevice?.thing.getProperty("mode"));
-  set mode(LyfiMode newMode) => super.boundDevice?.thing.setProperty("mode", newMode.toString());
+  set mode(LyfiMode newMode) => super.boundDevice?.thing.setProperty("mode", newMode.name);
 
   LyfiState get state => LyfiState.fromString(super.boundDevice?.thing.getProperty("state"));
-  set state(LyfiState newState) => super.boundDevice?.thing.setProperty("state", newState.toString());
+  set state(LyfiState newState) => super.boundDevice?.thing.setProperty("state", newState.name);
+
+  bool get isLocked => state.isLocked;
 
   BaseLyfiDeviceViewModel({
     required super.deviceID,
