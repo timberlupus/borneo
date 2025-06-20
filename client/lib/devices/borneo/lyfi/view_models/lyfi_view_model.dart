@@ -313,12 +313,12 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     super.enqueueUIJob(() async => await _switchMode(mode));
   }
 
-  Future<void> _switchMode(LyfiMode mode) async {
+  Future<void> _switchMode(LyfiMode newMode) async {
     if (isLocked) {
       return;
     }
 
-    if (mode == LyfiMode.sun) {
+    if (newMode == LyfiMode.sun) {
       if (borneoDeviceStatus?.timezone.isEmpty ?? true) {
         notifyAppError("Unable to switch to Sun Simulation mode, the device's timezone is not set.");
         return;
@@ -330,15 +330,14 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       }
     }
 
-    await _deviceApi.switchMode(boundDevice!.device, mode);
-    mode = await _deviceApi.getMode(boundDevice!.device);
-    await _toggleEditor(mode);
-    super.boundDevice!.thing.getProperty("mode").setValue(mode);
+    super.mode = newMode;
+    final _ = await super.lyfiDeviceApi.getMode(super.boundDevice!.device);
+    await _toggleEditor(super.mode);
     await refreshStatus();
   }
 
-  Future<void> _toggleEditor(LyfiMode mode) async {
-    switch (mode) {
+  Future<void> _toggleEditor(LyfiMode newMode) async {
+    switch (newMode) {
       case LyfiMode.manual:
         currentEditor = ManualEditorViewModel(this);
         break;

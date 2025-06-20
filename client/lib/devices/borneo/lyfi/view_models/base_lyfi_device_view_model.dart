@@ -10,11 +10,13 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
 
   ILyfiDeviceApi get lyfiDeviceApi => super.boundDevice!.driver as ILyfiDeviceApi;
   LyfiDeviceInfo get lyfiDeviceInfo => lyfiDeviceApi.getLyfiInfo(super.boundDevice!.device);
+
   LyfiDeviceStatus? get lyfiDeviceStatus => _lyfiStatus;
 
   double? get nominalPower => lyfiDeviceInfo.nominalPower;
 
   LyfiMode get mode => LyfiMode.fromString(super.boundDevice?.thing.getProperty("mode"));
+  set mode(LyfiMode mode) => super.boundDevice?.thing.setProperty("mode", mode.toString());
 
   BaseLyfiDeviceViewModel({
     required super.deviceID,
