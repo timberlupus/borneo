@@ -4,6 +4,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_view_model.dart';
 import 'package:borneo_app/core/services/i_app_notification_service.dart';
+import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
@@ -21,6 +22,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   static final int tempSetpoint = 45;
 
   static final DateFormat deviceDateFormat = DateFormat('yyyy-MM-dd HH:mm');
+
+  bool _isDisposed = false;
 
   final LocaleService localeService;
   final IAppNotificationService notification;
@@ -117,22 +120,25 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   @override
   void dispose() {
     //
-    for (final cvn in _channels) {
-      cvn.dispose();
-    }
-    if (!super.isLocked && super.isOnline) {
-      try {
-        super.state = LyfiState.normal;
-      } catch (e, stackTrace) {
-        logger?.e('Failed to setMode of the device(${super.deviceEntity})', error: e, stackTrace: stackTrace);
+    if (!_isDisposed) {
+      for (final cvn in _channels) {
+        cvn.dispose();
       }
-    }
-    /*
+      if (!super.isLocked && super.isOnline) {
+        try {
+          super.state = LyfiState.normal;
+        } catch (e, stackTrace) {
+          logger?.e('Failed to setMode of the device(${super.deviceEntity})', error: e, stackTrace: stackTrace);
+        }
+      }
+      /*
     for (final ch in _channels) {
       ch.dispose();
     }
     */
-    super.dispose();
+      super.dispose();
+      _isDisposed = true;
+    }
   }
 
   @override
@@ -207,6 +213,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   }
 
   Future<void> _fetchDeviceStatus() async {
+    assert(!_isDisposed);
     if (!super.isOnline) {
       return;
     }
