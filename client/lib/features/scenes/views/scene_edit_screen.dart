@@ -11,41 +11,65 @@ import 'package:image_cropper/image_cropper.dart';
 
 import '../../../shared/widgets/confirmation_sheet.dart';
 
-class SceneEditScreen extends ConsumerWidget {
+class SceneEditScreen extends ConsumerStatefulWidget {
   final SceneEditArguments args;
-  final _formKey = GlobalKey<FormState>();
 
-  SceneEditScreen({required this.args, super.key});
+  const SceneEditScreen({required this.args, super.key});
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SceneEditScreen> createState() => _SceneEditScreenState();
+}
+
+class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
+  final _formKey = GlobalKey<FormState>();
+  late final StateNotifierProvider<SceneEditNotifier, SceneEditState> _sceneEditProvider;
+  @override
+  void initState() {
+    super.initState();
+    // 创建一个稳定的 provider 实例
+    _sceneEditProvider = StateNotifierProvider<SceneEditNotifier, SceneEditState>((ref) {
+      return SceneEditNotifier(
+        ref.watch(_sceneManagerProvider),
+        isCreation: widget.args.isCreation,
+        model: widget.args.model,
+      );
+    }, dependencies: [_sceneManagerProvider]);
+  }
+
+  // 临时的 SceneManager provider，用于桥接
+  late final Provider<SceneManager> _sceneManagerProvider = Provider<SceneManager>((ref) {
+    throw UnimplementedError('SceneManager must be provided by context');
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return provider.Consumer<SceneManager>(
       builder: (context, sceneManager, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(args.isCreation ? context.translate('New Scene') : context.translate('Edit Scene')),
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            actions: _buildActions(context, ref, args, sceneManager),
+        return ProviderScope(
+          overrides: [_sceneManagerProvider.overrideWithValue(sceneManager)],
+          child: Consumer(
+            builder: (context, ref, child) {
+              final state = ref.watch(_sceneEditProvider);
+              final notifier = ref.read(_sceneEditProvider.notifier);
+
+              return Scaffold(
+                appBar: AppBar(
+                  title: Text(
+                    widget.args.isCreation ? context.translate('New Scene') : context.translate('Edit Scene'),
+                  ),
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                  actions: _buildActions(context, ref, state, notifier),
+                ),
+                body: _buildBody(context, ref, state, notifier),
+              );
+            },
           ),
-          body: _buildBody(context, ref, args, sceneManager),
         );
       },
     );
   }
 
-  StateNotifierProvider<SceneEditNotifier, SceneEditState> _createSceneEditProvider(
-    SceneManager sceneManager,
-    SceneEditArguments args,
-  ) {
-    return StateNotifierProvider<SceneEditNotifier, SceneEditState>((ref) {
-      return SceneEditNotifier(sceneManager, isCreation: args.isCreation, model: args.model);
-    });
-  }
-
-  Widget _buildBody(BuildContext context, WidgetRef ref, SceneEditArguments args, SceneManager sceneManager) {
-    final provider = _createSceneEditProvider(sceneManager, args);
-    final state = ref.watch(provider);
-    final notifier = ref.read(provider.notifier);
-
+  Widget _buildBody(BuildContext context, WidgetRef ref, SceneEditState state, SceneEditNotifier notifier) {
     return Container(
       color: Theme.of(context).colorScheme.surfaceContainer,
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
@@ -102,7 +126,6 @@ class SceneEditScreen extends ConsumerWidget {
                     : Center(child: Icon(Icons.add_a_photo_outlined, size: 40, color: Theme.of(context).hintColor)),
               ),
             ),
-            // 删除图片按钮
             if (state.imagePath != null && state.imagePath!.isNotEmpty && File(state.imagePath!).existsSync())
               Positioned(
                 top: 4,
@@ -184,11 +207,7 @@ class SceneEditScreen extends ConsumerWidget {
     );
   }
 
-  List<Widget> _buildActions(BuildContext context, WidgetRef ref, SceneEditArguments args, SceneManager sceneManager) {
-    final provider = _createSceneEditProvider(sceneManager, args);
-    final state = ref.watch(provider);
-    final notifier = ref.read(provider.notifier);
-
+  List<Widget> _buildActions(BuildContext context, WidgetRef ref, SceneEditState state, SceneEditNotifier notifier) {
     return [
       if (notifier.deletionAvailable)
         IconButton(
