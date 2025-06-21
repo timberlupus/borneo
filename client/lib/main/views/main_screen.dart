@@ -6,7 +6,7 @@ import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/i_app_notification_service.dart';
 import 'package:borneo_app/core/services/routine_manager.dart';
 import 'package:borneo_app/features/devices/view_models/group_edit_view_model.dart';
-import 'package:borneo_app/features/scenes/view_models/scene_edit_view_model.dart';
+import 'package:borneo_app/features/scenes/providers/scene_edit_provider.dart';
 import 'package:borneo_app/features/devices/views/group_edit_screen.dart';
 import 'package:borneo_app/features/scenes/views/scene_edit_screen.dart';
 import 'package:event_bus/event_bus.dart';

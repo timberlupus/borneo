@@ -3,8 +3,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 
-import 'package:borneo_app/features/scenes/view_models/scene_edit_view_model.dart';
 import 'package:borneo_app/features/scenes/view_models/scenes_view_model.dart';
+import 'package:borneo_app/features/scenes/providers/scene_edit_provider.dart';
 import '../../routines/views/routine_list.dart';
 import 'scene_card.dart';
 import 'scene_edit_screen.dart';
