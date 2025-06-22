@@ -3,10 +3,10 @@
 import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/features/devices/views/device_discovery_screen.dart';
+import 'package:borneo_app/features/scenes/views/scenes_screen_riverpod.dart';
 import 'package:flutter/material.dart';
 
 import '../routes/app_routes.dart';
-import '../features/scenes/views/scenes_screen.dart';
 import '../main/views/main_screen.dart';
 import '../features/devices/views/devices_screen.dart';
 import '../features/my/views/my_screen.dart';
@@ -14,7 +14,7 @@ import '../features/my/views/my_screen.dart';
 class RouteManager {
   final Map<String, WidgetBuilder> _routes = {
     AppRoutes.kMainScreen: (_) => MainScreen(),
-    AppRoutes.kScreens: (_) => const ScenesScreen(),
+    AppRoutes.kScreens: (_) => const ScenesScreenRiverpod(),
     AppRoutes.kDevices: (_) => const DevicesScreen(),
     AppRoutes.kDeviceDiscovery: (_) => const DeviceDiscoveryScreen(),
     AppRoutes.kAccount: (_) => const MyScreen(),

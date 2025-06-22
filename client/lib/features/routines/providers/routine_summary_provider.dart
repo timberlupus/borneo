@@ -80,4 +80,4 @@ final routineSummaryProvider =
       final logger = ref.watch(loggerProvider);
 
       return RoutineSummaryNotifier(routine, routineManager, notification, logger);
-    });
+    }, dependencies: [routineManagerProvider, appNotificationServiceProvider, loggerProvider]);

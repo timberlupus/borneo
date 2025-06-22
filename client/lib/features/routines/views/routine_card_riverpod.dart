@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,114 +18,163 @@ class RoutineCardRiverpod extends ConsumerWidget {
     final routineSummaryNotifier = ref.read(routineSummaryProvider(routine).notifier);
 
     final colorScheme = Theme.of(context).colorScheme;
+    final isActive = routineSummaryState.isActive;
+    final bgColor = isActive ? colorScheme.primaryContainer : colorScheme.surfaceContainer;
+    final fgColor = isActive ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: routineSummaryState.isBusy ? null : () => _onTap(routineSummaryNotifier, routineSummaryState.isActive),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Icon container
-              Container(
-                width: 48,
-                height: 48,
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: routineSummaryState.isActive ? colorScheme.primary : colorScheme.surface,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: routineSummaryState.isActive ? colorScheme.primary : colorScheme.outline,
-                    width: 1,
-                  ),
+    return _RoutineCardContent(
+      isBusy: routineSummaryState.isBusy,
+      bgColor: bgColor,
+      fgColor: fgColor,
+      state: routineSummaryState,
+      notifier: routineSummaryNotifier,
+      colorScheme: colorScheme,
+      isActive: isActive,
+    );
+  }
+}
+
+class _RoutineCardContent extends StatefulWidget {
+  final bool isBusy;
+  final Color bgColor;
+  final Color fgColor;
+  final RoutineSummaryState state;
+  final RoutineSummaryNotifier notifier;
+  final ColorScheme colorScheme;
+  final bool isActive;
+
+  const _RoutineCardContent({
+    required this.isBusy,
+    required this.bgColor,
+    required this.fgColor,
+    required this.state,
+    required this.notifier,
+    required this.colorScheme,
+    required this.isActive,
+  });
+
+  @override
+  State<_RoutineCardContent> createState() => _RoutineCardContentState();
+}
+
+class _RoutineCardContentState extends State<_RoutineCardContent> {
+  bool _showProgress = false;
+  Timer? _timer;
+
+  @override
+  void didUpdateWidget(covariant _RoutineCardContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isBusy && !_showProgress) {
+      _timer?.cancel();
+      _timer = Timer(const Duration(milliseconds: 800), () {
+        if (mounted && widget.isBusy) {
+          setState(() => _showProgress = true);
+        }
+      });
+    } else if (!widget.isBusy) {
+      _timer?.cancel();
+      if (_showProgress) setState(() => _showProgress = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = widget.state;
+    final bgColor = widget.bgColor;
+    final fgColor = widget.fgColor;
+    final colorScheme = widget.colorScheme;
+    final isActive = widget.isActive;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Stack(
+        children: [
+          Card.filled(
+            margin: EdgeInsets.all(0),
+            elevation: 0,
+            color: bgColor,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 350),
+                switchInCurve: Curves.easeInOut,
+                switchOutCurve: Curves.easeInOut,
+                child: Column(
+                  key: ValueKey(isActive.toString() + state.name),
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (BuildContext context, BoxConstraints constraints) {
+                          final iconSize = constraints.maxHeight - 16.0;
+                          return Align(
+                            alignment: Alignment.centerLeft,
+                            child: _buildIcon(state.iconAssetPath, iconSize, fgColor),
+                          );
+                        },
+                      ),
+                    ),
+                    Text(
+                      state.name,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 14.0, color: fgColor),
+                    ),
+                    Divider(height: 16, thickness: 1, color: fgColor.withOpacity(0.2)),
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Text(
+                          isActive ? context.translate('ACTIVE') : context.translate('INACTIVE'),
+                          style: TextStyle(fontSize: 12, color: fgColor.withOpacity(0.7)),
+                        ),
+                        Spacer(),
+                        Switch(
+                          value: isActive,
+                          onChanged: widget.isBusy
+                              ? null
+                              : (v) async {
+                                  if (v) {
+                                    await widget.notifier.executeRoutine();
+                                  } else {
+                                    await widget.notifier.undoRoutine();
+                                  }
+                                },
+                          activeColor: colorScheme.primary,
+                          inactiveThumbColor: colorScheme.primary,
+                          inactiveTrackColor: colorScheme.surfaceBright,
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                child: _buildIcon(context, routineSummaryState),
               ),
-              const SizedBox(height: 12),
-              // Routine name
-              Text(
-                routineSummaryState.name,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-              // Status indicator
-              _buildStatusIndicator(context, routineSummaryState),
-            ],
+            ),
           ),
-        ),
+          if (_showProgress && widget.isBusy)
+            Positioned.fill(
+              child: Container(
+                color: bgColor.withOpacity(0.6),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  Widget _buildIcon(BuildContext context, RoutineSummaryState state) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    if (state.isBusy) {
-      return SizedBox(
-        width: 24,
-        height: 24,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: state.isActive ? colorScheme.onPrimary : colorScheme.primary,
-        ),
-      );
-    }
-
-    final iconColor = state.isActive ? colorScheme.onPrimary : colorScheme.onSurface;
-
-    if (state.iconAssetPath.endsWith('.svg')) {
-      return SvgPicture.asset(
-        state.iconAssetPath,
-        width: 24,
-        height: 24,
-        colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
-      );
+  Widget _buildIcon(String iconAssetPath, double iconSize, Color iconColor) {
+    if (iconAssetPath.endsWith('.svg')) {
+      return SvgPicture.asset(iconAssetPath, height: iconSize, width: iconSize);
     } else {
-      return Image.asset(state.iconAssetPath, width: 24, height: 24, color: iconColor);
-    }
-  }
-
-  Widget _buildStatusIndicator(BuildContext context, RoutineSummaryState state) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    if (state.error != null) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(color: colorScheme.errorContainer, borderRadius: BorderRadius.circular(12)),
-        child: Text(context.translate('Error'), style: TextStyle(fontSize: 12, color: colorScheme.onErrorContainer)),
-      );
-    }
-
-    if (state.isActive) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(color: colorScheme.primaryContainer, borderRadius: BorderRadius.circular(12)),
-        child: Text(context.translate('Active'), style: TextStyle(fontSize: 12, color: colorScheme.onPrimaryContainer)),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)),
-      child: Text(
-        context.translate('Tap to activate'),
-        style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withOpacity(0.7)),
-      ),
-    );
-  }
-
-  void _onTap(RoutineSummaryNotifier notifier, bool isActive) {
-    if (isActive) {
-      notifier.undoRoutine();
-    } else {
-      notifier.executeRoutine();
+      return Image.asset(iconAssetPath, height: iconSize, width: iconSize);
     }
   }
 }
