@@ -4,9 +4,9 @@ import 'package:borneo_app/core/services/blob_manager.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/i_app_notification_service.dart';
-import 'package:borneo_app/core/services/routine_manager.dart';
 import 'package:borneo_app/features/devices/view_models/group_edit_view_model.dart';
 import 'package:borneo_app/features/scenes/providers/scene_edit_provider.dart';
+import 'package:borneo_app/features/scenes/widgets/riverpod_scenes_widget.dart';
 import 'package:borneo_app/features/devices/views/group_edit_screen.dart';
 import 'package:borneo_app/features/scenes/views/scene_edit_screen.dart';
 import 'package:event_bus/event_bus.dart';
@@ -18,9 +18,7 @@ import 'package:provider/provider.dart';
 import '../../core/services/device_manager.dart';
 import '../../core/services/scene_manager.dart';
 import '../../features/devices/view_models/grouped_devices_view_model.dart';
-import '../../features/scenes/view_models/scenes_view_model.dart';
 import '../../features/my/view_models/my_view_model.dart';
-import '../../features/scenes/views/scenes_screen.dart';
 import '../../features/devices/views/devices_screen.dart';
 import '../../features/my/views/my_screen.dart';
 
@@ -141,15 +139,13 @@ class MainScreen extends StatelessWidget {
     return Selector<MainViewModel, TabIndices>(
       selector: (context, vm) => vm.currentTabIndex,
       builder: (context, tabIndex, child) => Scaffold(
-        appBar: null,
-
-        // page body
+        appBar: null, // page body
         body: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
           child: switch (tabIndex) {
             TabIndices.devices => const DevicesScreen(key: ValueKey('devices')),
-            TabIndices.scenes => const ScenesScreen(key: ValueKey('scenes')),
+            TabIndices.scenes => const RiverpodScenesWidget(key: ValueKey('scenes')),
             TabIndices.my => const MyScreen(key: ValueKey('my')),
           },
         ),
@@ -259,17 +255,6 @@ class MainScreen extends StatelessWidget {
   Widget _buildInitializedContent(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<ScenesViewModel>(
-          create: (context) => ScenesViewModel(
-            context.read<EventBus>(),
-            context.read<SceneManager>(),
-            context.read<DeviceManager>(),
-            context.read<RoutineManager>(),
-            context.read<IAppNotificationService>(),
-            logger: context.read<Logger>(),
-          ),
-          lazy: true,
-        ),
         ChangeNotifierProvider(create: (_) => MyViewModel(), lazy: true),
         ChangeNotifierProvider(
           create: (context) {
