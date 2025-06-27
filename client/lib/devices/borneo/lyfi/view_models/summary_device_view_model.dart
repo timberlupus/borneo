@@ -27,19 +27,21 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
         notifyListeners();
       }
     });
-    if (super.deviceManager.isBound(deviceEntity.id)) {
-      final bound = super.deviceManager.getBoundDevice(deviceEntity.id);
-      final wotThing = bound.thing;
-      final stateValue = wotThing.getProperty(LyfiKnownProperties.kState);
-      if (stateValue != null) {
-        final state = LyfiState.fromString(stateValue as String);
-        ledState = state;
-      }
 
-      final modeValue = wotThing.getProperty(LyfiKnownProperties.kMode);
-      if (modeValue != null) {
-        final mode = LyfiMode.fromString(modeValue as String);
-        ledMode = mode;
+    if (super.deviceManager.isBound(deviceEntity.id)) {
+      final wotThing = super.deviceManager.getWotThing(deviceEntity.id);
+      if (wotThing != null) {
+        final stateValue = wotThing.getProperty(LyfiKnownProperties.kState);
+        if (stateValue != null) {
+          final state = LyfiState.fromString(stateValue as String);
+          ledState = state;
+        }
+
+        final modeValue = wotThing.getProperty(LyfiKnownProperties.kMode);
+        if (modeValue != null) {
+          final mode = LyfiMode.fromString(modeValue as String);
+          ledMode = mode;
+        }
       }
     }
   }

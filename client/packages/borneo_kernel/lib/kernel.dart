@@ -177,9 +177,7 @@ final class DefaultKernel implements IKernel {
 
       if (driverInitialized) {
         // Try to activate device
-        final driverData = device.data();
-        final wotAdapter = await driver.createWotAdapter(device, driverData.deviceEvents, cancelToken: cancelToken);
-        final bound = BoundDevice(driverID, device, driver, wotAdapter);
+        final bound = BoundDevice(driverID, device, driver);
         _deviceEventRouters[device.id] = bound.device.driverData.deviceEvents.on().listen((event) {
           _events.fire(event);
         });

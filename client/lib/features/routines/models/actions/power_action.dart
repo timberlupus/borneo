@@ -8,15 +8,19 @@ class PowerAction extends RoutineAction {
   final bool prevState;
 
   PowerAction({required super.deviceId, required this.prevState});
+
   @override
   Future<void> execute(DeviceManager deviceManager) async {
     final bound = deviceManager.boundDevices.where((d) => d.device.id == deviceId).lastOrNull;
     if (bound == null) {
       return;
     }
-    final isOn = bound.thing.getProperty("on") as bool;
-    if (isOn) {
-      bound.thing.setProperty("on", false);
+    final wotThing = deviceManager.getWotThing(deviceId);
+    if (wotThing != null) {
+      final isOn = wotThing.getProperty("on");
+      if (isOn is bool && isOn) {
+        wotThing.setProperty("on", false);
+      }
     }
   }
 
@@ -25,9 +29,12 @@ class PowerAction extends RoutineAction {
     final bound = deviceManager.boundDevices.where((d) => d.device.id == deviceId).lastOrNull;
     if (bound == null) return;
 
-    final isOn = bound.thing.getProperty("on") as bool;
-    if (isOn != prevState) {
-      bound.thing.setProperty("on", prevState);
+    final wotThing = deviceManager.getWotThing(deviceId);
+    if (wotThing != null) {
+      final isOn = wotThing.getProperty("on");
+      if (isOn is bool && isOn != prevState) {
+        wotThing.setProperty("on", prevState);
+      }
     }
   }
 

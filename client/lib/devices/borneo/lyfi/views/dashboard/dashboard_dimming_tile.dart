@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 
@@ -38,7 +39,10 @@ class DashboardDimmingTile extends StatelessWidget {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: Text('Dimming', style: theme.textTheme.titleMedium?.copyWith(color: textColor)),
+                          child: Text(
+                            context.translate('Dimming'),
+                            style: theme.textTheme.titleMedium?.copyWith(color: textColor),
+                          ),
                         ),
                       ],
                     );

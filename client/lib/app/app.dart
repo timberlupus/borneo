@@ -22,6 +22,7 @@ import '../core/services/group_manager.dart';
 import '../core/services/routine_manager.dart';
 import '../core/services/scene_manager.dart';
 import 'app_theme.dart';
+import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 
 const kSupportedLocales = [Locale('en', 'US'), Locale('zh', 'CN')];
 
@@ -142,6 +143,7 @@ class _BorneoAppState extends State<BorneoApp> {
                         context.read<EventBus>(),
                         context.read<SceneManager>(),
                         context.read<GroupManager>(),
+                        context.read<IDeviceModuleRegistry>(),
                         logger: context.read<Logger>(),
                       ),
                       dispose: (context, dm) => dm.dispose(),

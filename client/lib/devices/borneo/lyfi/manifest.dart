@@ -4,12 +4,14 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/summary_device_view_m
 import 'package:borneo_app/devices/borneo/lyfi/views/lyfi_view.dart';
 import 'package:borneo_app/devices/view_models/abstract_device_summary_view_model.dart';
 import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
+import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/device_manager.dart';
 import 'package:borneo_app/core/services/i_app_notification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:borneo_wot/wot.dart';
 
 import 'package:provider/provider.dart';
 
@@ -35,6 +37,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         primaryStateIconBuilder: _buildPrimaryStateIcon,
         secondaryStatesBuilder: _secondaryStatesBuilder,
         createSummaryVM: (dev, dm, bus) => LyfiSummaryDeviceViewModel(dev, dm, bus),
+        createWotThing: _createWotThing,
       );
 
   static Widget _buildDeviceIcon(BuildContext context, double iconSize, bool isOnline) {
@@ -84,5 +87,63 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
       default:
         return '-';
     }
+  }
+
+  static WotThing _createWotThing(DeviceEntity device) {
+    final thing = WotThing(
+      id: device.id,
+      title: device.name,
+      type: ['Light'],
+      description: 'Borneo LyFi LED Controller',
+    );
+
+    // Add Lyfi-specific properties
+    thing.addProperty(
+      WotProperty(
+        thing: thing,
+        name: 'on',
+        value: WotValue(initialValue: false),
+        metadata: WotPropertyMetadata(title: 'On/Off', type: 'boolean', description: 'Whether the light is turned on'),
+      ),
+    );
+
+    thing.addProperty(
+      WotProperty(
+        thing: thing,
+        name: 'state',
+        value: WotValue(initialValue: 'normal'),
+        metadata: WotPropertyMetadata(
+          title: 'State',
+          type: 'string',
+          description: 'Current light state',
+          enumValues: ['normal', 'dimming', 'temporary', 'preview'],
+        ),
+      ),
+    );
+
+    thing.addProperty(
+      WotProperty(
+        thing: thing,
+        name: 'mode',
+        value: WotValue(initialValue: 'manual'),
+        metadata: WotPropertyMetadata(
+          title: 'Mode',
+          type: 'string',
+          description: 'Current light mode',
+          enumValues: ['manual', 'scheduled', 'sun'],
+        ),
+      ),
+    );
+
+    thing.addProperty(
+      WotProperty(
+        thing: thing,
+        name: 'color',
+        value: WotValue(initialValue: '#FFFFFF'),
+        metadata: WotPropertyMetadata(title: 'Color', type: 'string', description: 'Current light color'),
+      ),
+    );
+
+    return thing;
   }
 }

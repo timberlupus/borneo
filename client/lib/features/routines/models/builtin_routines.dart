@@ -16,11 +16,16 @@ final class PowerOffAllRoutine extends AbstractBuiltinRoutine {
   Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, DeviceManager deviceManager) async {
     final steps = <PowerAction>[];
     for (final bound in deviceManager.boundDevices) {
-      final onValue = bound.thing.getProperty("on");
-      final prevState = onValue as bool;
-      if (prevState) {
-        bound.thing.setProperty("on", false);
-        steps.add(PowerAction(deviceId: bound.device.id, prevState: prevState));
+      final wotThing = deviceManager.getWotThing(bound.device.id);
+      if (wotThing != null) {
+        final onValue = wotThing.getProperty("on");
+        if (onValue != null) {
+          final prevState = onValue as bool;
+          if (prevState) {
+            wotThing.setProperty("on", false);
+            steps.add(PowerAction(deviceId: bound.device.id, prevState: prevState));
+          }
+        }
       }
     }
     return steps.map((e) => e.toJson()).toList();

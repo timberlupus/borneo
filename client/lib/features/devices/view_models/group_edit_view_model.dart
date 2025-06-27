@@ -34,6 +34,7 @@ class GroupEditViewModel extends AbstractScreenViewModel {
   }
 
   Future<void>? _initFuture;
+  @override
   Future<void>? get initFuture {
     if (isInitialized) return null;
     return _initFuture ??= initialize();

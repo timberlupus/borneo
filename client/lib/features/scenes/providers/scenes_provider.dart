@@ -139,9 +139,7 @@ class ScenesState {
 /// Scenes Notifier
 class ScenesNotifier extends StateNotifier<ScenesState> {
   final SceneManager _sceneManager;
-  final DeviceManager _deviceManager;
   final EventBus _eventBus;
-  final Logger? _logger;
 
   late final StreamSubscription<CurrentSceneChangedEvent> _currentSceneChangedSub;
   late final StreamSubscription<SceneCreatedEvent> _sceneCreatedSub;
@@ -150,7 +148,9 @@ class ScenesNotifier extends StateNotifier<ScenesState> {
 
   final Map<String, SceneSummaryNotifier> _sceneNotifiers = {};
 
-  ScenesNotifier(this._sceneManager, this._deviceManager, this._eventBus, this._logger) : super(const ScenesState()) {
+  ScenesNotifier(this._sceneManager, DeviceManager deviceManager, this._eventBus, Logger? logger)
+    : super(const ScenesState()) {
+    // deviceManager and logger are passed for potential future use
     _setupEventListeners();
   }
 

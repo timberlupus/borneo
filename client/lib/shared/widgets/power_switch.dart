@@ -14,7 +14,7 @@ class PowerButton extends StatefulWidget {
 }
 
 class _PowerButtonState extends State<PowerButton> {
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {

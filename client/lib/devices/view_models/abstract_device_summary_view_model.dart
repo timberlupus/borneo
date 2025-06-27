@@ -36,9 +36,8 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
     _powerEventSub = deviceManager.allDeviceEvents.on<DevicePowerOnOffChangedEvent>().listen(_onPowerChanged);
 
     if (deviceManager.isBound(deviceEntity.id)) {
-      final bound = deviceManager.getBoundDevice(deviceEntity.id);
-      final wotThing = bound.thing;
-      if (wotThing.hasProperty(LyfiKnownProperties.kOn)) {
+      final wotThing = deviceManager.getWotThing(deviceEntity.id);
+      if (wotThing != null && wotThing.hasProperty(LyfiKnownProperties.kOn)) {
         final onProp = wotThing.getProperty(LyfiKnownProperties.kOn);
         if (onProp != null) {
           _isPowerOn = onProp as bool;

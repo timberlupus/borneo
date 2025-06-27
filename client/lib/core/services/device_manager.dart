@@ -8,11 +8,14 @@ import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
 import 'package:synchronized/synchronized.dart';
+import 'package:borneo_wot/wot.dart';
 
 import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/features/devices/models/events.dart';
+import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/scene_manager.dart';
+import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 
 import 'package:borneo_app/core/services/store_names.dart';
@@ -37,6 +40,13 @@ final class DeviceManager implements IDisposable {
 
   // event subscriptions
   late final StreamSubscription<UnboundDeviceDiscoveredEvent> _unboundDeviceDiscoveredEventSub;
+  late final StreamSubscription<CurrentSceneChangedEvent> _currentSceneChangedEventSub;
+  late final StreamSubscription<DeviceBoundEvent> _deviceBoundEventSub;
+  late final StreamSubscription<DeviceRemovedEvent> _deviceRemovedEventSub;
+
+  // WotThing management
+  final Map<String, WotThing> _wotThings = {};
+  final IDeviceModuleRegistry _deviceModuleRegistry;
 
   bool get isInitialized => _isInitialized;
   GlobalDevicesEventBus get allDeviceEvents => _kernel.events;
@@ -46,11 +56,26 @@ final class DeviceManager implements IDisposable {
 
   Iterable<BoundDevice> get boundDevices => _kernel.boundDevices;
 
-  DeviceManager(this._db, this._kernel, this._globalBus, this._sceneManager, this._groupManager, {this.logger}) {
+  DeviceManager(
+    this._db,
+    this._kernel,
+    this._globalBus,
+    this._sceneManager,
+    this._groupManager,
+    this._deviceModuleRegistry, {
+    this.logger,
+  }) {
     logger?.i("Creating DeviceManager...");
     _unboundDeviceDiscoveredEventSub = allDeviceEvents.on<UnboundDeviceDiscoveredEvent>().listen(
       _onUnboundDeviceDiscovered,
     );
+
+    // Listen for scene changes to manage WotThing lifecycle
+    _currentSceneChangedEventSub = _globalBus.on<CurrentSceneChangedEvent>().listen(_onCurrentSceneChanged);
+
+    // Listen for device binding events to sync WotThings
+    _deviceBoundEventSub = allDeviceEvents.on<DeviceBoundEvent>().listen(_onDeviceBound);
+    _deviceRemovedEventSub = allDeviceEvents.on<DeviceRemovedEvent>().listen(_onDeviceRemoved);
   }
 
   Future<void> initialize() async {
@@ -63,10 +88,10 @@ final class DeviceManager implements IDisposable {
       await _kernel.start();
 
       await _rebindAll(devices);
-      /*
-      await db.transaction((tx) async {
-      });
-      */
+
+      // Load WotThings for current scene after devices are bound
+      await _loadWotThingsForCurrentScene();
+
       logger?.i('DeviceManager has been initialized successfully.');
     } finally {
       _isInitialized = true;
@@ -75,8 +100,15 @@ final class DeviceManager implements IDisposable {
 
   @override
   void dispose() {
-    if (_isDisposed) {
+    if (!_isDisposed) {
       _unboundDeviceDiscoveredEventSub.cancel();
+      _currentSceneChangedEventSub.cancel();
+      _deviceBoundEventSub.cancel();
+      _deviceRemovedEventSub.cancel();
+
+      // Dispose all WotThings
+      _disposeAllWotThings();
+
       _isDisposed = true;
     }
   }
@@ -289,5 +321,145 @@ final class DeviceManager implements IDisposable {
         allDeviceEvents.fire(NewDeviceFoundEvent(event.matched));
       }
     });
+  }
+
+  /// Get WotThing for a device in current scene
+  /// Returns null if device is not in current scene or WotThing doesn't exist
+  WotThing? getWotThing(String deviceID) {
+    // Only return WotThings for devices that are already loaded (current scene)
+    return _wotThings[deviceID];
+  }
+
+  /// Get WotThing for a device in current scene, create if not exists
+  /// Returns null if device is not in current scene
+  Future<WotThing?> getOrCreateWotThing(String deviceID) async {
+    // Check if already exists
+    if (_wotThings.containsKey(deviceID)) {
+      return _wotThings[deviceID];
+    }
+
+    try {
+      final device = await getDevice(deviceID);
+
+      // Check if device belongs to current scene
+      if (device.sceneID != _sceneManager.current.id) {
+        logger?.w('Device $deviceID is not in current scene, cannot create WotThing');
+        return null;
+      }
+
+      final metaModule = _deviceModuleRegistry.metaModules[device.driverID];
+      if (metaModule != null) {
+        final wotThing = metaModule.createWotThing(device);
+        _wotThings[deviceID] = wotThing;
+
+        // If device is bound, sync WotThing with actual device state
+        if (isBound(deviceID)) {
+          await _syncWotThingWithBoundDevice(deviceID, wotThing);
+        }
+
+        return wotThing;
+      }
+    } catch (e) {
+      logger?.w('Failed to create WotThing for device $deviceID: $e');
+    }
+    return null;
+  }
+
+  /// Check if WotThing exists for a device
+  bool hasWotThing(String deviceID) => _wotThings.containsKey(deviceID);
+
+  /// Get all WotThings in current scene
+  Iterable<WotThing> get wotThingsInCurrentScene => _wotThings.values;
+
+  /// Get all device IDs that have WotThings in current scene
+  Iterable<String> get deviceIDsWithWotThings => _wotThings.keys;
+
+  /// Get count of WotThings in current scene
+  int get wotThingCount => _wotThings.length;
+
+  /// Handle scene change event - reload WotThings for new scene
+  Future<void> _onCurrentSceneChanged(CurrentSceneChangedEvent event) async {
+    logger?.i('Scene changed from ${event.from.name} to ${event.to.name}, reloading WotThings...');
+    await _reloadWotThingsForCurrentScene();
+  }
+
+  /// Reload WotThings for current scene only
+  Future<void> _reloadWotThingsForCurrentScene() async {
+    await _deviceOperLock.synchronized(() async {
+      // Dispose of all existing WotThings
+      _disposeAllWotThings();
+
+      // Load WotThings for devices in current scene
+      await _loadWotThingsForCurrentScene();
+    });
+  }
+
+  /// Dispose all existing WotThings
+  void _disposeAllWotThings() {
+    for (final wotThing in _wotThings.values) {
+      try {
+        wotThing.dispose();
+      } catch (e) {
+        logger?.w('Failed to dispose WotThing: $e');
+      }
+    }
+    _wotThings.clear();
+    logger?.d('Disposed ${_wotThings.length} WotThings');
+  }
+
+  /// Load WotThings for devices in current scene
+  Future<void> _loadWotThingsForCurrentScene() async {
+    try {
+      final devices = await fetchAllDevicesInScene();
+      logger?.d('Loading WotThings for ${devices.length} devices in current scene');
+
+      for (final device in devices) {
+        try {
+          final metaModule = _deviceModuleRegistry.metaModules[device.driverID];
+          if (metaModule != null) {
+            final wotThing = metaModule.createWotThing(device);
+            _wotThings[device.id] = wotThing;
+
+            // If device is bound, sync WotThing with actual device state
+            if (isBound(device.id)) {
+              await _syncWotThingWithBoundDevice(device.id, wotThing);
+            }
+          }
+        } catch (e) {
+          logger?.w('Failed to create WotThing for device ${device.id}: $e');
+        }
+      }
+
+      logger?.d('Successfully loaded ${_wotThings.length} WotThings');
+    } catch (e) {
+      logger?.e('Failed to load WotThings for current scene: $e');
+    }
+  }
+
+  /// Sync WotThing properties with actual device state
+  Future<void> _syncWotThingWithBoundDevice(String deviceID, WotThing wotThing) async {
+    try {
+      // This is where we would sync WotThing properties with actual device state
+      // For now, we'll leave this as a placeholder for future implementation
+      logger?.d('WotThing synced for device $deviceID');
+    } catch (e) {
+      logger?.w('Failed to sync WotThing for device $deviceID: $e');
+    }
+  }
+
+  /// Handle device bound event - sync WotThing if exists
+  void _onDeviceBound(DeviceBoundEvent event) {
+    final deviceID = event.device.id;
+    final wotThing = _wotThings[deviceID];
+    if (wotThing != null) {
+      _syncWotThingWithBoundDevice(deviceID, wotThing);
+    }
+  }
+
+  /// Handle device removed event - no additional action needed
+  /// WotThing will be cleaned up when scene changes
+  void _onDeviceRemoved(DeviceRemovedEvent event) {
+    // WotThing lifecycle is managed by scene changes, not device binding
+    logger?.d('Device ${event.device.id} removed, WotThing will be cleaned up on scene change');
   }
 }

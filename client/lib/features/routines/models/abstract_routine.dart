@@ -23,7 +23,7 @@ abstract class AbstractRoutine with BaseEntity {
 
   bool checkAvailable(SceneEntity scene, DeviceManager deviceManager) {
     final devices = deviceManager.getBoundDevicesInCurrentScene();
-    return devices.any((d) => matchAllCapabilities(d));
+    return devices.any((d) => matchAllCapabilities(d, deviceManager));
   }
 
   RoutineAction createAction(Map<String, dynamic> e) => switch (e['type']) {
@@ -33,20 +33,24 @@ abstract class AbstractRoutine with BaseEntity {
   };
 
   Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, DeviceManager deviceManager);
-  bool matchAllCapabilities(BoundDevice bound) {
-    return requiredCapabilities.every((capability) => _hasCapability(bound, capability));
+
+  bool matchAllCapabilities(BoundDevice bound, DeviceManager deviceManager) {
+    return requiredCapabilities.every((capability) => _hasCapability(bound, capability, deviceManager));
   }
 
-  bool _hasCapability(BoundDevice bound, String capability) {
-    final types = bound.thing.getType();
+  bool _hasCapability(BoundDevice bound, String capability, DeviceManager deviceManager) {
+    final wotThing = deviceManager.getWotThing(bound.device.id);
+    if (wotThing == null) return false;
+
+    final types = wotThing.getType();
     if (types.contains(capability)) return true;
 
     // Check for capability-specific properties that indicate the capability
     switch (capability) {
       case "OnOffSwitch":
-        return bound.thing.hasProperty("on");
+        return wotThing.hasProperty("on");
       case "LyfiDevice":
-        return bound.thing.hasProperty("state") && bound.thing.hasProperty("mode");
+        return wotThing.hasProperty("state") && wotThing.hasProperty("mode");
       default:
         return false;
     }
