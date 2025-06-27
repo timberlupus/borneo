@@ -12,6 +12,9 @@ import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:borneo_wot/wot.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/wot.dart';
+import 'package:borneo_kernel/drivers/borneo/device_api.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 
 import 'package:provider/provider.dart';
 
@@ -89,7 +92,47 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
     }
   }
 
-  static WotThing _createWotThing(DeviceEntity device) {
+  static WotThing _createWotThing(DeviceEntity device, DeviceManager deviceManager) {
+    // Check if device is bound to get access to APIs
+    if (!deviceManager.isBound(device.id)) {
+      // Device not bound, create a basic WotThing with default values
+      // This can happen during initialization before device binding is complete
+      return _createBasicWotThing(device);
+    }
+
+    try {
+      // Get the bound device and extract APIs
+      final boundDevice = deviceManager.getBoundDevice(device.id);
+      final borneoApi = boundDevice.api<IBorneoDeviceApi>();
+      final lyfiApi = boundDevice.api<ILyfiDeviceApi>();
+      final deviceEvents = boundDevice.device.driverData.deviceEvents;
+
+      // Create the real LyfiThing with API connections
+      final lyfiThing = LyfiThing(
+        device: boundDevice.device,
+        deviceEvents: deviceEvents,
+        borneoApi: borneoApi,
+        lyfiApi: lyfiApi,
+        title: device.name,
+      );
+
+      // Initialize the LyfiThing asynchronously (hardware binding)
+      // Note: This doesn't block creation, initialization happens in background
+      lyfiThing.initialize().catchError((error) {
+        // Log error but don't fail creation - device may come online later
+        print('Warning: Failed to initialize LyfiThing for ${device.id}: $error');
+      });
+
+      return lyfiThing;
+    } catch (e) {
+      // If API access fails, fall back to basic WotThing
+      print('Warning: Failed to create LyfiThing with APIs for ${device.id}: $e');
+      return _createBasicWotThing(device);
+    }
+  }
+
+  /// Creates a basic WotThing when device is not bound or APIs are unavailable
+  static WotThing _createBasicWotThing(DeviceEntity device) {
     final thing = WotThing(
       id: device.id,
       title: device.name,
@@ -97,7 +140,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
       description: 'Borneo LyFi LED Controller',
     );
 
-    // Add Lyfi-specific properties
+    // Add Lyfi-specific properties with default values
     thing.addProperty(
       WotProperty(
         thing: thing,

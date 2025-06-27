@@ -19,7 +19,7 @@ abstract class DeviceModuleMetadata {
   final Widget Function(BuildContext context, double iconSize) primaryStateIconBuilder;
   final List<Widget> Function(BuildContext, AbstractDeviceSummaryViewModel) secondaryStatesBuilder;
   final AbstractDeviceSummaryViewModel Function(DeviceEntity, DeviceManager, EventBus) createSummaryVM;
-  final WotThing Function(DeviceEntity) createWotThing;
+  final WotThing Function(DeviceEntity, DeviceManager) createWotThing;
 
   const DeviceModuleMetadata({
     required this.id,

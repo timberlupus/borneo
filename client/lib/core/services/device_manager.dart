@@ -349,7 +349,7 @@ final class DeviceManager implements IDisposable {
 
       final metaModule = _deviceModuleRegistry.metaModules[device.driverID];
       if (metaModule != null) {
-        final wotThing = metaModule.createWotThing(device);
+        final wotThing = metaModule.createWotThing(device, this);
         _wotThings[deviceID] = wotThing;
 
         // If device is bound, sync WotThing with actual device state
@@ -417,7 +417,7 @@ final class DeviceManager implements IDisposable {
         try {
           final metaModule = _deviceModuleRegistry.metaModules[device.driverID];
           if (metaModule != null) {
-            final wotThing = metaModule.createWotThing(device);
+            final wotThing = metaModule.createWotThing(device, this);
             _wotThings[device.id] = wotThing;
 
             // If device is bound, sync WotThing with actual device state

@@ -216,7 +216,9 @@ class LyfiThing extends WotThing {
       name: 'state',
       value: WotValue<String>(
         initialValue: LyfiState.values.first.name, // Default state
-        valueForwarder: (update) => lyfiApi.switchState(device, LyfiState.fromString(update)),
+        valueForwarder: (update) async {
+          await lyfiApi.switchState(device, LyfiState.fromString(update));
+        },
       ),
       metadata: WotPropertyMetadata(
         type: 'string',
