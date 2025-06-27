@@ -197,7 +197,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       return;
     }
     await super.refreshStatus();
-    await _fetchDeviceStatus();
+    await _fetchDeviceStatus(cancelToken: cancelToken);
 
     if (super.mode == LyfiMode.sun) {
       final sunSchedule = await _deviceApi.getSunSchedule(boundDevice!.device);
@@ -209,7 +209,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
   }
 
-  Future<void> _fetchDeviceStatus() async {
+  Future<void> _fetchDeviceStatus({CancellationToken? cancelToken}) async {
     assert(!_isDisposed);
     if (!super.isOnline) {
       return;

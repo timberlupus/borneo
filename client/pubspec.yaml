@@ -106,6 +106,7 @@ dependencies:
   flutter_keyboard_visibility: ^6.0.0
   lat_lng_to_timezone: ^0.2.0
   timezone: ^0.10.1
+  riverpod: ^2.6.1
 
 
 dev_dependencies:

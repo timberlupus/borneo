@@ -4,42 +4,42 @@ import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 
 abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
-  LyfiDeviceInfo getLyfiInfo(Device dev);
+  LyfiDeviceInfo getLyfiInfo(Device dev, {CancellationToken? cancelToken});
   Future<LyfiDeviceStatus> getLyfiStatus(Device dev, {CancellationToken? cancelToken});
 
-  Future<LyfiState> getState(Device dev);
-  Future<void> switchState(Device dev, LyfiState state);
+  Future<LyfiState> getState(Device dev, {CancellationToken? cancelToken});
+  Future<void> switchState(Device dev, LyfiState state, {CancellationToken? cancelToken});
 
-  Future<LyfiMode> getMode(Device dev);
-  Future<void> switchMode(Device dev, LyfiMode mode);
+  Future<LyfiMode> getMode(Device dev, {CancellationToken? cancelToken});
+  Future<void> switchMode(Device dev, LyfiMode mode, {CancellationToken? cancelToken});
 
-  Future<List<ScheduledInstant>> getSchedule(Device dev);
-  Future<void> setSchedule(Device dev, Iterable<ScheduledInstant> schedule);
+  Future<List<ScheduledInstant>> getSchedule(Device dev, {CancellationToken? cancelToken});
+  Future<void> setSchedule(Device dev, Iterable<ScheduledInstant> schedule, {CancellationToken? cancelToken});
 
-  Future<List<int>> getColor(Device dev);
-  Future<void> setColor(Device dev, List<int> color);
+  Future<List<int>> getColor(Device dev, {CancellationToken? cancelToken});
+  Future<void> setColor(Device dev, List<int> color, {CancellationToken? cancelToken});
 
-  Future<int> getKeepTemp(Device dev);
+  Future<int> getKeepTemp(Device dev, {CancellationToken? cancelToken});
 
-  Future<LedCorrectionMethod> getCorrectionMethod(Device dev);
-  Future<void> setCorrectionMethod(Device dev, LedCorrectionMethod mode);
+  Future<LedCorrectionMethod> getCorrectionMethod(Device dev, {CancellationToken? cancelToken});
+  Future<void> setCorrectionMethod(Device dev, LedCorrectionMethod mode, {CancellationToken? cancelToken});
 
-  Future<Duration> getTemporaryDuration(Device dev);
-  Future<void> setTemporaryDuration(Device dev, Duration duration);
+  Future<Duration> getTemporaryDuration(Device dev, {CancellationToken? cancelToken});
+  Future<void> setTemporaryDuration(Device dev, Duration duration, {CancellationToken? cancelToken});
 
-  Future<GeoLocation?> getLocation(Device dev);
-  Future<void> setLocation(Device dev, GeoLocation location);
+  Future<GeoLocation?> getLocation(Device dev, {CancellationToken? cancelToken});
+  Future<void> setLocation(Device dev, GeoLocation location, {CancellationToken? cancelToken});
 
-  Future<bool> getTimeZoneEnabled(Device dev);
-  Future<void> setTimeZoneEnabled(Device dev, bool enabled);
+  Future<bool> getTimeZoneEnabled(Device dev, {CancellationToken? cancelToken});
+  Future<void> setTimeZoneEnabled(Device dev, bool enabled, {CancellationToken? cancelToken});
 
-  Future<int> getTimeZoneOffset(Device dev);
-  Future<void> setTimeZoneOffset(Device dev, int offset);
+  Future<int> getTimeZoneOffset(Device dev, {CancellationToken? cancelToken});
+  Future<void> setTimeZoneOffset(Device dev, int offset, {CancellationToken? cancelToken});
 
-  Future<AcclimationSettings> getAcclimation(Device dev);
-  Future<void> setAcclimation(Device dev, AcclimationSettings acc);
-  Future<void> terminateAcclimation(Device dev);
+  Future<AcclimationSettings> getAcclimation(Device dev, {CancellationToken? cancelToken});
+  Future<void> setAcclimation(Device dev, AcclimationSettings acc, {CancellationToken? cancelToken});
+  Future<void> terminateAcclimation(Device dev, {CancellationToken? cancelToken});
 
-  Future<List<ScheduledInstant>> getSunSchedule(Device dev);
-  Future<List<SunCurveItem>> getSunCurve(Device dev);
+  Future<List<ScheduledInstant>> getSunSchedule(Device dev, {CancellationToken? cancelToken});
+  Future<List<SunCurveItem>> getSunCurve(Device dev, {CancellationToken? cancelToken});
 }

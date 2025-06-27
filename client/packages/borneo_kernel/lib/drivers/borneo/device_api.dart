@@ -1,6 +1,7 @@
 import 'package:borneo_kernel/drivers/borneo/coap_driver_data.dart';
 import 'package:borneo_kernel_abstractions/idevice_api.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 
 import 'package:borneo_common/io/net/coap_client.dart';
 import 'package:borneo_kernel_abstractions/errors.dart';
@@ -204,56 +205,56 @@ class BorneoRtcLocalNtpResponse {
 }
 
 abstract class IBorneoDeviceApi extends IDeviceApi {
-  Future<String> getCompatible(Device dev);
-  Future<Version> getFirmwareVersion(Device dev);
+  Future<String> getCompatible(Device dev, {CancellationToken? cancelToken});
+  Future<Version> getFirmwareVersion(Device dev, {CancellationToken? cancelToken});
 
   GeneralBorneoDeviceInfo getGeneralDeviceInfo(Device dev);
-  Future<GeneralBorneoDeviceStatus> getGeneralDeviceStatus(Device dev);
+  Future<GeneralBorneoDeviceStatus> getGeneralDeviceStatus(Device dev, {CancellationToken? cancelToken});
 
-  Future<DateTime> getHeartbeat(Device dev);
+  Future<DateTime> getHeartbeat(Device dev, {CancellationToken? cancelToken});
 
-  Future<bool> getOnOff(Device dev);
-  Future setOnOff(Device dev, bool on);
+  Future<bool> getOnOff(Device dev, {CancellationToken? cancelToken});
+  Future setOnOff(Device dev, bool on, {CancellationToken? cancelToken});
 
-  Future<PowerBehavior> getPowerBehavior(Device dev);
-  Future setPowerBehavior(Device dev, PowerBehavior behavior);
+  Future<PowerBehavior> getPowerBehavior(Device dev, {CancellationToken? cancelToken});
+  Future setPowerBehavior(Device dev, PowerBehavior behavior, {CancellationToken? cancelToken});
 
-  Future<BorneoRtcLocalNtpResponse> getRtcLocal(Device dev, DateTime timestamp);
-  Future<void> setRtcLocalSkew(Device dev, Duration skew);
+  Future<BorneoRtcLocalNtpResponse> getRtcLocal(Device dev, DateTime timestamp, {CancellationToken? cancelToken});
+  Future<void> setRtcLocalSkew(Device dev, Duration skew, {CancellationToken? cancelToken});
 
-  Future<String> getTimeZone(Device dev);
-  Future<void> setTimeZone(Device dev, String timezone);
-  Future<void> factoryReset(Device dev);
+  Future<String> getTimeZone(Device dev, {CancellationToken? cancelToken});
+  Future<void> setTimeZone(Device dev, String timezone, {CancellationToken? cancelToken});
+  Future<void> factoryReset(Device dev, {CancellationToken? cancelToken});
 
-  Future<void> beginCheckNewVersion();
-  Future<bool> isCheckingNewVersionAsync();
-  Future<BorneoDeviceUpgradeInfo> getNewVersion();
-  Future<void> beginUpgrade();
-  Future<bool> isUpgrading();
+  Future<void> beginCheckNewVersion({CancellationToken? cancelToken});
+  Future<bool> isCheckingNewVersionAsync({CancellationToken? cancelToken});
+  Future<BorneoDeviceUpgradeInfo> getNewVersion({CancellationToken? cancelToken});
+  Future<void> beginUpgrade({CancellationToken? cancelToken});
+  Future<bool> isUpgrading({CancellationToken? cancelToken});
 }
 
 mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   @override
-  Future<String> getCompatible(Device dev) async {
+  Future<String> getCompatible(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as BorneoCoapDriverData;
-    return await dd.coap.getCbor<String>(BorneoPaths.compatible);
+    return await dd.coap.getCbor<String>(BorneoPaths.compatible, cancelToken: cancelToken);
   }
 
   @override
-  Future<Version> getFirmwareVersion(Device dev) async {
+  Future<Version> getFirmwareVersion(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as BorneoCoapDriverData;
-    final verStr = await dd.coap.getCbor<String>(BorneoPaths.firmwareVersion);
+    final verStr = await dd.coap.getCbor<String>(BorneoPaths.firmwareVersion, cancelToken: cancelToken);
     return Version.parse(verStr);
   }
 
   @override
-  Future<bool> getOnOff(Device dev) async {
+  Future<bool> getOnOff(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as BorneoCoapDriverData;
-    return await dd.coap.getCbor<bool>(BorneoPaths.power);
+    return await dd.coap.getCbor<bool>(BorneoPaths.power, cancelToken: cancelToken);
   }
 
   @override
-  Future setOnOff(Device dev, bool on) async {
+  Future setOnOff(Device dev, bool on, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as BorneoCoapDriverData;
     final response = await dd.coap.putBytes(
       BorneoPaths.power,
@@ -266,21 +267,25 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   }
 
   @override
-  Future<PowerBehavior> getPowerBehavior(Device dev) async {
+  Future<PowerBehavior> getPowerBehavior(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as BorneoCoapDriverData;
-    final value = await dd.coap.getCbor<int>(BorneoPaths.powerBehavior);
+    final value = await dd.coap.getCbor<int>(BorneoPaths.powerBehavior, cancelToken: cancelToken);
     return PowerBehavior.values[value];
   }
 
   @override
-  Future<DateTime> getHeartbeat(Device dev) async {
+  Future<DateTime> getHeartbeat(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as BorneoCoapDriverData;
-    final timestamp = await dd.coap.getCbor<int>(BorneoPaths.heartbeat);
+    final timestamp = await dd.coap.getCbor<int>(BorneoPaths.heartbeat, cancelToken: cancelToken);
     return DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
   }
 
   @override
-  Future<BorneoRtcLocalNtpResponse> getRtcLocal(Device dev, DateTime timestamp) async {
+  Future<BorneoRtcLocalNtpResponse> getRtcLocal(
+    Device dev,
+    DateTime timestamp, {
+    CancellationToken? cancelToken,
+  }) async {
     final dd = dev.driverData as BorneoCoapDriverData;
     final timestampUS = timestamp.isUtc ? timestamp.microsecondsSinceEpoch : timestamp.toUtc().microsecondsSinceEpoch;
     final request = CoapRequest.get(
@@ -295,7 +300,7 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   }
 
   @override
-  Future<void> setRtcLocalSkew(Device dev, Duration skew) async {
+  Future<void> setRtcLocalSkew(Device dev, Duration skew, {CancellationToken? cancelToken}) async {
     if (skew.isNegative) {
       throw ArgumentError('Skew must be a non-negative duration.');
     }
@@ -303,13 +308,13 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
       throw ArgumentError('Skew must be greater than 1ms.');
     }
     final dd = dev.driverData as BorneoCoapDriverData;
-    await dd.coap.postCbor(BorneoPaths.rtcLocal, skew.inMicroseconds);
+    await dd.coap.postCbor(BorneoPaths.rtcLocal, skew.inMicroseconds, cancelToken: cancelToken);
   }
 
   @override
-  Future setPowerBehavior(Device dev, PowerBehavior behavior) async {
+  Future setPowerBehavior(Device dev, PowerBehavior behavior, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as BorneoCoapDriverData;
-    await dd.coap.putCbor(BorneoPaths.powerBehavior, behavior.index);
+    await dd.coap.putCbor(BorneoPaths.powerBehavior, behavior.index, cancelToken: cancelToken);
   }
 
   @override
@@ -319,14 +324,14 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   }
 
   @override
-  Future<GeneralBorneoDeviceStatus> getGeneralDeviceStatus(Device dev) async {
+  Future<GeneralBorneoDeviceStatus> getGeneralDeviceStatus(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as BorneoCoapDriverData;
-    final payload = await dd.coap.getCbor<Map>(BorneoPaths.status);
+    final payload = await dd.coap.getCbor<Map>(BorneoPaths.status, cancelToken: cancelToken);
     return GeneralBorneoDeviceStatus.fromMap(payload);
   }
 
   @override
-  Future<void> factoryReset(Device dev) async {
+  Future<void> factoryReset(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as BorneoCoapDriverData;
     final response = await dd.coap.postBytes(
       BorneoPaths.factoryReset,
@@ -339,43 +344,43 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   }
 
   @override
-  Future<void> beginCheckNewVersion() {
+  Future<void> beginCheckNewVersion({CancellationToken? cancelToken}) {
     // TODO: implement beginCheckNewVersion
     throw UnimplementedError();
   }
 
   @override
-  Future<void> beginUpgrade() {
+  Future<void> beginUpgrade({CancellationToken? cancelToken}) {
     // TODO: implement beginUpgrade
     throw UnimplementedError();
   }
 
   @override
-  Future<BorneoDeviceUpgradeInfo> getNewVersion() {
+  Future<BorneoDeviceUpgradeInfo> getNewVersion({CancellationToken? cancelToken}) {
     // TODO: implement getNewVersion
     throw UnimplementedError();
   }
 
   @override
-  Future<bool> isCheckingNewVersionAsync() {
+  Future<bool> isCheckingNewVersionAsync({CancellationToken? cancelToken}) {
     // TODO: implement isCheckingNewVersionAsync
     throw UnimplementedError();
   }
 
   @override
-  Future<bool> isUpgrading() {
+  Future<bool> isUpgrading({CancellationToken? cancelToken}) {
     // TODO: implement isUpgrading
     throw UnimplementedError();
   }
 
   @override
-  Future<String> getTimeZone(Device dev) async {
+  Future<String> getTimeZone(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as BorneoCoapDriverData;
-    return await dd.coap.getCbor<String>(BorneoPaths.timezone);
+    return await dd.coap.getCbor<String>(BorneoPaths.timezone, cancelToken: cancelToken);
   }
 
   @override
-  Future<void> setTimeZone(Device dev, String timezone) async {
+  Future<void> setTimeZone(Device dev, String timezone, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as BorneoCoapDriverData;
     final response = await dd.coap.putBytes(
       BorneoPaths.timezone,
