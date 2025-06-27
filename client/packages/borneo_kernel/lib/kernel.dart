@@ -64,7 +64,13 @@ final class DefaultKernel implements IKernel {
   DefaultKernel(this._logger, this._driverRegistry, {this.mdnsProvider}) {
     _logger.i('Loading the kernel...');
 
-    _deviceOfflineSub = _events.on<DeviceOfflineEvent>().listen((event) async => await unbind(event.device.id));
+    _deviceOfflineSub = _events.on<DeviceOfflineEvent>().listen((event) async {
+      try {
+        await unbind(event.device.id);
+      } catch (e, stackTrace) {
+        _logger.e('Failed to unbind offline device ${event.device.id}: $e', error: e, stackTrace: stackTrace);
+      }
+    });
 
     _foundDeviceEventSub = _events.on<FoundDeviceEvent>().listen(_onDeviceFound);
   }
@@ -81,16 +87,49 @@ final class DefaultKernel implements IKernel {
   @override
   void dispose() {
     if (!_isDisposed) {
+      _isDisposed = true; // 首先标记为已销毁，避免其他操作
+
+      // 停止扫描（在销毁EventBus之前）
       if (isScanning) {
-        stopDevicesScanning();
+        // 直接设置扫描状态为false，避免异步操作
+        _isScanning = false;
+        // 同步停止mDNS发现
+        if (mdnsProvider != null) {
+          for (final disc in _mdnsDiscoveryList) {
+            disc.dispose();
+          }
+          _mdnsDiscoveryList.clear();
+        }
       }
+
+      // 取消令牌和定时器
       _masterCancelToken.cancel();
       _timer?.cancel();
+      _heartbeatPollingTaskCancelToken.cancel();
+
+      // 取消事件订阅
       _deviceOfflineSub.cancel();
       _foundDeviceEventSub.cancel();
-      _heartbeatPollingTaskCancelToken.cancel();
+
+      // 清理所有绑定的设备
+      for (final deviceEventRouter in _deviceEventRouters.values) {
+        deviceEventRouter.cancel();
+      }
+      _deviceEventRouters.clear();
+
+      for (final boundDevice in _boundDevices.values) {
+        boundDevice.dispose();
+      }
+      _boundDevices.clear();
+
+      // 清理所有激活的驱动程序
+      for (final driver in _activatedDrivers.values) {
+        driver.dispose();
+      }
+      _activatedDrivers.clear();
+
+      // 最后销毁EventBus
       _events.destroy();
-      _isDisposed = true;
     }
   }
 
@@ -158,8 +197,15 @@ final class DefaultKernel implements IKernel {
 
   @override
   Future<void> bind(Device device, String driverID, {Duration? timeout, CancellationToken? cancelToken}) async {
+    // 在获取锁之前检查取消状态
+    cancelToken?.throwIfCancelled();
+
     await _deviceOpLock.synchronized(() async {
       _ensureStarted();
+
+      // 在锁内再次检查取消状态
+      cancelToken?.throwIfCancelled();
+
       assert(_registeredDevices.containsKey(device.id));
       _logger.i('Binding device: `$device` to driver `$driverID`');
       var driverDesc = _driverRegistry.metaDrivers[driverID];
@@ -222,8 +268,26 @@ final class DefaultKernel implements IKernel {
   Future<void> unbindAll({CancellationToken? cancelToken}) async {
     await _deviceOpLock.synchronized(() async {
       _ensureStarted();
-      final futures = _boundDevices.keys.map((id) => unbind(id, cancelToken: cancelToken));
-      await Future.wait(futures);
+      final deviceIds = List.from(_boundDevices.keys); // 复制列表避免并发修改
+      for (final deviceId in deviceIds) {
+        // 直接在锁内执行解绑逻辑，避免重复获取锁
+        final boundDevice = _boundDevices[deviceId];
+        if (boundDevice != null) {
+          await boundDevice.driver.remove(boundDevice.device, cancelToken: cancelToken);
+          boundDevice.dispose();
+          _boundDevices.remove(deviceId);
+
+          _deviceEventRouters[deviceId]?.cancel();
+          _deviceEventRouters.remove(deviceId);
+
+          if (_pollIDList.contains(deviceId)) {
+            _pollIDList.remove(deviceId);
+          }
+
+          _events.fire(DeviceRemovedEvent(boundDevice.device));
+        }
+      }
+      _purgeUnusedDriver();
     });
   }
 
@@ -260,6 +324,10 @@ final class DefaultKernel implements IKernel {
       _logger.t('Heartbeat polling skipped due to device operation lock.');
       return;
     }
+
+    // 收集需要离线处理的设备
+    final List<Device> offlineDevices = [];
+
     try {
       await _deviceOpLock
           .synchronized(() async {
@@ -284,7 +352,8 @@ final class DefaultKernel implements IKernel {
               for (int i = 0; i < results.length; i++) {
                 if (!results[i]) {
                   _logger.w('The device(${devices[i].device}) is not responding.');
-                  _events.fire(DeviceOfflineEvent(devices[i].device));
+                  // 收集离线设备，稍后在锁外处理
+                  offlineDevices.add(devices[i].device);
                 }
               }
             }
@@ -318,6 +387,13 @@ final class DefaultKernel implements IKernel {
           .asCancellable(cancelToken);
     } catch (e, stackTrace) {
       _logger.w("Failed to do the heartbeat: $e", error: e, stackTrace: stackTrace);
+    }
+
+    // 在锁外处理离线设备
+    for (final device in offlineDevices) {
+      if (!_isDisposed) {
+        _events.fire(DeviceOfflineEvent(device));
+      }
     }
   }
 
@@ -387,10 +463,16 @@ final class DefaultKernel implements IKernel {
       await _stopMdnsDiscovery().asCancellable(
         MergedCancellationToken([if (cancelToken != null) cancelToken, _masterCancelToken]),
       );
-    } finally {
       _isScanning = false;
-      _events.fire(DeviceDiscoveringStoppedEvent());
+      // 只在未销毁时发送事件
+      if (!_isDisposed) {
+        _events.fire(DeviceDiscoveringStoppedEvent());
+      }
       _logger.i('Devices scanning stopped.');
+    } catch (e) {
+      _isScanning = false;
+      _logger.e('Error stopping device scanning: $e');
+      rethrow;
     }
   }
 
