@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:borneo_app/core/events/app_events.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
-import 'package:borneo_app/core/services/device_manager.dart';
-import 'package:borneo_app/core/services/group_manager.dart';
-import 'package:borneo_app/core/services/scene_manager.dart';
+import 'package:borneo_app/core/services/devices/i_device_manager.dart';
+import 'package:borneo_app/core/services/i_group_manager.dart';
+import 'package:borneo_app/core/services/i_scene_manager.dart';
 import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/shared/view_models/base_view_model.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
@@ -15,9 +15,9 @@ enum TabIndices { scenes, devices, my }
 class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModelInitFutureMixin {
   static final Duration kStartupScanningDuration = Duration(seconds: 5);
   final IBlobManager _blobManager;
-  final SceneManager _sceneManager;
-  final GroupManager _groupManager;
-  final DeviceManager _deviceManager;
+  final ISceneManager _sceneManager;
+  final IGroupManager _groupManager;
+  final IDeviceManager _deviceManager;
   final LocaleService _localeService;
   TabIndices _currentIndex = TabIndices.scenes;
   bool _isInitialized = false;

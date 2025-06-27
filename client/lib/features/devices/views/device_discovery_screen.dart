@@ -1,6 +1,6 @@
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
-import 'package:borneo_app/core/services/group_manager.dart';
+import 'package:borneo_app/core/services/i_group_manager.dart';
 import 'package:borneo_app/core/services/i_app_notification_service.dart';
 import 'package:borneo_app/features/devices/views/device_group_selection_sheet.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
@@ -11,7 +11,7 @@ import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
-import '../../../core/services/device_manager.dart';
+import '../../../core/services/devices/i_device_manager.dart';
 import '../view_models/device_discovery_view_model.dart';
 
 class StartStopButton extends StatelessWidget {
@@ -209,8 +209,8 @@ class DeviceDiscoveryScreen extends StatelessWidget {
 
   DeviceDiscoveryViewModel createViewModel(BuildContext context) => DeviceDiscoveryViewModel(
     context.read<Logger>(),
-    context.read<GroupManager>(),
-    context.read<DeviceManager>(),
+    context.read<IGroupManager>(),
+    context.read<IDeviceManager>(),
     context.read<IDeviceModuleRegistry>(),
     globalEventBus: context.read<EventBus>(),
   );

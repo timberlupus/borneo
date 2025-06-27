@@ -83,23 +83,23 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   });
 
   @override
-  Future<void> onInitialize() async {
+  Future<void> onInitialize({CancellationToken? cancelToken}) async {
     if (super.isOnline) {
-      _temporaryDuration = await _deviceApi.getTemporaryDuration(boundDevice!.device);
+      _temporaryDuration = await _deviceApi.getTemporaryDuration(boundDevice!.device, cancelToken: cancelToken);
     }
 
     //_channels.length * lyfiBrightnessMax.toDouble();
 
-    await refreshStatus();
+    await refreshStatus(cancelToken: cancelToken);
 
     if (super.isOnline) {
       switch (mode) {
         case LyfiMode.scheduled:
-          scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
+          scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device, cancelToken: cancelToken));
           break;
 
         case LyfiMode.sun:
-          sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
+          sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device, cancelToken: cancelToken));
           break;
 
         default:
@@ -110,7 +110,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     // Update schedule
     // final schedule = await _deviceApi.getSchedule(boundDevice.device);
     if (!super.isLocked) {
-      await _toggleEditor(super.mode);
+      await _toggleEditor(super.mode, cancelToken: cancelToken);
     }
   }
 
@@ -139,10 +139,10 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   }
 
   @override
-  Future<void> onDeviceBound() async {
+  Future<void> onDeviceBound({CancellationToken? cancelToken}) async {
     super.onDeviceBound();
 
-    _temporaryDuration = await _deviceApi.getTemporaryDuration(boundDevice!.device); // TODO add cancallabne
+    _temporaryDuration = await _deviceApi.getTemporaryDuration(boundDevice!.device, cancelToken: cancelToken);
 
     await refreshStatus();
 
@@ -324,7 +324,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     await refreshStatus();
   }
 
-  Future<void> _toggleEditor(LyfiMode newMode) async {
+  Future<void> _toggleEditor(LyfiMode newMode, {CancellationToken? cancelToken}) async {
     switch (newMode) {
       case LyfiMode.manual:
         currentEditor = ManualEditorViewModel(this);
@@ -338,7 +338,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         currentEditor = SunEditorViewModel(this);
         break;
     }
-    await currentEditor!.initialize();
+    await currentEditor!.initialize(cancelToken: cancelToken);
   }
 
   Future<SettingsViewModel> loadSettings() async {

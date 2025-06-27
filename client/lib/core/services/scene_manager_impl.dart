@@ -6,8 +6,8 @@ import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
-import 'package:borneo_app/core/services/device_manager.dart';
-import 'package:borneo_app/core/services/group_manager.dart';
+import 'package:borneo_app/core/services/devices/i_device_manager.dart';
+import 'package:borneo_app/core/services/i_group_manager.dart';
 import 'package:borneo_app/core/services/store_names.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:event_bus/event_bus.dart';
@@ -15,38 +15,46 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
+import 'package:borneo_app/core/services/i_scene_manager.dart';
 
-class SceneManager {
+class SceneManagerImpl extends ISceneManager {
   static const String currentSceneKey = 'status.scenes.current';
 
   final GettextLocalizations _gt;
-  final Logger? logger;
   final Database _db;
   final EventBus _globalEventBus;
   final IBlobManager _blobManager;
-  bool isInitialized = false;
+  bool _isInitialized = false;
 
-  late final GroupManager _groupManager;
-  late final DeviceManager _deviceManager;
+  late final IGroupManager _groupManager;
+  late final IDeviceManager _deviceManager;
 
   late SceneEntity _current;
-  SceneEntity get current => _current;
 
   SceneEntity? _located;
+
+  SceneManagerImpl(this._gt, this._db, this._globalEventBus, this._blobManager, {Logger? logger}) : super(logger);
+
+  @override
+  bool get isInitialized => _isInitialized;
+
+  @override
+  SceneEntity get current => _current;
+
+  @override
   SceneEntity? get located => _located;
 
-  SceneManager(this._gt, this._db, this._globalEventBus, this._blobManager, {this.logger});
-
-  Future<void> initialize(GroupManager groupManager, DeviceManager deviceManager) async {
-    if (isInitialized) {
+  @override
+  Future<void> initialize(IGroupManager groupManager, IDeviceManager deviceManager) async {
+    if (_isInitialized) {
       return;
     }
     _groupManager = groupManager;
     _deviceManager = deviceManager;
     return await _db.transaction((tx) async {
       await _ensureCurrentSceneExists(tx);
-      isInitialized = true;
-      logger?.i('The SceneManager has been initialized.');
+      _isInitialized = true;
+      logger?.i('The SceneManagerImpl has been initialized.');
     });
   }
 
@@ -99,6 +107,7 @@ class SceneManager {
     return SceneEntity.fromMap(currentRecord.key, currentRecord.value);
   }
 
+  @override
   Future<SceneEntity> single(String key, {Transaction? tx}) async {
     assert(isInitialized);
 
@@ -111,6 +120,7 @@ class SceneManager {
     }
   }
 
+  @override
   Future<List<SceneEntity>> all({Transaction? tx}) async {
     assert(isInitialized);
     if (tx == null) {
@@ -123,6 +133,7 @@ class SceneManager {
     }
   }
 
+  @override
   Future<DeviceStatistics> getDeviceStatistics(String sceneID) async {
     assert(isInitialized);
     return await _db.transaction((tx) async {
@@ -142,6 +153,7 @@ class SceneManager {
     });
   }
 
+  @override
   Future<SceneEntity> changeCurrent(String newSceneID) async {
     assert(isInitialized);
     if (newSceneID == current.id) {
@@ -179,6 +191,7 @@ class SceneManager {
     });
   }
 
+  @override
   Future<SceneEntity> create({required String name, required String notes, String? imagePath}) async {
     final store = stringMapStoreFactory.store(StoreNames.scenes);
     return await _db.transaction((tx) async {
@@ -197,6 +210,7 @@ class SceneManager {
     });
   }
 
+  @override
   Future<SceneEntity> update({
     required String id,
     required String name,
@@ -222,6 +236,7 @@ class SceneManager {
     }
   }
 
+  @override
   Future<void> delete(String id, {Transaction? tx}) async {
     if (tx == null) {
       await _db.transaction((tx) => delete(id, tx: tx));

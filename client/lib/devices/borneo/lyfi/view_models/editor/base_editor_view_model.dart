@@ -43,7 +43,7 @@ abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
   Future<void> initialize({CancellationToken? cancelToken}) async {
     try {
       await onInitialize(cancelToken: cancelToken);
-      await syncDimmingColor(false);
+      await syncDimmingColor(false, cancelToken: cancelToken);
     } finally {
       _isInitialized = true;
       notifyListeners();
@@ -64,12 +64,14 @@ abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
   @override
   LyfiDeviceInfo get deviceInfo => parent.lyfiDeviceInfo;
 
-  Future<void> syncDimmingColor(bool isLimited) async {
+  Future<void> syncDimmingColor(bool isLimited, {CancellationToken? cancelToken}) async {
     final color = _channels.map((x) => x.value).toList(growable: false);
     if (isLimited) {
-      _colorChangeRateLimiter.add(() => deviceApi.setColor(parent.boundDevice!.device, color));
+      _colorChangeRateLimiter.add(
+        () => deviceApi.setColor(parent.boundDevice!.device, color, cancelToken: cancelToken),
+      );
     } else {
-      await deviceApi.setColor(parent.boundDevice!.device, color);
+      await deviceApi.setColor(parent.boundDevice!.device, color, cancelToken: cancelToken);
     }
   }
 }

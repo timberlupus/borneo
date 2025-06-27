@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:core';
 
-import 'package:borneo_common/borneo_common.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
@@ -13,8 +12,8 @@ import 'package:borneo_wot/wot.dart';
 import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/features/devices/models/events.dart';
 import 'package:borneo_app/core/models/events.dart';
-import 'package:borneo_app/core/services/group_manager.dart';
-import 'package:borneo_app/core/services/scene_manager.dart';
+import 'package:borneo_app/core/services/i_group_manager.dart';
+import 'package:borneo_app/core/services/i_scene_manager.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 
@@ -23,20 +22,21 @@ import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_kernel_abstractions/ikernel.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
+import 'package:borneo_app/core/services/devices/i_device_manager.dart';
 
-final class DeviceManager implements IDisposable {
+final class DeviceManagerImpl extends IDeviceManager {
+  Logger? logger;
   bool _isDisposed = false;
-  final Logger? logger;
   final Database _db;
   bool _isInitialized = false;
-  final SceneManager _sceneManager;
+  final ISceneManager _sceneManager;
 
   final Lock _deviceOperLock = Lock();
 
   // ignore: unused_field
   final EventBus _globalBus;
   // ignore: unused_field
-  final GroupManager _groupManager;
+  final IGroupManager _groupManager;
 
   // event subscriptions
   late final StreamSubscription<UnboundDeviceDiscoveredEvent> _unboundDeviceDiscoveredEventSub;
@@ -48,24 +48,18 @@ final class DeviceManager implements IDisposable {
   final Map<String, WotThing> _wotThings = {};
   final IDeviceModuleRegistry _deviceModuleRegistry;
 
-  bool get isInitialized => _isInitialized;
-  GlobalDevicesEventBus get allDeviceEvents => _kernel.events;
-
   final IKernel _kernel;
-  IKernel get kernel => _kernel;
 
-  Iterable<BoundDevice> get boundDevices => _kernel.boundDevices;
-
-  DeviceManager(
+  DeviceManagerImpl(
     this._db,
     this._kernel,
     this._globalBus,
     this._sceneManager,
     this._groupManager,
     this._deviceModuleRegistry, {
-    this.logger,
+    Logger? logger,
   }) {
-    logger?.i("Creating DeviceManager...");
+    logger?.i("Creating DeviceManagerImpl...");
     _unboundDeviceDiscoveredEventSub = allDeviceEvents.on<UnboundDeviceDiscoveredEvent>().listen(
       _onUnboundDeviceDiscovered,
     );
@@ -78,10 +72,23 @@ final class DeviceManager implements IDisposable {
     _deviceRemovedEventSub = allDeviceEvents.on<DeviceRemovedEvent>().listen(_onDeviceRemoved);
   }
 
+  @override
+  bool get isInitialized => _isInitialized;
+
+  @override
+  GlobalDevicesEventBus get allDeviceEvents => _kernel.events;
+
+  @override
+  IKernel get kernel => _kernel;
+
+  @override
+  Iterable<BoundDevice> get boundDevices => _kernel.boundDevices;
+
+  @override
   Future<void> initialize() async {
     assert(!_isInitialized);
 
-    logger?.i('Initializing DeviceManager...');
+    logger?.i('Initializing DeviceManagerImpl...');
     try {
       final devices = await fetchAllDevicesInScene();
       _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
@@ -92,7 +99,7 @@ final class DeviceManager implements IDisposable {
       // Load WotThings for current scene after devices are bound
       await _loadWotThingsForCurrentScene();
 
-      logger?.i('DeviceManager has been initialized successfully.');
+      logger?.i('DeviceManagerImpl has been initialized successfully.');
     } finally {
       _isInitialized = true;
     }
@@ -113,15 +120,19 @@ final class DeviceManager implements IDisposable {
     }
   }
 
+  @override
   bool isBound(String deviceID) => _kernel.isBound(deviceID);
 
+  @override
   BoundDevice getBoundDevice(String deviceID) => _kernel.getBoundDevice(deviceID);
 
+  @override
   Iterable<BoundDevice> getBoundDevicesInCurrentScene() {
     final currentScene = _sceneManager.current;
     return _kernel.boundDevices.where((x) => (x.device as DeviceEntity).sceneID == currentScene.id);
   }
 
+  @override
   Future<void> reloadAllDevices() async {
     await _deviceOperLock.synchronized(() async {
       await _kernel.unbindAll();
@@ -143,12 +154,16 @@ final class DeviceManager implements IDisposable {
     });
   }
 
+  @override
   Future<bool> tryBind(DeviceEntity device) async => _kernel.tryBind(device, device.driverID);
 
+  @override
   Future<void> bind(DeviceEntity device) => _kernel.bind(device, device.driverID);
 
+  @override
   Future<void> unbind(String deviceID) => _kernel.unbind(deviceID);
 
+  @override
   Future<void> delete(String id, {Transaction? tx}) async {
     if (tx == null) {
       await _db.transaction((tx) => delete(id, tx: tx));
@@ -163,6 +178,7 @@ final class DeviceManager implements IDisposable {
     }
   }
 
+  @override
   Future<void> update(String id, {Transaction? tx, String? name, String? groupID}) async {
     if (tx == null) {
       return await _db.transaction((tx) => _update(id, tx: tx, name: name, groupID: groupID));
@@ -193,6 +209,7 @@ final class DeviceManager implements IDisposable {
     return groupRecord != null;
   }
 
+  @override
   Future<void> moveToGroup(String id, String newGroupID) async {
     return await _db.transaction((tx) async {
       final exists = await _groupExists(tx, newGroupID);
@@ -203,6 +220,7 @@ final class DeviceManager implements IDisposable {
     });
   }
 
+  @override
   Future<bool> isNewDevice(SupportedDeviceDescriptor matched, {Transaction? tx}) async {
     if (tx == null) {
       return await _db.transaction((tx) => isNewDevice(matched, tx: tx));
@@ -214,6 +232,7 @@ final class DeviceManager implements IDisposable {
     }
   }
 
+  @override
   Future<DeviceEntity?> singleOrDefaultByFingerprint(String fingerprint, {Transaction? tx}) async {
     if (tx == null) {
       return await _db.transaction((tx) => singleOrDefaultByFingerprint(fingerprint, tx: tx));
@@ -231,6 +250,7 @@ final class DeviceManager implements IDisposable {
     }
   }
 
+  @override
   Future<DeviceEntity> addNewDevice(SupportedDeviceDescriptor discovered, {String? groupID, Transaction? tx}) async {
     assert(isInitialized);
 
@@ -270,6 +290,7 @@ final class DeviceManager implements IDisposable {
     return device;
   }
 
+  @override
   Future<DeviceEntity> getDevice(String id, {Transaction? tx}) async {
     if (tx == null) {
       return await _db.transaction((tx) async {
@@ -283,6 +304,7 @@ final class DeviceManager implements IDisposable {
     }
   }
 
+  @override
   Future<List<DeviceEntity>> fetchAllDevicesInScene({String? sceneID}) async {
     return await _db.transaction((tx) async {
       final store = stringMapStoreFactory.store(StoreNames.devices);
@@ -293,13 +315,16 @@ final class DeviceManager implements IDisposable {
     });
   }
 
+  @override
   bool get isDiscoverying => _kernel.isScanning;
 
+  @override
   Future<void> startDiscovery({Duration? timeout, CancellationToken? cancelToken}) async {
     assert(!_kernel.isScanning);
     await _kernel.startDevicesScanning(timeout: timeout, cancelToken: cancelToken);
   }
 
+  @override
   Future<void> stopDiscovery() async {
     assert(_kernel.isScanning);
     await _kernel.stopDevicesScanning();
@@ -323,15 +348,13 @@ final class DeviceManager implements IDisposable {
     });
   }
 
-  /// Get WotThing for a device in current scene
-  /// Returns null if device is not in current scene or WotThing doesn't exist
+  @override
   WotThing? getWotThing(String deviceID) {
     // Only return WotThings for devices that are already loaded (current scene)
     return _wotThings[deviceID];
   }
 
-  /// Get WotThing for a device in current scene, create if not exists
-  /// Returns null if device is not in current scene
+  @override
   Future<WotThing?> getOrCreateWotThing(String deviceID) async {
     // Check if already exists
     if (_wotThings.containsKey(deviceID)) {
@@ -365,16 +388,16 @@ final class DeviceManager implements IDisposable {
     return null;
   }
 
-  /// Check if WotThing exists for a device
+  @override
   bool hasWotThing(String deviceID) => _wotThings.containsKey(deviceID);
 
-  /// Get all WotThings in current scene
+  @override
   Iterable<WotThing> get wotThingsInCurrentScene => _wotThings.values;
 
-  /// Get all device IDs that have WotThings in current scene
+  @override
   Iterable<String> get deviceIDsWithWotThings => _wotThings.keys;
 
-  /// Get count of WotThings in current scene
+  @override
   int get wotThingCount => _wotThings.length;
 
   /// Handle scene change event - reload WotThings for new scene

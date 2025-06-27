@@ -1,5 +1,5 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/acclimation_view_model.dart';
-import 'package:borneo_app/core/services/device_manager.dart';
+import 'package:borneo_app/core/services/devices/i_device_manager.dart';
 import 'package:borneo_app/core/services/i_app_notification_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,7 +17,7 @@ class AcclimationScreen extends StatelessWidget {
     final items = _buildSettingItems(context);
     final vm = AcclimationViewModel(
       deviceID: deviceID,
-      deviceManager: context.read<DeviceManager>(),
+      deviceManager: context.read<IDeviceManager>(),
       globalEventBus: context.read<EventBus>(),
     );
     return Scaffold(
@@ -151,8 +151,11 @@ class AcclimationScreen extends StatelessWidget {
   void onSubmit(AcclimationViewModel vm, BuildContext context) {
     vm.enqueueUIJob(() async {
       await vm.submitToDevice();
-      Provider.of<IAppNotificationService>(context, listen: false).showSuccess('Update acclimation settings succeed.');
       if (context.mounted) {
+        Provider.of<IAppNotificationService>(
+          context,
+          listen: false,
+        ).showSuccess('Update acclimation settings succeed.');
         Navigator.of(context).pop();
       }
     });

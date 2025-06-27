@@ -1,32 +1,37 @@
 import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 import 'package:borneo_app/core/models/events.dart';
-import 'package:borneo_app/core/services/scene_manager.dart';
+import 'package:borneo_app/core/services/i_scene_manager.dart';
 import 'package:borneo_app/core/services/store_names.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
+import 'package:borneo_app/core/services/i_group_manager.dart';
 
 import '../../features/devices/models/device_entity.dart';
 
-class GroupManager {
+class GroupManagerImpl extends IGroupManager {
   final Database _db;
   final Logger _logger;
   final EventBus _globalBus;
-  final SceneManager _scenes;
-  bool isInitialized = false;
+  final ISceneManager _scenes;
+  bool _isInitialized = false;
 
-  GroupManager(this._logger, this._globalBus, this._db, this._scenes) : isInitialized = false;
+  GroupManagerImpl(this._logger, this._globalBus, this._db, this._scenes) : super();
 
+  @override
+  bool get isInitialized => _isInitialized;
+
+  @override
   Future<void> initialize() async {
-    if (isInitialized) {
+    if (_isInitialized) {
       return;
     }
     return await _db.transaction((tx) async {
       //  await _ensureDefaultGroupExists(tx);
-      isInitialized = true;
-      _logger.i('The GroupManager has been initialized.');
+      _isInitialized = true;
+      _logger.i('The GroupManagerImpl has been initialized.');
     });
   }
 
@@ -55,6 +60,7 @@ class GroupManager {
   }
   */
 
+  @override
   Future<void> create({required String name, String notes = '', Transaction? tx}) async {
     if (tx == null) {
       await _db.transaction((tx) async {
@@ -73,6 +79,7 @@ class GroupManager {
     }
   }
 
+  @override
   Future<void> update(String id, {required String name, String notes = '', Transaction? tx}) async {
     if (tx == null) {
       await _db.transaction((tx) => update(id, name: name, notes: notes, tx: tx));
@@ -90,6 +97,7 @@ class GroupManager {
     }
   }
 
+  @override
   Future<void> delete(String id, {Transaction? tx}) async {
     if (tx == null) {
       await _db.transaction((tx) => delete(id, tx: tx));
@@ -106,6 +114,7 @@ class GroupManager {
     }
   }
 
+  @override
   Future<List<DeviceGroupEntity>> fetchAllGroupsInCurrentScene({Transaction? tx}) async {
     assert(isInitialized);
     if (tx == null) {

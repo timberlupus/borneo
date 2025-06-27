@@ -1,7 +1,7 @@
 import 'package:borneo_app/features/routines/models/actions/led_switch_temporary_mode_action.dart';
 import 'package:borneo_app/features/routines/models/actions/power_action.dart';
 import 'package:borneo_app/features/routines/models/actions/routine_action.dart';
-import 'package:borneo_app/core/services/device_manager.dart';
+import 'package:borneo_app/core/services/devices/i_device_manager.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 
@@ -21,7 +21,7 @@ abstract class AbstractRoutine with BaseEntity {
     required this.requiredCapabilities,
   });
 
-  bool checkAvailable(SceneEntity scene, DeviceManager deviceManager) {
+  bool checkAvailable(SceneEntity scene, IDeviceManager deviceManager) {
     final devices = deviceManager.getBoundDevicesInCurrentScene();
     return devices.any((d) => matchAllCapabilities(d, deviceManager));
   }
@@ -32,13 +32,13 @@ abstract class AbstractRoutine with BaseEntity {
     _ => throw UnimplementedError('Unknown routine action type: \'${e['type']}\''),
   };
 
-  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, DeviceManager deviceManager);
+  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, IDeviceManager deviceManager);
 
-  bool matchAllCapabilities(BoundDevice bound, DeviceManager deviceManager) {
+  bool matchAllCapabilities(BoundDevice bound, IDeviceManager deviceManager) {
     return requiredCapabilities.every((capability) => _hasCapability(bound, capability, deviceManager));
   }
 
-  bool _hasCapability(BoundDevice bound, String capability, DeviceManager deviceManager) {
+  bool _hasCapability(BoundDevice bound, String capability, IDeviceManager deviceManager) {
     final wotThing = deviceManager.getWotThing(bound.device.id);
     if (wotThing == null) return false;
 

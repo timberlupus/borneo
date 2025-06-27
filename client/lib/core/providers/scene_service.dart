@@ -8,8 +8,8 @@ import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/models/device_statistics.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
 import 'package:borneo_app/core/services/store_names.dart';
-import 'package:borneo_app/core/services/device_manager.dart';
-import 'package:borneo_app/core/services/group_manager.dart';
+import 'package:borneo_app/core/services/devices/i_device_manager.dart';
+import 'package:borneo_app/core/services/i_group_manager.dart';
 import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/app/assets.dart';
 
@@ -24,8 +24,8 @@ class SceneService extends StateNotifier<SceneState> {
   final IBlobManager _blobManager;
 
   // 在完全迁移前，这些依赖可能需要特殊处理
-  GroupManager? _groupManager;
-  DeviceManager? _deviceManager;
+  IGroupManager? _groupManager;
+  IDeviceManager? _deviceManager;
 
   SceneService({required Database db, required EventBus eventBus, required IBlobManager blobManager, Logger? logger})
     : _db = db,
@@ -37,7 +37,7 @@ class SceneService extends StateNotifier<SceneState> {
   /// 初始化服务
   /// 注意：在 Riverpod 中，通常不需要显式调用初始化
   /// 但这里保留了兼容性
-  Future<void> initialize({GroupManager? groupManager, DeviceManager? deviceManager}) async {
+  Future<void> initialize({IGroupManager? groupManager, IDeviceManager? deviceManager}) async {
     if (state.isInitialized) return;
 
     _groupManager = groupManager;

@@ -4,13 +4,13 @@ import 'package:borneo_app/devices/borneo/lyfi/core/wot.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_kernel/drivers/borneo/events.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
-import 'package:borneo_app/core/services/device_manager.dart';
+import 'package:borneo_app/core/services/devices/i_device_manager.dart';
 import 'package:event_bus/event_bus.dart';
 
 import '../../shared/view_models/base_view_model.dart';
 
 abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewModelEventBusMixin {
-  final DeviceManager deviceManager;
+  final IDeviceManager deviceManager;
   final DeviceEntity deviceEntity;
   var isInitialized = false;
 

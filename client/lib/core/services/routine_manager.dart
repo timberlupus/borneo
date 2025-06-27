@@ -1,7 +1,7 @@
-import 'package:borneo_app/core/services/scene_manager.dart';
+import 'package:borneo_app/core/services/i_scene_manager.dart';
 import 'package:borneo_app/features/routines/models/abstract_routine.dart';
 import 'package:borneo_app/features/routines/models/builtin_routines.dart';
-import 'package:borneo_app/core/services/device_manager.dart';
+import 'package:borneo_app/core/services/devices/i_device_manager.dart';
 import 'package:borneo_app/core/services/routine_history_store.dart';
 import 'package:borneo_common/borneo_common.dart';
 import 'package:event_bus/event_bus.dart';
@@ -20,8 +20,8 @@ class RoutineManager implements IDisposable {
   // ignore: unused_field
   final EventBus _globalBus;
 
-  final SceneManager _sceneManager;
-  final DeviceManager _deviceManager;
+  final ISceneManager _sceneManager;
+  final IDeviceManager _deviceManager;
 
   final RoutineHistoryStore _historyStore;
 

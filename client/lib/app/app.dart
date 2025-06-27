@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:borneo_app/core/events/app_events.dart';
 import 'package:borneo_app/core/services/default_app_notification_service.dart';
+import 'package:borneo_app/core/services/devices/device_manager_impl.dart';
+import 'package:borneo_app/core/services/group_manager_impl.dart';
 import 'package:borneo_app/core/services/i_app_notification_service.dart';
+import 'package:borneo_app/core/services/scene_manager_impl.dart';
 import 'package:borneo_app/main/views/main_screen.dart';
 import 'package:borneo_kernel_abstractions/ikernel.dart';
 import 'package:event_bus/event_bus.dart';
@@ -17,10 +20,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../routes/route_manager.dart';
 import '../core/services/blob_manager.dart';
-import '../core/services/device_manager.dart';
-import '../core/services/group_manager.dart';
+import '../core/services/devices/i_device_manager.dart';
+import '../core/services/i_group_manager.dart';
 import '../core/services/routine_manager.dart';
-import '../core/services/scene_manager.dart';
+import '../core/services/i_scene_manager.dart';
 import 'app_theme.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 
@@ -115,8 +118,8 @@ class _BorneoAppState extends State<BorneoApp> {
                     Provider<IAppNotificationService>(create: (context) => DefaultAppNotificationService()),
                     // Here >>> register all providers that need to access the gettext interface <<<
                     // SceneManager
-                    Provider<SceneManager>(
-                      create: (context) => SceneManager(
+                    Provider<ISceneManager>(
+                      create: (context) => SceneManagerImpl(
                         gt,
                         context.read<Database>(),
                         context.read<EventBus>(),
@@ -126,23 +129,23 @@ class _BorneoAppState extends State<BorneoApp> {
                     ),
 
                     // GroupManager
-                    Provider<GroupManager>(
-                      create: (context) => GroupManager(
+                    Provider<IGroupManager>(
+                      create: (context) => GroupManagerImpl(
                         context.read<Logger>(),
                         context.read<EventBus>(),
                         context.read<Database>(),
-                        context.read<SceneManager>(),
+                        context.read<ISceneManager>(),
                       ),
                     ),
 
                     // DeviceManager
-                    Provider<DeviceManager>(
-                      create: (context) => DeviceManager(
+                    Provider<IDeviceManager>(
+                      create: (context) => DeviceManagerImpl(
                         context.read<Database>(),
                         context.read<IKernel>(),
                         context.read<EventBus>(),
-                        context.read<SceneManager>(),
-                        context.read<GroupManager>(),
+                        context.read<ISceneManager>(),
+                        context.read<IGroupManager>(),
                         context.read<IDeviceModuleRegistry>(),
                         logger: context.read<Logger>(),
                       ),
@@ -154,8 +157,8 @@ class _BorneoAppState extends State<BorneoApp> {
                       create: (context) => RoutineManager(
                         context.read<EventBus>(),
                         context.read<Database>(),
-                        context.read<SceneManager>(),
-                        context.read<DeviceManager>(),
+                        context.read<ISceneManager>(),
+                        context.read<IDeviceManager>(),
                         logger: context.read<Logger>(),
                       ),
                       dispose: (context, rm) => rm.dispose(),

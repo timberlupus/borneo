@@ -1,4 +1,4 @@
-import 'package:borneo_app/core/services/scene_manager.dart';
+import 'package:borneo_app/core/services/i_scene_manager.dart';
 import 'package:borneo_app/features/scenes/providers/scene_edit_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -37,13 +37,13 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
   }
 
   // 临时的 SceneManager provider，用于桥接
-  late final Provider<SceneManager> _sceneManagerProvider = Provider<SceneManager>((ref) {
+  late final Provider<ISceneManager> _sceneManagerProvider = Provider<ISceneManager>((ref) {
     throw UnimplementedError('SceneManager must be provided by context');
   });
 
   @override
   Widget build(BuildContext context) {
-    return provider.Consumer<SceneManager>(
+    return provider.Consumer<ISceneManager>(
       builder: (context, sceneManager, child) {
         return ProviderScope(
           overrides: [_sceneManagerProvider.overrideWithValue(sceneManager)],
@@ -111,7 +111,7 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
                 decoration: BoxDecoration(
                   border: Border.all(color: Theme.of(context).dividerColor),
                   borderRadius: BorderRadius.circular(8),
-                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 ),
                 child: state.imagePath != null && state.imagePath!.isNotEmpty && File(state.imagePath!).existsSync()
                     ? ClipRRect(

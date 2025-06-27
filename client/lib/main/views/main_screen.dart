@@ -2,7 +2,7 @@ import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/routes/app_routes.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
-import 'package:borneo_app/core/services/group_manager.dart';
+import 'package:borneo_app/core/services/i_group_manager.dart';
 import 'package:borneo_app/core/services/i_app_notification_service.dart';
 import 'package:borneo_app/features/devices/view_models/group_edit_view_model.dart';
 import 'package:borneo_app/features/scenes/providers/scene_edit_provider.dart';
@@ -15,8 +15,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
-import '../../core/services/device_manager.dart';
-import '../../core/services/scene_manager.dart';
+import '../../core/services/devices/i_device_manager.dart';
+import '../../core/services/i_scene_manager.dart';
 import '../../features/devices/view_models/grouped_devices_view_model.dart';
 import '../../features/my/view_models/my_view_model.dart';
 import '../../features/devices/views/devices_screen.dart';
@@ -198,9 +198,9 @@ class MainScreen extends StatelessWidget {
       create: (context) {
         final bus = context.read<EventBus>();
         final bm = context.read<IBlobManager>();
-        final sm = context.read<SceneManager>();
-        final gm = context.read<GroupManager>();
-        final dm = context.read<DeviceManager>();
+        final sm = context.read<ISceneManager>();
+        final gm = context.read<IGroupManager>();
+        final dm = context.read<IDeviceManager>();
         final ls = context.read<LocaleService>();
         return MainViewModel(bus, bm, sm, gm, dm, ls, logger: context.read<Logger>());
       },
@@ -260,9 +260,9 @@ class MainScreen extends StatelessWidget {
           create: (context) {
             final logger = context.read<Logger>();
             final globalEventBus = context.read<EventBus>();
-            final sm = context.read<SceneManager>();
-            final gm = context.read<GroupManager>();
-            final dm = context.read<DeviceManager>();
+            final sm = context.read<ISceneManager>();
+            final gm = context.read<IGroupManager>();
+            final dm = context.read<IDeviceManager>();
             final dmr = context.read<IDeviceModuleRegistry>();
             return GroupedDevicesViewModel(globalEventBus, sm, gm, dm, dmr, logger: logger);
           },

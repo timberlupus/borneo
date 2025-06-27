@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:borneo_app/core/models/device_statistics.dart';
 import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
-import 'package:borneo_app/core/services/device_manager.dart';
-import 'package:borneo_app/core/services/scene_manager.dart';
+import 'package:borneo_app/core/services/devices/i_device_manager.dart';
+import 'package:borneo_app/core/services/i_scene_manager.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,8 +39,8 @@ class SceneSummaryState {
 
 /// Scene Summary Notifier
 class SceneSummaryNotifier extends StateNotifier<SceneSummaryState> {
-  final SceneManager _sceneManager;
-  final DeviceManager _deviceManager;
+  final ISceneManager _sceneManager;
+  final IDeviceManager _deviceManager;
   final EventBus _eventBus;
 
   late final StreamSubscription<CurrentSceneChangedEvent> _currentSceneChangedSub;
@@ -138,7 +138,7 @@ class ScenesState {
 
 /// Scenes Notifier
 class ScenesNotifier extends StateNotifier<ScenesState> {
-  final SceneManager _sceneManager;
+  final ISceneManager _sceneManager;
   final EventBus _eventBus;
 
   late final StreamSubscription<CurrentSceneChangedEvent> _currentSceneChangedSub;
@@ -148,7 +148,7 @@ class ScenesNotifier extends StateNotifier<ScenesState> {
 
   final Map<String, SceneSummaryNotifier> _sceneNotifiers = {};
 
-  ScenesNotifier(this._sceneManager, DeviceManager deviceManager, this._eventBus, Logger? logger)
+  ScenesNotifier(this._sceneManager, IDeviceManager deviceManager, this._eventBus, Logger? logger)
     : super(const ScenesState()) {
     // deviceManager and logger are passed for potential future use
     _setupEventListeners();
@@ -271,11 +271,11 @@ class ScenesNotifier extends StateNotifier<ScenesState> {
 }
 
 // Core providers that need to be provided elsewhere
-final sceneManagerProvider = Provider<SceneManager>((ref) {
+final sceneManagerProvider = Provider<ISceneManager>((ref) {
   throw UnimplementedError('SceneManager must be provided by context');
 });
 
-final deviceManagerProvider = Provider<DeviceManager>((ref) {
+final deviceManagerProvider = Provider<IDeviceManager>((ref) {
   throw UnimplementedError('DeviceManager must be provided by context');
 });
 

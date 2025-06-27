@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/services/i_app_notification_service.dart';
 import 'package:borneo_app/core/services/routine_manager.dart';
-import 'package:borneo_app/core/services/scene_manager.dart';
+import 'package:borneo_app/core/services/i_scene_manager.dart';
 import 'package:borneo_app/features/routines/models/abstract_routine.dart';
 import 'package:borneo_app/features/scenes/providers/scenes_provider.dart';
 import 'package:event_bus/event_bus.dart';
@@ -37,7 +37,7 @@ class RoutinesNotifier extends StateNotifier<RoutinesState> {
 
   RoutinesNotifier(
     this._routineManager,
-    SceneManager sceneManager, // Used for event listening only
+    ISceneManager sceneManager, // Used for event listening only
     IAppNotificationService notification, // Keep for compatibility but not store
     this._eventBus,
     this._logger,

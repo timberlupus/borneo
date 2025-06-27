@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
-import 'package:borneo_app/core/services/group_manager.dart';
+import 'package:borneo_app/core/services/i_group_manager.dart';
 import 'package:borneo_app/shared/view_models/abstract_screen_view_model.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:flutter/material.dart';
@@ -13,15 +13,15 @@ import 'package:esp_smartconfig/esp_smartconfig.dart';
 
 import '../models/events.dart';
 import 'package:borneo_common/exceptions.dart';
-import 'package:borneo_app/core/services/device_manager.dart';
+import 'package:borneo_app/core/services/devices/i_device_manager.dart';
 
 class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   // TODO move this to device manager
   bool _disposed = false;
   final Logger _logger;
   final _provisioner = Provisioner.espTouch();
-  final GroupManager _groupManager;
-  final DeviceManager _deviceManager;
+  final IGroupManager _groupManager;
+  final IDeviceManager _deviceManager;
   final IDeviceModuleRegistry deviceMdoules;
   bool get _isDiscovering => _deviceManager.isDiscoverying;
 

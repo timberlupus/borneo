@@ -54,7 +54,7 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   Future<void> refreshStatus({CancellationToken? cancelToken}) async {
     await super.refreshStatus(cancelToken: cancelToken);
     await _lock.synchronized(() async {
-      _lyfiStatus = await lyfiDeviceApi.getLyfiStatus(boundDevice!.device); // TODO cancel
+      _lyfiStatus = await lyfiDeviceApi.getLyfiStatus(boundDevice!.device, cancelToken: cancelToken);
     });
   }
 }

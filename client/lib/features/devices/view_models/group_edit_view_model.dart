@@ -1,5 +1,5 @@
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
-import 'package:borneo_app/core/services/group_manager.dart';
+import 'package:borneo_app/core/services/i_group_manager.dart';
 import 'package:borneo_app/shared/view_models/abstract_screen_view_model.dart';
 
 final class GroupEditArguments {
@@ -10,7 +10,7 @@ final class GroupEditArguments {
 }
 
 class GroupEditViewModel extends AbstractScreenViewModel {
-  final GroupManager _groupManager;
+  final IGroupManager _groupManager;
   final bool isCreation;
   late final String? id;
   late String name;
