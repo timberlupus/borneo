@@ -35,11 +35,18 @@ class RoutineManager implements IDisposable {
   List<AbstractRoutine> getAvailableRoutines() {
     List<AbstractRoutine> routines = [];
     final currentScene = _sceneManager.current;
+
+    logger?.d('Getting available routines for scene: ${currentScene.name} (${currentScene.id})');
+
     for (final r in allRoutines) {
-      if (r.checkAvailable(currentScene, _deviceManager)) {
+      final isAvailable = r.checkAvailable(currentScene, _deviceManager);
+      logger?.d('  Routine ${r.name}: ${isAvailable ? "available" : "not available"}');
+      if (isAvailable) {
         routines.add(r);
       }
     }
+
+    logger?.d('Total available routines: ${routines.length}');
     return routines;
   }
 

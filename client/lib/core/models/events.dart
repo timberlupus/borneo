@@ -7,6 +7,11 @@ final class CurrentSceneChangedEvent {
   const CurrentSceneChangedEvent(this.from, this.to);
 }
 
+final class CurrentSceneDevicesReloadedEvent {
+  final SceneEntity scene;
+  const CurrentSceneDevicesReloadedEvent(this.scene);
+}
+
 final class LocatedSceneChangedEvent {
   final SceneEntity? from;
   final SceneEntity to;

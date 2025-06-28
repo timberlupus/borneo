@@ -129,7 +129,8 @@ final class DeviceManagerImpl extends IDeviceManager {
   @override
   Iterable<BoundDevice> getBoundDevicesInCurrentScene() {
     final currentScene = _sceneManager.current;
-    return _kernel.boundDevices.where((x) => (x.device as DeviceEntity).sceneID == currentScene.id);
+    final devices = _kernel.boundDevices.where((x) => (x.device as DeviceEntity).sceneID == currentScene.id);
+    return devices;
   }
 
   @override
@@ -419,6 +420,11 @@ final class DeviceManagerImpl extends IDeviceManager {
 
       // Load WotThings for devices in current scene
       await _loadWotThingsForCurrentScene();
+
+      // Fire event to notify that devices for current scene have been reloaded
+      final currentScene = _sceneManager.current;
+      _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
+      logger?.d('Fired CurrentSceneDevicesReloadedEvent for scene: ${currentScene.name}');
     });
   }
 

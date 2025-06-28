@@ -23,7 +23,9 @@ abstract class AbstractRoutine with BaseEntity {
 
   bool checkAvailable(SceneEntity scene, IDeviceManager deviceManager) {
     final devices = deviceManager.getBoundDevicesInCurrentScene();
-    return devices.any((d) => matchAllCapabilities(d, deviceManager));
+    final isAvailable = devices.any((d) => matchAllCapabilities(d, deviceManager));
+
+    return isAvailable;
   }
 
   RoutineAction createAction(Map<String, dynamic> e) => switch (e['type']) {
