@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/models/device_statistics.dart';
+import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
 import 'package:borneo_app/core/services/store_names.dart';
 import 'package:borneo_app/core/services/devices/i_device_manager.dart';
@@ -16,14 +17,14 @@ import 'package:borneo_app/app/assets.dart';
 import 'core_providers.dart';
 import 'scene_state.dart';
 
-/// Scene Service - Riverpod 风格的场景管理服务
+/// Scene Service - Riverpod style scene management service
 class SceneService extends StateNotifier<SceneState> {
   final Database _db;
   final Logger? _logger;
   final EventBus _eventBus;
   final IBlobManager _blobManager;
 
-  // 在完全迁移前，这些依赖可能需要特殊处理
+  // These dependencies may need special handling before full migration
   IGroupManager? _groupManager;
   IDeviceManager? _deviceManager;
 
@@ -34,9 +35,9 @@ class SceneService extends StateNotifier<SceneState> {
       _blobManager = blobManager,
       super(const SceneState());
 
-  /// 初始化服务
-  /// 注意：在 Riverpod 中，通常不需要显式调用初始化
-  /// 但这里保留了兼容性
+  /// Initialize service
+  /// Note: In Riverpod, explicit initialization is usually not needed
+  /// but this is kept for compatibility
   Future<void> initialize({IGroupManager? groupManager, IDeviceManager? deviceManager}) async {
     if (state.isInitialized) return;
 
@@ -68,7 +69,7 @@ class SceneService extends StateNotifier<SceneState> {
     }
   }
 
-  /// 创建新场景
+  /// Create new scene
   Future<void> createScene({required String name, required String notes, String? imagePath}) async {
     if (state.isLoading) return;
 
@@ -78,9 +79,9 @@ class SceneService extends StateNotifier<SceneState> {
       String? imageID;
       String? finalImagePath;
 
-      // 处理图片
+      // Handle image
       if (imagePath != null) {
-        // 这里简化处理，实际可能需要复制图片到应用目录
+        // Simplified handling here, might need to copy image to app directory in real implementation
         finalImagePath = imagePath;
       }
 
@@ -99,11 +100,11 @@ class SceneService extends StateNotifier<SceneState> {
         await store.record(newScene.id).put(tx, newScene.toMap());
       });
 
-      // 更新状态
+      // Update state
       final updatedScenes = [...state.scenes, newScene];
       state = state.copyWith(scenes: updatedScenes, isLoading: false);
-      // 发送事件（简化版本，不使用具体的事件类）
-      _eventBus.fire('scene_created');
+      // Fire event
+      _eventBus.fire(SceneCreatedEvent(newScene));
 
       _logger?.i('Scene created: ${newScene.name}');
     } catch (e, stackTrace) {
@@ -113,7 +114,7 @@ class SceneService extends StateNotifier<SceneState> {
     }
   }
 
-  /// 更新场景
+  /// Update scene
   Future<void> updateScene({required String id, required String name, required String notes, String? imagePath}) async {
     if (state.isLoading) return;
 
@@ -133,7 +134,7 @@ class SceneService extends StateNotifier<SceneState> {
         await store.record(id).put(tx, updatedScene.toMap());
       });
 
-      // 更新状态
+      // Update state
       final updatedScenes = [...state.scenes];
       updatedScenes[sceneIndex] = updatedScene;
 
@@ -143,8 +144,8 @@ class SceneService extends StateNotifier<SceneState> {
       }
 
       state = state.copyWith(scenes: updatedScenes, currentScene: updatedCurrentScene, isLoading: false);
-      // 发送事件（简化版本）
-      _eventBus.fire('scene_updated');
+      // Fire event
+      _eventBus.fire(SceneUpdatedEvent(updatedScene));
 
       _logger?.i('Scene updated: ${updatedScene.name}');
     } catch (e, stackTrace) {
@@ -154,11 +155,11 @@ class SceneService extends StateNotifier<SceneState> {
     }
   }
 
-  /// 删除场景
+  /// Delete scene
   Future<void> deleteScene(String id) async {
     if (state.isLoading) return;
 
-    // 不允许删除当前场景
+    // Cannot delete current scene
     if (state.currentScene?.id == id) {
       state = state.copyWith(error: 'Cannot delete current scene');
       return;
@@ -177,11 +178,11 @@ class SceneService extends StateNotifier<SceneState> {
         await store.record(id).delete(tx);
       });
 
-      // 更新状态
+      // Update state
       final updatedScenes = state.scenes.where((s) => s.id != id).toList();
       state = state.copyWith(scenes: updatedScenes, isLoading: false);
-      // 发送事件（简化版本）
-      _eventBus.fire('scene_deleted');
+      // Fire event
+      _eventBus.fire(SceneDeletedEvent(id));
 
       _logger?.i('Scene deleted: ${sceneToDelete.name}');
     } catch (e, stackTrace) {
@@ -191,13 +192,13 @@ class SceneService extends StateNotifier<SceneState> {
     }
   }
 
-  /// 切换当前场景
+  /// Switch to current scene
   Future<void> switchToScene(String sceneId) async {
     if (state.isLoading) return;
 
     final scene = state.scenes.firstWhere((s) => s.id == sceneId, orElse: () => throw Exception('Scene not found'));
 
-    // 如果已经是当前场景，直接返回
+    // If already current scene, return directly
     if (state.currentScene?.id == sceneId) return;
 
     state = state.copyWith(isLoading: true, error: null);
@@ -206,18 +207,18 @@ class SceneService extends StateNotifier<SceneState> {
       await _db.transaction((tx) async {
         final store = stringMapStoreFactory.store(StoreNames.scenes);
 
-        // 更新旧的当前场景
+        // Update old current scene
         if (state.currentScene != null) {
           final oldCurrent = state.currentScene!.copyWith(isCurrent: false);
           await store.record(oldCurrent.id).put(tx, oldCurrent.toMap());
         }
 
-        // 设置新的当前场景
+        // Set new current scene
         final newCurrent = scene.copyWith(isCurrent: true, lastAccessTime: DateTime.now());
         await store.record(newCurrent.id).put(tx, newCurrent.toMap());
       });
 
-      // 更新状态
+      // Update state
       final updatedScenes = state.scenes.map((s) {
         if (s.id == sceneId) {
           return s.copyWith(isCurrent: true, lastAccessTime: DateTime.now());
@@ -228,10 +229,13 @@ class SceneService extends StateNotifier<SceneState> {
       }).toList();
 
       final newCurrentScene = updatedScenes.firstWhere((s) => s.id == sceneId);
+      final oldCurrentScene = state.currentScene;
 
       state = state.copyWith(scenes: updatedScenes, currentScene: newCurrentScene, isLoading: false);
-      // 发送事件（简化版本）
-      _eventBus.fire('current_scene_changed');
+      // Fire event
+      if (oldCurrentScene != null) {
+        _eventBus.fire(CurrentSceneChangedEvent(oldCurrentScene, newCurrentScene));
+      }
 
       _logger?.i('Switched to scene: ${newCurrentScene.name}');
     } catch (e, stackTrace) {
@@ -241,15 +245,15 @@ class SceneService extends StateNotifier<SceneState> {
     }
   }
 
-  /// 获取场景的设备统计信息
+  /// Get device statistics for scene
   Future<DeviceStatistics> getDeviceStatistics(String sceneId) async {
     try {
-      // 这里需要依赖 DeviceManager，在完全迁移前可能需要特殊处理
+      // This depends on DeviceManager, may need special handling before full migration
       if (_deviceManager != null && _groupManager != null) {
-        // 调用原有的逻辑
+        // Call original logic
         // return await _originalSceneManager.getDeviceStatistics(sceneId);
       }
-      // 临时返回空统计信息
+      // Temporarily return empty statistics
       return const DeviceStatistics(0, 0); // totalDeviceCount, activeDeviceCount
     } catch (e, stackTrace) {
       _logger?.e('Failed to get device statistics', error: e, stackTrace: stackTrace);
@@ -257,7 +261,7 @@ class SceneService extends StateNotifier<SceneState> {
     }
   }
 
-  /// 刷新所有场景数据
+  /// Refresh all scene data
   Future<void> refresh() async {
     if (state.isLoading) return;
 
@@ -279,24 +283,24 @@ class SceneService extends StateNotifier<SceneState> {
     }
   }
 
-  // 私有方法
+  // Private methods
 
   Future<void> _ensureDefaultScenesExist(Transaction tx) async {
     final store = stringMapStoreFactory.store(StoreNames.scenes);
 
     if (await store.count(tx) <= 0) {
       try {
-        // 创建默认的家庭场景
+        // Create default home scene
         final homeImageID = await _blobManager.create(await rootBundle.load(AssetsPath.kHomeSceneImagePath));
 
         final homeScene = SceneEntity.newDefault().copyWith(
-          name: 'My Home', // 简化，不使用国际化
+          name: 'My Home', // Simplified, not using internationalization
           imageID: homeImageID,
           imagePath: _blobManager.getPath(homeImageID),
         );
         await store.record(homeScene.id).put(tx, homeScene.toMap());
 
-        // 创建办公室场景
+        // Create office scene
         final officeImageID = await _blobManager.create(await rootBundle.load(AssetsPath.kOfficeSceneImagePath));
         final officeScene = SceneEntity(
           id: BaseEntity.generateID(),
@@ -312,7 +316,7 @@ class SceneService extends StateNotifier<SceneState> {
         _logger?.i('Default scenes created');
       } catch (e, stackTrace) {
         _logger?.w('Failed to create default scenes', error: e, stackTrace: stackTrace);
-        // 创建简单的默认场景
+        // Create simple default scene
         final homeScene = SceneEntity.newDefault().copyWith(name: 'Default Scene');
         await store.record(homeScene.id).put(tx, homeScene.toMap());
       }
@@ -357,27 +361,27 @@ final sceneServiceProvider = StateNotifierProvider<SceneService, SceneState>((re
   return SceneService(db: db, logger: logger, eventBus: eventBus, blobManager: blobManager);
 });
 
-/// 便捷的 Provider - 当前场景
+/// Convenience Provider - current scene
 final currentSceneProvider = Provider<SceneEntity?>((ref) {
   return ref.watch(sceneServiceProvider).currentScene;
 });
 
-/// 便捷的 Provider - 所有场景
+/// Convenience Provider - all scenes
 final allScenesProvider = Provider<List<SceneEntity>>((ref) {
   return ref.watch(sceneServiceProvider).scenes;
 });
 
-/// 便捷的 Provider - 场景是否正在加载
+/// Convenience Provider - scene loading status
 final sceneLoadingProvider = Provider<bool>((ref) {
   return ref.watch(sceneServiceProvider).isLoading;
 });
 
-/// 便捷的 Provider - 场景错误信息
+/// Convenience Provider - scene error message
 final sceneErrorProvider = Provider<String?>((ref) {
   return ref.watch(sceneServiceProvider).error;
 });
 
-/// 按 ID 获取场景的 Provider
+/// Provider to get scene by ID
 final sceneByIdProvider = Provider.family<SceneEntity?, String>((ref, sceneId) {
   final scenes = ref.watch(allScenesProvider);
   try {
@@ -387,7 +391,7 @@ final sceneByIdProvider = Provider.family<SceneEntity?, String>((ref, sceneId) {
   }
 });
 
-/// 场景设备统计 Provider
+/// Scene device statistics Provider
 final sceneDeviceStatisticsProvider = FutureProvider.family<DeviceStatistics, String>((ref, sceneId) async {
   final sceneService = ref.read(sceneServiceProvider.notifier);
   return await sceneService.getDeviceStatistics(sceneId);

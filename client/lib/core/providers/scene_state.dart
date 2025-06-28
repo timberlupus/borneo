@@ -1,8 +1,8 @@
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/models/device_statistics.dart';
 
-/// Scene 相关的状态类
-/// 使用简单的类而不是 Freezed，因为项目中没有 Freezed 依赖
+/// Scene-related state class
+/// Using simple class instead of Freezed, as project doesn't have Freezed dependency
 
 class SceneState {
   final List<SceneEntity> scenes;
@@ -45,7 +45,7 @@ class SceneState {
   }
 }
 
-/// Scene 设备统计状态
+/// Scene device statistics state
 class SceneDeviceStatistics {
   final String sceneId;
   final DeviceStatistics statistics;
