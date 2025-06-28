@@ -64,11 +64,12 @@ class AsyncConfirmationSheet extends StatelessWidget {
 
   static Future<bool> show(BuildContext context, {required String message}) async {
     return await showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return AsyncConfirmationSheet(message: message);
-      },
-    );
+          context: context,
+          builder: (BuildContext context) {
+            return AsyncConfirmationSheet(message: message);
+          },
+        ) ??
+        false;
   }
 
   @override
