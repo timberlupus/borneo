@@ -194,10 +194,15 @@ final class DeviceManagerImpl extends IDeviceManager {
       throw KeyNotFoundException(message: 'Cannot found device with ID `$id`');
     }
     final oldEntity = DeviceEntity.fromMap(id, originalRecord);
-    final fieldsToUpdate = {
-      DeviceEntity.kNameFieldName: originalRecord[DeviceEntity.kNameFieldName] ?? name,
-      DeviceEntity.kGroupIDFieldName: originalRecord[DeviceEntity.kGroupIDFieldName] ?? groupID,
-    };
+    final fieldsToUpdate = <String, dynamic>{};
+
+    if (name != null) {
+      fieldsToUpdate[DeviceEntity.kNameFieldName] = name;
+    }
+    if (groupID != null) {
+      fieldsToUpdate[DeviceEntity.kGroupIDFieldName] = groupID;
+    }
+
     final updatedRecord = await store.record(id).update(tx, fieldsToUpdate);
     final updatedEntity = DeviceEntity.fromMap(id, updatedRecord!);
     allDeviceEvents.fire(DeviceEntityUpdatedEvent(oldEntity, updatedEntity));
