@@ -205,8 +205,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
       final deviceToRemove = changedGroup.devices.firstWhere((d) => d.deviceEntity.id == event.id);
       deviceToRemove.dispose();
       changedGroup.removeDeviceById(event.id);
-    }
-    if (isEmpty) {
+      // Always notify listeners when a device is removed to ensure UI updates
       notifyListeners();
     }
   }

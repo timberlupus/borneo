@@ -13,8 +13,15 @@ class ManualEditorViewModel extends BaseEditorViewModel {
   @override
   Future<void> onInitialize({CancellationToken? cancelToken}) async {
     final lyfiStatus = await super.deviceApi.getLyfiStatus(parent.boundDevice!.device, cancelToken: cancelToken);
-    assert(lyfiStatus.state == LyfiState.dimming);
-    assert(lyfiStatus.mode == LyfiMode.manual);
+
+    // Ensure we are in the correct state and mode before proceeding
+    if (parent.state != LyfiState.dimming) {
+      throw StateError(
+        'ManualEditorViewModel requires parent state to be dimming, but current state is ${parent.state}',
+      );
+    }
+    assert(parent.mode == LyfiMode.manual);
+
     for (int i = 0; i < parent.lyfiDeviceInfo.channels.length; i++) {
       channels[i].value = lyfiStatus.manualColor[i];
     }

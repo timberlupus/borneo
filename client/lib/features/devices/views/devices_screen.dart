@@ -23,6 +23,7 @@ class InGroupDeviceListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Selector<GroupViewModel, List<AbstractDeviceSummaryViewModel>>(
       selector: (_, gvm) => gvm.devices,
+      shouldRebuild: (previous, current) => previous.length != current.length || !identical(previous, current),
       builder: (context, devices, child) {
         var index = 0;
         final List<Widget> deviceWidgets = <Widget>[];

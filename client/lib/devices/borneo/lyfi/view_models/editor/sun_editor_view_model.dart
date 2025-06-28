@@ -23,9 +23,13 @@ class SunEditorViewModel extends BaseEditorViewModel {
 
   @override
   Future<void> onInitialize({CancellationToken? cancelToken}) async {
+    // Ensure we are in the correct state and mode before proceeding
+    if (parent.state != LyfiState.dimming) {
+      throw StateError('SunEditorViewModel requires parent state to be dimming, but current state is ${parent.state}');
+    }
+    assert(parent.mode == LyfiMode.sun);
+
     final lyfiStatus = await _deviceApi.getLyfiStatus(parent.boundDevice!.device, cancelToken: cancelToken);
-    assert(lyfiStatus.state == LyfiState.dimming);
-    assert(lyfiStatus.mode == LyfiMode.sun);
     for (int i = 0; i < parent.lyfiDeviceInfo.channels.length; i++) {
       channels[i].value = lyfiStatus.sunColor[i];
     }

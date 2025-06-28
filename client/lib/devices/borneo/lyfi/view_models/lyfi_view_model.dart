@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
@@ -5,6 +6,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.d
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_view_model.dart';
 import 'package:borneo_app/core/services/i_app_notification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
@@ -285,15 +287,18 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       }
     }
 
-    final state = newIsLocked ? LyfiState.normal : LyfiState.dimming;
-    super.state = state;
-    final _ = await _deviceApi.getState(super.boundDevice!.device);
-
-    if (!newIsLocked) {
-      //Entering edit mode
-      await _toggleEditor(super.mode);
-    } else {
+    if (newIsLocked) {
+      // Exiting edit mode - switch to normal state
+      await _deviceApi.switchState(super.boundDevice!.device, LyfiState.normal);
       await refreshStatus();
+    } else {
+      // Entering edit mode - wait for state to change to dimming before creating editor
+      await _deviceApi.switchState(super.boundDevice!.device, LyfiState.dimming);
+
+      // Wait for the state change event instead of polling
+      await _waitForStateChange(LyfiState.dimming);
+
+      await _toggleEditor(super.mode);
     }
   }
 
@@ -357,5 +362,39 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     );
     await vm.initialize();
     return vm;
+  }
+
+  /// Wait for device state to change to the expected state using event subscription
+  Future<void> _waitForStateChange(LyfiState expectedState) async {
+    // If already in the expected state, return immediately
+    if (super.state == expectedState) {
+      return;
+    }
+
+    final completer = Completer<void>();
+    StreamSubscription<LyfiStateChangedEvent>? subscription;
+
+    // Set up timeout
+    Timer timeoutTimer = Timer(Duration(seconds: 5), () {
+      subscription?.cancel();
+      if (!completer.isCompleted) {
+        completer.completeError(
+          TimeoutException('Timeout waiting for state change to $expectedState', Duration(seconds: 5)),
+        );
+      }
+    });
+
+    // Listen for state change events
+    subscription = super.deviceManager.allDeviceEvents.on<LyfiStateChangedEvent>().listen((event) {
+      if (event.device.id == super.deviceID && event.state == expectedState) {
+        timeoutTimer.cancel();
+        subscription?.cancel();
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }
+    });
+
+    await completer.future;
   }
 }
