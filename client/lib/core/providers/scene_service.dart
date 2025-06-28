@@ -1,39 +1,44 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sembast/sembast.dart';
 import 'package:logger/logger.dart';
 import 'package:event_bus/event_bus.dart';
-import 'package:flutter/services.dart';
 
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/models/device_statistics.dart';
 import 'package:borneo_app/core/models/events.dart';
-import 'package:borneo_app/core/services/blob_manager.dart';
-import 'package:borneo_app/core/services/store_names.dart';
 import 'package:borneo_app/core/services/devices/i_device_manager.dart';
 import 'package:borneo_app/core/services/i_group_manager.dart';
-import 'package:borneo_app/shared/models/base_entity.dart';
-import 'package:borneo_app/app/assets.dart';
+import 'package:borneo_app/core/services/i_scene_manager.dart';
 
-import 'core_providers.dart';
 import 'scene_state.dart';
 
+// External providers that need to be provided by the application
+final sceneManagerProvider = Provider<ISceneManager>((ref) {
+  throw UnimplementedError('SceneManager must be provided by context');
+});
+
+final eventBusProvider = Provider<EventBus>((ref) {
+  throw UnimplementedError('EventBus must be provided by context');
+});
+
+final loggerProvider = Provider<Logger?>((ref) {
+  throw UnimplementedError('Logger must be provided by context');
+});
+
 /// Scene Service - Riverpod style scene management service
+/// Acts as a bridge to ISceneManager while providing Riverpod state management
 class SceneService extends StateNotifier<SceneState> {
-  final Database _db;
+  final ISceneManager _sceneManager;
   final Logger? _logger;
   final EventBus _eventBus;
-  final IBlobManager _blobManager;
 
-  // These dependencies may need special handling before full migration
-  IGroupManager? _groupManager;
-  IDeviceManager? _deviceManager;
-
-  SceneService({required Database db, required EventBus eventBus, required IBlobManager blobManager, Logger? logger})
-    : _db = db,
+  SceneService({required ISceneManager sceneManager, required EventBus eventBus, Logger? logger})
+    : _sceneManager = sceneManager,
       _logger = logger,
       _eventBus = eventBus,
-      _blobManager = blobManager,
-      super(const SceneState());
+      super(const SceneState()) {
+    // Listen to scene events to update state
+    _setupEventListeners();
+  }
 
   /// Initialize service
   /// Note: In Riverpod, explicit initialization is usually not needed
@@ -41,25 +46,13 @@ class SceneService extends StateNotifier<SceneState> {
   Future<void> initialize({IGroupManager? groupManager, IDeviceManager? deviceManager}) async {
     if (state.isInitialized) return;
 
-    _groupManager = groupManager;
-    _deviceManager = deviceManager;
-
     state = state.copyWith(isLoading: true);
 
     try {
-      await _db.transaction((tx) async {
-        await _ensureDefaultScenesExist(tx);
-        final currentScene = await _fetchCurrentScene(tx);
-        final allScenes = await _fetchAllScenes(tx);
+      await _sceneManager.initialize(groupManager!, deviceManager!);
+      await _loadScenesFromManager();
 
-        state = state.copyWith(
-          scenes: allScenes,
-          currentScene: currentScene,
-          isInitialized: true,
-          isLoading: false,
-          error: null,
-        );
-      });
+      state = state.copyWith(isInitialized: true, isLoading: false, error: null);
 
       _logger?.i('SceneService initialized successfully');
     } catch (e, stackTrace) {
@@ -76,35 +69,8 @@ class SceneService extends StateNotifier<SceneState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      String? imageID;
-      String? finalImagePath;
-
-      // Handle image
-      if (imagePath != null) {
-        // Simplified handling here, might need to copy image to app directory in real implementation
-        finalImagePath = imagePath;
-      }
-
-      final newScene = SceneEntity(
-        id: BaseEntity.generateID(),
-        name: name,
-        notes: notes,
-        imagePath: finalImagePath,
-        imageID: imageID,
-        isCurrent: false,
-        lastAccessTime: DateTime.now(),
-      );
-
-      await _db.transaction((tx) async {
-        final store = stringMapStoreFactory.store(StoreNames.scenes);
-        await store.record(newScene.id).put(tx, newScene.toMap());
-      });
-
-      // Update state
-      final updatedScenes = [...state.scenes, newScene];
-      state = state.copyWith(scenes: updatedScenes, isLoading: false);
-      // Fire event
-      _eventBus.fire(SceneCreatedEvent(newScene));
+      final newScene = await _sceneManager.create(name: name, notes: notes, imagePath: imagePath);
+      await _loadScenesFromManager();
 
       _logger?.i('Scene created: ${newScene.name}');
     } catch (e, stackTrace) {
@@ -121,31 +87,8 @@ class SceneService extends StateNotifier<SceneState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final sceneIndex = state.scenes.indexWhere((s) => s.id == id);
-      if (sceneIndex == -1) {
-        throw Exception('Scene not found');
-      }
-
-      final existingScene = state.scenes[sceneIndex];
-      final updatedScene = existingScene.copyWith(name: name, notes: notes, imagePath: imagePath);
-
-      await _db.transaction((tx) async {
-        final store = stringMapStoreFactory.store(StoreNames.scenes);
-        await store.record(id).put(tx, updatedScene.toMap());
-      });
-
-      // Update state
-      final updatedScenes = [...state.scenes];
-      updatedScenes[sceneIndex] = updatedScene;
-
-      SceneEntity? updatedCurrentScene = state.currentScene;
-      if (state.currentScene?.id == id) {
-        updatedCurrentScene = updatedScene;
-      }
-
-      state = state.copyWith(scenes: updatedScenes, currentScene: updatedCurrentScene, isLoading: false);
-      // Fire event
-      _eventBus.fire(SceneUpdatedEvent(updatedScene));
+      final updatedScene = await _sceneManager.update(id: id, name: name, notes: notes, imagePath: imagePath);
+      await _loadScenesFromManager();
 
       _logger?.i('Scene updated: ${updatedScene.name}');
     } catch (e, stackTrace) {
@@ -168,23 +111,10 @@ class SceneService extends StateNotifier<SceneState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final sceneToDelete = state.scenes.firstWhere(
-        (s) => s.id == id,
-        orElse: () => throw Exception('Scene not found'),
-      );
+      await _sceneManager.delete(id);
+      await _loadScenesFromManager();
 
-      await _db.transaction((tx) async {
-        final store = stringMapStoreFactory.store(StoreNames.scenes);
-        await store.record(id).delete(tx);
-      });
-
-      // Update state
-      final updatedScenes = state.scenes.where((s) => s.id != id).toList();
-      state = state.copyWith(scenes: updatedScenes, isLoading: false);
-      // Fire event
-      _eventBus.fire(SceneDeletedEvent(id));
-
-      _logger?.i('Scene deleted: ${sceneToDelete.name}');
+      _logger?.i('Scene deleted: $id');
     } catch (e, stackTrace) {
       _logger?.e('Failed to delete scene', error: e, stackTrace: stackTrace);
       state = state.copyWith(isLoading: false, error: 'Failed to delete scene: $e');
@@ -196,48 +126,16 @@ class SceneService extends StateNotifier<SceneState> {
   Future<void> switchToScene(String sceneId) async {
     if (state.isLoading) return;
 
-    final scene = state.scenes.firstWhere((s) => s.id == sceneId, orElse: () => throw Exception('Scene not found'));
-
     // If already current scene, return directly
     if (state.currentScene?.id == sceneId) return;
 
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      await _db.transaction((tx) async {
-        final store = stringMapStoreFactory.store(StoreNames.scenes);
+      await _sceneManager.changeCurrent(sceneId);
+      await _loadScenesFromManager();
 
-        // Update old current scene
-        if (state.currentScene != null) {
-          final oldCurrent = state.currentScene!.copyWith(isCurrent: false);
-          await store.record(oldCurrent.id).put(tx, oldCurrent.toMap());
-        }
-
-        // Set new current scene
-        final newCurrent = scene.copyWith(isCurrent: true, lastAccessTime: DateTime.now());
-        await store.record(newCurrent.id).put(tx, newCurrent.toMap());
-      });
-
-      // Update state
-      final updatedScenes = state.scenes.map((s) {
-        if (s.id == sceneId) {
-          return s.copyWith(isCurrent: true, lastAccessTime: DateTime.now());
-        } else if (s.isCurrent) {
-          return s.copyWith(isCurrent: false);
-        }
-        return s;
-      }).toList();
-
-      final newCurrentScene = updatedScenes.firstWhere((s) => s.id == sceneId);
-      final oldCurrentScene = state.currentScene;
-
-      state = state.copyWith(scenes: updatedScenes, currentScene: newCurrentScene, isLoading: false);
-      // Fire event
-      if (oldCurrentScene != null) {
-        _eventBus.fire(CurrentSceneChangedEvent(oldCurrentScene, newCurrentScene));
-      }
-
-      _logger?.i('Switched to scene: ${newCurrentScene.name}');
+      _logger?.i('Switched to scene: $sceneId');
     } catch (e, stackTrace) {
       _logger?.e('Failed to switch scene', error: e, stackTrace: stackTrace);
       state = state.copyWith(isLoading: false, error: 'Failed to switch scene: $e');
@@ -248,13 +146,7 @@ class SceneService extends StateNotifier<SceneState> {
   /// Get device statistics for scene
   Future<DeviceStatistics> getDeviceStatistics(String sceneId) async {
     try {
-      // This depends on DeviceManager, may need special handling before full migration
-      if (_deviceManager != null && _groupManager != null) {
-        // Call original logic
-        // return await _originalSceneManager.getDeviceStatistics(sceneId);
-      }
-      // Temporarily return empty statistics
-      return const DeviceStatistics(0, 0); // totalDeviceCount, activeDeviceCount
+      return await _sceneManager.getDeviceStatistics(sceneId);
     } catch (e, stackTrace) {
       _logger?.e('Failed to get device statistics', error: e, stackTrace: stackTrace);
       rethrow;
@@ -268,14 +160,7 @@ class SceneService extends StateNotifier<SceneState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final allScenes = await _fetchAllScenes();
-      final currentScene = allScenes.firstWhere(
-        (s) => s.isCurrent,
-        orElse: () => allScenes.isNotEmpty ? allScenes.first : throw Exception('No scenes found'),
-      );
-
-      state = state.copyWith(scenes: allScenes, currentScene: currentScene, isLoading: false);
-
+      await _loadScenesFromManager();
       _logger?.i('Scene data refreshed');
     } catch (e, stackTrace) {
       _logger?.e('Failed to refresh scene data', error: e, stackTrace: stackTrace);
@@ -285,80 +170,33 @@ class SceneService extends StateNotifier<SceneState> {
 
   // Private methods
 
-  Future<void> _ensureDefaultScenesExist(Transaction tx) async {
-    final store = stringMapStoreFactory.store(StoreNames.scenes);
-
-    if (await store.count(tx) <= 0) {
-      try {
-        // Create default home scene
-        final homeImageID = await _blobManager.create(await rootBundle.load(AssetsPath.kHomeSceneImagePath));
-
-        final homeScene = SceneEntity.newDefault().copyWith(
-          name: 'My Home', // Simplified, not using internationalization
-          imageID: homeImageID,
-          imagePath: _blobManager.getPath(homeImageID),
-        );
-        await store.record(homeScene.id).put(tx, homeScene.toMap());
-
-        // Create office scene
-        final officeImageID = await _blobManager.create(await rootBundle.load(AssetsPath.kOfficeSceneImagePath));
-        final officeScene = SceneEntity(
-          id: BaseEntity.generateID(),
-          name: 'My Office',
-          notes: '',
-          isCurrent: false,
-          lastAccessTime: DateTime.now(),
-          imageID: officeImageID,
-          imagePath: _blobManager.getPath(officeImageID),
-        );
-        await store.record(officeScene.id).put(tx, officeScene.toMap());
-
-        _logger?.i('Default scenes created');
-      } catch (e, stackTrace) {
-        _logger?.w('Failed to create default scenes', error: e, stackTrace: stackTrace);
-        // Create simple default scene
-        final homeScene = SceneEntity.newDefault().copyWith(name: 'Default Scene');
-        await store.record(homeScene.id).put(tx, homeScene.toMap());
-      }
-    }
+  void _setupEventListeners() {
+    // Listen to scene events from ISceneManager to update our state
+    _eventBus.on<SceneCreatedEvent>().listen((_) => _loadScenesFromManager());
+    _eventBus.on<SceneUpdatedEvent>().listen((_) => _loadScenesFromManager());
+    _eventBus.on<SceneDeletedEvent>().listen((_) => _loadScenesFromManager());
+    _eventBus.on<CurrentSceneChangedEvent>().listen((_) => _loadScenesFromManager());
   }
 
-  Future<SceneEntity> _fetchCurrentScene([Transaction? tx]) async {
-    final store = stringMapStoreFactory.store(StoreNames.scenes);
-    final finder = Finder(limit: 1, filter: Filter.equals(SceneEntity.kIsCurrent, true));
+  Future<void> _loadScenesFromManager() async {
+    try {
+      final allScenes = await _sceneManager.all();
+      final currentScene = _sceneManager.current;
 
-    final operation = tx != null
-        ? store.findFirst(tx, finder: finder)
-        : _db.transaction((tx) => store.findFirst(tx, finder: finder));
-
-    final currentRecord = await operation;
-
-    if (currentRecord == null) {
-      throw Exception('No current scene found');
+      state = state.copyWith(scenes: allScenes, currentScene: currentScene, isLoading: false, error: null);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: 'Failed to load scenes: $e');
     }
-
-    return SceneEntity.fromMap(currentRecord.key, currentRecord.value);
-  }
-
-  Future<List<SceneEntity>> _fetchAllScenes([Transaction? tx]) async {
-    final store = stringMapStoreFactory.store(StoreNames.scenes);
-
-    final operation = tx != null ? store.find(tx) : _db.transaction((tx) => store.find(tx));
-
-    final records = await operation;
-
-    return records.map((record) => SceneEntity.fromMap(record.key, record.value)).toList();
   }
 }
 
 /// Scene Service Provider
 final sceneServiceProvider = StateNotifierProvider<SceneService, SceneState>((ref) {
-  final db = ref.watch(databaseProvider);
+  final sceneManager = ref.watch(sceneManagerProvider);
   final logger = ref.watch(loggerProvider);
   final eventBus = ref.watch(eventBusProvider);
-  final blobManager = ref.watch(blobManagerProvider);
 
-  return SceneService(db: db, logger: logger, eventBus: eventBus, blobManager: blobManager);
+  return SceneService(sceneManager: sceneManager, logger: logger, eventBus: eventBus);
 });
 
 /// Convenience Provider - current scene

@@ -195,7 +195,6 @@ class SceneManagerImpl extends ISceneManager {
   Future<SceneEntity> create({required String name, required String notes, String? imagePath}) async {
     final store = stringMapStoreFactory.store(StoreNames.scenes);
     return await _db.transaction((tx) async {
-      // TODO make it current
       final scene = SceneEntity(
         id: BaseEntity.generateID(),
         name: name,
