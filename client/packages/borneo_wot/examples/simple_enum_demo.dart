@@ -1,11 +1,11 @@
 // simple_enum_demo.dart
-// 在 borneo_wot 中使用 Dart enum 的简单演示
+// Simple demonstration of using Dart enum in borneo_wot
 
 import 'package:borneo_wot/property.dart';
 import 'package:borneo_wot/thing.dart';
 import 'package:borneo_wot/value.dart';
 
-// 定义设备状态枚举
+// Define device state enum
 enum DeviceState {
   offline,
   standby,
@@ -25,7 +25,7 @@ enum DeviceState {
   static List<String> get allValues => values.map((e) => e.name).toList();
 }
 
-// 定义操作模式枚举
+// Define operation mode enum
 enum OperationMode {
   manual,
   automatic,
@@ -45,9 +45,9 @@ enum OperationMode {
 }
 
 void main() {
-  print('=== 在 borneo_wot 中使用 Dart Enum 属性的示例 ===\n');
+  print('=== Example of using Dart Enum properties in borneo_wot ===\n');
 
-  // 创建 WoT Thing
+  // Create WoT Thing
   final device = WotThing(
     id: 'smart-device-001',
     title: 'Smart Device Controller',
@@ -55,7 +55,7 @@ void main() {
     description: 'A smart device demonstrating enum properties',
   );
 
-  // 1. 创建设备状态枚举属性（只读）
+  // 1. Create device state enum property (read-only)
   final deviceStateProperty = WotProperty<String>(
     thing: device,
     name: 'deviceState',
@@ -65,11 +65,11 @@ void main() {
       title: 'Device State',
       description: 'Current state of the device',
       enumValues: DeviceState.allValues, // ['offline', 'standby', 'active', 'maintenance']
-      readOnly: true, // 只读，通常由设备内部状态决定
+      readOnly: true, // Read-only, usually determined by internal device state
     ),
   );
 
-  // 2. 创建操作模式枚举属性（可读写）
+  // 2. Create operation mode enum property (read-write)
   final operationModeProperty = WotProperty<String>(
     thing: device,
     name: 'operationMode',
@@ -79,11 +79,11 @@ void main() {
       title: 'Operation Mode',
       description: 'How the device operates',
       enumValues: OperationMode.allValues, // ['manual', 'automatic', 'scheduled']
-      readOnly: false, // 可写，用户可以更改
+      readOnly: false, // Writable, user can change
     ),
   );
 
-  // 3. 创建其他类型的属性作为对比
+  // 3. Create other types of properties for comparison
   final temperatureProperty = WotProperty<double>(
     thing: device,
     name: 'temperature',
@@ -111,131 +111,131 @@ void main() {
     ),
   );
 
-  // 添加属性到设备
+  // Add properties to device
   device.addProperty(deviceStateProperty);
   device.addProperty(operationModeProperty);
   device.addProperty(temperatureProperty);
   device.addProperty(enabledProperty);
 
-  print('设备创建完成，包含以下属性:');
+  print('Device created with the following properties:');
   print('- deviceState (enum): ${deviceStateProperty.getValue()}');
   print('- operationMode (enum): ${operationModeProperty.getValue()}');
   print('- temperature (number): ${temperatureProperty.getValue()}°C');
   print('- enabled (boolean): ${enabledProperty.getValue()}');
   print('');
 
-  // 演示枚举属性的使用
-  print('=== 演示枚举属性操作 ===\n');
+  // Demonstrate enum property usage
+  print('=== Demonstrating enum property operations ===\n');
 
-  // 监听属性变化
+  // Listen to property changes
   operationModeProperty.value.onUpdate.listen((newMode) {
-    print('操作模式已更改为: $newMode');
+    print('Operation mode changed to: $newMode');
 
-    // 根据模式执行不同的业务逻辑
+    // Execute different business logic based on mode
     final mode = OperationMode.fromString(newMode);
     switch (mode) {
       case OperationMode.manual:
-        print('  -> 切换到手动模式，等待用户指令');
+        print('  -> Switched to manual mode, waiting for user instructions');
         break;
       case OperationMode.automatic:
-        print('  -> 切换到自动模式，开始自动运行');
+        print('  -> Switched to automatic mode, starting automatic operation');
         break;
       case OperationMode.scheduled:
-        print('  -> 切换到定时模式，按计划执行任务');
+        print('  -> Switched to scheduled mode, executing tasks as planned');
         break;
     }
   });
 
-  // 测试更改枚举值
-  print('1. 当前操作模式: ${operationModeProperty.getValue()}');
+  // Test changing enum values
+  print('1. Current operation mode: ${operationModeProperty.getValue()}');
 
-  print('2. 更改为手动模式...');
+  print('2. Changing to manual mode...');
   operationModeProperty.setValue(OperationMode.manual.toString());
 
-  print('3. 更改为定时模式...');
+  print('3. Changing to scheduled mode...');
   operationModeProperty.setValue(OperationMode.scheduled.toString());
 
-  // 模拟设备状态变化（只读属性，只能内部更改）
-  print('\n4. 模拟设备状态变化...');
-  print('当前设备状态: ${deviceStateProperty.getValue()}');
+  // Simulate device state change (read-only property, can only be changed internally)
+  print('\n4. Simulating device state change...');
+  print('Current device state: ${deviceStateProperty.getValue()}');
 
-  // 通过内部逻辑更改状态
+  // Change state through internal logic
   deviceStateProperty.value.set(DeviceState.active.toString());
-  print('设备状态更新为: ${deviceStateProperty.getValue()}');
+  print('Device state updated to: ${deviceStateProperty.getValue()}');
 
-  // 显示属性描述信息
-  print('\n=== 属性描述信息 ===\n');
+  // Display property description information
+  print('\n=== Property Description Information ===\n');
 
   final deviceStateDesc = deviceStateProperty.asPropertyDescription();
-  print('设备状态属性:');
-  print('  类型: ${deviceStateDesc['type']}');
-  print('  枚举值: ${deviceStateDesc['enum']}');
-  print('  只读: ${deviceStateDesc['readOnly']}');
-  print('  标题: ${deviceStateDesc['title']}');
+  print('Device state property:');
+  print('  Type: ${deviceStateDesc['type']}');
+  print('  Enum values: ${deviceStateDesc['enum']}');
+  print('  Read only: ${deviceStateDesc['readOnly']}');
+  print('  Title: ${deviceStateDesc['title']}');
   print('');
 
   final operationModeDesc = operationModeProperty.asPropertyDescription();
-  print('操作模式属性:');
-  print('  类型: ${operationModeDesc['type']}');
-  print('  枚举值: ${operationModeDesc['enum']}');
-  print('  只读: ${operationModeDesc['readOnly']}');
-  print('  标题: ${operationModeDesc['title']}');
+  print('Operation mode property:');
+  print('  Type: ${operationModeDesc['type']}');
+  print('  Enum values: ${operationModeDesc['enum']}');
+  print('  Read only: ${operationModeDesc['readOnly']}');
+  print('  Title: ${operationModeDesc['title']}');
   print('');
 
-  // 显示完整的 WoT Thing 描述
-  print('=== 完整的 WoT Thing 描述 ===\n');
+  // Display complete WoT Thing description
+  print('=== Complete WoT Thing Description ===\n');
   final thingDescription = device.asThingDescription();
 
-  print('设备 ID: ${thingDescription['id']}');
-  print('设备名称: ${thingDescription['title']}');
-  print('设备类型: ${thingDescription['@type']}');
-  print('设备描述: ${thingDescription['description']}');
+  print('Device ID: ${thingDescription['id']}');
+  print('Device name: ${thingDescription['title']}');
+  print('Device type: ${thingDescription['@type']}');
+  print('Device description: ${thingDescription['description']}');
   print('');
 
-  print('属性列表:');
+  print('Property list:');
   final properties = thingDescription['properties'] as Map<String, dynamic>;
   properties.forEach((name, desc) {
     print('  $name: ${desc['type']} ${desc['enum'] != null ? '(enum)' : ''}');
   });
 
-  print('\n=== 枚举值验证演示 ===\n');
+  print('\n=== Enum Value Validation Demo ===\n');
 
-  // 测试有效的枚举值
-  print('测试有效的枚举值:');
+  // Test valid enum values
+  print('Testing valid enum values:');
   for (final mode in OperationMode.values) {
-    print('  设置模式为: $mode');
+    print('  Setting mode to: $mode');
     operationModeProperty.setValue(mode.toString());
-    print('  当前模式: ${operationModeProperty.getValue()}');
+    print('  Current mode: ${operationModeProperty.getValue()}');
   }
 
-  // 测试无效的枚举值（这会在业务逻辑中处理）
-  print('\n测试无效的枚举值:');
+  // Test invalid enum values (this will be handled in business logic)
+  print('\nTesting invalid enum values:');
   try {
     final invalidMode = 'invalid_mode';
-    print('  尝试设置无效模式: $invalidMode');
+    print('  Attempting to set invalid mode: $invalidMode');
 
-    // 这不会直接失败，但在业务逻辑中会处理
+    // This won't fail directly, but will be handled in business logic
     operationModeProperty.setValue(invalidMode);
 
-    // 在实际的监听器中会验证并处理错误
+    // In actual listener, validation and error handling would occur
     try {
       OperationMode.fromString(invalidMode);
     } catch (e) {
-      print('  捕获到错误: $e');
-      print('  恢复到上一个有效值');
+      print('  Caught error: $e');
+      print('  Reverting to previous valid value');
       operationModeProperty.setValue(OperationMode.automatic.toString());
     }
   } catch (e) {
-    print('  处理错误: $e');
+    print('  Handling error: $e');
   }
 
-  print('\n=== 总结 ===\n');
-  print('在 borneo_wot 中使用 Dart enum 作为属性的要点:');
+  print('\n=== Summary ===\n');
+  print('Key points for using Dart enum as properties in borneo_wot:');
   print('');
-  print('1. 定义枚举时提供 toString() 和 fromString() 方法');
-  print('2. 在 WotPropertyMetadata 中设置 enumValues 列表');
-  print('3. 使用字符串类型的 WotProperty 存储枚举值');
-  print('4. 在属性监听器中进行枚举值验证和业务逻辑处理');
-  print('5. 区分只读和可写的枚举属性用于不同场景');
-  print('6. 在 WoT 描述中，enum 信息会自动包含在属性描述里');
+  print('1. Define enum with toString() and fromString() methods');
+  print('2. Set enumValues list in WotPropertyMetadata');
+  print('3. Use string-type WotProperty to store enum values');
+  print('4. Perform enum value validation and business logic in property listeners');
+  print('5. Distinguish between read-only and writable enum properties for different scenarios');
+  print('6. In WoT description, enum information is automatically included in property descriptions');
 }
