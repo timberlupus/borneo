@@ -8,7 +8,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
-import 'package:borneo_wot/wot.dart';
+import '../../../../../lw_wot/lib/wot.dart';
 
 /// Custom WotProperty for state that handles its own event subscription
 class LyfiStateProperty extends WotProperty<String> {

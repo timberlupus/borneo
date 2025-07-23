@@ -1,6 +1,6 @@
 // Dart port of src/property.ts
 
-import 'package:borneo_wot/thing.dart';
+import 'thing.dart';
 
 import 'types.dart';
 import 'value.dart';

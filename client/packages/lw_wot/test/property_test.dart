@@ -1,8 +1,8 @@
 import 'package:test/test.dart';
-import 'package:borneo_wot/property.dart';
-import 'package:borneo_wot/value.dart';
-import 'package:borneo_wot/thing.dart';
-import 'package:borneo_wot/types.dart';
+import '../lib/property.dart';
+import '../lib/value.dart';
+import '../lib/thing.dart';
+import '../lib/types.dart';
 
 void main() {
   group('WotPropertyMetadata', () {

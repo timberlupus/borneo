@@ -1,7 +1,7 @@
 import 'package:test/test.dart';
-import 'package:borneo_wot/action.dart';
-import 'package:borneo_wot/thing.dart';
-import 'package:borneo_wot/types.dart';
+import '../lib/action.dart';
+import '../lib/thing.dart';
+import '../lib/types.dart';
 
 class TestAction extends WotAction<Map<String, dynamic>> {
   bool _performed = false;

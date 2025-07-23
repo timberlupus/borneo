@@ -1,6 +1,6 @@
-import 'package:borneo_wot/property.dart';
-import 'package:borneo_wot/thing.dart';
-import 'package:borneo_wot/value.dart';
+import '../lib/property.dart';
+import '../lib/thing.dart';
+import '../lib/value.dart';
 
 enum DeviceWorkMode {
   auto,

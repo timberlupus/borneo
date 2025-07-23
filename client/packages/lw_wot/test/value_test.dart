@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:borneo_wot/value.dart';
+import '../lib/value.dart';
 import 'dart:async';
 
 void main() {

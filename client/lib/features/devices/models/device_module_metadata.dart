@@ -4,7 +4,7 @@ import 'package:borneo_app/core/services/devices/i_device_manager.dart';
 import 'package:borneo_app/features/devices/view_models/base_device_view_model.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/widgets.dart';
-import 'package:borneo_wot/wot.dart';
+import '../../../../packages/lw_wot/lib/wot.dart';
 
 import 'package:borneo_kernel_abstractions/models/driver_descriptor.dart';
 

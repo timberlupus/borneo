@@ -1,7 +1,7 @@
 import 'package:test/test.dart';
-import 'package:borneo_wot/property.dart';
-import 'package:borneo_wot/value.dart';
-import 'package:borneo_wot/thing.dart';
+import '../lib/property.dart';
+import '../lib/value.dart';
+import '../lib/thing.dart';
 
 void main() {
   group('Dispose Functionality', () {

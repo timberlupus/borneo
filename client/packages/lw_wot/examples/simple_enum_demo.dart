@@ -1,9 +1,9 @@
 // simple_enum_demo.dart
-// Simple demonstration of using Dart enum in borneo_wot
+// Simple demonstration of using Dart enum in lw_wot
 
-import 'package:borneo_wot/property.dart';
-import 'package:borneo_wot/thing.dart';
-import 'package:borneo_wot/value.dart';
+import '../lib/property.dart';
+import '../lib/thing.dart';
+import '../lib/value.dart';
 
 // Define device state enum
 enum DeviceState {
@@ -45,7 +45,7 @@ enum OperationMode {
 }
 
 void main() {
-  print('=== Example of using Dart Enum properties in borneo_wot ===\n');
+  print('=== Example of using Dart Enum properties in lw_wot ===\n');
 
   // Create WoT Thing
   final device = WotThing(
@@ -230,7 +230,7 @@ void main() {
   }
 
   print('\n=== Summary ===\n');
-  print('Key points for using Dart enum as properties in borneo_wot:');
+  print('Key points for using Dart enum as properties in lw_wot:');
   print('');
   print('1. Define enum with toString() and fromString() methods');
   print('2. Set enumValues list in WotPropertyMetadata');

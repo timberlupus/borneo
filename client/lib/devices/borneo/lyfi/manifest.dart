@@ -12,7 +12,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:borneo_wot/wot.dart';
+import '../../../../packages/lw_wot/lib/wot.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/wot.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';

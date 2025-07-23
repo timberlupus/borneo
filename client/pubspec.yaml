@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 0.3.99+1
 
 workspace:
-  - packages/borneo_wot
+  - packages/lw_wot
   - packages/borneo_common
   - packages/borneo_kernel
   - packages/borneo_kernel_abstractions
@@ -86,8 +86,8 @@ dependencies:
 
 
   # My libraries
-  borneo_wot:
-    path: packages/borneo_wot
+  lw_wot:
+    path: packages/lw_wot
   borneo_common:
     path: packages/borneo_common
   borneo_kernel_abstractions:
