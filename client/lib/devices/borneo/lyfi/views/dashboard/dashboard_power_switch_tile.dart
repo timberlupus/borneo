@@ -47,7 +47,7 @@ class DashboardPowerSwitchTile extends StatelessWidget {
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: (!props.isBusy && props.isLocked)
+                    onTap: (!props.isBusy && props.isLocked && context.read<LyfiViewModel>().isOnline)
                         ? () => context.read<LyfiViewModel>().switchPowerOnOff(!isOn)
                         : null,
                     child: Padding(

@@ -212,4 +212,10 @@ abstract class BaseDeviceViewModel extends BaseViewModel
       }
     }
   }
+
+  Future<void> reconnect() async {
+    if (!isOnline) {
+      await deviceManager.reloadAllDevices();
+    }
+  }
 }

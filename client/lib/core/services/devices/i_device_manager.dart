@@ -3,7 +3,7 @@ import 'dart:core';
 import 'package:borneo_common/borneo_common.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:sembast/sembast.dart';
-import '../../../../packages/lw_wot/lib/wot.dart';
+import 'package:lw_wot/wot.dart';
 
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:borneo_kernel_abstractions/events.dart';

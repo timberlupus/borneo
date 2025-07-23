@@ -7,7 +7,7 @@ import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
 import 'package:synchronized/synchronized.dart';
-import '../../../../packages/lw_wot/lib/wot.dart';
+import 'package:lw_wot/wot.dart';
 
 import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/features/devices/models/events.dart';

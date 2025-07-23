@@ -18,9 +18,6 @@ class DashboardView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isOnline = context.read<LyfiViewModel>().isOnline;
-    if (!isOnline) {
-      return const SizedBox.shrink();
-    }
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
       child: SingleChildScrollView(

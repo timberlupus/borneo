@@ -1,5 +1,5 @@
 import 'package:borneo_app/core/services/local_service.dart';
-import 'package:borneo_app/devices/views/device_offline_view.dart';
+import 'package:borneo_app/shared/widgets/device_status_indicator.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/editor/sun_editor_view.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/i_app_notification_service.dart';
@@ -279,9 +279,16 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                     : Container(color: Colors.transparent),
               ),
             ),
+            Selector<LyfiViewModel, bool>(
+              selector: (_, vm) => vm.isOnline,
+              builder: (context, isOnline, _) {
+                final vm = context.read<LyfiViewModel>();
+                return DeviceStatusIndicator(isOnline: isOnline, onReconnect: isOnline ? null : vm.reconnect);
+              },
+            ),
             Expanded(
-              child: Selector<LyfiViewModel, ({bool isOnline, bool isLocked})>(
-                selector: (_, props) => (isOnline: props.isOnline, isLocked: props.isLocked),
+              child: Selector<LyfiViewModel, ({bool isOnline, bool isLocked, bool isOn})>(
+                selector: (_, vm) => (isOnline: vm.isOnline, isLocked: vm.isLocked, isOn: vm.isOn),
                 builder: (context, props, _) {
                   final vm = context.read<LyfiViewModel>();
                   return AnimatedSwitcher(
@@ -289,10 +296,10 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                     transitionBuilder: (Widget child, Animation<double> animation) {
                       return FadeTransition(opacity: animation, child: child);
                     },
-                    child: switch ((vm.isOnline, vm.isOn, vm.isLocked)) {
+                    child: switch ((props.isOnline, props.isOn, props.isLocked)) {
                       (true, true, false) => DimmingView(key: ValueKey('dimming')),
                       (true, _, true) => DashboardView(key: ValueKey('dashboard')),
-                      (false, _, _) => DeviceOfflineView(key: ValueKey('offline')),
+                      (false, _, _) => DashboardView(key: ValueKey('offline-dashboard')),
                       (true, false, false) => DashboardView(key: ValueKey('dashboard')),
                     },
                   );
