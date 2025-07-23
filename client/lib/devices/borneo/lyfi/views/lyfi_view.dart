@@ -287,8 +287,8 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
               },
             ),
             Expanded(
-              child: Selector<LyfiViewModel, ({bool isOnline, bool isLocked, bool isOn})>(
-                selector: (_, vm) => (isOnline: vm.isOnline, isLocked: vm.isLocked, isOn: vm.isOn),
+              child: Selector<LyfiViewModel, ({bool isOnline, LyfiState state, bool isOn})>(
+                selector: (_, vm) => (isOnline: vm.isOnline, state: vm.state, isOn: vm.isOn),
                 builder: (context, props, _) {
                   final vm = context.read<LyfiViewModel>();
                   return AnimatedSwitcher(
@@ -296,11 +296,13 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                     transitionBuilder: (Widget child, Animation<double> animation) {
                       return FadeTransition(opacity: animation, child: child);
                     },
-                    child: switch ((props.isOnline, props.isOn, props.isLocked)) {
-                      (true, true, false) => DimmingView(key: ValueKey('dimming')),
-                      (true, _, true) => DashboardView(key: ValueKey('dashboard')),
+                    child: switch ((props.isOnline, props.isOn, props.state)) {
+                      (true, true, LyfiState.dimming) => DimmingView(key: ValueKey('dimming')),
+                      (true, _, LyfiState.preview) => DashboardView(key: ValueKey('dashboard')),
                       (false, _, _) => DashboardView(key: ValueKey('offline-dashboard')),
-                      (true, false, false) => DashboardView(key: ValueKey('dashboard')),
+                      (true, false, _) => DashboardView(key: ValueKey('dashboard')),
+                      (true, true, LyfiState.normal) => DashboardView(key: ValueKey('dashboard')),
+                      (true, true, LyfiState.temporary) => DashboardView(key: ValueKey('dashboard')),
                     },
                   );
                 },

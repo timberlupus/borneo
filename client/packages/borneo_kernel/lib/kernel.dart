@@ -6,6 +6,7 @@ import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.da
 import 'package:logger/logger.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:synchronized/synchronized.dart';
+import 'package:retry/retry.dart';
 
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
@@ -45,6 +46,7 @@ final class DefaultKernel implements IKernel {
   late final StreamSubscription<DeviceOfflineEvent> _deviceOfflineSub;
   late final StreamSubscription<FoundDeviceEvent> _foundDeviceEventSub;
   final Lock _deviceOpLock = Lock();
+  final Map<String, int> _consecutiveFailures = {};
 
   @override
   bool get isInitialized => _isInitialized;
@@ -254,6 +256,9 @@ final class DefaultKernel implements IKernel {
         _deviceEventRouters[deviceID]?.cancel();
         _deviceEventRouters.remove(deviceID);
 
+        // Clean up consecutive failures tracking
+        _consecutiveFailures.remove(deviceID);
+
         _purgeUnusedDriver();
 
         _events.fire(DeviceRemovedEvent(boundDevice.device));
@@ -280,6 +285,9 @@ final class DefaultKernel implements IKernel {
           _deviceEventRouters[deviceId]?.cancel();
           _deviceEventRouters.remove(deviceId);
 
+          // Clean up consecutive failures tracking
+          _consecutiveFailures.remove(deviceId);
+
           if (_pollIDList.contains(deviceId)) {
             _pollIDList.remove(deviceId);
           }
@@ -305,13 +313,25 @@ final class DefaultKernel implements IKernel {
 
   Future<bool> _tryDoHeartBeat(BoundDevice bd, Duration timeout) async {
     try {
-      await bd.driver
-          .heartbeat(bd.device, cancelToken: _heartbeatPollingTaskCancelToken)
-          .timeout(timeout)
-          .asCancellable(_heartbeatPollingTaskCancelToken);
-      return true;
+      final result = await retry(
+        () async {
+          final success = await bd.driver
+              .heartbeat(bd.device, cancelToken: _heartbeatPollingTaskCancelToken)
+              .timeout(timeout)
+              .asCancellable(_heartbeatPollingTaskCancelToken);
+          if (!success) {
+            throw Exception('Heartbeat failed');
+          }
+          return success;
+        },
+        maxAttempts: 3,
+        delayFactor: const Duration(milliseconds: 500),
+        maxDelay: const Duration(seconds: 1),
+        randomizationFactor: 0.1,
+      );
+      return result;
     } catch (e, stackTrace) {
-      _logger.t("Failed to do heartbeat", error: e, stackTrace: stackTrace);
+      _logger.t("Failed to do heartbeat after retries", error: e, stackTrace: stackTrace);
       return false;
     }
   }
@@ -350,10 +370,19 @@ final class DefaultKernel implements IKernel {
                 futures,
               ).timeout(kHeartbeatPollingInterval).asCancellable(_heartbeatPollingTaskCancelToken);
               for (int i = 0; i < results.length; i++) {
+                final deviceId = devices[i].device.id;
                 if (!results[i]) {
-                  _logger.w('The device(${devices[i].device}) is not responding.');
-                  // 收集离线设备，稍后在锁外处理
-                  offlineDevices.add(devices[i].device);
+                  _consecutiveFailures[deviceId] = (_consecutiveFailures[deviceId] ?? 0) + 1;
+                  _logger.w('The device(${devices[i].device}) is not responding. Consecutive failures: ${_consecutiveFailures[deviceId]}');
+                  
+                  // Only mark as offline after 3 consecutive failures
+                  if (_consecutiveFailures[deviceId]! >= 3) {
+                    offlineDevices.add(devices[i].device);
+                    _consecutiveFailures.remove(deviceId);
+                  }
+                } else {
+                  // Reset consecutive failures on success
+                  _consecutiveFailures.remove(deviceId);
                 }
               }
             }
