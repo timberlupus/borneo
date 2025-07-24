@@ -9,6 +9,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel/drivers/borneo/probe_coap_config.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:coap/coap.dart';
+import 'package:cbor/cbor.dart' as cbor2;
 
 import 'package:borneo_common/io/net/coap_client.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/metadata.dart';
@@ -39,6 +40,7 @@ class LyfiPaths {
   static final Uri sunCurve = Uri(path: '/borneo/lyfi/sun/curve');
 
   static final Uri keepTemp = Uri(path: '/borneo/lyfi/thermal/keep-temp');
+  static final Uri heartbeat = Uri(path: '/borneo/heartbeat');
 }
 
 class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi implements IDriver, ILyfiDeviceApi {
@@ -116,6 +118,26 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
 
   @override
   void dispose() {}
+
+  Future<Stream<dynamic>> startHeartbeatObservation(Device device) async {
+    final dd = device.driverData as LyfiCoapDriverData;
+    final client = dd.coap;
+    final request = CoapRequest.get(LyfiPaths.heartbeat);
+    request.observe = 0; // Enable observation
+
+    final obs = await client.observe(request);
+
+    return obs
+        .map((msg) {
+          try {
+            return cbor2.cborDecode(msg.payload!);
+          } catch (e) {
+            logger?.w('Failed to decode heartbeat payload: $e');
+            return null;
+          }
+        })
+        .where((data) => data != null);
+  }
 
   Future<String> _getCompatible(CoapClient coap) async {
     final compatible = await coap.getCbor<String>(BorneoPaths.compatible);

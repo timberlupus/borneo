@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:borneo_kernel/drivers/borneo/lyfi/coap_driver.dart';
 import 'package:borneo_kernel_abstractions/errors.dart';
 import 'package:borneo_kernel_abstractions/models/heartbeat_method.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
@@ -47,6 +48,10 @@ final class DefaultKernel implements IKernel {
   late final StreamSubscription<FoundDeviceEvent> _foundDeviceEventSub;
   final Lock _deviceOpLock = Lock();
   final Map<String, int> _consecutiveFailures = {};
+  final Map<String, StreamSubscription> _observationSubscriptions = {};
+  final Map<String, int> _missedObservations = {};
+  final Map<String, Timer> _observationTimeoutTimers = {};
+  static const int kMaxMissedObservations = 3;
 
   @override
   bool get isInitialized => _isInitialized;
@@ -112,6 +117,18 @@ final class DefaultKernel implements IKernel {
       // 取消事件订阅
       _deviceOfflineSub.cancel();
       _foundDeviceEventSub.cancel();
+
+      // 清理所有观察订阅
+      for (final subscription in _observationSubscriptions.values) {
+        subscription.cancel();
+      }
+      _observationSubscriptions.clear();
+
+      // 清理所有超时定时器
+      for (final timer in _observationTimeoutTimers.values) {
+        timer.cancel();
+      }
+      _observationTimeoutTimers.clear();
 
       // 清理所有绑定的设备
       for (final deviceEventRouter in _deviceEventRouters.values) {
@@ -230,12 +247,18 @@ final class DefaultKernel implements IKernel {
           _events.fire(event);
         });
 
+        _events.fire(DeviceBoundEvent(device));
+
+        // Start observation for push heartbeat if supported
+        final driverDesc = _driverRegistry.metaDrivers[driverID];
+        if (driverDesc?.heartbeatMethod == HeartbeatMethod.push) {
+          await _startHeartbeatObservation(device, driver);
+        }
         _boundDevices[device.id] = bound;
 
-        if (!_pollIDList.contains(device.id) && driverDesc.heartbeatMethod == HeartbeatMethod.poll) {
+        if (!_pollIDList.contains(device.id) && driverDesc!.heartbeatMethod == HeartbeatMethod.poll) {
           _pollIDList.add(device.id);
         }
-        _events.fire(DeviceBoundEvent(device));
       } else {
         throw DeviceProbeError("Failed to probe $device", device);
       }
@@ -258,6 +281,9 @@ final class DefaultKernel implements IKernel {
 
         // Clean up consecutive failures tracking
         _consecutiveFailures.remove(deviceID);
+
+        // Clean up heartbeat observation
+        await _stopHeartbeatObservation(deviceID);
 
         _purgeUnusedDriver();
 
@@ -336,6 +362,96 @@ final class DefaultKernel implements IKernel {
     }
   }
 
+  Future<void> _startHeartbeatObservation(Device device, IDriver driver) async {
+    try {
+      // Check if the driver supports observation (has observation method)
+      if (driver is! BorneoLyfiCoapDriver) {
+        _logger.w('Driver ${driver.runtimeType} does not support push heartbeat observation');
+        return;
+      }
+
+      final deviceId = device.id;
+
+      // Clean up any existing observation
+      await _stopHeartbeatObservation(deviceId);
+
+      _logger.d('Starting heartbeat observation for device $deviceId');
+
+      // Start observation
+      final obsStream = await driver.startHeartbeatObservation(device);
+
+      _observationSubscriptions[deviceId] = obsStream.listen(
+        (timestamp) {
+          _onHeartbeatReceived(deviceId, timestamp);
+        },
+        onError: (error) {
+          _logger.w('Heartbeat observation error for device $deviceId: $error');
+          _onHeartbeatMissed(deviceId);
+        },
+        onDone: () {
+          _logger.w('Heartbeat observation ended for device $deviceId');
+          _onHeartbeatMissed(deviceId);
+        },
+      );
+
+      // Reset missed observations counter
+      _missedObservations[deviceId] = 0;
+
+      // Set up timeout timer
+      _resetObservationTimeout(deviceId);
+    } catch (e, stackTrace) {
+      _logger.e('Failed to start heartbeat observation for device ${device.id}', error: e, stackTrace: stackTrace);
+    }
+  }
+
+  void _onHeartbeatReceived(String deviceId, dynamic timestamp) {
+    _logger.d('Heartbeat received for device $deviceId: $timestamp');
+
+    // Reset missed observations counter
+    _missedObservations[deviceId] = 0;
+
+    // Reset timeout timer
+    _resetObservationTimeout(deviceId);
+  }
+
+  void _onHeartbeatMissed(String deviceId) {
+    _missedObservations[deviceId] = (_missedObservations[deviceId] ?? 0) + 1;
+    _logger.w('Heartbeat missed for device $deviceId. Total missed: ${_missedObservations[deviceId]}');
+
+    if (_missedObservations[deviceId]! >= kMaxMissedObservations) {
+      _logger.w('Device $deviceId marked offline after $kMaxMissedObservations missed observations');
+
+      // Find the device and mark it offline
+      final boundDevice = _boundDevices[deviceId];
+      if (boundDevice != null) {
+        _events.fire(DeviceOfflineEvent(boundDevice.device));
+      }
+
+      // Clean up observation
+      _stopHeartbeatObservation(deviceId);
+    } else {
+      // Reset timeout timer for next observation
+      _resetObservationTimeout(deviceId);
+    }
+  }
+
+  void _resetObservationTimeout(String deviceId) {
+    _observationTimeoutTimers[deviceId]?.cancel();
+
+    // Set timeout for 3x the normal heartbeat interval
+    _observationTimeoutTimers[deviceId] = Timer(kHeartbeatPollingInterval * 3, () => _onHeartbeatMissed(deviceId));
+  }
+
+  Future<void> _stopHeartbeatObservation(String deviceId) async {
+    _observationSubscriptions[deviceId]?.cancel();
+    _observationSubscriptions.remove(deviceId);
+
+    _observationTimeoutTimers[deviceId]?.cancel();
+    _observationTimeoutTimers.remove(deviceId);
+
+    _missedObservations.remove(deviceId);
+  }
+
   Future<void> _heartbeatPollingPeriodicTask({CancellationToken? cancelToken}) async {
     if (!isInitialized) {
       return;
@@ -353,11 +469,12 @@ final class DefaultKernel implements IKernel {
           .synchronized(() async {
             final futures = <Future<bool>>[];
 
-            // BoundDevices
+            // BoundDevices - only poll devices that use HeartbeatMethod.poll
             {
               final devices = <BoundDevice>[];
               for (final bd in _boundDevices.values) {
-                if (_pollIDList.contains(bd.device.id)) {
+                final driverDesc = _driverRegistry.metaDrivers[bd.driverID];
+                if (driverDesc?.heartbeatMethod == HeartbeatMethod.poll) {
                   futures.add(
                     _tryDoHeartBeat(bd, kHeartbeatPollingInterval).asCancellable(_heartbeatPollingTaskCancelToken),
                   );
@@ -373,8 +490,10 @@ final class DefaultKernel implements IKernel {
                 final deviceId = devices[i].device.id;
                 if (!results[i]) {
                   _consecutiveFailures[deviceId] = (_consecutiveFailures[deviceId] ?? 0) + 1;
-                  _logger.w('The device(${devices[i].device}) is not responding. Consecutive failures: ${_consecutiveFailures[deviceId]}');
-                  
+                  _logger.w(
+                    'The device(${devices[i].device}) is not responding. Consecutive failures: ${_consecutiveFailures[deviceId]}',
+                  );
+
                   // Only mark as offline after 3 consecutive failures
                   if (_consecutiveFailures[deviceId]! >= 3) {
                     offlineDevices.add(devices[i].device);

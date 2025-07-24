@@ -13,7 +13,7 @@ final kLyfiFWVersionConstraint = VersionConstraint.parse('>=0.3.0');
 final DriverDescriptor borneoLyfiDriverDescriptor = DriverDescriptor(
   id: kLyfiDriverID,
   name: kLyfiDriverName,
-  heartbeatMethod: HeartbeatMethod.poll,
+  heartbeatMethod: HeartbeatMethod.push,
   discoveryMethod: MdnsDeviceDiscoveryMethod(kBorneoDeviceMdnsServiceType),
   matches: BorneoLyfiCoapDriver.matches,
   factory: BorneoLyfiCoapDriver.new,
