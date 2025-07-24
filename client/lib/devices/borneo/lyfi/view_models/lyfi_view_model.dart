@@ -366,35 +366,24 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
   /// Wait for device state to change to the expected state using event subscription
   Future<void> _waitForStateChange(LyfiState expectedState) async {
-    // If already in the expected state, return immediately
-    if (super.state == expectedState) {
-      return;
-    }
+    if (super.state == expectedState) return;
 
     final completer = Completer<void>();
     StreamSubscription<LyfiStateChangedEvent>? subscription;
 
-    // Set up timeout
-    Timer timeoutTimer = Timer(Duration(seconds: 5), () {
-      subscription?.cancel();
-      if (!completer.isCompleted) {
-        completer.completeError(
-          TimeoutException('Timeout waiting for state change to $expectedState', Duration(seconds: 5)),
-        );
-      }
-    });
-
-    // Listen for state change events
     subscription = super.deviceManager.allDeviceEvents.on<LyfiStateChangedEvent>().listen((event) {
       if (event.device.id == super.deviceID && event.state == expectedState) {
-        timeoutTimer.cancel();
         subscription?.cancel();
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
+        if (!completer.isCompleted) completer.complete();
       }
     });
 
-    await completer.future;
+    try {
+      await completer.future.timeout(const Duration(seconds: 5));
+    } on TimeoutException catch (e) {
+      subscription.cancel();
+      super.logger?.e('Timeout waiting for state change to $expectedState', error: e);
+      rethrow;
+    }
   }
 }
