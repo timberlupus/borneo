@@ -40,7 +40,6 @@ class LyfiPaths {
   static final Uri sunCurve = Uri(path: '/borneo/lyfi/sun/curve');
 
   static final Uri keepTemp = Uri(path: '/borneo/lyfi/thermal/keep-temp');
-  static final Uri heartbeat = Uri(path: '/borneo/heartbeat');
 }
 
 class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi implements IDriver, ILyfiDeviceApi {
@@ -122,7 +121,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   Future<Stream<dynamic>> startHeartbeatObservation(Device device) async {
     final dd = device.driverData as LyfiCoapDriverData;
     final client = dd.coap;
-    final request = CoapRequest.get(LyfiPaths.heartbeat);
+    final request = CoapRequest.get(BorneoPaths.heartbeat);
     request.observe = 0; // Enable observation
 
     final obs = await client.observe(request);
