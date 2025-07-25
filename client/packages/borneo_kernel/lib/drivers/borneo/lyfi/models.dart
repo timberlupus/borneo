@@ -75,6 +75,17 @@ enum LyfiMode {
 
 enum LedCorrectionMethod { log, linear, exp, gamma, cie1931 }
 
+extension LedCorrectionMethodExtension on LedCorrectionMethod {
+  static LedCorrectionMethod fromString(String item) => switch (item) {
+    "log" => LedCorrectionMethod.log,
+    "linear" => LedCorrectionMethod.linear,
+    "exp" => LedCorrectionMethod.exp,
+    "gamma" => LedCorrectionMethod.gamma,
+    "cie1931" => LedCorrectionMethod.cie1931,
+    _ => throw InvalidDataException(),
+  };
+}
+
 class GeoLocation {
   final double lat;
   final double lng;

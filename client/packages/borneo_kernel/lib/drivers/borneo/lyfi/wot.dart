@@ -153,6 +153,219 @@ class LyfiSetColorAction extends WotAction<Map<String, dynamic>> {
   }
 }
 
+/// Custom action for setting LED schedule
+class LyfiSetScheduleAction extends WotAction<Map<String, dynamic>> {
+  final List<ScheduledInstant> schedule;
+  final ILyfiDeviceApi lyfiApi;
+  final Device device;
+
+  LyfiSetScheduleAction({
+    required super.id,
+    required super.thing,
+    required this.schedule,
+    required this.lyfiApi,
+    required this.device,
+  }) : super(name: 'setSchedule', input: {'schedule': schedule.map((s) => s.toPayload()).toList()});
+
+  @override
+  Future<void> performAction() async {
+    await lyfiApi.setSchedule(device, schedule);
+  }
+}
+
+/// Custom action for setting acclimation settings
+class LyfiSetAcclimationAction extends WotAction<Map<String, dynamic>> {
+  final AcclimationSettings settings;
+  final ILyfiDeviceApi lyfiApi;
+  final Device device;
+
+  LyfiSetAcclimationAction({
+    required super.id,
+    required super.thing,
+    required this.settings,
+    required this.lyfiApi,
+    required this.device,
+  }) : super(name: 'setAcclimation', input: {
+          'enabled': settings.enabled,
+          'startTimestamp': (settings.startTimestamp.millisecondsSinceEpoch / 1000).round(),
+          'startPercent': settings.startPercent,
+          'days': settings.days
+        });
+
+  @override
+  Future<void> performAction() async {
+    await lyfiApi.setAcclimation(device, settings);
+  }
+}
+
+/// Custom action for setting geographic location
+class LyfiSetLocationAction extends WotAction<Map<String, dynamic>> {
+  final GeoLocation location;
+  final ILyfiDeviceApi lyfiApi;
+  final Device device;
+
+  LyfiSetLocationAction({
+    required super.id,
+    required super.thing,
+    required this.location,
+    required this.lyfiApi,
+    required this.device,
+  }) : super(name: 'setLocation', input: {'lat': location.lat, 'lng': location.lng});
+
+  @override
+  Future<void> performAction() async {
+    await lyfiApi.setLocation(device, location);
+  }
+}
+
+/// Custom action for setting LED correction method
+class LyfiSetCorrectionMethodAction extends WotAction<Map<String, dynamic>> {
+  final LedCorrectionMethod method;
+  final ILyfiDeviceApi lyfiApi;
+  final Device device;
+
+  LyfiSetCorrectionMethodAction({
+    required super.id,
+    required super.thing,
+    required this.method,
+    required this.lyfiApi,
+    required this.device,
+  }) : super(name: 'setCorrectionMethod', input: {'method': method.name});
+
+  @override
+  Future<void> performAction() async {
+    await lyfiApi.setCorrectionMethod(device, method);
+  }
+}
+
+/// Custom WotProperty for schedule that handles its own event subscription
+class LyfiScheduleProperty extends WotProperty<List<ScheduledInstant>> {
+  StreamSubscription? _eventSubscription;
+  final DeviceEventBus deviceEvents;
+
+  LyfiScheduleProperty({
+    required super.thing,
+    required this.deviceEvents,
+    required super.name,
+    required super.value,
+    required super.metadata,
+  });
+
+  void subscribeToEvents() {
+    _eventSubscription = deviceEvents.on<LyfiScheduleChangedEvent>().listen((event) {
+      value.notifyOfExternalUpdate(event.schedule);
+      thing.addEvent(WotEvent(thing: thing, name: 'scheduleChanged', data: event.schedule));
+    });
+  }
+
+  void unsubscribeFromEvents() {
+    _eventSubscription?.cancel();
+    _eventSubscription = null;
+  }
+
+  @override
+  void dispose() {
+    unsubscribeFromEvents();
+    super.dispose();
+  }
+}
+
+/// Custom WotProperty for acclimation settings that handles its own event subscription
+class LyfiAcclimationProperty extends WotProperty<AcclimationSettings> {
+  StreamSubscription? _eventSubscription;
+  final DeviceEventBus deviceEvents;
+
+  LyfiAcclimationProperty({
+    required super.thing,
+    required this.deviceEvents,
+    required super.name,
+    required super.value,
+    required super.metadata,
+  });
+
+  void subscribeToEvents() {
+    _eventSubscription = deviceEvents.on<LyfiAcclimationChangedEvent>().listen((event) {
+      value.notifyOfExternalUpdate(event.settings);
+      thing.addEvent(WotEvent(thing: thing, name: 'acclimationChanged', data: event.settings));
+    });
+  }
+
+  void unsubscribeFromEvents() {
+    _eventSubscription?.cancel();
+    _eventSubscription = null;
+  }
+
+  @override
+  void dispose() {
+    unsubscribeFromEvents();
+    super.dispose();
+  }
+}
+
+/// Custom WotProperty for location that handles its own event subscription
+class LyfiLocationProperty extends WotProperty<GeoLocation?> {
+  StreamSubscription? _eventSubscription;
+  final DeviceEventBus deviceEvents;
+
+  LyfiLocationProperty({
+    required super.thing,
+    required this.deviceEvents,
+    required super.name,
+    required super.value,
+    required super.metadata,
+  });
+
+  void subscribeToEvents() {
+    _eventSubscription = deviceEvents.on<LyfiLocationChangedEvent>().listen((event) {
+      value.notifyOfExternalUpdate(event.location);
+      thing.addEvent(WotEvent(thing: thing, name: 'locationChanged', data: event.location));
+    });
+  }
+
+  void unsubscribeFromEvents() {
+    _eventSubscription?.cancel();
+    _eventSubscription = null;
+  }
+
+  @override
+  void dispose() {
+    unsubscribeFromEvents();
+    super.dispose();
+  }
+}
+
+/// Custom WotProperty for correction method that handles its own event subscription
+class LyfiCorrectionMethodProperty extends WotProperty<String> {
+  StreamSubscription? _eventSubscription;
+  final DeviceEventBus deviceEvents;
+
+  LyfiCorrectionMethodProperty({
+    required super.thing,
+    required this.deviceEvents,
+    required super.name,
+    required super.value,
+    required super.metadata,
+  });
+
+  void subscribeToEvents() {
+    _eventSubscription = deviceEvents.on<LyfiCorrectionMethodChangedEvent>().listen((event) {
+      value.notifyOfExternalUpdate(event.method.name);
+      thing.addEvent(WotEvent(thing: thing, name: 'correctionMethodChanged', data: event.method.name));
+    });
+  }
+
+  void unsubscribeFromEvents() {
+    _eventSubscription?.cancel();
+    _eventSubscription = null;
+  }
+
+  @override
+  void dispose() {
+    unsubscribeFromEvents();
+    super.dispose();
+  }
+}
+
 /// LyfiThing extends WotThing following Mozilla WebThing initialization pattern
 /// This class uses default values during construction and binds to actual hardware asynchronously
 class LyfiThing extends WotThing {
@@ -166,6 +379,13 @@ class LyfiThing extends WotThing {
   late final LyfiStateProperty stateProperty;
   late final LyfiModeProperty modeProperty;
   late final WotProperty<List<int>> colorProperty;
+  late final LyfiScheduleProperty scheduleProperty;
+  late final LyfiAcclimationProperty acclimationProperty;
+  late final LyfiLocationProperty locationProperty;
+  late final LyfiCorrectionMethodProperty correctionMethodProperty;
+  late final WotProperty<bool> timeZoneEnabledProperty;
+  late final WotProperty<int> timeZoneOffsetProperty;
+  late final WotProperty<int> keepTempProperty;
 
   LyfiThing({
     required this.device,
@@ -265,6 +485,142 @@ class LyfiThing extends WotThing {
       ),
     );
     addProperty(colorProperty);
+
+    // Schedule property
+    scheduleProperty = LyfiScheduleProperty(
+      thing: this,
+      deviceEvents: deviceEvents,
+      name: 'schedule',
+      value: WotValue<List<ScheduledInstant>>(
+        initialValue: [], // Default empty schedule
+        valueForwarder: (update) => lyfiApi.setSchedule(device, update),
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'array',
+        title: 'Schedule',
+        description: 'LED lighting schedule with time instants and colors',
+        readOnly: false,
+      ),
+    );
+    addProperty(scheduleProperty);
+
+    // Acclimation property
+    acclimationProperty = LyfiAcclimationProperty(
+      thing: this,
+      deviceEvents: deviceEvents,
+      name: 'acclimation',
+      value: WotValue<AcclimationSettings>(
+        initialValue: AcclimationSettings(
+          enabled: false,
+          startTimestamp: DateTime.now().toUtc(),
+          startPercent: 0,
+          days: 0,
+        ),
+        valueForwarder: (update) => lyfiApi.setAcclimation(device, update),
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'object',
+        title: 'Acclimation',
+        description: 'LED acclimation settings for gradual brightness increase',
+        readOnly: false,
+      ),
+    );
+    addProperty(acclimationProperty);
+
+    // Location property
+    locationProperty = LyfiLocationProperty(
+      thing: this,
+      deviceEvents: deviceEvents,
+      name: 'location',
+      value: WotValue<GeoLocation?>(
+        initialValue: null, // Default no location
+        valueForwarder: (update) async {
+          if (update != null) {
+            await lyfiApi.setLocation(device, update);
+          }
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'object',
+        title: 'Location',
+        description: 'Geographic location for sun simulation calculations',
+        readOnly: false,
+      ),
+    );
+    addProperty(locationProperty);
+
+    // Correction method property
+    correctionMethodProperty = LyfiCorrectionMethodProperty(
+      thing: this,
+      deviceEvents: deviceEvents,
+      name: 'correctionMethod',
+      value: WotValue<String>(
+        initialValue: LedCorrectionMethod.log.name,
+        valueForwarder: (update) => lyfiApi.setCorrectionMethod(device, LedCorrectionMethodExtension.fromString(update)),
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'string',
+        title: 'Correction Method',
+        description: 'LED brightness correction method',
+        enumValues: LedCorrectionMethod.values.map((e) => e.name).toList(),
+        readOnly: false,
+      ),
+    );
+    addProperty(correctionMethodProperty);
+
+    // Timezone enabled property
+    timeZoneEnabledProperty = WotProperty<bool>(
+      thing: this,
+      name: 'timeZoneEnabled',
+      value: WotValue<bool>(
+        initialValue: false, // Default false
+        valueForwarder: (update) => lyfiApi.setTimeZoneEnabled(device, update),
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'boolean',
+        title: 'Timezone Enabled',
+        description: 'Whether timezone offset is enabled',
+        readOnly: false,
+      ),
+    );
+    addProperty(timeZoneEnabledProperty);
+
+    // Timezone offset property
+    timeZoneOffsetProperty = WotProperty<int>(
+      thing: this,
+      name: 'timeZoneOffset',
+      value: WotValue<int>(
+        initialValue: 0, // Default 0 offset
+        valueForwarder: (update) => lyfiApi.setTimeZoneOffset(device, update),
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'integer',
+        title: 'Timezone Offset',
+        description: 'Timezone offset in seconds from UTC',
+        readOnly: false,
+      ),
+    );
+    addProperty(timeZoneOffsetProperty);
+
+    // Keep temperature property
+    keepTempProperty = WotProperty<int>(
+      thing: this,
+      name: 'keepTemp',
+      value: WotValue<int>(
+        initialValue: 75, // Default 75°C
+        valueForwarder: (update) async {
+          // Note: This is read-only as it's a safety setting
+          throw UnsupportedError('Keep temperature is read-only for safety');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'integer',
+        title: 'Keep Temperature',
+        description: 'Thermal protection temperature threshold in Celsius',
+        readOnly: true,
+      ),
+    );
+    addProperty(keepTempProperty);
   }
 
   /// Bind properties to actual hardware state (like Mozilla WebThing ready callback)
@@ -274,12 +630,26 @@ class LyfiThing extends WotThing {
       final generalStatus = await borneoApi.getGeneralDeviceStatus(device);
       final lyfiStatus = await lyfiApi.getLyfiStatus(device);
       final actualColor = await lyfiApi.getColor(device);
+      final schedule = await lyfiApi.getSchedule(device);
+      final acclimation = await lyfiApi.getAcclimation(device);
+      final location = await lyfiApi.getLocation(device);
+      final correctionMethod = await lyfiApi.getCorrectionMethod(device);
+      final timeZoneEnabled = await lyfiApi.getTimeZoneEnabled(device);
+      final timeZoneOffset = await lyfiApi.getTimeZoneOffset(device);
+      final keepTemp = await lyfiApi.getKeepTemp(device);
 
       // Update properties with actual values (like notifyOfExternalUpdate in Mozilla WebThing)
       onOffProperty.value.notifyOfExternalUpdate(generalStatus.power);
       stateProperty.value.notifyOfExternalUpdate(lyfiStatus.state.name);
       modeProperty.value.notifyOfExternalUpdate(lyfiStatus.mode.name);
       colorProperty.value.notifyOfExternalUpdate(actualColor);
+      scheduleProperty.value.notifyOfExternalUpdate(schedule);
+      acclimationProperty.value.notifyOfExternalUpdate(acclimation);
+      locationProperty.value.notifyOfExternalUpdate(location);
+      correctionMethodProperty.value.notifyOfExternalUpdate(correctionMethod.name);
+      timeZoneEnabledProperty.value.notifyOfExternalUpdate(timeZoneEnabled);
+      timeZoneOffsetProperty.value.notifyOfExternalUpdate(timeZoneOffset);
+      keepTempProperty.value.notifyOfExternalUpdate(keepTemp);
 
       print('LyfiThing: Successfully bound to hardware state');
     } catch (e) {
@@ -293,6 +663,10 @@ class LyfiThing extends WotThing {
     onOffProperty.subscribeToEvents();
     stateProperty.subscribeToEvents();
     modeProperty.subscribeToEvents();
+    scheduleProperty.subscribeToEvents();
+    acclimationProperty.subscribeToEvents();
+    locationProperty.subscribeToEvents();
+    correctionMethodProperty.subscribeToEvents();
   }
 
   /// Lightweight periodic sync - only check critical properties
@@ -333,6 +707,10 @@ class LyfiThing extends WotThing {
     onOffProperty.unsubscribeFromEvents();
     stateProperty.unsubscribeFromEvents();
     modeProperty.unsubscribeFromEvents();
+    scheduleProperty.unsubscribeFromEvents();
+    acclimationProperty.unsubscribeFromEvents();
+    locationProperty.unsubscribeFromEvents();
+    correctionMethodProperty.unsubscribeFromEvents();
 
     super.dispose();
   }
