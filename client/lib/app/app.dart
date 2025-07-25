@@ -3,7 +3,7 @@ import 'package:borneo_app/core/events/app_events.dart';
 import 'package:borneo_app/core/services/default_app_notification_service.dart';
 import 'package:borneo_app/core/services/devices/device_manager_impl.dart';
 import 'package:borneo_app/core/services/group_manager_impl.dart';
-import 'package:borneo_app/core/services/i_app_notification_service.dart';
+import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/core/services/scene_manager_impl.dart';
 import 'package:borneo_app/main/views/main_screen.dart';
 import 'package:borneo_kernel_abstractions/ikernel.dart';
@@ -21,9 +21,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../routes/route_manager.dart';
 import '../core/services/blob_manager.dart';
 import '../core/services/devices/i_device_manager.dart';
-import '../core/services/i_group_manager.dart';
+import '../core/services/group_manager.dart';
 import '../core/services/routine_manager.dart';
-import '../core/services/i_scene_manager.dart';
+import '../core/services/scene_manager.dart';
 import 'app_theme.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 
@@ -129,7 +129,7 @@ class _BorneoAppState extends State<BorneoApp> {
                     ),
 
                     // GroupManager
-                    Provider<IGroupManager>(
+                    Provider<GroupManager>(
                       create: (context) => GroupManagerImpl(
                         context.read<Logger>(),
                         context.read<EventBus>(),
@@ -145,7 +145,7 @@ class _BorneoAppState extends State<BorneoApp> {
                         context.read<IKernel>(),
                         context.read<EventBus>(),
                         context.read<ISceneManager>(),
-                        context.read<IGroupManager>(),
+                        context.read<GroupManager>(),
                         context.read<IDeviceModuleRegistry>(),
                         logger: context.read<Logger>(),
                       ),

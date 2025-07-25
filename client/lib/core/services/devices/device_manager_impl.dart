@@ -12,8 +12,8 @@ import 'package:lw_wot/wot.dart';
 import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/features/devices/models/events.dart';
 import 'package:borneo_app/core/models/events.dart';
-import 'package:borneo_app/core/services/i_group_manager.dart';
-import 'package:borneo_app/core/services/i_scene_manager.dart';
+import 'package:borneo_app/core/services/group_manager.dart';
+import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 
@@ -36,7 +36,7 @@ final class DeviceManagerImpl extends IDeviceManager {
   // ignore: unused_field
   final EventBus _globalBus;
   // ignore: unused_field
-  final IGroupManager _groupManager;
+  final GroupManager _groupManager;
 
   // event subscriptions
   late final StreamSubscription<UnboundDeviceDiscoveredEvent> _unboundDeviceDiscoveredEventSub;

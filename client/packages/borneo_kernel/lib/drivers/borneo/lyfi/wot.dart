@@ -185,12 +185,15 @@ class LyfiSetAcclimationAction extends WotAction<Map<String, dynamic>> {
     required this.settings,
     required this.lyfiApi,
     required this.device,
-  }) : super(name: 'setAcclimation', input: {
-          'enabled': settings.enabled,
-          'startTimestamp': (settings.startTimestamp.millisecondsSinceEpoch / 1000).round(),
-          'startPercent': settings.startPercent,
-          'days': settings.days
-        });
+  }) : super(
+         name: 'setAcclimation',
+         input: {
+           'enabled': settings.enabled,
+           'startTimestamp': (settings.startTimestamp.millisecondsSinceEpoch / 1000).round(),
+           'startPercent': settings.startPercent,
+           'days': settings.days,
+         },
+       );
 
   @override
   Future<void> performAction() async {
@@ -556,7 +559,8 @@ class LyfiThing extends WotThing {
       name: 'correctionMethod',
       value: WotValue<String>(
         initialValue: LedCorrectionMethod.log.name,
-        valueForwarder: (update) => lyfiApi.setCorrectionMethod(device, LedCorrectionMethodExtension.fromString(update)),
+        valueForwarder: (update) =>
+            lyfiApi.setCorrectionMethod(device, LedCorrectionMethodExtension.fromString(update)),
       ),
       metadata: WotPropertyMetadata(
         type: 'string',

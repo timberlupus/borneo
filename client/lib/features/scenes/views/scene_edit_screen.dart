@@ -1,4 +1,4 @@
-import 'package:borneo_app/core/services/i_scene_manager.dart';
+import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_app/features/scenes/providers/scene_edit_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';

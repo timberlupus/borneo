@@ -1,4 +1,4 @@
-import 'package:borneo_app/core/services/i_app_notification_service.dart';
+import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
 

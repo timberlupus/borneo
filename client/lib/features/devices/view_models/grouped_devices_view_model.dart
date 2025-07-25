@@ -8,8 +8,8 @@ import 'package:cancellation_token/cancellation_token.dart';
 
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 import 'package:borneo_app/features/devices/models/events.dart';
-import 'package:borneo_app/core/services/i_scene_manager.dart';
-import 'package:borneo_app/core/services/i_group_manager.dart';
+import 'package:borneo_app/core/services/scene_manager.dart';
+import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/features/devices/view_models/group_view_model.dart';
 
 import 'package:borneo_app/core/services/devices/i_device_manager.dart';
@@ -19,7 +19,7 @@ import '../../../core/models/events.dart';
 
 class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModelInitFutureMixin {
   final ISceneManager _sceneManager;
-  final IGroupManager _groupManager;
+  final GroupManager _groupManager;
   final IDeviceManager _deviceManager;
   final IDeviceModuleRegistry _deviceModuleRegistry;
   final CancellationToken _cancellationToken = CancellationToken();

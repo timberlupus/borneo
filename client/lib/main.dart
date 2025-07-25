@@ -44,70 +44,73 @@ Future<void> main() async {
 
   final db = await openDatabase();
   // debugRepaintRainbowEnabled = true;
-  runZonedGuarded(() {
-    runApp(
-      ProviderScope(
-        child: provider.MultiProvider(
-          providers: [
-            // Logger
-            provider.Provider<Logger>(
-              create: (_) => createLogger(),
-              lazy: false,
-              dispose: (_, logger) {
-                logger.close();
-              },
-            ),
+  runZonedGuarded(
+    () {
+      runApp(
+        ProviderScope(
+          child: provider.MultiProvider(
+            providers: [
+              // Logger
+              provider.Provider<Logger>(
+                create: (_) => createLogger(),
+                lazy: false,
+                dispose: (_, logger) {
+                  logger.close();
+                },
+              ),
 
-            // IClock
-            provider.Provider<IClock>(create: (_) => DefaultClock()),
+              // IClock
+              provider.Provider<IClock>(create: (_) => DefaultClock()),
 
-            // DB
-            provider.Provider<Database>(
-              create: (_) => db,
-              lazy: false,
-              dispose: (_, db) {
-                db.close();
-              },
-            ),
+              // DB
+              provider.Provider<Database>(
+                create: (_) => db,
+                lazy: false,
+                dispose: (_, db) {
+                  db.close();
+                },
+              ),
 
-            // mDns provider
-            provider.Provider<IMdnsProvider>(create: (_) => NsdMdnsProvider(), lazy: true),
+              // mDns provider
+              provider.Provider<IMdnsProvider>(create: (_) => NsdMdnsProvider(), lazy: true),
 
-            // IDeviceModuleRegistry
-            provider.Provider<IDeviceModuleRegistry>(
-              create: (_) => DeviceModuleRegistry(StaticDeviceModuleHarvester()),
-              lazy: true,
-            ),
+              // IDeviceModuleRegistry
+              provider.Provider<IDeviceModuleRegistry>(
+                create: (_) => DeviceModuleRegistry(StaticDeviceModuleHarvester()),
+                lazy: true,
+              ),
 
-            // RouteManager
-            provider.ProxyProvider<IDeviceModuleRegistry, RouteManager>(
-              update: (_, reg, rm) => rm ?? RouteManager(reg),
-              lazy: true,
-            ),
+              // RouteManager
+              provider.ProxyProvider<IDeviceModuleRegistry, RouteManager>(
+                update: (_, reg, rm) => rm ?? RouteManager(reg),
+                lazy: true,
+              ),
 
-            // IDriverRegistry
-            provider.ProxyProvider<IDeviceModuleRegistry, IDriverRegistry>(
-              update: (_, reg, smdr) => smdr ?? StaticModularDriverRegistry(reg),
-              lazy: true,
-            ),
+              // IDriverRegistry
+              provider.ProxyProvider<IDeviceModuleRegistry, IDriverRegistry>(
+                update: (_, reg, smdr) => smdr ?? StaticModularDriverRegistry(reg),
+                lazy: true,
+              ),
 
-            // IKernel
-            provider.ProxyProvider3<Logger, IDriverRegistry, IMdnsProvider, IKernel>(
-              update: (_, logger, driverReg, nsdMdns, kernel) =>
-                  kernel ?? DefaultKernel(logger, driverReg, mdnsProvider: nsdMdns),
-              dispose: (context, kernel) => kernel.dispose(),
-              lazy: true,
-            ),
+              // IKernel
+              provider.ProxyProvider3<Logger, IDriverRegistry, IMdnsProvider, IKernel>(
+                update: (_, logger, driverReg, nsdMdns, kernel) =>
+                    kernel ?? DefaultKernel(logger, driverReg, mdnsProvider: nsdMdns),
+                dispose: (context, kernel) => kernel.dispose(),
+                lazy: true,
+              ),
 
-            // LocaleService
-            provider.Provider<LocaleService>(create: (_) => AppLocaleService(), lazy: false),
-          ],
-          child: BorneoApp(),
+              // LocaleService
+              provider.Provider<LocaleService>(create: (_) => AppLocaleService(), lazy: false),
+            ],
+            child: BorneoApp(),
+          ),
         ),
-      ),
-    );
-  }, (error, stack) {
-    print('Uncaught async error: $error\n$stack');
-    // 如果有 logger，可以用 logger?.e('Uncaught async error: $error\n$stack');
-  });
+      );
+    },
+    (error, stack) {
+      print('Uncaught async error: $error\n$stack');
+      // 如果有 logger，可以用 logger?.e('Uncaught async error: $error\n$stack');
+    },
+  );
 }

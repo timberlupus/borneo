@@ -1,19 +1,19 @@
 import 'dart:async';
 
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
-import 'package:borneo_app/core/services/i_scene_manager.dart';
+import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
 import 'package:borneo_app/core/services/group_manager_impl.dart';
 
-abstract class IGroupManager {
+abstract class GroupManager {
   bool get isInitialized;
 
-  IGroupManager();
+  GroupManager();
 
   // Factory constructor to create the implementation
-  factory IGroupManager.create(Logger logger, EventBus globalBus, Database db, ISceneManager scenes) {
+  factory GroupManager.create(Logger logger, EventBus globalBus, Database db, ISceneManager scenes) {
     return GroupManagerImpl(logger, globalBus, db, scenes);
   }
 

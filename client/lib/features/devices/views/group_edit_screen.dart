@@ -1,4 +1,4 @@
-import 'package:borneo_app/core/services/i_group_manager.dart';
+import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/features/devices/view_models/group_edit_view_model.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
@@ -128,7 +128,7 @@ class GroupEditScreen extends StatelessWidget {
 
     return ChangeNotifierProvider<GroupEditViewModel>(
       create: (context) => GroupEditViewModel(
-        context.read<IGroupManager>(),
+        context.read<GroupManager>(),
         isCreation: args.isCreation,
         model: args.model,
         globalEventBus: context.read<EventBus>(),

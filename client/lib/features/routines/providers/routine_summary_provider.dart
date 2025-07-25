@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:borneo_app/features/routines/models/abstract_routine.dart';
-import 'package:borneo_app/core/services/i_app_notification_service.dart';
+import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/core/services/routine_manager.dart';
 import 'package:borneo_app/features/routines/providers/routines_provider.dart';
 import 'package:borneo_app/features/scenes/providers/scenes_provider.dart';

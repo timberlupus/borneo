@@ -1,4 +1,4 @@
-import 'package:borneo_app/core/services/i_scene_manager.dart';
+import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_app/features/routines/models/abstract_routine.dart';
 import 'package:borneo_app/features/routines/models/builtin_routines.dart';
 import 'package:borneo_app/core/services/devices/i_device_manager.dart';

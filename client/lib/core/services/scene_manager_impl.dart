@@ -7,7 +7,7 @@ import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
 import 'package:borneo_app/core/services/devices/i_device_manager.dart';
-import 'package:borneo_app/core/services/i_group_manager.dart';
+import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/store_names.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:event_bus/event_bus.dart';
@@ -15,7 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
-import 'package:borneo_app/core/services/i_scene_manager.dart';
+import 'package:borneo_app/core/services/scene_manager.dart';
 
 class SceneManagerImpl extends ISceneManager {
   static const String currentSceneKey = 'status.scenes.current';
@@ -26,7 +26,7 @@ class SceneManagerImpl extends ISceneManager {
   final IBlobManager _blobManager;
   bool _isInitialized = false;
 
-  late final IGroupManager _groupManager;
+  late final GroupManager _groupManager;
   late final IDeviceManager _deviceManager;
 
   late SceneEntity _current;
@@ -45,7 +45,7 @@ class SceneManagerImpl extends ISceneManager {
   SceneEntity? get located => _located;
 
   @override
-  Future<void> initialize(IGroupManager groupManager, IDeviceManager deviceManager) async {
+  Future<void> initialize(GroupManager groupManager, IDeviceManager deviceManager) async {
     if (_isInitialized) {
       return;
     }

@@ -1,17 +1,17 @@
 import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 import 'package:borneo_app/core/models/events.dart';
-import 'package:borneo_app/core/services/i_scene_manager.dart';
+import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_app/core/services/store_names.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
-import 'package:borneo_app/core/services/i_group_manager.dart';
+import 'package:borneo_app/core/services/group_manager.dart';
 
 import '../../features/devices/models/device_entity.dart';
 
-class GroupManagerImpl extends IGroupManager {
+class GroupManagerImpl extends GroupManager {
   final Database _db;
   final Logger _logger;
   final EventBus _globalBus;

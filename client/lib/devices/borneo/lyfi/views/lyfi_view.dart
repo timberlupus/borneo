@@ -2,7 +2,7 @@ import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/shared/widgets/device_status_indicator.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/editor/sun_editor_view.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
-import 'package:borneo_app/core/services/i_app_notification_service.dart';
+import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:event_bus/event_bus.dart';

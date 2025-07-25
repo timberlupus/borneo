@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
 
 // Your existing services
-import 'package:borneo_app/core/services/i_scene_manager.dart';
+import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_app/core/services/devices/i_device_manager.dart';
 import 'package:borneo_app/core/services/routine_manager.dart';
-import 'package:borneo_app/core/services/i_app_notification_service.dart';
+import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 

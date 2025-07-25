@@ -4,7 +4,7 @@ import 'package:borneo_app/core/models/device_statistics.dart';
 import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/devices/i_device_manager.dart';
-import 'package:borneo_app/core/services/i_scene_manager.dart';
+import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

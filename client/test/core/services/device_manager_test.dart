@@ -4,8 +4,8 @@ import 'dart:collection';
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager_impl.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
-import 'package:borneo_app/core/services/i_group_manager.dart';
-import 'package:borneo_app/core/services/i_scene_manager.dart';
+import 'package:borneo_app/core/services/group_manager.dart';
+import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
 import 'package:borneo_common/exceptions.dart';
@@ -496,7 +496,7 @@ class TestSceneManager implements ISceneManager {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-class TestGroupManager implements IGroupManager {
+class TestGroupManager implements GroupManager {
   // Simplified - only implement what we need for testing
   @override
   dynamic noSuchMethod(Invocation invocation) => null;

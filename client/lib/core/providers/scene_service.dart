@@ -6,8 +6,8 @@ import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/models/device_statistics.dart';
 import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/services/devices/i_device_manager.dart';
-import 'package:borneo_app/core/services/i_group_manager.dart';
-import 'package:borneo_app/core/services/i_scene_manager.dart';
+import 'package:borneo_app/core/services/group_manager.dart';
+import 'package:borneo_app/core/services/scene_manager.dart';
 
 import 'scene_state.dart';
 
@@ -43,7 +43,7 @@ class SceneService extends StateNotifier<SceneState> {
   /// Initialize service
   /// Note: In Riverpod, explicit initialization is usually not needed
   /// but this is kept for compatibility
-  Future<void> initialize({IGroupManager? groupManager, IDeviceManager? deviceManager}) async {
+  Future<void> initialize({GroupManager? groupManager, IDeviceManager? deviceManager}) async {
     if (state.isInitialized) return;
 
     state = state.copyWith(isLoading: true);
