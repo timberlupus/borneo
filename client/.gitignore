@@ -45,3 +45,4 @@ app.*.map.json
 packages/*/build
 
 .claude
+CLAUDE.md
