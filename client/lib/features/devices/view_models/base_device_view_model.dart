@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
-import 'package:borneo_app/core/services/devices/i_device_manager.dart';
+import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/shared/view_models/base_view_model.dart';
 
 abstract class BaseDeviceViewModel extends BaseViewModel
@@ -19,7 +19,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   bool _isOnline = false;
 
   final CancellationToken initializationCancelToken = CancellationToken();
-  final IDeviceManager deviceManager;
+  final DeviceManager deviceManager;
   final String deviceID;
   late final DeviceEntity deviceEntity;
 

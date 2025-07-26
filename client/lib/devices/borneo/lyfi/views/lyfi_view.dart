@@ -13,7 +13,7 @@ import 'package:provider/provider.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/dashboard_view.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/editor/schedule_editor_view.dart';
-import 'package:borneo_app/core/services/devices/i_device_manager.dart';
+import 'package:borneo_app/core/services/devices/device_manager.dart';
 
 import '../view_models/lyfi_view_model.dart';
 import 'editor/manual_editor_view.dart';
@@ -331,7 +331,7 @@ class LyfiView extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (cb) => LyfiViewModel(
         deviceID: device.id,
-        deviceManager: cb.read<IDeviceManager>(),
+        deviceManager: cb.read<DeviceManager>(),
         globalEventBus: cb.read<EventBus>(),
         notification: cb.read<IAppNotificationService>(),
         localeService: cb.read<LocaleService>(),

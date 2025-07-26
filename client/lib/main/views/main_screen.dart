@@ -15,7 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
-import '../../core/services/devices/i_device_manager.dart';
+import '../../core/services/devices/device_manager.dart';
 import '../../core/services/scene_manager.dart';
 import '../../features/devices/view_models/grouped_devices_view_model.dart';
 import '../../features/my/view_models/my_view_model.dart';
@@ -200,7 +200,7 @@ class MainScreen extends StatelessWidget {
         final bm = context.read<IBlobManager>();
         final sm = context.read<ISceneManager>();
         final gm = context.read<GroupManager>();
-        final dm = context.read<IDeviceManager>();
+        final dm = context.read<DeviceManager>();
         final ls = context.read<LocaleService>();
         return MainViewModel(bus, bm, sm, gm, dm, ls, logger: context.read<Logger>());
       },
@@ -262,7 +262,7 @@ class MainScreen extends StatelessWidget {
             final globalEventBus = context.read<EventBus>();
             final sm = context.read<ISceneManager>();
             final gm = context.read<GroupManager>();
-            final dm = context.read<IDeviceManager>();
+            final dm = context.read<DeviceManager>();
             final dmr = context.read<IDeviceModuleRegistry>();
             return GroupedDevicesViewModel(globalEventBus, sm, gm, dm, dmr, logger: logger);
           },

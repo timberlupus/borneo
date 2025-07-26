@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:borneo_app/core/models/device_statistics.dart';
 import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
-import 'package:borneo_app/core/services/devices/i_device_manager.dart';
+import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
@@ -40,7 +40,7 @@ class SceneSummaryState {
 /// Scene Summary Notifier
 class SceneSummaryNotifier extends StateNotifier<SceneSummaryState> {
   final ISceneManager _sceneManager;
-  final IDeviceManager _deviceManager;
+  final DeviceManager _deviceManager;
   final EventBus _eventBus;
 
   late final StreamSubscription<CurrentSceneChangedEvent> _currentSceneChangedSub;
@@ -148,7 +148,7 @@ class ScenesNotifier extends StateNotifier<ScenesState> {
 
   final Map<String, SceneSummaryNotifier> _sceneNotifiers = {};
 
-  ScenesNotifier(this._sceneManager, IDeviceManager deviceManager, this._eventBus, Logger? logger)
+  ScenesNotifier(this._sceneManager, DeviceManager deviceManager, this._eventBus, Logger? logger)
     : super(const ScenesState()) {
     // deviceManager and logger are passed for potential future use
     _setupEventListeners();
@@ -275,7 +275,7 @@ final sceneManagerProvider = Provider<ISceneManager>((ref) {
   throw UnimplementedError('SceneManager must be provided by context');
 });
 
-final deviceManagerProvider = Provider<IDeviceManager>((ref) {
+final deviceManagerProvider = Provider<DeviceManager>((ref) {
   throw UnimplementedError('DeviceManager must be provided by context');
 });
 

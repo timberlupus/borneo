@@ -20,7 +20,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../routes/route_manager.dart';
 import '../core/services/blob_manager.dart';
-import '../core/services/devices/i_device_manager.dart';
+import '../core/services/devices/device_manager.dart';
 import '../core/services/group_manager.dart';
 import '../core/services/routine_manager.dart';
 import '../core/services/scene_manager.dart';
@@ -139,7 +139,7 @@ class _BorneoAppState extends State<BorneoApp> {
                     ),
 
                     // DeviceManager
-                    Provider<IDeviceManager>(
+                    Provider<DeviceManager>(
                       create: (context) => DeviceManagerImpl(
                         context.read<Database>(),
                         context.read<IKernel>(),
@@ -158,7 +158,7 @@ class _BorneoAppState extends State<BorneoApp> {
                         context.read<EventBus>(),
                         context.read<Database>(),
                         context.read<ISceneManager>(),
-                        context.read<IDeviceManager>(),
+                        context.read<DeviceManager>(),
                         logger: context.read<Logger>(),
                       ),
                       dispose: (context, rm) => rm.dispose(),

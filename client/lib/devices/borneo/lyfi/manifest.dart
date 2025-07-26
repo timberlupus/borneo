@@ -5,7 +5,7 @@ import 'package:borneo_app/devices/borneo/lyfi/views/lyfi_view.dart';
 import 'package:borneo_app/devices/view_models/abstract_device_summary_view_model.dart';
 import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
-import 'package:borneo_app/core/services/devices/i_device_manager.dart';
+import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
@@ -31,7 +31,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         detailsViewBuilder: (_) => LyfiView(),
         detailsViewModelBuilder: (context, deviceID) => LyfiViewModel(
           deviceID: deviceID,
-          deviceManager: context.read<IDeviceManager>(),
+          deviceManager: context.read<DeviceManager>(),
           globalEventBus: context.read<EventBus>(),
           notification: context.read<IAppNotificationService>(),
           localeService: context.read<LocaleService>(),
@@ -93,7 +93,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
     }
   }
 
-  static WotThing _createWotThing(DeviceEntity device, IDeviceManager deviceManager) {
+  static WotThing _createWotThing(DeviceEntity device, DeviceManager deviceManager) {
     // Check if device is bound to get access to APIs
     if (!deviceManager.isBound(device.id)) {
       // Device not bound, create a basic WotThing with default values

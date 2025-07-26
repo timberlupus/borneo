@@ -1,5 +1,5 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/acclimation_view_model.dart';
-import 'package:borneo_app/core/services/devices/i_device_manager.dart';
+import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,7 +17,7 @@ class AcclimationScreen extends StatelessWidget {
     final items = _buildSettingItems(context);
     final vm = AcclimationViewModel(
       deviceID: deviceID,
-      deviceManager: context.read<IDeviceManager>(),
+      deviceManager: context.read<DeviceManager>(),
       globalEventBus: context.read<EventBus>(),
     );
     return Scaffold(

@@ -11,7 +11,7 @@ import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
-import '../../../core/services/devices/i_device_manager.dart';
+import '../../../core/services/devices/device_manager.dart';
 import '../view_models/device_discovery_view_model.dart';
 
 class StartStopButton extends StatelessWidget {
@@ -210,7 +210,7 @@ class DeviceDiscoveryScreen extends StatelessWidget {
   DeviceDiscoveryViewModel createViewModel(BuildContext context) => DeviceDiscoveryViewModel(
     context.read<Logger>(),
     context.read<GroupManager>(),
-    context.read<IDeviceManager>(),
+    context.read<DeviceManager>(),
     context.read<IDeviceModuleRegistry>(),
     globalEventBus: context.read<EventBus>(),
   );

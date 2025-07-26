@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:borneo_app/core/models/device_statistics.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
-import 'package:borneo_app/core/services/devices/i_device_manager.dart';
+import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
@@ -35,7 +35,7 @@ abstract class ISceneManager {
   SceneEntity? get located;
 
   // Abstract methods
-  Future<void> initialize(GroupManager groupManager, IDeviceManager deviceManager);
+  Future<void> initialize(GroupManager groupManager, DeviceManager deviceManager);
   Future<SceneEntity> single(String key, {Transaction? tx});
   Future<List<SceneEntity>> all({Transaction? tx});
   Future<DeviceStatistics> getDeviceStatistics(String sceneID);

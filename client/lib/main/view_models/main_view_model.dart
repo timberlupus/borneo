@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:borneo_app/core/events/app_events.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
-import 'package:borneo_app/core/services/devices/i_device_manager.dart';
+import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_app/core/services/local_service.dart';
@@ -17,7 +17,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   final IBlobManager _blobManager;
   final ISceneManager _sceneManager;
   final GroupManager _groupManager;
-  final IDeviceManager _deviceManager;
+  final DeviceManager _deviceManager;
   final LocaleService _localeService;
   TabIndices _currentIndex = TabIndices.scenes;
   bool _isInitialized = false;

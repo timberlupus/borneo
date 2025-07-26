@@ -4,7 +4,7 @@ import 'package:provider/provider.dart' as provider;
 
 // Your existing services
 import 'package:borneo_app/core/services/scene_manager.dart';
-import 'package:borneo_app/core/services/devices/i_device_manager.dart';
+import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/routine_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:event_bus/event_bus.dart';
@@ -39,7 +39,7 @@ class RiverpodScenesWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // Read services from the existing Provider context
     final sceneManager = provider.Provider.of<ISceneManager>(context, listen: false);
-    final deviceManager = provider.Provider.of<IDeviceManager>(context, listen: false);
+    final deviceManager = provider.Provider.of<DeviceManager>(context, listen: false);
     final routineManager = provider.Provider.of<RoutineManager>(context, listen: false);
     final notificationService = provider.Provider.of<IAppNotificationService>(context, listen: false);
     final eventBus = provider.Provider.of<EventBus>(context, listen: false);
