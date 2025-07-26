@@ -232,6 +232,7 @@ melos:
     test:all:
       #  melos run test:dart --no-select
       run: |
+        melos run --no-select test:dart
         melos run --no-select test:flutter
       description: Run tests for all packages
 
