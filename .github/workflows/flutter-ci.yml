@@ -58,9 +58,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('client/**/*.gradle*', 'client/**/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-gradle-
 
-      - name: Install Melos
-        run: dart pub global activate melos
-
       - name: Install dependencies
         run: flutter pub get
 
@@ -95,9 +92,6 @@ jobs:
           key: ${{ runner.os }}-pub-cache-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: ${{ runner.os }}-pub-cache-
 
-      - name: Install Melos
-        run: dart pub global activate melos
-
       - name: Install dependencies
         run: flutter pub get
 
@@ -105,7 +99,7 @@ jobs:
         run: dart format --set-exit-if-changed .
 
       - name: Run tests
-        run: melos run test:all
+        run: flutter test
 
   build-apk:
     needs: setup
@@ -146,9 +140,6 @@ jobs:
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('client/**/*.gradle*', 'client/**/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-gradle-
-
-      - name: Install Melos
-        run: dart pub global activate melos
 
       - name: Install dependencies
         run: flutter pub get
@@ -199,10 +190,6 @@ jobs:
 #           path: ~/AppData/Local/Microsoft/VisualStudio
 #           key: ${{ runner.os }}-msbuild-${{ hashFiles('client/windows/**') }}
 #           restore-keys: ${{ runner.os }}-msbuild-
-
-#       - name: Install Melos
-#         run: dart pub global activate melos
-#         shell: powershell
 
 #       - name: Install dependencies
 #         run: flutter pub get
