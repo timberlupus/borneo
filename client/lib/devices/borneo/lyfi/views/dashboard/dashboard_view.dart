@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../view_models/lyfi_view_model.dart';
 import 'dashboard_acclimation_tile.dart';
 import 'dashboard_chart.dart';
 import 'dashboard_power_switch_tile.dart';
@@ -17,7 +15,6 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isOnline = context.read<LyfiViewModel>().isOnline;
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
       child: SingleChildScrollView(

@@ -15,30 +15,42 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
 
   double? get nominalPower => lyfiDeviceInfo.nominalPower;
 
-  LyfiMode get mode {
-    final wotThing = super.deviceManager.getWotThing(super.deviceID);
-    if (wotThing != null) {
-      return LyfiMode.fromString(wotThing.getProperty("mode"));
+  late LyfiMode _mode;
+  late LyfiState _state;
+
+  @override
+  Future<void> onInitialize() async {
+    await super.refreshStatus();
+  }
+
+  LyfiMode get mode => _mode;
+
+  Future<void> setMode(LyfiMode newMode) async {
+    if (newMode == _mode) {
+      return;
     }
-    return LyfiMode.values.first; // Default fallback
-  }
-
-  set mode(LyfiMode newMode) {
-    final wotThing = super.deviceManager.getWotThing(super.deviceID);
-    wotThing?.setProperty("mode", newMode.name);
-  }
-
-  LyfiState get state {
-    final wotThing = super.deviceManager.getWotThing(super.deviceID);
-    if (wotThing != null) {
-      return LyfiState.fromString(wotThing.getProperty("state"));
+    try {
+      await lyfiDeviceApi.switchMode(super.boundDevice!.device, newMode);
+      _mode = newMode;
+    } catch (_) {
+      await refreshStatus();
+      rethrow;
     }
-    return LyfiState.values.first; // Default fallback
   }
 
-  set state(LyfiState newState) {
-    final wotThing = super.deviceManager.getWotThing(super.deviceID);
-    wotThing?.setProperty("state", newState.name);
+  LyfiState get state => _state;
+
+  Future<void> setState(LyfiState newState) async {
+    if (newState == _state) {
+      return;
+    }
+    try {
+      await lyfiDeviceApi.switchState(super.boundDevice!.device, newState);
+      _state = newState;
+    } catch (_) {
+      await refreshStatus();
+      rethrow;
+    }
   }
 
   bool get isLocked => state.isLocked;
@@ -55,6 +67,8 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
     await super.refreshStatus(cancelToken: cancelToken);
     await _lock.synchronized(() async {
       _lyfiStatus = await lyfiDeviceApi.getLyfiStatus(boundDevice!.device, cancelToken: cancelToken);
+      _mode = _lyfiStatus?.mode ?? LyfiMode.manual;
+      _state = _lyfiStatus?.state ?? LyfiState.normal;
     });
   }
 }

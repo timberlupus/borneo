@@ -76,7 +76,7 @@ extension CoapClientExtensions on CoapClient {
       confirmable: confirmable,
     ).asCancellable(cancelToken);
     if (!response.isSuccess) {
-      throw CoapException("Failed to put uri `$uri`", response);
+      throw CoapException("Failed to put uri `$uri`, payload: `$payload`", response);
     }
   }
 

@@ -6,7 +6,6 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.d
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_view_model.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
@@ -72,7 +71,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     if (index >= 0 && index < _channels.length) {
       _channels[index].value = value;
     }
-    notifyListeners();
   }
 
   LyfiViewModel({
@@ -86,6 +84,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
   @override
   Future<void> onInitialize({CancellationToken? cancelToken}) async {
+    await super.onInitialize();
     if (super.isOnline) {
       _temporaryDuration = await _deviceApi.getTemporaryDuration(boundDevice!.device, cancelToken: cancelToken);
     }
@@ -125,7 +124,11 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       }
       if (!super.isLocked && super.isOnline) {
         try {
-          super.state = LyfiState.normal;
+          Future.microtask(() async {
+            if (super.state != LyfiState.normal) {
+              await super.setState(LyfiState.normal);
+            }
+          });
         } catch (e, stackTrace) {
           logger?.e('Failed to setMode of the device(${super.deviceEntity})', error: e, stackTrace: stackTrace);
         }
@@ -179,10 +182,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       cvn.dispose();
     }
     _channels.clear();
-
-    if (super.state != LyfiState.normal) {
-      super.state = LyfiState.normal;
-    }
 
     _overallBrightness = 0.0;
     _fanPowerRatio = 0.0;
@@ -289,14 +288,12 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
     if (newIsLocked) {
       // Exiting edit mode - switch to normal state
-      await _deviceApi.switchState(super.boundDevice!.device, LyfiState.normal);
+      await super.setState(LyfiState.normal);
       await refreshStatus();
     } else {
       // Entering edit mode - wait for state to change to dimming before creating editor
-      await _deviceApi.switchState(super.boundDevice!.device, LyfiState.dimming);
-
-      // Wait for the state change event instead of polling
-      await _waitForStateChange(LyfiState.dimming);
+      await super.setState(LyfiState.dimming);
+      await refreshStatus();
 
       await _toggleEditor(super.mode);
     }
@@ -323,10 +320,9 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       }
     }
 
-    super.mode = newMode;
-    final _ = await super.lyfiDeviceApi.getMode(super.boundDevice!.device);
-    await _toggleEditor(super.mode);
+    await super.setMode(newMode);
     await refreshStatus();
+    await _toggleEditor(super.mode);
   }
 
   Future<void> _toggleEditor(LyfiMode newMode, {CancellationToken? cancelToken}) async {
@@ -362,28 +358,5 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     );
     await vm.initialize();
     return vm;
-  }
-
-  /// Wait for device state to change to the expected state using event subscription
-  Future<void> _waitForStateChange(LyfiState expectedState) async {
-    if (super.state == expectedState) return;
-
-    final completer = Completer<void>();
-    StreamSubscription<LyfiStateChangedEvent>? subscription;
-
-    subscription = super.deviceManager.allDeviceEvents.on<LyfiStateChangedEvent>().listen((event) {
-      if (event.device.id == super.deviceID && event.state == expectedState) {
-        subscription?.cancel();
-        if (!completer.isCompleted) completer.complete();
-      }
-    });
-
-    try {
-      await completer.future.timeout(const Duration(seconds: 5));
-    } on TimeoutException catch (e) {
-      subscription.cancel();
-      super.logger?.e('Timeout waiting for state change to $expectedState', error: e);
-      rethrow;
-    }
   }
 }

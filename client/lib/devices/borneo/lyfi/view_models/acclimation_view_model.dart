@@ -34,6 +34,7 @@ class AcclimationViewModel extends BaseLyfiDeviceViewModel {
 
   @override
   Future<void> onInitialize() async {
+    await super.onInitialize();
     _origSettings = await super.lyfiDeviceApi.getAcclimation(super.boundDevice!.device);
 
     _startTimestamp = _origSettings.startTimestamp;
@@ -94,7 +95,9 @@ class AcclimationViewModel extends BaseLyfiDeviceViewModel {
   }
 
   @override
-  Future<void> refreshStatus({CancellationToken? cancelToken}) async {}
+  Future<void> refreshStatus({CancellationToken? cancelToken}) async {
+    await super.refreshStatus(cancelToken: cancelToken);
+  }
 
   @override
   RssiLevel? get rssiLevel => null;

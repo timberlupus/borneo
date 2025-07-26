@@ -290,7 +290,6 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
               child: Selector<LyfiViewModel, ({bool isOnline, LyfiState state, bool isOn})>(
                 selector: (_, vm) => (isOnline: vm.isOnline, state: vm.state, isOn: vm.isOn),
                 builder: (context, props, _) {
-                  final vm = context.read<LyfiViewModel>();
                   return AnimatedSwitcher(
                     duration: Duration(milliseconds: 500),
                     transitionBuilder: (Widget child, Animation<double> animation) {

@@ -122,14 +122,12 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
     final dd = device.driverData as LyfiCoapDriverData;
     final client = dd.coap;
     final request = CoapRequest.get(BorneoPaths.heartbeat);
-    request.observe = 0; // Enable observation
-
     final obs = await client.observe(request);
 
     return obs
         .map((msg) {
           try {
-            return cbor2.cborDecode(msg.payload!);
+            return cbor2.cborDecode(msg.payload);
           } catch (e) {
             logger?.w('Failed to decode heartbeat payload: $e');
             return null;

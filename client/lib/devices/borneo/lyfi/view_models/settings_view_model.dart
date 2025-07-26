@@ -58,6 +58,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
 
   @override
   Future<void> onInitialize() async {
+    await super.onInitialize();
     _correctionMethod = await api.getCorrectionMethod(boundDevice!.device);
     _temporaryDuration = await api.getTemporaryDuration(boundDevice!.device);
   }
