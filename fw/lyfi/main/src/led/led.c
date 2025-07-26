@@ -467,21 +467,33 @@ static void system_events_handler(void* handler_args, esp_event_base_t base, int
         }
         led_blank();
         if (led_get_state() != LED_STATE_NORMAL) {
-            BO_MUST(led_switch_state(LED_STATE_NORMAL));
+            int rc = led_switch_state(LED_STATE_NORMAL);
+            if (rc) {
+                ESP_LOGE(TAG, "Unable to swtich to normal state, errcode=%d", rc);
+            }
         }
     } break;
 
     case BO_EVENT_SHUTDOWN_SCHEDULED: {
-        BO_MUST(led_fade_black());
+        int rc = led_fade_black();
+        if (rc) {
+            ESP_LOGE(TAG, "Failed to invoke `led_fade_black()`, errcode=%d", rc);
+        }
         if (led_get_state() != LED_STATE_NORMAL) {
             smf_set_state(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_NORMAL]);
         }
     } break;
 
     case BO_EVENT_POWER_ON: {
-        BO_MUST(led_fade_to_normal());
+        int rc = led_fade_to_normal();
+        if (rc) {
+            ESP_LOGE(TAG, "Failed to invoke `led_fade_to_normal()`, errcode=%d", rc);
+        }
         if (led_get_state() != LED_STATE_NORMAL) {
-            BO_MUST(led_switch_state(LED_STATE_NORMAL));
+            rc = led_switch_state(LED_STATE_NORMAL);
+            if (rc) {
+                ESP_LOGE(TAG, "Failed to swtich state to normal, errcode=%d", rc);
+            }
         }
     } break;
 
