@@ -1,7 +1,7 @@
 import 'package:test/test.dart';
-import '../lib/event.dart';
-import '../lib/thing.dart';
-import '../lib/types.dart';
+import 'package:lw_wot/event.dart';
+import 'package:lw_wot/thing.dart';
+import 'package:lw_wot/types.dart';
 
 void main() {
   group('WotEventMetadata', () {

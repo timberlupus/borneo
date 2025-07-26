@@ -25,6 +25,8 @@ dependencies:
     path: ../borneo_common
   borneo_kernel_abstractions:
     path: ../borneo_kernel_abstractions
+  lw_wot:
+    path: ../lw_wot
 
 dev_dependencies:
   lints: ^6.0.0

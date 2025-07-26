@@ -14,15 +14,14 @@ import 'package:lw_wot/wot.dart';
 class LyfiStateProperty extends WotProperty<String> {
   StreamSubscription? _eventSubscription;
   final DeviceEventBus deviceEvents;
-  final WotThing thing;
 
   LyfiStateProperty({
-    required this.thing,
+    required super.thing,
     required this.deviceEvents,
     required super.name,
     required super.value,
     required super.metadata,
-  }) : super(thing: thing);
+  });
 
   void subscribeToEvents() {
     _eventSubscription = deviceEvents.on<LyfiStateChangedEvent>().listen((event) {
@@ -79,15 +78,14 @@ class LyfiModeProperty extends WotProperty<String> {
 class LyfiPowerProperty extends WotProperty<bool> {
   StreamSubscription? _eventSubscription;
   final DeviceEventBus deviceEvents;
-  final WotThing thing;
 
   LyfiPowerProperty({
-    required this.thing,
+    required super.thing,
     required this.deviceEvents,
     required super.name,
     required super.value,
     required super.metadata,
-  }) : super(thing: thing);
+  });
 
   void subscribeToEvents() {
     _eventSubscription = deviceEvents.on<DevicePowerOnOffChangedEvent>().listen((event) {

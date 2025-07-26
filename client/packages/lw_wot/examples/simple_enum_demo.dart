@@ -1,9 +1,9 @@
 // simple_enum_demo.dart
 // Simple demonstration of using Dart enum in lw_wot
 
-import '../lib/property.dart';
-import '../lib/thing.dart';
-import '../lib/value.dart';
+import 'package:lw_wot/property.dart';
+import 'package:lw_wot/thing.dart';
+import 'package:lw_wot/value.dart';
 
 // Define device state enum
 enum DeviceState {

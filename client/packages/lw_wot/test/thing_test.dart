@@ -1,10 +1,10 @@
 import 'package:test/test.dart';
-import '../lib/thing.dart';
-import '../lib/property.dart';
-import '../lib/action.dart';
-import '../lib/event.dart';
-import '../lib/value.dart';
-import '../lib/types.dart';
+import 'package:lw_wot/thing.dart';
+import 'package:lw_wot/property.dart';
+import 'package:lw_wot/action.dart';
+import 'package:lw_wot/event.dart';
+import 'package:lw_wot/value.dart';
+import 'package:lw_wot/types.dart';
 
 // Test action for action testing
 class TestThingAction extends WotAction<dynamic> {

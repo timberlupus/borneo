@@ -19,7 +19,6 @@ import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.da
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
-import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_memory.dart';
 import 'package:test/test.dart';
 
@@ -452,7 +451,7 @@ class TestDevice extends Device {
 }
 
 class TestDriverData extends DriverData {
-  TestDriverData(Device device) : super(device);
+  TestDriverData(super.device);
 
   @override
   void dispose() {}
@@ -472,15 +471,9 @@ class TestDriver extends IDriver {
   void dispose() {}
 }
 
-class TestGlobalDevicesEventBus extends EventBus implements GlobalDevicesEventBus {
-  @override
-  StreamController get streamController => super.streamController;
-}
+class TestGlobalDevicesEventBus extends EventBus implements GlobalDevicesEventBus {}
 
-class TestEventBus extends EventBus {
-  @override
-  StreamController get streamController => super.streamController;
-}
+class TestEventBus extends EventBus {}
 
 class TestSceneManager implements ISceneManager {
   late SceneEntity currentScene;

@@ -1,8 +1,8 @@
 import 'package:test/test.dart';
-import '../lib/property.dart';
-import '../lib/value.dart';
-import '../lib/thing.dart';
-import '../lib/types.dart';
+import 'package:lw_wot/property.dart';
+import 'package:lw_wot/value.dart';
+import 'package:lw_wot/thing.dart';
+import 'package:lw_wot/types.dart';
 
 void main() {
   group('WotPropertyMetadata', () {

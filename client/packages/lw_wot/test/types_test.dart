@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import '../lib/types.dart';
+import 'package:lw_wot/types.dart';
 
 void main() {
   group('WotPrimitiveJsonType', () {

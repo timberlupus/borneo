@@ -1,6 +1,5 @@
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_common/exceptions.dart';
-import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_memory.dart';
 import 'package:test/test.dart';
 

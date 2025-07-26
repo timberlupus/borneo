@@ -1,7 +1,7 @@
 import 'package:test/test.dart';
-import '../lib/property.dart';
-import '../lib/thing.dart';
-import '../lib/value.dart';
+import 'package:lw_wot/property.dart';
+import 'package:lw_wot/thing.dart';
+import 'package:lw_wot/value.dart';
 
 // 定义一个设备状态枚举
 enum DeviceOperationMode {

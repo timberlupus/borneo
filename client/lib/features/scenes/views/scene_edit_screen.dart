@@ -104,7 +104,7 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
           children: [
             InkWell(
               borderRadius: BorderRadius.circular(8),
-              onTap: () => _pickImage(context, notifier),
+              onTap: () => _pickImage(notifier, Theme.of(context)),
               child: Container(
                 width: double.infinity,
                 height: 120,
@@ -196,7 +196,9 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
                   _formKey.currentState!.save();
                   final success = await notifier.submit();
                   if (success) {
-                    Navigator.pop(context);
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
                   }
                 }
               },
@@ -224,7 +226,9 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
                         okPressed: () async {
                           final success = await notifier.delete();
                           if (success) {
-                            Navigator.of(context).pop(true);
+                            if (context.mounted) {
+                              Navigator.of(context).pop(true);
+                            }
                           }
                         },
                       );
@@ -236,7 +240,7 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
     ];
   }
 
-  Future<void> _pickImage(BuildContext context, SceneEditNotifier notifier) async {
+  Future<void> _pickImage(SceneEditNotifier notifier, ThemeData theme) async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
 
@@ -249,7 +253,7 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
           uiSettings: [
             AndroidUiSettings(
               toolbarTitle: 'Crop Image',
-              toolbarColor: Theme.of(context).colorScheme.primary,
+              toolbarColor: theme.colorScheme.primary,
               toolbarWidgetColor: Colors.white,
               initAspectRatio: CropAspectRatioPreset.ratio16x9,
               lockAspectRatio: false,

@@ -1,6 +1,6 @@
-import '../lib/property.dart';
-import '../lib/thing.dart';
-import '../lib/value.dart';
+import 'package:lw_wot/property.dart';
+import 'package:lw_wot/thing.dart';
+import 'package:lw_wot/value.dart';
 
 enum DeviceWorkMode {
   auto,
@@ -226,7 +226,7 @@ class SmartAirConditioner {
   }
 
   void _handleTemperatureChange(double temperature) {
-    print('Target temperature set to: ${temperature}°C');
+    print('Target temperature set to: $temperature°C');
 
     if (_workMode == DeviceWorkMode.auto) {
       print('Switching to manual mode due to temperature change');

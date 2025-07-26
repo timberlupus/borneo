@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import '../lib/value.dart';
+import 'package:lw_wot/value.dart';
 import 'dart:async';
 
 void main() {

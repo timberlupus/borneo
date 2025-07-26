@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import '../lib/utils.dart';
+import 'package:lw_wot/utils.dart';
 
 void main() {
   group('timestamp', () {
