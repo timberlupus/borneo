@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 async def main():
-    async with LyfiDeviceCoapClient('coap://192.168.0.15') as client:
+    async with LyfiDeviceCoapClient('coap://192.168.0.14') as client:
 
         response = await client.get_wellknown_core()
         print("Wellknown-core:")
@@ -23,9 +23,6 @@ async def main():
 
         print("Get current time zone:")
         print(await client.get_timezone())
-
-        print("Set time zone to CST-9")
-        await client.set_timezone("CST-8")
 
         print("Get current time zone again:")
         print(await client.get_timezone())

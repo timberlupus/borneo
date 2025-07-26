@@ -59,13 +59,13 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
     bool succeed = false;
     try {
       // Verify compatible string
-      final compatible = await _getCompatible(probeCoapClient);
+      final compatible = await _getCompatible(probeCoapClient, cancelToken: cancelToken);
       if (compatible != lyfiCompatibleString) {
         throw UncompatibleDeviceError("Uncompatible device: `$compatible`", dev);
       }
 
       // Verify firmware version
-      final fwver = await _getFirmwareVersion(probeCoapClient);
+      final fwver = await _getFirmwareVersion(probeCoapClient, cancelToken: cancelToken);
       if (!kLyfiFWVersionConstraint.allows(fwver)) {
         throw UnsupportedVersionError(
           'Unsupported firmware version',
@@ -138,13 +138,13 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
         .where((data) => data != null);
   }
 
-  Future<String> _getCompatible(CoapClient coap) async {
-    final compatible = await coap.getCbor<String>(BorneoPaths.compatible);
+  Future<String> _getCompatible(CoapClient coap, {CancellationToken? cancelToken}) async {
+    final compatible = await coap.getCbor<String>(BorneoPaths.compatible, cancelToken: cancelToken);
     return compatible;
   }
 
-  Future<Version> _getFirmwareVersion(CoapClient coap) async {
-    final fwver = await coap.getCbor<String>(BorneoPaths.firmwareVersion);
+  Future<Version> _getFirmwareVersion(CoapClient coap, {CancellationToken? cancelToken}) async {
+    final fwver = await coap.getCbor<String>(BorneoPaths.firmwareVersion, cancelToken: cancelToken);
     return Version.parse(fwver);
   }
 

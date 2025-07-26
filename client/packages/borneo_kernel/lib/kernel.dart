@@ -23,6 +23,7 @@ import 'package:borneo_kernel_abstractions/mdns.dart';
 final class DefaultKernel implements IKernel {
   static const Duration kStartupDiscoveryDuration = Duration(seconds: 10);
   static const Duration kLocalProbeTimeOut = Duration(seconds: 3);
+  static const Duration kLocalBindTimeOut = Duration(seconds: 15);
   static const Duration kHeartbeatPollingInterval = Duration(seconds: 5);
 
   Timer? _timer;
@@ -218,6 +219,7 @@ final class DefaultKernel implements IKernel {
   Future<void> bind(Device device, String driverID, {Duration? timeout, CancellationToken? cancelToken}) async {
     // 在获取锁之前检查取消状态
     cancelToken?.throwIfCancelled();
+    final eventsToFire = [];
 
     await _deviceOpLock.synchronized(() async {
       _ensureStarted();
@@ -238,7 +240,7 @@ final class DefaultKernel implements IKernel {
 
       final driverInitialized = await driver
           .probe(device, cancelToken: cancelToken)
-          .timeout(timeout ?? kLocalProbeTimeOut);
+          .timeout(timeout ?? kLocalBindTimeOut);
 
       if (driverInitialized) {
         // Try to activate device
@@ -247,7 +249,8 @@ final class DefaultKernel implements IKernel {
           _events.fire(event);
         });
 
-        _events.fire(DeviceBoundEvent(device));
+        //_events.fire(DeviceBoundEvent(device));
+        eventsToFire.add(DeviceBoundEvent(device));
 
         // Start observation for push heartbeat if supported
         final driverDesc = _driverRegistry.metaDrivers[driverID];
@@ -263,6 +266,9 @@ final class DefaultKernel implements IKernel {
         throw DeviceProbeError("Failed to probe $device", device);
       }
     });
+    for (final e in eventsToFire) {
+      _events.fire(e);
+    }
   }
 
   @override
