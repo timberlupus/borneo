@@ -9,6 +9,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:intl/intl.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/manual_editor_view_model.dart';
@@ -342,8 +343,9 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     await currentEditor!.initialize(cancelToken: cancelToken);
   }
 
-  Future<SettingsViewModel> loadSettings() async {
+  Future<SettingsViewModel> loadSettings(final GettextLocalizations gt) async {
     final vm = SettingsViewModel(
+      gt,
       deviceID: deviceID,
       deviceManager: deviceManager,
       globalEventBus: globalEventBus,

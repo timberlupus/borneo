@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 import '../settings_screen.dart';
@@ -30,7 +31,7 @@ class DashboardSettingsTile extends StatelessWidget {
                     ? null
                     : () async {
                         final lyfi = context.read<LyfiViewModel>();
-                        final vm = await lyfi.loadSettings();
+                        final vm = await lyfi.loadSettings(GettextLocalizations.of(context));
                         final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
                         if (context.mounted) {
                           Navigator.push(context, route);

@@ -6,6 +6,7 @@ import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
+import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'package:latlong2/latlong.dart';
@@ -17,6 +18,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   final GeneralBorneoDeviceInfo borneoInfo;
   final LyfiDeviceInfo ledInfo;
   final LyfiDeviceStatus ledStatus;
+  final GettextLocalizations _gt;
 
   ILyfiDeviceApi get api => deviceManager.getBoundDevice(deviceID).api<ILyfiDeviceApi>();
 
@@ -40,7 +42,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   PowerBehavior get powerBehavior => _powerBehavior;
   bool get canUpdatePowerBehavior => !isBusy && isOnline;
 
-  SettingsViewModel({
+  SettingsViewModel(
+    this._gt, {
     required super.deviceID,
     required super.deviceManager,
     required super.globalEventBus,
@@ -65,23 +68,14 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
 
   Future<void> updateGeoLocation(LatLng location) async {
     super.enqueueUIJob(() async {
-      /*
-      final tzc = TimezoneConverter();
-      await tzc.init();
-      final device_posix_tz = await super.lyfiDeviceApi.getTimeZone(super.boundDevice!.device);
-      final device_tz = await tzc.convertToIanaTimezone(device_posix_tz);
-      final selected_tz = latLngToTimezoneString(location.latitude, location.longitude);
-      final offset_enabled = device_tz != selected_tz;
-      var offset = offset_enabled ? _getTimeDifference(device_tz!, selected_tz).inSeconds : 0;
-      await super.lyfiDeviceApi.setTimeZoneEnabled(super.boundDevice!.device, offset_enabled);
-      await super.lyfiDeviceApi.setTimeZoneOffset(super.boundDevice!.device, offset);
-
-      //await super.lyfiDeviceApi.setTimeZoneOffset(super.boundDevice!.device, )
-      */
-      final loc = GeoLocation(lat: location.latitude, lng: location.longitude);
-      await super.lyfiDeviceApi.setLocation(super.boundDevice!.device, loc);
-      _location = loc;
-      notification.showSuccess("Location updated successfully");
+      try {
+        final loc = GeoLocation(lat: location.latitude, lng: location.longitude);
+        await super.lyfiDeviceApi.setLocation(super.boundDevice!.device, loc);
+        _location = loc;
+        notification.showSuccess(_gt.translate("Location updated successfully"));
+      } catch (e) {
+        notification.showError(_gt.translate("Failed to update device location: $e"));
+      }
     });
   }
 
@@ -103,7 +97,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     // Check if location services are enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled().asCancellable(cancel);
     if (!serviceEnabled) {
-      throw bo_ex.InvalidOperationException(message: 'Please enable location services');
+      throw bo_ex.InvalidOperationException(message: _gt.translate('Please enable location services'));
     }
 
     // Check permissions
@@ -111,36 +105,44 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission().asCancellable(cancel);
       if (permission == LocationPermission.denied) {
-        throw bo_ex.PermissionDeniedException(message: 'Location permissions are denied');
+        throw bo_ex.PermissionDeniedException(message: _gt.translate('Location permissions are denied'));
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      throw bo_ex.PermissionDeniedException(message: 'Location permissions are permanently denied');
+      throw bo_ex.PermissionDeniedException(message: _gt.translate('Location permissions are permanently denied'));
     }
 
     // Get current position
-    final position = await Geolocator.getCurrentPosition(
-      locationSettings: LocationSettings(
-        accuracy: LocationAccuracy.low,
-        timeLimit: Duration(seconds: 30),
-        distanceFilter: 100,
-      ),
-    ).asCancellable(cancel);
-
-    return position;
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: LocationSettings(
+          accuracy: LocationAccuracy.low,
+          timeLimit: Duration(seconds: 30),
+          distanceFilter: 100,
+        ),
+      ).asCancellable(cancel);
+      return position;
+    } catch (e) {
+      notification.showError(_gt.translate("Failed to get location: $e"));
+      rethrow;
+    }
   }
 
   Future<void> updateTimezone() async {
     super.enqueueUIJob(() async {
       isBusy = true;
       notifyListeners();
-      final tzc = TimezoneConverter();
-      await tzc.init();
-      final posixTZ = await tzc.getLocalPosixTimezone();
-      await api.setTimeZone(boundDevice!.device, posixTZ!);
-      _timezone = posixTZ;
-      notification.showSuccess("Time zone updated successfully");
+      try {
+        final tzc = TimezoneConverter();
+        await tzc.init();
+        final posixTZ = await tzc.getLocalPosixTimezone();
+        await api.setTimeZone(boundDevice!.device, posixTZ!);
+        _timezone = posixTZ;
+        notification.showSuccess(_gt.translate("Time zone updated successfully"));
+      } catch (e) {
+        notification.showError(_gt.translate("Failed to update device time zone: $e"));
+      }
     });
   }
 
@@ -148,9 +150,13 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     super.enqueueUIJob(() async {
       isBusy = true;
       notifyListeners();
-      await api.setCorrectionMethod(boundDevice!.device, newMethod);
-      _correctionMethod = newMethod;
-      notification.showSuccess("LED correction method updated successfully");
+      try {
+        await api.setCorrectionMethod(boundDevice!.device, newMethod);
+        _correctionMethod = newMethod;
+        notification.showSuccess(_gt.translate("LED correction method updated successfully"));
+      } catch (e) {
+        notification.showError(_gt.translate("Failed to update LED correction method: $e"));
+      }
     });
   }
 
@@ -158,9 +164,13 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     super.enqueueUIJob(() async {
       isBusy = true;
       notifyListeners();
-      await api.setTemporaryDuration(boundDevice!.device, dur);
-      _temporaryDuration = dur;
-      notification.showSuccess("Temporary duration updated successfully");
+      try {
+        await api.setTemporaryDuration(boundDevice!.device, dur);
+        _temporaryDuration = dur;
+        notification.showSuccess(_gt.translate("Temporary duration updated successfully"));
+      } catch (e) {
+        notification.showError(_gt.translate("Failed to update temporary duration: $e"));
+      }
     });
   }
 
@@ -168,9 +178,13 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     super.enqueueUIJob(() async {
       isBusy = true;
       notifyListeners();
-      await api.setPowerBehavior(boundDevice!.device, behavior);
-      _powerBehavior = behavior;
-      notification.showSuccess("Power behavior updated successfully");
+      try {
+        await api.setPowerBehavior(boundDevice!.device, behavior);
+        _powerBehavior = behavior;
+        notification.showSuccess(_gt.translate("Power behavior updated successfully"));
+      } catch (e) {
+        notification.showError(_gt.translate("Failed to update power behavior: $e"));
+      }
     });
   }
 }
