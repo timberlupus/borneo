@@ -151,7 +151,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   Future<void> refreshStatus({CancellationToken? cancelToken});
 
   Future<void> _periodicRefreshTask(CancellationToken? cancelToken) async {
-    if (!hasListeners || isBusy || !isOnline) {
+    if (!hasListeners || isBusy || !isOnline || isDisposed) {
       return;
     }
     try {

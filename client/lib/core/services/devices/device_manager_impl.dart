@@ -378,7 +378,7 @@ final class DeviceManagerImpl extends DeviceManager {
 
       final metaModule = _deviceModuleRegistry.metaModules[device.driverID];
       if (metaModule != null) {
-        final wotThing = metaModule.createWotThing(device, this);
+        final wotThing = await metaModule.createWotThing(device, this, logger: logger);
         _wotThings[deviceID] = wotThing;
 
         // If device is bound, sync WotThing with actual device state
@@ -451,7 +451,7 @@ final class DeviceManagerImpl extends DeviceManager {
         try {
           final metaModule = _deviceModuleRegistry.metaModules[device.driverID];
           if (metaModule != null) {
-            final wotThing = metaModule.createWotThing(device, this);
+            final wotThing = await metaModule.createWotThing(device, this, logger: logger);
             _wotThings[device.id] = wotThing;
 
             // If device is bound, sync WotThing with actual device state

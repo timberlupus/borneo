@@ -4,6 +4,7 @@ import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/features/devices/view_models/base_device_view_model.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logger/logger.dart';
 import 'package:lw_wot/wot.dart';
 
 import 'package:borneo_kernel_abstractions/models/driver_descriptor.dart';
@@ -19,7 +20,7 @@ abstract class DeviceModuleMetadata {
   final Widget Function(BuildContext context, double iconSize) primaryStateIconBuilder;
   final List<Widget> Function(BuildContext, AbstractDeviceSummaryViewModel) secondaryStatesBuilder;
   final AbstractDeviceSummaryViewModel Function(DeviceEntity, DeviceManager, EventBus) createSummaryVM;
-  final WotThing Function(DeviceEntity, DeviceManager) createWotThing;
+  final Future<WotThing> Function(DeviceEntity, DeviceManager, {Logger? logger}) createWotThing;
 
   const DeviceModuleMetadata({
     required this.id,

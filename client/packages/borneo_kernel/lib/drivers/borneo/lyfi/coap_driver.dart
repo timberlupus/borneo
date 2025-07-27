@@ -39,7 +39,8 @@ class LyfiPaths {
   static final Uri sunSchedule = Uri(path: '/borneo/lyfi/sun/schedule');
   static final Uri sunCurve = Uri(path: '/borneo/lyfi/sun/curve');
 
-  static final Uri keepTemp = Uri(path: '/borneo/lyfi/thermal/keep-temp');
+  static final Uri currentTemp = Uri(path: '/borneo/lyfi/thermal/temp/current');
+  static final Uri keepTemp = Uri(path: '/borneo/lyfi/thermal/temp/keep');
 }
 
 class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi implements IDriver, ILyfiDeviceApi {

@@ -8,6 +8,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
+import 'package:logger/logger.dart';
 import 'package:lw_wot/wot.dart';
 
 /// Custom WotProperty for state that handles its own event subscription
@@ -370,6 +371,7 @@ class LyfiCorrectionMethodProperty extends WotProperty<String> {
 /// LyfiThing extends WotThing following Mozilla WebThing initialization pattern
 /// This class uses default values during construction and binds to actual hardware asynchronously
 class LyfiThing extends WotThing {
+  final Logger? logger;
   final Device device;
   final DeviceEventBus deviceEvents;
   final IBorneoDeviceApi borneoApi;
@@ -394,6 +396,7 @@ class LyfiThing extends WotThing {
     required this.borneoApi,
     required this.lyfiApi,
     required super.title,
+    this.logger,
   }) : super(id: device.id, type: ["OnOffSwitch", "Light"], description: "Lyfi LED lighting device");
 
   /// Mozilla WebThing style initialization - sync constructor with async hardware binding
@@ -653,10 +656,10 @@ class LyfiThing extends WotThing {
       timeZoneOffsetProperty.value.notifyOfExternalUpdate(timeZoneOffset);
       keepTempProperty.value.notifyOfExternalUpdate(keepTemp);
 
-      print('LyfiThing: Successfully bound to hardware state');
-    } catch (e) {
-      print('LyfiThing: Warning - Failed to bind to hardware: $e');
+      logger?.d('LyfiThing: Successfully bound to hardware state');
+    } catch (e, stackTrace) {
       // Continue with default values if hardware is not available
+      logger?.e('LyfiThing: Warning - Failed to bind to hardware: $e', error: e, stackTrace: stackTrace);
     }
   }
 

@@ -93,7 +93,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
     }
   }
 
-  static WotThing _createWotThing(DeviceEntity device, DeviceManager deviceManager) {
+  static Future<WotThing> _createWotThing(DeviceEntity device, DeviceManager deviceManager, {Logger? logger}) async {
     // Check if device is bound to get access to APIs
     if (!deviceManager.isBound(device.id)) {
       // Device not bound, create a basic WotThing with default values
@@ -115,20 +115,16 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         borneoApi: borneoApi,
         lyfiApi: lyfiApi,
         title: device.name,
+        logger: logger,
       );
 
       // Initialize the LyfiThing asynchronously (hardware binding)
       // Note: This doesn't block creation, initialization happens in background
-      lyfiThing.initialize().catchError((error) {
-        // Log error but don't fail creation - device may come online later
-        throw InvalidOperationException(message: 'Warning: Failed to initialize LyfiThing for ${device.id}: $error');
-      });
-
+      await lyfiThing.initialize();
       return lyfiThing;
     } catch (e) {
       // If API access fails, fall back to basic WotThing
       throw InvalidOperationException(message: 'Warning: Failed to create LyfiThing with APIs for ${device.id}: $e');
-      // return _createBasicWotThing(device);
     }
   }
 
