@@ -18,7 +18,9 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
 
   @override
   Future<void> onInitialize() async {
-    await super.refreshStatus();
+    if (super.isOnline) {
+      await super.refreshStatus();
+    }
   }
 
   LyfiMode get mode => _mode;

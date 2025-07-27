@@ -40,6 +40,9 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
 
   @override
   Future<void> refreshStatus({CancellationToken? cancelToken}) async {
+    if (!super.isOnline) {
+      return;
+    }
     await _lock
         .synchronized(() async {
           _borneoDeviceStatus = await borneoDeviceApi.getGeneralDeviceStatus(super.boundDevice!.device);

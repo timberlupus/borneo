@@ -94,7 +94,7 @@ final class DeviceManagerImpl extends DeviceManager {
       _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
       await _kernel.start();
 
-      await _rebindAll(devices);
+      unawaited(_rebindAll(devices));
 
       // Load WotThings for current scene after devices are bound
       await _loadWotThingsForCurrentScene();
