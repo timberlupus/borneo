@@ -47,3 +47,5 @@ class DeviceGroupDeletedEvent {
   final String id;
   const DeviceGroupDeletedEvent(this.id);
 }
+
+final class DeviceManagerReadyEvent {}

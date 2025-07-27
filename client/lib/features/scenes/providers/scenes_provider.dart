@@ -47,6 +47,7 @@ class SceneSummaryNotifier extends StateNotifier<SceneSummaryState> {
   late final StreamSubscription<SceneUpdatedEvent> _sceneUpdatedSub;
   late final StreamSubscription<DeviceBoundEvent> _deviceBoundSub;
   late final StreamSubscription<DeviceRemovedEvent> _deviceRemovedSub;
+  late final StreamSubscription<DeviceManagerReadyEvent> _deviceManagerReadySub;
 
   SceneSummaryNotifier(
     this._sceneManager,
@@ -70,6 +71,7 @@ class SceneSummaryNotifier extends StateNotifier<SceneSummaryState> {
     _sceneUpdatedSub = _eventBus.on<SceneUpdatedEvent>().listen(_onSceneUpdated);
     _deviceBoundSub = _deviceManager.allDeviceEvents.on<DeviceBoundEvent>().listen(_onDeviceBound);
     _deviceRemovedSub = _deviceManager.allDeviceEvents.on<DeviceRemovedEvent>().listen(_onDeviceRemoved);
+    _deviceManagerReadySub = _eventBus.on<DeviceManagerReadyEvent>().listen(_onDeviceManagerReady);
   }
 
   void _onCurrentSceneChanged(CurrentSceneChangedEvent event) {
@@ -97,6 +99,10 @@ class SceneSummaryNotifier extends StateNotifier<SceneSummaryState> {
     _updateDeviceStatistics();
   }
 
+  void _onDeviceManagerReady(final DeviceManagerReadyEvent _) {
+    _updateDeviceStatistics();
+  }
+
   Future<void> _updateDeviceStatistics() async {
     try {
       final deviceStats = await _sceneManager.getDeviceStatistics(state.scene.id);
@@ -115,6 +121,7 @@ class SceneSummaryNotifier extends StateNotifier<SceneSummaryState> {
     _sceneUpdatedSub.cancel();
     _deviceBoundSub.cancel();
     _deviceRemovedSub.cancel();
+    _deviceManagerReadySub.cancel();
     super.dispose();
   }
 }
@@ -145,6 +152,7 @@ class ScenesNotifier extends StateNotifier<ScenesState> {
   late final StreamSubscription<SceneCreatedEvent> _sceneCreatedSub;
   late final StreamSubscription<SceneDeletedEvent> _sceneDeletedSub;
   late final StreamSubscription<SceneUpdatedEvent> _sceneUpdatedSub;
+  late final StreamSubscription<DeviceManagerReadyEvent> _deviceManagerReadySub;
 
   final Map<String, SceneSummaryNotifier> _sceneNotifiers = {};
 
@@ -159,6 +167,7 @@ class ScenesNotifier extends StateNotifier<ScenesState> {
     _sceneCreatedSub = _eventBus.on<SceneCreatedEvent>().listen(_onSceneCreated);
     _sceneDeletedSub = _eventBus.on<SceneDeletedEvent>().listen(_onSceneDeleted);
     _sceneUpdatedSub = _eventBus.on<SceneUpdatedEvent>().listen(_onSceneUpdated);
+    _deviceManagerReadySub = _eventBus.on<DeviceManagerReadyEvent>().listen(_onDeviceManagerReady);
   }
 
   Future<void> initialize() async {
@@ -254,12 +263,19 @@ class ScenesNotifier extends StateNotifier<ScenesState> {
     state = state.copyWith(scenes: updatedScenes);
   }
 
+  void _onDeviceManagerReady(final DeviceManagerReadyEvent _) {
+    if (!state.isLoading) {
+      _reload();
+    }
+  }
+
   @override
   void dispose() {
     _currentSceneChangedSub.cancel();
     _sceneCreatedSub.cancel();
     _sceneDeletedSub.cancel();
     _sceneUpdatedSub.cancel();
+    _deviceManagerReadySub.cancel();
 
     for (final notifier in _sceneNotifiers.values) {
       notifier.dispose();

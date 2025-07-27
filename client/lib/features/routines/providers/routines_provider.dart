@@ -35,6 +35,7 @@ class RoutinesNotifier extends StateNotifier<RoutinesState> {
 
   late final StreamSubscription<CurrentSceneChangedEvent> _currentSceneChangedSub;
   late final StreamSubscription<CurrentSceneDevicesReloadedEvent> _devicesReloadedSub;
+  late final StreamSubscription<DeviceManagerReadyEvent> _deviceManagerReadySub;
 
   RoutinesNotifier(
     this._routineManager,
@@ -49,6 +50,7 @@ class RoutinesNotifier extends StateNotifier<RoutinesState> {
   void _setupEventListeners() {
     _currentSceneChangedSub = _eventBus.on<CurrentSceneChangedEvent>().listen(_onCurrentSceneChanged);
     _devicesReloadedSub = _eventBus.on<CurrentSceneDevicesReloadedEvent>().listen(_onDevicesReloaded);
+    _deviceManagerReadySub = _eventBus.on<DeviceManagerReadyEvent>().listen(_onDeviceManagerReady);
   }
 
   Future<void> initialize() async {
@@ -78,7 +80,10 @@ class RoutinesNotifier extends StateNotifier<RoutinesState> {
   }
 
   void _onDevicesReloaded(CurrentSceneDevicesReloadedEvent event) {
-    // Now reload routines after devices have been reloaded for the new scene
+    _reloadRoutines();
+  }
+
+  void _onDeviceManagerReady(DeviceManagerReadyEvent event) {
     _reloadRoutines();
   }
 
@@ -86,6 +91,7 @@ class RoutinesNotifier extends StateNotifier<RoutinesState> {
   void dispose() {
     _currentSceneChangedSub.cancel();
     _devicesReloadedSub.cancel();
+    _deviceManagerReadySub.cancel();
     super.dispose();
   }
 }

@@ -95,13 +95,10 @@ final class DefaultKernel implements IKernel {
   @override
   void dispose() {
     if (!_isDisposed) {
-      _isDisposed = true; // 首先标记为已销毁，避免其他操作
+      _isDisposed = true;
 
-      // 停止扫描（在销毁EventBus之前）
       if (isScanning) {
-        // 直接设置扫描状态为false，避免异步操作
         _isScanning = false;
-        // 同步停止mDNS发现
         if (mdnsProvider != null) {
           for (final disc in _mdnsDiscoveryList) {
             disc.dispose();
@@ -110,28 +107,23 @@ final class DefaultKernel implements IKernel {
         }
       }
 
-      // 取消令牌和定时器
       _masterCancelToken.cancel();
       _timer?.cancel();
       _heartbeatPollingTaskCancelToken.cancel();
 
-      // 取消事件订阅
       _deviceOfflineSub.cancel();
       _foundDeviceEventSub.cancel();
 
-      // 清理所有观察订阅
       for (final subscription in _observationSubscriptions.values) {
         subscription.cancel();
       }
       _observationSubscriptions.clear();
 
-      // 清理所有超时定时器
       for (final timer in _observationTimeoutTimers.values) {
         timer.cancel();
       }
       _observationTimeoutTimers.clear();
 
-      // 清理所有绑定的设备
       for (final deviceEventRouter in _deviceEventRouters.values) {
         deviceEventRouter.cancel();
       }
@@ -142,13 +134,11 @@ final class DefaultKernel implements IKernel {
       }
       _boundDevices.clear();
 
-      // 清理所有激活的驱动程序
       for (final driver in _activatedDrivers.values) {
         driver.dispose();
       }
       _activatedDrivers.clear();
 
-      // 最后销毁EventBus
       _events.destroy();
     }
   }
@@ -224,7 +214,6 @@ final class DefaultKernel implements IKernel {
     await _deviceOpLock.synchronized(() async {
       _ensureStarted();
 
-      // 在锁内再次检查取消状态
       cancelToken?.throwIfCancelled();
 
       assert(_registeredDevices.containsKey(device.id));
@@ -467,7 +456,6 @@ final class DefaultKernel implements IKernel {
       return;
     }
 
-    // 收集需要离线处理的设备
     final List<Device> offlineDevices = [];
 
     try {
@@ -618,7 +606,6 @@ final class DefaultKernel implements IKernel {
         MergedCancellationToken([if (cancelToken != null) cancelToken, _masterCancelToken]),
       );
       _isScanning = false;
-      // 只在未销毁时发送事件
       if (!_isDisposed) {
         _events.fire(DeviceDiscoveringStoppedEvent());
       }

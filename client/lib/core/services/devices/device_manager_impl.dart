@@ -152,6 +152,7 @@ final class DeviceManagerImpl extends DeviceManager {
         futures.add(tryBind(device));
       }
       await Future.wait(futures);
+      _globalBus.fire(DeviceManagerReadyEvent());
     });
   }
 
