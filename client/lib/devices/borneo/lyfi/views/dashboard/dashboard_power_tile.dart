@@ -22,18 +22,28 @@ class DashboardPowerTile extends StatelessWidget {
       builder: (context, props, _) {
         final vm = context.read<LyfiViewModel>();
         final mergedListenable = Listenable.merge([vm.currentVoltage, vm.currentCurrent, vm.currentWatts]);
+        final bool isOnline = props.isOnline;
+        final Color disabledColor = Theme.of(context).disabledColor;
+        final Color fgColor = Theme.of(context).colorScheme.onSurface;
+        final Color bgColor = isOnline
+            ? Theme.of(context).colorScheme.surfaceContainer
+            : Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.5);
+        final Color arcColor = isOnline ? Theme.of(context).colorScheme.outlineVariant : disabledColor;
+        final Color progressColor = isOnline ? Theme.of(context).colorScheme.tertiary : disabledColor;
+        final Color textPrimary = Theme.of(context).colorScheme.primary;
+        final Color textOnSurface = Theme.of(context).colorScheme.onSurface;
         return ListenableBuilder(
           listenable: mergedListenable,
           builder: (context, _) => DashboardToufu(
             title: 'LED Power',
             icon: Icons.power_outlined,
-            foregroundColor: Theme.of(context).colorScheme.onSurface,
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-            arcColor: Theme.of(context).colorScheme.outlineVariant,
-            progressColor: Theme.of(context).colorScheme.tertiary,
+            foregroundColor: fgColor,
+            backgroundColor: bgColor,
+            arcColor: arcColor,
+            progressColor: progressColor,
             minValue: 0.0,
-            maxValue: props.isOnline ? vm.nominalPower ?? 99999 : 99999,
-            value: props.canMeasurePower ? vm.currentWatts.value ?? 0 : 0,
+            maxValue: isOnline ? vm.nominalPower ?? 99999 : 99999,
+            value: props.canMeasurePower && isOnline ? vm.currentWatts.value ?? 0 : 0,
             center: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.max,
@@ -44,7 +54,7 @@ class DashboardPowerTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    if (props.canMeasurePower)
+                    if (props.canMeasurePower && isOnline)
                       ...() {
                         final double watts = vm.currentWatts.value!;
                         final int intPart = watts.floor();
@@ -54,7 +64,7 @@ class DashboardPowerTile extends StatelessWidget {
                           Text(
                             isZero ? '0' : intPart.toString(),
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
+                              color: textPrimary,
                               fontFeatures: [FontFeature.tabularFigures()],
                             ),
                           ),
@@ -62,7 +72,7 @@ class DashboardPowerTile extends StatelessWidget {
                             Text(
                               '.',
                               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
+                                color: textPrimary,
                                 fontFeatures: [FontFeature.tabularFigures()],
                               ),
                             ),
@@ -70,7 +80,7 @@ class DashboardPowerTile extends StatelessWidget {
                               decimalPart.toString(),
                               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                 fontFeatures: [FontFeature.tabularFigures()],
-                                color: Theme.of(context).colorScheme.primary,
+                                color: textPrimary,
                               ),
                             ),
                           ],
@@ -78,7 +88,7 @@ class DashboardPowerTile extends StatelessWidget {
                             'W',
                             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontFeatures: [FontFeature.tabularFigures()],
-                              color: Theme.of(context).colorScheme.primary,
+                              color: textPrimary,
                             ),
                           ),
                         ];
@@ -87,7 +97,7 @@ class DashboardPowerTile extends StatelessWidget {
                       Text(
                         'N/A',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
+                          color: textPrimary,
                           fontFeatures: [FontFeature.tabularFigures()],
                         ),
                       ),
@@ -98,28 +108,23 @@ class DashboardPowerTile extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (props.canMeasureVoltage)
+                    if (props.canMeasureVoltage && isOnline)
                       Text(
                         '${vm.currentVoltage.value!.toStringAsFixed(1)}V',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
+                          color: textOnSurface,
                           fontFeatures: [FontFeature.tabularFigures()],
                         ),
                       ),
-                    if (props.canMeasureCurrent) const SizedBox(width: 4),
-                    if (props.canMeasureCurrent)
-                      Text(
-                        "·",
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
-                      ),
-                    if (props.canMeasureCurrent) const SizedBox(width: 4),
-                    if (vm.canMeasureCurrent)
+                    if (props.canMeasureCurrent && isOnline) const SizedBox(width: 4),
+                    if (props.canMeasureCurrent && isOnline)
+                      Text("·", style: Theme.of(context).textTheme.bodySmall?.copyWith(color: textOnSurface)),
+                    if (props.canMeasureCurrent && isOnline) const SizedBox(width: 4),
+                    if (vm.canMeasureCurrent && isOnline)
                       Text(
                         '${vm.currentCurrent.value!.toStringAsFixed(1)}A',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
+                          color: textOnSurface,
                           fontFeatures: [FontFeature.tabularFigures()],
                         ),
                       ),

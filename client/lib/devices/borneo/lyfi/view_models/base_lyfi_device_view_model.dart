@@ -2,10 +2,8 @@ import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_mo
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
-import 'package:synchronized/synchronized.dart';
 
 abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
-  final _lock = Lock();
   LyfiDeviceStatus? _lyfiStatus;
 
   ILyfiDeviceApi get lyfiDeviceApi => super.boundDevice!.driver as ILyfiDeviceApi;
@@ -15,8 +13,8 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
 
   double? get nominalPower => lyfiDeviceInfo.nominalPower;
 
-  late LyfiMode _mode;
-  late LyfiState _state;
+  LyfiMode _mode = LyfiMode.manual;
+  LyfiState _state = LyfiState.normal;
 
   @override
   Future<void> onInitialize() async {
@@ -65,10 +63,8 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   @override
   Future<void> refreshStatus({CancellationToken? cancelToken}) async {
     await super.refreshStatus(cancelToken: cancelToken);
-    await _lock.synchronized(() async {
-      _lyfiStatus = await lyfiDeviceApi.getLyfiStatus(boundDevice!.device, cancelToken: cancelToken);
-      _mode = _lyfiStatus?.mode ?? LyfiMode.manual;
-      _state = _lyfiStatus?.state ?? LyfiState.normal;
-    });
+    _lyfiStatus = await lyfiDeviceApi.getLyfiStatus(boundDevice!.device, cancelToken: cancelToken);
+    _mode = _lyfiStatus?.mode ?? LyfiMode.manual;
+    _state = _lyfiStatus?.state ?? LyfiState.normal;
   }
 }

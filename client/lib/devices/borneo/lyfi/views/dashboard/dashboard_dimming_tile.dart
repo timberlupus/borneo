@@ -14,7 +14,9 @@ class DashboardDimmingTile extends StatelessWidget {
         final theme = Theme.of(context);
         final isDisabled = !canUnlock;
         final iconColor = isDisabled ? theme.colorScheme.primary.withValues(alpha: 0.38) : theme.colorScheme.primary;
-        final textColor = isDisabled ? theme.colorScheme.primary.withValues(alpha: 0.38) : theme.colorScheme.primary;
+        final textColor = isDisabled
+            ? theme.colorScheme.onSurface.withValues(alpha: 0.38)
+            : theme.colorScheme.onSurface;
         return AspectRatio(
           aspectRatio: 1,
           child: Container(

@@ -7,18 +7,25 @@ class DashboardPowerSwitchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<LyfiViewModel, ({bool isOn, bool isBusy, bool isLocked, double overallBrightness, bool canUnlock})>(
+    return Selector<
+      LyfiViewModel,
+      ({bool isOn, bool isBusy, bool isLocked, double overallBrightness, bool canUnlock, bool isOnline})
+    >(
       selector: (_, vm) => (
         isOn: vm.isOn,
         isBusy: vm.isBusy,
         isLocked: vm.isLocked,
         overallBrightness: vm.overallBrightness,
         canUnlock: vm.canUnlock,
+        isOnline: vm.isOnline,
       ),
       builder: (context, props, _) {
         final theme = Theme.of(context);
         final isOn = props.isOn;
         final brightness = (props.overallBrightness * 100).clamp(0, 100).toInt();
+        final isOnline = props.isOnline;
+        final isDisabled = !isOnline;
+        final disabledColor = theme.colorScheme.onSurface.withOpacity(0.38);
         return AspectRatio(
           aspectRatio: 2.0,
           child: ClipRRect(
@@ -40,16 +47,17 @@ class DashboardPowerSwitchTile extends StatelessWidget {
                         child: child,
                       );
                     },
-                    child: Container(color: theme.colorScheme.inversePrimary),
+                    child: Container(color: isDisabled ? disabledColor : theme.colorScheme.inversePrimary),
                   ),
                 ),
 
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: (!props.isBusy && props.isLocked && context.read<LyfiViewModel>().isOnline)
+                    onTap: (!props.isBusy && props.isLocked && isOnline)
                         ? () => context.read<LyfiViewModel>().switchPowerOnOff(!isOn)
                         : null,
+                    splashColor: isDisabled ? Colors.transparent : null,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       child: AnimatedSwitcher(
@@ -59,12 +67,19 @@ class DashboardPowerSwitchTile extends StatelessWidget {
                           key: ValueKey(isOn),
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            if (!isOn) Icon(Icons.power_settings_new, color: Colors.red, size: 24),
+                            if (!isOn)
+                              Icon(Icons.power_settings_new, color: isDisabled ? disabledColor : Colors.red, size: 24),
                             if (isOn)
                               SizedBox(
                                 height: 24,
                                 width: 24,
-                                child: Center(child: Icon(Icons.power_settings_new, color: Colors.green, size: 24)),
+                                child: Center(
+                                  child: Icon(
+                                    Icons.power_settings_new,
+                                    color: isDisabled ? disabledColor : Colors.green,
+                                    size: 24,
+                                  ),
+                                ),
                               ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -75,14 +90,18 @@ class DashboardPowerSwitchTile extends StatelessWidget {
                                   Text(
                                     isOn ? 'ON' : 'OFF',
                                     style: theme.textTheme.titleSmall?.copyWith(
-                                      color: isOn ? theme.colorScheme.onSurface : Colors.red,
+                                      color: isDisabled
+                                          ? disabledColor
+                                          : (isOn ? theme.colorScheme.onSurface : Colors.red),
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   if (isOn)
                                     Text(
                                       '$brightness%',
-                                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: isDisabled ? disabledColor : theme.colorScheme.primary,
+                                      ),
                                     ),
                                 ],
                               ),
