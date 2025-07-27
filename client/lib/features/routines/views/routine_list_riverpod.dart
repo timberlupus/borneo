@@ -132,10 +132,7 @@ class _RoutineListRiverpodState extends ConsumerState<RoutineListRiverpod> {
           Container(
             margin: const EdgeInsets.only(top: 16),
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.errorContainer,
-              borderRadius: BorderRadius.circular(8),
-            ),
+            decoration: BoxDecoration(color: theme.colorScheme.errorContainer, borderRadius: BorderRadius.circular(8)),
             child: Row(
               children: [
                 Icon(Icons.error_outline, color: theme.colorScheme.onErrorContainer),

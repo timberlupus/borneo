@@ -9,13 +9,55 @@ import 'package:borneo_app/features/routines/views/routine_list_riverpod.dart';
 import 'scene_card_riverpod.dart';
 import 'scene_edit_screen.dart';
 
-class SceneListRiverpod extends ConsumerWidget {
+class SceneListRiverpod extends ConsumerStatefulWidget {
   const SceneListRiverpod({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SceneListRiverpod> createState() => _SceneListRiverpodState();
+}
+
+class _SceneListRiverpodState extends ConsumerState<SceneListRiverpod> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToSelectedCard(int index) {
+    if (!_scrollController.hasClients) return;
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final cardHeight = screenHeight / 4.0;
+    final cardWidth = cardHeight * (16.0 / 9.0); // Based on aspect ratio 16:9
+    final separatorWidth = 16.0;
+    final itemWidth = cardWidth + separatorWidth;
+
+    // Calculate center offset
+    final centerOffset = screenWidth / 2 - cardWidth / 2;
+    final targetOffset = index * itemWidth - centerOffset;
+
+    _scrollController.animateTo(
+      targetOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final scenesState = ref.watch(scenesProvider);
     double screenHeight = MediaQuery.of(context).size.height;
+
+    // Scroll to selected card when it changes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final selectedIndex = scenesState.scenes.indexWhere((scene) => scene.isSelected);
+      if (selectedIndex != -1) {
+        _scrollToSelectedCard(selectedIndex);
+      }
+    });
 
     return SliverToBoxAdapter(
       child: Container(
@@ -31,12 +73,13 @@ class SceneListRiverpod extends ConsumerWidget {
             },
           ),
           child: ListView.separated(
+            controller: _scrollController,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             separatorBuilder: (_, _) => const SizedBox(width: 16),
             scrollDirection: Axis.horizontal,
             itemCount: scenesState.scenes.length,
             itemBuilder: (context, index) {
-              return SceneCardRiverpod(scenesState.scenes[index]);
+              return SceneCardRiverpod(scenesState.scenes[index], onTap: () => _scrollToSelectedCard(index));
             },
           ),
         ),

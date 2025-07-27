@@ -10,9 +10,10 @@ import 'scene_edit_screen.dart';
 
 class SceneCardRiverpod extends ConsumerWidget {
   final SceneSummaryState scene;
+  final VoidCallback? onTap;
   static const _smallShadow = Shadow(offset: Offset(1.0, 1.0), blurRadius: 2.0, color: Color.fromARGB(128, 0, 0, 0));
 
-  const SceneCardRiverpod(this.scene, {super.key});
+  const SceneCardRiverpod(this.scene, {super.key, this.onTap});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,11 +31,12 @@ class SceneCardRiverpod extends ConsumerWidget {
               : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16.0),
           child: InkWell(
-            onTap: scene.isSelected
-                ? () {}
-                : () async {
-                    await ref.read(scenesProvider.notifier).switchCurrentScene(scene.id);
-                  },
+            onTap: () async {
+              if (onTap != null) onTap!();
+              if (!scene.isSelected) {
+                await ref.read(scenesProvider.notifier).switchCurrentScene(scene.id);
+              }
+            },
             child: scene.isSelected
                 ? Stack(
                     alignment: Alignment.topRight,
