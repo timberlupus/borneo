@@ -286,10 +286,10 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                 return DeviceStatusIndicator(isOnline: isOnline, onReconnect: isOnline ? null : vm.reconnect);
               },
             ),
-            Selector<LyfiViewModel, bool>(
-              selector: (_, vm) => vm.hasTimezoneMismatch,
-              builder: (context, hasMismatch, _) {
-                if (!hasMismatch) return SizedBox.shrink();
+            Selector<LyfiViewModel, ({bool hasTimezoneMismatch, bool isOnline})>(
+              selector: (_, vm) => (hasTimezoneMismatch: vm.hasTimezoneMismatch, isOnline: vm.isOnline),
+              builder: (context, props, _) {
+                if (!props.hasTimezoneMismatch || !props.isOnline) return SizedBox.shrink();
                 return _TimezoneSyncBanner();
               },
             ),
