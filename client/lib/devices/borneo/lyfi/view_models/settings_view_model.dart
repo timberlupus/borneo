@@ -1,6 +1,5 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
 import 'package:borneo_app/core/infrastructure/timezone.dart';
-import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_common/exceptions.dart' as bo_ex;
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
@@ -12,7 +11,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
 class SettingsViewModel extends BaseLyfiDeviceViewModel {
-  final IAppNotificationService notification;
   final Uri address;
   final GeneralBorneoDeviceStatus borneoStatus;
   final GeneralBorneoDeviceInfo borneoInfo;
@@ -47,7 +45,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     required super.deviceID,
     required super.deviceManager,
     required super.globalEventBus,
-    required this.notification,
+    required super.notification,
     required this.address,
     required this.borneoStatus,
     required this.borneoInfo,
@@ -184,6 +182,19 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
         notification.showSuccess(_gt.translate("Power behavior updated successfully"));
       } catch (e) {
         notification.showError(_gt.translate("Failed to update power behavior: $e"));
+      }
+    });
+  }
+
+  Future<void> factoryReset() async {
+    super.enqueueUIJob(() async {
+      isBusy = true;
+      notifyListeners();
+      try {
+        await api.factoryReset(boundDevice!.device);
+        notification.showSuccess(_gt.translate("Device restored to factory settings"));
+      } catch (e) {
+        notification.showError(_gt.translate("Failed to restore device to factory settings: $e"));
       }
     });
   }

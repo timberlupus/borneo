@@ -5,6 +5,7 @@ import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 
 import 'package:provider/provider.dart';
 
@@ -19,6 +20,8 @@ class AcclimationScreen extends StatelessWidget {
       deviceID: deviceID,
       deviceManager: context.read<DeviceManager>(),
       globalEventBus: context.read<EventBus>(),
+      notification: context.read<IAppNotificationService>(),
+      logger: context.read<Logger>(),
     );
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

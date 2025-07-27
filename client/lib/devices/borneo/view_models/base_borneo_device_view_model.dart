@@ -1,3 +1,4 @@
+import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/features/devices/view_models/base_device_view_model.dart';
 import 'package:borneo_app/core/infrastructure/timezone.dart';
 import 'package:borneo_common/io/net/rssi.dart';
@@ -10,6 +11,7 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
 
   GeneralBorneoDeviceStatus? _borneoDeviceStatus;
   GeneralBorneoDeviceStatus? get borneoDeviceStatus => isOnline ? _borneoDeviceStatus : null;
+
 
   IBorneoDeviceApi get borneoDeviceApi => super.boundDevice!.driver as IBorneoDeviceApi;
 
@@ -25,6 +27,8 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   final ValueNotifier<double?> currentVoltage = ValueNotifier<double?>(null);
   final ValueNotifier<double?> currentCurrent = ValueNotifier<double?>(null);
   final ValueNotifier<double?> currentWatts = ValueNotifier<double?>(null);
+
+  final IAppNotificationService notification;
 
   @override
   RssiLevel? get rssiLevel =>
@@ -43,6 +47,7 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
     required super.deviceID,
     required super.deviceManager,
     required super.globalEventBus,
+    required this.notification,
     super.logger,
   });
 
@@ -74,7 +79,18 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
     }
   }
 
-  Future<bool> syncDeviceTimezone() async {
+  Future<void> syncDeviceTimezone() async {
+    enqueueUIJob(() async {
+      final success = await _syncDeviceTimezone();
+      if (success) {
+        notification.showSuccess('Timezone synchronized successfully');
+      } else {
+        notification.showError('Failed to sync timezone');
+      }
+    });
+  }
+
+  Future<bool> _syncDeviceTimezone() async {
     if (!super.isOnline || _localPosixTimezone == null) return false;
 
     try {

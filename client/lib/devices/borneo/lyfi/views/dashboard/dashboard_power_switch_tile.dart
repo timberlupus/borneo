@@ -25,7 +25,7 @@ class DashboardPowerSwitchTile extends StatelessWidget {
         final brightness = (props.overallBrightness * 100).clamp(0, 100).toInt();
         final isOnline = props.isOnline;
         final isDisabled = !isOnline;
-        final disabledColor = theme.colorScheme.onSurface.withOpacity(0.38);
+        final disabledColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
         return AspectRatio(
           aspectRatio: 2.0,
           child: ClipRRect(

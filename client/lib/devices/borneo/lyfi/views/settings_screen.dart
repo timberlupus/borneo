@@ -329,7 +329,53 @@ class SettingsScreen extends StatelessWidget {
         title: Text('Restore to factory settings', style: TextStyle(color: Theme.of(context).colorScheme.error)),
         subtitle: Text('Your device will lose all custom settings.'),
         trailing: rightChevron,
+        onTap: () => _showFactoryResetDialog(context, vm),
       ),
     ];
+  }
+
+  void _showFactoryResetDialog(BuildContext context, SettingsViewModel vm) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Restore Factory Settings'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Are you sure you want to restore this device to factory settings?'),
+            SizedBox(height: 16),
+            Text('This action will:', style: Theme.of(context).textTheme.titleSmall),
+            SizedBox(height: 8),
+            Text('• Delete all custom settings and configurations'),
+            Text('• Disconnect the device from your network'),
+            Text('• Reset all schedules and modes to defaults'),
+            SizedBox(height: 8),
+            Text(
+              'The device will need to be reconfigured after this operation.',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Cancel')),
+          FilledButton.tonal(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.errorContainer,
+              foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              vm.factoryReset().then((_) {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
+              });
+            },
+            child: Text('Restore'),
+          ),
+        ],
+      ),
+    );
   }
 }

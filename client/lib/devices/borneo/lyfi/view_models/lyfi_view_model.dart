@@ -4,7 +4,6 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_view_model.dart';
-import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
@@ -27,7 +26,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   bool _isDisposed = false;
 
   final LocaleService localeService;
-  final IAppNotificationService notification;
 
   ILyfiDeviceApi get _deviceApi => super.borneoDeviceApi as ILyfiDeviceApi;
 
@@ -78,7 +76,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     required super.deviceID,
     required super.deviceManager,
     required super.globalEventBus,
-    required this.notification,
+    required super.notification,
     required this.localeService,
     super.logger,
   });
@@ -341,18 +339,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         break;
     }
     await currentEditor!.initialize();
-  }
-
-  @override
-  Future<void> syncDeviceTimezone() async {
-    enqueueUIJob(() async {
-      final success = await super.syncDeviceTimezone();
-      if (success) {
-        notification.showSuccess('Timezone synchronized successfully');
-      } else {
-        notification.showError('Failed to sync timezone');
-      }
-    });
   }
 
   Future<SettingsViewModel> loadSettings(final GettextLocalizations gt) async {
