@@ -8,7 +8,6 @@ import 'package:synchronized/synchronized.dart';
 abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   GeneralBorneoDeviceInfo? get borneoDeviceInfo => borneoDeviceApi.getGeneralDeviceInfo(boundDevice!.device);
 
-  final _lock = Lock();
   GeneralBorneoDeviceStatus? _borneoDeviceStatus;
   GeneralBorneoDeviceStatus? get borneoDeviceStatus => isOnline ? _borneoDeviceStatus : null;
 
@@ -43,17 +42,16 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
     if (!super.isOnline) {
       return;
     }
-    await _lock
-        .synchronized(() async {
-          _borneoDeviceStatus = await borneoDeviceApi.getGeneralDeviceStatus(super.boundDevice!.device);
-          _isOn = borneoDeviceStatus!.power;
+    _borneoDeviceStatus = await borneoDeviceApi.getGeneralDeviceStatus(
+      super.boundDevice!.device,
+      cancelToken: cancelToken,
+    );
+    _isOn = borneoDeviceStatus!.power;
 
-          currentVoltage.value = _borneoDeviceStatus?.powerVoltage;
-          currentCurrent.value = _borneoDeviceStatus?.powerCurrent;
-          currentWatts.value = currentVoltage.value != null && currentCurrent.value != null
-              ? currentVoltage.value! * currentCurrent.value!
-              : null;
-        })
-        .asCancellable(cancelToken);
+    currentVoltage.value = _borneoDeviceStatus?.powerVoltage;
+    currentCurrent.value = _borneoDeviceStatus?.powerCurrent;
+    currentWatts.value = currentVoltage.value != null && currentCurrent.value != null
+        ? currentVoltage.value! * currentCurrent.value!
+        : null;
   }
 }
