@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:borneo_app/core/events/app_events.dart';
+import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
@@ -9,6 +10,7 @@ import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/shared/view_models/base_view_model.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 
 enum TabIndices { scenes, devices, my }
 
@@ -46,13 +48,18 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
 
   bool get isScanningDevices => _deviceManager.isDiscoverying;
 
+  final IAppNotificationService notification;
+  final GettextLocalizations _gt;
+
   MainViewModel(
     EventBus globalEventBus,
     this._blobManager,
     this._sceneManager,
     this._groupManager,
     this._deviceManager,
-    this._localeService, {
+    this._localeService,
+    this._gt, {
+    required this.notification,
     super.logger,
   }) {
     this.globalEventBus = globalEventBus;
@@ -107,7 +114,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   void _onAppError(AppErrorEvent event) {
     if (_errorsStack.isEmpty || _errorsStack.last.error.runtimeType != event.error.runtimeType) {
       _errorsStack.add(event);
-      notifyListeners();
+      notification.showError(_gt.translate("ERROR"), body: event.message);
     }
     logger?.e('APP_ERROR: ${event.message}', error: event.error, stackTrace: event.stackTrace);
   }

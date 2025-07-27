@@ -128,8 +128,8 @@ class HeroProgressIndicator extends StatelessWidget {
 }
 */
 
-class HeroPanel extends StatelessWidget {
-  const HeroPanel({super.key});
+class DimmingHeroPanel extends StatelessWidget {
+  const DimmingHeroPanel({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -193,7 +193,7 @@ class DimmingView extends StatelessWidget {
       spacing: 16,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        HeroPanel(),
+        DimmingHeroPanel(),
         Expanded(
           child: Selector<LyfiViewModel, ({bool isLocked, LyfiMode mode})>(
             selector: (context, vm) => (isLocked: vm.isLocked, mode: vm.mode),

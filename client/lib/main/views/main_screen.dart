@@ -13,6 +13,7 @@ import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import '../../core/services/devices/device_manager.dart';
@@ -195,14 +196,24 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) {
-        final bus = context.read<EventBus>();
-        final bm = context.read<IBlobManager>();
-        final sm = context.read<ISceneManager>();
-        final gm = context.read<GroupManager>();
-        final dm = context.read<DeviceManager>();
-        final ls = context.read<LocaleService>();
-        return MainViewModel(bus, bm, sm, gm, dm, ls, logger: context.read<Logger>());
+      create: (ctx) {
+        final bus = ctx.read<EventBus>();
+        final bm = ctx.read<IBlobManager>();
+        final sm = ctx.read<ISceneManager>();
+        final gm = ctx.read<GroupManager>();
+        final dm = ctx.read<DeviceManager>();
+        final ls = ctx.read<LocaleService>();
+        return MainViewModel(
+          bus,
+          bm,
+          sm,
+          gm,
+          dm,
+          ls,
+          GettextLocalizations.of(context),
+          notification: ctx.read<IAppNotificationService>(),
+          logger: ctx.read<Logger>(),
+        );
       },
       lazy: false,
       child: Builder(

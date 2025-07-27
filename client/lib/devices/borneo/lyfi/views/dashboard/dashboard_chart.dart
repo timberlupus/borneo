@@ -17,7 +17,13 @@ class DashboardChart extends StatelessWidget {
         if (!props.isOnline) {
           return const SizedBox.shrink();
         }
-        final Widget widget = switch (props.mode) {
+        final modeIcon = switch (props.mode) {
+          LyfiMode.manual => Icons.bar_chart_outlined,
+          LyfiMode.scheduled => Icons.alarm_outlined,
+          LyfiMode.sun => Icons.wb_sunny_outlined,
+        };
+
+        final chartWidget = switch (props.mode) {
           LyfiMode.manual => ManualRunningChart(),
           LyfiMode.scheduled => ScheduleRunningChart(),
           LyfiMode.sun => Selector<LyfiViewModel, ({List<LyfiChannelInfo> channels, List<ScheduledInstant> instants})>(
@@ -28,9 +34,8 @@ class DashboardChart extends StatelessWidget {
         };
 
         return AnimatedSwitcher(
-          duration: Duration(milliseconds: 100), // 减少动画时间，让图表快速出现
+          duration: Duration(milliseconds: 300),
           transitionBuilder: (Widget child, Animation<double> animation) {
-            // 使用SlideTransition而不是FadeTransition，避免透明度变化影响背景
             return SlideTransition(
               position: Tween<Offset>(
                 begin: const Offset(0.0, 0.1),
@@ -39,7 +44,28 @@ class DashboardChart extends StatelessWidget {
               child: child,
             );
           },
-          child: widget,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final iconSize =
+                  (constraints.maxWidth < constraints.maxHeight ? constraints.maxWidth : constraints.maxHeight) * 0.50;
+              return Stack(
+                children: [
+                  Positioned(
+                    right: -iconSize * 0.1,
+                    bottom: -iconSize * 0.1,
+                    child: IgnorePointer(
+                      child: Icon(
+                        modeIcon,
+                        size: iconSize,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .03),
+                      ),
+                    ),
+                  ),
+                  Positioned.fill(child: chartWidget),
+                ],
+              );
+            },
+          ),
         );
       },
     );
