@@ -286,6 +286,13 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
                 return DeviceStatusIndicator(isOnline: isOnline, onReconnect: isOnline ? null : vm.reconnect);
               },
             ),
+            Selector<LyfiViewModel, bool>(
+              selector: (_, vm) => vm.hasTimezoneMismatch,
+              builder: (context, hasMismatch, _) {
+                if (!hasMismatch) return SizedBox.shrink();
+                return _TimezoneSyncBanner();
+              },
+            ),
             Expanded(
               child: Selector<LyfiViewModel, ({bool isOnline, LyfiState state, bool isOn})>(
                 selector: (_, vm) => (isOnline: vm.isOnline, state: vm.state, isOn: vm.isOn),
@@ -320,6 +327,44 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
     } else {
       vm.toggleLock(true);
     }
+  }
+}
+
+class _TimezoneSyncBanner extends StatelessWidget {
+  const _TimezoneSyncBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.access_time, size: 20, color: Theme.of(context).colorScheme.onPrimaryContainer),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Device timezone is different from app timezone',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer),
+            ),
+          ),
+          SizedBox(width: 12),
+          FilledButton.tonal(
+            onPressed: () {
+              final vm = context.read<LyfiViewModel>();
+              vm.syncDeviceTimezone();
+            },
+            child: Text('Sync Timezone'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
