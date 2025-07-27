@@ -43,6 +43,7 @@ class _RoutineListRiverpodState extends ConsumerState<RoutineListRiverpod> {
   }
 
   Widget _buildRoutinesContent(BuildContext context, RoutinesState routinesState) {
+    final theme = Theme.of(context);
     if (routinesState.isLoading && routinesState.routines.isEmpty) {
       return const Center(
         child: Padding(padding: EdgeInsets.symmetric(vertical: 32), child: CircularProgressIndicator()),
@@ -55,10 +56,7 @@ class _RoutineListRiverpodState extends ConsumerState<RoutineListRiverpod> {
           padding: const EdgeInsets.symmetric(vertical: 32),
           child: Column(
             children: [
-              Text(
-                context.translate('Error loading routines'),
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
+              Text(context.translate('Error loading routines'), style: TextStyle(color: theme.colorScheme.error)),
               const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () => ref.read(routinesProvider.notifier).initialize(),
@@ -74,8 +72,31 @@ class _RoutineListRiverpodState extends ConsumerState<RoutineListRiverpod> {
     if (routines.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 32),
-          child: Text(context.translate('No routines'), style: TextStyle(color: Colors.grey)),
+          padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.block, // Represents 'none' or 'not available'
+                size: 56,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                context.translate('No routines'),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                context.translate('No routines available for devices in the current scene.'),
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -112,18 +133,15 @@ class _RoutineListRiverpodState extends ConsumerState<RoutineListRiverpod> {
             margin: const EdgeInsets.only(top: 16),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.errorContainer,
+              color: theme.colorScheme.errorContainer,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
-                Icon(Icons.error_outline, color: Theme.of(context).colorScheme.onErrorContainer),
+                Icon(Icons.error_outline, color: theme.colorScheme.onErrorContainer),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    routinesState.error!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
-                  ),
+                  child: Text(routinesState.error!, style: TextStyle(color: theme.colorScheme.onErrorContainer)),
                 ),
                 TextButton(
                   onPressed: () => ref.read(routinesProvider.notifier).initialize(),
