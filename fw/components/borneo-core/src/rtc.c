@@ -19,7 +19,7 @@
 #include "borneo/rtc.h"
 
 #define TAG "rtc"
-#define TIMEZONE_DEFAULT "CST-8"
+#define TIMEZONE_DEFAULT "UTC"
 #define NVS_RTC_NAMESPACE "rtc"
 #define NVS_RTC_TZ_KEY "tz"
 #define MAX_TZ_LEN 32
