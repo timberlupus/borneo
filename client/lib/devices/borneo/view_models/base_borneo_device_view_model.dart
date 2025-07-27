@@ -12,7 +12,6 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   GeneralBorneoDeviceStatus? _borneoDeviceStatus;
   GeneralBorneoDeviceStatus? get borneoDeviceStatus => isOnline ? _borneoDeviceStatus : null;
 
-
   IBorneoDeviceApi get borneoDeviceApi => super.boundDevice!.driver as IBorneoDeviceApi;
 
   DateTime get deviceClock => borneoDeviceStatus!.timestamp.toLocal();
