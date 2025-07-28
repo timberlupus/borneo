@@ -12,6 +12,7 @@ import 'package:borneo_app/features/devices/view_models/group_view_model.dart';
 import 'package:borneo_app/features/devices/views/device_list_tile.dart';
 import 'package:borneo_app/features/devices/view_models/grouped_devices_view_model.dart';
 import 'package:borneo_app/devices/view_models/abstract_device_summary_view_model.dart';
+import 'package:borneo_app/features/devices/widgets/empty_groups_widget.dart';
 import 'group_edit_screen.dart';
 
 enum PlusMenuIndexes { addGroup, addDevice }
@@ -57,29 +58,20 @@ class NoDataHintView extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverFillRemaining(
       hasScrollBody: false,
-      child: Container(
-        color: Theme.of(context).colorScheme.surface,
-        padding: const EdgeInsets.fromLTRB(16, 40, 16, 40),
-        child: Center(
-          child: Column(
-            children: [
-              const Spacer(),
-              Text(
-                context.translate('There are no devices or device groups in the current scene.'),
-                style: DefaultTextStyle.of(context).style.copyWith(color: Theme.of(context).hintColor),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                icon: Icon(Icons.add_outlined),
-                label: Text(context.translate("Add new devices")),
-                onPressed: () {
-                  Navigator.of(context).pushNamed(AppRoutes.kDeviceDiscovery);
-                },
-              ),
-              const Spacer(),
-            ],
-          ),
-        ),
+      child: EmptyGroupsWidget(
+        onCreateGroup: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GroupEditScreen(),
+              settings: RouteSettings(arguments: GroupEditArguments(isCreation: true)),
+            ),
+          );
+          // Refresh after creating group
+          if (context.mounted) {
+            context.read<GroupedDevicesViewModel>().refresh();
+          }
+        },
       ),
     );
   }
@@ -95,13 +87,18 @@ class DevicesScreen extends StatelessWidget {
   }
 
   Future<void> _showNewGroupScreen(BuildContext context) async {
-    await Navigator.push(
+    final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (context) => GroupEditScreen(),
         settings: RouteSettings(arguments: GroupEditArguments(isCreation: true)),
       ),
     );
+
+    // Refresh if group was created
+    if (result == true && context.mounted) {
+      context.read<GroupedDevicesViewModel>().refresh();
+    }
   }
 
   @override
@@ -287,13 +284,18 @@ class DevicesScreen extends StatelessWidget {
     );
   }
 
-  void _showEditGroupPage(BuildContext context, DeviceGroupEntity group) {
-    Navigator.push(
+  void _showEditGroupPage(BuildContext context, DeviceGroupEntity group) async {
+    final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (context) => GroupEditScreen(),
         settings: RouteSettings(arguments: GroupEditArguments(isCreation: false, model: group)),
       ),
     );
+
+    // Refresh if group was deleted or updated
+    if (result == true && context.mounted) {
+      context.read<GroupedDevicesViewModel>().refresh();
+    }
   }
 }

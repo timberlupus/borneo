@@ -1,12 +1,13 @@
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/features/devices/view_models/group_edit_view_model.dart';
+import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
-import '../../../shared/widgets/confirmation_sheet.dart';
+import 'package:borneo_app/features/devices/widgets/delete_group_dialog.dart';
 
 class GroupEditScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
@@ -51,16 +52,48 @@ class GroupEditScreen extends StatelessWidget {
       ElevatedButton(
         onPressed: vm.isBusy
             ? null
-            : () async {
+            : () {
                 if (_formKey.currentState?.validate() ?? false) {
                   _formKey.currentState!.save();
-                  await vm.submit();
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                  }
+
+                  // Show loading indicator
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => const Center(child: CircularProgressIndicator()),
+                  );
+
+                  final submitContext = context;
+                  final navigator = Navigator.of(context);
+                  final notificationService = context.read<IAppNotificationService>();
+
+                  vm
+                      .submit()
+                      .then((_) {
+                        if (submitContext.mounted) {
+                          Navigator.pop(submitContext); // Close loading dialog
+                          navigator.pop(true); // Return success
+                          notificationService.showSuccess(
+                            (ModalRoute.of(submitContext)!.settings.arguments as GroupEditArguments).isCreation
+                                ? submitContext.translate('Group created')
+                                : submitContext.translate('Group updated'),
+                          );
+                        }
+                      })
+                      .catchError((error) {
+                        if (submitContext.mounted) {
+                          Navigator.pop(submitContext); // Close loading dialog
+                          notificationService.showError(
+                            submitContext.translate('Operation failed'),
+                            body: error.toString(),
+                          );
+                        }
+                      });
                 }
               },
-        child: Text(context.translate('Submit')),
+        child: vm.isBusy
+            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+            : Text(context.translate('Submit')),
       ),
     ];
   }
@@ -95,29 +128,52 @@ class GroupEditScreen extends StatelessWidget {
   }
 
   List<Widget> buildActions(BuildContext context, GroupEditArguments args) {
-    final vm = context.read<GroupEditViewModel>();
     return [
       if (!args.isCreation)
-        IconButton(
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              builder: (BuildContext context) {
-                return ConfirmationSheet(
-                  message: context.translate(
-                    'Are you sure you want to delete this device group? The devices within this group will not be deleted but will be moved to the "Ungrouped" group.',
-                  ),
-                  okPressed: () async {
-                    await vm.delete();
-                    if (context.mounted) {
-                      Navigator.of(context).pop(true);
+        Builder(
+          builder: (BuildContext context) {
+            return IconButton(
+              onPressed: () {
+                final vm = context.read<GroupEditViewModel>();
+                final notificationService = context.read<IAppNotificationService>();
+                final navigator = Navigator.of(context);
+
+                showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) => DeleteGroupDialog(groupName: vm.name),
+                ).then((confirmed) async {
+                  if (confirmed == true) {
+                    // Show loading indicator
+                    final loadingContext = context;
+                    final loadingNavigator = Navigator.of(loadingContext);
+                    showDialog(
+                      context: loadingContext,
+                      barrierDismissible: false,
+                      builder: (dialogContext) => const Center(child: CircularProgressIndicator()),
+                    );
+
+                    try {
+                      await vm.delete();
+                      if (loadingContext.mounted) {
+                        loadingNavigator.pop(); // Close loading dialog
+                        navigator.pop(true); // Return success
+                        notificationService.showSuccess(loadingContext.translate('Group deleted'));
+                      }
+                    } catch (error) {
+                      if (loadingContext.mounted) {
+                        loadingNavigator.pop(); // Close loading dialog
+                        notificationService.showError(
+                          loadingContext.translate('Delete failed'),
+                          body: error.toString(),
+                        );
+                      }
                     }
-                  },
-                );
+                  }
+                });
               },
+              icon: const Icon(Icons.delete_outline),
             );
           },
-          icon: Icon(Icons.delete_outline),
         ),
     ];
   }
@@ -138,7 +194,11 @@ class GroupEditScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
-          title: Text(args.isCreation ? context.translate('New Device Group') : context.translate('Edit Device Group')),
+          title: Text(
+            (ModalRoute.of(context)!.settings.arguments as GroupEditArguments).isCreation
+                ? context.translate('New Device Group')
+                : context.translate('Edit Device Group'),
+          ),
           actions: buildActions(context, args),
         ),
         body: buildBody(context),

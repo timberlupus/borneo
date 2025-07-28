@@ -30,6 +30,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
   // Getter for error message
 
   bool get isEmpty => _groups.isEmpty;
+  bool get isLoading => isBusy;
 
   // Getter for users list
   final List<GroupViewModel> _groups = [];
@@ -229,17 +230,25 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
   }
 
   void _onDeviceGroupCreated(DeviceGroupCreatedEvent event) {
-    if (!isBusy) {
-      _tryReloadAll();
-      notifyListeners();
-    }
+    // Always reload to ensure new groups appear immediately
+    _reloadAll().then((_) {
+      if (!isDisposed) {
+        notifyListeners();
+      }
+    });
   }
 
   void _onDeviceGroupDeleted(DeviceGroupDeletedEvent event) {
-    if (!isBusy) {
-      _tryReloadAll();
-      notifyListeners();
-    }
+    // Always update immediately regardless of busy state
+    _groups.removeWhere((group) => group.id == event.id);
+    notifyListeners();
+
+    // Also trigger full reload to ensure consistency
+    _reloadAll().then((_) {
+      if (!isDisposed) {
+        notifyListeners();
+      }
+    });
   }
 
   void _onDeviceGroupUpdated(DeviceGroupUpdatedEvent event) {
@@ -249,5 +258,6 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
         gvm.notifyListeners();
       }
     }
+    notifyListeners(); // Ensure parent view updates too
   }
 }
