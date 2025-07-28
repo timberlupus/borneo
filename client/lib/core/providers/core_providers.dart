@@ -1,31 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sembast/sembast.dart';
-import 'package:logger/logger.dart';
 import 'package:event_bus/event_bus.dart';
-import 'package:borneo_app/core/services/blob_manager.dart';
+import 'package:logger/logger.dart';
 
-/// 基础依赖 Providers
-/// 这些需要在应用根部通过 override 提供实际实例
-
-final databaseProvider = Provider<Database>((ref) {
-  throw UnimplementedError('Database provider must be overridden in main.dart');
+// 核心服务Provider
+final eventBusProvider = Provider<EventBus>((ref) {
+  return EventBus();
 });
 
 final loggerProvider = Provider<Logger>((ref) {
-  throw UnimplementedError('Logger provider must be overridden in main.dart');
+  return Logger();
 });
 
-final eventBusProvider = Provider<EventBus>((ref) {
-  throw UnimplementedError('EventBus provider must be overridden in main.dart');
-});
-
-final blobManagerProvider = Provider<IBlobManager>((ref) {
-  throw UnimplementedError('BlobManager provider must be overridden in main.dart');
-});
-
-/// Gettext Localizations Provider
-/// 这个比较特殊，因为它依赖于 BuildContext
-/// 在完全迁移之前，可能需要通过其他方式获取
-final gettextProvider = Provider<dynamic>((ref) {
-  throw UnimplementedError('GettextLocalizations needs special handling');
+// 全局初始化Provider
+final appInitializationProvider = FutureProvider<void>((ref) async {
+  // 初始化Settings - 需要导入相关模块
+  // 注意：这里需要确保settings_notifier.dart被正确导入
+  // 为了避免循环依赖，我们暂时不在这里初始化
 });
