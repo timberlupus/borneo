@@ -5,6 +5,7 @@ import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import '../../settings/views/app_settings_screen_riverpod.dart';
 import 'about_screen_riverpod.dart';
+import 'donation_screen.dart';
 
 class MyScreenRiverpod extends ConsumerWidget {
   const MyScreenRiverpod({super.key});
@@ -22,6 +23,22 @@ class MyScreenRiverpod extends ConsumerWidget {
         onTap: () {
           final route = MaterialPageRoute(builder: (context) => const AppSettingsScreenRiverpod());
           Navigator.push(context, route);
+        },
+      ),
+
+      // Donation tile
+      ListTile(
+        title: Text(context.translate('Back This Project')),
+        leading: const Icon(Icons.favorite_outline),
+        trailing: const CupertinoListTileChevron(),
+        tileColor: Theme.of(context).colorScheme.surfaceContainer,
+        onTap: () {
+          Future.delayed(const Duration(milliseconds: 300), () {
+            final route = MaterialPageRoute(builder: (context) => const DonationScreen());
+            if (context.mounted) {
+              Navigator.push(context, route);
+            }
+          });
         },
       ),
 
