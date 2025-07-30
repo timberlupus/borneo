@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart' as provider;
-import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/my_providers.dart';
 
@@ -15,20 +14,25 @@ class AboutScreenRiverpod extends ConsumerWidget {
   AboutScreenRiverpod({super.key});
   late final UrlLauncherService _urlLauncher;
 
-  Future<void> _launchWebsite() async {
-    if (!await launchUrl(_websiteUrl, mode: LaunchMode.externalApplication)) {
-      throw Exception('Could not launch $_websiteUrl');
-    }
+  Future<void> _launchWebsite(BuildContext context) async {
+    final urlLauncher = UrlLauncherService(
+      notification: provider.Provider.of<IAppNotificationService>(context, listen: false),
+    );
+    await urlLauncher.open(_websiteUrl.toString());
   }
 
-  Future<void> _launchDocs() async {
-    if (!await launchUrl(_docsUrl, mode: LaunchMode.externalApplication)) {
-      throw Exception('Could not launch $_docsUrl');
-    }
+  Future<void> _launchDocs(BuildContext context) async {
+    final urlLauncher = UrlLauncherService(
+      notification: provider.Provider.of<IAppNotificationService>(context, listen: false),
+    );
+    await urlLauncher.open(_docsUrl.toString());
   }
 
-  Future<bool> _canLaunchUrl(Uri url) async {
-    return await canLaunchUrl(url);
+  Future<bool> _canLaunchUrl(String url) async {
+    final urlLauncher = UrlLauncherService(
+      notification: provider.Provider.of<IAppNotificationService>(context, listen: false),
+    );
+    return await urlLauncher.canOpen(url);
   }
 
   @override
@@ -104,8 +108,8 @@ class AboutScreenRiverpod extends ConsumerWidget {
                       Text(context.translate('Website'), style: Theme.of(context).textTheme.titleSmall),
                       InkWell(
                         onTap: () async {
-                          if (await _canLaunchUrl(_websiteUrl)) {
-                            await _launchWebsite();
+                          if (await _canLaunchUrl(_websiteUrl.toString())) {
+                            await _launchWebsite(context);
                           }
                         },
                         child: Ink(
@@ -137,8 +141,8 @@ class AboutScreenRiverpod extends ConsumerWidget {
                       Text(context.translate('Documentation'), style: Theme.of(context).textTheme.titleSmall),
                       InkWell(
                         onTap: () async {
-                          if (await _canLaunchUrl(_docsUrl)) {
-                            await _launchDocs();
+                          if (await _canLaunchUrl(_docsUrl.toString())) {
+                            await _launchDocs(context);
                           }
                         },
                         child: Ink(

@@ -1,6 +1,7 @@
+import 'package:borneo_app/core/services/app_notification_service.dart';
+import 'package:borneo_app/core/services/url_launcher_service.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 
 import 'package:borneo_app/features/my/view_models/about_view_model.dart';
@@ -11,16 +12,14 @@ final Uri _docsUrl = Uri.parse('https://docs.borneoiot.com');
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
-  Future<void> _launchWebsite() async {
-    if (!await launchUrl(_websiteUrl, mode: LaunchMode.externalApplication)) {
-      throw Exception('Could not launch $_websiteUrl');
-    }
+  Future<void> _launchWebsite(BuildContext context) async {
+    final urlLauncher = UrlLauncherService(notification: Provider.of<IAppNotificationService>(context, listen: false));
+    await urlLauncher.open(_websiteUrl.toString());
   }
 
-  Future<void> _launchDocs() async {
-    if (!await launchUrl(_docsUrl, mode: LaunchMode.externalApplication)) {
-      throw Exception('Could not launch $_docsUrl');
-    }
+  Future<void> _launchDocs(BuildContext context) async {
+    final urlLauncher = UrlLauncherService(notification: Provider.of<IAppNotificationService>(context, listen: false));
+    await urlLauncher.open(_docsUrl.toString());
   }
 
   @override
@@ -104,10 +103,7 @@ class AboutScreen extends StatelessWidget {
                       Text(context.translate('Website'), style: Theme.of(context).textTheme.titleSmall),
                       InkWell(
                         onTap: () async {
-                          // TODO move to viewmodel
-                          if (await canLaunchUrl(_websiteUrl)) {
-                            await _launchWebsite();
-                          }
+                          await _launchWebsite(context);
                         },
                         child: Ink(
                           child: Text(
@@ -138,9 +134,7 @@ class AboutScreen extends StatelessWidget {
                       Text(context.translate('Documentation'), style: Theme.of(context).textTheme.titleSmall),
                       InkWell(
                         onTap: () async {
-                          if (await canLaunchUrl(_docsUrl)) {
-                            await _launchDocs();
-                          }
+                          await _launchDocs(context);
                         },
                         child: Ink(
                           child: Text(

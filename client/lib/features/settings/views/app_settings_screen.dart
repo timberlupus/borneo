@@ -1,12 +1,12 @@
 import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
+import 'package:borneo_app/core/services/url_launcher_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:borneo_app/features/settings/view_models/app_settings_view_model.dart';
 import 'package:borneo_app/shared/widgets/generic_settings_screen.dart';
@@ -18,13 +18,11 @@ class AppSettingsScreen extends StatelessWidget {
   static const String githubIssuesUrl = 'https://github.com/borneo-iot/borneo/issues';
 
   Future<void> _openUrl(BuildContext context, String url) async {
-    final uri = Uri.parse(url);
-    if (!await launchUrl(uri)) {
-      if (context.mounted) {
-        final notificationService = Provider.of<IAppNotificationService>(context, listen: false);
-        notificationService.showError(context.translate('Could not open link'), body: url);
-      }
-    }
+    final urlLauncher = UrlLauncherService(
+      notification: Provider.of<IAppNotificationService>(context, listen: false),
+      logger: Provider.of<Logger>(context, listen: false),
+    );
+    await urlLauncher.open(url);
   }
 
   @override

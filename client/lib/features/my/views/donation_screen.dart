@@ -1,6 +1,8 @@
+import 'package:borneo_app/core/services/app_notification_service.dart';
+import 'package:borneo_app/core/services/url_launcher_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
 
 class DonationScreen extends StatelessWidget {
   const DonationScreen({super.key});
@@ -8,11 +10,9 @@ class DonationScreen extends StatelessWidget {
   static const String koFiUrl = 'https://ko-fi.com/oldrev';
   static const String paypalUrl = 'https://www.paypal.com/paypalme/oldrev';
 
-  Future<void> _launchUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (!await launchUrl(uri)) {
-      throw Exception('Could not launch $url');
-    }
+  Future<void> _launchUrl(BuildContext context, String url) async {
+    final urlLauncher = UrlLauncherService(notification: Provider.of<IAppNotificationService>(context, listen: false));
+    await urlLauncher.open(url);
   }
 
   @override
@@ -91,7 +91,7 @@ class DonationScreen extends StatelessWidget {
               label: 'Ko-fi',
               description: context.translate('Buy me a coffee'),
               color: const Color(0xFF13C3FF),
-              onTap: () => _launchUrl(koFiUrl),
+              onTap: () => _launchUrl(context, koFiUrl),
             ),
 
             const SizedBox(height: 16),
@@ -103,7 +103,7 @@ class DonationScreen extends StatelessWidget {
               label: 'PayPal',
               description: context.translate('Support via PayPal'),
               color: const Color(0xFF0070BA),
-              onTap: () => _launchUrl(paypalUrl),
+              onTap: () => _launchUrl(context, paypalUrl),
             ),
           ],
         ),
