@@ -5,6 +5,7 @@ import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:logger/logger.dart';
@@ -49,4 +50,5 @@ abstract class ISceneManager {
     Transaction? tx,
   });
   Future<void> delete(String id, {Transaction? tx});
+  Future<SceneEntity> getLastAccessed({CancellationToken? cancelToken});
 }

@@ -242,13 +242,18 @@ class ScenesNotifier extends StateNotifier<ScenesState> {
 
   void _onSceneCreated(SceneCreatedEvent event) {
     if (!state.isLoading) {
-      _reload();
+      unawaited(_sceneManager.changeCurrent(event.scene.id).then((_) => _reload()));
     }
   }
 
   void _onSceneDeleted(SceneDeletedEvent event) {
     if (!state.isLoading) {
-      _reload();
+      unawaited(
+        _sceneManager.getLastAccessed().then((scene) async {
+          await _sceneManager.changeCurrent(scene.id);
+          _reload();
+        }),
+      );
     }
   }
 

@@ -11,6 +11,7 @@ import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/store_names.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_app/core/exceptions/scene_deletion_exceptions.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
@@ -271,5 +272,38 @@ class SceneManagerImpl extends ISceneManager {
       await sceneStore.record(id).delete(tx);
       _globalEventBus.fire(SceneDeletedEvent(id));
     }
+  }
+
+  @override
+  Future<SceneEntity> getLastAccessed({CancellationToken? cancelToken}) async {
+    assert(isInitialized);
+    return await _db.transaction((tx) async {
+      final store = stringMapStoreFactory.store(StoreNames.scenes);
+      final records = await store.find(tx);
+
+      if (records.isEmpty) {
+        throw KeyNotFoundException(message: 'No scenes found');
+      }
+
+      SceneEntity? lastAccessed;
+      int lastAccessEpoch = -1;
+
+      for (final record in records) {
+        if (cancelToken?.isCancelled == true) {
+          throw Exception('Operation cancelled');
+        }
+        final scene = SceneEntity.fromMap(record.key, record.value);
+        final accessEpoch = scene.lastAccessTime?.millisecondsSinceEpoch ?? 0;
+        if (accessEpoch > lastAccessEpoch) {
+          lastAccessEpoch = accessEpoch;
+          lastAccessed = scene;
+        }
+      }
+
+      if (lastAccessed == null) {
+        throw KeyNotFoundException(message: 'No last accessed scene found');
+      }
+      return lastAccessed;
+    });
   }
 }
