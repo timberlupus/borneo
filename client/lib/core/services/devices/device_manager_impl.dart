@@ -98,6 +98,10 @@ final class DeviceManagerImpl extends DeviceManager {
         await _rebindAll(devices);
         // Load WotThings for current scene after devices are bound
         await _loadWotThingsForCurrentScene();
+
+        final currentScene = _sceneManager.current;
+        _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
+        logger?.d('Fired CurrentSceneDevicesReloadedEvent for initial scene: ${currentScene.name}');
       }());
 
       logger?.i('DeviceManagerImpl has been initialized successfully.');
@@ -142,6 +146,7 @@ final class DeviceManagerImpl extends DeviceManager {
       final devices = await fetchAllDevicesInScene();
       _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
       await _rebindAll(devices);
+      await _reloadWotThingsForCurrentScene();
     });
   }
 
@@ -411,7 +416,7 @@ final class DeviceManagerImpl extends DeviceManager {
   /// Handle scene change event - reload WotThings for new scene
   Future<void> _onCurrentSceneChanged(CurrentSceneChangedEvent event) async {
     logger?.i('Scene changed from ${event.from.name} to ${event.to.name}, reloading WotThings...');
-    await _reloadWotThingsForCurrentScene();
+    await reloadAllDevices();
   }
 
   /// Reload WotThings for current scene only
