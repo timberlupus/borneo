@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:borneo_app/core/infrastructure/logging.dart';
 import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/core/services/devices/device_module_harvesters.dart';
@@ -17,6 +19,7 @@ import 'package:provider/provider.dart' as provider;
 import 'dart:async';
 
 import 'package:sembast/sembast.dart';
+import 'package:window_size/window_size.dart';
 
 import 'app/app.dart';
 import 'routes/route_manager.dart';
@@ -43,6 +46,16 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final db = await openDatabase();
+
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    const double aspectRatio = 9 / 19.5;
+    const double height = 960;
+    final double width = height * aspectRatio;
+    setWindowMinSize(Size(width, height));
+    setWindowMaxSize(Size(width, height));
+    setWindowFrame(Rect.fromLTWH(100, 100, width, height));
+  }
+
   // debugRepaintRainbowEnabled = true;
   runApp(
     ProviderScope(

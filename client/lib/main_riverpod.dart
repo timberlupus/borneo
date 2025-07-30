@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,7 +35,6 @@ class MyAppRiverpod extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(localeProvider);
 
-    // 初始化应用
     ref.watch(appInitializationProvider);
 
     return MaterialApp(
@@ -49,7 +49,6 @@ class MyAppRiverpod extends ConsumerWidget {
   }
 }
 
-// 演示屏幕，用于测试迁移后的功能
 class RiverpodDemoScreen extends ConsumerWidget {
   const RiverpodDemoScreen({super.key});
 
@@ -85,3 +84,4 @@ class RiverpodDemoScreen extends ConsumerWidget {
     );
   }
 }
+*/
