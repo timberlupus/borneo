@@ -22,8 +22,8 @@ import 'package:borneo_kernel_abstractions/mdns.dart';
 
 final class DefaultKernel implements IKernel {
   static const Duration kStartupDiscoveryDuration = Duration(seconds: 15);
-  static const Duration kLocalProbeTimeOut = Duration(seconds: 10);
-  static const Duration kLocalBindTimeOut = Duration(seconds: 30);
+  static const Duration kLocalProbeTimeOut = Duration(seconds: 5);
+  static const Duration kLocalBindTimeOut = Duration(seconds: 10);
   static const Duration kHeartbeatPollingInterval = Duration(seconds: 15);
 
   Timer? _timer;
