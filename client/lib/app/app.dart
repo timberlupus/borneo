@@ -5,6 +5,7 @@ import 'package:borneo_app/core/services/devices/device_manager_impl.dart';
 import 'package:borneo_app/core/services/group_manager_impl.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/core/services/scene_manager_impl.dart';
+import 'package:borneo_app/core/services/url_launcher_service.dart';
 import 'package:borneo_app/main/views/main_screen.dart';
 import 'package:borneo_kernel_abstractions/ikernel.dart';
 import 'package:event_bus/event_bus.dart';
@@ -116,6 +117,15 @@ class _BorneoAppState extends State<BorneoApp> {
                 return MultiProvider(
                   providers: [
                     Provider<IAppNotificationService>(create: (context) => DefaultAppNotificationService()),
+
+                    Provider<UrlLauncherService>(
+                      create: (context) => UrlLauncherService(
+                        notification: Provider.of<IAppNotificationService>(context, listen: false),
+                        logger: Provider.of<Logger>(context, listen: false),
+                      ),
+                      lazy: false,
+                    ),
+
                     // Here >>> register all providers that need to access the gettext interface <<<
                     // SceneManager
                     Provider<ISceneManager>(

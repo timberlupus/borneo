@@ -77,7 +77,7 @@ class RiverpodDemoScreen extends ConsumerWidget {
             title: const Text('测试关于屏幕'),
             subtitle: const Text('About Screen - Riverpod版本'),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutScreenRiverpod()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => AboutScreenRiverpod()));
             },
           ),
         ],

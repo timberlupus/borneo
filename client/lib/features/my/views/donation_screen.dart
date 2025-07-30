@@ -5,6 +5,9 @@ import 'package:url_launcher/url_launcher.dart';
 class DonationScreen extends StatelessWidget {
   const DonationScreen({super.key});
 
+  static const String koFiUrl = 'https://ko-fi.com/oldrev';
+  static const String paypalUrl = 'https://www.paypal.com/paypalme/oldrev';
+
   Future<void> _launchUrl(String url) async {
     final uri = Uri.parse(url);
     if (!await launchUrl(uri)) {
@@ -88,7 +91,7 @@ class DonationScreen extends StatelessWidget {
               label: 'Ko-fi',
               description: context.translate('Buy me a coffee'),
               color: const Color(0xFF13C3FF),
-              onTap: () => _launchUrl('https://ko-fi.com/oldrev'),
+              onTap: () => _launchUrl(koFiUrl),
             ),
 
             const SizedBox(height: 16),
@@ -100,7 +103,7 @@ class DonationScreen extends StatelessWidget {
               label: 'PayPal',
               description: context.translate('Support via PayPal'),
               color: const Color(0xFF0070BA),
-              onTap: () => _launchUrl('https://www.paypal.com/paypalme/oldrev'),
+              onTap: () => _launchUrl(paypalUrl),
             ),
           ],
         ),
@@ -125,12 +128,12 @@ class DonationScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+                decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
                 child: Icon(icon, color: color, size: 28),
               ),
               const SizedBox(width: 16),
@@ -149,7 +152,11 @@ class DonationScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5), size: 20),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.38),
+                size: 20,
+              ),
             ],
           ),
         ),

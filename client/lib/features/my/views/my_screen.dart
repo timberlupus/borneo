@@ -50,7 +50,6 @@ class MyScreen extends StatelessWidget {
         tileColor: Theme.of(context).colorScheme.surfaceContainer,
         onTap: () {
           final route = MaterialPageRoute(builder: (context) => DonationScreen());
-          // TODO
           Navigator.push(context, route);
         },
       ),

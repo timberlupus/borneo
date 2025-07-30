@@ -1,6 +1,9 @@
+import 'package:borneo_app/core/services/app_notification_service.dart';
+import 'package:borneo_app/core/services/url_launcher_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/my_providers.dart';
@@ -9,7 +12,8 @@ final Uri _websiteUrl = Uri.parse('https://www.borneoiot.com');
 final Uri _docsUrl = Uri.parse('https://docs.borneoiot.com');
 
 class AboutScreenRiverpod extends ConsumerWidget {
-  const AboutScreenRiverpod({super.key});
+  AboutScreenRiverpod({super.key});
+  late final UrlLauncherService _urlLauncher;
 
   Future<void> _launchWebsite() async {
     if (!await launchUrl(_websiteUrl, mode: LaunchMode.externalApplication)) {
