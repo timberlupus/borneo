@@ -12,7 +12,6 @@ class UrlLauncherService {
     bool failed = true;
     try {
       failed = !await launchUrl(uri);
-      notification.showError('Could not open link', body: url);
     } catch (e, stackTrace) {
       failed = true;
       logger?.e(e.toString(), error: e, stackTrace: stackTrace);

@@ -50,7 +50,7 @@ class MyScreenRiverpod extends ConsumerWidget {
         tileColor: Theme.of(context).colorScheme.surfaceContainer,
         onTap: () {
           Future.delayed(const Duration(milliseconds: 300), () {
-            final route = MaterialPageRoute(builder: (context) => AboutScreenRiverpod());
+            final route = MaterialPageRoute(builder: (context) => const AboutScreenRiverpod());
             if (context.mounted) {
               Navigator.push(context, route);
             }

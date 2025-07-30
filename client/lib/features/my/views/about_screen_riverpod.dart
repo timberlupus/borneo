@@ -11,8 +11,7 @@ final Uri _websiteUrl = Uri.parse('https://www.borneoiot.com');
 final Uri _docsUrl = Uri.parse('https://docs.borneoiot.com');
 
 class AboutScreenRiverpod extends ConsumerWidget {
-  AboutScreenRiverpod({super.key});
-  late final UrlLauncherService _urlLauncher;
+  const AboutScreenRiverpod({super.key});
 
   Future<void> _launchWebsite(BuildContext context) async {
     final urlLauncher = UrlLauncherService(
@@ -26,13 +25,6 @@ class AboutScreenRiverpod extends ConsumerWidget {
       notification: provider.Provider.of<IAppNotificationService>(context, listen: false),
     );
     await urlLauncher.open(_docsUrl.toString());
-  }
-
-  Future<bool> _canLaunchUrl(String url) async {
-    final urlLauncher = UrlLauncherService(
-      notification: provider.Provider.of<IAppNotificationService>(context, listen: false),
-    );
-    return await urlLauncher.canOpen(url);
   }
 
   @override
@@ -108,7 +100,7 @@ class AboutScreenRiverpod extends ConsumerWidget {
                       Text(context.translate('Website'), style: Theme.of(context).textTheme.titleSmall),
                       InkWell(
                         onTap: () async {
-                          if (await _canLaunchUrl(_websiteUrl.toString())) {
+                          if (context.mounted) {
                             await _launchWebsite(context);
                           }
                         },
@@ -141,9 +133,7 @@ class AboutScreenRiverpod extends ConsumerWidget {
                       Text(context.translate('Documentation'), style: Theme.of(context).textTheme.titleSmall),
                       InkWell(
                         onTap: () async {
-                          if (await _canLaunchUrl(_docsUrl.toString())) {
-                            await _launchDocs(context);
-                          }
+                          await _launchDocs(context);
                         },
                         child: Ink(
                           child: Text(

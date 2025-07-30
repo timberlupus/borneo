@@ -56,28 +56,28 @@ class RiverpodDemoScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Riverpod 迁移测试')),
+      appBar: AppBar(title: const Text('Riverpod Migration Demo')),
       body: ListView(
         children: [
           ListTile(
-            title: const Text('测试设置屏幕'),
-            subtitle: const Text('Settings Screen - Riverpod版本'),
+            title: const Text('Test Settings Screen'),
+            subtitle: const Text('Settings Screen - Riverpod Version'),
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const AppSettingsScreenRiverpod()));
             },
           ),
           ListTile(
-            title: const Text('测试我的屏幕'),
-            subtitle: const Text('My Screen - Riverpod版本'),
+            title: const Text('Test My Screen'),
+            subtitle: const Text('My Screen - Riverpod Version'),
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const MyScreenRiverpod()));
             },
           ),
           ListTile(
-            title: const Text('测试关于屏幕'),
-            subtitle: const Text('About Screen - Riverpod版本'),
+            title: const Text('Test About Screen'),
+            subtitle: const Text('About Screen - Riverpod Version'),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => AboutScreenRiverpod()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutScreenRiverpod()));
             },
           ),
         ],

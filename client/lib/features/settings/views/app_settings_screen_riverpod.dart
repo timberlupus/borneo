@@ -1,6 +1,9 @@
+import 'package:borneo_app/core/services/app_notification_service.dart';
+import 'package:borneo_app/core/services/url_launcher_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../providers/settings_providers.dart';
 import '../../../shared/widgets/generic_settings_screen.dart';
@@ -86,14 +89,17 @@ class AppSettingsScreenRiverpod extends ConsumerWidget {
             leading: const Icon(Icons.star_outline),
             title: Text(context.translate('Rate in application store')),
             onTap: () {
-              // TODO: 实现应用商店跳转
+              // TODO
             },
           ),
           ListTile(
             leading: const Icon(Icons.bug_report_outlined),
             title: Text(context.translate('Report an issue on GitHub')),
-            onTap: () {
-              // TODO: 实现GitHub问题报告
+            onTap: () async {
+              final urlLauncher = UrlLauncherService(
+                notification: provider.Provider.of<IAppNotificationService>(context, listen: false),
+              );
+              await urlLauncher.open('https://github.com/borneo-iot/borneo/issues');
             },
           ),
         ],
