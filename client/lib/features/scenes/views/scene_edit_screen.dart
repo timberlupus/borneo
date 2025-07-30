@@ -26,7 +26,6 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
   @override
   void initState() {
     super.initState();
-    // 创建一个稳定的 provider 实例
     _sceneEditProvider = StateNotifierProvider<SceneEditNotifier, SceneEditState>((ref) {
       return SceneEditNotifier(
         ref.watch(_sceneManagerProvider),
@@ -36,7 +35,6 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
     }, dependencies: [_sceneManagerProvider]);
   }
 
-  // 临时的 SceneManager provider，用于桥接
   late final Provider<ISceneManager> _sceneManagerProvider = Provider<ISceneManager>((ref) {
     throw UnimplementedError('SceneManager must be provided by context');
   });
