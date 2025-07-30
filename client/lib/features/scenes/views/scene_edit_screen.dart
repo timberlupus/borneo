@@ -164,7 +164,7 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
         hintText: context.translate('Enter the required scene name'),
       ),
       validator: (value) {
-        if (value?.isEmpty ?? true) {
+        if (value?.trim().isEmpty ?? true) {
           return context.translate('Please enter the scene name');
         }
         return null;

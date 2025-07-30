@@ -293,7 +293,7 @@ class SceneManagerImpl extends ISceneManager {
           throw Exception('Operation cancelled');
         }
         final scene = SceneEntity.fromMap(record.key, record.value);
-        final accessEpoch = scene.lastAccessTime?.millisecondsSinceEpoch ?? 0;
+        final accessEpoch = scene.lastAccessTime.millisecondsSinceEpoch;
         if (accessEpoch > lastAccessEpoch) {
           lastAccessEpoch = accessEpoch;
           lastAccessed = scene;

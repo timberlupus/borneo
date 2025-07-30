@@ -159,7 +159,6 @@ class TestMdnsDiscoveredDevice extends MdnsDiscoveredDevice {
 }
 
 SupportedDeviceDescriptor createTestDeviceDescriptor(String id, String address, DriverDescriptor driverDescriptor) {
-  // 确保地址是一个有效的 URI
   final uri = address.startsWith('http') ? Uri.parse(address) : Uri.parse('http://$address');
   return SupportedDeviceDescriptor(
     driverDescriptor: driverDescriptor,

@@ -55,7 +55,7 @@ class AboutScreenRiverpod extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
                     ),
                     loading: () => const SizedBox(),
-                    error: (_, __) => const SizedBox(),
+                    error: (_, _) => const SizedBox(),
                   ),
                   packageInfoAsync.when(
                     data: (info) => Text(
@@ -66,7 +66,7 @@ class AboutScreenRiverpod extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white30),
                     ),
                     loading: () => const SizedBox(),
-                    error: (_, __) => const SizedBox(),
+                    error: (_, _) => const SizedBox(),
                   ),
                 ],
               ),
