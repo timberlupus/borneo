@@ -1,4 +1,5 @@
 import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_model.dart';
+import 'package:borneo_app/core/services/device_exception_handler.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
@@ -67,8 +68,19 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   @override
   Future<void> refreshStatus({CancellationToken? cancelToken}) async {
     await super.refreshStatus(cancelToken: cancelToken);
-    _lyfiStatus = await lyfiDeviceApi.getLyfiStatus(boundDevice!.device, cancelToken: cancelToken);
-    _mode = _lyfiStatus?.mode ?? LyfiMode.manual;
-    _state = _lyfiStatus?.state ?? LyfiState.normal;
+
+    await DeviceExceptionHandler.handleDeviceCall(
+      () async {
+        _lyfiStatus = await lyfiDeviceApi.getLyfiStatus(boundDevice!.device, cancelToken: cancelToken);
+        _mode = _lyfiStatus?.mode ?? LyfiMode.manual;
+        _state = _lyfiStatus?.state ?? LyfiState.normal;
+      },
+      deviceName: boundDevice?.device.id ?? 'Unknown LyFi Device',
+      operation: 'status refresh',
+      fallbackValue: null,
+      onError: (error, stack) {
+        super.logger?.w('Failed to refresh LyFi status', error: error, stackTrace: stack);
+      },
+    );
   }
 }

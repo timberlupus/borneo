@@ -65,8 +65,14 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
         throw UncompatibleDeviceError("Uncompatible device: `$compatible`", dev);
       }
 
+      final coapClient = BorneoCoapClient(
+        dev.address,
+        config: BorneoCoapConfig.coapConfig,
+        device: dev,
+        offlineDetectionEnabled: true,
+      );
       // Verify firmware version
-      final fwver = await _getFirmwareVersion(probeCoapClient, cancelToken: cancelToken);
+      final fwver = await _getFirmwareVersion(coapClient, cancelToken: cancelToken);
       if (!kLyfiFWVersionConstraint.allows(fwver)) {
         throw UnsupportedVersionError(
           'Unsupported firmware version',
@@ -76,13 +82,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
         );
       }
 
-      final generalDeviceInfo = await _getGeneralDeviceInfo(probeCoapClient, cancelToken: cancelToken);
-      final coapClient = BorneoCoapClient(
-        dev.address,
-        config: BorneoCoapConfig.coapConfig,
-        device: dev,
-        offlineDetectionEnabled: true,
-      );
+      final generalDeviceInfo = await _getGeneralDeviceInfo(coapClient, cancelToken: cancelToken);
       final lyfiInfo = await _getLyfiInfo(coapClient, cancelToken: cancelToken);
       final driverData = LyfiCoapDriverData(dev, coapClient, probeCoapClient, generalDeviceInfo, lyfiInfo);
       driverData.load();

@@ -22,8 +22,8 @@ import 'package:borneo_kernel_abstractions/mdns.dart';
 
 final class DefaultKernel implements IKernel {
   static const Duration kStartupDiscoveryDuration = Duration(seconds: 15);
-  static const Duration kLocalProbeTimeOut = Duration(seconds: 3);
-  static const Duration kLocalBindTimeOut = Duration(seconds: 5);
+  static const Duration kLocalProbeTimeOut = Duration(seconds: 5);
+  static const Duration kLocalBindTimeOut = Duration(seconds: 10);
   static const Duration kHeartbeatPollingInterval = Duration(seconds: 15);
 
   Timer? _timer;
@@ -194,8 +194,8 @@ final class DefaultKernel implements IKernel {
     } on CancelledException catch (_) {
       _logger.w('Device($device) binding cancelled');
       return false;
-    } on TimeoutException catch (_) {
-      _logger.w('Probing device($device) timed out');
+    } on TimeoutException catch (error, stackTrace) {
+      _logger.w('Probing device($device) timed out:', error: error, stackTrace: stackTrace);
       return false;
     } on DeviceProbeError catch (_) {
       return false;
@@ -208,7 +208,6 @@ final class DefaultKernel implements IKernel {
 
   @override
   Future<void> bind(Device device, String driverID, {Duration? timeout, CancellationToken? cancelToken}) async {
-    // 在获取锁之前检查取消状态
     cancelToken?.throwIfCancelled();
     final eventsToFire = [];
 
@@ -255,7 +254,7 @@ final class DefaultKernel implements IKernel {
       } else {
         throw DeviceProbeError("Failed to probe $device", device);
       }
-    });
+    }, timeout: timeout);
     for (final e in eventsToFire) {
       _events.fire(e);
     }
