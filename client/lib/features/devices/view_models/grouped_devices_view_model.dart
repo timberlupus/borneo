@@ -136,6 +136,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
 
   Future<void> _reloadAll() async {
     final groupEntities = await _groupManager.fetchAllGroupsInCurrentScene().asCancellable(_cancellationToken);
+    final deviceEntities = await _deviceManager.fetchAllDevicesInScene().asCancellable(_cancellationToken);
 
     _clearAllItems();
 
@@ -145,15 +146,18 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
 
     _groups.addAll(groupEntities.map((g) => GroupViewModel(g)).followedBy([newDummyGroup]));
 
-    final deviceEntities = await _deviceManager.fetchAllDevicesInScene().asCancellable(_cancellationToken);
+    // Build device group mapping for efficient assignment
+    final groupMap = {for (final group in _groups) group.id: group};
+
     for (final deviceEntity in deviceEntities) {
       final metaModule = _deviceModuleRegistry.metaModules[deviceEntity.driverID];
-      final deviceVM = metaModule!.createSummaryVM(deviceEntity, _deviceManager, globalEventBus);
-      if (deviceEntity.groupID != null) {
-        final g = _groups.singleWhere((x) => x.id == deviceEntity.groupID);
-        g.addDevice(deviceVM);
-      } else {
-        dummyGroup.addDevice(deviceVM);
+      if (metaModule != null) {
+        final deviceVM = metaModule.createSummaryVM(deviceEntity, _deviceManager, globalEventBus);
+        final targetGroup = deviceEntity.groupID != null ? groupMap[deviceEntity.groupID] : newDummyGroup;
+
+        if (targetGroup != null) {
+          targetGroup.addDevice(deviceVM);
+        }
       }
     }
   }
@@ -256,8 +260,12 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
   }
 
   void _onDeviceGroupCreated(DeviceGroupCreatedEvent event) {
-    // Always reload to ensure new groups appear immediately
-    _reloadAll().then((_) {
+    // Use reload with lock to prevent race conditions
+    if (!isDisposed && !_isInitialized) return;
+
+    _deviceOperLock.synchronized(() async {
+      if (isDisposed) return;
+      await _reloadAll();
       if (!isDisposed) {
         notifyListeners();
       }
@@ -267,21 +275,11 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
   void _onDeviceGroupDeleted(DeviceGroupDeletedEvent event) {
     if (isDisposed) return;
 
-    // 避免重复通知
-    final removedGroupIndex = _groups.indexWhere((group) => group.id == event.id);
-    if (removedGroupIndex != -1) {
-      final removedGroup = _groups[removedGroupIndex];
-      removedGroup.dispose();
-      _groups.removeAt(removedGroupIndex);
+    _deviceOperLock.synchronized(() async {
+      if (isDisposed) return;
 
-      // 单次通知
-      if (!isDisposed) {
-        notifyListeners();
-      }
-    }
-
-    // Also trigger full reload to ensure consistency
-    _reloadAll().then((_) {
+      // 避免重复通知 - 直接重载即可保证一致性
+      await _reloadAll();
       if (!isDisposed) {
         notifyListeners();
       }
@@ -289,12 +287,14 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
   }
 
   void _onDeviceGroupUpdated(DeviceGroupUpdatedEvent event) {
-    for (final gvm in _groups) {
-      if (gvm.id == event.group.id) {
-        gvm.model = event.group;
-        gvm.notifyListeners();
+    _deviceOperLock.synchronized(() async {
+      if (isDisposed) return;
+
+      // 简单重载保证数据一致性
+      await _reloadAll();
+      if (!isDisposed) {
+        notifyListeners();
       }
-    }
-    notifyListeners(); // Ensure parent view updates too
+    });
   }
 }
