@@ -22,8 +22,8 @@ import 'package:borneo_kernel_abstractions/mdns.dart';
 
 final class DefaultKernel implements IKernel {
   static const Duration kStartupDiscoveryDuration = Duration(seconds: 15);
-  static const Duration kLocalProbeTimeOut = Duration(seconds: 5);
-  static const Duration kLocalBindTimeOut = Duration(seconds: 10);
+  static const Duration kLocalProbeTimeOut = Duration(seconds: 3);
+  static const Duration kLocalBindTimeOut = Duration(seconds: 5);
   static const Duration kHeartbeatPollingInterval = Duration(seconds: 15);
 
   Timer? _timer;
@@ -48,6 +48,7 @@ final class DefaultKernel implements IKernel {
   late final StreamSubscription<DeviceOfflineEvent> _deviceOfflineSub;
   late final StreamSubscription<FoundDeviceEvent> _foundDeviceEventSub;
   final Lock _deviceOpLock = Lock();
+  final Lock _hbLock = Lock();
   final Map<String, int> _consecutiveFailures = {};
   final Map<String, StreamSubscription> _observationSubscriptions = {};
   final Map<String, int> _missedObservations = {};
@@ -451,7 +452,7 @@ final class DefaultKernel implements IKernel {
     if (!isInitialized) {
       return;
     }
-    if (_deviceOpLock.locked) {
+    if (_hbLock.locked) {
       _logger.t('Heartbeat polling skipped due to device operation lock.');
       return;
     }
@@ -459,7 +460,7 @@ final class DefaultKernel implements IKernel {
     final List<Device> offlineDevices = [];
 
     try {
-      await _deviceOpLock
+      await _hbLock
           .synchronized(() async {
             final futures = <Future<bool>>[];
 

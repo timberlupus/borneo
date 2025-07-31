@@ -76,14 +76,14 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
         );
       }
 
-      final generalDeviceInfo = await _getGeneralDeviceInfo(probeCoapClient);
+      final generalDeviceInfo = await _getGeneralDeviceInfo(probeCoapClient, cancelToken: cancelToken);
       final coapClient = BorneoCoapClient(
         dev.address,
         config: BorneoCoapConfig.coapConfig,
         device: dev,
         offlineDetectionEnabled: true,
       );
-      final lyfiInfo = await _getLyfiInfo(coapClient);
+      final lyfiInfo = await _getLyfiInfo(coapClient, cancelToken: cancelToken);
       final driverData = LyfiCoapDriverData(dev, coapClient, probeCoapClient, generalDeviceInfo, lyfiInfo);
       driverData.load();
       await dev.setDriverData(driverData, cancelToken: cancelToken);
@@ -147,13 +147,13 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
     return Version.parse(fwver);
   }
 
-  Future<GeneralBorneoDeviceInfo> _getGeneralDeviceInfo(CoapClient coap) async {
-    final payload = await coap.getCbor<Map>(BorneoPaths.deviceInfo);
+  Future<GeneralBorneoDeviceInfo> _getGeneralDeviceInfo(CoapClient coap, {CancellationToken? cancelToken}) async {
+    final payload = await coap.getCbor<Map>(BorneoPaths.deviceInfo, cancelToken: cancelToken);
     return GeneralBorneoDeviceInfo.fromMap(payload);
   }
 
-  Future<LyfiDeviceInfo> _getLyfiInfo(CoapClient coap) async {
-    final payload = await coap.getCbor<Map>(LyfiPaths.info);
+  Future<LyfiDeviceInfo> _getLyfiInfo(CoapClient coap, {CancellationToken? cancelToken}) async {
+    final payload = await coap.getCbor<Map>(LyfiPaths.info, cancelToken: cancelToken);
     return LyfiDeviceInfo.fromMap(payload);
   }
 
