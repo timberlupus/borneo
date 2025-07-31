@@ -19,9 +19,9 @@ abstract class IKernel implements IDisposable {
 
   BoundDevice getBoundDevice(String deviceID);
 
-  Future<bool> tryBind(Device device, String driverID, {Duration? timeout, CancellationToken? cancelToken});
+  Future<bool> tryBind(Device device, String driverID, {CancellationToken? cancelToken});
 
-  Future<void> bind(Device device, String driverID, {Duration? timeout, CancellationToken? cancelToken});
+  Future<void> bind(Device device, String driverID, {CancellationToken? cancelToken});
 
   Future<void> unbind(String deviceID, {CancellationToken? cancelToken});
   Future<void> unbindAll({CancellationToken? cancelToken});
