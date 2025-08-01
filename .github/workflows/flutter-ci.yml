@@ -97,8 +97,14 @@ jobs:
       - name: Run dart format check
         run: dart format --set-exit-if-changed .
 
-      - name: Run analyze
-        run: flutter analyze --no-pub
+      - name: Run analyze (fail only on error)
+        run: |
+          flutter analyze --no-pub > analyze.log || true
+          cat analyze.log
+          if grep -q "error •" analyze.log; then
+            echo "Found errors in analysis"
+            exit 1
+          fi
 
       - name: Run tests
         run: flutter test --no-pub

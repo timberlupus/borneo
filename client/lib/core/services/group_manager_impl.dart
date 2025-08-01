@@ -115,6 +115,21 @@ class GroupManagerImpl extends GroupManager {
   }
 
   @override
+  Future<DeviceGroupEntity> fetch(String id, {Transaction? tx}) async {
+    assert(isInitialized);
+    if (tx == null) {
+      return await _db.transaction((tx) => fetch(id, tx: tx));
+    } else {
+      final store = stringMapStoreFactory.store(StoreNames.groups);
+      final map = await store.record(id).get(tx);
+      if (map == null) {
+        throw KeyNotFoundException(message: 'DeviceGroupEntity with id $id not found');
+      }
+      return DeviceGroupEntity.fromMap(id, map);
+    }
+  }
+
+  @override
   Future<List<DeviceGroupEntity>> fetchAllGroupsInCurrentScene({Transaction? tx}) async {
     assert(isInitialized);
     if (tx == null) {

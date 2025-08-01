@@ -22,5 +22,6 @@ abstract class GroupManager {
   Future<void> create({required String name, String notes = '', Transaction? tx});
   Future<void> update(String id, {required String name, String notes = '', Transaction? tx});
   Future<void> delete(String id, {Transaction? tx});
+  Future<DeviceGroupEntity> fetch(String id, {Transaction? tx});
   Future<List<DeviceGroupEntity>> fetchAllGroupsInCurrentScene({Transaction? tx});
 }
