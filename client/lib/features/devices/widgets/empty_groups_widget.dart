@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 /// Widget displayed when no device groups exist
 class EmptyGroupsWidget extends StatelessWidget {
@@ -16,10 +17,10 @@ class EmptyGroupsWidget extends StatelessWidget {
           children: [
             const Icon(Icons.group_outlined, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            Text('No Device Groups', style: Theme.of(context).textTheme.headlineSmall),
+            Text(context.translate('No Device Groups'), style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
-              'Create groups to better organize your devices',
+              context.translate('Create groups to better organize your devices'),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
@@ -27,7 +28,7 @@ class EmptyGroupsWidget extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onCreateGroup,
               icon: const Icon(Icons.add),
-              label: const Text('Create First Group'),
+              label: Text(context.translate('Create First Group')),
             ),
           ],
         ),

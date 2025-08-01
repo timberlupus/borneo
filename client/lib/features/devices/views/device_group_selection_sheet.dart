@@ -1,5 +1,6 @@
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 class DeviceGroupSelectionSheet extends StatelessWidget {
   final String title;
@@ -19,7 +20,7 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
     final tiles =
         <Widget>[
               ListTile(
-                title: Text('No group'),
+                title: Text(context.translate('No group')),
                 onTap: () {
                   Navigator.pop(context);
                   onTapGroup(null);

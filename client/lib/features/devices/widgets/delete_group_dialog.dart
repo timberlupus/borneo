@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 /// Confirmation dialog for deleting a device group
 class DeleteGroupDialog extends StatelessWidget {
@@ -15,11 +16,11 @@ class DeleteGroupDialog extends StatelessWidget {
         'Devices in this group will be moved to the "Ungrouped" area.',
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.translate('Cancel'))),
         TextButton(
           onPressed: () => Navigator.pop(context, true),
-          style: TextButton.styleFrom(foregroundColor: Colors.red),
-          child: const Text('Delete'),
+          style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+          child: Text(context.translate('Delete')),
         ),
       ],
     );
