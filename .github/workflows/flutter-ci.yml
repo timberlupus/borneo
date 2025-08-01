@@ -1,4 +1,6 @@
 name: Flutter CI
+permissions:
+  contents: write
 
 on:
   push:
