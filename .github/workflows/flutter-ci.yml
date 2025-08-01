@@ -58,8 +58,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('client/**/*.gradle*', 'client/**/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-gradle-
 
-      # 依赖已在 setup job 安装，无需重复安装
-
   test:
     needs: setup
     runs-on: ubuntu-latest
@@ -91,14 +89,18 @@ jobs:
           key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock') }}
           restore-keys: ${{ runner.os }}-pub-cache-
 
+
       - name: Install dependencies
         run: flutter pub get
 
       - name: Run dart format check
         run: dart format --set-exit-if-changed .
 
+      - name: Run analyze
+        run: flutter analyze --no-pub
+
       - name: Run tests
-        run: flutter test
+        run: flutter test --no-pub
 
   build-apk:
     needs: [setup, test]
@@ -106,6 +108,8 @@ jobs:
     defaults:
       run:
         working-directory: client
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
 
     steps:
       - name: Checkout code
@@ -116,6 +120,19 @@ jobs:
         run: |
           echo "FLUTTER_VERSION=$(cat flutter_version)" >> $GITHUB_ENV
         working-directory: client
+
+      - name: Decode keystore from base64
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/keystore.jks
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
+      - name: Set up signing properties
+        run: |
+          echo "storeFile=keystore.jks" > android/app/key.properties
+          echo "keyAlias=${{ secrets.KEYSTORE_KEY_ALIAS }}" >> android/app/key.properties
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/app/key.properties
+          echo "keyPassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/app/key.properties
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -146,12 +163,22 @@ jobs:
       - name: Build APK
         run: flutter build apk --release --target-platform android-arm64 --no-pub
 
-#      - name: Upload APK artifact
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: release-apk
-#          path: build/app/outputs/flutter-apk/borneo-app-release.apk
-#
+      - name: Get version from pubspec.yaml
+        id: get_version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | head -n1 | awk '{print $2}' | cut -d'+' -f1)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Rename APK with version
+        run: |
+          mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/borneo-app-${{ steps.get_version.outputs.version }}.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: borneo-app-${{ steps.get_version.outputs.version }}
+          path: build/app/outputs/flutter-apk/borneo-app-${{ steps.get_version.outputs.version }}.apk
 
   build-windows:
     needs: [setup, test]
@@ -159,6 +186,8 @@ jobs:
     defaults:
       run:
         working-directory: client
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
 
     steps:
       - name: Checkout code
@@ -199,7 +228,55 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Get version from pubspec.yaml
+        id: get_version
+        run: |
+          $version = (Select-String -Path pubspec.yaml -Pattern '^version:' | Select-Object -First 1).Line.Split(':')[1].Trim().Split('+')[0]
+          echo "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+        shell: powershell
+
       - name: Build Windows executable
         run: flutter build windows --release --no-pub
         shell: powershell
+
+      - name: Zip Windows Release (exclude pdb)
+        run: |
+          $zipPath = "build/windows/runner/Release/borneo-app-${{ steps.get_version.outputs.version }}-windows.zip"
+          $srcDir = "build/windows/runner/Release"
+          Get-ChildItem $srcDir -File -Exclude *.pdb | Compress-Archive -DestinationPath $zipPath
+        shell: powershell
+
+      - name: Upload Windows zip artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: borneo-app-${{ steps.get_version.outputs.version }}-windows
+          path: build/windows/runner/Release/borneo-app-${{ steps.get_version.outputs.version }}-windows.zip
+
+  release:
+    needs: [build-apk, build-windows]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Download APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: borneo-app-${{ needs.build-apk.outputs.version }}
+          path: ./release-artifacts
+
+      - name: Download Windows zip artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: borneo-app-${{ needs.build-windows.outputs.version }}-windows
+          path: ./release-artifacts
+
+      - name: Create Release and Upload APK/ZIP
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.build-apk.outputs.version }}
+          name: Release v${{ needs.build-apk.outputs.version }}
+          files: |
+            release-artifacts/borneo-app-${{ needs.build-apk.outputs.version }}.apk
+            release-artifacts/borneo-app-${{ needs.build-windows.outputs.version }}-windows.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
