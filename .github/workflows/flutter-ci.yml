@@ -9,6 +9,7 @@ on:
     branches: [master, dev, dev-*]
     paths:
       - 'client/**'
+  workflow_dispatch:
 
 jobs:
   setup:
