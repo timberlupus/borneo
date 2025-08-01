@@ -178,13 +178,15 @@ class MainScreen extends StatelessWidget {
         return PopScope(
           canPop: false,
           child: AlertDialog(
-            content: Row(children: [CircularProgressIndicator(), SizedBox(width: 20), Text('Loading...')]),
+            content: Row(
+              children: [CircularProgressIndicator(), SizedBox(width: 20), Text(context.translate('Loading...'))],
+            ),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(context);
                 },
-                child: Text('Cancel'),
+                child: Text(context.translate('Cancel')),
               ),
             ],
           ),
@@ -228,7 +230,10 @@ class MainScreen extends StatelessWidget {
               final shouldPop = await vm.handleWillPop();
               if (!shouldPop) {
                 if (context.mounted) {
-                  Provider.of<IAppNotificationService>(context, listen: false).showInfo('Press back again to exit');
+                  Provider.of<IAppNotificationService>(
+                    context,
+                    listen: false,
+                  ).showInfo(context.translate('Press back again to exit'));
                 }
               } else if (context.mounted) {
                 if (Navigator.of(context).canPop()) {
