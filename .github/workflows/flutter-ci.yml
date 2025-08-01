@@ -288,6 +288,15 @@ jobs:
           name: borneo-app-${{ needs.build-windows.outputs.version }}-windows-x64
           path: ./release-artifacts
 
+      - name: Set prerelease flag
+        id: set_prerelease
+        run: |
+          if [[ "${{ needs.build-apk.outputs.version }}" == *beta* || "${{ needs.build-apk.outputs.version }}" == *alpha* ]]; then
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
@@ -295,7 +304,7 @@ jobs:
           tag_name: v${{ needs.build-apk.outputs.version }}
           release_name: Release v${{ needs.build-apk.outputs.version }}
           draft: false
-          prerelease: false
+          prerelease: ${{ steps.set_prerelease.outputs.prerelease }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
