@@ -263,7 +263,7 @@ jobs:
           $srcDir = "build/windows/x64/runner/Release"
           if (-not (Test-Path $distDir)) { New-Item -ItemType Directory -Force -Path $distDir | Out-Null }
           if (Test-Path $zipPath) { Remove-Item $zipPath }
-          & "C:\Program Files\7-Zip\7z.exe" a -tzip $zipPath "$srcDir\*" -xr!*.pdb -mx=9
+          & "C:\Program Files\7-Zip\7z.exe" a -tzip "$zipPath" "$srcDir\*" "-xr!*.pdb" -mx=9
         shell: powershell
 
       - name: Upload Windows zip artifact

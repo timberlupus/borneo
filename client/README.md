@@ -50,7 +50,7 @@ flutter test
 
 - Build runner: `flutter packages pub run build_runner build`
 - Generate splash: `dart run flutter_native_splash:create`
-- Analyze code: `flutter analyze`
+- Analyze code: `flutter analyze --no-pub`
 - Format code: `flutter format .`
 
 ## Credits
