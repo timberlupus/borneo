@@ -248,8 +248,8 @@ jobs:
 
       - name: Zip Windows Release (exclude pdb)
         run: |
-          $zipPath = "build/windows/runner/Release/borneo-app-${{ steps.get_version.outputs.version }}-windows.zip"
-          $srcDir = "build/windows/runner/Release"
+          $zipPath = "build/windows/x64/runner/Release/borneo-app-${{ steps.get_version.outputs.version }}-windows.zip"
+          $srcDir = "build/windows/x64/runner/Release"
           Get-ChildItem $srcDir -File -Exclude *.pdb | Compress-Archive -DestinationPath $zipPath
         shell: powershell
 
@@ -257,7 +257,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: borneo-app-${{ steps.get_version.outputs.version }}-windows
-          path: build/windows/runner/Release/borneo-app-${{ steps.get_version.outputs.version }}-windows.zip
+          path: build/windows/x64/runner/Release/borneo-app-${{ steps.get_version.outputs.version }}-windows.zip
 
   release:
     needs: [build-apk, build-windows]
