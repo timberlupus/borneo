@@ -107,7 +107,12 @@ jobs:
           fi
 
       - name: Run tests
-        run: flutter test --no-pub
+        run: |
+          flutter test --no-pub
+          flutter test --no-pub packages/borneo_common
+          flutter test --no-pub packages/borneo_kernel
+          flutter test --no-pub packages/borneo_kernel_abstractions
+          flutter test --no-pub packages/lw_wot
 
   build-apk:
     needs: [setup, test]
