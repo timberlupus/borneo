@@ -256,7 +256,7 @@ jobs:
           Get-ChildItem $srcDir -File -Exclude *.pdb | Compress-Archive -DestinationPath $zipPath
         shell: powershell
         
-      - name: Debug: List Windows output
+      - name: Debug List Windows output
         run: dir build/windows/x64/runner/Release/
         shell: powershell
 

@@ -31,7 +31,7 @@ abstract class AbstractRoutine with BaseEntity {
   RoutineAction createAction(Map<String, dynamic> e) => switch (e['type']) {
     PowerAction.type => PowerAction.fromJson(e),
     LedSwitchTemporaryModeAction.type => LedSwitchTemporaryModeAction.fromJson(e),
-    _ => throw UnimplementedError('Unknown routine action type: \'${e['type']}\''),
+    _ => throw UnimplementedError('Unknown routine action type: `${e['type']}`'),
   };
 
   Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, DeviceManager deviceManager);
