@@ -180,15 +180,15 @@ jobs:
       - name: Rename APK with version
         run: |
           mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/borneo-app-${{ steps.get_version.outputs.version }}.apk
-          
+
       - name: Debug List APK output
         run: ls -l build/app/outputs/flutter-apk/
-        
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: borneo-app-${{ steps.get_version.outputs.version }}
-          path: build/app/outputs/flutter-apk/borneo-app-${{ steps.get_version.outputs.version }}.apk
+          path: ${{ github.workspace }}/client/build/app/outputs/flutter-apk/borneo-app-${{ steps.get_version.outputs.version }}.apk
 
   build-windows:
     needs: [setup, test]
@@ -258,17 +258,11 @@ jobs:
           Get-ChildItem $srcDir -Recurse -File -Exclude *.pdb | Compress-Archive -DestinationPath $zipPath -Update
         shell: powershell
 
-      - name: Debug List Windows output
-        run: |
-          dir build/windows/x64/runner/Release/
-          dir build/windows/dist/
-        shell: powershell
-
       - name: Upload Windows zip artifact
         uses: actions/upload-artifact@v4
         with:
           name: borneo-app-${{ steps.get_version.outputs.version }}-windows-x64
-          path: build/windows/dist/borneo-app-${{ steps.get_version.outputs.version }}-windows-x64.zip
+          path: ${{ github.workspace }}/client/build/windows/dist/borneo-app-${{ steps.get_version.outputs.version }}-windows-x64.zip
 
   release:
     needs: [build-apk, build-windows]

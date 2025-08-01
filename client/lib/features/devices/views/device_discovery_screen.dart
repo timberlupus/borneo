@@ -388,7 +388,7 @@ class DeviceDiscoveryScreen extends StatelessWidget {
     } else {
       iconWidget = Icon(Icons.device_unknown, size: 40, color: Theme.of(context).colorScheme.outline);
     }
-    // 增加边框和背景，参考 DeviceTile
+
     return Container(
       height: 48,
       width: 48,
@@ -410,7 +410,7 @@ class DeviceDiscoveryScreen extends StatelessWidget {
         availableGroups: vm.availableGroups,
         onTapGroup: (g) => vm.addNewDevice(deviceInfo, g),
         title: 'Registry "${deviceInfo.name}"',
-        subtitle: 'Select the group to which the new device belongs:',
+        subtitle: context.translate('Select the group to which the new device belongs:'),
       ),
     );
   }
