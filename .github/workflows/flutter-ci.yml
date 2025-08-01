@@ -168,7 +168,7 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release --target-platform android-arm64 --no-pub
+        run: flutter build apk --release --target-platform android-arm64 --no-pub --build-number ${{ github.run_number }}
 
       - name: Get version from pubspec.yaml
         id: get_version
@@ -246,25 +246,29 @@ jobs:
         shell: powershell
 
       - name: Build Windows executable
-        run: flutter build windows --release --no-pub
+        run: flutter build windows --release --no-pub --build-number ${{ github.run_number }}
         shell: powershell
 
-      - name: Zip Windows Release (exclude pdb)
+      - name: Zip Windows Release (exclude pdb, keep structure)
         run: |
-          $zipPath = "build/windows/x64/runner/Release/borneo-app-${{ steps.get_version.outputs.version }}-windows.zip"
+          $distDir = "build/windows/dist"
+          $zipPath = "$distDir/borneo-app-${{ steps.get_version.outputs.version }}-windows-x64.zip"
           $srcDir = "build/windows/x64/runner/Release"
-          Get-ChildItem $srcDir -File -Exclude *.pdb | Compress-Archive -DestinationPath $zipPath
+          if (-not (Test-Path $distDir)) { New-Item -ItemType Directory -Force -Path $distDir | Out-Null }
+          Get-ChildItem $srcDir -Recurse -File -Exclude *.pdb | Compress-Archive -DestinationPath $zipPath -Update
         shell: powershell
-        
+
       - name: Debug List Windows output
-        run: dir build/windows/x64/runner/Release/
+        run: |
+          dir build/windows/x64/runner/Release/
+          dir build/windows/dist/
         shell: powershell
 
       - name: Upload Windows zip artifact
         uses: actions/upload-artifact@v4
         with:
-          name: borneo-app-${{ steps.get_version.outputs.version }}-windows
-          path: build/windows/x64/runner/Release/borneo-app-${{ steps.get_version.outputs.version }}-windows.zip
+          name: borneo-app-${{ steps.get_version.outputs.version }}-windows-x64
+          path: build/windows/dist/borneo-app-${{ steps.get_version.outputs.version }}-windows-x64.zip
 
   release:
     needs: [build-apk, build-windows]
@@ -280,7 +284,7 @@ jobs:
       - name: Download Windows zip artifact
         uses: actions/download-artifact@v4
         with:
-          name: borneo-app-${{ needs.build-windows.outputs.version }}-windows
+          name: borneo-app-${{ needs.build-windows.outputs.version }}-windows-x64
           path: ./release-artifacts
 
       - name: Create GitHub Release
@@ -310,7 +314,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release-artifacts/borneo-app-${{ needs.build-windows.outputs.version }}-windows.zip
-          asset_name: borneo-app-${{ needs.build-windows.outputs.version }}-windows.zip
+          asset_path: release-artifacts/borneo-app-${{ needs.build-windows.outputs.version }}-windows-x64.zip
+          asset_name: borneo-app-${{ needs.build-windows.outputs.version }}-windows-x64.zip
           asset_content_type: application/zip
 
