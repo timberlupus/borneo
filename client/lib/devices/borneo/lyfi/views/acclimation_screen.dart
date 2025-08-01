@@ -80,7 +80,7 @@ class AcclimationScreen extends StatelessWidget {
         builder: (context, vm, _) => SwitchListTile(
           title: Text('Enabled'),
           value: vm.enabled,
-          onChanged: !vm.isBusy && vm.isOnline ? vm.setEanbled : null, // TODO check power state
+          onChanged: !vm.isBusy && vm.isOnline && vm.isOn ? vm.setEanbled : null,
         ),
       ),
 

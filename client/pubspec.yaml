@@ -107,6 +107,7 @@ dependencies:
   lat_lng_to_timezone: ^0.2.0
   timezone: ^0.10.1
   riverpod: ^2.6.1
+  window_size: ^0.1.0
 
 
 dev_dependencies:

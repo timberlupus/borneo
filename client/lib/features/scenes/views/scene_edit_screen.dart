@@ -1,4 +1,5 @@
 import 'package:borneo_app/core/services/scene_manager.dart';
+import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/features/scenes/providers/scene_edit_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -26,7 +27,6 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
   @override
   void initState() {
     super.initState();
-    // 创建一个稳定的 provider 实例
     _sceneEditProvider = StateNotifierProvider<SceneEditNotifier, SceneEditState>((ref) {
       return SceneEditNotifier(
         ref.watch(_sceneManagerProvider),
@@ -36,34 +36,44 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
     }, dependencies: [_sceneManagerProvider]);
   }
 
-  // 临时的 SceneManager provider，用于桥接
   late final Provider<ISceneManager> _sceneManagerProvider = Provider<ISceneManager>((ref) {
     throw UnimplementedError('SceneManager must be provided by context');
+  });
+
+  late final Provider<IAppNotificationService> _notificationServiceProvider = Provider<IAppNotificationService>((ref) {
+    throw UnimplementedError('NotificationService must be provided by context');
   });
 
   @override
   Widget build(BuildContext context) {
     return provider.Consumer<ISceneManager>(
       builder: (context, sceneManager, child) {
-        return ProviderScope(
-          overrides: [_sceneManagerProvider.overrideWithValue(sceneManager)],
-          child: Consumer(
-            builder: (context, ref, child) {
-              final state = ref.watch(_sceneEditProvider);
-              final notifier = ref.read(_sceneEditProvider.notifier);
+        return provider.Consumer<IAppNotificationService>(
+          builder: (context, notificationService, child) {
+            return ProviderScope(
+              overrides: [
+                _sceneManagerProvider.overrideWithValue(sceneManager),
+                _notificationServiceProvider.overrideWithValue(notificationService),
+              ],
+              child: Consumer(
+                builder: (context, ref, child) {
+                  final state = ref.watch(_sceneEditProvider);
+                  final notifier = ref.read(_sceneEditProvider.notifier);
 
-              return Scaffold(
-                appBar: AppBar(
-                  title: Text(
-                    widget.args.isCreation ? context.translate('New Scene') : context.translate('Edit Scene'),
-                  ),
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                  actions: _buildActions(context, ref, state, notifier),
-                ),
-                body: _buildBody(context, ref, state, notifier),
-              );
-            },
-          ),
+                  return Scaffold(
+                    appBar: AppBar(
+                      title: Text(
+                        widget.args.isCreation ? context.translate('New Scene') : context.translate('Edit Scene'),
+                      ),
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      actions: _buildActions(context, ref, state, notifier),
+                    ),
+                    body: _buildBody(context, ref, state, notifier),
+                  );
+                },
+              ),
+            );
+          },
         );
       },
     );
@@ -84,10 +94,6 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
             _buildNotesField(context, state, notifier),
             const SizedBox(height: 24),
             _buildSubmitButton(context, state, notifier),
-            if (state.error != null) ...[
-              const SizedBox(height: 16),
-              Text(state.error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
-            ],
           ],
         ),
       ),
@@ -158,7 +164,7 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
         hintText: context.translate('Enter the required scene name'),
       ),
       validator: (value) {
-        if (value?.isEmpty ?? true) {
+        if (value?.trim().isEmpty ?? true) {
           return context.translate('Please enter the scene name');
         }
         return null;
@@ -210,6 +216,7 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
   }
 
   List<Widget> _buildActions(BuildContext context, WidgetRef ref, SceneEditState state, SceneEditNotifier notifier) {
+    final notificationService = ref.read(_notificationServiceProvider);
     return [
       if (notifier.deletionAvailable)
         IconButton(
@@ -221,13 +228,32 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
                     builder: (BuildContext context) {
                       return ConfirmationSheet(
                         message: context.translate(
-                          'Are you sure you want to delete this device group? The devices within this group will not be deleted but will be moved to the "Ungrouped" group.',
+                          'Are you sure you want to delete this scene? This action cannot be undone.',
                         ),
                         okPressed: () async {
                           final success = await notifier.delete();
                           if (success) {
                             if (context.mounted) {
                               Navigator.of(context).pop(true);
+                            }
+                          } else if (context.mounted) {
+                            // Show error notification if deletion was blocked
+                            final error = ref.read(_sceneEditProvider).error;
+                            switch (error) {
+                              case 'last_scene':
+                                notificationService.showWarning(
+                                  context.translate('Cannot Delete Scene'),
+                                  body: context.translate('Cannot delete the last remaining scene.'),
+                                );
+                                break;
+                              case 'devices_or_groups':
+                                notificationService.showWarning(
+                                  context.translate('Cannot Delete Scene'),
+                                  body: context.translate(
+                                    'This scene contains devices or device groups. Please remove all devices and groups from this scene before deleting it.',
+                                  ),
+                                );
+                                break;
                             }
                           }
                         },

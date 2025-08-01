@@ -364,7 +364,7 @@ class TestKernel implements IKernel {
   }
 
   @override
-  Future<bool> tryBind(dynamic device, String driverID, {Duration? timeout, CancellationToken? cancelToken}) async {
+  Future<bool> tryBind(dynamic device, String driverID, {CancellationToken? cancelToken}) async {
     tryBindCalled = true;
     lastBoundDeviceId = device.id;
     if (tryBindResult) {
@@ -377,7 +377,7 @@ class TestKernel implements IKernel {
   }
 
   @override
-  Future<void> bind(dynamic device, String driverID, {Duration? timeout, CancellationToken? cancelToken}) async {
+  Future<void> bind(dynamic device, String driverID, {CancellationToken? cancelToken}) async {
     bindCalled = true;
     lastBoundDeviceId = device.id;
     boundDeviceIds.add(device.id);

@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:cancellation_token/cancellation_token.dart';
+import 'package:synchronized/synchronized.dart';
 
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 import 'package:borneo_app/features/devices/models/events.dart';
@@ -23,6 +25,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
   final DeviceManager _deviceManager;
   final IDeviceModuleRegistry _deviceModuleRegistry;
   final CancellationToken _cancellationToken = CancellationToken();
+  final Lock _deviceOperLock = Lock();
   bool _isInitialized = false;
 
   // Getter for loading state
@@ -30,10 +33,11 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
   // Getter for error message
 
   bool get isEmpty => _groups.isEmpty;
+  bool get isLoading => isBusy;
 
   // Getter for users list
   final List<GroupViewModel> _groups = [];
-  List<GroupViewModel> get groups => _groups;
+  List<GroupViewModel> get groups => UnmodifiableListView(_groups);
 
   GroupViewModel get dummyGroup => _groups.singleWhere((g) => g.isDummy);
 
@@ -132,48 +136,69 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
 
   Future<void> _reloadAll() async {
     final groupEntities = await _groupManager.fetchAllGroupsInCurrentScene().asCancellable(_cancellationToken);
+    final deviceEntities = await _deviceManager.fetchAllDevicesInScene().asCancellable(_cancellationToken);
 
     _clearAllItems();
 
-    final dummyGroup = GroupViewModel(
+    final newDummyGroup = GroupViewModel(
       DeviceGroupEntity(id: '', sceneID: _sceneManager.current.id, name: 'Ungrouped devices'),
     );
 
-    _groups.addAll(groupEntities.map((g) => GroupViewModel(g)).followedBy([dummyGroup]));
+    _groups.addAll(groupEntities.map((g) => GroupViewModel(g)).followedBy([newDummyGroup]));
 
-    final deviceEntities = await _deviceManager.fetchAllDevicesInScene().asCancellable(_cancellationToken);
+    // Build device group mapping for efficient assignment
+    final groupMap = {for (final group in _groups) group.id: group};
+
     for (final deviceEntity in deviceEntities) {
       final metaModule = _deviceModuleRegistry.metaModules[deviceEntity.driverID];
-      final deviceVM = metaModule!.createSummaryVM(deviceEntity, _deviceManager, globalEventBus);
-      if (deviceEntity.groupID != null) {
-        final g = _groups.singleWhere((x) => x.id == deviceEntity.groupID);
-        g.addDevice(deviceVM);
-      } else {
-        dummyGroup.addDevice(deviceVM);
+      if (metaModule != null) {
+        final deviceVM = metaModule.createSummaryVM(deviceEntity, _deviceManager, globalEventBus);
+        final targetGroup = deviceEntity.groupID != null ? groupMap[deviceEntity.groupID] : newDummyGroup;
+
+        if (targetGroup != null) {
+          targetGroup.addDevice(deviceVM);
+        }
       }
     }
   }
 
   Future<void> changeDeviceGroup(DeviceEntity device, String? newGroupID) async {
-    final originalGroupVM = _groups.singleWhere((g) => g.devices.any((d) => d.deviceEntity.id == device.id));
-    final newGroupVM = newGroupID != null ? _groups.singleWhere((g) => g.id == newGroupID) : dummyGroup;
-    final deviceVM = originalGroupVM.devices.singleWhere((d) => d.deviceEntity.id == device.id);
+    return await _deviceOperLock.synchronized(() async {
+      if (isDisposed) return;
 
-    if (identical(originalGroupVM, newGroupVM)) {
-      return;
-    }
-    try {
-      await _deviceManager.moveToGroup(device.id, newGroupVM.id);
-      newGroupVM.insertDevice(0, deviceVM);
-      originalGroupVM.removeDevice(deviceVM);
-    } catch (e, stackTrace) {
-      notifyAppError('Failed to change the group for device "${device.name}"', error: e, stackTrace: stackTrace);
-    } finally {
-      setBusy(false, notify: false);
-    }
+      final originalGroupVM = _groups.singleWhere((g) => g.devices.any((d) => d.deviceEntity.id == device.id));
+      final newGroupVM = newGroupID != null ? _groups.singleWhere((g) => g.id == newGroupID) : dummyGroup;
+      final deviceVM = originalGroupVM.devices.singleWhere((d) => d.deviceEntity.id == device.id);
+
+      if (identical(originalGroupVM, newGroupVM)) {
+        return;
+      }
+
+      try {
+        // 1. 先更新数据库
+        await _deviceManager.moveToGroup(device.id, newGroupVM.id);
+
+        // 2. 确认数据库更新成功后，原子性更新内存状态
+        originalGroupVM.removeDevice(deviceVM);
+        newGroupVM.insertDevice(0, deviceVM);
+
+        // 3. 仅通知相关组更新，减少全局刷新
+        originalGroupVM.notifyListeners();
+        newGroupVM.notifyListeners();
+
+        logger?.i('Device ${device.name} moved from ${originalGroupVM.name} to ${newGroupVM.name}');
+      } catch (e, stackTrace) {
+        // 失败时重载全部数据保持一致性
+        logger?.e('Failed to change device group, reloading all devices', error: e, stackTrace: stackTrace);
+        await _reloadAll();
+        notifyAppError('Failed to change the group for device "${device.name}"', error: e, stackTrace: stackTrace);
+      }
+    });
   }
 
   Future<void> _onNewDeviceEntityAdded(NewDeviceEntityAddedEvent event) async {
+    if (isDisposed) return;
+
     try {
       final metaModule = _deviceModuleRegistry.metaModules[event.device.driverID];
       if (metaModule != null) {
@@ -187,17 +212,21 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
         }
 
         targetGroup.addDevice(deviceVM);
-
         logger?.i('Device ${event.device.name} added to group ${targetGroup.name}');
       }
     } catch (e, stackTrace) {
       logger?.e('Failed to add device incrementally, falling back to full reload', error: e, stackTrace: stackTrace);
       await _tryReloadAll();
     }
-    notifyListeners();
+    // 仅在必要时通知
+    if (!isDisposed) {
+      notifyListeners();
+    }
   }
 
   Future<void> _onDeviceDeleted(DeviceEntityDeletedEvent event) async {
+    if (isDisposed) return;
+
     final int changedGroupIndex = _groups.indexWhere((g) => g.devices.any((d) => d.deviceEntity.id == event.id));
     // Remove the deleted device from UI
     if (changedGroupIndex != -1) {
@@ -205,8 +234,10 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
       final deviceToRemove = changedGroup.devices.firstWhere((d) => d.deviceEntity.id == event.id);
       deviceToRemove.dispose();
       changedGroup.removeDeviceById(event.id);
-      // Always notify listeners when a device is removed to ensure UI updates
-      notifyListeners();
+      // 仅在必要时通知
+      if (!isDisposed) {
+        notifyListeners();
+      }
     }
   }
 
@@ -229,25 +260,41 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
   }
 
   void _onDeviceGroupCreated(DeviceGroupCreatedEvent event) {
-    if (!isBusy) {
-      _tryReloadAll();
-      notifyListeners();
-    }
+    // Use reload with lock to prevent race conditions
+    if (!isDisposed && !_isInitialized) return;
+
+    _deviceOperLock.synchronized(() async {
+      if (isDisposed) return;
+      await _reloadAll();
+      if (!isDisposed) {
+        notifyListeners();
+      }
+    });
   }
 
   void _onDeviceGroupDeleted(DeviceGroupDeletedEvent event) {
-    if (!isBusy) {
-      _tryReloadAll();
-      notifyListeners();
-    }
+    if (isDisposed) return;
+
+    _deviceOperLock.synchronized(() async {
+      if (isDisposed) return;
+
+      // 避免重复通知 - 直接重载即可保证一致性
+      await _reloadAll();
+      if (!isDisposed) {
+        notifyListeners();
+      }
+    });
   }
 
   void _onDeviceGroupUpdated(DeviceGroupUpdatedEvent event) {
-    for (final gvm in _groups) {
-      if (gvm.id == event.group.id) {
-        gvm.model = event.group;
-        gvm.notifyListeners();
+    _deviceOperLock.synchronized(() async {
+      if (isDisposed) return;
+
+      // 简单重载保证数据一致性
+      await _reloadAll();
+      if (!isDisposed) {
+        notifyListeners();
       }
-    }
+    });
   }
 }

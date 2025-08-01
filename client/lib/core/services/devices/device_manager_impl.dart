@@ -23,6 +23,7 @@ import 'package:borneo_kernel_abstractions/ikernel.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
+import 'package:borneo_common/io/net/network_interface_helper.dart';
 
 final class DeviceManagerImpl extends DeviceManager {
   final Logger? logger;
@@ -94,10 +95,15 @@ final class DeviceManagerImpl extends DeviceManager {
       _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
       await _kernel.start();
 
-      unawaited(_rebindAll(devices));
+      unawaited(() async {
+        await _rebindAll(devices);
+        // Load WotThings for current scene after devices are bound
+        await _loadWotThingsForCurrentScene();
 
-      // Load WotThings for current scene after devices are bound
-      await _loadWotThingsForCurrentScene();
+        final currentScene = _sceneManager.current;
+        _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
+        logger?.d('Fired CurrentSceneDevicesReloadedEvent for initial scene: ${currentScene.name}');
+      }());
 
       logger?.i('DeviceManagerImpl has been initialized successfully.');
     } finally {
@@ -141,6 +147,7 @@ final class DeviceManagerImpl extends DeviceManager {
       final devices = await fetchAllDevicesInScene();
       _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
       await _rebindAll(devices);
+      await _reloadWotThingsForCurrentScene();
     });
   }
 
@@ -281,6 +288,9 @@ final class DeviceManagerImpl extends DeviceManager {
     assert(isInitialized);
     final store = stringMapStoreFactory.store(StoreNames.devices);
 
+    final networkInterface = await NetworkInterfaceHelper.inferNetworkInterface(discovered.address.host);
+    logger?.d('Inferred network interface for new device ${discovered.fingerprint}: $networkInterface');
+
     final device = DeviceEntity(
       id: BaseEntity.generateID(),
       sceneID: _sceneManager.current.id,
@@ -340,14 +350,21 @@ final class DeviceManagerImpl extends DeviceManager {
   Future<void> _onUnboundDeviceDiscovered(UnboundDeviceDiscoveredEvent event) async {
     logger?.i('Device discovered: ${event.matched}');
     assert(isInitialized);
+
+    final networkInterface = await NetworkInterfaceHelper.inferNetworkInterface(event.matched.address.host);
+    logger?.d('Inferred network interface for device ${event.matched.fingerprint}: $networkInterface');
+
     return await _db.transaction((tx) async {
       final existed = await singleOrDefaultByFingerprint(event.matched.fingerprint, tx: tx);
       if (existed != null) {
+        final updates = <String, dynamic>{};
         if (event.matched.address != existed.address) {
-          // Otherwise we should update the `address` field
+          updates[DeviceEntity.kAddressFieldName] = event.matched.address.toString();
+        }
+        if (updates.isNotEmpty) {
           final store = stringMapStoreFactory.store(StoreNames.devices);
           final record = store.record(existed.id);
-          await record.update(tx, {DeviceEntity.kAddressFieldName: event.matched.address.toString()});
+          await record.update(tx, updates);
         }
       } else {
         allDeviceEvents.fire(NewDeviceFoundEvent(event.matched));
@@ -410,7 +427,7 @@ final class DeviceManagerImpl extends DeviceManager {
   /// Handle scene change event - reload WotThings for new scene
   Future<void> _onCurrentSceneChanged(CurrentSceneChangedEvent event) async {
     logger?.i('Scene changed from ${event.from.name} to ${event.to.name}, reloading WotThings...');
-    await _reloadWotThingsForCurrentScene();
+    await reloadAllDevices();
   }
 
   /// Reload WotThings for current scene only

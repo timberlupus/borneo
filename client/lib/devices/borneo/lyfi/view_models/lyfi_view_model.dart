@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:borneo_app/core/services/local_service.dart';
+import 'package:borneo_app/core/services/device_exception_handler.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
@@ -196,16 +197,26 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     if (!super.isOnline) {
       return;
     }
-    await super.refreshStatus();
+    await super.refreshStatus(cancelToken: cancelToken);
     await _fetchDeviceStatus(cancelToken: cancelToken);
 
     if (super.mode == LyfiMode.sun) {
-      final sunSchedule = await _deviceApi.getSunSchedule(boundDevice!.device);
-      if (sunSchedule.length == sunInstants.length) {
-        for (int i = 0; i < sunSchedule.length; i++) {
-          sunInstants[i] = sunSchedule[i];
-        }
-      }
+      await DeviceExceptionHandler.handleDeviceCall(
+        () async {
+          final sunSchedule = await _deviceApi.getSunSchedule(boundDevice!.device);
+          if (sunSchedule.length == sunInstants.length) {
+            for (int i = 0; i < sunSchedule.length; i++) {
+              sunInstants[i] = sunSchedule[i];
+            }
+          }
+        },
+        deviceName: boundDevice?.device.id ?? 'Unknown LyFi Device',
+        operation: 'sun schedule fetch',
+        fallbackValue: null,
+        onError: (error, stack) {
+          super.logger?.w('Failed to fetch sun schedule', error: error, stackTrace: stack);
+        },
+      );
     }
   }
 
@@ -215,23 +226,33 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       return;
     }
 
-    _fanPowerRatio = super.lyfiDeviceStatus?.fanPower.toDouble() ?? 0;
+    await DeviceExceptionHandler.handleDeviceCall(
+      () async {
+        _fanPowerRatio = super.lyfiDeviceStatus?.fanPower.toDouble() ?? 0;
 
-    _temporaryRemaining.value = lyfiDeviceStatus?.temporaryRemaining ?? Duration.zero;
+        _temporaryRemaining.value = lyfiDeviceStatus?.temporaryRemaining ?? Duration.zero;
 
-    bool emptyChannels = _channels.isEmpty;
-    if (super.lyfiDeviceStatus != null) {
-      double ob = 0;
-      for (int i = 0; i < lyfiDeviceStatus!.currentColor.length; i++) {
-        if (emptyChannels) {
-          _channels.add(ValueNotifier<int>(super.lyfiDeviceStatus!.currentColor[i]));
-        } else {
-          _channels[i].value = super.lyfiDeviceStatus!.currentColor[i];
+        bool emptyChannels = _channels.isEmpty;
+        if (super.lyfiDeviceStatus != null) {
+          double ob = 0;
+          for (int i = 0; i < lyfiDeviceStatus!.currentColor.length; i++) {
+            if (emptyChannels) {
+              _channels.add(ValueNotifier<int>(super.lyfiDeviceStatus!.currentColor[i]));
+            } else {
+              _channels[i].value = super.lyfiDeviceStatus!.currentColor[i];
+            }
+            ob += lyfiDeviceInfo.channels[i].brightnessRatio * _channels[i].value / lyfiBrightnessMax;
+          }
+          _overallBrightness = ob;
         }
-        ob += lyfiDeviceInfo.channels[i].brightnessRatio * _channels[i].value / lyfiBrightnessMax;
-      }
-      _overallBrightness = ob;
-    }
+      },
+      deviceName: boundDevice?.device.id ?? 'Unknown LyFi Device',
+      operation: 'device status fetch',
+      fallbackValue: null,
+      onError: (error, stack) {
+        logger?.w('Failed to fetch device status', error: error, stackTrace: stack);
+      },
+    );
   }
 
   void switchPowerOnOff(bool onOff) {

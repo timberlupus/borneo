@@ -1,5 +1,6 @@
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/scene_manager.dart';
+import 'package:borneo_app/core/exceptions/scene_deletion_exceptions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Scene Edit State
@@ -86,8 +87,14 @@ class SceneEditNotifier extends StateNotifier<SceneEditState> {
       await _sceneManager.delete(id!);
       state = state.copyWith(isLoading: false);
       return true;
+    } on CannotDeleteLastSceneException {
+      state = state.copyWith(isLoading: false, error: 'last_scene');
+      return false;
+    } on SceneContainsDevicesOrGroupsException {
+      state = state.copyWith(isLoading: false, error: 'devices_or_groups');
+      return false;
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: 'Failed to delete scene `${state.name}`: $e');
+      state = state.copyWith(isLoading: false, error: 'unknown');
       return false;
     }
   }

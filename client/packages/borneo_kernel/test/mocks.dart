@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:typed_data';
 
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/idriver.dart';
@@ -149,17 +148,10 @@ class MockMdnsProvider implements IMdnsProvider {
 }
 
 class TestMdnsDiscoveredDevice extends MdnsDiscoveredDevice {
-  TestMdnsDiscoveredDevice({
-    required String host,
-    int? port,
-    String? name,
-    Map<String, Uint8List?>? txt,
-    String? serviceType,
-  }) : super(host: host, port: port, name: name, txt: txt, serviceType: serviceType);
+  TestMdnsDiscoveredDevice({required super.host, super.port, super.name, super.txt, super.serviceType});
 }
 
 SupportedDeviceDescriptor createTestDeviceDescriptor(String id, String address, DriverDescriptor driverDescriptor) {
-  // 确保地址是一个有效的 URI
   final uri = address.startsWith('http') ? Uri.parse(address) : Uri.parse('http://$address');
   return SupportedDeviceDescriptor(
     driverDescriptor: driverDescriptor,
@@ -176,7 +168,7 @@ DriverDescriptor createTestDriverDescriptor(String id, MockDriver driver) {
   descriptor = DriverDescriptor(
     id: id,
     name: 'Test Driver $id',
-    factory: () => driver,
+    factory: ({Logger? logger}) => driver,
     matches: (discovered) => createTestDeviceDescriptor(id, discovered.host, descriptor),
     heartbeatMethod: HeartbeatMethod.poll,
     discoveryMethod: const MdnsDeviceDiscoveryMethod('_test._tcp'),

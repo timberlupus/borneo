@@ -131,7 +131,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   }
 
   void _validateForm() {
-    _isFormValid = !_isSmartConfigEnabled || (_ssid.isNotEmpty && _password.isNotEmpty);
+    _isFormValid = !_isSmartConfigEnabled || (_ssid.trim().isNotEmpty && _password.trim().isNotEmpty);
     notifyListeners();
   }
 

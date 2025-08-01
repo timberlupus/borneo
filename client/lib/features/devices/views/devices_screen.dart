@@ -12,7 +12,24 @@ import 'package:borneo_app/features/devices/view_models/group_view_model.dart';
 import 'package:borneo_app/features/devices/views/device_list_tile.dart';
 import 'package:borneo_app/features/devices/view_models/grouped_devices_view_model.dart';
 import 'package:borneo_app/devices/view_models/abstract_device_summary_view_model.dart';
+import 'package:borneo_app/features/devices/widgets/empty_groups_widget.dart';
 import 'group_edit_screen.dart';
+
+class GroupSnapshot {
+  final String id;
+  final String name;
+  final int deviceCount;
+  final int lastModified;
+  final bool isDummy;
+
+  const GroupSnapshot({
+    required this.id,
+    required this.name,
+    required this.deviceCount,
+    required this.lastModified,
+    required this.isDummy,
+  });
+}
 
 enum PlusMenuIndexes { addGroup, addDevice }
 
@@ -21,30 +38,39 @@ class InGroupDeviceListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<GroupViewModel, List<AbstractDeviceSummaryViewModel>>(
-      selector: (_, gvm) => gvm.devices,
-      shouldRebuild: (previous, current) => previous.length != current.length || !identical(previous, current),
-      builder: (context, devices, child) {
-        var index = 0;
-        final List<Widget> deviceWidgets = <Widget>[];
-        for (var dvm in devices) {
-          deviceWidgets.add(ChangeNotifierProvider.value(value: dvm, child: DeviceTile(index == devices.length - 1)));
-          if (index < devices.length - 1) {
-            deviceWidgets.add(
-              Container(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                child: Row(
-                  children: [
-                    const SizedBox(width: 72), // 48 icon + 16 ListTile padding + 8
-                    Expanded(child: Divider(height: 1, thickness: 1, color: Theme.of(context).colorScheme.surface)),
-                  ],
-                ),
-              ),
+    return Selector<GroupViewModel, int>(
+      selector: (_, gvm) => gvm.devices.length,
+      shouldRebuild: (previous, current) => previous != current,
+      builder: (context, deviceCount, child) {
+        if (deviceCount == 0) return const SizedBox.shrink();
+
+        return ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: deviceCount,
+          separatorBuilder: (context, index) => Container(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            child: Row(
+              children: [
+                const SizedBox(width: 72), // 48 icon + 16 ListTile padding + 8
+                Expanded(child: Divider(height: 1, thickness: 1, color: Theme.of(context).colorScheme.surface)),
+              ],
+            ),
+          ),
+          itemBuilder: (context, index) {
+            return Selector<GroupViewModel, AbstractDeviceSummaryViewModel>(
+              selector: (_, gvm) => gvm.devices[index],
+              shouldRebuild: (previous, current) => previous != current,
+              builder: (context, deviceVM, child) {
+                return ChangeNotifierProvider.value(
+                  key: ValueKey(deviceVM.deviceEntity.id),
+                  value: deviceVM,
+                  child: DeviceTile(index == deviceCount - 1),
+                );
+              },
             );
-          }
-          index++;
-        }
-        return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: deviceWidgets);
+          },
+        );
       },
     );
   }
@@ -57,29 +83,20 @@ class NoDataHintView extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverFillRemaining(
       hasScrollBody: false,
-      child: Container(
-        color: Theme.of(context).colorScheme.surface,
-        padding: const EdgeInsets.fromLTRB(16, 40, 16, 40),
-        child: Center(
-          child: Column(
-            children: [
-              const Spacer(),
-              Text(
-                context.translate('There are no devices or device groups in the current scene.'),
-                style: DefaultTextStyle.of(context).style.copyWith(color: Theme.of(context).hintColor),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                icon: Icon(Icons.add_outlined),
-                label: Text(context.translate("Add new devices")),
-                onPressed: () {
-                  Navigator.of(context).pushNamed(AppRoutes.kDeviceDiscovery);
-                },
-              ),
-              const Spacer(),
-            ],
-          ),
-        ),
+      child: EmptyGroupsWidget(
+        onCreateGroup: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GroupEditScreen(),
+              settings: RouteSettings(arguments: GroupEditArguments(isCreation: true)),
+            ),
+          );
+          // Refresh after creating group
+          if (context.mounted) {
+            context.read<GroupedDevicesViewModel>().refresh();
+          }
+        },
       ),
     );
   }
@@ -95,13 +112,18 @@ class DevicesScreen extends StatelessWidget {
   }
 
   Future<void> _showNewGroupScreen(BuildContext context) async {
-    await Navigator.push(
+    final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (context) => GroupEditScreen(),
         settings: RouteSettings(arguments: GroupEditArguments(isCreation: true)),
       ),
     );
+
+    // Refresh if group was created
+    if (result == true && context.mounted) {
+      context.read<GroupedDevicesViewModel>().refresh();
+    }
   }
 
   @override
@@ -123,25 +145,34 @@ class DevicesScreen extends StatelessWidget {
             body: CustomScrollView(
               slivers: <Widget>[
                 _buildAppBar(context),
-                Selector<GroupedDevicesViewModel, List<GroupViewModel>>(
-                  selector: (_, vm) => vm.groups,
-                  shouldRebuild: (previous, current) =>
-                      previous.length != current.length ||
-                      previous.any(
-                        (preGroup) => current.any(
-                          (curGroup) =>
-                              preGroup.id == curGroup.id &&
-                              (preGroup.name != curGroup.name || preGroup.isEmpty != curGroup.isEmpty),
+                Selector<GroupedDevicesViewModel, List<GroupSnapshot>>(
+                  selector: (_, vm) => vm.groups
+                      .map(
+                        (g) => GroupSnapshot(
+                          id: g.id,
+                          name: g.name,
+                          deviceCount: g.devices.length,
+                          lastModified: g.lastModified,
+                          isDummy: g.isDummy,
                         ),
-                      ),
-                  builder: (context, groups, child) {
+                      )
+                      .toList(),
+                  shouldRebuild: (previous, current) {
+                    if (previous.length != current.length) return true;
+                    for (var i = 0; i < previous.length; i++) {
+                      if (previous[i].lastModified != current[i].lastModified) return true;
+                    }
+                    return false;
+                  },
+                  builder: (context, groupSnapshots, child) {
                     final groupedDevicesVM = context.read<GroupedDevicesViewModel>();
                     return groupedDevicesVM.isEmpty
-                        ? NoDataHintView()
+                        ? const NoDataHintView()
                         : SliverList.builder(
-                            itemCount: groups.length,
+                            itemCount: groupSnapshots.length,
                             itemBuilder: (context, index) {
-                              final gvm = groups[index];
+                              final snapshot = groupSnapshots[index];
+                              final gvm = groupedDevicesVM.groups.firstWhere((g) => g.id == snapshot.id);
                               return _buildGroupSection(context, gvm);
                             },
                           );
@@ -171,7 +202,6 @@ class DevicesScreen extends StatelessWidget {
               break;
             }
         }
-        // Handle menu item selection
       },
       itemBuilder: (BuildContext context) {
         return <PopupMenuEntry<PlusMenuIndexes>>[
@@ -287,13 +317,18 @@ class DevicesScreen extends StatelessWidget {
     );
   }
 
-  void _showEditGroupPage(BuildContext context, DeviceGroupEntity group) {
-    Navigator.push(
+  void _showEditGroupPage(BuildContext context, DeviceGroupEntity group) async {
+    final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (context) => GroupEditScreen(),
         settings: RouteSettings(arguments: GroupEditArguments(isCreation: false, model: group)),
       ),
     );
+
+    // Refresh if group was deleted or updated
+    if (result == true && context.mounted) {
+      context.read<GroupedDevicesViewModel>().refresh();
+    }
   }
 }

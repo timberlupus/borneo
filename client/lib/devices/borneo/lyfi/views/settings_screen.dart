@@ -367,8 +367,10 @@ class SettingsScreen extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).pop();
               vm.factoryReset().then((_) {
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
+                if (context.mounted) {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  }
                 }
               });
             },

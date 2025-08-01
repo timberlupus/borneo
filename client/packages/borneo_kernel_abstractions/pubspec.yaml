@@ -16,6 +16,7 @@ dependencies:
   event_bus: ^2.0.1
   pub_semver: ^2.1.5
   synchronized: ^3.3.0
+  logger: ^2.5.0
 
 dev_dependencies:
   lints: ^6.0.0

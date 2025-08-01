@@ -10,6 +10,8 @@ import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/store_names.dart';
 import 'package:borneo_common/exceptions.dart';
+import 'package:borneo_app/core/exceptions/scene_deletion_exceptions.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
@@ -168,7 +170,7 @@ class SceneManagerImpl extends ISceneManager {
         SceneEntity.kIsCurrent: false,
       });
       if (oldUpdate == null) {
-        throw InvalidOperationException(message: 'Failed to update old scene');
+        logger?.w("Cannot found the old scene");
       }
       // Update the new one
       final newUpdate = await store.record(newSceneID).update(tx, {
@@ -242,27 +244,23 @@ class SceneManagerImpl extends ISceneManager {
     } else {
       logger?.i('Begin deleting the scene id=`$id`');
 
-      final deviceStore = stringMapStoreFactory.store(StoreNames.devices);
-      final deviceRecordsToDelete = await deviceStore.find(
-        tx,
-        finder: Finder(filter: Filter.equals(DeviceEntity.kSceneIDFieldName, id)),
-      );
-
-      for (final deviceRecord in deviceRecordsToDelete) {
-        await _deviceManager.delete(deviceRecord.key, tx: tx);
+      // Check if this is the last scene
+      final sceneStore = stringMapStoreFactory.store(StoreNames.scenes);
+      final totalScenesCount = await sceneStore.count(tx);
+      if (totalScenesCount <= 1) {
+        throw CannotDeleteLastSceneException();
       }
+
+      // Check if scene has devices or groups
+      final deviceStore = stringMapStoreFactory.store(StoreNames.devices);
+      final deviceCount = await deviceStore.count(tx, filter: Filter.equals(DeviceEntity.kSceneIDFieldName, id));
 
       final groupStore = stringMapStoreFactory.store(StoreNames.groups);
-      final groupRecordsToDelete = await groupStore.find(
-        tx,
-        finder: Finder(filter: Filter.equals(DeviceGroupEntity.kSceneIDFieldName, id)),
-      );
+      final groupCount = await groupStore.count(tx, filter: Filter.equals(DeviceGroupEntity.kSceneIDFieldName, id));
 
-      for (final groupRecord in groupRecordsToDelete) {
-        await _groupManager.delete(groupRecord.key, tx: tx);
+      if (deviceCount > 0 || groupCount > 0) {
+        throw SceneContainsDevicesOrGroupsException();
       }
-
-      final sceneStore = stringMapStoreFactory.store(StoreNames.scenes);
       final sceneRecordToDelete = await sceneStore.record(id).get(tx);
 
       // Delete image
@@ -274,5 +272,38 @@ class SceneManagerImpl extends ISceneManager {
       await sceneStore.record(id).delete(tx);
       _globalEventBus.fire(SceneDeletedEvent(id));
     }
+  }
+
+  @override
+  Future<SceneEntity> getLastAccessed({CancellationToken? cancelToken}) async {
+    assert(isInitialized);
+    return await _db.transaction((tx) async {
+      final store = stringMapStoreFactory.store(StoreNames.scenes);
+      final records = await store.find(tx);
+
+      if (records.isEmpty) {
+        throw KeyNotFoundException(message: 'No scenes found');
+      }
+
+      SceneEntity? lastAccessed;
+      int lastAccessEpoch = -1;
+
+      for (final record in records) {
+        if (cancelToken?.isCancelled == true) {
+          throw Exception('Operation cancelled');
+        }
+        final scene = SceneEntity.fromMap(record.key, record.value);
+        final accessEpoch = scene.lastAccessTime.millisecondsSinceEpoch;
+        if (accessEpoch > lastAccessEpoch) {
+          lastAccessEpoch = accessEpoch;
+          lastAccessed = scene;
+        }
+      }
+
+      if (lastAccessed == null) {
+        throw KeyNotFoundException(message: 'No last accessed scene found');
+      }
+      return lastAccessed;
+    });
   }
 }

@@ -1,5 +1,8 @@
 import 'package:borneo_app/core/services/local_service.dart';
+import 'package:borneo_app/core/services/app_notification_service.dart';
+import 'package:borneo_app/core/services/url_launcher_service.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
@@ -11,6 +14,16 @@ import 'package:borneo_app/app/app.dart';
 
 class AppSettingsScreen extends StatelessWidget {
   const AppSettingsScreen({super.key});
+
+  static const String githubIssuesUrl = 'https://github.com/borneo-iot/borneo/issues';
+
+  Future<void> _openUrl(BuildContext context, String url) async {
+    final urlLauncher = UrlLauncherService(
+      notification: Provider.of<IAppNotificationService>(context, listen: false),
+      logger: Provider.of<Logger>(context, listen: false),
+    );
+    await urlLauncher.open(url);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +56,7 @@ class AppSettingsScreen extends StatelessWidget {
       title: context.translate('APPEARANCE'),
       children: [
         ListTile(
-          leading: Icon(Icons.settings_brightness_outlined),
+          leading: const Icon(Icons.settings_brightness_outlined),
           title: Text(context.translate('Theme')),
           trailing: Selector<AppSettingsViewModel, ThemeMode>(
             selector: (_, vm) => vm.themeMode,
@@ -95,13 +108,20 @@ class AppSettingsScreen extends StatelessWidget {
         ),
       ],
     ),
+
     GenericSettingsGroup(
       title: context.translate('FEEDBACK'),
       children: [
-        ListTile(leading: Icon(Icons.star_outline), title: Text(context.translate('Rate in application store'))),
         ListTile(
-          leading: Icon(Icons.settings_brightness_outlined),
+          leading: const Icon(Icons.star_outline),
+          title: Text(context.translate('Rate in application store')),
+          trailing: const CupertinoListTileChevron(),
+        ),
+        ListTile(
+          leading: const Icon(Icons.settings_brightness_outlined),
           title: Text(context.translate('Report an issue on GitHub')),
+          trailing: const CupertinoListTileChevron(),
+          onTap: () => _openUrl(context, githubIssuesUrl),
         ),
       ],
     ),

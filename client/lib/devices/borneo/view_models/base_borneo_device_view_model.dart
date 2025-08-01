@@ -1,6 +1,7 @@
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/features/devices/view_models/base_device_view_model.dart';
 import 'package:borneo_app/core/infrastructure/timezone.dart';
+import 'package:borneo_app/core/services/device_exception_handler.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:cancellation_token/cancellation_token.dart';
@@ -108,17 +109,28 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
     if (!super.isOnline) {
       return;
     }
-    _borneoDeviceStatus = await borneoDeviceApi.getGeneralDeviceStatus(
-      super.boundDevice!.device,
-      cancelToken: cancelToken,
-    );
-    _isOn = borneoDeviceStatus!.power;
-    _deviceTimezone = _borneoDeviceStatus?.timezone;
 
-    currentVoltage.value = _borneoDeviceStatus?.powerVoltage;
-    currentCurrent.value = _borneoDeviceStatus?.powerCurrent;
-    currentWatts.value = currentVoltage.value != null && currentCurrent.value != null
-        ? currentVoltage.value! * currentCurrent.value!
-        : null;
+    await DeviceExceptionHandler.handleDeviceCall(
+      () async {
+        _borneoDeviceStatus = await borneoDeviceApi.getGeneralDeviceStatus(
+          super.boundDevice!.device,
+          cancelToken: cancelToken,
+        );
+        _isOn = borneoDeviceStatus!.power;
+        _deviceTimezone = _borneoDeviceStatus?.timezone;
+
+        currentVoltage.value = _borneoDeviceStatus?.powerVoltage;
+        currentCurrent.value = _borneoDeviceStatus?.powerCurrent;
+        currentWatts.value = currentVoltage.value != null && currentCurrent.value != null
+            ? currentVoltage.value! * currentCurrent.value!
+            : null;
+      },
+      deviceName: boundDevice?.device.id ?? 'Unknown Device',
+      operation: 'status refresh',
+      fallbackValue: null,
+      onError: (error, stack) {
+        logger?.w('Failed to refresh device status', error: error, stackTrace: stack);
+      },
+    );
   }
 }

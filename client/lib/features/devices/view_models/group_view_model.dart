@@ -5,35 +5,48 @@ import '../../../shared/view_models/base_view_model.dart';
 
 class GroupViewModel extends BaseViewModel {
   List<AbstractDeviceSummaryViewModel> _devices = [];
+  int _lastModified = DateTime.now().millisecondsSinceEpoch;
 
   String get id => model.id;
   String get name => model.name;
   List<AbstractDeviceSummaryViewModel> get devices => _devices;
   bool get isDummy => model.isDummy;
+  int get lastModified => _lastModified;
 
   DeviceGroupEntity model;
 
   bool get isEmpty => _devices.isEmpty;
 
+  void _updateModified() {
+    _lastModified = DateTime.now().millisecondsSinceEpoch;
+  }
+
   void addDevice(AbstractDeviceSummaryViewModel device) {
     _devices = [..._devices, device];
+    _updateModified();
     notifyListeners();
   }
 
   void insertDevice(int index, AbstractDeviceSummaryViewModel device) {
     _devices = [..._devices];
     _devices.insert(index, device);
+    _updateModified();
     notifyListeners();
   }
 
   void removeDevice(AbstractDeviceSummaryViewModel device) {
     _devices = _devices.where((d) => d != device).toList();
+    _updateModified();
     notifyListeners();
   }
 
   void removeDeviceById(String deviceId) {
+    final originalLength = _devices.length;
     _devices = _devices.where((d) => d.deviceEntity.id != deviceId).toList();
-    notifyListeners();
+    if (originalLength != _devices.length) {
+      _updateModified();
+      notifyListeners();
+    }
   }
 
   void clearDevices() {
@@ -43,6 +56,7 @@ class GroupViewModel extends BaseViewModel {
       }
     }
     _devices = [];
+    _updateModified();
     notifyListeners();
   }
 

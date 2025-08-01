@@ -17,12 +17,11 @@ class DeviceTile extends StatelessWidget {
 
   void openDevicePage(BuildContext context, DeviceEntity device) {
     var vm = context.read<AbstractDeviceSummaryViewModel>();
-    Future.delayed(Duration(milliseconds: 200)).then((_) async {
-      if (context.mounted) {
-        await Navigator.of(context).pushNamed(AppRoutes.makeDeviceScreenRoute(device.driverID), arguments: device);
-        vm.notifyListeners();
-      }
-    });
+    if (context.mounted) {
+      Navigator.of(context)
+          .pushNamed(AppRoutes.makeDeviceScreenRoute(device.driverID), arguments: device)
+          .then((_) => vm.notifyListeners());
+    }
   }
 
   @override
@@ -31,7 +30,7 @@ class DeviceTile extends StatelessWidget {
     final device = vm.deviceEntity;
     final moduleMeta = context.read<IDeviceModuleRegistry>().metaModules[device.driverID]!;
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 300),
       transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
       child: Selector<AbstractDeviceSummaryViewModel, (bool, bool)>(
         selector: (_, vm) => (vm.isOnline, vm.isPowerOn),
@@ -58,7 +57,7 @@ class DeviceTile extends StatelessWidget {
             subtitle: () {
               if (!status.$1) {
                 return Text(
-                  context.translate('Off-line'),
+                  context.translate('OFF-LINE'),
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
@@ -118,10 +117,10 @@ class DeviceTile extends StatelessWidget {
         context: context,
         position: RelativeRect.fromRect(rect, Offset.zero & overlay.size),
         items: <PopupMenuEntry<String>>[
-          PopupMenuItem<String>(value: 'reconnect', child: Text('Reconnect')),
+          PopupMenuItem<String>(value: 'reconnect', child: Text(context.translate('Reconnect'))),
           PopupMenuDivider(),
-          PopupMenuItem<String>(value: 'change-group', child: Text('Change group...')),
-          PopupMenuItem<String>(value: 'delete', child: Text('Delete...')),
+          PopupMenuItem<String>(value: 'change-group', child: Text(context.translate('Change group...'))),
+          PopupMenuItem<String>(value: 'delete', child: Text(context.translate('Delete...'))),
         ],
       ).then((value) {
         if (value != null) {
@@ -151,7 +150,7 @@ class DeviceTile extends StatelessWidget {
                     builder: (BuildContext context) => DeviceGroupSelectionSheet(
                       availableGroups: groupEntites,
                       onTapGroup: (g) => parentVM.changeDeviceGroup(selectedDeviceVM.deviceEntity, g?.id),
-                      title: 'Change Device Group',
+                      title: context.translate('Change Device Group'),
                       subtitle: 'Select the group to which device "${selectedDeviceVM.name}" belongs:',
                     ),
                   );

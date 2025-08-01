@@ -1,46 +1,46 @@
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/core/services/url_launcher_service.dart';
-import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:provider/provider.dart' as provider;
 
-import 'package:borneo_app/features/my/view_models/about_view_model.dart';
+import '../providers/my_providers.dart';
 
 final Uri _websiteUrl = Uri.parse('https://www.borneoiot.com');
 final Uri _docsUrl = Uri.parse('https://docs.borneoiot.com');
 
-class AboutScreen extends StatelessWidget {
-  const AboutScreen({super.key});
+class AboutScreenRiverpod extends ConsumerWidget {
+  const AboutScreenRiverpod({super.key});
 
   Future<void> _launchWebsite(BuildContext context) async {
-    final urlLauncher = UrlLauncherService(notification: Provider.of<IAppNotificationService>(context, listen: false));
+    final urlLauncher = UrlLauncherService(
+      notification: provider.Provider.of<IAppNotificationService>(context, listen: false),
+    );
     await urlLauncher.open(_websiteUrl.toString());
   }
 
   Future<void> _launchDocs(BuildContext context) async {
-    final urlLauncher = UrlLauncherService(notification: Provider.of<IAppNotificationService>(context, listen: false));
+    final urlLauncher = UrlLauncherService(
+      notification: provider.Provider.of<IAppNotificationService>(context, listen: false),
+    );
     await urlLauncher.open(_docsUrl.toString());
   }
 
   @override
-  Widget build(BuildContext context) => ChangeNotifierProvider<AboutViewModel>(
-    create: (_) => AboutViewModel()..initialize(),
-    builder: (context, child) {
-      return buildBody(context);
-    },
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final packageInfoAsync = ref.watch(packageInfoProvider);
 
-  Widget buildBody(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
-        slivers: <Widget>[
+        slivers: [
           SliverAppBar(
             pinned: false,
             snap: false,
             floating: false,
             expandedHeight: 200,
             foregroundColor: Colors.white,
-            backgroundColor: Color.fromARGB(0xff, 0x3e, 0x36, 0x58),
+            backgroundColor: const Color.fromARGB(0xff, 0x3e, 0x36, 0x58),
             flexibleSpace: FlexibleSpaceBar(
               expandedTitleScale: 1.0,
               title: Column(
@@ -49,27 +49,24 @@ class AboutScreen extends StatelessWidget {
                 children: [
                   Image.asset('assets/images/main-logo.png', height: 80),
                   const SizedBox(height: 8),
-                  Consumer<AboutViewModel>(
-                    builder: (context, vm, child) => vm.isInitialized
-                        ? Text(
-                            vm.packageInfo.appName,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
-                          )
-                        : Container(),
+                  packageInfoAsync.when(
+                    data: (info) => Text(
+                      info.appName,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
+                    ),
+                    loading: () => const SizedBox(),
+                    error: (_, _) => const SizedBox(),
                   ),
-                  Consumer<AboutViewModel>(
-                    builder: (context, vm, child) => vm.isInitialized
-                        ? Text(
-                            context.translate(
-                              'Version: {verText} Build: {buildNumberText}',
-                              nArgs: {
-                                'verText': vm.packageInfo.version.toString(),
-                                'buildNumberText': vm.packageInfo.buildNumber.toString(),
-                              },
-                            ),
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white30),
-                          )
-                        : Container(),
+                  packageInfoAsync.when(
+                    data: (info) => Text(
+                      context.translate(
+                        'Version: {verText} Build: {buildNumberText}',
+                        nArgs: {'verText': info.version.toString(), 'buildNumberText': info.buildNumber.toString()},
+                      ),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white30),
+                    ),
+                    loading: () => const SizedBox(),
+                    error: (_, _) => const SizedBox(),
                   ),
                 ],
               ),
@@ -103,7 +100,9 @@ class AboutScreen extends StatelessWidget {
                       Text(context.translate('Website'), style: Theme.of(context).textTheme.titleSmall),
                       InkWell(
                         onTap: () async {
-                          await _launchWebsite(context);
+                          if (context.mounted) {
+                            await _launchWebsite(context);
+                          }
                         },
                         child: Ink(
                           child: Text(
