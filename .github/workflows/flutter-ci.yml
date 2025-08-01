@@ -91,6 +91,9 @@ jobs:
           key: ${{ runner.os }}-pub-cache-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: ${{ runner.os }}-pub-cache-
 
+      - name: Install dependencies
+        run: flutter pub get
+
       - name: Run dart format check
         run: dart format --set-exit-if-changed .
 
@@ -136,6 +139,9 @@ jobs:
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('client/**/*.gradle*', 'client/**/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Install dependencies
+        run: flutter pub get
 
       - name: Build APK
         run: flutter build apk --release --target-platform android-arm64 --no-pub
