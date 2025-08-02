@@ -103,22 +103,11 @@ jobs:
       - name: Run Melos format check
         run: melos format --set-exit-if-changed .
 
-      - name: Run analyze (fail only on error)
-        run: |
-          flutter analyze --no-pub > analyze.log || true
-          cat analyze.log
-          if grep -q "error •" analyze.log; then
-            echo "Found errors in analysis"
-            exit 1
-          fi
+      - name: Run analyze
+        run: melos run analyze
 
       - name: Run tests
-        run: |
-          flutter test --no-pub
-          flutter test --no-pub packages/borneo_common
-          flutter test --no-pub packages/borneo_kernel
-          flutter test --no-pub packages/borneo_kernel_abstractions
-          flutter test --no-pub packages/lw_wot
+        run: melos run test --no-select
 
   build-apk:
     needs: [setup, test]
