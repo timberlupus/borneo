@@ -59,33 +59,35 @@ class MyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = buildItems(context);
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverAppBar(
-          pinned: false,
-          snap: false,
-          floating: false,
-          expandedHeight: 160,
-          foregroundColor: Colors.white,
-          backgroundColor: Color.fromARGB(0xff, 0x3e, 0x36, 0x58),
-          flexibleSpace: FlexibleSpaceBar(
-            expandedTitleScale: 1.0,
-            title: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [Image.asset('assets/images/main-logo.png', height: 80), const SizedBox(height: 8)],
+    return SafeArea(
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            pinned: false,
+            snap: false,
+            floating: false,
+            expandedHeight: 160,
+            foregroundColor: Colors.white,
+            backgroundColor: Color.fromARGB(0xff, 0x3e, 0x36, 0x58),
+            flexibleSpace: FlexibleSpaceBar(
+              expandedTitleScale: 1.0,
+              title: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [Image.asset('assets/images/main-logo.png', height: 80), const SizedBox(height: 8)],
+              ),
+              centerTitle: true,
             ),
-            centerTitle: true,
           ),
-        ),
-        SliverList.separated(
-          itemCount: items.length,
-          itemBuilder: (context, index) => items[index],
-          separatorBuilder: (context, index) {
-            return Divider(height: 1, color: Theme.of(context).scaffoldBackgroundColor);
-          },
-        ),
-      ],
+          SliverList.separated(
+            itemCount: items.length,
+            itemBuilder: (context, index) => items[index],
+            separatorBuilder: (context, index) {
+              return Divider(height: 1, color: Theme.of(context).scaffoldBackgroundColor);
+            },
+          ),
+        ],
+      ),
     );
   }
 }

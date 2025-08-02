@@ -136,52 +136,54 @@ class _ScenesScreenRiverpodState extends ConsumerState<ScenesScreenRiverpod> {
     }
 
     return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: () => ref.read(scenesProvider.notifier).initialize(),
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              title: Text(context.translate('Scenes')),
-              actions: [
-                IconButton(icon: const Icon(Icons.add_outlined), onPressed: () => _showNewSceneScreen(context)),
-                if (scenesState.isLoading)
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-                  ),
-              ],
-            ),
-            const SceneListRiverpod(),
-            const RoutineListRiverpod(), // Use Riverpod version of RoutineList
-            // Error display at the bottom if there's an error but we have scenes
-            if (scenesState.error != null && scenesState.scenes.isNotEmpty)
-              SliverToBoxAdapter(
-                child: Container(
-                  margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.error_outline, color: Theme.of(context).colorScheme.onErrorContainer),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          scenesState.error!,
-                          style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () => ref.read(scenesProvider.notifier).initialize(),
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                title: Text(context.translate('Scenes')),
+                actions: [
+                  IconButton(icon: const Icon(Icons.add_outlined), onPressed: () => _showNewSceneScreen(context)),
+                  if (scenesState.isLoading)
+                    const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                    ),
+                ],
+              ),
+              const SceneListRiverpod(),
+              const RoutineListRiverpod(), // Use Riverpod version of RoutineList
+              // Error display at the bottom if there's an error but we have scenes
+              if (scenesState.error != null && scenesState.scenes.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Container(
+                    margin: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.errorContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline, color: Theme.of(context).colorScheme.onErrorContainer),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            scenesState.error!,
+                            style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
+                          ),
                         ),
-                      ),
-                      TextButton(
-                        onPressed: () => ref.read(scenesProvider.notifier).initialize(),
-                        child: Text(context.translate('Retry')),
-                      ),
-                    ],
+                        TextButton(
+                          onPressed: () => ref.read(scenesProvider.notifier).initialize(),
+                          child: Text(context.translate('Retry')),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

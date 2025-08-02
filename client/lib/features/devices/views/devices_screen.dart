@@ -144,43 +144,45 @@ class DevicesScreen extends StatelessWidget {
           );
         } else {
           return Scaffold(
-            body: CustomScrollView(
-              slivers: <Widget>[
-                _buildAppBar(context),
-                Selector<GroupedDevicesViewModel, List<GroupSnapshot>>(
-                  selector: (_, vm) => vm.groups
-                      .map(
-                        (g) => GroupSnapshot(
-                          id: g.id,
-                          name: g.name,
-                          deviceCount: g.devices.length,
-                          lastModified: g.lastModified,
-                          isDummy: g.isDummy,
-                        ),
-                      )
-                      .toList(),
-                  shouldRebuild: (previous, current) {
-                    if (previous.length != current.length) return true;
-                    for (var i = 0; i < previous.length; i++) {
-                      if (previous[i].lastModified != current[i].lastModified) return true;
-                    }
-                    return false;
-                  },
-                  builder: (context, groupSnapshots, child) {
-                    final groupedDevicesVM = context.read<GroupedDevicesViewModel>();
-                    return groupedDevicesVM.isEmpty
-                        ? const NoDataHintView()
-                        : SliverList.builder(
-                            itemCount: groupSnapshots.length,
-                            itemBuilder: (context, index) {
-                              final snapshot = groupSnapshots[index];
-                              final gvm = groupedDevicesVM.groups.firstWhere((g) => g.id == snapshot.id);
-                              return _buildGroupSection(context, gvm);
-                            },
-                          );
-                  },
-                ),
-              ],
+            body: SafeArea(
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  _buildAppBar(context),
+                  Selector<GroupedDevicesViewModel, List<GroupSnapshot>>(
+                    selector: (_, vm) => vm.groups
+                        .map(
+                          (g) => GroupSnapshot(
+                            id: g.id,
+                            name: g.name,
+                            deviceCount: g.devices.length,
+                            lastModified: g.lastModified,
+                            isDummy: g.isDummy,
+                          ),
+                        )
+                        .toList(),
+                    shouldRebuild: (previous, current) {
+                      if (previous.length != current.length) return true;
+                      for (var i = 0; i < previous.length; i++) {
+                        if (previous[i].lastModified != current[i].lastModified) return true;
+                      }
+                      return false;
+                    },
+                    builder: (context, groupSnapshots, child) {
+                      final groupedDevicesVM = context.read<GroupedDevicesViewModel>();
+                      return groupedDevicesVM.isEmpty
+                          ? const NoDataHintView()
+                          : SliverList.builder(
+                              itemCount: groupSnapshots.length,
+                              itemBuilder: (context, index) {
+                                final snapshot = groupSnapshots[index];
+                                final gvm = groupedDevicesVM.groups.firstWhere((g) => g.id == snapshot.id);
+                                return _buildGroupSection(context, gvm);
+                              },
+                            );
+                    },
+                  ),
+                ],
+              ),
             ),
           );
         }

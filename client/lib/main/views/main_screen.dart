@@ -142,29 +142,33 @@ class MainScreen extends StatelessWidget {
       selector: (context, vm) => vm.currentTabIndex,
       builder: (context, tabIndex, child) => Scaffold(
         appBar: null, // page body
-        body: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-          child: switch (tabIndex) {
-            TabIndices.devices => const DevicesScreen(key: ValueKey('devices')),
-            TabIndices.scenes => const RiverpodScenesWidget(key: ValueKey('scenes')),
-            TabIndices.my => const MyScreen(key: ValueKey('my')),
-          },
+        body: SafeArea(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+            child: switch (tabIndex) {
+              TabIndices.devices => const DevicesScreen(key: ValueKey('devices')),
+              TabIndices.scenes => const RiverpodScenesWidget(key: ValueKey('scenes')),
+              TabIndices.my => const MyScreen(key: ValueKey('my')),
+            },
+          ),
         ),
 
         // bottom
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: tabIndex.index,
-          onTap: (index) {
-            if (index != tabIndex.index) {
-              mainVM.setIndex(TabIndices.values[index]);
-            }
-          },
-          items: [
-            BottomNavigationBarItem(icon: Icon(Icons.house_outlined), label: context.translate('Scenes')),
-            BottomNavigationBarItem(icon: Icon(Icons.device_hub), label: context.translate('Devices')),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: context.translate('My')),
-          ],
+        bottomNavigationBar: SafeArea(
+          child: BottomNavigationBar(
+            currentIndex: tabIndex.index,
+            onTap: (index) {
+              if (index != tabIndex.index) {
+                mainVM.setIndex(TabIndices.values[index]);
+              }
+            },
+            items: [
+              BottomNavigationBarItem(icon: Icon(Icons.house_outlined), label: context.translate('Scenes')),
+              BottomNavigationBarItem(icon: Icon(Icons.device_hub), label: context.translate('Devices')),
+              BottomNavigationBarItem(icon: Icon(Icons.person), label: context.translate('My')),
+            ],
+          ),
         ),
       ),
     );
