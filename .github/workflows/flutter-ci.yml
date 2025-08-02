@@ -258,7 +258,9 @@ jobs:
           if (Test-Path $zipPath) { Remove-Item $zipPath }
 
           Push-Location $srcDir
-          Compress-Archive -Path * -DestinationPath $zipPath -CompressionLevel Optimal -Force
+          $license = Join-Path "${{ github.workspace }}" "LICENSE"
+          $readme = Join-Path "${{ github.workspace }}" "README.md"
+          & "C:\Program Files\7-Zip\7z.exe" a -tzip "$zipPath" * $license $readme
           Pop-Location
 
       - name: Upload Windows zip artifact
