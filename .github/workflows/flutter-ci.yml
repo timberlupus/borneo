@@ -7,10 +7,12 @@ on:
     branches: [master, dev]
     paths:
       - 'client/**'
+      - '.github/workflows/flutter-ci.yml'
   pull_request:
     branches: [master, dev]
     paths:
       - 'client/**'
+      - '.github/workflows/flutter-ci.yml'
   workflow_dispatch:
 
 env:
