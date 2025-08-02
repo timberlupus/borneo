@@ -1,3 +1,4 @@
+import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/routes/app_routes.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
@@ -203,7 +204,7 @@ class MainScreen extends StatelessWidget {
         final bm = ctx.read<IBlobManager>();
         final sm = ctx.read<ISceneManager>();
         final gm = ctx.read<IGroupManager>();
-        final dm = ctx.read<DeviceManager>();
+        final dm = ctx.read<IDeviceManager>();
         final ls = ctx.read<ILocaleService>();
         return MainViewModel(
           bus,
@@ -214,6 +215,7 @@ class MainScreen extends StatelessWidget {
           ls,
           GettextLocalizations.of(context),
           notification: ctx.read<IAppNotificationService>(),
+          clock: ctx.read<IClock>(),
           logger: ctx.read<Logger>(),
         );
       },
@@ -278,9 +280,10 @@ class MainScreen extends StatelessWidget {
             final globalEventBus = context.read<EventBus>();
             final sm = context.read<ISceneManager>();
             final gm = context.read<IGroupManager>();
-            final dm = context.read<DeviceManager>();
+            final dm = context.read<IDeviceManager>();
             final dmr = context.read<IDeviceModuleRegistry>();
-            return GroupedDevicesViewModel(globalEventBus, sm, gm, dm, dmr, logger: logger);
+            final clock = context.read<IClock>();
+            return GroupedDevicesViewModel(globalEventBus, sm, gm, dm, dmr, clock: clock, logger: logger);
           },
           lazy: true,
         ),

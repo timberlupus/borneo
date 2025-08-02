@@ -23,6 +23,10 @@ abstract class KnownDeviceEvent {
   const KnownDeviceEvent(this.device);
 }
 
+abstract class DeviceStateChangedEvent extends KnownDeviceEvent {
+  const DeviceStateChangedEvent(super.device);
+}
+
 class DeviceBoundEvent extends KnownDeviceEvent {
   const DeviceBoundEvent(super.device);
 }

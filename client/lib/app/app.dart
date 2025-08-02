@@ -151,7 +151,7 @@ class _BorneoAppState extends State<BorneoApp> {
                     ),
 
                     // DeviceManager
-                    Provider<DeviceManager>(
+                    Provider<IDeviceManager>(
                       create: (context) => DeviceManagerImpl(
                         context.read<Database>(),
                         context.read<IKernel>(),
@@ -170,7 +170,7 @@ class _BorneoAppState extends State<BorneoApp> {
                         context.read<EventBus>(),
                         context.read<Database>(),
                         context.read<ISceneManager>(),
-                        context.read<DeviceManager>(),
+                        context.read<IDeviceManager>(),
                         clock: context.read<IClock>(),
                         logger: context.read<Logger>(),
                       ),

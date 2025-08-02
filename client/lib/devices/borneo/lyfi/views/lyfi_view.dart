@@ -376,7 +376,7 @@ class LyfiView extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (cb) => LyfiViewModel(
         deviceID: device.id,
-        deviceManager: cb.read<DeviceManager>(),
+        deviceManager: cb.read<IDeviceManager>(),
         globalEventBus: cb.read<EventBus>(),
         notification: cb.read<IAppNotificationService>(),
         localeService: cb.read<ILocaleService>(),

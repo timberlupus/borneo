@@ -5,6 +5,6 @@ abstract class RoutineAction {
   final String deviceId;
 
   RoutineAction({required this.deviceId});
-  Future<void> execute(DeviceManager deviceManager);
-  Future<void> undo(DeviceManager deviceManager);
+  Future<void> execute(IDeviceManager deviceManager);
+  Future<void> undo(IDeviceManager deviceManager);
 }

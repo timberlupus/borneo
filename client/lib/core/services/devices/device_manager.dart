@@ -11,8 +11,8 @@ import 'package:borneo_kernel_abstractions/ikernel.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 
-abstract class DeviceManager implements IDisposable {
-  DeviceManager();
+abstract class IDeviceManager implements IDisposable {
+  IDeviceManager();
 
   // Factory constructor to create the implementation
 

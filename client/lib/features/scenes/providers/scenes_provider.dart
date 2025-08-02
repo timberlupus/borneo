@@ -40,7 +40,7 @@ class SceneSummaryState {
 /// Scene Summary Notifier
 class SceneSummaryNotifier extends StateNotifier<SceneSummaryState> {
   final ISceneManager _sceneManager;
-  final DeviceManager _deviceManager;
+  final IDeviceManager _deviceManager;
   final EventBus _eventBus;
 
   late final StreamSubscription<CurrentSceneChangedEvent> _currentSceneChangedSub;
@@ -156,7 +156,7 @@ class ScenesNotifier extends StateNotifier<ScenesState> {
 
   final Map<String, SceneSummaryNotifier> _sceneNotifiers = {};
 
-  ScenesNotifier(this._sceneManager, DeviceManager deviceManager, this._eventBus, Logger? logger)
+  ScenesNotifier(this._sceneManager, IDeviceManager deviceManager, this._eventBus, Logger? logger)
     : super(const ScenesState()) {
     // deviceManager and logger are passed for potential future use
     _setupEventListeners();
@@ -296,7 +296,7 @@ final sceneManagerProvider = Provider<ISceneManager>((ref) {
   throw UnimplementedError('SceneManager must be provided by context');
 });
 
-final deviceManagerProvider = Provider<DeviceManager>((ref) {
+final deviceManagerProvider = Provider<IDeviceManager>((ref) {
   throw UnimplementedError('DeviceManager must be provided by context');
 });
 

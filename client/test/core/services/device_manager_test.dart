@@ -481,7 +481,6 @@ class TestSceneManager implements ISceneManager {
   @override
   SceneEntity get current => currentScene;
 
-  @override
   Logger? get logger => null;
 
   // Simplified - only implement what we need for testing

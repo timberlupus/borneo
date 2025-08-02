@@ -32,7 +32,7 @@ class SceneManagerImpl extends ISceneManager {
   bool _isInitialized = false;
 
   late final IGroupManager _groupManager;
-  late final DeviceManager _deviceManager;
+  late final IDeviceManager _deviceManager;
 
   late SceneEntity _current;
 
@@ -50,7 +50,7 @@ class SceneManagerImpl extends ISceneManager {
   SceneEntity? get located => _located;
 
   @override
-  Future<void> initialize(IGroupManager groupManager, DeviceManager deviceManager) async {
+  Future<void> initialize(IGroupManager groupManager, IDeviceManager deviceManager) async {
     if (_isInitialized) {
       return;
     }
@@ -81,7 +81,7 @@ class SceneManagerImpl extends ISceneManager {
         id: BaseEntity.generateID(),
         name: _gt.translate('My Office'),
         isCurrent: false,
-        lastAccessTime: DateTime.now(),
+        lastAccessTime: this.clock.now(),
         imageID: officeImageID,
         imagePath: _blobManager.getPath(officeImageID),
       );
@@ -169,7 +169,7 @@ class SceneManagerImpl extends ISceneManager {
     return await _db.transaction((tx) async {
       // Update the old one
       final oldUpdate = await store.record(_current.id).update(tx, {
-        SceneEntity.kLastAccessTime: DateTime.now().millisecondsSinceEpoch,
+        SceneEntity.kLastAccessTime: this.clock.now().millisecondsSinceEpoch,
         SceneEntity.kIsCurrent: false,
       });
       if (oldUpdate == null) {
@@ -177,7 +177,7 @@ class SceneManagerImpl extends ISceneManager {
       }
       // Update the new one
       final newUpdate = await store.record(newSceneID).update(tx, {
-        SceneEntity.kLastAccessTime: DateTime.now().millisecondsSinceEpoch,
+        SceneEntity.kLastAccessTime: this.clock.now().millisecondsSinceEpoch,
         SceneEntity.kIsCurrent: true,
       });
       if (newUpdate == null) {
@@ -204,7 +204,7 @@ class SceneManagerImpl extends ISceneManager {
         id: BaseEntity.generateID(),
         name: name,
         isCurrent: false,
-        lastAccessTime: DateTime.now(),
+        lastAccessTime: this.clock.now(),
         notes: notes,
         imagePath: imagePath,
       );

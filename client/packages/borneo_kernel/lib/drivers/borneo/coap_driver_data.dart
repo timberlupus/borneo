@@ -21,7 +21,7 @@ abstract class BorneoCoapDriverData extends DriverData {
   void load() {
     _coapPowerOnOffSub = coap
         .observeCborNon<bool>(BorneoPaths.power)
-        .listen((onOff) => super.deviceEvents.fire(DevicePowerOnOffChangedEvent(device, onOff)));
+        .listen((onOff) => super.deviceEvents.fire(DevicePowerOnOffChangedEvent(device, onOff: onOff)));
   }
 
   GeneralBorneoDeviceInfo get generalDeviceInfo {

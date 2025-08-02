@@ -9,7 +9,7 @@ class LedSwitchTemporaryModeAction extends RoutineAction {
   LedSwitchTemporaryModeAction({required super.deviceId});
 
   @override
-  Future<void> execute(DeviceManager deviceManager) async {
+  Future<void> execute(IDeviceManager deviceManager) async {
     final bound = deviceManager.boundDevices.where((d) => d.device.id == deviceId).lastOrNull;
     if (bound == null) return;
     final api = bound.api<ILyfiDeviceApi>();
@@ -21,7 +21,7 @@ class LedSwitchTemporaryModeAction extends RoutineAction {
   }
 
   @override
-  Future<void> undo(DeviceManager deviceManager) async {
+  Future<void> undo(IDeviceManager deviceManager) async {
     final bound = deviceManager.boundDevices.where((d) => d.device.id == deviceId).lastOrNull;
     if (bound == null) {
       return;

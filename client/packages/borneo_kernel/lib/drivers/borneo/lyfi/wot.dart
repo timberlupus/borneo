@@ -154,7 +154,7 @@ class LyfiSetColorAction extends WotAction<Map<String, dynamic>> {
 
 /// Custom action for setting LED schedule
 class LyfiSetScheduleAction extends WotAction<Map<String, dynamic>> {
-  final List<ScheduledInstant> schedule;
+  final Timetable schedule;
   final ILyfiDeviceApi lyfiApi;
   final Device device;
 
@@ -241,7 +241,7 @@ class LyfiSetCorrectionMethodAction extends WotAction<Map<String, dynamic>> {
 }
 
 /// Custom WotProperty for schedule that handles its own event subscription
-class LyfiScheduleProperty extends WotProperty<List<ScheduledInstant>> {
+class LyfiScheduleProperty extends WotProperty<Timetable> {
   StreamSubscription? _eventSubscription;
   final DeviceEventBus deviceEvents;
 
@@ -495,7 +495,7 @@ class LyfiThing extends WotThing {
       thing: this,
       deviceEvents: deviceEvents,
       name: 'schedule',
-      value: WotValue<List<ScheduledInstant>>(
+      value: WotValue<Timetable>(
         initialValue: [], // Default empty schedule
         valueForwarder: (update) => lyfiApi.setSchedule(device, update),
       ),

@@ -20,7 +20,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   final IBlobManager _blobManager;
   final ISceneManager _sceneManager;
   final IGroupManager _groupManager;
-  final DeviceManager _deviceManager;
+  final IDeviceManager _deviceManager;
   final ILocaleService _localeService;
   final IClock clock;
   TabIndices _currentIndex = TabIndices.scenes;

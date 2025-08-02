@@ -2,6 +2,8 @@ import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_common/utils/float.dart';
 import 'package:cbor/cbor.dart';
 
+typedef ScheduleTable = List<ScheduledInstant>;
+
 class LyfiChannelInfo {
   final String name;
   final String color;

@@ -10,7 +10,7 @@ import 'package:event_bus/event_bus.dart';
 import '../../shared/view_models/base_view_model.dart';
 
 abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewModelEventBusMixin {
-  final DeviceManager deviceManager;
+  final IDeviceManager deviceManager;
   final DeviceEntity deviceEntity;
   var isInitialized = false;
 

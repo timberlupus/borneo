@@ -5,7 +5,7 @@ import 'package:borneo_app/core/services/devices/device_manager.dart';
 /// Service for handling device group operations
 /// This service decouples group management logic from view models
 class GroupService {
-  final DeviceManager _deviceManager;
+  final IDeviceManager _deviceManager;
   final IGroupManager _groupManager;
 
   GroupService(this._deviceManager, this._groupManager);

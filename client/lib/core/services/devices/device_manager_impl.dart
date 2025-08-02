@@ -25,7 +25,7 @@ import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_common/io/net/network_interface_helper.dart';
 
-final class DeviceManagerImpl extends DeviceManager {
+final class DeviceManagerImpl extends IDeviceManager {
   final Logger? logger;
   bool _isDisposed = false;
   final Database _db;

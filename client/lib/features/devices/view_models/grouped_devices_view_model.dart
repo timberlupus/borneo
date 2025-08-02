@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
@@ -20,9 +21,10 @@ import 'package:borneo_app/shared/view_models/base_view_model.dart';
 import '../../../core/models/events.dart';
 
 class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModelInitFutureMixin {
+  final IClock clock;
   final ISceneManager _sceneManager;
   final IGroupManager _groupManager;
-  final DeviceManager _deviceManager;
+  final IDeviceManager _deviceManager;
   final IDeviceModuleRegistry _deviceModuleRegistry;
   final CancellationToken _cancellationToken = CancellationToken();
   final Lock _deviceOperLock = Lock();
@@ -58,6 +60,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     this._groupManager,
     this._deviceManager,
     this._deviceModuleRegistry, {
+    required this.clock,
     super.logger,
   }) {
     super.globalEventBus = globalEventBus;
@@ -142,9 +145,10 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
 
     final newDummyGroup = GroupViewModel(
       DeviceGroupEntity(id: '', sceneID: _sceneManager.current.id, name: 'Ungrouped devices'),
+      clock: this.clock,
     );
 
-    _groups.addAll(groupEntities.map((g) => GroupViewModel(g)).followedBy([newDummyGroup]));
+    _groups.addAll(groupEntities.map((g) => GroupViewModel(g, clock: this.clock)).followedBy([newDummyGroup]));
 
     // Build device group mapping for efficient assignment
     final groupMap = {for (final group in _groups) group.id: group};

@@ -77,17 +77,6 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     });
   }
 
-  /*
-  Duration _getTimeDifference(String timezone1, String timezone2) {
-    final location1 = tz.getLocation(timezone1);
-    final location2 = tz.getLocation(timezone2);
-    final now = tz.TZDateTime.now(location1);
-    final offset1 = now.timeZoneOffset;
-    final offset2 = tz.TZDateTime.now(location2).timeZoneOffset;
-    return offset1 - offset2;
-  }
-  */
-
   Future<Position> getLocation({CancellationToken? cancel}) async {
     bool serviceEnabled;
     LocationPermission permission;

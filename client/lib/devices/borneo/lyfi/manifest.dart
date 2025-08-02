@@ -31,7 +31,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         detailsViewBuilder: (_) => LyfiView(),
         detailsViewModelBuilder: (context, deviceID) => LyfiViewModel(
           deviceID: deviceID,
-          deviceManager: context.read<DeviceManager>(),
+          deviceManager: context.read<IDeviceManager>(),
           globalEventBus: context.read<EventBus>(),
           notification: context.read<IAppNotificationService>(),
           localeService: context.read<ILocaleService>(),
@@ -93,7 +93,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
     }
   }
 
-  static Future<WotThing> _createWotThing(DeviceEntity device, DeviceManager deviceManager, {Logger? logger}) async {
+  static Future<WotThing> _createWotThing(DeviceEntity device, IDeviceManager deviceManager, {Logger? logger}) async {
     // Check if device is bound to get access to APIs
     if (!deviceManager.isBound(device.id)) {
       // Device not bound, create a basic WotThing with default values

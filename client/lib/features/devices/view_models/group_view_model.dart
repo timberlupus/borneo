@@ -1,3 +1,4 @@
+import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/devices/view_models/abstract_device_summary_view_model.dart';
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 
@@ -5,7 +6,8 @@ import '../../../shared/view_models/base_view_model.dart';
 
 class GroupViewModel extends BaseViewModel {
   List<AbstractDeviceSummaryViewModel> _devices = [];
-  int _lastModified = DateTime.now().millisecondsSinceEpoch;
+  final IClock clock;
+  late int _lastModified;
 
   String get id => model.id;
   String get name => model.name;
@@ -17,8 +19,12 @@ class GroupViewModel extends BaseViewModel {
 
   bool get isEmpty => _devices.isEmpty;
 
+  GroupViewModel(this.model, {required this.clock}) {
+    _lastModified = this.clock.now().millisecondsSinceEpoch;
+  }
+
   void _updateModified() {
-    _lastModified = DateTime.now().millisecondsSinceEpoch;
+    _lastModified = this.clock.now().millisecondsSinceEpoch;
   }
 
   void addDevice(AbstractDeviceSummaryViewModel device) {
@@ -60,7 +66,6 @@ class GroupViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  GroupViewModel(this.model);
   @override
   void dispose() {
     if (!isDisposed) {

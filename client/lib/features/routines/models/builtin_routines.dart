@@ -13,7 +13,7 @@ final class PowerOffAllRoutine extends AbstractBuiltinRoutine {
 
   /// Execute routine
   @override
-  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, DeviceManager deviceManager) async {
+  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, IDeviceManager deviceManager) async {
     final steps = <PowerAction>[];
     for (final bound in deviceManager.boundDevices) {
       final wotThing = deviceManager.getWotThing(bound.device.id);
@@ -42,7 +42,7 @@ final class FeedModeRoutine extends AbstractBuiltinRoutine {
       );
 
   @override
-  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, DeviceManager deviceManager) async {
+  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, IDeviceManager deviceManager) async {
     // TODO: implement execute
     return [];
   }
@@ -57,7 +57,7 @@ final class WaterChangeModeRoutine extends AbstractBuiltinRoutine {
       );
 
   @override
-  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, DeviceManager deviceManager) async {
+  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, IDeviceManager deviceManager) async {
     // TODO: implement execute
     return [];
   }
@@ -73,7 +73,7 @@ final class DryScapeModeRoutine extends AbstractBuiltinRoutine {
       );
 
   @override
-  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, DeviceManager deviceManager) async {
+  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, IDeviceManager deviceManager) async {
     // TODO: implement execute
     return [];
   }

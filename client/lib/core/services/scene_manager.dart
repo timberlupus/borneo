@@ -16,7 +16,7 @@ abstract class ISceneManager {
   SceneEntity? get located;
 
   // Abstract methods
-  Future<void> initialize(IGroupManager groupManager, DeviceManager deviceManager);
+  Future<void> initialize(IGroupManager groupManager, IDeviceManager deviceManager);
   Future<SceneEntity> single(String key, {Transaction? tx});
   Future<List<SceneEntity>> all({Transaction? tx});
   Future<DeviceStatistics> getDeviceStatistics(String sceneID);

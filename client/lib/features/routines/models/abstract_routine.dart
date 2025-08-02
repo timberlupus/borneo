@@ -21,7 +21,7 @@ abstract class AbstractRoutine with BaseEntity {
     required this.requiredCapabilities,
   });
 
-  bool checkAvailable(SceneEntity scene, DeviceManager deviceManager) {
+  bool checkAvailable(SceneEntity scene, IDeviceManager deviceManager) {
     final devices = deviceManager.getBoundDevicesInCurrentScene();
     final isAvailable = devices.any((d) => matchAllCapabilities(d, deviceManager));
 
@@ -34,13 +34,13 @@ abstract class AbstractRoutine with BaseEntity {
     _ => throw UnimplementedError('Unknown routine action type: `${e['type']}`'),
   };
 
-  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, DeviceManager deviceManager);
+  Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, IDeviceManager deviceManager);
 
-  bool matchAllCapabilities(BoundDevice bound, DeviceManager deviceManager) {
+  bool matchAllCapabilities(BoundDevice bound, IDeviceManager deviceManager) {
     return requiredCapabilities.every((capability) => _hasCapability(bound, capability, deviceManager));
   }
 
-  bool _hasCapability(BoundDevice bound, String capability, DeviceManager deviceManager) {
+  bool _hasCapability(BoundDevice bound, String capability, IDeviceManager deviceManager) {
     final wotThing = deviceManager.getWotThing(bound.device.id);
     if (wotThing == null) return false;
 

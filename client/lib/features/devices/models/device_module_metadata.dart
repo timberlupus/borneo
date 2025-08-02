@@ -19,8 +19,8 @@ abstract class DeviceModuleMetadata {
   final Widget Function(BuildContext context, double iconSize, bool isOnline) deviceIconBuilder;
   final Widget Function(BuildContext context, double iconSize) primaryStateIconBuilder;
   final List<Widget> Function(BuildContext, AbstractDeviceSummaryViewModel) secondaryStatesBuilder;
-  final AbstractDeviceSummaryViewModel Function(DeviceEntity, DeviceManager, EventBus) createSummaryVM;
-  final Future<WotThing> Function(DeviceEntity, DeviceManager, {Logger? logger}) createWotThing;
+  final AbstractDeviceSummaryViewModel Function(DeviceEntity, IDeviceManager, EventBus) createSummaryVM;
+  final Future<WotThing> Function(DeviceEntity, IDeviceManager, {Logger? logger}) createWotThing;
 
   const DeviceModuleMetadata({
     required this.id,

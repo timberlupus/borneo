@@ -20,7 +20,7 @@ class EasySetupViewModel extends ChangeNotifier {
 
   EasySetupViewModel();
 
-  List<ScheduledInstant> build(ScheduleEditorViewModel editor) {
+  Timetable build(ScheduleEditorViewModel editor) {
     final blackColor = List<int>.filled(editor.availableChannelCount, 0);
     return <ScheduledInstant>[
       ScheduledInstant(instant: _startTime.value, color: blackColor.toList()),

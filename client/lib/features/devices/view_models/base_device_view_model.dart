@@ -19,7 +19,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   bool _isOnline = false;
 
   final CancellationToken initializationCancelToken = CancellationToken();
-  final DeviceManager deviceManager;
+  final IDeviceManager deviceManager;
   final String deviceID;
   late final DeviceEntity deviceEntity;
 

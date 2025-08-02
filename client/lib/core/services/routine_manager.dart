@@ -23,7 +23,7 @@ class IRoutineManager implements IDisposable {
   final EventBus _globalBus;
 
   final ISceneManager _sceneManager;
-  final DeviceManager _deviceManager;
+  final IDeviceManager _deviceManager;
 
   final RoutineHistoryStore _historyStore;
 
@@ -65,7 +65,7 @@ class IRoutineManager implements IDisposable {
       final steps = await routine.execute(currentScene, _deviceManager);
       if (steps.isNotEmpty) {
         await _historyStore.addRecord(
-          RoutineHistoryRecord(routineId: routineID, timestamp: DateTime.now(), steps: steps),
+          RoutineHistoryRecord(routineId: routineID, timestamp: this.clock.now(), steps: steps),
         );
       }
     });
