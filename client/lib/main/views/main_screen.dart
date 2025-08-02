@@ -140,10 +140,11 @@ class MainScreen extends StatelessWidget {
     final mainVM = context.read<MainViewModel>();
     return Selector<MainViewModel, TabIndices>(
       selector: (context, vm) => vm.currentTabIndex,
-      builder: (context, tabIndex, child) => Scaffold(
-        appBar: null, // page body
-        body: SafeArea(
-          child: AnimatedSwitcher(
+      builder: (context, tabIndex, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.dark),
+        child: Scaffold(
+          appBar: null, // page body
+          body: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
             child: switch (tabIndex) {
@@ -152,22 +153,22 @@ class MainScreen extends StatelessWidget {
               TabIndices.my => const MyScreen(key: ValueKey('my')),
             },
           ),
-        ),
 
-        // bottom
-        bottomNavigationBar: SafeArea(
-          child: BottomNavigationBar(
-            currentIndex: tabIndex.index,
-            onTap: (index) {
-              if (index != tabIndex.index) {
-                mainVM.setIndex(TabIndices.values[index]);
-              }
-            },
-            items: [
-              BottomNavigationBarItem(icon: Icon(Icons.house_outlined), label: context.translate('Scenes')),
-              BottomNavigationBarItem(icon: Icon(Icons.device_hub), label: context.translate('Devices')),
-              BottomNavigationBarItem(icon: Icon(Icons.person), label: context.translate('My')),
-            ],
+          // bottom
+          bottomNavigationBar: SafeArea(
+            child: BottomNavigationBar(
+              currentIndex: tabIndex.index,
+              onTap: (index) {
+                if (index != tabIndex.index) {
+                  mainVM.setIndex(TabIndices.values[index]);
+                }
+              },
+              items: [
+                BottomNavigationBarItem(icon: const Icon(Icons.house_outlined), label: context.translate('Scenes')),
+                BottomNavigationBarItem(icon: const Icon(Icons.device_hub), label: context.translate('Devices')),
+                BottomNavigationBarItem(icon: const Icon(Icons.person), label: context.translate('My')),
+              ],
+            ),
           ),
         ),
       ),

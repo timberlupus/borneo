@@ -34,13 +34,17 @@ extension CoapClientExtensions on CoapClient {
   /// Errors during decoding are emitted as stream errors.
   Stream<T> observeCbor<T>(Uri uri, {CancellationToken? cancelToken}) async* {
     final request = CoapRequest.get(uri, accept: CoapMediaType.applicationCbor);
-    final obs = await observe(request).asCancellable(cancelToken);
-    await for (final rep in obs) {
-      try {
-        yield simple_cbor.cbor.decode(rep.payload) as T;
-      } catch (e, st) {
-        yield* Stream<T>.error(e, st);
+    final obs = await observe(request, maxRetransmit: 3).asCancellable(cancelToken);
+    try {
+      await for (final rep in obs) {
+        try {
+          yield simple_cbor.cbor.decode(rep.payload) as T;
+        } catch (e, st) {
+          yield* Stream<T>.error(e, st);
+        }
       }
+    } catch (e, st) {
+      yield* Stream<T>.error(e, st);
     }
   }
 
@@ -54,13 +58,18 @@ extension CoapClientExtensions on CoapClient {
       confirmable: false,
       contentFormat: CoapMediaType.applicationCbor,
     );
-    final obs = await observe(request).asCancellable(cancelToken);
-    await for (final rep in obs) {
-      try {
-        yield simple_cbor.cbor.decode(rep.payload) as T;
-      } catch (e, st) {
-        yield* Stream<T>.error(e, st);
+    final obs = await observe(request, maxRetransmit: 3).asCancellable(cancelToken);
+
+    try {
+      await for (final rep in obs) {
+        try {
+          yield simple_cbor.cbor.decode(rep.payload) as T;
+        } catch (e, st) {
+          yield* Stream<T>.error(e, st);
+        }
       }
+    } catch (e, st) {
+      yield* Stream<T>.error(e, st);
     }
   }
 

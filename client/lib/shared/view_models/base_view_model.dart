@@ -19,11 +19,13 @@ abstract class BaseViewModel extends ChangeNotifier {
   @override
   void dispose() {
     if (!_isDisposed) {
+      _isDisposed = true;
+
       taskQueueCancelToken.cancel();
       taskQueue.stop();
       taskQueue.close();
+
       super.dispose();
-      _isDisposed = true;
     }
   }
 

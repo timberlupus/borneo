@@ -21,11 +21,11 @@ class LyfiCoapDriverData extends BorneoCoapDriverData {
     super.load();
 
     _modeChangedSub = coap
-        .observeCborNon<int>(LyfiPaths.mode)
+        .observeCbor<int>(LyfiPaths.mode)
         .listen((mode) => super.deviceEvents.fire(LyfiModeChangedEvent(device, mode: LyfiMode.values[mode])));
 
     _stateChangedSub = coap
-        .observeCborNon<int>(LyfiPaths.state)
+        .observeCbor<int>(LyfiPaths.state)
         .listen((state) => super.deviceEvents.fire(LyfiStateChangedEvent(device, state: LyfiState.values[state])));
   }
 
