@@ -42,9 +42,11 @@ class InGroupDeviceListView extends StatelessWidget {
       selector: (_, gvm) => gvm.devices.length,
       shouldRebuild: (previous, current) => previous != current,
       builder: (context, deviceCount, child) {
-        if (deviceCount == 0) return const SizedBox.shrink();
-
+        if (deviceCount == 0) {
+          return const SizedBox.shrink();
+        }
         return ListView.separated(
+          padding: const EdgeInsets.all(0),
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: deviceCount,
@@ -283,18 +285,25 @@ class DevicesScreen extends StatelessWidget {
         selector: (_, gvm) => (name: gvm.name, isEmpty: gvm.isEmpty, isDummy: gvm.isDummy, isBusy: gvm.isBusy),
         builder: (context, groupData, child) {
           if (groupData.isDummy && groupData.isEmpty) {
-            return SizedBox(height: 0);
+            return const SizedBox(height: 0);
           } else {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Container(
-                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  height: 32,
+                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  height: 48,
                   child: Row(
                     children: [
-                      Text(groupData.name, textAlign: TextAlign.start, style: Theme.of(context).textTheme.titleMedium),
+                      Text(
+                        groupData.name,
+                        textAlign: TextAlign.start,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
                       const Spacer(),
                       if (!groupData.isDummy)
                         IconButton(
