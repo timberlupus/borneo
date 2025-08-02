@@ -252,18 +252,7 @@ jobs:
 
       - name: Create and zip Windows release
         run: |
-          $distDir = "build/windows/dist"
-          $zipPath = "$distDir/borneo-app-${{ steps.get_version.outputs.version }}-windows-x64.zip"
-          $srcDir = "build/windows/x64/runner/Release"
-
-          if (-not (Test-Path $distDir)) { New-Item -ItemType Directory -Force -Path $distDir }
-          if (Test-Path $zipPath) { Remove-Item $zipPath }
-
-          Push-Location $srcDir
-          $license = Join-Path "${{ github.workspace }}" "LICENSE"
-          $readme = Join-Path "${{ github.workspace }}" "README.md"
-          & "C:\Program Files\7-Zip\7z.exe" a -tzip "$zipPath" * $license $readme
-          Pop-Location
+          pwsh ./scripts/windows-dist-pack.ps1 ${{ steps.get_version.outputs.version }}
 
       - name: Upload Windows zip artifact
         uses: actions/upload-artifact@v4
@@ -275,7 +264,7 @@ jobs:
     needs: [build-apk, build-windows]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
-    
+
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
