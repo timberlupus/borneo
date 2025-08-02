@@ -267,7 +267,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: borneo-app-${{ steps.get_version.outputs.version }}-windows-x64
-          path: ${{ github.workspace }}/${{ env.FLUTTER_WORKING_DIR }}/build/windows/dist/borneo-app-${{ steps.get_version.outputs.version }}-windows-x64.zip
+          path: ${{ github.workspace }}\\${{ env.FLUTTER_WORKING_DIR }}\\build\\windows\\dist\\borneo-app-${{ steps.get_version.outputs.version }}-windows-x64.zip
 
   release:
     needs: [build-apk, build-windows]
