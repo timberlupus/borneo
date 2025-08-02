@@ -1,8 +1,8 @@
-## Borneo Common
+# Borneo Common
 
 This package provides common utilities and abstractions for the Borneo project.
 
-### Features
+## Features
 
 - Async rate limiter
 - DateTime and Duration extensions
@@ -13,7 +13,7 @@ This package provides common utilities and abstractions for the Borneo project.
 - Float32 utilities
 - Simple state machine
 
-### Usage
+## Usage
 
 Add to your `pubspec.yaml` dependencies:
 
@@ -35,6 +35,6 @@ Or import specific utilities:
 import 'package:borneo_common/utils/disposable.dart';
 ```
 
-### License
+## License
 
 See [LICENSE](LICENSE).

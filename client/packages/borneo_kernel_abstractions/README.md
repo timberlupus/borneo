@@ -1,39 +1,38 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# Borneo Kernel Abstractions
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages). 
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages). 
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+This package provides core abstractions and interfaces for the Borneo project kernel.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+- Device and driver interfaces
+- Device event bus
+- Command queue
+- Error types for device operations
+- mDNS discovery abstractions
+- Bound device and driver data models
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+Add to your `pubspec.yaml` dependencies:
 
-```dart
-const like = 'sample';
+```yaml
+dependencies:
+  borneo_kernel_abstractions:
+    path: packages/borneo_kernel_abstractions
 ```
 
-## Additional information
+Import what you need:
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+```dart
+import 'package:borneo_kernel_abstractions/kernel.dart';
+```
+
+Or import specific interfaces or models:
+
+```dart
+import 'package:borneo_kernel_abstractions/ikernel.dart';
+```
+
+## License
+
+See [LICENSE](LICENSE).
