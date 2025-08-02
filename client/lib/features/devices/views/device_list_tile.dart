@@ -134,7 +134,10 @@ class DeviceTile extends StatelessWidget {
                   if (context.mounted) {
                     ConfirmationSheet.show(
                       context,
-                      message: 'Are you sure to delete the device "${selectedDeviceVM.name}" ?',
+                      message: context.translate(
+                        'Are you sure to delete the device "{deviceName}"?',
+                        nArgs: {"deviceName": selectedDeviceVM.name},
+                      ),
                       okPressed: () {
                         parentVM.deleteDevice(selectedDeviceVM.deviceEntity.id);
                       },
@@ -151,7 +154,10 @@ class DeviceTile extends StatelessWidget {
                       availableGroups: groupEntites,
                       onTapGroup: (g) => parentVM.changeDeviceGroup(selectedDeviceVM.deviceEntity, g?.id),
                       title: context.translate('Change Device Group'),
-                      subtitle: 'Select the group to which device "${selectedDeviceVM.name}" belongs:',
+                      subtitle: context.translate(
+                        'Select the group to which device "{deviceName}" belongs:',
+                        nArgs: {'deviceName': selectedDeviceVM.name},
+                      ),
                     ),
                   );
 

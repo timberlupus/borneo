@@ -54,16 +54,21 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
             child: Text(
               subtitle!,
               textAlign: TextAlign.start,
-              style: DefaultTextStyle.of(context).style.copyWith(color: Theme.of(context).hintColor),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).hintColor),
             ),
           ),
-        const SizedBox(height: 16),
-        ListView.separated(
-          shrinkWrap: true,
-          itemBuilder: (BuildContext context, int index) => tiles[index],
-          separatorBuilder: (BuildContext context, int index) => Divider(indent: 16, height: 16, thickness: 1),
-          itemCount: tiles.length,
+        const SizedBox(height: 8),
+        Material(
+          color: Theme.of(context).colorScheme.surfaceContainer,
+          child: ListView.separated(
+            padding: const EdgeInsets.all(0),
+            shrinkWrap: true,
+            itemBuilder: (BuildContext context, int index) => tiles[index],
+            separatorBuilder: (BuildContext context, int index) => const Divider(indent: 16, height: 8, thickness: 1),
+            itemCount: tiles.length,
+          ),
         ),
+        const SizedBox(height: 16),
       ],
     );
   }

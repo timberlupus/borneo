@@ -179,20 +179,20 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
       }
 
       try {
-        // 1. 先更新数据库
+        // 1. Update the database first
         await _deviceManager.moveToGroup(device.id, newGroupVM.id);
 
-        // 2. 确认数据库更新成功后，原子性更新内存状态
+        // 2. After confirming the database update, atomically update the in-memory state
         originalGroupVM.removeDevice(deviceVM);
         newGroupVM.insertDevice(0, deviceVM);
 
-        // 3. 仅通知相关组更新，减少全局刷新
+        // 3. Only notify the relevant groups to update, reducing global refreshes
         originalGroupVM.notifyListeners();
         newGroupVM.notifyListeners();
 
         logger?.i('Device ${device.name} moved from ${originalGroupVM.name} to ${newGroupVM.name}');
       } catch (e, stackTrace) {
-        // 失败时重载全部数据保持一致性
+        // Reload all data to maintain consistency in case of failure
         logger?.e('Failed to change device group, reloading all devices', error: e, stackTrace: stackTrace);
         await _reloadAll();
         notifyAppError('Failed to change the group for device "${device.name}"', error: e, stackTrace: stackTrace);
@@ -222,7 +222,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
       logger?.e('Failed to add device incrementally, falling back to full reload', error: e, stackTrace: stackTrace);
       await _tryReloadAll();
     }
-    // 仅在必要时通知
+    // Notify only when necessary
     if (!isDisposed) {
       notifyListeners();
     }
@@ -238,7 +238,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
       final deviceToRemove = changedGroup.devices.firstWhere((d) => d.deviceEntity.id == event.id);
       deviceToRemove.dispose();
       changedGroup.removeDeviceById(event.id);
-      // 仅在必要时通知
+      // Notify only when necessary
       if (!isDisposed) {
         notifyListeners();
       }
@@ -282,7 +282,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     _deviceOperLock.synchronized(() async {
       if (isDisposed) return;
 
-      // 避免重复通知 - 直接重载即可保证一致性
+      // Avoid duplicate notifications - directly reload to ensure consistency
       await _reloadAll();
       if (!isDisposed) {
         notifyListeners();
@@ -294,7 +294,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     _deviceOperLock.synchronized(() async {
       if (isDisposed) return;
 
-      // 简单重载保证数据一致性
+      // Simple reload to ensure data consistency
       await _reloadAll();
       if (!isDisposed) {
         notifyListeners();
