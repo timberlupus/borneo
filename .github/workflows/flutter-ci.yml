@@ -13,13 +13,19 @@ on:
       - 'client/**'
   workflow_dispatch:
 
+env:
+  FLUTTER_WORKING_DIR: client
+
 jobs:
   setup:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: client
-    # outputs removed as setup-flutter does not define flutter-version output
+        working-directory: ${{ env.FLUTTER_WORKING_DIR }}
+    outputs:
+      flutter-version: ${{ steps.read-flutter-version.outputs.FLUTTER_VERSION }}
+      cache-key-pub: ${{ steps.cache-keys.outputs.pub }}
+      cache-key-gradle: ${{ steps.cache-keys.outputs.gradle }}
 
     steps:
       - name: Checkout code
@@ -28,8 +34,14 @@ jobs:
       - name: Read Flutter version
         id: read-flutter-version
         run: |
-          echo "FLUTTER_VERSION=$(cat flutter_version)" >> $GITHUB_ENV
-        working-directory: client
+          FLUTTER_VERSION=$(cat flutter_version)
+          echo "FLUTTER_VERSION=$FLUTTER_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate cache keys
+        id: cache-keys
+        run: |
+          echo "pub=${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock', 'client/packages/*/pubspec.yaml') }}" >> $GITHUB_OUTPUT
+          echo "gradle=${{ runner.os }}-gradle-${{ hashFiles('client/**/*.gradle*', 'client/**/gradle-wrapper.properties') }}" >> $GITHUB_OUTPUT
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -38,7 +50,6 @@ jobs:
           java-version: 17
 
       - name: Setup Flutter
-        id: setup-flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -49,55 +60,46 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock') }}
+          key: ${{ steps.cache-keys.outputs.pub }}
           restore-keys: ${{ runner.os }}-pub-cache-
 
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('client/**/*.gradle*', 'client/**/gradle-wrapper.properties') }}
-          restore-keys: ${{ runner.os }}-gradle-
+      - name: Activate melos and bootstrap
+        run: |
+          dart pub global activate melos
+          melos bootstrap
 
   test:
     needs: setup
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: client
+        working-directory: ${{ env.FLUTTER_WORKING_DIR }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Read Flutter version
-        id: read-flutter-version
-        run: |
-          echo "FLUTTER_VERSION=$(cat flutter_version)" >> $GITHUB_ENV
-        working-directory: client
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: ${{ steps.read-flutter-version.outputs.FLUTTER_VERSION }}
+          flutter-version: ${{ needs.setup.outputs.flutter-version }}
           cache: true
 
       - name: Cache pub dependencies
         uses: actions/cache@v4
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock') }}
+          key: ${{ needs.setup.outputs.cache-key-pub }}
           restore-keys: ${{ runner.os }}-pub-cache-
 
+      - name: Activate melos and bootstrap
+        run: |
+          dart pub global activate melos
+          melos bootstrap
 
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Run dart format check
-        run: dart format --set-exit-if-changed .
+      - name: Run Melos format check
+        run: melos format --set-exit-if-changed .
 
       - name: Run analyze (fail only on error)
         run: |
@@ -121,19 +123,13 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: client
+        working-directory: ${{ env.FLUTTER_WORKING_DIR }}
     outputs:
       version: ${{ steps.get_version.outputs.version }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Read Flutter version
-        id: read-flutter-version
-        run: |
-          echo "FLUTTER_VERSION=$(cat flutter_version)" >> $GITHUB_ENV
-        working-directory: client
 
       - name: Decode keystore from base64
         run: |
@@ -143,23 +139,25 @@ jobs:
 
       - name: Set up signing properties
         run: |
-          echo "storeFile=keystore.jks" > android/app/key.properties
-          echo "keyAlias=${{ secrets.KEYSTORE_KEY_ALIAS }}" >> android/app/key.properties
-          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/app/key.properties
-          echo "keyPassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/app/key.properties
+          cat > android/app/key.properties << EOF
+          storeFile=keystore.jks
+          keyAlias=${{ secrets.KEYSTORE_KEY_ALIAS }}
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.KEYSTORE_PASSWORD }}
+          EOF
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: ${{ steps.read-flutter-version.outputs.FLUTTER_VERSION }}
+          flutter-version: ${{ needs.setup.outputs.flutter-version }}
           cache: true
 
       - name: Cache pub dependencies
         uses: actions/cache@v4
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock') }}
+          key: ${{ needs.setup.outputs.cache-key-pub }}
           restore-keys: ${{ runner.os }}-pub-cache-
 
       - name: Cache Gradle dependencies
@@ -168,41 +166,40 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('client/**/*.gradle*', 'client/**/gradle-wrapper.properties') }}
+          key: ${{ needs.setup.outputs.cache-key-gradle }}
           restore-keys: ${{ runner.os }}-gradle-
 
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build APK
-        run: flutter build apk --release --target-platform android-arm64 --no-pub --build-number ${{ github.run_number }}
+      - name: Activate melos and bootstrap
+        run: |
+          dart pub global activate melos
+          melos bootstrap
 
       - name: Get version from pubspec.yaml
         id: get_version
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | head -n1 | awk '{print $2}' | cut -d'+' -f1)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build APK
+        run: flutter build apk --release --target-platform android-arm64 --no-pub --build-number ${{ github.run_number }}
 
       - name: Rename APK with version
         run: |
-          mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/borneo-app-${{ steps.get_version.outputs.version }}.apk
-
-      - name: Debug List APK output
-        run: ls -l build/app/outputs/flutter-apk/
+          mv build/app/outputs/flutter-apk/app-release.apk \
+             build/app/outputs/flutter-apk/borneo-app-${{ steps.get_version.outputs.version }}.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: borneo-app-${{ steps.get_version.outputs.version }}
-          path: ${{ github.workspace }}/client/build/app/outputs/flutter-apk/borneo-app-${{ steps.get_version.outputs.version }}.apk
+          path: ${{ github.workspace }}/${{ env.FLUTTER_WORKING_DIR }}/build/app/outputs/flutter-apk/borneo-app-${{ steps.get_version.outputs.version }}.apk
 
   build-windows:
     needs: [setup, test]
     runs-on: windows-latest
     defaults:
       run:
-        working-directory: client
+        working-directory: ${{ env.FLUTTER_WORKING_DIR }}
     outputs:
       version: ${{ steps.get_version.outputs.version }}
 
@@ -210,30 +207,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Read Flutter version
-        id: read-flutter-version
-        run: |
-          echo "FLUTTER_VERSION=$(cat flutter_version)" >> $GITHUB_ENV
-        working-directory: client
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: ${{ steps.read-flutter-version.outputs.FLUTTER_VERSION }}
+          flutter-version: ${{ needs.setup.outputs.flutter-version }}
           cache: true
 
       - name: Cache pub dependencies
         uses: actions/cache@v4
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock') }}
+          key: ${{ needs.setup.outputs.cache-key-pub }}
           restore-keys: ${{ runner.os }}-pub-cache-
-
-      - name: Install Visual Studio Build Tools
-        run: |
-          choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK" -y
-        shell: powershell
 
       - name: Cache MSBuild
         uses: actions/cache@v4
@@ -242,54 +228,54 @@ jobs:
           key: ${{ runner.os }}-msbuild-${{ hashFiles('client/windows/**') }}
           restore-keys: ${{ runner.os }}-msbuild-
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Install Visual Studio Build Tools
+        run: |
+          choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK" -y
+
+      - name: Activate melos and bootstrap
+        run: |
+          dart pub global activate melos
+          melos bootstrap
 
       - name: Get version from pubspec.yaml
         id: get_version
         run: |
           $version = (Select-String -Path pubspec.yaml -Pattern '^version:' | Select-Object -First 1).Line.Split(':')[1].Trim().Split('+')[0]
           echo "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        shell: powershell
 
       - name: Build Windows executable
         run: flutter build windows --release --no-pub --build-number ${{ github.run_number }}
-        shell: powershell
 
-      - name: Zip Windows Release (exclude pdb, keep structure, max compression)
+      - name: Create and zip Windows release
         run: |
           $distDir = "build/windows/dist"
           $zipPath = "$distDir/borneo-app-${{ steps.get_version.outputs.version }}-windows-x64.zip"
           $srcDir = "build/windows/x64/runner/Release"
-          if (-not (Test-Path $distDir)) { New-Item -ItemType Directory -Force -Path $distDir | Out-Null }
+          
+          if (-not (Test-Path $distDir)) { New-Item -ItemType Directory -Force -Path $distDir }
           if (Test-Path $zipPath) { Remove-Item $zipPath }
+          
           Push-Location $srcDir
-          & "C:\Program Files\7-Zip\7z.exe" a -tzip "$zipPath" * "-xr!*.pdb" -mx=9
+          Compress-Archive -Path * -DestinationPath $zipPath -CompressionLevel Optimal -Force
           Pop-Location
-        shell: powershell
 
       - name: Upload Windows zip artifact
         uses: actions/upload-artifact@v4
         with:
           name: borneo-app-${{ steps.get_version.outputs.version }}-windows-x64
-          path: ${{ github.workspace }}/client/build/windows/dist/borneo-app-${{ steps.get_version.outputs.version }}-windows-x64.zip
+          path: ${{ github.workspace }}/${{ env.FLUTTER_WORKING_DIR }}/build/windows/dist/borneo-app-${{ steps.get_version.outputs.version }}-windows-x64.zip
 
   release:
     needs: [build-apk, build-windows]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
+    
     steps:
-      - name: Download APK artifact
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: borneo-app-${{ needs.build-apk.outputs.version }}
           path: ./release-artifacts
-
-      - name: Download Windows zip artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: borneo-app-${{ needs.build-windows.outputs.version }}-windows-x64
-          path: ./release-artifacts
+          merge-multiple: true
 
       - name: Set prerelease flag
         id: set_prerelease
@@ -301,33 +287,12 @@ jobs:
           fi
 
       - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.build-apk.outputs.version }}
-          release_name: Release v${{ needs.build-apk.outputs.version }}
+          name: Release v${{ needs.build-apk.outputs.version }}
           draft: false
           prerelease: ${{ steps.set_prerelease.outputs.prerelease }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload APK to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release-artifacts/borneo-app-${{ needs.build-apk.outputs.version }}.apk
-          asset_name: borneo-app-${{ needs.build-apk.outputs.version }}.apk
-          asset_content_type: application/vnd.android.package-archive
-
-      - name: Upload Windows zip to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release-artifacts/borneo-app-${{ needs.build-windows.outputs.version }}-windows-x64.zip
-          asset_name: borneo-app-${{ needs.build-windows.outputs.version }}-windows-x64.zip
-          asset_content_type: application/zip
-
+          files: |
+            release-artifacts/borneo-app-${{ needs.build-apk.outputs.version }}.apk
+            release-artifacts/borneo-app-${{ needs.build-windows.outputs.version }}-windows-x64.zip

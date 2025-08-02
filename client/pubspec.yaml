@@ -116,6 +116,20 @@ dev_dependencies:
   test: ^1.25.0
   build_runner: ^2.4.13
   mockito: ^5.4.4
+  melos: ^7.0.0-dev.9
+
+melos:
+  scripts:
+    analyze:
+      exec: |
+        dart analyze .
+
+    lint:all:
+      run: melos run analyze-ci && melos run format-ci
+      description: Run all static analysis checks.
+
+
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
