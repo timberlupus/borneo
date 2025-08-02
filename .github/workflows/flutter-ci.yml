@@ -174,6 +174,9 @@ jobs:
           dart pub global activate melos
           melos bootstrap
 
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
       - name: Get version from pubspec.yaml
         id: get_version
         run: |
@@ -228,14 +231,13 @@ jobs:
           key: ${{ runner.os }}-msbuild-${{ hashFiles('client/windows/**') }}
           restore-keys: ${{ runner.os }}-msbuild-
 
-      - name: Install Visual Studio Build Tools
-        run: |
-          choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK" -y
-
       - name: Activate melos and bootstrap
         run: |
           dart pub global activate melos
           melos bootstrap
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
 
       - name: Get version from pubspec.yaml
         id: get_version
@@ -251,10 +253,10 @@ jobs:
           $distDir = "build/windows/dist"
           $zipPath = "$distDir/borneo-app-${{ steps.get_version.outputs.version }}-windows-x64.zip"
           $srcDir = "build/windows/x64/runner/Release"
-          
+
           if (-not (Test-Path $distDir)) { New-Item -ItemType Directory -Force -Path $distDir }
           if (Test-Path $zipPath) { Remove-Item $zipPath }
-          
+
           Push-Location $srcDir
           Compress-Archive -Path * -DestinationPath $zipPath -CompressionLevel Optimal -Force
           Pop-Location
