@@ -29,7 +29,7 @@ class RoutinesState {
 
 /// Routines Notifier
 class RoutinesNotifier extends StateNotifier<RoutinesState> {
-  final RoutineManager _routineManager;
+  final IRoutineManager _routineManager;
   final EventBus _eventBus;
   final Logger? _logger;
 
@@ -97,7 +97,7 @@ class RoutinesNotifier extends StateNotifier<RoutinesState> {
 }
 
 /// Routines specific providers
-final routineManagerProvider = Provider<RoutineManager>((ref) {
+final routineManagerProvider = Provider<IRoutineManager>((ref) {
   throw UnimplementedError('RoutineManager must be provided by context');
 });
 

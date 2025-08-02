@@ -37,7 +37,7 @@ final class DeviceManagerImpl extends DeviceManager {
   // ignore: unused_field
   final EventBus _globalBus;
   // ignore: unused_field
-  final GroupManager _groupManager;
+  final IGroupManager _groupManager;
 
   // event subscriptions
   late final StreamSubscription<UnboundDeviceDiscoveredEvent> _unboundDeviceDiscoveredEventSub;

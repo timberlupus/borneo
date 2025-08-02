@@ -112,7 +112,7 @@ Future<void> main() async {
           ),
 
           // LocaleService
-          provider.Provider<LocaleService>(create: (_) => AppLocaleService(), lazy: false),
+          provider.Provider<ILocaleService>(create: (_) => AppLocaleService(), lazy: false),
         ],
         child: BorneoApp(),
       ),

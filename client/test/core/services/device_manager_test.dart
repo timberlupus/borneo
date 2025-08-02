@@ -489,7 +489,7 @@ class TestSceneManager implements ISceneManager {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-class TestGroupManager implements GroupManager {
+class TestGroupManager implements IGroupManager {
   // Simplified - only implement what we need for testing
   @override
   dynamic noSuchMethod(Invocation invocation) => null;

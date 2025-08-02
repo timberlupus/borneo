@@ -40,7 +40,7 @@ class RiverpodScenesWidget extends StatelessWidget {
     // Read services from the existing Provider context
     final sceneManager = provider.Provider.of<ISceneManager>(context, listen: false);
     final deviceManager = provider.Provider.of<DeviceManager>(context, listen: false);
-    final routineManager = provider.Provider.of<RoutineManager>(context, listen: false);
+    final routineManager = provider.Provider.of<IRoutineManager>(context, listen: false);
     final notificationService = provider.Provider.of<IAppNotificationService>(context, listen: false);
     final eventBus = provider.Provider.of<EventBus>(context, listen: false);
     final logger = provider.Provider.of<Logger?>(context, listen: false);

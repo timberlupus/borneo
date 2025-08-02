@@ -379,7 +379,7 @@ class LyfiView extends StatelessWidget {
         deviceManager: cb.read<DeviceManager>(),
         globalEventBus: cb.read<EventBus>(),
         notification: cb.read<IAppNotificationService>(),
-        localeService: cb.read<LocaleService>(),
+        localeService: cb.read<ILocaleService>(),
         logger: cb.read<Logger>(),
       ),
       builder: (context, child) {

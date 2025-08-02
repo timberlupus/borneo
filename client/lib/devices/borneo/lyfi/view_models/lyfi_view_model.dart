@@ -26,7 +26,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
   bool _isDisposed = false;
 
-  final LocaleService localeService;
+  final ILocaleService localeService;
 
   ILyfiDeviceApi get _deviceApi => super.borneoDeviceApi as ILyfiDeviceApi;
 

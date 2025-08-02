@@ -7,13 +7,13 @@ import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
 import 'package:borneo_app/core/services/group_manager_impl.dart';
 
-abstract class GroupManager {
+abstract class IGroupManager {
   bool get isInitialized;
 
-  GroupManager();
+  IGroupManager();
 
   // Factory constructor to create the implementation
-  factory GroupManager.create(Logger logger, EventBus globalBus, Database db, ISceneManager scenes) {
+  factory IGroupManager.create(Logger logger, EventBus globalBus, Database db, ISceneManager scenes) {
     return GroupManagerImpl(logger, globalBus, db, scenes);
   }
 

@@ -10,7 +10,7 @@ final class GroupEditArguments {
 }
 
 class GroupEditViewModel extends AbstractScreenViewModel {
-  final GroupManager _groupManager;
+  final IGroupManager _groupManager;
   final bool isCreation;
   late final String? id;
   late String name;

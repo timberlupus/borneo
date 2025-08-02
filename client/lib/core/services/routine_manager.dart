@@ -1,3 +1,4 @@
+import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_app/features/routines/models/abstract_routine.dart';
 import 'package:borneo_app/features/routines/models/builtin_routines.dart';
@@ -9,8 +10,9 @@ import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
 import 'package:synchronized/synchronized.dart';
 
-class RoutineManager implements IDisposable {
+class IRoutineManager implements IDisposable {
   final Logger? logger;
+  final IClock clock;
 
   // ignore: unused_field
   final Database _db;
@@ -27,8 +29,14 @@ class RoutineManager implements IDisposable {
 
   final List<AbstractRoutine> allRoutines = [];
 
-  RoutineManager(this._globalBus, this._db, this._sceneManager, this._deviceManager, {this.logger})
-    : _historyStore = RoutineHistoryStore(_db) {
+  IRoutineManager(
+    this._globalBus,
+    this._db,
+    this._sceneManager,
+    this._deviceManager, {
+    required this.clock,
+    this.logger,
+  }) : _historyStore = RoutineHistoryStore(_db) {
     allRoutines.addAll([PowerOffAllRoutine(), FeedModeRoutine(), WaterChangeModeRoutine(), DryScapeModeRoutine()]);
   }
 

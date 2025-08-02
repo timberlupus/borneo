@@ -12,7 +12,7 @@ const kLocaleKey = "app.locale";
 class AppSettingsViewModel extends AbstractScreenViewModel {
   AppSettingsViewModel({required super.globalEventBus, required super.logger, required this.localeService});
 
-  final LocaleService localeService;
+  final ILocaleService localeService;
 
   ThemeMode _themeMode = ThemeMode.system;
   ThemeMode get themeMode => _themeMode;

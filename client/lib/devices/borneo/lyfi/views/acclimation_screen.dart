@@ -1,3 +1,4 @@
+import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/acclimation_view_model.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
@@ -101,7 +102,7 @@ class AcclimationScreen extends StatelessWidget {
           ),
           onTap: !vm.isBusy && vm.isOnline
               ? () async {
-                  final now = DateTime.now();
+                  final now = context.read<IClock>().now();
                   final picked = await showDatePicker(
                     context: context,
                     initialDate: vm.startTimestamp.toLocal().year < 2025 ? now : vm.startTimestamp.toLocal(),

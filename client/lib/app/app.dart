@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:borneo_app/core/events/app_events.dart';
+import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/core/services/default_app_notification_service.dart';
 import 'package:borneo_app/core/services/devices/device_manager_impl.dart';
 import 'package:borneo_app/core/services/group_manager_impl.dart';
@@ -134,12 +135,13 @@ class _BorneoAppState extends State<BorneoApp> {
                         context.read<Database>(),
                         context.read<EventBus>(),
                         context.read<IBlobManager>(),
+                        clock: context.read<IClock>(),
                         logger: context.read<Logger>(),
                       ),
                     ),
 
                     // GroupManager
-                    Provider<GroupManager>(
+                    Provider<IGroupManager>(
                       create: (context) => GroupManagerImpl(
                         context.read<Logger>(),
                         context.read<EventBus>(),
@@ -155,7 +157,7 @@ class _BorneoAppState extends State<BorneoApp> {
                         context.read<IKernel>(),
                         context.read<EventBus>(),
                         context.read<ISceneManager>(),
-                        context.read<GroupManager>(),
+                        context.read<IGroupManager>(),
                         context.read<IDeviceModuleRegistry>(),
                         logger: context.read<Logger>(),
                       ),
@@ -163,12 +165,13 @@ class _BorneoAppState extends State<BorneoApp> {
                     ),
 
                     // RoutineManager
-                    Provider<RoutineManager>(
-                      create: (context) => RoutineManager(
+                    Provider<IRoutineManager>(
+                      create: (context) => IRoutineManager(
                         context.read<EventBus>(),
                         context.read<Database>(),
                         context.read<ISceneManager>(),
                         context.read<DeviceManager>(),
+                        clock: context.read<IClock>(),
                         logger: context.read<Logger>(),
                       ),
                       dispose: (context, rm) => rm.dispose(),

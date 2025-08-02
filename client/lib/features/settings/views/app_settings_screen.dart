@@ -30,7 +30,7 @@ class AppSettingsScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (cb) => AppSettingsViewModel(
         globalEventBus: cb.read<EventBus>(),
-        localeService: cb.read<LocaleService>(),
+        localeService: cb.read<ILocaleService>(),
         logger: cb.read<Logger>(),
       ),
       builder: (context, child) {

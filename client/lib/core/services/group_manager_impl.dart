@@ -11,7 +11,7 @@ import 'package:borneo_app/core/services/group_manager.dart';
 
 import '../../features/devices/models/device_entity.dart';
 
-class GroupManagerImpl extends GroupManager {
+class GroupManagerImpl extends IGroupManager {
   final Database _db;
   final Logger _logger;
   final EventBus _globalBus;

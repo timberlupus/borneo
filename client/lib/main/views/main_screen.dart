@@ -202,9 +202,9 @@ class MainScreen extends StatelessWidget {
         final bus = ctx.read<EventBus>();
         final bm = ctx.read<IBlobManager>();
         final sm = ctx.read<ISceneManager>();
-        final gm = ctx.read<GroupManager>();
+        final gm = ctx.read<IGroupManager>();
         final dm = ctx.read<DeviceManager>();
-        final ls = ctx.read<LocaleService>();
+        final ls = ctx.read<ILocaleService>();
         return MainViewModel(
           bus,
           bm,
@@ -277,7 +277,7 @@ class MainScreen extends StatelessWidget {
             final logger = context.read<Logger>();
             final globalEventBus = context.read<EventBus>();
             final sm = context.read<ISceneManager>();
-            final gm = context.read<GroupManager>();
+            final gm = context.read<IGroupManager>();
             final dm = context.read<DeviceManager>();
             final dmr = context.read<IDeviceModuleRegistry>();
             return GroupedDevicesViewModel(globalEventBus, sm, gm, dm, dmr, logger: logger);

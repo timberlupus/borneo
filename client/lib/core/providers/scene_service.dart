@@ -43,7 +43,7 @@ class SceneService extends StateNotifier<SceneState> {
   /// Initialize service
   /// Note: In Riverpod, explicit initialization is usually not needed
   /// but this is kept for compatibility
-  Future<void> initialize({GroupManager? groupManager, DeviceManager? deviceManager}) async {
+  Future<void> initialize({IGroupManager? groupManager, DeviceManager? deviceManager}) async {
     if (state.isInitialized) return;
 
     state = state.copyWith(isLoading: true);

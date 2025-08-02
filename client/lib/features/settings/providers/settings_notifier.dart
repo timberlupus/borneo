@@ -36,7 +36,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   SettingsNotifier({required this.localeService, required this.sharedPreferences, required this.eventBus})
     : super(const SettingsState());
 
-  final LocaleService localeService;
+  final ILocaleService localeService;
   final SharedPreferences sharedPreferences;
   final EventBus eventBus;
 

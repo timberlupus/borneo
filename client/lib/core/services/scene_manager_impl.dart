@@ -1,4 +1,5 @@
 import 'package:borneo_app/app/assets.dart';
+import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/core/models/device_statistics.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
@@ -22,20 +23,22 @@ import 'package:borneo_app/core/services/scene_manager.dart';
 class SceneManagerImpl extends ISceneManager {
   static const String currentSceneKey = 'status.scenes.current';
 
+  final Logger? logger;
   final GettextLocalizations _gt;
   final Database _db;
   final EventBus _globalEventBus;
   final IBlobManager _blobManager;
+  final IClock clock;
   bool _isInitialized = false;
 
-  late final GroupManager _groupManager;
+  late final IGroupManager _groupManager;
   late final DeviceManager _deviceManager;
 
   late SceneEntity _current;
 
   SceneEntity? _located;
 
-  SceneManagerImpl(this._gt, this._db, this._globalEventBus, this._blobManager, {Logger? logger}) : super(logger);
+  SceneManagerImpl(this._gt, this._db, this._globalEventBus, this._blobManager, {required this.clock, this.logger});
 
   @override
   bool get isInitialized => _isInitialized;
@@ -47,7 +50,7 @@ class SceneManagerImpl extends ISceneManager {
   SceneEntity? get located => _located;
 
   @override
-  Future<void> initialize(GroupManager groupManager, DeviceManager deviceManager) async {
+  Future<void> initialize(IGroupManager groupManager, DeviceManager deviceManager) async {
     if (_isInitialized) {
       return;
     }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:borneo_app/core/events/app_events.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
+import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/scene_manager.dart';
@@ -18,9 +19,10 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   static final Duration kStartupScanningDuration = Duration(seconds: 5);
   final IBlobManager _blobManager;
   final ISceneManager _sceneManager;
-  final GroupManager _groupManager;
+  final IGroupManager _groupManager;
   final DeviceManager _deviceManager;
-  final LocaleService _localeService;
+  final ILocaleService _localeService;
+  final IClock clock;
   TabIndices _currentIndex = TabIndices.scenes;
   bool _isInitialized = false;
 
@@ -60,6 +62,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
     this._localeService,
     this._gt, {
     required this.notification,
+    required this.clock,
     super.logger,
   }) {
     this.globalEventBus = globalEventBus;
@@ -132,7 +135,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   }
 
   Future<bool> handleWillPop() async {
-    final now = DateTime.now();
+    final now = clock.now();
 
     if (_lastPressedAt == null || now.difference(_lastPressedAt!) > const Duration(seconds: 2)) {
       _lastPressedAt = now;

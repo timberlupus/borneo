@@ -21,7 +21,7 @@ import '../../../core/models/events.dart';
 
 class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModelInitFutureMixin {
   final ISceneManager _sceneManager;
-  final GroupManager _groupManager;
+  final IGroupManager _groupManager;
   final DeviceManager _deviceManager;
   final IDeviceModuleRegistry _deviceModuleRegistry;
   final CancellationToken _cancellationToken = CancellationToken();

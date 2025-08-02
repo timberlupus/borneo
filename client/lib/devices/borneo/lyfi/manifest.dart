@@ -34,7 +34,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
           deviceManager: context.read<DeviceManager>(),
           globalEventBus: context.read<EventBus>(),
           notification: context.read<IAppNotificationService>(),
-          localeService: context.read<LocaleService>(),
+          localeService: context.read<ILocaleService>(),
           logger: context.read<Logger>(),
         ),
         deviceIconBuilder: _buildDeviceIcon,

@@ -20,7 +20,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   bool _disposed = false;
   final Logger _logger;
   final _provisioner = Provisioner.espTouch();
-  final GroupManager _groupManager;
+  final IGroupManager _groupManager;
   final DeviceManager _deviceManager;
   final IDeviceModuleRegistry deviceMdoules;
   bool get _isDiscovering => _deviceManager.isDiscoverying;

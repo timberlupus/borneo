@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/widgets.dart';
 
-abstract class LocaleService {
+abstract class ILocaleService {
   Future<void> initialize();
   String get temperatureUnitText;
   double convertTemperatureValue(double celsius);
@@ -9,7 +9,7 @@ abstract class LocaleService {
   Future<void> setTemperatureUnit(String unit);
 }
 
-class AppLocaleService implements LocaleService {
+class AppLocaleService implements ILocaleService {
   static const _kTemperatureUnitKey = 'app.temperature_unit';
   String _temperatureUnit = 'C'; // 默认摄氏度
   bool _initialized = false;

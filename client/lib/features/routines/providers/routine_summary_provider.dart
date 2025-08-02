@@ -32,7 +32,7 @@ class RoutineSummaryState {
 
 /// Routine Summary Notifier
 class RoutineSummaryNotifier extends StateNotifier<RoutineSummaryState> {
-  final RoutineManager _routineManager;
+  final IRoutineManager _routineManager;
   final IAppNotificationService _notification;
   final Logger? _logger;
 

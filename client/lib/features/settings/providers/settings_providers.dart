@@ -11,7 +11,7 @@ final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError('SharedPreferences must be overridden in main.dart');
 });
 
-final localeServiceProvider = Provider<LocaleService>((ref) {
+final localeServiceProvider = Provider<ILocaleService>((ref) {
   throw UnimplementedError('LocaleService must be overridden in main.dart');
 });
 
