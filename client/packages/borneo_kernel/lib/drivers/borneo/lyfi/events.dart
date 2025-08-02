@@ -12,7 +12,7 @@ class LyfiStateChangedEvent extends DeviceStateChangedEvent {
 }
 
 class LyfiScheduleChangedEvent extends DeviceStateChangedEvent {
-  final Timetable schedule;
+  final ScheduleTable schedule;
   const LyfiScheduleChangedEvent(super.device, {required this.schedule});
 }
 

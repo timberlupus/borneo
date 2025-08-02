@@ -14,8 +14,8 @@ class SunEditorViewModel extends BaseEditorViewModel {
   @override
   LyfiDeviceInfo get deviceInfo => parent.lyfiDeviceInfo;
 
-  Timetable _sunInstants = const [];
-  Timetable get sunInstants => _sunInstants;
+  ScheduleTable _sunInstants = const [];
+  ScheduleTable get sunInstants => _sunInstants;
 
   List<SunCurveItem> _sunCurve = const [];
 

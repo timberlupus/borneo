@@ -47,8 +47,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   bool get canTimedOn => !isBusy && (!isOn || super.mode == LyfiMode.scheduled);
 
   IEditor? currentEditor;
-  final Timetable scheduledInstants = [];
-  final Timetable sunInstants = [];
+  final ScheduleTable scheduledInstants = [];
+  final ScheduleTable sunInstants = [];
 
   int? get currentTempRaw => borneoDeviceStatus?.temperature;
   int? get currentTemp => borneoDeviceStatus?.temperature == null

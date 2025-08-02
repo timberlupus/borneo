@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SunRunningChart extends StatelessWidget {
-  final Timetable sunInstants;
+  final ScheduleTable sunInstants;
   final List<LyfiChannelInfo> channelInfoList;
   const SunRunningChart({required this.sunInstants, required this.channelInfoList, super.key});
 

@@ -39,7 +39,7 @@ class SunEditorView extends StatelessWidget {
   }
 
   Widget buildGraph(BuildContext context) {
-    return Selector<SunEditorViewModel, ({List<LyfiChannelInfo> channels, Timetable instants})>(
+    return Selector<SunEditorViewModel, ({List<LyfiChannelInfo> channels, ScheduleTable instants})>(
       selector: (context, vm) => (channels: vm.parent.lyfiDeviceInfo.channels, instants: vm.sunInstants),
       builder: (context, selected, _) =>
           SunRunningChart(sunInstants: selected.instants, channelInfoList: selected.channels),

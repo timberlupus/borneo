@@ -26,7 +26,7 @@ class DashboardChart extends StatelessWidget {
         final chartWidget = switch (props.mode) {
           LyfiMode.manual => ManualRunningChart(),
           LyfiMode.scheduled => ScheduleRunningChart(),
-          LyfiMode.sun => Selector<LyfiViewModel, ({List<LyfiChannelInfo> channels, Timetable instants})>(
+          LyfiMode.sun => Selector<LyfiViewModel, ({List<LyfiChannelInfo> channels, ScheduleTable instants})>(
             selector: (context, vm) => (channels: vm.lyfiDeviceInfo.channels, instants: vm.sunInstants),
             builder: (context, selected, _) =>
                 SunRunningChart(sunInstants: selected.instants, channelInfoList: selected.channels),

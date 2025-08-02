@@ -15,7 +15,7 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   Future<LyfiMode> getMode(Device dev, {CancellationToken? cancelToken});
   Future<void> switchMode(Device dev, LyfiMode mode, {CancellationToken? cancelToken});
 
-  Future<Timetable> getSchedule(Device dev, {CancellationToken? cancelToken});
+  Future<ScheduleTable> getSchedule(Device dev, {CancellationToken? cancelToken});
   Future<void> setSchedule(Device dev, Iterable<ScheduledInstant> schedule, {CancellationToken? cancelToken});
 
   Future<List<int>> getColor(Device dev, {CancellationToken? cancelToken});
@@ -42,6 +42,6 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   Future<void> setAcclimation(Device dev, AcclimationSettings acc, {CancellationToken? cancelToken});
   Future<void> terminateAcclimation(Device dev, {CancellationToken? cancelToken});
 
-  Future<Timetable> getSunSchedule(Device dev, {CancellationToken? cancelToken});
+  Future<ScheduleTable> getSunSchedule(Device dev, {CancellationToken? cancelToken});
   Future<List<SunCurveItem>> getSunCurve(Device dev, {CancellationToken? cancelToken});
 }

@@ -247,7 +247,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   }
 
   @override
-  Future<Timetable> getSchedule(Device dev, {CancellationToken? cancelToken}) async {
+  Future<ScheduleTable> getSchedule(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as LyfiCoapDriverData;
     final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.schedule, cancelToken: cancelToken);
     return items.map((x) => ScheduledInstant.fromMap(x!)).toList();
@@ -354,7 +354,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   }
 
   @override
-  Future<Timetable> getSunSchedule(Device dev, {CancellationToken? cancelToken}) async {
+  Future<ScheduleTable> getSunSchedule(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as LyfiCoapDriverData;
     final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.sunSchedule, cancelToken: cancelToken);
     return items.map((x) => ScheduledInstant.fromMap(x!)).toList();
