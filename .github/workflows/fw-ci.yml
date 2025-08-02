@@ -5,10 +5,12 @@ on:
     branches: [master, dev, dev-*]
     paths:
       - 'fw/**'
+      - '.github/workflows/fw-ci.yml'
   pull_request:
     branches: [master, dev, dev-*]
     paths:
       - 'fw/**'
+      - '.github/workflows/fw-ci.yml'
 
 jobs:
   build:
