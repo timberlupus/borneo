@@ -21,8 +21,7 @@ class MockLogger extends Logger {
 
   @override
   void log(Level level, dynamic message, {Object? error, StackTrace? stackTrace, DateTime? time}) {
-    logs.add('[$level] $message');
-    super.log(level, message, error: error, stackTrace: stackTrace, time: time);
+    // Do nothing
   }
 }
 
