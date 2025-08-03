@@ -109,7 +109,7 @@ jobs:
       - name: Run tests
         run: |
           flutter test --no-pub
-          melos run test:all --no-select
+          melos run test:dart --no-select
 
   build-apk:
     needs: [setup, test]

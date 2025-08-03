@@ -134,32 +134,39 @@ melos:
         dart analyze .
 
     lint:all:
-      run: melos run analyze && melos run format-ci
+      exec: melos run analyze && melos run format-ci
       description: Run all static analysis checks.
 
     test:flutter:
-      run: melos exec --flutter -c 6 --fail-fast -- "flutter test --no-pub"
+      run: melos exec --fail-fast -- "flutter test --no-pub"
       packageFilters:
-        dirExists:
-          - test
-      description: Run flutter test for flutter packages only.
+        dirExists: test
+        flutter: true
+        dependsOn:
+          - flutter
+      concurrency: 6
+      failFast: true
+      description: Run flutter test for Flutter packages only.
 
     test:dart:
-      run: melos exec --no-flutter -c 6 --fail-fast -- "dart test --no-pub"
+      run: melos exec --fail-fast -- "dart test"
       packageFilters:
-        dirExists:
-          - test
-      description: Run dart test for pure dart packages only.
+        dirExists: test
+        flutter: false
+        noDependsOn:
+          - flutter
+      concurrency: 6
+      failFast: true
+      description: Run dart test for Dart packages.
 
     test:all:
         run: |
-          melos run test:flutter
-          melos run test:dart
+          melos run test:flutter --no-select && \
+          melos run test:dart --no-select
         description: Run all tests (flutter & dart)
 
     coverage:
-      run: |
-        melos exec -c 6 --fail-fast -- "flutter test --coverage --no-pub"
+      exec: flutter test --coverage --no-pub
       description: Run `flutter test --coverage` for a specific package.
       packageFilters:
         dirExists:
