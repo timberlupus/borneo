@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:borneo_app/devices/borneo/lyfi/core/wot.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
+import 'package:borneo_app/features/devices/models/events.dart';
 import 'package:borneo_kernel/drivers/borneo/events.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
@@ -11,7 +12,7 @@ import '../../shared/view_models/base_view_model.dart';
 
 abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewModelEventBusMixin {
   final IDeviceManager deviceManager;
-  final DeviceEntity deviceEntity;
+  DeviceEntity deviceEntity;
   var isInitialized = false;
 
   bool _isOnline;
@@ -24,6 +25,7 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
   late final StreamSubscription<DeviceBoundEvent> _boundEventSub;
   late final StreamSubscription<DeviceRemovedEvent> _removedEventSub;
   late final StreamSubscription<DevicePowerOnOffChangedEvent> _powerEventSub;
+  late final StreamSubscription<DeviceEntityUpdatedEvent> _deviceUpdatedSub;
 
   late bool _isPowerOn = false;
   bool get isPowerOn => _isPowerOn;
@@ -34,6 +36,7 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
     _boundEventSub = deviceManager.allDeviceEvents.on<DeviceBoundEvent>().listen(_onBound);
     _removedEventSub = deviceManager.allDeviceEvents.on<DeviceRemovedEvent>().listen(_onRemoved);
     _powerEventSub = deviceManager.allDeviceEvents.on<DevicePowerOnOffChangedEvent>().listen(_onPowerChanged);
+    _deviceUpdatedSub = deviceManager.allDeviceEvents.on<DeviceEntityUpdatedEvent>().listen(_onDeviceUpdated);
 
     if (deviceManager.isBound(deviceEntity.id)) {
       final wotThing = deviceManager.getWotThing(deviceEntity.id);
@@ -51,6 +54,7 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
     _boundEventSub.cancel();
     _removedEventSub.cancel();
     _powerEventSub.cancel();
+    _deviceUpdatedSub.cancel();
     super.dispose();
   }
 
@@ -75,6 +79,13 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
   void _onPowerChanged(DevicePowerOnOffChangedEvent event) {
     if (event.device.id == deviceEntity.id) {
       _isPowerOn = event.onOff;
+      notifyListeners();
+    }
+  }
+
+  void _onDeviceUpdated(DeviceEntityUpdatedEvent event) {
+    if (event.updated.id == deviceEntity.id) {
+      deviceEntity = event.updated;
       notifyListeners();
     }
   }

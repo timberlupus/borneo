@@ -158,6 +158,7 @@ class DeviceTile extends StatelessWidget {
                         'Select the group to which device "{deviceName}" belongs:',
                         nArgs: {'deviceName': selectedDeviceVM.name},
                       ),
+                      excludeGroupId: selectedDeviceVM.deviceEntity.groupID,
                     ),
                   );
 

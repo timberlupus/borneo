@@ -7,16 +7,20 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
   final String? subtitle;
   final void Function(DeviceGroupEntity? group) onTapGroup;
   final List<DeviceGroupEntity> availableGroups;
+  final String? excludeGroupId;
   const DeviceGroupSelectionSheet({
     required this.availableGroups,
     required this.onTapGroup,
     required this.title,
     this.subtitle,
+    this.excludeGroupId,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    final filteredGroups = availableGroups.where((g) => g.id != excludeGroupId).toList();
+
     final tiles =
         <Widget>[
               ListTile(
@@ -28,7 +32,7 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
               ),
             ]
             .followedBy(
-              availableGroups.map((g) {
+              filteredGroups.map((g) {
                 return ListTile(
                   dense: true,
                   title: Text(g.name),
