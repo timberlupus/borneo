@@ -19,17 +19,19 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final filteredGroups = availableGroups.where((g) => g.id != excludeGroupId).toList();
+    final String? effectiveExcludeGroupId = excludeGroupId;
+    final filteredGroups = availableGroups.where((g) => g.id != effectiveExcludeGroupId).toList();
 
     final tiles =
         <Widget>[
-              ListTile(
-                title: Text(context.translate('No group')),
-                onTap: () {
-                  Navigator.pop(context);
-                  onTapGroup(null);
-                },
-              ),
+              if (effectiveExcludeGroupId != '')
+                ListTile(
+                  title: Text(context.translate('No group')),
+                  onTap: () {
+                    Navigator.pop(context);
+                    onTapGroup(null);
+                  },
+                ),
             ]
             .followedBy(
               filteredGroups.map((g) {
