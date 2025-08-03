@@ -378,13 +378,19 @@ final class DefaultKernel implements IKernel {
           _onHeartbeatReceived(deviceId, timestamp);
         },
         onError: (error) {
-          _logger.w('Heartbeat observation error for device $deviceId: $error');
+          if (error.toString().contains('CoapRequestException') || error.toString().contains('timed out')) {
+            _logger.w('Heartbeat observation error for device $deviceId: $error');
+            _onHeartbeatMissed(device.id);
+          } else {
+            _logger.e('Unknown heartbeat observation error for device $deviceId: $error');
+          }
           _onHeartbeatMissed(deviceId);
         },
         onDone: () {
           _logger.w('Heartbeat observation ended for device $deviceId');
           _onHeartbeatMissed(deviceId);
         },
+        cancelOnError: false,
       );
 
       // Reset missed observations counter
