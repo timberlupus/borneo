@@ -41,7 +41,7 @@ class DBProvider {
     }
   }
 
-  Future<bool> isExisted() => File(dbPath).exists();
+  Future<bool> isExisted() async => _isInitialized ? await File(dbPath).exists() : false;
 
   Future<Database> open() async {
     _ensureInit();
