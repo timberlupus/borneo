@@ -107,7 +107,9 @@ jobs:
         run: melos run analyze
 
       - name: Run tests
-        run: melos run test --no-select
+        run: |
+          flutter test --no-pub
+          melos run test:all --no-select
 
   build-apk:
     needs: [setup, test]

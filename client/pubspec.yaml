@@ -137,10 +137,30 @@ melos:
       run: melos run analyze && melos run format-ci
       description: Run all static analysis checks.
 
-    test:
+    test:flutter:
+      run: melos exec --flutter -c 6 --fail-fast -- "flutter test --no-pub"
+      packageFilters:
+        dirExists:
+          - test
+      description: Run flutter test for flutter packages only.
+
+    test:dart:
+      run: melos exec --no-flutter -c 6 --fail-fast -- "dart test --no-pub"
+      packageFilters:
+        dirExists:
+          - test
+      description: Run dart test for pure dart packages only.
+
+    test:all:
+        run: |
+          melos run test:flutter
+          melos run test:dart
+        description: Run all tests (flutter & dart)
+
+    coverage:
       run: |
-        melos exec -c 6 --fail-fast -- "flutter test"
-      description: Run `flutter test` for a specific package.
+        melos exec -c 6 --fail-fast -- "flutter test --coverage --no-pub"
+      description: Run `flutter test --coverage` for a specific package.
       packageFilters:
         dirExists:
           - test

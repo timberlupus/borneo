@@ -4,3 +4,4 @@ flutter:
     - path: ./packages/borneo_common
     - path: ./packages/borneo_kernel
     - path: ./packages/borneo_kernel_abstractions
+    - path: ./packages/lw_wot
