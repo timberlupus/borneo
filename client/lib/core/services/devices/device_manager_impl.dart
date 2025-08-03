@@ -226,9 +226,12 @@ final class DeviceManagerImpl extends IDeviceManager {
   @override
   Future<void> moveToGroup(String id, String newGroupID) async {
     return await _db.transaction((tx) async {
-      final exists = await _groupExists(tx, newGroupID);
-      if (!exists) {
-        throw KeyNotFoundException(message: 'Cannot find group with ID `$newGroupID`');
+      // Allow empty string for ungrouped devices
+      if (newGroupID.isNotEmpty) {
+        final exists = await _groupExists(tx, newGroupID);
+        if (!exists) {
+          throw KeyNotFoundException(message: 'Cannot find group with ID `$newGroupID`');
+        }
       }
       return await _update(id, tx: tx, groupID: newGroupID);
     });
