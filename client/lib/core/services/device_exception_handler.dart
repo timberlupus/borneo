@@ -4,15 +4,17 @@ import 'dart:io';
 import 'package:borneo_common/io/net/coap_client.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:coap/coap.dart';
-import 'package:logging/logging.dart';
+import 'package:logger/logger.dart';
 
 /// Centralized exception handler for device API calls
 /// Provides consistent error handling, logging, and user feedback
 class DeviceExceptionHandler {
-  static final Logger _logger = Logger('DeviceExceptionHandler');
+  final Logger? logger;
+
+  const DeviceExceptionHandler({this.logger});
 
   /// Wraps a device API call with comprehensive exception handling
-  static Future<T> handleDeviceCall<T>(
+  Future<T> handleDeviceCall<T>(
     Future<T> Function() apiCall, {
     required String deviceName,
     required String operation,
@@ -27,7 +29,7 @@ class DeviceExceptionHandler {
 
       return await apiCall();
     } on CoapException catch (e, stack) {
-      _logger.warning('CoAP error during $operation on $deviceName: ${e.message}', e, stack);
+      logger?.w('CoAP error during $operation on $deviceName: ${e.message}', error: e, stackTrace: stack);
       _handleCoapException(e, deviceName, operation);
       if (onError != null) {
         onError(e, stack);
@@ -35,15 +37,17 @@ class DeviceExceptionHandler {
       if (fallbackValue != null) return fallbackValue;
       rethrow;
     } on SocketException catch (e, stack) {
-      _logger.warning('Network error during $operation on $deviceName: ${e.message}', e, stack);
+      logger?.w('Network error during $operation on $deviceName: ${e.message}', error: e, stackTrace: stack);
       _handleNetworkException(e, deviceName, operation);
       if (onError != null) {
         onError(e, stack);
       }
-      if (fallbackValue != null) return fallbackValue;
+      if (fallbackValue != null) {
+        return fallbackValue;
+      }
       rethrow;
     } on TimeoutException catch (e, stack) {
-      _logger.warning('Timeout during $operation on $deviceName: ${e.message}', e, stack);
+      logger?.w('Timeout during $operation on $deviceName: ${e.message}', error: e, stackTrace: stack);
       _handleTimeoutException(e, deviceName, operation);
       if (onError != null) {
         onError(e, stack);
@@ -51,7 +55,7 @@ class DeviceExceptionHandler {
       if (fallbackValue != null) return fallbackValue;
       rethrow;
     } catch (e, stack) {
-      _logger.severe('Unexpected error during $operation on $deviceName: $e', e, stack);
+      logger?.e('Unexpected error during $operation on $deviceName: $e', error: e, stackTrace: stack);
       _handleGenericException(e, deviceName, operation);
       if (onError != null) {
         onError(e, stack);
@@ -62,7 +66,7 @@ class DeviceExceptionHandler {
   }
 
   /// Handles device status refresh with safe defaults
-  static Future<void> handleDeviceRefresh({
+  Future<void> handleDeviceRefresh({
     required String deviceName,
     required Future<void> Function() refreshCall,
     void Function(Object error)? onError,
@@ -78,13 +82,13 @@ class DeviceExceptionHandler {
       );
     } catch (e) {
       if (!silent) {
-        _logger.info('Device refresh failed for $deviceName but continuing gracefully');
+        logger?.i('Device refresh failed for $deviceName but continuing gracefully');
       }
     }
   }
 
   /// Handles CoAP-specific exceptions with appropriate user messages
-  static void _handleCoapException(CoapException e, String deviceName, String operation) {
+  void _handleCoapException(CoapException e, String deviceName, String operation) {
     final statusCode = ResponseCode.decode(e.response.code.code);
     String message;
 
@@ -111,11 +115,11 @@ class DeviceExceptionHandler {
         message = 'Communication error with $deviceName (Code: $statusCode)';
     }
 
-    _logger.info('CoAP $operation error: $message');
+    this.logger?.i('CoAP $operation error: $message');
   }
 
   /// Handles network-related exceptions
-  static void _handleNetworkException(SocketException e, String deviceName, String operation) {
+  void _handleNetworkException(SocketException e, String deviceName, String operation) {
     String message;
     if (e.message.contains('refused')) {
       message = 'Connection refused by $deviceName';
@@ -127,21 +131,21 @@ class DeviceExceptionHandler {
       message = 'Network error connecting to $deviceName';
     }
 
-    _logger.info('Network $operation error: $message');
+    this.logger?.i('Network $operation error: $message');
   }
 
   /// Handles timeout exceptions
-  static void _handleTimeoutException(TimeoutException e, String deviceName, String operation) {
-    _logger.info('Timeout during $operation on $deviceName: ${e.duration}');
+  void _handleTimeoutException(TimeoutException e, String deviceName, String operation) {
+    this.logger?.i('Timeout during $operation on $deviceName: ${e.duration}');
   }
 
   /// Handles generic exceptions
-  static void _handleGenericException(Object e, String deviceName, String operation) {
-    _logger.info('Unexpected error during $operation on $deviceName: $e');
+  void _handleGenericException(Object e, String deviceName, String operation) {
+    this.logger?.i('Unexpected error during $operation on $deviceName: $e');
   }
 
   /// Provides a human-readable error message for display to users
-  static String getUserFriendlyMessage(Object error, {String? deviceName}) {
+  String getUserFriendlyMessage(Object error, {String? deviceName}) {
     if (error is CoapException) {
       switch (ResponseCode.decode(error.response.code.code)) {
         case ResponseCode.notFound:
@@ -179,6 +183,7 @@ class DeviceExceptionHandler {
   }
 }
 
+/*
 /// Extension methods for convenient exception handling
 extension DeviceApiExtensions on Future Function() {
   /// Safely executes a device API call with exception handling
@@ -188,7 +193,7 @@ extension DeviceApiExtensions on Future Function() {
     T? fallbackValue,
     void Function(Object error, StackTrace stack)? onError,
   }) {
-    return DeviceExceptionHandler.handleDeviceCall(
+    return handleDeviceCall(
       this as Future<T> Function(),
       deviceName: deviceName,
       operation: operation,
@@ -211,3 +216,4 @@ extension DeviceApiExtensions on Future Function() {
     );
   }
 }
+*/
