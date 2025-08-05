@@ -629,14 +629,18 @@ void led_render_task()
             portEXIT_CRITICAL(&g_led_spinlock);
         }
 
-        int64_t end = esp_timer_get_time();
         next_tick += period_us;
+        int64_t end = esp_timer_get_time();
         int64_t delay_us = next_tick - end;
+
         if (delay_us > 0) {
             vTaskDelay(pdMS_TO_TICKS((delay_us + 999) / 1000));
         }
         else {
             next_tick = end;
+            if (delay_us < -period_us) {
+                ESP_LOGW(TAG, "LED render task overrun by %lld us", -delay_us);
+            }
         }
     }
 }

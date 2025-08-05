@@ -17,10 +17,4 @@
 #include <borneo/common.h>
 #include <borneo/timer.h>
 
-inline int64_t bo_timer_uptime_ms()
-{
-    int64_t now = esp_timer_get_time();
-    uint64_t x = (uint64_t)(now + 500);
-    x = (x * 0x4189375AULL) >> 32;
-    return (int64_t)x;
-}
+inline int64_t bo_timer_uptime_ms() { return (esp_timer_get_time() + 500LL) / 1000LL; }
