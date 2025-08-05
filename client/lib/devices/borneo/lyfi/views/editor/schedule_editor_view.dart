@@ -159,7 +159,7 @@ class ScheduleEditorView extends StatelessWidget {
                     // Easy Setup
                     _BottomActionButton(
                       icon: Icons.auto_fix_high_outlined,
-                      label: 'Easy',
+                      label: context.translate('Easy'),
                       color: Theme.of(context).colorScheme.primary,
                       onPressed: () async {
                         if (context.mounted) {
@@ -167,8 +167,9 @@ class ScheduleEditorView extends StatelessWidget {
                           if (vm.isNotEmpty) {
                             proceed = await AsyncConfirmationSheet.show(
                               context,
-                              message:
-                                  'Using Easy Setup will clear your current dimming settings. Are you sure you want to proceed?',
+                              message: context.translate(
+                                'Using Easy Setup will clear your current dimming settings. Are you sure you want to proceed?',
+                              ),
                             );
                           }
                           if (proceed && context.mounted) {
@@ -185,7 +186,7 @@ class ScheduleEditorView extends StatelessWidget {
                     // Add
                     _BottomActionButton(
                       icon: Icons.add_outlined,
-                      label: 'Add',
+                      label: context.translate('Add'),
                       color: vm.canAddInstant ? Theme.of(context).colorScheme.primary : Theme.of(context).disabledColor,
                       onPressed: vm.canAddInstant
                           ? () async {
@@ -202,7 +203,7 @@ class ScheduleEditorView extends StatelessWidget {
                     // Remove
                     _BottomActionButton(
                       icon: Icons.remove,
-                      label: 'Remove',
+                      label: context.translate('Remove'),
                       color: vm.canRemoveCurrentInstant
                           ? Theme.of(context).colorScheme.secondary
                           : Theme.of(context).disabledColor,
@@ -211,7 +212,7 @@ class ScheduleEditorView extends StatelessWidget {
                     // Clear
                     _BottomActionButton(
                       icon: Icons.clear,
-                      label: 'Clear',
+                      label: context.translate('Clear'),
                       color: vm.canClearInstants
                           ? Theme.of(context).colorScheme.error
                           : Theme.of(context).disabledColor,
@@ -220,7 +221,7 @@ class ScheduleEditorView extends StatelessWidget {
                     // Prev
                     _BottomActionButton(
                       icon: Icons.skip_previous_outlined,
-                      label: 'Prev',
+                      label: context.translate('Prev'),
                       color: vm.canPrevInstant
                           ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).disabledColor,
@@ -229,7 +230,7 @@ class ScheduleEditorView extends StatelessWidget {
                     // Next
                     _BottomActionButton(
                       icon: Icons.skip_next_outlined,
-                      label: 'Next',
+                      label: context.translate('Next'),
                       color: vm.canNextInstant
                           ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).disabledColor,
@@ -254,9 +255,9 @@ class ScheduleEditorView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text('Confirmation', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(context.translate('Confirmation'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               SizedBox(height: 16),
-              Text('Are you sure you want to remove all schedule entries?'),
+              Text(context.translate('Are you sure you want to remove all schedule entries?')),
               SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -265,13 +266,13 @@ class ScheduleEditorView extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).pop(false);
                     },
-                    child: Text('Cancel'),
+                    child: Text(context.translate('Cancel')),
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pop(true);
                     },
-                    child: Text('Confirm'),
+                    child: Text(context.translate('Confirm')),
                   ),
                 ],
               ),

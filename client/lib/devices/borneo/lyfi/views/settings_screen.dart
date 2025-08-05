@@ -139,15 +139,15 @@ class SettingsScreen extends StatelessWidget {
             items: [
               DropdownMenuItem<PowerBehavior>(
                 value: PowerBehavior.autoPowerOn,
-                child: Text("Keep on", style: Theme.of(context).textTheme.bodySmall),
+                child: Text(context.translate("Keep on"), style: Theme.of(context).textTheme.bodySmall),
               ),
               DropdownMenuItem<PowerBehavior>(
                 value: PowerBehavior.maintainPowerOff,
-                child: Text("Keep off", style: Theme.of(context).textTheme.bodySmall),
+                child: Text(context.translate("Keep off"), style: Theme.of(context).textTheme.bodySmall),
               ),
               DropdownMenuItem<PowerBehavior>(
                 value: PowerBehavior.lastPowerState,
-                child: Text("Maintain last", style: Theme.of(context).textTheme.bodySmall),
+                child: Text(context.translate("Maintain last"), style: Theme.of(context).textTheme.bodySmall),
               ),
             ],
             onChanged: (PowerBehavior? newValue) async {
@@ -161,13 +161,15 @@ class SettingsScreen extends StatelessWidget {
         dense: true,
         tileColor: tileColor,
         leading: const Icon(Icons.power_off),
-        title: Text('Last shutdown'),
-        trailing: Text(vm.borneoStatus.shutdownTimestamp?.toString() ?? 'N/A'),
-        subtitle: Text("Reason code: ${vm.borneoStatus.shutdownReason}"),
+        title: Text(context.translate('Last shutdown')),
+        trailing: Text(vm.borneoStatus.shutdownTimestamp?.toString() ?? context.translate('N/A')),
+        subtitle: Text(
+          context.translate("Reason code: {reasonCode}", nArgs: {"reasonCode": vm.borneoStatus.shutdownReason}),
+        ),
       ),
 
       // LED Lighting settings
-      ListTile(dense: true, title: Text('LIGHTING', style: Theme.of(context).textTheme.titleSmall)),
+      ListTile(dense: true, title: Text(context.translate('LIGHTING'), style: Theme.of(context).textTheme.titleSmall)),
 
       // Location
       Selector<SettingsViewModel, ({bool canUpdate, GeoLocation? location})>(
@@ -176,10 +178,10 @@ class SettingsScreen extends StatelessWidget {
           dense: true,
           tileColor: tileColor,
           leading: const Icon(Icons.location_pin),
-          title: Text('Location for sun & moon simulation'),
+          title: Text(context.translate('Location for sun & moon simulation')),
           subtitle: map.location != null
               ? Text("(${vm.location!.lat.toStringAsFixed(3)}, ${vm.location!.lng.toStringAsFixed(3)})")
-              : Text('Unknown'),
+              : Text(context.translate('Unknown')),
           trailing: rightChevron,
           onTap: map.canUpdate
               ? () async {
@@ -197,7 +199,7 @@ class SettingsScreen extends StatelessWidget {
         builder: (context, map, _) => ListTile(
           dense: true,
           tileColor: tileColor,
-          title: Text('Correction curve'),
+          title: Text(context.translate('Correction curve')),
           trailing: Selector<SettingsViewModel, LedCorrectionMethod>(
             selector: (context, map) => map.correctionMethod,
             builder: (context, selectedPowerBehavior, child) => DropdownButton<LedCorrectionMethod>(
@@ -205,23 +207,23 @@ class SettingsScreen extends StatelessWidget {
               items: [
                 DropdownMenuItem<LedCorrectionMethod>(
                   value: LedCorrectionMethod.log,
-                  child: Text("Logarithmic", style: Theme.of(context).textTheme.bodySmall),
+                  child: Text(context.translate("Logarithmic"), style: Theme.of(context).textTheme.bodySmall),
                 ),
                 DropdownMenuItem<LedCorrectionMethod>(
                   value: LedCorrectionMethod.linear,
-                  child: Text("Linear", style: Theme.of(context).textTheme.bodySmall),
+                  child: Text(context.translate("Linear"), style: Theme.of(context).textTheme.bodySmall),
                 ),
                 DropdownMenuItem<LedCorrectionMethod>(
                   value: LedCorrectionMethod.exp,
-                  child: Text("Exponential", style: Theme.of(context).textTheme.bodySmall),
+                  child: Text(context.translate("Exponential"), style: Theme.of(context).textTheme.bodySmall),
                 ),
                 DropdownMenuItem<LedCorrectionMethod>(
                   value: LedCorrectionMethod.gamma,
-                  child: Text("Gamma", style: Theme.of(context).textTheme.bodySmall),
+                  child: Text(context.translate("Gamma"), style: Theme.of(context).textTheme.bodySmall),
                 ),
                 DropdownMenuItem<LedCorrectionMethod>(
                   value: LedCorrectionMethod.cie1931,
-                  child: Text("CIE1931", style: Theme.of(context).textTheme.bodySmall),
+                  child: Text(context.translate("CIE1931"), style: Theme.of(context).textTheme.bodySmall),
                 ),
               ],
               onChanged: (LedCorrectionMethod? newValue) async {
@@ -237,7 +239,7 @@ class SettingsScreen extends StatelessWidget {
         builder: (context, map, _) => ListTile(
           dense: true,
           tileColor: tileColor,
-          title: Text('Temporary light on duration'),
+          title: Text(context.translate('Temporary light on duration')),
           trailing: Selector<SettingsViewModel, Duration>(
             selector: (context, map) => map.temporaryDuration,
             builder: (context, selectedPowerBehavior, child) => DropdownButton<Duration>(
@@ -245,35 +247,35 @@ class SettingsScreen extends StatelessWidget {
               items: [
                 DropdownMenuItem<Duration>(
                   value: Duration(minutes: 5),
-                  child: Text("5 minutes", style: Theme.of(context).textTheme.bodySmall),
+                  child: Text(context.translate("5 minutes"), style: Theme.of(context).textTheme.bodySmall),
                 ),
                 DropdownMenuItem<Duration>(
                   value: Duration(minutes: 10),
-                  child: Text("10 minutes", style: Theme.of(context).textTheme.bodySmall),
+                  child: Text(context.translate("10 minutes"), style: Theme.of(context).textTheme.bodySmall),
                 ),
                 DropdownMenuItem<Duration>(
                   value: Duration(minutes: 20),
-                  child: Text("20 minutes", style: Theme.of(context).textTheme.bodySmall),
+                  child: Text(context.translate("20 minutes"), style: Theme.of(context).textTheme.bodySmall),
                 ),
                 DropdownMenuItem<Duration>(
                   value: Duration(hours: 1),
-                  child: Text("1 hour", style: Theme.of(context).textTheme.bodySmall),
+                  child: Text(context.translate("1 hour"), style: Theme.of(context).textTheme.bodySmall),
                 ),
                 DropdownMenuItem<Duration>(
                   value: Duration(hours: 2),
-                  child: Text("2 hour", style: Theme.of(context).textTheme.bodySmall),
+                  child: Text(context.translate("2 hours"), style: Theme.of(context).textTheme.bodySmall),
                 ),
                 DropdownMenuItem<Duration>(
                   value: Duration(hours: 4),
-                  child: Text("4 hour", style: Theme.of(context).textTheme.bodySmall),
+                  child: Text(context.translate("4 hours"), style: Theme.of(context).textTheme.bodySmall),
                 ),
                 DropdownMenuItem<Duration>(
                   value: Duration(hours: 8),
-                  child: Text("8 hour", style: Theme.of(context).textTheme.bodySmall),
+                  child: Text(context.translate("8 hours"), style: Theme.of(context).textTheme.bodySmall),
                 ),
                 DropdownMenuItem<Duration>(
                   value: Duration(hours: 12),
-                  child: Text("12 hour", style: Theme.of(context).textTheme.bodySmall),
+                  child: Text(context.translate("12 hours"), style: Theme.of(context).textTheme.bodySmall),
                 ),
               ],
               onChanged: (Duration? newValue) async {
@@ -285,19 +287,22 @@ class SettingsScreen extends StatelessWidget {
       ),
 
       // Version & upgrade group
-      ListTile(dense: true, title: Text('VERSION & UPGRADE', style: Theme.of(context).textTheme.titleSmall)),
+      ListTile(
+        dense: true,
+        title: Text(context.translate('VERSION & UPGRADE'), style: Theme.of(context).textTheme.titleSmall),
+      ),
       ListTile(
         dense: true,
         leading: const Icon(Icons.info_outline),
         tileColor: tileColor,
-        title: Text('Hardware version'),
+        title: Text(context.translate('Hardware version')),
         trailing: Text(vm.borneoInfo.hwVer.toString()),
       ),
       ListTile(
         dense: true,
         leading: const Icon(Icons.info_outline),
         tileColor: tileColor,
-        title: Text('Firmware version'),
+        title: Text(context.translate('Firmware version')),
         trailing: Text(vm.borneoInfo.fwVer.toString()),
       ),
       /*
@@ -326,8 +331,11 @@ class SettingsScreen extends StatelessWidget {
         dense: true,
         leading: Icon(Icons.restore_outlined),
         tileColor: tileColor,
-        title: Text('Restore to factory settings', style: TextStyle(color: Theme.of(context).colorScheme.error)),
-        subtitle: Text('Your device will lose all custom settings.'),
+        title: Text(
+          context.translate('Restore to factory settings'),
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
+        ),
+        subtitle: Text(context.translate('Your device will lose all custom settings.')),
         trailing: rightChevron,
         onTap: () => _showFactoryResetDialog(context, vm),
       ),
@@ -338,27 +346,27 @@ class SettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Restore Factory Settings'),
+        title: Text(context.translate('Restore Factory Settings')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Are you sure you want to restore this device to factory settings?'),
+            Text(context.translate('Are you sure you want to restore this device to factory settings?')),
             SizedBox(height: 16),
-            Text('This action will:', style: Theme.of(context).textTheme.titleSmall),
+            Text(context.translate('This action will:'), style: Theme.of(context).textTheme.titleSmall),
             SizedBox(height: 8),
-            Text('• Delete all custom settings and configurations'),
-            Text('• Disconnect the device from your network'),
-            Text('• Reset all schedules and modes to defaults'),
+            Text(context.translate('• Delete all custom settings and configurations')),
+            Text(context.translate('• Disconnect the device from your network')),
+            Text(context.translate('• Reset all schedules and modes to defaults')),
             SizedBox(height: 8),
             Text(
-              'The device will need to be reconfigured after this operation.',
+              context.translate('The device will need to be reconfigured after this operation.'),
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Cancel')),
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.translate('Cancel'))),
           FilledButton.tonal(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.errorContainer,
@@ -374,7 +382,7 @@ class SettingsScreen extends StatelessWidget {
                 }
               });
             },
-            child: Text('Restore'),
+            child: Text(context.translate('Restore')),
           ),
         ],
       ),

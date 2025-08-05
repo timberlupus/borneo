@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-05 22:42+0800\n"
+"POT-Creation-Date: 2025-08-05 23:53+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,6 +47,7 @@ msgid "Dimming"
 msgstr ""
 
 #: devices\borneo\lyfi\manifest.dart:88
+#: devices\borneo\lyfi\views\dashboard\dashboard_temporary_tile.dart:86
 msgid "Temporary"
 msgstr ""
 
@@ -118,12 +119,134 @@ msgstr ""
 msgid "Failed to restore device to factory settings: $e"
 msgstr ""
 
+#: devices\borneo\lyfi\views\acclimation_screen.dart:30
+msgid "Acclimation Mode"
+msgstr ""
+
+#: devices\borneo\lyfi\views\acclimation_screen.dart:63
+#: features\devices\views\group_edit_screen.dart:96
+#: features\scenes\views\scene_edit_screen.dart:213
+msgid "Submit"
+msgstr ""
+
+#: devices\borneo\lyfi\views\acclimation_screen.dart:80
+msgid "SETTINGS"
+msgstr ""
+
+#: devices\borneo\lyfi\views\acclimation_screen.dart:83
+msgid "Enabled"
+msgstr ""
+
+#: devices\borneo\lyfi\views\acclimation_screen.dart:92
+msgid "Start date"
+msgstr ""
+
+#: devices\borneo\lyfi\views\acclimation_screen.dart:129
+msgid "Duration"
+msgstr ""
+
+#: devices\borneo\lyfi\views\acclimation_screen.dart:140
+msgid "Start percent"
+msgstr ""
+
+#: devices\borneo\lyfi\views\acclimation_screen.dart:163
+msgid "Update acclimation settings succeed."
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_acclimation_tile.dart:73
+msgid "Acclimation"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_fan_tile.dart:15
+msgid "Fan"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_power_tile.dart:39
+msgid "LED Power"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_power_tile.dart:99
+#: devices\borneo\lyfi\views\dashboard\dashboard_temperature_tile.dart:48
+#: devices\borneo\lyfi\views\editor\sun_editor_view.dart:37
+#: devices\borneo\lyfi\views\settings_screen.dart:165
+msgid "N/A"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_settings_tile.dart:54
+#: devices\borneo\lyfi\views\settings_screen.dart:24
+#: features\my\views\my_screen.dart:18
+#: features\my\views\my_screen_riverpod.dart:19
+msgid "Settings"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_temperature_tile.dart:33
+msgid "Temperature"
+msgstr ""
+
+#: devices\borneo\lyfi\views\easy_setup_screen.dart:34
+msgid "Easy Setup"
+msgstr ""
+
+#: devices\borneo\lyfi\views\easy_setup_screen.dart:134
+msgid "Hrs"
+msgstr ""
+
+#: devices\borneo\lyfi\views\easy_setup_screen.dart:151
+msgid "Mins"
+msgstr ""
+
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:26
 msgid "Add time point"
 msgstr ""
 
-#: devices\borneo\lyfi\views\editor\sun_editor_view.dart:37
-msgid "N/A"
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:162
+msgid "Easy"
+msgstr ""
+
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:171
+msgid ""
+"Using Easy Setup will clear your current dimming settings. Are you sure you "
+"want to proceed?"
+msgstr ""
+
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:189
+msgid "Add"
+msgstr ""
+
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:206
+msgid "Remove"
+msgstr ""
+
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:215
+msgid "Clear"
+msgstr ""
+
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:224
+msgid "Prev"
+msgstr ""
+
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:233
+msgid "Next"
+msgstr ""
+
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:258
+msgid "Confirmation"
+msgstr ""
+
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:260
+msgid "Are you sure you want to remove all schedule entries?"
+msgstr ""
+
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:269
+#: devices\borneo\lyfi\views\settings_screen.dart:369
+#: features\devices\widgets\delete_group_dialog.dart:19
+#: main\views\main_screen.dart:195
+#: shared\widgets\generic_settings_screen.dart:69
+msgid "Cancel"
+msgstr ""
+
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:275
+msgid "Confirm"
 msgstr ""
 
 #: devices\borneo\lyfi\views\lyfi_view.dart:154
@@ -138,10 +261,8 @@ msgstr ""
 msgid "SUN"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:24
-#: features\my\views\my_screen.dart:18
-#: features\my\views\my_screen_riverpod.dart:19
-msgid "Settings"
+#: devices\borneo\lyfi\views\lyfi_view.dart:363
+msgid "Sync Timezone"
 msgstr ""
 
 #: devices\borneo\lyfi\views\settings_screen.dart:70
@@ -180,6 +301,155 @@ msgstr ""
 
 #: devices\borneo\lyfi\views\settings_screen.dart:136
 msgid "Power status at startup"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:142
+msgid "Keep on"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:146
+msgid "Keep off"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:150
+msgid "Maintain last"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:164
+msgid "Last shutdown"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:167
+#, python-brace-format
+msgid "Reason code: {reasonCode}"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:172
+msgid "LIGHTING"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:181
+msgid "Location for sun & moon simulation"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:184
+msgid "Unknown"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:202
+msgid "Correction curve"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:210
+msgid "Logarithmic"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:214
+msgid "Linear"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:218
+msgid "Exponential"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:222
+msgid "Gamma"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:226
+msgid "CIE1931"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:242
+msgid "Temporary light on duration"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:250
+msgid "5 minutes"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:254
+msgid "10 minutes"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:258
+msgid "20 minutes"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:262
+msgid "1 hour"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:266
+msgid "2 hours"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:270
+msgid "4 hours"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:274
+msgid "8 hours"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:278
+msgid "12 hours"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:292
+msgid "VERSION & UPGRADE"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:298
+msgid "Hardware version"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:305
+msgid "Firmware version"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:326
+msgid "DANGER ZONE"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:335
+msgid "Restore to factory settings"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:338
+msgid "Your device will lose all custom settings."
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:349
+msgid "Restore Factory Settings"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:354
+msgid "Are you sure you want to restore this device to factory settings?"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:356
+msgid "This action will:"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:358
+msgid "• Delete all custom settings and configurations"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:359
+msgid "• Disconnect the device from your network"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:360
+msgid "• Reset all schedules and modes to defaults"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:363
+msgid "The device will need to be reconfigured after this operation."
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:385
+msgid "Restore"
 msgstr ""
 
 #: devices\views\device_offline_view.dart:21
@@ -308,11 +578,6 @@ msgstr ""
 msgid "Operation failed"
 msgstr ""
 
-#: features\devices\views\group_edit_screen.dart:96
-#: features\scenes\views\scene_edit_screen.dart:213
-msgid "Submit"
-msgstr ""
-
 #: features\devices\views\group_edit_screen.dart:160
 msgid "Group deleted"
 msgstr ""
@@ -327,12 +592,6 @@ msgstr ""
 
 #: features\devices\views\group_edit_screen.dart:200
 msgid "Edit Device Group"
-msgstr ""
-
-#: features\devices\widgets\delete_group_dialog.dart:19
-#: main\views\main_screen.dart:195
-#: shared\widgets\generic_settings_screen.dart:69
-msgid "Cancel"
 msgstr ""
 
 #: features\devices\widgets\delete_group_dialog.dart:23
