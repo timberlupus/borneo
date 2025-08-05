@@ -1,5 +1,6 @@
 import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/toufu_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 
@@ -35,7 +36,7 @@ class DashboardPowerTile extends StatelessWidget {
         return ListenableBuilder(
           listenable: mergedListenable,
           builder: (context, _) => DashboardToufu(
-            title: 'LED Power',
+            title: context.translate("LED Power"),
             icon: Icons.power_outlined,
             foregroundColor: fgColor,
             backgroundColor: bgColor,
@@ -95,7 +96,7 @@ class DashboardPowerTile extends StatelessWidget {
                       }()
                     else ...[
                       Text(
-                        'N/A',
+                        context.translate("N/A"),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: textPrimary,
                           fontFeatures: [FontFeature.tabularFigures()],

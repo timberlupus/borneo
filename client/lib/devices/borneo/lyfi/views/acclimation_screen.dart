@@ -5,6 +5,7 @@ import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
@@ -26,7 +27,7 @@ class AcclimationScreen extends StatelessWidget {
     );
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(title: Text('Acclimation Mode')),
+      appBar: AppBar(title: Text(context.translate('Acclimation Mode'))),
       body: FutureBuilder(
         future: vm.initFuture,
         builder: (context, snapshot) {
@@ -59,10 +60,10 @@ class AcclimationScreen extends StatelessWidget {
                             icon: const Icon(Icons.upload),
                           ),
                         ),
-                        child: Text("Submit"),
+                        child: Text(context.translate("Submit")),
                       ),
                     ),
-                    Spacer(),
+                    const Spacer(),
                   ],
                 );
               },
@@ -76,10 +77,10 @@ class AcclimationScreen extends StatelessWidget {
   List<Widget> _buildSettingItems(BuildContext context) {
     final tileColor = Theme.of(context).colorScheme.surfaceContainer;
     return <Widget>[
-      ListTile(title: Text('SETTINGS', style: Theme.of(context).textTheme.titleSmall)),
+      ListTile(title: Text(context.translate('SETTINGS'), style: Theme.of(context).textTheme.titleSmall)),
       Consumer<AcclimationViewModel>(
         builder: (context, vm, _) => SwitchListTile(
-          title: Text('Enabled'),
+          title: Text(context.translate("Enabled")),
           value: vm.enabled,
           onChanged: !vm.isBusy && vm.isOnline && vm.isOn ? vm.setEanbled : null,
         ),
@@ -88,7 +89,7 @@ class AcclimationScreen extends StatelessWidget {
       Consumer<AcclimationViewModel>(
         builder: (context, vm, _) => ListTile(
           tileColor: tileColor,
-          title: const Text('Start date'),
+          title: Text(context.translate('Start date')),
           trailing: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
@@ -125,7 +126,7 @@ class AcclimationScreen extends StatelessWidget {
       Consumer<AcclimationViewModel>(
         builder: (context, vm, _) => ListTile(
           tileColor: tileColor,
-          leading: Text("Duration"),
+          leading: Text(context.translate("Duration")),
           title: Slider(value: vm.days, min: 5, max: 100, onChanged: vm.updateDays),
           trailing: Text(
             '${vm.days.round().toString()} days',
@@ -136,7 +137,7 @@ class AcclimationScreen extends StatelessWidget {
       Consumer<AcclimationViewModel>(
         builder: (context, vm, _) => ListTile(
           tileColor: tileColor,
-          leading: Text('Start percent'),
+          leading: Text(context.translate('Start percent')),
           title: Slider(value: vm.startPercent, min: 10, max: 90, onChanged: vm.updateStartPercent),
           trailing: Text(
             '${vm.startPercent.round().toString()}%',
@@ -159,7 +160,7 @@ class AcclimationScreen extends StatelessWidget {
         Provider.of<IAppNotificationService>(
           context,
           listen: false,
-        ).showSuccess('Update acclimation settings succeed.');
+        ).showSuccess(context.translate('Update acclimation settings succeed.'));
         Navigator.of(context).pop();
       }
     });

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-01 20:57+0800\n"
+"POT-Creation-Date: 2025-08-05 22:42+0800\n"
 "PO-Revision-Date: 2024-12-22 15:38+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -16,32 +16,375 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: services\scene_manager.dart:60
+#: core\services\scene_manager_impl.dart:73
 msgid "My Home"
 msgstr "我的家"
 
-#: services\scene_manager.dart:69
+#: core\services\scene_manager_impl.dart:82
 msgid "My Office"
 msgstr "我的办公室"
 
-#: views\about_screen.dart:69
+#: devices\borneo\lyfi\manifest.dart:71
+msgid "Manual"
+msgstr "手动模式"
+
+#: devices\borneo\lyfi\manifest.dart:73
+msgid "Scheduled"
+msgstr "编程模式"
+
+#: devices\borneo\lyfi\manifest.dart:75
+msgid "Sun Simulation"
+msgstr "日出日落"
+
+#: devices\borneo\lyfi\manifest.dart:84
+msgid "Running"
+msgstr "正常运行"
+
+#: devices\borneo\lyfi\manifest.dart:86
+#: devices\borneo\lyfi\views\dashboard\dashboard_dimming_tile.dart:47
+msgid "Dimming"
+msgstr "调光"
+
+#: devices\borneo\lyfi\manifest.dart:88
+msgid "Temporary"
+msgstr "临时开灯"
+
+#: devices\borneo\lyfi\manifest.dart:90
+msgid "Preview"
+msgstr "预览"
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:73
+msgid "Location updated successfully"
+msgstr "定位更新成功"
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:75
+msgid "Failed to update device location: $e"
+msgstr ""
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:87
+msgid "Please enable location services"
+msgstr "请开启定位服务"
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:95
+msgid "Location permissions are denied"
+msgstr "已拒绝给予定位权限"
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:100
+msgid "Location permissions are permanently denied"
+msgstr "已永久拒绝给予定位权限
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:114
+msgid "Failed to get location: $e"
+msgstr ""
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:129
+msgid "Time zone updated successfully"
+msgstr "时区已成功更新"
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:131
+msgid "Failed to update device time zone: $e"
+msgstr ""
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:143
+msgid "LED correction method updated successfully"
+msgstr "LED 矫正方法已成功更新"
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:145
+msgid "Failed to update LED correction method: $e"
+msgstr ""
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:157
+msgid "Temporary duration updated successfully"
+msgstr ""
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:159
+msgid "Failed to update temporary duration: $e"
+msgstr ""
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:171
+msgid "Power behavior updated successfully"
+msgstr ""
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:173
+msgid "Failed to update power behavior: $e"
+msgstr ""
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:184
+msgid "Device restored to factory settings"
+msgstr ""
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:186
+msgid "Failed to restore device to factory settings: $e"
+msgstr ""
+
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:26
+msgid "Add time point"
+msgstr "增加时间点"
+
+#: devices\borneo\lyfi\views\editor\sun_editor_view.dart:37
+msgid "N/A"
+msgstr "不适用"
+
+#: devices\borneo\lyfi\views\lyfi_view.dart:154
+msgid "MANU"
+msgstr "手动"
+
+#: devices\borneo\lyfi\views\lyfi_view.dart:159
+msgid "SCHED"
+msgstr "编程"
+
+#: devices\borneo\lyfi\views\lyfi_view.dart:164
+msgid "SUN"
+msgstr "日出日落"
+
+#: devices\borneo\lyfi\views\settings_screen.dart:24
+#: features\my\views\my_screen.dart:18
+#: features\my\views\my_screen_riverpod.dart:19
+msgid "Settings"
+msgstr "设置"
+
+#: devices\borneo\lyfi\views\settings_screen.dart:70
+msgid "DEVICE INFORMATION"
+msgstr "设备信息"
+
+#: devices\borneo\lyfi\views\settings_screen.dart:76
+#: features\devices\views\group_edit_screen.dart:23
+#: features\scenes\views\scene_edit_screen.dart:162
+msgid "Name"
+msgstr "名称"
+
+#: devices\borneo\lyfi\views\settings_screen.dart:85
+msgid "Manufacturer & Model"
+msgstr "制造商与型号"
+
+#: devices\borneo\lyfi\views\settings_screen.dart:95
+msgid "Serial number"
+msgstr "产品序列号"
+
+#: devices\borneo\lyfi\views\settings_screen.dart:102
+#, fuzzy
+#| msgid "Devices"
+msgid "Device address"
+msgstr "设备"
+
+#: devices\borneo\lyfi\views\settings_screen.dart:108
+msgid "DEVICE STATUS"
+msgstr "设备状态"
+
+#: devices\borneo\lyfi\views\settings_screen.dart:117
+msgid "Device time & time zone"
+msgstr "设备时间与时区"
+
+#: devices\borneo\lyfi\views\settings_screen.dart:122
+msgid "Unknown time zone"
+msgstr "未知时区"
+
+#: devices\borneo\lyfi\views\settings_screen.dart:136
+msgid "Power status at startup"
+msgstr "上电时电源状态"
+
+#: devices\views\device_offline_view.dart:21
+msgid "Device is offline"
+msgstr "设备离线"
+
+#: devices\views\device_offline_view.dart:26
+msgid ""
+"The device is currently offline. Please check the network or power "
+"connection."
+msgstr ""
+
+#: devices\views\device_offline_view.dart:36
+msgid "Close"
+msgstr "关闭"
+
+#: features\devices\views\device_discovery_screen.dart:42
+msgid "Stop"
+msgstr "停止"
+
+#: features\devices\views\device_discovery_screen.dart:45
+msgid "Start"
+msgstr "开始"
+
+#: features\devices\views\device_discovery_screen.dart:189
+#, fuzzy
+#| msgid "Add New Devices"
+msgid "A new device has been added."
+msgstr "添加新设备"
+
+#: features\devices\views\device_discovery_screen.dart:293
+msgid "Discovered Devices:"
+msgstr "已发现设备："
+
+#: features\devices\views\device_discovery_screen.dart:405
+msgid "Select the group to which the new device belongs:"
+msgstr "请选择该设备所属的分组："
+
+#: features\devices\views\device_group_selection_sheet.dart:29
+msgid "No group"
+msgstr "未指定分组"
+
+#: features\devices\views\device_list_tile.dart:60
+msgid "OFF-LINE"
+msgstr "离线"
+
+#: features\devices\views\device_list_tile.dart:68
+msgid "OFF"
+msgstr "关闭"
+
+#: features\devices\views\device_list_tile.dart:120
+#: shared\widgets\device_status_indicator.dart:43
+msgid "Reconnect"
+msgstr "重连"
+
+#: features\devices\views\device_list_tile.dart:122
+msgid "Change group..."
+msgstr "更改分组..."
+
+#: features\devices\views\device_list_tile.dart:123
+msgid "Delete..."
+msgstr "删除..."
+
+#: features\devices\views\device_list_tile.dart:138
+#, python-brace-format
+msgid "Are you sure to delete the device \"{deviceName}\"?"
+msgstr "你确定要删除设备“{deviceName}”？"
+
+#: features\devices\views\device_list_tile.dart:156
+#, fuzzy
+#| msgid "Add Devices Group"
+msgid "Change Device Group"
+msgstr "新建设备组"
+
+#: features\devices\views\device_list_tile.dart:158
+#, python-brace-format
+msgid "Select the group to which device \"{deviceName}\" belongs:"
+msgstr "选择设备“{deviceName}”所属的分组："
+
+#: features\devices\views\devices_screen.dart:141
+#: features\scenes\views\scenes_screen_riverpod.dart:122
+#, python-brace-format
+msgid "Error: {errMsg}"
+msgstr "错误：{errMsg}"
+
+#: features\devices\views\devices_screen.dart:208
+#: main\views\main_screen.dart:92
+msgid "Add New Devices"
+msgstr "添加新设备"
+
+#: features\devices\views\devices_screen.dart:212
+#: main\views\main_screen.dart:98
+msgid "Add Devices Group"
+msgstr "新建设备组"
+
+#: features\devices\views\devices_screen.dart:225
+#, python-brace-format
+msgid "Devices in {currentScene}"
+msgstr "{currentScene}中的设备"
+
+#: features\devices\views\group_edit_screen.dart:25
+#: features\scenes\views\scene_edit_screen.dart:164
+msgid "Enter the required scene name"
+msgstr "输入必须的场景名称"
+
+#: features\devices\views\group_edit_screen.dart:29
+#: features\scenes\views\scene_edit_screen.dart:168
+msgid "Please enter the scene name"
+msgstr "请输入场景名称"
+
+#: features\devices\views\group_edit_screen.dart:44
+#: features\scenes\views\scene_edit_screen.dart:185
+msgid "Enter the optional notes for this scene"
+msgstr "输入该场景的备注文字（可选）"
+
+#: features\devices\views\group_edit_screen.dart:45
+#: features\scenes\views\scene_edit_screen.dart:186
+msgid "Notes"
+msgstr "备注"
+
+#: features\devices\views\group_edit_screen.dart:78
+msgid "Group created"
+msgstr "分组已创建"
+
+#: features\devices\views\group_edit_screen.dart:79
+msgid "Group updated"
+msgstr "分组已更新"
+
+#: features\devices\views\group_edit_screen.dart:87
+msgid "Operation failed"
+msgstr "操作失败"
+
+#: features\devices\views\group_edit_screen.dart:96
+#: features\scenes\views\scene_edit_screen.dart:213
+msgid "Submit"
+msgstr "提交"
+
+#: features\devices\views\group_edit_screen.dart:160
+msgid "Group deleted"
+msgstr "分组已删除"
+
+#: features\devices\views\group_edit_screen.dart:166
+msgid "Delete failed"
+msgstr "删除失败"
+
+#: features\devices\views\group_edit_screen.dart:199
+#, fuzzy
+#| msgid "Add Devices Group"
+msgid "New Device Group"
+msgstr "新建设备组"
+
+#: features\devices\views\group_edit_screen.dart:200
+#, fuzzy
+#| msgid "Add Devices Group"
+msgid "Edit Device Group"
+msgstr "新建设备组"
+
+#: features\devices\widgets\delete_group_dialog.dart:19
+#: main\views\main_screen.dart:195
+#: shared\widgets\generic_settings_screen.dart:69
+msgid "Cancel"
+msgstr "取消"
+
+#: features\devices\widgets\delete_group_dialog.dart:23
+msgid "Delete"
+msgstr "删除"
+
+#: features\devices\widgets\empty_groups_widget.dart:20
+#, fuzzy
+#| msgid "Add Devices Group"
+msgid "No Device Groups"
+msgstr "新建设备组"
+
+#: features\devices\widgets\empty_groups_widget.dart:23
+msgid "Create groups to better organize your devices"
+msgstr ""
+
+#: features\devices\widgets\empty_groups_widget.dart:31
+msgid "Create First Group"
+msgstr "创建首个备分组"
+
+#: features\my\views\about_screen.dart:64
+#: features\my\views\about_screen_riverpod.dart:63
 #, python-brace-format
 msgid "Version: {verText} Build: {buildNumberText}"
 msgstr "版本：{verText} 构建号：{buildNumberText}"
 
-#: views\about_screen.dart:92
+#: features\my\views\about_screen.dart:87
+#: features\my\views\about_screen_riverpod.dart:84
 msgid "Copyright © Li Wei. All rights reserved."
 msgstr "版权所有 © 李维。保留所有权利。"
 
-#: views\about_screen.dart:108
+#: features\my\views\about_screen.dart:103
+#: features\my\views\about_screen_riverpod.dart:100
 msgid "Website"
 msgstr "网站"
 
-#: views\about_screen.dart:142
+#: features\my\views\about_screen.dart:134
+#: features\my\views\about_screen_riverpod.dart:133
 msgid "Documentation"
 msgstr "文档"
 
-#: views\about_screen.dart:173
+#: features\my\views\about_screen.dart:163
+#: features\my\views\about_screen_riverpod.dart:162
 msgid ""
 "This mobile application is free software licensed under GNU General Public "
 "License version 3 or later, with no warranty.\n"
@@ -51,191 +394,243 @@ msgstr ""
 "此移动端应用程序是基于 GPL 3 或更新版本协议授权的自由软件，不提供任何担保。\n"
 "作者不对使用此软件造成的任何直接和间接后果负责。\n"
 
-#: views\app_settings_screen.dart:27
-#, fuzzy
-#| msgid "Settings"
-msgid "App Settings"
-msgstr "设置"
+#: features\my\views\donation_screen.dart:24
+#: features\my\views\my_screen.dart:45
+#: features\my\views\my_screen_riverpod.dart:31
+msgid "Back This Project"
+msgstr "支持这个项目"
 
-#: views\app_settings_screen.dart:37
-msgid "APPEARANCE"
-msgstr "外观"
+#: features\my\views\donation_screen.dart:44
+msgid "Support Open Source Aquarium Tech"
+msgstr "支持开源水族技术"
 
-#: views\app_settings_screen.dart:41
-msgid "Theme"
-msgstr "主题"
+#: features\my\views\donation_screen.dart:63
+msgid "Why Your Support Matters"
+msgstr "为何你的支持很重要"
 
-#: views\app_settings_screen.dart:50
-msgid "System"
-msgstr "系统"
-
-#: views\app_settings_screen.dart:54
-msgid "Light"
-msgstr "亮色"
-
-#: views\app_settings_screen.dart:58
-msgid "Dark"
-msgstr "暗色"
-
-#: views\app_settings_screen.dart:73
-msgid "FEEDBACK"
-msgstr "反馈"
-
-#: views\app_settings_screen.dart:75
-msgid "Rate in application store"
-msgstr "在应用商店里给我评分"
-
-#: views\app_settings_screen.dart:78
-msgid "Report an issue on GitHub"
-msgstr "在 GitHub 上报告问题"
-
-#: views\devices\device_discovery_screen.dart:257
-#, fuzzy
-#| msgid "Add New Devices"
-msgid "A new device has been added."
-msgstr "添加新设备"
-
-#: views\devices\device_discovery_screen.dart:358
-msgid "Discovered Devices:"
-msgstr ""
-
-#: views\devices\devices_screen.dart:54
-msgid "There are no devices or device groups in the current scene."
-msgstr "当前场景中没有设备和设备组。"
-
-#: views\devices\devices_screen.dart:60
-#, fuzzy
-#| msgid "Add New Devices"
-msgid "Add new devices"
-msgstr "添加新设备"
-
-#: views\devices\devices_screen.dart:177 views\scenes\scene_edit_screen.dart:33
-#: views\scenes\scenes_screen.dart:54
-#, python-brace-format
-msgid "Error: {errMsg}"
-msgstr "错误：{errMsg}"
-
-#: views\devices\devices_screen.dart:228 views\main_screen.dart:142
-msgid "Add New Devices"
-msgstr "添加新设备"
-
-#: views\devices\devices_screen.dart:232 views\main_screen.dart:148
-msgid "Add Devices Group"
-msgstr "新建设备组"
-
-#: views\devices\devices_screen.dart:245
-#, python-brace-format
-msgid "Devices in {currentScene}"
-msgstr "{currentScene}中的设备"
-
-#: views\devices\group_edit_screen.dart:22
-#: views\scenes\scene_edit_screen.dart:155
-msgid "Name"
-msgstr "名称"
-
-#: views\devices\group_edit_screen.dart:24
-#: views\scenes\scene_edit_screen.dart:157
-msgid "Enter the required scene name"
-msgstr "输入必须的场景名称"
-
-#: views\devices\group_edit_screen.dart:28
-#: views\scenes\scene_edit_screen.dart:161
-msgid "Please enter the scene name"
-msgstr "请输入场景名称"
-
-#: views\devices\group_edit_screen.dart:43
-#: views\scenes\scene_edit_screen.dart:176
-msgid "Enter the optional notes for this scene"
-msgstr "输入该场景的备注文字（可选）"
-
-#: views\devices\group_edit_screen.dart:44
-#: views\scenes\scene_edit_screen.dart:177
-msgid "Notes"
-msgstr "备注"
-
-#: views\devices\group_edit_screen.dart:64
-#: views\scenes\scene_edit_screen.dart:199
-msgid "Submit"
-msgstr "提交"
-
-#: views\devices\group_edit_screen.dart:109
-#: views\scenes\scene_edit_screen.dart:240
+#: features\my\views\donation_screen.dart:69
 msgid ""
-"Are you sure you want to delete this device group? The devices within this "
-"group will not be deleted but will be moved to the \"Ungrouped\" group."
-msgstr "你确定要删除该设备组？该组中的设备将会移动到“未指定分组”中。"
+"Your donation helps cover development costs, server expenses, and continuous "
+"improvements that benefit the entire aquarium community. Every contribution, "
+"no matter how small, helps keep this project alive and thriving. Thank you "
+"for being part of this journey!"
+msgstr "你的捐赠可以帮助覆盖开发成本、服务器支出，并带来对整个水族社区都有益的持续改进。"
+"无论多小的贡献都可以帮助此项目存在和壮大。"
+"感谢和你一起经历这个奇妙的旅程！"
 
-#: views\devices\group_edit_screen.dart:145
-#, fuzzy
-#| msgid "Add Devices Group"
-msgid "New Device Group"
-msgstr "新建设备组"
+#: features\my\views\donation_screen.dart:81
+msgid "Choose Your Support Method"
+msgstr "选择你的支持方式"
 
-#: views\devices\group_edit_screen.dart:145
-#, fuzzy
-#| msgid "Add Devices Group"
-msgid "Edit Device Group"
-msgstr "新建设备组"
+#: features\my\views\donation_screen.dart:92
+msgid "Buy me a coffee"
+msgstr "请我喝杯咖啡"
 
-#: views\main_screen.dart:88 views\main_screen.dart:222
-#: views\scenes\scenes_screen.dart:62
-msgid "Scenes"
-msgstr "场景"
+#: features\my\views\donation_screen.dart:104
+msgid "Support via PayPal"
+msgstr "通过 PayPal 捐赠"
 
-#: views\main_screen.dart:90 views\main_screen.dart:224
-msgid "My"
-msgstr "我的"
-
-#: views\main_screen.dart:145
-msgid "Add Scene"
-msgstr "新建场景"
-
-#: views\main_screen.dart:223
-msgid "Devices"
-msgstr "设备"
-
-#: views\my_screen.dart:16
-msgid "Settings"
-msgstr "设置"
-
-#: views\my_screen.dart:28
+#: features\my\views\my_screen.dart:30
+#: features\my\views\my_screen_riverpod.dart:45
 msgid "About"
 msgstr "关于"
 
-#: views\routines\routine_card.dart:49
+#: features\routines\views\routine_card_riverpod.dart:134
 msgid "ACTIVE"
 msgstr "激活"
 
-#: views\routines\routine_card.dart:54
+#: features\routines\views\routine_card_riverpod.dart:134
 msgid "INACTIVE"
 msgstr "未激活"
 
-#: views\routines\routine_list.dart:21
+#: features\routines\views\routine_list_riverpod.dart:36
 msgid "Routines"
 msgstr "日常养护"
 
-#: views\routines\routine_list.dart:36
+#: features\routines\views\routine_list_riverpod.dart:59
+#, fuzzy
+#| msgid "Routines"
+msgid "Error loading routines"
+msgstr "日常养护"
+
+#: features\routines\views\routine_list_riverpod.dart:63
+#: features\routines\views\routine_list_riverpod.dart:145
+#: features\scenes\views\scenes_screen_riverpod.dart:129
+#: features\scenes\views\scenes_screen_riverpod.dart:175
+msgid "Retry"
+msgstr "重试"
+
+#: features\routines\views\routine_list_riverpod.dart:86
 #, fuzzy
 #| msgid "Routines"
 msgid "No routines"
 msgstr "日常养护"
 
-#: views\routines\routine_list.dart:87
-msgid "New Routine"
-msgstr "新建日常养护"
+#: features\routines\views\routine_list_riverpod.dart:94
+#, fuzzy
+#| msgid "There are no devices or device groups in the current scene."
+msgid "No routines available for devices in the current scene."
+msgstr "当前场景中没有设备和设备组。"
 
-#: views\scenes\scene_edit_screen.dart:38
+#: features\scenes\views\scene_card_riverpod.dart:190
+#, fuzzy, python-brace-format
+#| msgid "Devices"
+msgid "{0} devices"
+msgstr "{0} 个设备"
+
+#: features\scenes\views\scene_card_riverpod.dart:200
+#, python-brace-format
+msgid "{0} active"
+msgstr "{0} 个活跃中"
+
+#: features\scenes\views\scene_edit_screen.dart:66
 #, fuzzy
 #| msgid "Add Scene"
 msgid "New Scene"
 msgstr "新建场景"
 
-#: views\scenes\scene_edit_screen.dart:38
+#: features\scenes\views\scene_edit_screen.dart:66
 #, fuzzy
 #| msgid "Add Scene"
 msgid "Edit Scene"
 msgstr "新建场景"
 
-#: views\scenes\scene_edit_screen.dart:67
+#: features\scenes\views\scene_edit_screen.dart:107
 msgid "Scene Image"
+msgstr "场景图片"
+
+#: features\scenes\views\scene_edit_screen.dart:231
+msgid ""
+"Are you sure you want to delete this scene? This action cannot be undone."
+msgstr "你确定要删除此场景？此操作不可撤销。"
+
+#: features\scenes\views\scene_edit_screen.dart:245
+#: features\scenes\views\scene_edit_screen.dart:251
+msgid "Cannot Delete Scene"
+msgstr "无法删除场景"
+
+#: features\scenes\views\scene_edit_screen.dart:246
+msgid "Cannot delete the last remaining scene."
+msgstr "无法删除最后剩下的场景。"
+
+#: features\scenes\views\scene_edit_screen.dart:253
+msgid ""
+"This scene contains devices or device groups. Please remove all devices and "
+"groups from this scene before deleting it."
 msgstr ""
+
+#: features\scenes\views\scenes_screen_riverpod.dart:141
+#: main\views\main_screen.dart:38 main\views\main_screen.dart:167
+msgid "Scenes"
+msgstr "场景"
+
+#: features\settings\views\app_settings_screen.dart:46
+#: features\settings\views\app_settings_screen_riverpod.dart:24
+#, fuzzy
+#| msgid "Settings"
+msgid "App Settings"
+msgstr "设置"
+
+#: features\settings\views\app_settings_screen.dart:56
+#: features\settings\views\app_settings_screen_riverpod.dart:32
+msgid "APPEARANCE"
+msgstr "外观"
+
+#: features\settings\views\app_settings_screen.dart:60
+#: features\settings\views\app_settings_screen_riverpod.dart:36
+msgid "Theme"
+msgstr "主题"
+
+#: features\settings\views\app_settings_screen.dart:69
+#: features\settings\views\app_settings_screen_riverpod.dart:45
+msgid "System"
+msgstr "系统"
+
+#: features\settings\views\app_settings_screen.dart:70
+#: features\settings\views\app_settings_screen_riverpod.dart:46
+msgid "Light"
+msgstr "亮色"
+
+#: features\settings\views\app_settings_screen.dart:71
+#: features\settings\views\app_settings_screen_riverpod.dart:47
+msgid "Dark"
+msgstr "暗色"
+
+#: features\settings\views\app_settings_screen.dart:78
+#: features\settings\views\app_settings_screen_riverpod.dart:53
+msgid "Language"
+msgstr "语言"
+
+#: features\settings\views\app_settings_screen.dart:94
+#: features\settings\views\app_settings_screen_riverpod.dart:69
+msgid "Temperature Unit"
+msgstr "温度单位"
+
+#: features\settings\views\app_settings_screen.dart:103
+msgid "℃ (Celsius)"
+msgstr "℃（摄氏度）"
+
+#: features\settings\views\app_settings_screen.dart:104
+msgid "℉ (Fahrenheit)"
+msgstr "℉（华氏度）"
+
+#: features\settings\views\app_settings_screen.dart:113
+#: features\settings\views\app_settings_screen_riverpod.dart:86
+msgid "FEEDBACK"
+msgstr "反馈"
+
+#: features\settings\views\app_settings_screen.dart:117
+#: features\settings\views\app_settings_screen_riverpod.dart:90
+msgid "Rate in application store"
+msgstr "在应用商店里给我评分"
+
+#: features\settings\views\app_settings_screen.dart:122
+#: features\settings\views\app_settings_screen_riverpod.dart:97
+msgid "Report an issue on GitHub"
+msgstr "在 GitHub 上报告问题"
+
+#: main\view_models\main_view_model.dart:120
+msgid "ERROR"
+msgstr "错误"
+
+#: main\views\main_screen.dart:40 main\views\main_screen.dart:169
+msgid "My"
+msgstr "我的"
+
+#: main\views\main_screen.dart:95
+msgid "Add Scene"
+msgstr "新建场景"
+
+#: main\views\main_screen.dart:168
+msgid "Devices"
+msgstr "设备"
+
+#: main\views\main_screen.dart:188
+msgid "Loading..."
+msgstr "载入中..."
+
+#: main\views\main_screen.dart:243
+msgid "Press back again to exit"
+msgstr "再次按下后退将退出软件"
+
+#: shared\widgets\device_status_indicator.dart:31
+msgid "Device offline"
+msgstr "设备离线"
+
+#: shared\widgets\generic_settings_screen.dart:55
+msgid "Save"
+msgstr "保存"
+
+#, fuzzy
+#~| msgid "Add New Devices"
+#~ msgid "Add new devices"
+#~ msgstr "添加新设备"
+
+#~ msgid ""
+#~ "Are you sure you want to delete this device group? The devices within "
+#~ "this group will not be deleted but will be moved to the \"Ungrouped\" "
+#~ "group."
+#~ msgstr "你确定要删除该设备组？该组中的设备将会移动到“未指定分组”中。"
+
+#~ msgid "New Routine"
+#~ msgstr "新建日常养护"

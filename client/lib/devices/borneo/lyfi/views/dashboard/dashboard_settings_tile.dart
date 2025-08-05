@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
@@ -11,7 +12,7 @@ class DashboardSettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Selector<LyfiViewModel, bool>(
-      selector: (_, vm) => vm.canUnlock, // 或根据实际逻辑选择
+      selector: (_, vm) => vm.canUnlock,
       builder: (context, canUnlock, _) {
         final isDisabled = !canUnlock;
         final iconColor = isDisabled ? theme.colorScheme.primary.withValues(alpha: 0.38) : theme.colorScheme.primary;
@@ -49,7 +50,10 @@ class DashboardSettingsTile extends StatelessWidget {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: Text('Settings', style: theme.textTheme.titleMedium?.copyWith(color: textColor)),
+                          child: Text(
+                            context.translate("Settings"),
+                            style: theme.textTheme.titleMedium?.copyWith(color: textColor),
+                          ),
                         ),
                       ],
                     );

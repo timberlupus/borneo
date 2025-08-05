@@ -1,5 +1,6 @@
 import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/toufu_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 import 'package:gauge_indicator/gauge_indicator.dart';
@@ -11,12 +12,10 @@ class DashboardTemperatureTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    // 背景分段色：亮色用很浅，暗色用更深且加透明度
     final greenBg = isDark ? Colors.green[800]!.withValues(alpha: 0.38) : Colors.green[100]!;
     final yellowBg = isDark ? Colors.amber[800]!.withValues(alpha: 0.38) : Colors.amber[100]!;
     final redBg = isDark ? Colors.red[800]!.withValues(alpha: 0.38) : Colors.red[100]!;
 
-    // 当前进度色：和原来一样，主题色
     Color progressColor;
     final temp = context.select<LyfiViewModel, int?>((vm) => vm.currentTempRaw);
     if (temp != null && temp <= 45) {
@@ -31,7 +30,7 @@ class DashboardTemperatureTile extends StatelessWidget {
 
     return Consumer<LyfiViewModel>(
       builder: (context, vm, _) => DashboardToufu(
-        title: 'Temperature',
+        title: context.translate("Temperature"),
         icon: Icons.thermostat,
         foregroundColor: theme.colorScheme.onSurface,
         backgroundColor: theme.colorScheme.surfaceContainer,
@@ -46,7 +45,7 @@ class DashboardTemperatureTile extends StatelessWidget {
           textBaseline: TextBaseline.alphabetic,
           children: [
             Text(
-              vm.currentTemp != null ? '${vm.currentTemp}' : "N/A",
+              vm.currentTemp != null ? '${vm.currentTemp}' : context.translate("N/A"),
               style: theme.textTheme.headlineLarge?.copyWith(
                 fontFeatures: [FontFeature.tabularFigures()],
                 color: progressColor,

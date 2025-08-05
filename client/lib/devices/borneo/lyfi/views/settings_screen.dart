@@ -318,7 +318,7 @@ class SettingsScreen extends StatelessWidget {
           children: [
             Icon(Icons.warning, size: 24, color: Theme.of(context).colorScheme.error),
             SizedBox(width: 8),
-            Text('DANGER ZONE', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            Text(context.translate('DANGER ZONE'), style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ],
         ),
       ),

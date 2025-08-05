@@ -187,14 +187,6 @@ class NewDeviceAddedSnackBarListener extends StatelessWidget {
               context,
               listen: false,
             ).showSuccess(context.translate('A new device has been added.'), body: lastestAdded.name);
-
-            /*
-            Future.delayed(const Duration(seconds: 3), () {
-              if (!vm.isDisposed) {
-                vm.clearAddedDevice();
-              }
-            });
-            */
           });
         }
         return child!;

@@ -360,7 +360,7 @@ class _TimezoneSyncBanner extends StatelessWidget {
               final vm = context.read<LyfiViewModel>();
               vm.syncDeviceTimezone();
             },
-            child: Text('Sync Timezone'),
+            child: Text(context.translate('Sync Timezone')),
           ),
         ],
       ),
@@ -405,9 +405,7 @@ class LyfiView extends StatelessWidget {
                         valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
                       ),
                     ),
-                    Expanded(
-                      child: Container(), // 空白内容区域
-                    ),
+                    Expanded(child: Container()),
                   ],
                 ),
               );

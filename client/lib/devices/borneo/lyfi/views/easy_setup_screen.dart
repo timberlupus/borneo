@@ -2,6 +2,7 @@ import 'package:borneo_common/duration_ext.dart';
 import 'package:flutter/material.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/schedule_editor_view_model.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:progressive_time_picker/progressive_time_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -30,7 +31,7 @@ class EasySetupScreen extends StatelessWidget {
       value: editor,
       builder: (context, child) {
         return Scaffold(
-          appBar: AppBar(title: Text('Easy Setup')),
+          appBar: AppBar(title: Text(context.translate('Easy Setup'))),
           body: Container(color: Theme.of(context).colorScheme.surface, child: child),
         );
       },
@@ -130,7 +131,7 @@ class EasySetupScreen extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "Hrs",
+                    context.translate("Hrs"),
                     style: Theme.of(
                       context,
                     ).textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.outline),
@@ -147,7 +148,7 @@ class EasySetupScreen extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "Mins",
+                    context.translate("Mins"),
                     style: Theme.of(
                       context,
                     ).textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.outline),

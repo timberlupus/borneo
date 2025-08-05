@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
@@ -81,7 +82,10 @@ class DashboardTemporaryTile extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Temporary', style: theme.textTheme.titleSmall?.copyWith(color: effectiveFgColor)),
+                                Text(
+                                  context.translate("Temporary"),
+                                  style: theme.textTheme.titleSmall?.copyWith(color: effectiveFgColor),
+                                ),
                                 if (isActive && remainText.isNotEmpty)
                                   Text(
                                     remainText,

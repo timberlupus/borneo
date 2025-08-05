@@ -32,12 +32,10 @@ class MyScreen extends StatelessWidget {
         trailing: const CupertinoListTileChevron(),
         tileColor: Theme.of(context).colorScheme.surfaceContainer,
         onTap: () {
-          Future.delayed(Duration(milliseconds: 300), () {
-            final route = MaterialPageRoute(builder: (context) => AboutScreen());
-            if (context.mounted) {
-              Navigator.push(context, route);
-            }
-          });
+          final route = MaterialPageRoute(builder: (context) => AboutScreen());
+          if (context.mounted) {
+            Navigator.push(context, route);
+          }
         },
       ),
       // divider

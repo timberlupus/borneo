@@ -33,12 +33,10 @@ class MyScreenRiverpod extends ConsumerWidget {
         trailing: const CupertinoListTileChevron(),
         tileColor: Theme.of(context).colorScheme.surfaceContainer,
         onTap: () {
-          Future.delayed(const Duration(milliseconds: 300), () {
-            final route = MaterialPageRoute(builder: (context) => const DonationScreen());
-            if (context.mounted) {
-              Navigator.push(context, route);
-            }
-          });
+          final route = MaterialPageRoute(builder: (context) => const DonationScreen());
+          if (context.mounted) {
+            Navigator.push(context, route);
+          }
         },
       ),
 
@@ -49,12 +47,10 @@ class MyScreenRiverpod extends ConsumerWidget {
         trailing: const CupertinoListTileChevron(),
         tileColor: Theme.of(context).colorScheme.surfaceContainer,
         onTap: () {
-          Future.delayed(const Duration(milliseconds: 300), () {
-            final route = MaterialPageRoute(builder: (context) => const AboutScreenRiverpod());
-            if (context.mounted) {
-              Navigator.push(context, route);
-            }
-          });
+          final route = MaterialPageRoute(builder: (context) => const AboutScreenRiverpod());
+          if (context.mounted) {
+            Navigator.push(context, route);
+          }
         },
       ),
       // divider

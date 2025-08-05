@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 import '../acclimation_screen.dart';
@@ -68,7 +69,10 @@ class DashboardAcclimationTile extends StatelessWidget {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: Text('Acclimation', style: theme.textTheme.titleMedium?.copyWith(color: textColor)),
+                          child: Text(
+                            context.translate("Acclimation"),
+                            style: theme.textTheme.titleMedium?.copyWith(color: textColor),
+                          ),
                         ),
                       ],
                     );
