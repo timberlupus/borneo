@@ -19,6 +19,7 @@
 #include <borneo/power.h>
 #include <borneo/nvs.h>
 #include <borneo/power-meas.h>
+#include <borneo/timer.h>
 
 #define TAG "borneo-core-coap"
 
@@ -155,7 +156,7 @@ static void coap_hnd_borneo_status_get(coap_resource_t* resource, coap_session_t
     BO_COAP_TRY(cbor_encode_uint(&root_map, bo_rtc_get_timestamp()), response);
 
     BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "bootDuration"), response);
-    BO_COAP_TRY(cbor_encode_int(&root_map, esp_timer_get_time() / 1000ULL), response);
+    BO_COAP_TRY(cbor_encode_int(&root_map, bo_timer_uptime_ms()), response);
 
     BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "timezone"), response);
     char* tz_name = getenv("TZ");

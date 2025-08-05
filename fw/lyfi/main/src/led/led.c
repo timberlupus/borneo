@@ -21,6 +21,7 @@
 #include <borneo/nvs.h>
 #include <borneo/algo/astronomy.h>
 #include <borneo/wifi.h>
+#include <borneo/timer.h>
 
 #include "../lyfi-events.h"
 #include "../algo.h"
@@ -892,7 +893,7 @@ int led_set_temporary_duration(uint32_t duration)
 int32_t led_get_temporary_remaining()
 {
     if (led_get_state() == LED_STATE_TEMPORARY) {
-        int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
+        int64_t now = bo_timer_uptime_ms();
         return (int32_t)((_led.temporary_off_time - now + 500LL) / 1000LL);
     }
     else {
@@ -908,7 +909,7 @@ void led_temporary_state_entry()
     if (_led.settings.mode != LED_MODE_SUN && _led.settings.mode != LED_MODE_SCHEDULED) {
         return;
     }
-    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
+    int64_t now = bo_timer_uptime_ms();
     portENTER_CRITICAL(&g_led_spinlock);
     _led.temporary_off_time = now + (_led.settings.temporary_duration * 60 * 1000);
     portEXIT_CRITICAL(&g_led_spinlock);
@@ -927,7 +928,7 @@ void led_temporary_state_run()
 {
     assert(led_get_state() == LED_STATE_TEMPORARY);
 
-    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
+    int64_t now = bo_timer_uptime_ms();
 
     if (now >= _led.temporary_off_time) {
         smf_set_state(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_NORMAL]);

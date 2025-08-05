@@ -19,6 +19,7 @@
 #include <borneo/power.h>
 #include <borneo/nvs.h>
 #include <borneo/utils/time.h>
+#include <borneo/timer.h>
 
 #include "../lyfi-events.h"
 #include "../algo.h"
@@ -44,7 +45,7 @@ int led_fade_to_color(const led_color_t color, uint32_t duration_ms)
         return -EINVAL;
     }
 
-    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
+    int64_t now = bo_timer_uptime_ms();
     portENTER_CRITICAL(&g_led_spinlock);
     _led.fade_start_time_ms = now;
     _led.fade_duration_ms = duration_ms;
@@ -118,7 +119,7 @@ void led_fade_drive()
         return;
     }
 
-    int64_t now = (esp_timer_get_time() + 500LL) / 1000LL;
+    int64_t now = bo_timer_uptime_ms();
     portENTER_CRITICAL(&g_led_spinlock);
     int64_t fade_start_time_ms = _led.fade_start_time_ms;
     int64_t fade_duration_ms = _led.fade_duration_ms;
