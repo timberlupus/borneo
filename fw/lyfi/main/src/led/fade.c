@@ -135,7 +135,7 @@ void led_fade_drive()
     }
 
     uint32_t elapsed_time_ms = (uint32_t)(now - fade_start_time_ms);
-    uint32_t progress = (elapsed_time_ms * 65536ULL + (fade_duration_ms / 2)) / fade_duration_ms;
+    uint32_t progress = ((elapsed_time_ms << 16) + (fade_duration_ms >> 1)) / fade_duration_ms;
 
     led_color_t color;
     for (size_t ich = 0; ich < LYFI_LED_CHANNEL_COUNT; ich++) {
