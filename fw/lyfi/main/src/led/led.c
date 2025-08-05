@@ -600,7 +600,12 @@ void led_render_task()
         BO_MUST(led_fade_to_normal());
     }
 
+    const int64_t period_us = 16000; // 16ms
+    int64_t next_tick = esp_timer_get_time();
+
     while (true) {
+        int64_t start = esp_timer_get_time();
+
         int smf_ret = smf_run_state(SMF_CTX(&_led));
         if (smf_ret) {
             bo_panic();
@@ -624,7 +629,15 @@ void led_render_task()
             portEXIT_CRITICAL(&g_led_spinlock);
         }
 
-        vTaskDelay(pdMS_TO_TICKS(10));
+        int64_t end = esp_timer_get_time();
+        next_tick += period_us;
+        int64_t delay_us = next_tick - end;
+        if (delay_us > 0) {
+            vTaskDelay(pdMS_TO_TICKS((delay_us + 999) / 1000));
+        }
+        else {
+            next_tick = end;
+        }
     }
 }
 
