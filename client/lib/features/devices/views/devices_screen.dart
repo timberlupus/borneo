@@ -50,15 +50,8 @@ class InGroupDeviceListView extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: deviceCount,
-          separatorBuilder: (context, index) => Container(
-            color: Theme.of(context).colorScheme.surfaceContainer,
-            child: Row(
-              children: [
-                const SizedBox(width: 72), // 48 icon + 16 ListTile padding + 8
-                Expanded(child: Divider(height: 1, thickness: 1, color: Theme.of(context).colorScheme.surface)),
-              ],
-            ),
-          ),
+          separatorBuilder: (context, index) =>
+              Divider(height: 1, thickness: 1, indent: 72, color: Theme.of(context).colorScheme.surface),
           itemBuilder: (context, index) {
             return Selector<GroupViewModel, AbstractDeviceSummaryViewModel>(
               selector: (_, gvm) => gvm.devices[index],
@@ -142,6 +135,7 @@ class DevicesScreen extends StatelessWidget {
           );
         } else {
           return CustomScrollView(
+            // physics: const ClampingScrollPhysics(),
             slivers: <Widget>[
               _buildAppBar(context),
               Selector<GroupedDevicesViewModel, List<GroupSnapshot>>(
@@ -313,7 +307,7 @@ class DevicesScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const InGroupDeviceListView(),
+                Material(color: Theme.of(context).colorScheme.surfaceContainer, child: const InGroupDeviceListView()),
               ],
             );
           }

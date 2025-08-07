@@ -21,89 +21,109 @@ class DonationScreen extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.translate('Back This Project')), elevation: 0),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Heart icon
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withValues(alpha: 0.38),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.favorite, size: 48, color: colorScheme.primary),
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              title: Text(context.translate('Back This Project')),
+              elevation: 0,
+              floating: true,
+              snap: true,
+              pinned: false,
             ),
-
-            const SizedBox(height: 24),
-
-            // Title
-            Text(
-              context.translate('Support Open Source Aquarium Tech'),
-              style: theme.textTheme.headlineSmall?.copyWith(color: colorScheme.onSurface),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 24),
-
-            // Description
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.38),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: colorScheme.outlineVariant, width: 1),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.translate('Why Your Support Matters'),
-                    style: theme.textTheme.titleMedium?.copyWith(color: colorScheme.onSurface),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    context.translate(
-                      'Your donation helps cover development costs, server expenses, and continuous improvements that benefit the entire aquarium community. Every contribution, no matter how small, helps keep this project alive and thriving. Thank you for being part of this journey!',
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Heart icon
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer.withValues(alpha: 0.38),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.favorite, size: 48, color: colorScheme.primary),
                     ),
-                    style: theme.textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant, height: 1.6),
-                  ),
-                ],
+
+                    const SizedBox(height: 24),
+
+                    // Title
+                    Text(
+                      context.translate('Support Open Source Aquarium Tech'),
+                      style: theme.textTheme.headlineSmall?.copyWith(color: colorScheme.onSurface),
+                      textAlign: TextAlign.center,
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Description
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.38),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: colorScheme.outlineVariant, width: 1),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.translate('Why Your Support Matters'),
+                            style: theme.textTheme.titleMedium?.copyWith(color: colorScheme.onSurface),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            context.translate(
+                              'Your donation helps cover development costs, server expenses, and continuous improvements that benefit the entire aquarium community. Every contribution, no matter how small, helps keep this project alive and thriving. Thank you for being part of this journey!',
+                            ),
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                              height: 1.6,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // Donation buttons
+                    Text(
+                      context.translate('Choose Your Support Method'),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Ko-fi button
+                    _buildDonationButton(
+                      context: context,
+                      icon: Icons.coffee,
+                      label: 'Ko-fi',
+                      description: context.translate('Buy me a coffee'),
+                      color: const Color(0xFF13C3FF),
+                      onTap: () => _launchUrl(context, koFiUrl),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // PayPal button
+                    _buildDonationButton(
+                      context: context,
+                      icon: Icons.account_balance_wallet,
+                      label: 'PayPal',
+                      description: context.translate('Support via PayPal'),
+                      color: const Color(0xFF0070BA),
+                      onTap: () => _launchUrl(context, paypalUrl),
+                    ),
+                  ],
+                ),
               ),
-            ),
-
-            const SizedBox(height: 40),
-
-            // Donation buttons
-            Text(
-              context.translate('Choose Your Support Method'),
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onSurface),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Ko-fi button
-            _buildDonationButton(
-              context: context,
-              icon: Icons.coffee,
-              label: 'Ko-fi',
-              description: context.translate('Buy me a coffee'),
-              color: const Color(0xFF13C3FF),
-              onTap: () => _launchUrl(context, koFiUrl),
-            ),
-
-            const SizedBox(height: 16),
-
-            // PayPal button
-            _buildDonationButton(
-              context: context,
-              icon: Icons.account_balance_wallet,
-              label: 'PayPal',
-              description: context.translate('Support via PayPal'),
-              color: const Color(0xFF0070BA),
-              onTap: () => _launchUrl(context, paypalUrl),
             ),
           ],
         ),

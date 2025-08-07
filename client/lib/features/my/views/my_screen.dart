@@ -58,6 +58,7 @@ class MyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = buildItems(context);
     return CustomScrollView(
+      physics: const ClampingScrollPhysics(),
       slivers: <Widget>[
         SliverAppBar(
           pinned: false,
@@ -71,7 +72,7 @@ class MyScreen extends StatelessWidget {
             title: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [Image.asset('assets/images/main-logo.png', height: 80), const SizedBox(height: 8)],
+              children: [Image.asset('assets/images/main-logo.png', height: 90), const SizedBox(height: 8)],
             ),
             centerTitle: true,
           ),
@@ -80,7 +81,11 @@ class MyScreen extends StatelessWidget {
           itemCount: items.length,
           itemBuilder: (context, index) => items[index],
           separatorBuilder: (context, index) {
-            return Divider(height: 1, color: Theme.of(context).scaffoldBackgroundColor);
+            if (index == items.length - 1 || items[index] is SizedBox) {
+              return SizedBox(height: 0);
+            } else {
+              return Divider(height: 1, indent: 56, color: Theme.of(context).colorScheme.surface);
+            }
           },
         ),
       ],

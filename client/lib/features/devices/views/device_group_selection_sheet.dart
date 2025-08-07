@@ -64,14 +64,17 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
             ),
           ),
         const SizedBox(height: 8),
-        Material(
-          color: Theme.of(context).colorScheme.surfaceContainer,
-          child: ListView.separated(
-            padding: const EdgeInsets.all(0),
-            shrinkWrap: true,
-            itemBuilder: (BuildContext context, int index) => tiles[index],
-            separatorBuilder: (BuildContext context, int index) => const Divider(indent: 16, height: 8, thickness: 1),
-            itemCount: tiles.length,
+        Flexible(
+          child: Material(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            child: ListView.separated(
+              padding: const EdgeInsets.all(0),
+              shrinkWrap: true,
+              physics: const ClampingScrollPhysics(),
+              itemBuilder: (BuildContext context, int index) => tiles[index],
+              separatorBuilder: (BuildContext context, int index) => const Divider(indent: 16, height: 8, thickness: 1),
+              itemCount: tiles.length,
+            ),
           ),
         ),
         const SizedBox(height: 16),
