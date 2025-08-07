@@ -53,6 +53,7 @@ struct bo_protect_status {
 
 #if CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
     volatile int overheated_count; // Count of overheated events
+    volatile int temp_read_fail_count; // Count of temperature read failures
 #endif // CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
 };
 
@@ -61,18 +62,82 @@ static struct bo_protect_settings _settings = { 0 };
 
 int bo_protect_init()
 {
-    ESP_LOGI(TAG, "Initializing over-power protection...");
+    ESP_LOGI(TAG, "Initializing protection...");
 
     ESP_LOGI(TAG, "Loading factory settings...");
     BO_TRY(load_factory_settings());
 
     xTaskCreate(&protect_task, "protect_task", 2048, NULL, 5, NULL);
 
-    ESP_LOGI(TAG, "Over-power protection initialized");
+    ESP_LOGI(TAG, "Protection initialized");
     return 0;
 }
 
 uint8_t bo_protect_get_overheated_temp() { return _settings.overheated_temp; }
+
+int bo_protect_set_overheated_temp(uint8_t temp)
+{
+    if (temp < 40 || temp > 85) {
+        ESP_LOGE(TAG, "Invalid overheated temperature: %u", temp);
+        return -1;
+    }
+
+    _settings.overheated_temp = temp;
+
+    nvs_handle_t nvs_handle;
+    int rc = nvs_open(PROTECT_NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+    if (rc != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to open NVS handle");
+        return rc;
+    }
+
+    rc = nvs_set_u8(nvs_handle, NVS_KEY_OVERHEATED_TEMP, temp);
+    if (rc == ESP_OK) {
+        rc = nvs_commit(nvs_handle);
+    }
+
+    nvs_close(nvs_handle);
+
+    if (rc == ESP_OK) {
+        ESP_LOGI(TAG, "Overheated temperature set to %u°C", temp);
+    }
+
+    return rc;
+}
+
+#if CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
+int32_t bo_protect_get_over_power_mw() { return _settings.over_power_mw; }
+
+int bo_protect_set_over_power_mw(int32_t power_mw)
+{
+    if (power_mw < 0) {
+        ESP_LOGE(TAG, "Invalid over power value: %ld", power_mw);
+        return -1;
+    }
+
+    _settings.over_power_mw = power_mw;
+
+    nvs_handle_t nvs_handle;
+    int rc = nvs_open(PROTECT_NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+    if (rc != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to open NVS handle");
+        return rc;
+    }
+
+    rc = nvs_set_i32(nvs_handle, NVS_KEY_OPP_VALUE, power_mw);
+    if (rc == ESP_OK) {
+        rc = nvs_commit(nvs_handle);
+    }
+
+    nvs_close(nvs_handle);
+
+    if (rc == ESP_OK) {
+        ESP_LOGI(TAG, "Over power protection set to %ld mW", power_mw);
+    }
+
+    return rc;
+}
+#endif // CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
 
 int load_factory_settings()
 {
@@ -82,7 +147,7 @@ int load_factory_settings()
 
 #if CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
     {
-        rc = nvs_get_i32(nvs_handle, NVS_KEY_ENABLED, &_settings.over_power_mw);
+        rc = nvs_get_i32(nvs_handle, NVS_KEY_OPP_VALUE, &_settings.over_power_mw);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
             _settings.over_power_mw = CONFIG_LYFI_PROTECTION_OVER_POWER_DEFAULT_VALUE;
             rc = 0;
@@ -141,20 +206,31 @@ void protect_task()
             // Continuous detection of high temperatures multiple times will trigger an emergency shutdown of the
             // lights.
             int current_temp = thermal_get_current_temp();
-            if (current_temp >= _settings.overheated_temp) {
-                _protect.overheated_count++;
-                ESP_LOGW(TAG, "[%u/%u] Too hot!", _protect.overheated_count, OVERHEATED_TEMP_COUNT_MAX);
-                if (_protect.overheated_count > OVERHEATED_TEMP_COUNT_MAX) {
+            if (current_temp < 0) {
+                _protect.temp_read_fail_count++;
+                if (_protect.temp_read_fail_count >= 5) {
+                    ESP_LOGE(TAG, "thermal_get_current_temp failed 5 times, assuming overheated!");
                     fan_set_power(100);
-                    ESP_LOGW(TAG, "Over temperature(temp=%d, set=%u)! shuting down...", current_temp,
-                             _settings.overheated_temp);
                     bo_power_shutdown(BO_SHUTDOWN_REASON_OVERHEATED);
-                    _protect.overheated_count = 0;
-                    return;
+                    _protect.temp_read_fail_count = 0;
                 }
             }
             else {
+                _protect.temp_read_fail_count = 0;
+                if (current_temp >= _settings.overheated_temp) {
+                    _protect.overheated_count++;
+                    ESP_LOGW(TAG, "[%u/%u] Too hot!", _protect.overheated_count, OVERHEATED_TEMP_COUNT_MAX);
+                    if (_protect.overheated_count >= OVERHEATED_TEMP_COUNT_MAX) {
+                        fan_set_power(100);
+                        ESP_LOGW(TAG, "Over temperature(temp=%d, set=%u)! shutting down...", current_temp,
+                                 _settings.overheated_temp);
+                        bo_power_shutdown(BO_SHUTDOWN_REASON_OVERHEATED);
+                        _protect.overheated_count = 0;
+                    }
+                }
+            else {
                 _protect.overheated_count = 0;
+            }
             }
 #endif // CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
         }
