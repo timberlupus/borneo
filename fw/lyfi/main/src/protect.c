@@ -33,7 +33,7 @@ static void protect_task();
 #define NVS_KEY_OPP_VALUE "opp"
 #define NVS_KEY_OVERHEATED_TEMP "ohtemp"
 
-#define OVERHEATED_TEMP_COUNT_MAX 3
+#define OVERHEATED_TEMP_COUNT_MAX 5
 #define PROTECT_OVERHEATED_TEMP_DEFAULT 65
 
 #define TAG "protect"
