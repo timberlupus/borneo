@@ -13,44 +13,56 @@ class MyScreen extends StatelessWidget {
     return <Widget>[
       const SizedBox(height: 16),
 
-      // Settings tile
-      ListTile(
-        title: Text(context.translate('Settings')),
-        leading: Icon(Icons.settings_outlined),
-        trailing: const CupertinoListTileChevron(),
-        tileColor: Theme.of(context).colorScheme.surfaceContainer,
-        onTap: () {
-          final route = MaterialPageRoute(builder: (context) => AppSettingsScreen());
-          Navigator.push(context, route);
-        },
+      // App Settings Card
+      Card(
+        elevation: 0.25,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          children: [
+            ListTile(
+              title: Text(context.translate('Settings')),
+              leading: Icon(Icons.settings_outlined),
+              trailing: const CupertinoListTileChevron(),
+              onTap: () {
+                final route = MaterialPageRoute(builder: (context) => AppSettingsScreen());
+                Navigator.push(context, route);
+              },
+            ),
+            ListTile(
+              title: Text(context.translate('About')),
+              leading: Icon(Icons.info_outline),
+              trailing: const CupertinoListTileChevron(),
+              onTap: () {
+                final route = MaterialPageRoute(builder: (context) => AboutScreen());
+                if (context.mounted) {
+                  Navigator.push(context, route);
+                }
+              },
+            ),
+          ],
+        ),
       ),
 
-      // About tile
-      ListTile(
-        title: Text(context.translate('About')),
-        leading: Icon(Icons.info_outline),
-        trailing: const CupertinoListTileChevron(),
-        tileColor: Theme.of(context).colorScheme.surfaceContainer,
-        onTap: () {
-          final route = MaterialPageRoute(builder: (context) => AboutScreen());
-          if (context.mounted) {
+      const SizedBox(height: 8),
+
+      // Support Card
+      Card(
+        elevation: 0.25,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          title: Text(context.translate('Back This Project')),
+          leading: Icon(Icons.favorite_outline, color: Theme.of(context).colorScheme.error),
+          trailing: const CupertinoListTileChevron(),
+          onTap: () {
+            final route = MaterialPageRoute(builder: (context) => DonationScreen());
             Navigator.push(context, route);
-          }
-        },
+          },
+        ),
       ),
-      // divider
+
       const SizedBox(height: 16),
-      // Settings tile
-      ListTile(
-        title: Text(context.translate('Back This Project')),
-        leading: Icon(Icons.favorite_outline, color: Theme.of(context).colorScheme.error),
-        trailing: const CupertinoListTileChevron(),
-        tileColor: Theme.of(context).colorScheme.surfaceContainer,
-        onTap: () {
-          final route = MaterialPageRoute(builder: (context) => DonationScreen());
-          Navigator.push(context, route);
-        },
-      ),
     ];
   }
 
@@ -77,17 +89,7 @@ class MyScreen extends StatelessWidget {
             centerTitle: true,
           ),
         ),
-        SliverList.separated(
-          itemCount: items.length,
-          itemBuilder: (context, index) => items[index],
-          separatorBuilder: (context, index) {
-            if (index == items.length - 1 || items[index] is SizedBox) {
-              return SizedBox(height: 0);
-            } else {
-              return Divider(height: 1, indent: 56, color: Theme.of(context).colorScheme.surface);
-            }
-          },
-        ),
+        SliverList(delegate: SliverChildBuilderDelegate((context, index) => items[index], childCount: items.length)),
       ],
     );
   }
