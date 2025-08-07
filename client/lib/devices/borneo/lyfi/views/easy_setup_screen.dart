@@ -32,7 +32,9 @@ class EasySetupScreen extends StatelessWidget {
       builder: (context, child) {
         return Scaffold(
           appBar: AppBar(title: Text(context.translate('Easy Setup'))),
-          body: Container(color: Theme.of(context).colorScheme.surface, child: child),
+          body: SafeArea(
+            child: Container(color: Theme.of(context).colorScheme.surface, child: child),
+          ),
         );
       },
       child: buildBody(context),

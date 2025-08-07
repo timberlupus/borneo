@@ -28,48 +28,50 @@ class AcclimationScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: Text(context.translate('Acclimation Mode'))),
-      body: FutureBuilder(
-        future: vm.initFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            return ChangeNotifierProvider(
-              create: (cb) => vm,
-              builder: (context, child) {
-                return Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    ListView.separated(
-                      physics: ClampingScrollPhysics(),
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) => items[index],
-                      itemCount: items.length,
-                      separatorBuilder: (context, index) => SizedBox(height: 1),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Consumer<AcclimationViewModel>(
-                        builder: (context, vm, child) => SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: vm.canSubmit ? () => onSubmit(vm, context) : null,
-                            label: child!,
-                            icon: const Icon(Icons.upload),
-                          ),
-                        ),
-                        child: Text(context.translate("Submit")),
+      body: SafeArea(
+        child: FutureBuilder(
+          future: vm.initFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else {
+              return ChangeNotifierProvider(
+                create: (cb) => vm,
+                builder: (context, child) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      ListView.separated(
+                        physics: ClampingScrollPhysics(),
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) => items[index],
+                        itemCount: items.length,
+                        separatorBuilder: (context, index) => SizedBox(height: 1),
                       ),
-                    ),
-                    const Spacer(),
-                  ],
-                );
-              },
-            );
-          }
-        },
+                      Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Consumer<AcclimationViewModel>(
+                          builder: (context, vm, child) => SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: vm.canSubmit ? () => onSubmit(vm, context) : null,
+                              label: child!,
+                              icon: const Icon(Icons.upload),
+                            ),
+                          ),
+                          child: Text(context.translate("Submit")),
+                        ),
+                      ),
+                      const Spacer(),
+                    ],
+                  );
+                },
+              );
+            }
+          },
+        ),
       ),
     );
   }

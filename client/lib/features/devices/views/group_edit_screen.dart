@@ -73,11 +73,6 @@ class GroupEditScreen extends StatelessWidget {
                         if (submitContext.mounted) {
                           Navigator.pop(submitContext); // Close loading dialog
                           navigator.pop(true); // Return success
-                          notificationService.showSuccess(
-                            (ModalRoute.of(submitContext)!.settings.arguments as GroupEditArguments).isCreation
-                                ? submitContext.translate('Group created')
-                                : submitContext.translate('Group updated'),
-                          );
                         }
                       })
                       .catchError((error) {
@@ -201,7 +196,7 @@ class GroupEditScreen extends StatelessWidget {
           ),
           actions: buildActions(context, args),
         ),
-        body: buildBody(context),
+        body: SafeArea(child: buildBody(context)),
       ),
     );
   }

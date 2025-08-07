@@ -264,57 +264,59 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
             SizedBox(width: 16),
           ],
         ),
-        body: Column(
-          children: [
-            Selector<LyfiViewModel, ({bool isBusy, bool isOnline})>(
-              selector: (_, vm) => (isBusy: vm.isBusy, isOnline: vm.isOnline),
-              builder: (context, vm, _) => SizedBox(
-                height: 1,
-                width: double.infinity,
-                child: vm.isBusy
-                    ? LinearProgressIndicator(
-                        backgroundColor: Colors.transparent,
-                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
-                      )
-                    : Container(color: Colors.transparent),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Selector<LyfiViewModel, ({bool isBusy, bool isOnline})>(
+                selector: (_, vm) => (isBusy: vm.isBusy, isOnline: vm.isOnline),
+                builder: (context, vm, _) => SizedBox(
+                  height: 1,
+                  width: double.infinity,
+                  child: vm.isBusy
+                      ? LinearProgressIndicator(
+                          backgroundColor: Colors.transparent,
+                          valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+                        )
+                      : Container(color: Colors.transparent),
+                ),
               ),
-            ),
-            Selector<LyfiViewModel, bool>(
-              selector: (_, vm) => vm.isOnline,
-              builder: (context, isOnline, _) {
-                final vm = context.read<LyfiViewModel>();
-                return DeviceStatusIndicator(isOnline: isOnline, onReconnect: isOnline ? null : vm.reconnect);
-              },
-            ),
-            Selector<LyfiViewModel, ({bool hasTimezoneMismatch, bool isOnline})>(
-              selector: (_, vm) => (hasTimezoneMismatch: vm.hasTimezoneMismatch, isOnline: vm.isOnline),
-              builder: (context, props, _) {
-                if (!props.hasTimezoneMismatch || !props.isOnline) return SizedBox.shrink();
-                return _TimezoneSyncBanner();
-              },
-            ),
-            Expanded(
-              child: Selector<LyfiViewModel, ({bool isOnline, LyfiState state, bool isOn})>(
-                selector: (_, vm) => (isOnline: vm.isOnline, state: vm.state, isOn: vm.isOn),
-                builder: (context, props, _) {
-                  return AnimatedSwitcher(
-                    duration: Duration(milliseconds: 500),
-                    transitionBuilder: (Widget child, Animation<double> animation) {
-                      return FadeTransition(opacity: animation, child: child);
-                    },
-                    child: switch ((props.isOnline, props.isOn, props.state)) {
-                      (true, true, LyfiState.dimming) => DimmingView(key: ValueKey('dimming')),
-                      (true, _, LyfiState.preview) => DashboardView(key: ValueKey('dashboard')),
-                      (false, _, _) => DashboardView(key: ValueKey('offline-dashboard')),
-                      (true, false, _) => DashboardView(key: ValueKey('dashboard')),
-                      (true, true, LyfiState.normal) => DashboardView(key: ValueKey('dashboard')),
-                      (true, true, LyfiState.temporary) => DashboardView(key: ValueKey('dashboard')),
-                    },
-                  );
+              Selector<LyfiViewModel, bool>(
+                selector: (_, vm) => vm.isOnline,
+                builder: (context, isOnline, _) {
+                  final vm = context.read<LyfiViewModel>();
+                  return DeviceStatusIndicator(isOnline: isOnline, onReconnect: isOnline ? null : vm.reconnect);
                 },
               ),
-            ),
-          ],
+              Selector<LyfiViewModel, ({bool hasTimezoneMismatch, bool isOnline})>(
+                selector: (_, vm) => (hasTimezoneMismatch: vm.hasTimezoneMismatch, isOnline: vm.isOnline),
+                builder: (context, props, _) {
+                  if (!props.hasTimezoneMismatch || !props.isOnline) return SizedBox.shrink();
+                  return _TimezoneSyncBanner();
+                },
+              ),
+              Expanded(
+                child: Selector<LyfiViewModel, ({bool isOnline, LyfiState state, bool isOn})>(
+                  selector: (_, vm) => (isOnline: vm.isOnline, state: vm.state, isOn: vm.isOn),
+                  builder: (context, props, _) {
+                    return AnimatedSwitcher(
+                      duration: Duration(milliseconds: 500),
+                      transitionBuilder: (Widget child, Animation<double> animation) {
+                        return FadeTransition(opacity: animation, child: child);
+                      },
+                      child: switch ((props.isOnline, props.isOn, props.state)) {
+                        (true, true, LyfiState.dimming) => DimmingView(key: ValueKey('dimming')),
+                        (true, _, LyfiState.preview) => DashboardView(key: ValueKey('dashboard')),
+                        (false, _, _) => DashboardView(key: ValueKey('offline-dashboard')),
+                        (true, false, _) => DashboardView(key: ValueKey('dashboard')),
+                        (true, true, LyfiState.normal) => DashboardView(key: ValueKey('dashboard')),
+                        (true, true, LyfiState.temporary) => DashboardView(key: ValueKey('dashboard')),
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

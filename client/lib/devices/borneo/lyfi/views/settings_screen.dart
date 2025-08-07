@@ -22,11 +22,13 @@ class SettingsScreen extends StatelessWidget {
       builder: (context, child) => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(title: Text(context.translate('Settings'))),
-        body: ListView.separated(
-          shrinkWrap: true,
-          itemBuilder: (context, index) => items[index],
-          itemCount: items.length,
-          separatorBuilder: (context, index) => SizedBox(height: 1),
+        body: SafeArea(
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemBuilder: (context, index) => items[index],
+            itemCount: items.length,
+            separatorBuilder: (context, index) => SizedBox(height: 1),
+          ),
         ),
       ),
     );

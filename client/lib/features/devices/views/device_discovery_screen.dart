@@ -230,7 +230,7 @@ class DeviceDiscoveryScreen extends StatelessWidget {
                     onPressed: isBusy ? null : () => Navigator.of(context).maybePop(),
                   ),
                 ),
-                body: buildBody(context, isBusy),
+                body: SafeArea(child: buildBody(context, isBusy)),
               ),
             );
           }
