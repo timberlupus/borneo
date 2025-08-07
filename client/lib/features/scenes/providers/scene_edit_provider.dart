@@ -13,11 +13,18 @@ class SceneEditState {
 
   const SceneEditState({this.name = '', this.notes = '', this.imagePath, this.isLoading = false, this.error});
 
-  SceneEditState copyWith({String? name, String? notes, String? imagePath, bool? isLoading, String? error}) {
+  SceneEditState copyWith({
+    String? name,
+    String? notes,
+    String? imagePath,
+    bool? isLoading,
+    String? error,
+    bool clearImagePath = false,
+  }) {
     return SceneEditState(
       name: name ?? this.name,
       notes: notes ?? this.notes,
-      imagePath: imagePath ?? this.imagePath,
+      imagePath: clearImagePath ? null : (imagePath ?? this.imagePath),
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
     );
@@ -53,7 +60,11 @@ class SceneEditNotifier extends StateNotifier<SceneEditState> {
   }
 
   void setImagePath(String? path) {
-    state = state.copyWith(imagePath: path);
+    if (path == null) {
+      state = state.copyWith(clearImagePath: true);
+    } else {
+      state = state.copyWith(imagePath: path);
+    }
   }
 
   Future<bool> submit() async {

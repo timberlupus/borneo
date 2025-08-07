@@ -119,6 +119,7 @@ dev_dependencies:
   build_runner: ^2.4.13
   mockito: ^5.4.4
   melos: ^7.0.0-dev.9
+  flutter_launcher_icons: ^0.14.4
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -228,6 +229,20 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/icon-512x512.png"
+  remove_alpha_ios: true
+  windows:
+    generate: true
+    image_path: "assets/images/icon-512x512.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/images/icon-512x512.png"
+
+
 flutter_native_splash:
   # This package generates native code to customize Flutter's default white native splash screen
   # with background color and splash image.
@@ -253,13 +268,13 @@ flutter_native_splash:
 
   # The image parameter allows you to specify an image used in the splash screen.  It must be a
   # png file and should be sized for 4x pixel density.
-  #image: assets/splash.png
+  image: assets/images/icon-512x512.png
 
   # The branding property allows you to specify an image used as branding in the splash screen.
   # It must be a png file. It is supported for Android, iOS and the Web.  For Android 12,
   # see the Android 12 section below.
-  branding: assets/images/splash-logo.png
-  branding_dark: assets/images/splash-logo.png
+  # branding: assets/images/splash-logo.png
+  # branding_dark: assets/images/splash-logo.png
 
   # To position the branding image at the bottom of the screen you can use bottom, bottomRight,
   # and bottomLeft. The default values is bottom if not specified or specified something else.
@@ -276,6 +291,7 @@ flutter_native_splash:
   #color_dark: "#042a49"
   #background_image_dark: "assets/dark-background.png"
   #image_dark: assets/splash-invert.png
+  image_dark: assets/images/icon-512x512.png
   #branding_dark: assets/dart_dark.png
 
   # From Android 12 onwards, the splash screen is handled differently than in previous versions.
@@ -291,7 +307,7 @@ flutter_native_splash:
     # 768 pixels in diameter.  To fit a 1152x1152 image within a circle with a 768 diameter, simply 
     # ensure that the most important design elements of your image are placed within a circular area
     # with a 768 diameter at the center of the 1152x1152 canvas.
-    #image: assets/images/splash-logo.png
+    image: assets/images/icon-512x512.png
 
     # Splash screen background color.
     color: "#3d3557"
@@ -301,13 +317,13 @@ flutter_native_splash:
 
     # The branding property allows you to specify an image used as branding in the splash screen.
     # branding: assets/images/splash-logo.png
-    branding: assets/images/splash-logo.png
-    branding_dark: assets/images/splash-logo.png
+    # branding: assets/images/splash-logo.png
+    # branding_dark: assets/images/splash-logo.png
 
     # The image_dark, color_dark, icon_background_color_dark, and branding_dark set values that
     # apply when the device is in dark mode. If they are not specified, the app will use the
     # parameters from above.
-    #image_dark: assets/images/splash-logo.png
+    image_dark: assets/images/icon-512x512.png
     color_dark: "#3d3557"
     #image_dark: assets/android12splash-invert.png
     #color_dark: "#042a49"
