@@ -228,50 +228,57 @@ uint8_t thermal_pid_step(int32_t current_temp)
 
     int32_t error = current_temp - _settings.keep_temp;
 
-    if (abs(error) <= 1) { // ±1°C
+    // If error is within ±1°C, keep previous output to avoid fan jitter
+    if (abs(error) <= 1) {
         return (uint8_t)(pid->last_output);
     }
 
     int32_t p_term = _settings.kp * error;
+    int32_t d_term = _settings.kd * (error - pid->prev_error);
 
-    if (abs(error) >= 2) {
+    // Calculate unsaturated output (before scaling down by PID_Q)
+    int32_t output_unsat = p_term + pid->integral + d_term;
+
+    // Check if the output is saturated
+    bool saturated = false;
+    if (output_unsat > OUTPUT_MAX * PID_Q) {
+        saturated = true;
+    } else if (output_unsat < OUTPUT_MIN * PID_Q) {
+        saturated = true;
+    }
+
+    // Only integrate when output is not saturated and error is significant
+    if (!saturated && abs(error) >= 2) {
         int32_t new_integral = pid->integral + _settings.ki * error;
+        // Clamp integral to prevent overflow
         if (new_integral > PID_INTEGRAL_MAX) {
             pid->integral = PID_INTEGRAL_MAX;
-        }
-        else if (new_integral < PID_INTEGRAL_MIN) {
+        } else if (new_integral < PID_INTEGRAL_MIN) {
             pid->integral = PID_INTEGRAL_MIN;
-        }
-        else {
+        } else {
             pid->integral = new_integral;
         }
     }
 
-    int32_t d_term = _settings.kd * (error - pid->prev_error);
-
-    int32_t output = p_term + pid->integral + d_term;
-
+    // Update previous error for next derivative calculation
     pid->prev_error = error;
 
+    // Recalculate output with possibly updated integral
+    int32_t output = p_term + pid->integral + d_term;
+
+    // Clamp output to allowed range and scale down
     if (output > OUTPUT_MAX * PID_Q) {
         output = OUTPUT_MAX;
-        if (error > 0) {
-            pid->integral -= _settings.ki * error;
-        }
-    }
-    else if (output < OUTPUT_MIN * PID_Q) {
+    } else if (output < OUTPUT_MIN * PID_Q) {
         output = 0;
-        if (error < 0) {
-            pid->integral -= _settings.ki * error;
-        }
-    }
-    else {
+    } else {
         output /= PID_Q;
     }
 
     pid->last_output = output;
     return (uint8_t)output;
 }
+
 
 static void thermal_timer_callback(void* args)
 {
