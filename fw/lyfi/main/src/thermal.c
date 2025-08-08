@@ -228,57 +228,82 @@ uint8_t thermal_pid_step(int32_t current_temp)
 
     int32_t error = current_temp - _settings.keep_temp;
 
-    // If error is within ±1°C, keep previous output to avoid fan jitter
+    // Dead zone: Keep the last output within ±1°C and gently release the integral to avoid long-term historical error
+    // residue
     if (abs(error) <= 1) {
+        pid->integral -= pid->integral / 8;
         return (uint8_t)(pid->last_output);
     }
 
+    // Period normalization: Make PID_PERIOD changes not affect the feel (based on seconds)
+    const int32_t dt_ms = PID_PERIOD;
+    const int32_t ki_eff = (int32_t)((int64_t)_settings.ki * dt_ms / 1000); // Ki * dt
+    const int32_t kd_eff = (int32_t)((int64_t)_settings.kd * 1000 / dt_ms); // Kd / dt
+
+    // Calculate each term (still in PID_Q amplified domain)
     int32_t p_term = _settings.kp * error;
-    int32_t d_term = _settings.kd * (error - pid->prev_error);
+    int32_t d_term = kd_eff * (error - pid->prev_error);
 
-    // Calculate unsaturated output (before scaling down by PID_Q)
-    int32_t output_unsat = p_term + pid->integral + d_term;
+    // Estimate unsaturated output
+    int32_t out_unsat = p_term + pid->integral + d_term;
 
-    // Check if the output is saturated
-    bool saturated = false;
-    if (output_unsat > OUTPUT_MAX * PID_Q) {
-        saturated = true;
-    } else if (output_unsat < OUTPUT_MIN * PID_Q) {
-        saturated = true;
+    // Saturation boundaries (Q domain)
+    const int32_t hi_q = OUTPUT_MAX * PID_Q;
+    const int32_t lo_q = OUTPUT_MIN * PID_Q;
+    // Below this threshold, the fan is considered off
+
+    bool sat_hi = out_unsat > hi_q;
+    bool sat_lo = out_unsat < lo_q;
+
+    // Conditional integration:
+    // - Can integrate if not saturated
+    // - If already high saturated, allow integration only when error decreases (error < 0) to help "desaturate"
+    // - If already low saturated, allow integration only when error increases (error > 0)
+    bool allow_i = true;
+    if (sat_hi && error > 0)
+        allow_i = false;
+    if (sat_lo && error < 0)
+        allow_i = false;
+
+    if (abs(error) >= 2 && allow_i) {
+        int64_t new_i = (int64_t)pid->integral + (int64_t)ki_eff * error;
+        if (new_i > PID_INTEGRAL_MAX)
+            new_i = PID_INTEGRAL_MAX;
+        if (new_i < PID_INTEGRAL_MIN)
+            new_i = PID_INTEGRAL_MIN;
+        pid->integral = (int32_t)new_i;
     }
 
-    // Only integrate when output is not saturated and error is significant
-    if (!saturated && abs(error) >= 2) {
-        int32_t new_integral = pid->integral + _settings.ki * error;
-        // Clamp integral to prevent overflow
-        if (new_integral > PID_INTEGRAL_MAX) {
-            pid->integral = PID_INTEGRAL_MAX;
-        } else if (new_integral < PID_INTEGRAL_MIN) {
-            pid->integral = PID_INTEGRAL_MIN;
-        } else {
-            pid->integral = new_integral;
-        }
-    }
-
-    // Update previous error for next derivative calculation
     pid->prev_error = error;
 
-    // Recalculate output with possibly updated integral
-    int32_t output = p_term + pid->integral + d_term;
-
-    // Clamp output to allowed range and scale down
-    if (output > OUTPUT_MAX * PID_Q) {
-        output = OUTPUT_MAX;
-    } else if (output < OUTPUT_MIN * PID_Q) {
-        output = 0;
-    } else {
-        output /= PID_Q;
+    // Recalculate and quantize to 0..100
+    int32_t out_q = p_term + pid->integral + d_term;
+    uint8_t out;
+    if (out_q <= lo_q) {
+        out = 0;
+        // Turn off if below the starting threshold
+    }
+    else if (out_q >= hi_q) {
+        out = OUTPUT_MAX;
+    }
+    else {
+        out = (uint8_t)(out_q / PID_Q);
     }
 
-    pid->last_output = output;
-    return (uint8_t)output;
-}
+    // Output slew rate limit: restrict the maximum change per cycle to improve user experience and suppress
+    // noise-induced jumps
+    const int32_t max_step = 10;
+    // Maximum change of 10% per second
+    int32_t delta = (int32_t)out - pid->last_output;
+    if (delta > max_step)
+        delta = max_step;
+    if (delta < -max_step)
+        delta = -max_step;
+    out = (uint8_t)(pid->last_output + delta);
 
+    pid->last_output = out;
+    return out;
+}
 
 static void thermal_timer_callback(void* args)
 {
