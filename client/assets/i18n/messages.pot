@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-05 23:53+0800\n"
+"POT-Creation-Date: 2025-08-08 23:19+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,7 +42,7 @@ msgid "Running"
 msgstr ""
 
 #: devices\borneo\lyfi\manifest.dart:86
-#: devices\borneo\lyfi\views\dashboard\dashboard_dimming_tile.dart:47
+#: devices\borneo\lyfi\views\dashboard\dashboard_dimming_tile.dart:62
 msgid "Dimming"
 msgstr ""
 
@@ -123,33 +123,33 @@ msgstr ""
 msgid "Acclimation Mode"
 msgstr ""
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:63
-#: features\devices\views\group_edit_screen.dart:96
+#: devices\borneo\lyfi\views\acclimation_screen.dart:64
+#: features\devices\views\group_edit_screen.dart:91
 #: features\scenes\views\scene_edit_screen.dart:213
 msgid "Submit"
 msgstr ""
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:80
+#: devices\borneo\lyfi\views\acclimation_screen.dart:82
 msgid "SETTINGS"
 msgstr ""
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:83
+#: devices\borneo\lyfi\views\acclimation_screen.dart:85
 msgid "Enabled"
 msgstr ""
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:92
+#: devices\borneo\lyfi\views\acclimation_screen.dart:94
 msgid "Start date"
 msgstr ""
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:129
+#: devices\borneo\lyfi\views\acclimation_screen.dart:131
 msgid "Duration"
 msgstr ""
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:140
+#: devices\borneo\lyfi\views\acclimation_screen.dart:142
 msgid "Start percent"
 msgstr ""
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:163
+#: devices\borneo\lyfi\views\acclimation_screen.dart:165
 msgid "Update acclimation settings succeed."
 msgstr ""
 
@@ -168,13 +168,13 @@ msgstr ""
 #: devices\borneo\lyfi\views\dashboard\dashboard_power_tile.dart:99
 #: devices\borneo\lyfi\views\dashboard\dashboard_temperature_tile.dart:48
 #: devices\borneo\lyfi\views\editor\sun_editor_view.dart:37
-#: devices\borneo\lyfi\views\settings_screen.dart:165
+#: devices\borneo\lyfi\views\settings_screen.dart:167
 msgid "N/A"
 msgstr ""
 
 #: devices\borneo\lyfi\views\dashboard\dashboard_settings_tile.dart:54
 #: devices\borneo\lyfi\views\settings_screen.dart:24
-#: features\my\views\my_screen.dart:18
+#: features\my\views\my_screen.dart:24
 #: features\my\views\my_screen_riverpod.dart:19
 msgid "Settings"
 msgstr ""
@@ -183,15 +183,27 @@ msgstr ""
 msgid "Temperature"
 msgstr ""
 
+#: devices\borneo\lyfi\views\dimming_screen.dart:74
+msgid "MANU"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dimming_screen.dart:79
+msgid "SCHED"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dimming_screen.dart:84
+msgid "SUN"
+msgstr ""
+
 #: devices\borneo\lyfi\views\easy_setup_screen.dart:34
 msgid "Easy Setup"
 msgstr ""
 
-#: devices\borneo\lyfi\views\easy_setup_screen.dart:134
+#: devices\borneo\lyfi\views\easy_setup_screen.dart:136
 msgid "Hrs"
 msgstr ""
 
-#: devices\borneo\lyfi\views\easy_setup_screen.dart:151
+#: devices\borneo\lyfi\views\easy_setup_screen.dart:153
 msgid "Mins"
 msgstr ""
 
@@ -238,7 +250,7 @@ msgid "Are you sure you want to remove all schedule entries?"
 msgstr ""
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:269
-#: devices\borneo\lyfi\views\settings_screen.dart:369
+#: devices\borneo\lyfi\views\settings_screen.dart:371
 #: features\devices\widgets\delete_group_dialog.dart:19
 #: main\views\main_screen.dart:195
 #: shared\widgets\generic_settings_screen.dart:69
@@ -249,207 +261,195 @@ msgstr ""
 msgid "Confirm"
 msgstr ""
 
-#: devices\borneo\lyfi\views\lyfi_view.dart:154
-msgid "MANU"
-msgstr ""
-
-#: devices\borneo\lyfi\views\lyfi_view.dart:159
-msgid "SCHED"
-msgstr ""
-
-#: devices\borneo\lyfi\views\lyfi_view.dart:164
-msgid "SUN"
-msgstr ""
-
-#: devices\borneo\lyfi\views\lyfi_view.dart:363
-msgid "Sync Timezone"
-msgstr ""
-
-#: devices\borneo\lyfi\views\settings_screen.dart:70
+#: devices\borneo\lyfi\views\settings_screen.dart:72
 msgid "DEVICE INFORMATION"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:76
+#: devices\borneo\lyfi\views\settings_screen.dart:78
 #: features\devices\views\group_edit_screen.dart:23
 #: features\scenes\views\scene_edit_screen.dart:162
 msgid "Name"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:85
+#: devices\borneo\lyfi\views\settings_screen.dart:87
 msgid "Manufacturer & Model"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:95
+#: devices\borneo\lyfi\views\settings_screen.dart:97
 msgid "Serial number"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:102
+#: devices\borneo\lyfi\views\settings_screen.dart:104
 msgid "Device address"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:108
+#: devices\borneo\lyfi\views\settings_screen.dart:110
 msgid "DEVICE STATUS"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:117
+#: devices\borneo\lyfi\views\settings_screen.dart:119
 msgid "Device time & time zone"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:122
+#: devices\borneo\lyfi\views\settings_screen.dart:124
 msgid "Unknown time zone"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:136
+#: devices\borneo\lyfi\views\settings_screen.dart:138
 msgid "Power status at startup"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:142
+#: devices\borneo\lyfi\views\settings_screen.dart:144
 msgid "Keep on"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:146
+#: devices\borneo\lyfi\views\settings_screen.dart:148
 msgid "Keep off"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:150
+#: devices\borneo\lyfi\views\settings_screen.dart:152
 msgid "Maintain last"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:164
+#: devices\borneo\lyfi\views\settings_screen.dart:166
 msgid "Last shutdown"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:167
+#: devices\borneo\lyfi\views\settings_screen.dart:169
 #, python-brace-format
 msgid "Reason code: {reasonCode}"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:172
+#: devices\borneo\lyfi\views\settings_screen.dart:174
 msgid "LIGHTING"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:181
+#: devices\borneo\lyfi\views\settings_screen.dart:183
 msgid "Location for sun & moon simulation"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:184
+#: devices\borneo\lyfi\views\settings_screen.dart:186
 msgid "Unknown"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:202
+#: devices\borneo\lyfi\views\settings_screen.dart:204
 msgid "Correction curve"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:210
+#: devices\borneo\lyfi\views\settings_screen.dart:212
 msgid "Logarithmic"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:214
+#: devices\borneo\lyfi\views\settings_screen.dart:216
 msgid "Linear"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:218
+#: devices\borneo\lyfi\views\settings_screen.dart:220
 msgid "Exponential"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:222
+#: devices\borneo\lyfi\views\settings_screen.dart:224
 msgid "Gamma"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:226
+#: devices\borneo\lyfi\views\settings_screen.dart:228
 msgid "CIE1931"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:242
+#: devices\borneo\lyfi\views\settings_screen.dart:244
 msgid "Temporary light on duration"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:250
+#: devices\borneo\lyfi\views\settings_screen.dart:252
 msgid "5 minutes"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:254
+#: devices\borneo\lyfi\views\settings_screen.dart:256
 msgid "10 minutes"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:258
+#: devices\borneo\lyfi\views\settings_screen.dart:260
 msgid "20 minutes"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:262
+#: devices\borneo\lyfi\views\settings_screen.dart:264
 msgid "1 hour"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:266
+#: devices\borneo\lyfi\views\settings_screen.dart:268
 msgid "2 hours"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:270
+#: devices\borneo\lyfi\views\settings_screen.dart:272
 msgid "4 hours"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:274
+#: devices\borneo\lyfi\views\settings_screen.dart:276
 msgid "8 hours"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:278
+#: devices\borneo\lyfi\views\settings_screen.dart:280
 msgid "12 hours"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:292
+#: devices\borneo\lyfi\views\settings_screen.dart:294
 msgid "VERSION & UPGRADE"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:298
+#: devices\borneo\lyfi\views\settings_screen.dart:300
 msgid "Hardware version"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:305
+#: devices\borneo\lyfi\views\settings_screen.dart:307
 msgid "Firmware version"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:326
+#: devices\borneo\lyfi\views\settings_screen.dart:328
 msgid "DANGER ZONE"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:335
+#: devices\borneo\lyfi\views\settings_screen.dart:337
 msgid "Restore to factory settings"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:338
+#: devices\borneo\lyfi\views\settings_screen.dart:340
 msgid "Your device will lose all custom settings."
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:349
+#: devices\borneo\lyfi\views\settings_screen.dart:351
 msgid "Restore Factory Settings"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:354
+#: devices\borneo\lyfi\views\settings_screen.dart:356
 msgid "Are you sure you want to restore this device to factory settings?"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:356
+#: devices\borneo\lyfi\views\settings_screen.dart:358
 msgid "This action will:"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:358
+#: devices\borneo\lyfi\views\settings_screen.dart:360
 msgid "• Delete all custom settings and configurations"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:359
+#: devices\borneo\lyfi\views\settings_screen.dart:361
 msgid "• Disconnect the device from your network"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:360
+#: devices\borneo\lyfi\views\settings_screen.dart:362
 msgid "• Reset all schedules and modes to defaults"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:363
+#: devices\borneo\lyfi\views\settings_screen.dart:365
 msgid "The device will need to be reconfigured after this operation."
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:385
+#: devices\borneo\lyfi\views\settings_screen.dart:387
 msgid "Restore"
+msgstr ""
+
+#: devices\borneo\lyfi\views\widgets\lyfi_header.dart:126
+msgid "Sync Timezone"
 msgstr ""
 
 #: devices\views\device_offline_view.dart:21
@@ -525,23 +525,23 @@ msgstr ""
 msgid "Select the group to which device \"{deviceName}\" belongs:"
 msgstr ""
 
-#: features\devices\views\devices_screen.dart:141
+#: features\devices\views\devices_screen.dart:134
 #: features\scenes\views\scenes_screen_riverpod.dart:122
 #, python-brace-format
 msgid "Error: {errMsg}"
 msgstr ""
 
-#: features\devices\views\devices_screen.dart:208
+#: features\devices\views\devices_screen.dart:202
 #: main\views\main_screen.dart:92
 msgid "Add New Devices"
 msgstr ""
 
-#: features\devices\views\devices_screen.dart:212
+#: features\devices\views\devices_screen.dart:206
 #: main\views\main_screen.dart:98
 msgid "Add Devices Group"
 msgstr ""
 
-#: features\devices\views\devices_screen.dart:225
+#: features\devices\views\devices_screen.dart:219
 #, python-brace-format
 msgid "Devices in {currentScene}"
 msgstr ""
@@ -566,31 +566,23 @@ msgstr ""
 msgid "Notes"
 msgstr ""
 
-#: features\devices\views\group_edit_screen.dart:78
-msgid "Group created"
-msgstr ""
-
-#: features\devices\views\group_edit_screen.dart:79
-msgid "Group updated"
-msgstr ""
-
-#: features\devices\views\group_edit_screen.dart:87
+#: features\devices\views\group_edit_screen.dart:82
 msgid "Operation failed"
 msgstr ""
 
-#: features\devices\views\group_edit_screen.dart:160
+#: features\devices\views\group_edit_screen.dart:155
 msgid "Group deleted"
 msgstr ""
 
-#: features\devices\views\group_edit_screen.dart:166
+#: features\devices\views\group_edit_screen.dart:161
 msgid "Delete failed"
 msgstr ""
 
-#: features\devices\views\group_edit_screen.dart:199
+#: features\devices\views\group_edit_screen.dart:194
 msgid "New Device Group"
 msgstr ""
 
-#: features\devices\views\group_edit_screen.dart:200
+#: features\devices\views\group_edit_screen.dart:195
 msgid "Edit Device Group"
 msgstr ""
 
@@ -640,21 +632,21 @@ msgid ""
 "consequences resulting from the use of this software."
 msgstr ""
 
-#: features\my\views\donation_screen.dart:24
-#: features\my\views\my_screen.dart:45
+#: features\my\views\donation_screen.dart:28
+#: features\my\views\my_screen.dart:55
 #: features\my\views\my_screen_riverpod.dart:31
 msgid "Back This Project"
 msgstr ""
 
-#: features\my\views\donation_screen.dart:44
+#: features\my\views\donation_screen.dart:54
 msgid "Support Open Source Aquarium Tech"
 msgstr ""
 
-#: features\my\views\donation_screen.dart:63
+#: features\my\views\donation_screen.dart:73
 msgid "Why Your Support Matters"
 msgstr ""
 
-#: features\my\views\donation_screen.dart:69
+#: features\my\views\donation_screen.dart:79
 msgid ""
 "Your donation helps cover development costs, server expenses, and continuous "
 "improvements that benefit the entire aquarium community. Every contribution, "
@@ -662,19 +654,19 @@ msgid ""
 "for being part of this journey!"
 msgstr ""
 
-#: features\my\views\donation_screen.dart:81
+#: features\my\views\donation_screen.dart:94
 msgid "Choose Your Support Method"
 msgstr ""
 
-#: features\my\views\donation_screen.dart:92
+#: features\my\views\donation_screen.dart:108
 msgid "Buy me a coffee"
 msgstr ""
 
-#: features\my\views\donation_screen.dart:104
+#: features\my\views\donation_screen.dart:120
 msgid "Support via PayPal"
 msgstr ""
 
-#: features\my\views\my_screen.dart:30
+#: features\my\views\my_screen.dart:33
 #: features\my\views\my_screen_riverpod.dart:45
 msgid "About"
 msgstr ""

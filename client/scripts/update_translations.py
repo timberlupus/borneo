@@ -58,9 +58,17 @@ def generate_pot(project_path):
             run_command(command)
         else:
             # Update the .po file with new translations using msgmerge
+            # Disable fuzzy matching so only exact matches are merged
             print(f"Updating .po file for {lang}...")
-            update_command = f"msgmerge --backup=off --previous --update {po_file} {pot_output_path}"
+            update_command = (
+                f"msgmerge --backup=off --previous --no-fuzzy-matching --update {po_file} {pot_output_path}"
+            )
             run_command(update_command)
+
+            # Optional: clear any existing 'fuzzy' flags that may already be present in the file
+            # This keeps only confirmed translations and avoids fuzzy entries lingering around
+            clear_fuzzy_cmd = f"msgattrib --clear-fuzzy -o {po_file} {po_file}"
+            run_command(clear_fuzzy_cmd)
 
     # Step 5: Compile .po files to .mo
     # for lang in languages:
