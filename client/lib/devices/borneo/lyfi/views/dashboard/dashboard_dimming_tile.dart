@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
-import '../dimming/dimming_screen.dart';
+import '../dimming_screen.dart';
 
 class DashboardDimmingTile extends StatelessWidget {
   const DashboardDimmingTile({super.key});

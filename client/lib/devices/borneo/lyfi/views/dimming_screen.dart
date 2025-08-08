@@ -3,10 +3,50 @@ import 'package:provider/provider.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 
-import '../../view_models/lyfi_view_model.dart';
-import '../editor/manual_editor_view.dart';
-import '../editor/schedule_editor_view.dart';
-import '../editor/sun_editor_view.dart';
+import '../view_models/lyfi_view_model.dart';
+import 'widgets/lyfi_header.dart';
+import 'editor/manual_editor_view.dart';
+import 'editor/schedule_editor_view.dart';
+import 'editor/sun_editor_view.dart';
+
+class DimmingScreen extends StatelessWidget {
+  static const routeName = '/lyfi/dimming';
+  const DimmingScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        final vm = context.read<LyfiViewModel>();
+        if (vm.isOnline && !vm.isLocked) {
+          vm.toggleLock(true);
+        }
+        Navigator.of(context).pop();
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            LyfiAppBar(
+              onBack: () {
+                final vm = context.read<LyfiViewModel>();
+                if (!vm.isLocked) {
+                  vm.toggleLock(true);
+                }
+                Navigator.of(context).pop();
+              },
+            ),
+            const LyfiBusyIndicatorSliver(),
+            const LyfiStatusBannersSliver(),
+          ],
+          body: const SafeArea(top: false, child: DimmingView()),
+        ),
+      ),
+    );
+  }
+}
 
 class DimmingHeroPanel extends StatelessWidget {
   const DimmingHeroPanel({super.key});
