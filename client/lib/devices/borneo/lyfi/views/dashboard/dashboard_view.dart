@@ -18,6 +18,7 @@ class DashboardView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
       child: SingleChildScrollView(
+        primary: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,

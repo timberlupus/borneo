@@ -1,22 +1,16 @@
 import 'package:borneo_app/core/services/local_service.dart';
-import 'package:borneo_app/shared/widgets/device_status_indicator.dart';
-import 'package:borneo_app/devices/borneo/lyfi/views/editor/sun_editor_view.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
-import 'package:borneo_common/io/net/rssi.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/dashboard_view.dart';
-import 'package:borneo_app/devices/borneo/lyfi/views/editor/schedule_editor_view.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 
 import '../view_models/lyfi_view_model.dart';
-import 'editor/manual_editor_view.dart';
+import 'widgets/lyfi_header.dart';
 
 class CircleButton extends StatelessWidget {
   final String text;
@@ -128,95 +122,6 @@ class HeroProgressIndicator extends StatelessWidget {
 }
 */
 
-class DimmingHeroPanel extends StatelessWidget {
-  const DimmingHeroPanel({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Theme.of(context).colorScheme.surface,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Selector<LyfiViewModel, LyfiMode>(
-              selector: (context, vm) => vm.mode,
-              builder: (context, mode, _) {
-                final vm = context.read<LyfiViewModel>();
-                return SegmentedButton<LyfiMode>(
-                  showSelectedIcon: false,
-                  selected: <LyfiMode>{mode},
-                  segments: [
-                    ButtonSegment<LyfiMode>(
-                      value: LyfiMode.manual,
-                      label: Text(context.translate('MANU')),
-                      icon: Icon(Icons.bar_chart_outlined, size: 24),
-                    ),
-                    ButtonSegment<LyfiMode>(
-                      value: LyfiMode.scheduled,
-                      label: Text(context.translate('SCHED')),
-                      icon: Icon(Icons.alarm_outlined, size: 24),
-                    ),
-                    ButtonSegment<LyfiMode>(
-                      value: LyfiMode.sun,
-                      label: Text(context.translate('SUN')),
-                      icon: Icon(Icons.wb_sunny_outlined, size: 24),
-                    ),
-                  ],
-                  onSelectionChanged: vm.isOn && !vm.isBusy && !vm.isLocked
-                      ? (Set<LyfiMode> newSelection) {
-                          if (mode != newSelection.single) {
-                            vm.switchMode(newSelection.single);
-                          }
-                        }
-                      : null,
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class DimmingView extends StatelessWidget {
-  const DimmingView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    //final String deviceID =
-    //   ModalRoute.of(context)!.settings.arguments as String;
-    return Column(
-      spacing: 16,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        DimmingHeroPanel(),
-        Expanded(
-          child: Selector<LyfiViewModel, ({bool isLocked, LyfiMode mode})>(
-            selector: (context, vm) => (isLocked: vm.isLocked, mode: vm.mode),
-            builder: (context, vm, child) {
-              return AnimatedSwitcher(
-                duration: Duration(milliseconds: 300),
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-                child: switch (vm.mode) {
-                  LyfiMode.manual => ManualEditorView(),
-                  LyfiMode.scheduled => ScheduleEditorView(),
-                  LyfiMode.sun => SunEditorView(),
-                },
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _LyfiDeviceDetailsScreen extends StatelessWidget {
   const _LyfiDeviceDetailsScreen();
 
@@ -237,86 +142,13 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        appBar: AppBar(
-          foregroundColor: Theme.of(context).colorScheme.onSurface,
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          title: Selector<LyfiViewModel, String>(
-            selector: (_, vm) => vm.name,
-            builder: (contet, name, _) => Text(name),
-          ),
-          leading: Selector<LyfiViewModel, bool>(
-            selector: (context, vm) => vm.isBusy,
-            builder: (context, isBusy, child) =>
-                IconButton(icon: Icon(Icons.arrow_back), onPressed: isBusy ? null : () => goBack(context)),
-          ),
-          actions: [
-            Selector<LyfiViewModel, RssiLevel?>(
-              selector: (_, vm) => vm.rssiLevel,
-              builder: (content, rssi, _) => Center(
-                child: switch (rssi) {
-                  null => Icon(Icons.link_off, size: 24, color: Theme.of(context).colorScheme.error),
-                  RssiLevel.strong => Icon(Icons.wifi_rounded, size: 24),
-                  RssiLevel.medium => Icon(Icons.wifi_2_bar_rounded, size: 24),
-                  RssiLevel.weak => Icon(Icons.wifi_1_bar_rounded, size: 24),
-                },
-              ),
-            ),
-            SizedBox(width: 16),
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            LyfiAppBar(onBack: () => goBack(context)),
+            const LyfiBusyIndicatorSliver(),
+            const LyfiStatusBannersSliver(),
           ],
-        ),
-        body: SafeArea(
-          child: Column(
-            children: [
-              Selector<LyfiViewModel, ({bool isBusy, bool isOnline})>(
-                selector: (_, vm) => (isBusy: vm.isBusy, isOnline: vm.isOnline),
-                builder: (context, vm, _) => SizedBox(
-                  height: 1,
-                  width: double.infinity,
-                  child: vm.isBusy
-                      ? LinearProgressIndicator(
-                          backgroundColor: Colors.transparent,
-                          valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
-                        )
-                      : Container(color: Colors.transparent),
-                ),
-              ),
-              Selector<LyfiViewModel, bool>(
-                selector: (_, vm) => vm.isOnline,
-                builder: (context, isOnline, _) {
-                  final vm = context.read<LyfiViewModel>();
-                  return DeviceStatusIndicator(isOnline: isOnline, onReconnect: isOnline ? null : vm.reconnect);
-                },
-              ),
-              Selector<LyfiViewModel, ({bool hasTimezoneMismatch, bool isOnline})>(
-                selector: (_, vm) => (hasTimezoneMismatch: vm.hasTimezoneMismatch, isOnline: vm.isOnline),
-                builder: (context, props, _) {
-                  if (!props.hasTimezoneMismatch || !props.isOnline) return SizedBox.shrink();
-                  return _TimezoneSyncBanner();
-                },
-              ),
-              Expanded(
-                child: Selector<LyfiViewModel, ({bool isOnline, LyfiState state, bool isOn})>(
-                  selector: (_, vm) => (isOnline: vm.isOnline, state: vm.state, isOn: vm.isOn),
-                  builder: (context, props, _) {
-                    return AnimatedSwitcher(
-                      duration: Duration(milliseconds: 500),
-                      transitionBuilder: (Widget child, Animation<double> animation) {
-                        return FadeTransition(opacity: animation, child: child);
-                      },
-                      child: switch ((props.isOnline, props.isOn, props.state)) {
-                        (true, true, LyfiState.dimming) => DimmingView(key: ValueKey('dimming')),
-                        (true, _, LyfiState.preview) => DashboardView(key: ValueKey('dashboard')),
-                        (false, _, _) => DashboardView(key: ValueKey('offline-dashboard')),
-                        (true, false, _) => DashboardView(key: ValueKey('dashboard')),
-                        (true, true, LyfiState.normal) => DashboardView(key: ValueKey('dashboard')),
-                        (true, true, LyfiState.temporary) => DashboardView(key: ValueKey('dashboard')),
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+          body: const SafeArea(top: false, child: DashboardView(key: ValueKey('dashboard'))),
         ),
       ),
     );
@@ -329,44 +161,6 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
     } else {
       vm.toggleLock(true);
     }
-  }
-}
-
-class _TimezoneSyncBanner extends StatelessWidget {
-  const _TimezoneSyncBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.fromLTRB(16, 8, 16, 8),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.access_time, size: 20, color: Theme.of(context).colorScheme.onPrimaryContainer),
-          SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Device timezone is different from app timezone',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer),
-            ),
-          ),
-          SizedBox(width: 12),
-          FilledButton.tonal(
-            onPressed: () {
-              final vm = context.read<LyfiViewModel>();
-              vm.syncDeviceTimezone();
-            },
-            child: Text(context.translate('Sync Timezone')),
-          ),
-        ],
-      ),
-    );
   }
 }
 

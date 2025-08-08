@@ -282,12 +282,15 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       // Exiting edit mode - switch to normal state
       await super.setState(LyfiState.normal);
       await refreshStatus();
+      notifyListeners();
     } else {
       // Entering edit mode - wait for state to change to dimming before creating editor
       await super.setState(LyfiState.dimming);
       await refreshStatus();
 
       await _toggleEditor(super.mode);
+      // Notify listeners so UI awaiting readiness can proceed
+      notifyListeners();
     }
   }
 
@@ -315,6 +318,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     await super.setMode(newMode);
     await refreshStatus();
     await _toggleEditor(super.mode);
+    notifyListeners();
   }
 
   Future<void> _toggleEditor(LyfiMode newMode) async {
@@ -332,6 +336,26 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         break;
     }
     await currentEditor!.initialize();
+    // Do not notify here; callers decide after refresh/creation to notify.
+  }
+
+  bool get isDimmingReady => !isLocked && super.state == LyfiState.dimming && currentEditor != null;
+
+  /// Returns a Future that completes when the view model is ready for Dimming editing
+  /// (unlocked, state==dimming, editor initialized). No timers/polling are used; it resolves
+  /// on the next notifyListeners that satisfies the predicate.
+  Future<void> onDimmingReady() async {
+    if (isDimmingReady) return;
+    final completer = Completer<void>();
+    late VoidCallback listener;
+    listener = () {
+      if (isDimmingReady && !completer.isCompleted) {
+        removeListener(listener);
+        completer.complete();
+      }
+    };
+    addListener(listener);
+    return completer.future;
   }
 
   Future<SettingsViewModel> loadSettings(final GettextLocalizations gt) async {

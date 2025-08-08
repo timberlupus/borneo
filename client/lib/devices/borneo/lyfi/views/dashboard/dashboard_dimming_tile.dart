@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
+import '../dimming/dimming_screen.dart';
 
 class DashboardDimmingTile extends StatelessWidget {
   const DashboardDimmingTile({super.key});
@@ -29,7 +30,21 @@ class DashboardDimmingTile extends StatelessWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: (canUnlock && context.read<LyfiViewModel>().isOnline)
-                    ? () async => context.read<LyfiViewModel>().toggleLock(false)
+                    ? () async {
+                        final vm = context.read<LyfiViewModel>();
+                        // Request entering dimming (unlock) then wait for readiness event-driven
+                        vm.toggleLock(false);
+                        await vm.onDimmingReady();
+
+                        if (context.mounted) {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ChangeNotifierProvider.value(value: vm, child: const DimmingScreen()),
+                            ),
+                          );
+                        }
+                      }
                     : null,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
