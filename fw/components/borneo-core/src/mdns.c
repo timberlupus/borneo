@@ -26,15 +26,15 @@ int bo_mdns_init()
 {
     ESP_LOGI(TAG, "Initializing Borneo MDNS sub-system...");
 
-    BO_TRY(mdns_init());
+    BO_TRY_ESP(mdns_init());
 
     BO_TRY(populate_hostname());
 
     const struct system_info* sysinfo = bo_system_get_info();
 
-    BO_TRY(mdns_hostname_set(_hostname));
+    BO_TRY_ESP(mdns_hostname_set(_hostname));
 
-    BO_TRY(mdns_instance_name_set(sysinfo->name));
+    BO_TRY_ESP(mdns_instance_name_set(sysinfo->name));
 
     BO_TRY(add_mdns_services());
 
@@ -56,11 +56,11 @@ static int add_mdns_services()
 {
     const struct system_info* sysinfo = bo_system_get_info();
     // Add the mDNS service
-    BO_TRY(mdns_service_add(sysinfo->name, MDNS_SERVICE_TYPE, "_udp", MDNS_UDP_PORT, NULL, 0));
+    BO_TRY_ESP(mdns_service_add(sysinfo->name, MDNS_SERVICE_TYPE, "_udp", MDNS_UDP_PORT, NULL, 0));
 
     // Note: You must add the service first, then you can set its properties.
     // The web server uses a custom instance name.
-    BO_TRY(mdns_service_instance_name_set(MDNS_SERVICE_TYPE, "_udp", sysinfo->name));
+    BO_TRY_ESP(mdns_service_instance_name_set(MDNS_SERVICE_TYPE, "_udp", sysinfo->name));
 
     const esp_app_desc_t* app_desc = esp_app_get_description();
 
@@ -79,8 +79,8 @@ static int add_mdns_services()
         { "path", "/borneo" },
     };
 
-    BO_TRY(mdns_service_txt_set(MDNS_SERVICE_TYPE, "_udp", serviceTxtData,
-                                sizeof(serviceTxtData) / sizeof(mdns_txt_item_t)));
+    BO_TRY_ESP(mdns_service_txt_set(MDNS_SERVICE_TYPE, "_udp", serviceTxtData,
+                                    sizeof(serviceTxtData) / sizeof(mdns_txt_item_t)));
 
     return 0;
 }

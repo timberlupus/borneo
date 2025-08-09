@@ -131,8 +131,8 @@ int thermal_init()
             .callback = &thermal_timer_callback,
             .name = "thermal_timer",
         };
-        BO_TRY(esp_timer_create(&timer_args, &_thermal.timer));
-        BO_TRY(esp_timer_start_periodic(_thermal.timer, (uint64_t)PID_PERIOD * 1000));
+        BO_TRY_ESP(esp_timer_create(&timer_args, &_thermal.timer));
+        BO_TRY_ESP(esp_timer_start_periodic(_thermal.timer, (uint64_t)PID_PERIOD * 1000));
     }
 
     BO_TRY(thermal_reinit());

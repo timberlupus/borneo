@@ -119,7 +119,7 @@ int bo_rtc_set_tz(const char* tz)
         BO_TRY(bo_nvs_user_open(NVS_RTC_NAMESPACE, NVS_READWRITE, &nvs_handle));
         BO_NVS_AUTO_CLOSE(nvs_handle);
 
-        BO_TRY(nvs_set_str(nvs_handle, NVS_RTC_TZ_KEY, tz));
+        BO_TRY_ESP(nvs_set_str(nvs_handle, NVS_RTC_TZ_KEY, tz));
 
         // TODO Post message
     }

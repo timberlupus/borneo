@@ -80,7 +80,7 @@ int bo_power_on()
     }
     _state.is_power_on = true;
     _settings.last_state = true;
-    BO_TRY(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_POWER_ON, NULL, 0, portMAX_DELAY));
+    BO_TRY_ESP(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_POWER_ON, NULL, 0, portMAX_DELAY));
     BO_TRY(update_settings());
     return 0;
 }
@@ -90,10 +90,10 @@ int bo_power_shutdown(uint32_t reason)
     _state.is_power_on = false;
     _settings.last_state = false;
     if (reason) {
-        BO_TRY(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_SHUTDOWN_FAULT, NULL, 0, portMAX_DELAY));
+        BO_TRY_ESP(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_SHUTDOWN_FAULT, NULL, 0, portMAX_DELAY));
     }
     else {
-        BO_TRY(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_SHUTDOWN_SCHEDULED, NULL, 0, portMAX_DELAY));
+        BO_TRY_ESP(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_SHUTDOWN_SCHEDULED, NULL, 0, portMAX_DELAY));
     }
     bo_system_set_shutdown_reason(reason);
     if (reason == BO_SHUTDOWN_REASON_SCHEDULED) {

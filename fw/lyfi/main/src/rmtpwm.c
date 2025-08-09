@@ -69,7 +69,7 @@ int rmtpwm_init()
     rmt_pwm_encoder_config_t encoder_config = {
         .resolution = RMT_PWM_RESOLUTION_HZ,
     };
-    BO_TRY(rmt_new_pwm_encoder(&encoder_config, &s_pwm_encoder));
+    BO_TRY_ESP(rmt_new_pwm_encoder(&encoder_config, &s_pwm_encoder));
     return 0;
 }
 
@@ -88,11 +88,11 @@ int rmtpwm_dac_init()
         .resolution_hz = RMT_PWM_RESOLUTION_HZ,
         .trans_queue_depth = 8, // set the maximum number of transactions that can pend in the background
     };
-    BO_TRY(rmt_new_tx_channel(&fan_dac_tx_chan_config, &s_dac_channel.rmt_channel));
-    BO_TRY(gpio_pullup_en(CONFIG_LYFI_FAN_CTRL_PWMDAC_GPIO));
-    BO_TRY(rmt_enable(s_dac_channel.rmt_channel));
-    BO_TRY(rmt_transmit(s_dac_channel.rmt_channel, s_pwm_encoder, &s_dac_channel.duty, sizeof(s_dac_channel.duty),
-                        &tx_config));
+    BO_TRY_ESP(rmt_new_tx_channel(&fan_dac_tx_chan_config, &s_dac_channel.rmt_channel));
+    BO_TRY_ESP(gpio_pullup_en(CONFIG_LYFI_FAN_CTRL_PWMDAC_GPIO));
+    BO_TRY_ESP(rmt_enable(s_dac_channel.rmt_channel));
+    BO_TRY_ESP(rmt_transmit(s_dac_channel.rmt_channel, s_pwm_encoder, &s_dac_channel.duty, sizeof(s_dac_channel.duty),
+                            &tx_config));
 
     return 0;
 }
@@ -114,10 +114,10 @@ int rmtpwm_pwm_init()
         .resolution_hz = RMT_PWM_RESOLUTION_HZ,
         .trans_queue_depth = 8, // set the maximum number of transactions that can pend in the background
     };
-    BO_TRY(rmt_new_tx_channel(&fan_pwm_tx_chan_config, &s_pwm_channel.rmt_channel));
-    BO_TRY(rmt_enable(s_pwm_channel.rmt_channel));
-    BO_TRY(rmt_transmit(s_pwm_channel.rmt_channel, s_pwm_encoder, &s_pwm_channel.duty, sizeof(s_pwm_channel.duty),
-                        &tx_config));
+    BO_TRY_ESP(rmt_new_tx_channel(&fan_pwm_tx_chan_config, &s_pwm_channel.rmt_channel));
+    BO_TRY_ESP(rmt_enable(s_pwm_channel.rmt_channel));
+    BO_TRY_ESP(rmt_transmit(s_pwm_channel.rmt_channel, s_pwm_encoder, &s_pwm_channel.duty, sizeof(s_pwm_channel.duty),
+                            &tx_config));
 
     return 0;
 }
@@ -144,9 +144,10 @@ int rmtpwm_set_duty_internal(struct rmtpwm_channel* channel, uint8_t duty)
             .loop_count = -1,
         };
 
-        BO_TRY(rmt_disable(channel->rmt_channel));
-        BO_TRY(rmt_enable(channel->rmt_channel));
-        BO_TRY(rmt_transmit(channel->rmt_channel, s_pwm_encoder, &channel->duty, sizeof(channel->duty), &tx_config));
+        BO_TRY_ESP(rmt_disable(channel->rmt_channel));
+        BO_TRY_ESP(rmt_enable(channel->rmt_channel));
+        BO_TRY_ESP(
+            rmt_transmit(channel->rmt_channel, s_pwm_encoder, &channel->duty, sizeof(channel->duty), &tx_config));
     }
     else {
         return -EBUSY;

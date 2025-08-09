@@ -53,7 +53,7 @@ int bo_system_init()
 
     // Make the device ID (EUI-64 from MAC)
     uint8_t mac[6];
-    BO_TRY(esp_read_mac(mac, ESP_MAC_WIFI_STA));
+    BO_TRY_ESP(esp_read_mac(mac, ESP_MAC_WIFI_STA));
 
     // EUI-64: insert 0xFFFE in the middle, flip U/L bit
     _sysinfo.id[0] = mac[0] ^ 0x02; // flip U/L bit
@@ -71,7 +71,7 @@ int bo_system_init()
     }
     _sysinfo.hex_id[16] = '\0';
 
-    BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &_system_event_handler, NULL));
+    BO_TRY_ESP(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &_system_event_handler, NULL));
 
     return 0;
 }
@@ -80,7 +80,7 @@ void bo_system_set_ready()
 {
     if (!_status.is_ready) {
         _status.is_ready = true;
-        BO_MUST(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_READY, NULL, 0, portMAX_DELAY));
+        BO_MUST_ESP(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_READY, NULL, 0, portMAX_DELAY));
     }
     else {
         bo_panic();
@@ -116,32 +116,16 @@ void bo_system_reboot_later(uint32_t delay_ms)
         .callback = &_reboot_callback,
         .name = "reboot_timer",
     };
-    esp_timer_handle_t* reboot_timer = (esp_timer_handle_t*)malloc(sizeof(esp_timer_handle_t));
-    if (reboot_timer == NULL) {
-        ESP_LOGE(TAG, "Failed to allocate reboot_timer.");
-        return;
-    }
 
-    int rc = esp_timer_create(&timer_args, reboot_timer);
-    if (rc) {
-        free(reboot_timer);
-        ESP_LOGE(TAG, "Failed to create reboot timer.");
-        return;
-    }
-
-    rc = esp_timer_start_once(*reboot_timer, delay_ms * 1000);
-    if (rc) {
-        free(reboot_timer);
-        ESP_LOGE(TAG, "Failed to start reboot timer.");
-        return;
-    }
+    esp_timer_handle_t reboot_timer;
+    BO_MUST_ESP(esp_timer_create(&timer_args, &reboot_timer));
+    BO_MUST_ESP(esp_timer_start_once(reboot_timer, delay_ms * 1000));
 
     if (bo_power_is_on()) {
         BO_MUST(bo_power_shutdown(0));
-        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
-    BO_MUST(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_REBOOTING, NULL, 0, portMAX_DELAY));
+    BO_MUST_ESP(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_REBOOTING, NULL, 0, portMAX_DELAY));
 }
 
 int bo_system_factory_reset()

@@ -87,7 +87,7 @@ static int _coap_init()
 
     coap_set_log_level(CONFIG_COAP_LOG_DEFAULT_LEVEL);
 
-    BO_TRY(esp_event_handler_register(BO_SNTP_EVENTS, ESP_EVENT_ANY_ID, &_bo_event_handler, NULL));
+    BO_TRY_ESP(esp_event_handler_register(BO_SNTP_EVENTS, ESP_EVENT_ANY_ID, &_bo_event_handler, NULL));
 
     // Prepare the CoAP server socket
     coap_address_init(&_serv_addr);
@@ -192,7 +192,7 @@ int notify_init()
         return -ENOMEM;
     }
 
-    BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &_system_event_handler, NULL));
+    BO_TRY_ESP(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &_system_event_handler, NULL));
 
     BaseType_t rc = xTaskCreate(&notify_task, "coap.notify", 1024 * 3, NULL, NOTIFY_TASK_PRIO, NULL);
     if (rc != pdPASS) {

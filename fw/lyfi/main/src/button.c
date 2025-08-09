@@ -45,17 +45,17 @@ int button_init()
         .active_level = 0,
         .disable_pull = 1,
     };
-    BO_TRY(iot_button_new_gpio_device(&btn_cfg, &btn_gpio_cfg, &s_button));
+    BO_TRY_ESP(iot_button_new_gpio_device(&btn_cfg, &btn_gpio_cfg, &s_button));
     if (NULL == s_button) {
         ESP_LOGE(TAG, "Press button create failed");
         return -EIO;
     }
 
-    iot_button_set_param(s_button, BUTTON_LONG_PRESS_TIME_MS, (void*)LONG_PRESS_DURATION_MS);
+    BO_TRY_ESP(iot_button_set_param(s_button, BUTTON_LONG_PRESS_TIME_MS, (void*)LONG_PRESS_DURATION_MS));
 
-    iot_button_register_cb(s_button, BUTTON_SINGLE_CLICK, NULL, button_single_click_cb, NULL);
+    BO_TRY_ESP(iot_button_register_cb(s_button, BUTTON_SINGLE_CLICK, NULL, button_single_click_cb, NULL));
 
-    iot_button_register_cb(s_button, BUTTON_LONG_PRESS_UP, NULL, button_long_press_cb, NULL);
+    BO_TRY_ESP(iot_button_register_cb(s_button, BUTTON_LONG_PRESS_UP, NULL, button_long_press_cb, NULL));
 
     return 0;
 }
@@ -63,7 +63,7 @@ int button_init()
 static void button_single_click_cb(void* arg, void* usr_data)
 {
     if (bo_power_is_on()) {
-        BO_MUST(esp_event_post(LYFI_EVENTS, LYFI_EVENT_LED_NOTIFY_TEMPORARY_STATE, NULL, 0, portMAX_DELAY));
+        BO_MUST_ESP(esp_event_post(LYFI_EVENTS, LYFI_EVENT_LED_NOTIFY_TEMPORARY_STATE, NULL, 0, portMAX_DELAY));
     }
     else {
         // Turn the power on

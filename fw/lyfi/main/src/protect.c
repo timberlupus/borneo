@@ -87,23 +87,20 @@ int bo_protect_set_overheated_temp(uint8_t temp)
     _settings.overheated_temp = temp;
 
     nvs_handle_t nvs_handle;
-    int rc = nvs_open(PROTECT_NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
-    if (rc != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to open NVS handle");
-        return rc;
+    BO_TRY_ESP(nvs_open(PROTECT_NVS_NAMESPACE, NVS_READWRITE, &nvs_handle));
+
+    int rc = nvs_set_u8(nvs_handle, NVS_KEY_OVERHEATED_TEMP, temp);
+    if (rc) {
+        goto __EXIT_CLOSE;
     }
 
-    rc = nvs_set_u8(nvs_handle, NVS_KEY_OVERHEATED_TEMP, temp);
-    if (rc == ESP_OK) {
-        rc = nvs_commit(nvs_handle);
+    rc = nvs_commit(nvs_handle);
+    if (rc) {
+        goto __EXIT_CLOSE;
     }
 
+__EXIT_CLOSE:
     nvs_close(nvs_handle);
-
-    if (rc == ESP_OK) {
-        ESP_LOGI(TAG, "Overheated temperature set to %u°C", temp);
-    }
-
     return rc;
 }
 
@@ -120,23 +117,20 @@ int bo_protect_set_over_power_mw(int32_t power_mw)
     _settings.over_power_mw = power_mw;
 
     nvs_handle_t nvs_handle;
-    int rc = nvs_open(PROTECT_NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
-    if (rc != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to open NVS handle");
-        return rc;
+    BO_TRY_ESP(nvs_open(PROTECT_NVS_NAMESPACE, NVS_READWRITE, &nvs_handle));
+
+    int rc = nvs_set_i32(nvs_handle, NVS_KEY_OPP_VALUE, power_mw);
+    if (rc) {
+        goto __EXIT_CLOSE;
     }
 
-    rc = nvs_set_i32(nvs_handle, NVS_KEY_OPP_VALUE, power_mw);
-    if (rc == ESP_OK) {
-        rc = nvs_commit(nvs_handle);
+    rc = nvs_commit(nvs_handle);
+    if (rc) {
+        goto __EXIT_CLOSE;
     }
 
+__EXIT_CLOSE:
     nvs_close(nvs_handle);
-
-    if (rc == ESP_OK) {
-        ESP_LOGI(TAG, "Over power protection set to %ld mW", power_mw);
-    }
-
     return rc;
 }
 #endif // CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
@@ -230,9 +224,9 @@ void protect_task()
                         _protect.overheated_count = 0;
                     }
                 }
-            else {
-                _protect.overheated_count = 0;
-            }
+                else {
+                    _protect.overheated_count = 0;
+                }
             }
 #endif // CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
         }

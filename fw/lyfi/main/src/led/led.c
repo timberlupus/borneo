@@ -180,13 +180,13 @@ int led_init()
 #endif
     };
 
-    BO_TRY(ledc_timer_config(&ledc_timer));
+    BO_TRY_ESP(ledc_timer_config(&ledc_timer));
 
     // More than 8 channels need to initialize the second timer
 #if LYFI_LED_CHANNEL_COUNT > 8
     ledc_timer.speed_mode = LEDC_LOW_SPEED_MODE;
     ledc_timer.timer_num = LEDC_TIMER_1;
-    BO_TRY(ledc_timer_config(&ledc_timer));
+    BO_TRY_ESP(ledc_timer_config(&ledc_timer));
 #endif
 
     ESP_LOGI(TAG, "PWM timer initialized.");
@@ -213,16 +213,16 @@ int led_init()
         _ledc_channels[ch].channel = (uint8_t)ch % 8;
         ESP_LOGI(TAG, "Configure GPIO [%u] as PWM Channel [%u], hpoint=[%u]", _ledc_channels[ch].gpio_num,
                  _ledc_channels[ch].channel, _ledc_channels[ch].hpoint);
-        BO_TRY(ledc_channel_config(&_ledc_channels[ch]));
+        BO_TRY_ESP(ledc_channel_config(&_ledc_channels[ch]));
     }
 
     // Initialize fade service.
-    BO_TRY(ledc_fade_func_install(0));
+    BO_TRY_ESP(ledc_fade_func_install(0));
 
     smf_set_initial(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_NORMAL]);
 
-    BO_TRY(esp_event_handler_register(LYFI_EVENTS, ESP_EVENT_ANY_ID, led_events_handler, NULL));
-    BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, system_events_handler, NULL));
+    BO_TRY_ESP(esp_event_handler_register(LYFI_EVENTS, ESP_EVENT_ANY_ID, led_events_handler, NULL));
+    BO_TRY_ESP(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, system_events_handler, NULL));
 
     ESP_LOGI(TAG, "Starting LED controller...");
 
@@ -353,7 +353,7 @@ int led_set_channel_duty(uint8_t ch, led_duty_t duty)
     }
 
     uint32_t hpoint = total_duty % (1 << LED_DUTY_RES);
-    BO_TRY(ledc_set_duty_and_update(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel, duty, hpoint));
+    BO_TRY_ESP(ledc_set_duty_and_update(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel, duty, hpoint));
     return 0;
 }
 
@@ -386,7 +386,7 @@ int led_set_channel_brightness(uint8_t ch, led_brightness_t brightness)
         return -EINVAL;
     }
     led_duty_t duty = channel_brightness_to_duty(brightness);
-    BO_TRY(led_set_channel_duty(ch, duty));
+    BO_TRY_ESP(led_set_channel_duty(ch, duty));
     return 0;
 }
 
@@ -601,48 +601,47 @@ void led_render_task()
         BO_MUST(led_fade_to_normal());
     }
 
+    // Maintain a strict 16ms refresh cadence; if work exceeds 16ms, skip this frame's HW update.
     const int64_t period_us = 16000; // 16ms
-    int64_t next_tick = esp_timer_get_time();
+    const TickType_t period_ticks = pdMS_TO_TICKS(16);
+    TickType_t last_wake = xTaskGetTickCount();
 
     while (true) {
-        int64_t start = esp_timer_get_time();
+        int64_t frame_start_us = esp_timer_get_time();
 
         int smf_ret = smf_run_state(SMF_CTX(&_led));
         if (smf_ret) {
             bo_panic();
         }
 
-        // Sync color to hardware
-        portENTER_CRITICAL(&g_led_spinlock);
-        bool color_changed = memcmp(last_color, _led.color, sizeof(led_color_t)) != 0;
-        portEXIT_CRITICAL(&g_led_spinlock);
+        // If SMF and other ops already exceed budget, skip this frame's HW sync to catch up.
+        bool skip_hw_update = (esp_timer_get_time() - frame_start_us) >= period_us;
 
-        if (color_changed) {
+        if (!skip_hw_update) {
+            // Sync color to hardware if changed
             portENTER_CRITICAL(&g_led_spinlock);
-            for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
-                led_brightness_t new_val = _led.color[ch];
-
-                if (last_color[ch] != new_val) {
-                    last_color[ch] = new_val;
-                    BO_MUST(led_set_channel_brightness(ch, last_color[ch]));
+            bool color_changed = memcmp(last_color, _led.color, sizeof(led_color_t)) != 0;
+            if (color_changed) {
+                for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+                    led_brightness_t new_val = _led.color[ch];
+                    if (last_color[ch] != new_val) {
+                        last_color[ch] = new_val;
+                        BO_MUST(led_set_channel_brightness(ch, last_color[ch]));
+                    }
                 }
             }
             portEXIT_CRITICAL(&g_led_spinlock);
         }
-
-        next_tick += period_us;
-        int64_t end = esp_timer_get_time();
-        int64_t delay_us = next_tick - end;
-
-        if (delay_us > 0) {
-            vTaskDelay(pdMS_TO_TICKS((delay_us + 999) / 1000));
-        }
         else {
-            next_tick = end;
-            if (delay_us < -period_us) {
-                ESP_LOGW(TAG, "LED render task overrun by %lld us", -delay_us);
+            int64_t over_us = (esp_timer_get_time() - frame_start_us) - period_us;
+            // Log only when severely over budget to avoid spam
+            if (over_us > period_us) {
+                ESP_LOGW(TAG, "LED render task overrun, skipping frame (over by %lld us)", over_us);
             }
         }
+
+        // Wait until the next 16ms boundary; if overran, this returns immediately.
+        vTaskDelayUntil(&last_wake, period_ticks);
     }
 }
 
@@ -699,7 +698,7 @@ int led_switch_state(uint8_t state)
         return -1;
     }
 
-    BO_TRY(esp_event_post(LYFI_EVENTS, LYFI_EVENT_LED_STATE_CHANGED, NULL, 0, portMAX_DELAY));
+    BO_TRY_ESP(esp_event_post(LYFI_EVENTS, LYFI_EVENT_LED_STATE_CHANGED, NULL, 0, portMAX_DELAY));
 
     return 0;
 }
@@ -737,7 +736,7 @@ int led_switch_mode(uint8_t mode)
     }
 
     _led.settings.mode = mode;
-    BO_TRY(esp_event_post(LYFI_EVENTS, LYFI_EVENT_LED_MODE_CHANGED, NULL, 0, portMAX_DELAY));
+    BO_TRY_ESP(esp_event_post(LYFI_EVENTS, LYFI_EVENT_LED_MODE_CHANGED, NULL, 0, portMAX_DELAY));
 
     return 0;
 }
