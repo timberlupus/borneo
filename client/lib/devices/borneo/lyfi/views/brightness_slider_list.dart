@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:borneo_app/core/utils/hex_color.dart';
 import '../view_models/editor/ieditor.dart';
 import 'brightness_slider_list_tile.dart';
+import 'package:borneo_app/shared/widgets/screen_top_rounded_container.dart';
 
 class BrightnessSliderList<TEditor extends IEditor> extends StatelessWidget {
   final TEditor editor;
@@ -49,8 +50,8 @@ class BrightnessSliderList<TEditor extends IEditor> extends StatelessWidget {
       );
       sliders.add(slider);
     }
-    return Container(
-      color: Theme.of(context).colorScheme.surfaceContainer,
+    return ScreenTopRoundedContainer(
+      color: Theme.of(context).colorScheme.surface,
       child: ListView.separated(
         physics: ClampingScrollPhysics(),
         primary: true,

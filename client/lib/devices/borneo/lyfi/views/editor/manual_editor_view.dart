@@ -22,7 +22,7 @@ class ManualEditorView extends StatelessWidget {
         if (props.isInitialized) {
           return BrightnessSliderList(context.read<ManualEditorViewModel>(), disabled: !props.canChangeColor);
         } else {
-          return Container();
+          return const SizedBox.shrink();
         }
       },
     );
@@ -121,7 +121,7 @@ class ManualEditorView extends StatelessWidget {
         spacing: 16,
         children: [
           Container(
-            color: Theme.of(context).colorScheme.surfaceContainer,
+            color: Theme.of(context).colorScheme.inverseSurface,
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: AspectRatio(aspectRatio: 2.75, child: buildGraph(context)),
           ),

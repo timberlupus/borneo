@@ -9,12 +9,14 @@ import 'dashboard_fan_tile.dart';
 import 'dashboard_power_tile.dart';
 import 'dashboard_dimming_tile.dart';
 import 'dashboard_settings_tile.dart';
+import 'package:borneo_app/shared/widgets/screen_top_rounded_container.dart';
 
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
       child: SingleChildScrollView(
@@ -28,15 +30,16 @@ class DashboardView extends StatelessWidget {
               builder: (context, constraints) => AspectRatio(
                 aspectRatio: 2.75,
                 child: Container(
-                  color: Theme.of(context).colorScheme.surfaceContainer,
+                  color: colorScheme.inverseSurface,
                   margin: const EdgeInsets.all(0),
                   child: const ClipRect(child: DashboardChart()),
                 ),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
-              child: Column(
+            ScreenTopRoundedContainer(
+              color: colorScheme.surface,
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+              child: const Column(
                 children: [
                   Row(
                     children: [

@@ -92,7 +92,7 @@ class ScheduleEditorView extends StatelessWidget {
           children: [
             // The chart
             Container(
-              color: Theme.of(context).colorScheme.surfaceContainer,
+              color: Theme.of(context).colorScheme.inverseSurface,
               padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
               child: AspectRatio(
                 aspectRatio: 2.75,

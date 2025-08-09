@@ -56,7 +56,7 @@ class SunEditorView extends StatelessWidget {
         spacing: 16,
         children: [
           Container(
-            color: Theme.of(context).colorScheme.surfaceContainer,
+            color: Theme.of(context).colorScheme.inverseSurface,
             padding: const EdgeInsets.all(0),
             child: AspectRatio(
               aspectRatio: 2.75,

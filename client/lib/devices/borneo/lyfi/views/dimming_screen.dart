@@ -8,6 +8,7 @@ import 'widgets/lyfi_header.dart';
 import 'editor/manual_editor_view.dart';
 import 'editor/schedule_editor_view.dart';
 import 'editor/sun_editor_view.dart';
+// screen_top_rounded_container is used inside slider lists
 
 class DimmingScreen extends StatelessWidget {
   static const routeName = '/lyfi/dimming';
@@ -26,7 +27,7 @@ class DimmingScreen extends StatelessWidget {
         Navigator.of(context).pop();
       },
       child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: Theme.of(context).colorScheme.inverseSurface,
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             LyfiAppBar(
@@ -53,50 +54,47 @@ class DimmingHeroPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Theme.of(context).colorScheme.surface,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Selector<LyfiViewModel, LyfiMode>(
-              selector: (context, vm) => vm.mode,
-              builder: (context, mode, _) {
-                final vm = context.read<LyfiViewModel>();
-                return SegmentedButton<LyfiMode>(
-                  showSelectedIcon: false,
-                  selected: <LyfiMode>{mode},
-                  segments: [
-                    ButtonSegment<LyfiMode>(
-                      value: LyfiMode.manual,
-                      label: Text(context.translate('MANU')),
-                      icon: const Icon(Icons.bar_chart_outlined, size: 24),
-                    ),
-                    ButtonSegment<LyfiMode>(
-                      value: LyfiMode.scheduled,
-                      label: Text(context.translate('SCHED')),
-                      icon: const Icon(Icons.alarm_outlined, size: 24),
-                    ),
-                    ButtonSegment<LyfiMode>(
-                      value: LyfiMode.sun,
-                      label: Text(context.translate('SUN')),
-                      icon: const Icon(Icons.wb_sunny_outlined, size: 24),
-                    ),
-                  ],
-                  onSelectionChanged: vm.isOn && !vm.isBusy && !vm.isLocked
-                      ? (Set<LyfiMode> newSelection) {
-                          if (mode != newSelection.single) {
-                            vm.switchMode(newSelection.single);
-                          }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Selector<LyfiViewModel, LyfiMode>(
+            selector: (context, vm) => vm.mode,
+            builder: (context, mode, _) {
+              final vm = context.read<LyfiViewModel>();
+              return SegmentedButton<LyfiMode>(
+                showSelectedIcon: false,
+                selected: <LyfiMode>{mode},
+                segments: [
+                  ButtonSegment<LyfiMode>(
+                    value: LyfiMode.manual,
+                    label: Text(context.translate('MANU')),
+                    icon: const Icon(Icons.bar_chart_outlined, size: 24),
+                  ),
+                  ButtonSegment<LyfiMode>(
+                    value: LyfiMode.scheduled,
+                    label: Text(context.translate('SCHED')),
+                    icon: const Icon(Icons.alarm_outlined, size: 24),
+                  ),
+                  ButtonSegment<LyfiMode>(
+                    value: LyfiMode.sun,
+                    label: Text(context.translate('SUN')),
+                    icon: const Icon(Icons.wb_sunny_outlined, size: 24),
+                  ),
+                ],
+                onSelectionChanged: vm.isOn && !vm.isBusy && !vm.isLocked
+                    ? (Set<LyfiMode> newSelection) {
+                        if (mode != newSelection.single) {
+                          vm.switchMode(newSelection.single);
                         }
-                      : null,
-                );
-              },
-            ),
-          ],
-        ),
+                      }
+                    : null,
+              );
+            },
+          ),
+        ],
       ),
     );
   }

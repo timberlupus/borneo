@@ -141,7 +141,7 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
         }
       },
       child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: Theme.of(context).colorScheme.inverseSurface,
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             LyfiAppBar(onBack: () => goBack(context)),
