@@ -28,6 +28,8 @@
 static int load_factory_settings();
 static void protect_task();
 
+#define TASK_PRIORITY 12
+
 #define PROTECT_NVS_NAMESPACE "protect"
 #define NVS_KEY_ENABLED "en"
 #define NVS_KEY_OPP_VALUE "opp"
@@ -67,7 +69,7 @@ int bo_protect_init()
     ESP_LOGI(TAG, "Loading factory settings...");
     BO_TRY(load_factory_settings());
 
-    xTaskCreate(&protect_task, "protect_task", 2048, NULL, 5, NULL);
+    xTaskCreate(&protect_task, "protect_task", 2048, NULL, TASK_PRIORITY, NULL);
 
     ESP_LOGI(TAG, "Protection initialized");
     return 0;

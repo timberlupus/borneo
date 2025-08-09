@@ -26,6 +26,7 @@
 #define CONNECTED_BIT BIT0
 #define SC_DONE_BIT BIT1
 #define RVD_MAX_LEN 33
+#define TASK_PRIORITY 12
 
 static void sc_task(void* parm);
 static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
@@ -184,7 +185,7 @@ int bo_wifi_sc_init()
 
 int bo_wifi_sc_start()
 {
-    xTaskCreate(sc_task, "smartconfig_task", 4096, NULL, 3, NULL);
+    xTaskCreate(sc_task, "smartconfig_task", 4096, NULL, TASK_PRIORITY, NULL);
     return 0;
 }
 

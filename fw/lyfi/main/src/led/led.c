@@ -54,6 +54,7 @@ static void dimming_state_exit();
 
 #define TAG "lyfi-ledc"
 
+#define TASK_PRIORITY 15
 #define SECS_PER_DAY 172800
 #define LED_MAX_DUTY ((1 << LEDC_TIMER_12_BIT) - 1)
 #define LED_DUTY_RES LEDC_TIMER_10_BIT
@@ -229,7 +230,7 @@ int led_init()
         BO_TRY(led_sun_init());
     }
 
-    xTaskCreate(&led_render_task, "led_render_task", 2 * 1024, NULL, tskIDLE_PRIORITY + 2, NULL);
+    xTaskCreate(&led_render_task, "led_render_task", 4 * 1024, NULL, TASK_PRIORITY, NULL);
     ESP_LOGI(TAG, "LED Controller module has been initialized successfully.");
     return 0;
 }

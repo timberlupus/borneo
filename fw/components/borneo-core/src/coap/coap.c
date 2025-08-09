@@ -11,7 +11,8 @@
 #include <borneo/coap.h>
 #include <borneo/sntp.h>
 
-#define COAP_TASK_PRIO 5
+#define COAP_TASK_PRIO 10
+#define NOTIFY_TASK_PRIO 9
 
 static int notify_init();
 static void notify_task();
@@ -193,7 +194,7 @@ int notify_init()
 
     BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &_system_event_handler, NULL));
 
-    BaseType_t rc = xTaskCreate(&notify_task, "coap.notify", 1024, NULL, tskIDLE_PRIORITY + 1, NULL);
+    BaseType_t rc = xTaskCreate(&notify_task, "coap.notify", 1024 * 3, NULL, NOTIFY_TASK_PRIO, NULL);
     if (rc != pdPASS) {
         return -ENOMEM;
     }
