@@ -46,22 +46,23 @@ Future<Database> openDatabase() async {
 final _fatalErrorLogger = createLogger();
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  final db = await openDatabase();
-
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    const double aspectRatio = 9 / 19.5;
-    const double height = 960;
-    final double width = height * aspectRatio;
-    setWindowMinSize(Size(width, height));
-    setWindowMaxSize(Size(width, height));
-    setWindowFrame(Rect.fromLTWH(100, 100, width, height));
-  }
-
-  // debugRepaintRainbowEnabled = true;
+  // Ensure binding initialization and app startup occur in the SAME zone as runApp
   runZonedGuarded(
     () async {
+      WidgetsFlutterBinding.ensureInitialized();
+
+      final db = await openDatabase();
+
+      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+        const double aspectRatio = 9 / 19.5;
+        const double height = 960;
+        final double width = height * aspectRatio;
+        setWindowMinSize(Size(width, height));
+        setWindowMaxSize(Size(width, height));
+        setWindowFrame(Rect.fromLTWH(100, 100, width, height));
+      }
+
+      // debugRepaintRainbowEnabled = true;
       runApp(
         ProviderScope(
           child: provider.MultiProvider(
