@@ -3,6 +3,7 @@ import 'package:borneo_app/devices/borneo/lyfi/views/easy_setup_screen.dart';
 import 'package:borneo_app/core/infrastructure/duration.dart';
 import 'package:borneo_app/core/infrastructure/time_of_day.dart';
 import 'package:borneo_app/shared/widgets/confirmation_sheet.dart';
+import 'package:borneo_app/shared/widgets/screen_top_rounded_container.dart';
 import 'package:borneo_common/duration_ext.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +93,7 @@ class ScheduleEditorView extends StatelessWidget {
           children: [
             // The chart
             Container(
-              color: Theme.of(context).colorScheme.inverseSurface,
+              color: Theme.of(context).scaffoldBackgroundColor,
               padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
               child: AspectRatio(
                 aspectRatio: 2.75,
@@ -144,15 +145,9 @@ class ScheduleEditorView extends StatelessWidget {
 
             // Bottom buttons
             Consumer<ScheduleEditorViewModel>(
-              builder: (context, vm, child) => Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainer,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8, offset: Offset(0, -2)),
-                  ],
-                ),
-                padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
+              builder: (context, vm, child) => ScreenTopRoundedContainer(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                padding: const EdgeInsets.fromLTRB(8, 24, 8, 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [

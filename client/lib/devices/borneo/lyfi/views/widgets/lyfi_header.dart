@@ -17,8 +17,8 @@ class LyfiAppBar extends StatelessWidget {
       pinned: false,
       floating: false,
       snap: false,
-      foregroundColor: Theme.of(context).colorScheme.onInverseSurface,
-      backgroundColor: Theme.of(context).colorScheme.inverseSurface,
+      foregroundColor: Theme.of(context).colorScheme.onSurface,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: Selector<LyfiViewModel, String>(selector: (_, vm) => vm.name, builder: (contet, name, _) => Text(name)),
       leading: Selector<LyfiViewModel, bool>(
         selector: (context, vm) => vm.isBusy,

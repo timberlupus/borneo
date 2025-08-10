@@ -65,7 +65,7 @@ class SettingsScreen extends StatelessWidget {
 
   List<Widget> _buildSettingItems(BuildContext context) {
     const rightChevron = CupertinoListTileChevron();
-    final tileColor = Theme.of(context).colorScheme.surfaceContainer;
+    final tileColor = Theme.of(context).colorScheme.surfaceContainerHighest;
     return <Widget>[
       ListTile(
         dense: true,

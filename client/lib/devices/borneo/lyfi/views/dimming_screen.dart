@@ -27,7 +27,6 @@ class DimmingScreen extends StatelessWidget {
         Navigator.of(context).pop();
       },
       child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.inverseSurface,
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             LyfiAppBar(
@@ -54,8 +53,8 @@ class DimmingHeroPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+    return Material(
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -71,17 +70,17 @@ class DimmingHeroPanel extends StatelessWidget {
                   ButtonSegment<LyfiMode>(
                     value: LyfiMode.manual,
                     label: Text(context.translate('MANU')),
-                    icon: const Icon(Icons.bar_chart_outlined, size: 24),
+                    icon: const Icon(Icons.bar_chart_outlined, size: 16),
                   ),
                   ButtonSegment<LyfiMode>(
                     value: LyfiMode.scheduled,
                     label: Text(context.translate('SCHED')),
-                    icon: const Icon(Icons.alarm_outlined, size: 24),
+                    icon: const Icon(Icons.alarm_outlined, size: 16),
                   ),
                   ButtonSegment<LyfiMode>(
                     value: LyfiMode.sun,
                     label: Text(context.translate('SUN')),
-                    icon: const Icon(Icons.wb_sunny_outlined, size: 24),
+                    icon: const Icon(Icons.wb_sunny_outlined, size: 16),
                   ),
                 ],
                 onSelectionChanged: vm.isOn && !vm.isBusy && !vm.isLocked

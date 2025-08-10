@@ -33,7 +33,7 @@ class DashboardTemperatureTile extends StatelessWidget {
         title: context.translate("Temperature"),
         icon: Icons.thermostat,
         foregroundColor: theme.colorScheme.onSurface,
-        backgroundColor: theme.colorScheme.surfaceContainer,
+        backgroundColor: theme.colorScheme.surfaceContainerHighest,
         arcColor: null,
         progressColor: progressColor,
         value: vm.currentTempRaw?.toDouble() ?? 0.0,

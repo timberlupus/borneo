@@ -15,7 +15,7 @@ class DashboardFanTile extends StatelessWidget {
         title: context.translate("Fan"),
         icon: Icons.air,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         arcColor: Theme.of(context).colorScheme.outlineVariant,
         progressColor: Theme.of(context).colorScheme.secondary,
         minValue: 0,

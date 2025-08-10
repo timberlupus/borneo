@@ -31,14 +31,13 @@ class LyfiTimeLineChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderSide = BorderSide(color: Theme.of(context).colorScheme.surfaceDim, width: 1.5);
+    final cs = Theme.of(context).colorScheme;
+    final borderSide = BorderSide(color: cs.outlineVariant, width: 1);
     final verticalLines = <VerticalLine>[];
 
-    // 计算label高度
-    final labelStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
-      color: Theme.of(context).colorScheme.primary,
-      fontFeatures: [FontFeature.tabularFigures()],
-    );
+    final labelStyle = Theme.of(
+      context,
+    ).textTheme.labelMedium?.copyWith(color: cs.onPrimary, fontFeatures: [FontFeature.tabularFigures()]);
     final labelText = _formatTimeLabel(
       Duration(hours: currentTime.hour, minutes: currentTime.minute, seconds: currentTime.second).inSeconds.toDouble(),
     );
@@ -58,20 +57,19 @@ class LyfiTimeLineChart extends StatelessWidget {
         lineTouchData: lineTouchData ?? _defaultLineTouchData,
         gridData: FlGridData(
           show: true,
-          drawVerticalLine: false,
+          drawVerticalLine: true,
           drawHorizontalLine: true,
           horizontalInterval: (maxY - minY) * 0.25,
           verticalInterval: 3600 * 6,
-          getDrawingHorizontalLine: (value) =>
-              FlLine(color: Theme.of(context).colorScheme.surfaceDim, strokeWidth: 1.5),
-          getDrawingVerticalLine: (value) => FlLine(color: Theme.of(context).colorScheme.surfaceDim, strokeWidth: 1.5),
+          getDrawingHorizontalLine: (value) => FlLine(color: cs.outlineVariant, strokeWidth: 1.0),
+          getDrawingVerticalLine: (value) => FlLine(color: cs.outlineVariant, strokeWidth: 1.0),
         ),
         titlesData: FlTitlesData(
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 16,
-              interval: 3600 * 3,
+              interval: 3600 * 6,
               getTitlesWidget: (value, meta) {
                 final text = _formatTimeLabel(value);
                 return SideTitleWidget(
@@ -79,9 +77,9 @@ class LyfiTimeLineChart extends StatelessWidget {
                   space: 0,
                   child: Text(
                     text,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelSmall?.copyWith(color: cs.onSurface.withValues(alpha: 0.38)),
                   ),
                 );
               },
@@ -95,7 +93,12 @@ class LyfiTimeLineChart extends StatelessWidget {
                 final text = leftTitleBuilder?.call(value) ?? '';
                 return SideTitleWidget(
                   meta: meta,
-                  child: Text(text, style: Theme.of(context).textTheme.labelSmall),
+                  child: Text(
+                    text,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelSmall?.copyWith(color: cs.onSurface.withValues(alpha: 0.38)),
+                  ),
                 );
               },
             ),
@@ -137,11 +140,11 @@ class LyfiTimeLineChart extends StatelessWidget {
         end: Alignment.bottomCenter,
         colors: [
           Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
-          Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.75),
+          Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.75),
         ],
       ),
       dashArray: const [3, 2],
-      strokeWidth: 1.5,
+      strokeWidth: 3,
       label: VerticalLineLabel(
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
           color: Theme.of(context).colorScheme.primary,

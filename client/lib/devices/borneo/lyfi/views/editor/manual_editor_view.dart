@@ -44,6 +44,7 @@ class ManualEditorView extends StatelessWidget {
 
   BarChartGroupData makeGroupData(BuildContext context, LyfiChannelInfo ch, int x, double y) {
     final primaryColor = HexColor.fromHex(ch.color);
+    final barBackColor = Theme.of(context).colorScheme.surfaceContainerLow;
     return BarChartGroupData(
       x: x,
       barRods: [
@@ -55,12 +56,12 @@ class ManualEditorView extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [primaryColor, Color.lerp(primaryColor, Colors.white, 0.7)!],
           ),
-          width: 16,
+          width: 24,
           backDrawRodData: BackgroundBarChartRodData(
             show: true,
             fromY: 0,
             toY: lyfiBrightnessMax.toDouble(),
-            color: Theme.of(context).scaffoldBackgroundColor,
+            color: barBackColor,
           ),
         ),
       ],
@@ -71,7 +72,12 @@ class ManualEditorView extends StatelessWidget {
     if (vm.isInitialized) {
       final index = value.toInt();
       final ch = vm.deviceInfo.channels[index];
-      return Text(ch.name, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor));
+      return Text(
+        ch.name,
+        style: Theme.of(
+          context,
+        ).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.80)),
+      );
     } else {
       return Text("N/A");
     }
@@ -88,9 +94,7 @@ class ManualEditorView extends StatelessWidget {
               titlesData: FlTitlesData(
                 show: true,
                 bottomTitles: AxisTitles(
-                  axisNameSize: 24,
                   sideTitles: SideTitles(
-                    reservedSize: 24,
                     showTitles: true,
                     getTitlesWidget: (value, _) => buildTitles(context, vm, value),
                   ),
@@ -121,7 +125,7 @@ class ManualEditorView extends StatelessWidget {
         spacing: 16,
         children: [
           Container(
-            color: Theme.of(context).colorScheme.inverseSurface,
+            color: Theme.of(context).scaffoldBackgroundColor,
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: AspectRatio(aspectRatio: 2.75, child: buildGraph(context)),
           ),

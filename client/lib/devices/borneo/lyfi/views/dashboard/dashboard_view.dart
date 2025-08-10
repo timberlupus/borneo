@@ -16,9 +16,10 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+      padding: EdgeInsets.zero,
       child: SingleChildScrollView(
         primary: true,
         child: Column(
@@ -30,14 +31,15 @@ class DashboardView extends StatelessWidget {
               builder: (context, constraints) => AspectRatio(
                 aspectRatio: 2.75,
                 child: Container(
-                  color: colorScheme.inverseSurface,
+                  color: theme.scaffoldBackgroundColor,
                   margin: const EdgeInsets.all(0),
                   child: const ClipRect(child: DashboardChart()),
                 ),
               ),
             ),
+            const SizedBox(height: 24),
             ScreenTopRoundedContainer(
-              color: colorScheme.surface,
+              color: colorScheme.surfaceContainer,
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
               child: const Column(
                 children: [

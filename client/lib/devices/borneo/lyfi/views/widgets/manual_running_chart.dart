@@ -44,7 +44,7 @@ class ManualRunningChart extends StatelessWidget {
             show: true,
             fromY: 0,
             toY: lyfiBrightnessMax.toDouble(),
-            color: Theme.of(context).scaffoldBackgroundColor,
+            color: Theme.of(context).colorScheme.surfaceContainerLowest,
           ),
         ),
       ],
@@ -57,7 +57,7 @@ class ManualRunningChart extends StatelessWidget {
     final ch = vm.lyfiDeviceInfo.channels[index];
     return Text(
       context.translate(ch.name),
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
     );
   }
 

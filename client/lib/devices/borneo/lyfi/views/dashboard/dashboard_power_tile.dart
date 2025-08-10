@@ -27,8 +27,8 @@ class DashboardPowerTile extends StatelessWidget {
         final Color disabledColor = Theme.of(context).disabledColor;
         final Color fgColor = Theme.of(context).colorScheme.onSurface;
         final Color bgColor = isOnline
-            ? Theme.of(context).colorScheme.surfaceContainer
-            : Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.5);
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : Theme.of(context).colorScheme.surfaceContainerLow;
         final Color arcColor = isOnline ? Theme.of(context).colorScheme.outlineVariant : disabledColor;
         final Color progressColor = isOnline ? Theme.of(context).colorScheme.tertiary : disabledColor;
         final Color textPrimary = Theme.of(context).colorScheme.primary;

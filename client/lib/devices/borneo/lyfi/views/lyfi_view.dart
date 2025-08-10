@@ -73,7 +73,7 @@ class HeroVerticalDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: width,
-      color: Theme.of(context).colorScheme.surface,
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: VerticalDivider(color: color, thickness: 1),
     );
   }
@@ -141,7 +141,7 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
         }
       },
       child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.inverseSurface,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             LyfiAppBar(onBack: () => goBack(context)),
@@ -185,12 +185,8 @@ class LyfiView extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Scaffold(
-                backgroundColor: Theme.of(context).colorScheme.surface,
-                appBar: AppBar(
-                  foregroundColor: Theme.of(context).colorScheme.onSurface,
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                  title: Text(device.name),
-                ),
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                appBar: AppBar(backgroundColor: Theme.of(context).scaffoldBackgroundColor, title: Text(device.name)),
                 body: Column(
                   children: [
                     SizedBox(
@@ -198,7 +194,7 @@ class LyfiView extends StatelessWidget {
                       width: double.infinity,
                       child: LinearProgressIndicator(
                         backgroundColor: Colors.transparent,
-                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onPrimary),
                       ),
                     ),
                     Expanded(child: Container()),

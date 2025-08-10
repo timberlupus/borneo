@@ -77,12 +77,13 @@ class AcclimationScreen extends StatelessWidget {
   }
 
   List<Widget> _buildSettingItems(BuildContext context) {
-    final tileColor = Theme.of(context).colorScheme.surfaceContainer;
+    final tileColor = Theme.of(context).colorScheme.surfaceContainerHighest;
     return <Widget>[
       ListTile(title: Text(context.translate('SETTINGS'), style: Theme.of(context).textTheme.titleSmall)),
       Consumer<AcclimationViewModel>(
         builder: (context, vm, _) => SwitchListTile(
           title: Text(context.translate("Enabled")),
+          tileColor: tileColor,
           value: vm.enabled,
           onChanged: !vm.isBusy && vm.isOnline && vm.isOn ? vm.setEanbled : null,
         ),

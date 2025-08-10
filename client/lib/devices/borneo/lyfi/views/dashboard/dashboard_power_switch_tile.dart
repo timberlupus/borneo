@@ -32,8 +32,7 @@ class DashboardPowerSwitchTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             child: Stack(
               children: [
-                Container(color: theme.colorScheme.surfaceContainer),
-
+                Container(color: theme.colorScheme.surfaceContainerHighest),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: TweenAnimationBuilder<double>(

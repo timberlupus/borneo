@@ -8,8 +8,9 @@ class ScreenTopRoundedContainer extends StatelessWidget {
   final Widget child;
   final Color? color;
   final EdgeInsetsGeometry? padding;
+  final List<BoxShadow>? shadows;
 
-  const ScreenTopRoundedContainer({super.key, required this.child, this.color, this.padding});
+  const ScreenTopRoundedContainer({super.key, required this.child, this.color, this.padding, this.shadows});
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +25,7 @@ class ScreenTopRoundedContainer extends StatelessWidget {
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.only(topLeft: Radius.circular(r.topLeft), topRight: Radius.circular(r.topRight)),
+            boxShadow: shadows,
           ),
           child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
         );

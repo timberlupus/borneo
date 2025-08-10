@@ -71,13 +71,13 @@ class EasySetupScreen extends StatelessWidget {
               showConnector: false,
             ),
             initHandlerDecoration: TimePickerHandlerDecoration(
-              color: Theme.of(context).colorScheme.inverseSurface,
+              color: Theme.of(context).colorScheme.primary,
               shape: BoxShape.circle,
               radius: 20.0,
               icon: Icon(Icons.wb_sunny_outlined, size: 24.0, color: Theme.of(context).colorScheme.onInverseSurface),
             ),
             endHandlerDecoration: TimePickerHandlerDecoration(
-              color: Theme.of(context).colorScheme.inverseSurface,
+              color: Theme.of(context).colorScheme.primary,
               shape: BoxShape.circle,
               radius: 20.0,
               icon: Icon(Icons.mode_night_outlined, size: 24.0, color: Theme.of(context).colorScheme.onInverseSurface),

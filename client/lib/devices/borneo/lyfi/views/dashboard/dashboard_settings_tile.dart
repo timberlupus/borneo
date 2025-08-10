@@ -21,7 +21,7 @@ class DashboardSettingsTile extends StatelessWidget {
           aspectRatio: 1,
           child: Container(
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainer,
+              color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Material(
