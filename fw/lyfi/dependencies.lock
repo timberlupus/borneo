@@ -56,7 +56,7 @@ dependencies:
   idf:
     source:
       type: idf
-    version: 5.4.1
+    version: 5.5.0
 direct_dependencies:
 - espressif/button
 - espressif/cbor
