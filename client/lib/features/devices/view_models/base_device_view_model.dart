@@ -218,7 +218,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   Future<void> reconnect() async {
     if (!isOnline) {
       final bound = await deviceManager.tryBind(deviceEntity);
-      if (bound) {
+      if (bound && !isDisposed) {
         await refreshStatus();
         super.notifyListeners();
       }

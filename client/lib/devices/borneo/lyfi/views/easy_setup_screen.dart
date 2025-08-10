@@ -208,7 +208,8 @@ class EasySetupScreen extends StatelessWidget {
       Expanded(
         child: Selector<ScheduleEditorViewModel, bool>(
           selector: (_, editor) => editor.canEdit,
-          builder: (_, canEdit, _) => BrightnessSliderList(editor, disabled: !canEdit),
+          builder: (_, canEdit, _) =>
+              BrightnessSliderList(editor, disabled: !canEdit, padding: EdgeInsets.fromLTRB(0, 24, 0, 24)),
         ),
       ),
     ];

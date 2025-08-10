@@ -9,7 +9,8 @@ import 'package:borneo_app/shared/widgets/screen_top_rounded_container.dart';
 class BrightnessSliderList<TEditor extends IEditor> extends StatelessWidget {
   final TEditor editor;
   final bool disabled;
-  const BrightnessSliderList(this.editor, {required this.disabled, super.key});
+  final EdgeInsetsGeometry? padding;
+  const BrightnessSliderList(this.editor, {required this.disabled, this.padding, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +53,10 @@ class BrightnessSliderList<TEditor extends IEditor> extends StatelessWidget {
     }
     return ScreenTopRoundedContainer(
       color: Theme.of(context).colorScheme.surfaceContainer,
+      padding: padding,
       child: ListView.separated(
-        physics: ClampingScrollPhysics(),
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
         primary: true,
         itemCount: editor.availableChannelCount,
         itemBuilder: (context, index) => sliders[index],

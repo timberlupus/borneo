@@ -26,24 +26,25 @@ class BrightnessSliderListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final handlerSize = 24.0;
     return ListTile(
       dense: true,
-      //tileColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+      tileColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       minVerticalPadding: 0,
       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
       title: FlutterSlider(
         selectByTap: true,
         jump: true,
         disabled: disabled,
-        handlerWidth: 24,
-        handlerHeight: 24,
+        handlerWidth: handlerSize,
+        handlerHeight: handlerSize,
         handler: FlutterSliderHandler(
           child: Material(
             type: MaterialType.canvas,
             borderRadius: BorderRadius.circular(32),
-            color: Theme.of(context).colorScheme.primaryContainer,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Center(
-              child: Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onPrimaryContainer, size: 16),
+              child: Icon(Icons.circle, color: color, size: handlerSize * 0.60),
             ),
           ),
         ),
@@ -52,7 +53,7 @@ class BrightnessSliderListTile extends StatelessWidget {
         handlerAnimation: const FlutterSliderHandlerAnimation(
           curve: Curves.elasticOut,
           reverseCurve: Curves.bounceIn,
-          duration: Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 100),
           scale: 1.5,
         ),
         max: max.toDouble(),
@@ -62,13 +63,13 @@ class BrightnessSliderListTile extends StatelessWidget {
           activeTrackBarHeight: 8,
           inactiveTrackBarHeight: 8,
           activeTrackBar: BoxDecoration(
-            border: Border.all(color: Theme.of(context).colorScheme.surface, width: 3.0),
+            border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerLowest, width: 3.0),
             color: color,
-            borderRadius: BorderRadius.circular(4.0),
+            borderRadius: BorderRadius.circular(3),
           ),
           inactiveTrackBar: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(4.0),
+            color: Theme.of(context).colorScheme.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(3),
           ),
         ),
         onDragging: (index, low, _) => onChanged(low.toInt()),
