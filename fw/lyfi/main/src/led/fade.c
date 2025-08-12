@@ -28,7 +28,7 @@
 #define TAG "led.fade"
 
 #define FADE_PERIOD_MS 10000
-#define FADE_ON_PERIOD_MS 5000
+#define FADE_ON_PERIOD_MS 7000
 #define FADE_OFF_PERIOD_MS 3000
 
 int led_fade_to_color(const led_color_t color, uint32_t duration_ms)

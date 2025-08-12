@@ -59,7 +59,9 @@ static void dimming_state_exit();
 #define LED_MAX_DUTY ((1 << LEDC_TIMER_12_BIT) - 1)
 #define LED_DUTY_RES LEDC_TIMER_10_BIT
 
-#define TEMPORARY_FADE_PERIOD_MS 5000
+#define LED_UPDATE_PERIOD_US 10000 // 10ms
+#define LED_UPDATE_PERIOD_TICKS (pdMS_TO_TICKS(10)) // Ticks in 10ms
+#define TEMPORARY_FADE_PERIOD_MS 7000
 
 static inline led_duty_t channel_brightness_to_duty(led_brightness_t power);
 static inline void color_to_duties(const led_color_t color, led_duty_t* duties);
@@ -601,9 +603,7 @@ void led_render_task()
         BO_MUST(led_fade_to_normal());
     }
 
-    // Maintain a strict 16ms refresh cadence; if work exceeds 16ms, skip this frame's HW update.
-    const int64_t period_us = 16000; // 16ms
-    const TickType_t period_ticks = pdMS_TO_TICKS(16);
+    // Maintain a strict 10ms refresh cadence; if work exceeds 10ms, skip this frame's HW update.
     TickType_t last_wake = xTaskGetTickCount();
 
     while (true) {
@@ -615,7 +615,7 @@ void led_render_task()
         }
 
         // If SMF and other ops already exceed budget, skip this frame's HW sync to catch up.
-        bool skip_hw_update = (esp_timer_get_time() - frame_start_us) >= period_us;
+        bool skip_hw_update = (esp_timer_get_time() - frame_start_us) >= LED_UPDATE_PERIOD_US;
 
         if (!skip_hw_update) {
             // Sync color to hardware if changed
@@ -633,15 +633,15 @@ void led_render_task()
             portEXIT_CRITICAL(&g_led_spinlock);
         }
         else {
-            int64_t over_us = (esp_timer_get_time() - frame_start_us) - period_us;
+            int64_t over_us = (esp_timer_get_time() - frame_start_us) - LED_UPDATE_PERIOD_US;
             // Log only when severely over budget to avoid spam
-            if (over_us > period_us) {
+            if (over_us > LED_UPDATE_PERIOD_US) {
                 ESP_LOGW(TAG, "LED render task overrun, skipping frame (over by %lld us)", over_us);
             }
         }
 
-        // Wait until the next 16ms boundary; if overran, this returns immediately.
-        vTaskDelayUntil(&last_wake, period_ticks);
+        // Wait until the next 10ms boundary; if overran, this returns immediately.
+        vTaskDelayUntil(&last_wake, LED_UPDATE_PERIOD_TICKS);
     }
 }
 
