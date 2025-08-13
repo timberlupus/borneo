@@ -119,6 +119,7 @@ int thermal_init()
             else {
                 _thermal.temp_window[ti] = -1;
             }
+            vTaskDelay(pdMS_TO_TICKS(10));
         }
     }
 

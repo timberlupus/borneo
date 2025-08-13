@@ -88,7 +88,7 @@ int ntc_init()
 int ntc_read_temp(int* temp)
 {
     int adc_mv;
-    BO_TRY(bo_adc_read_mv_filtered(CONFIG_BORNEO_NTC_ADC_CHANNEL, &adc_mv));
+    BO_TRY(bo_adc_read_mv(CONFIG_BORNEO_NTC_ADC_CHANNEL, &adc_mv));
     if (adc_mv == 0 || adc_mv == 4095) {
         ESP_LOGE(TAG, "No NTC connected! sample_avg=%d", adc_mv);
         return -EIO;
