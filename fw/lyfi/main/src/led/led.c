@@ -157,6 +157,7 @@ int led_init()
 
     memset(&_led, 0, sizeof(_led));
     memset(_ledc_channels, 0, sizeof(_ledc_channels));
+    _led.fade_active = ATOMIC_VAR_INIT(false);
 
     _led.settings_lock = xSemaphoreCreateMutex();
 

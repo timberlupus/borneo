@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <smf/smf.h>
+#include <stdatomic.h>
 
 #include <borneo/algo/astronomy.h>
 #include <freertos/portmacro.h>
@@ -112,6 +113,7 @@ struct led_status {
     led_color_t fade_end_color;
     int64_t fade_start_time_ms; ///< Time point of fading started
     uint32_t fade_duration_ms; ///< The duration of fading
+    atomic_bool fade_active; ///< Lock-free flag for whether fading is active
 
     time_t sun_next_reschedule_time_utc; ///< The next rescheduling time in UTC
     struct led_scheduler sun_scheduler; ///< The scheduler of sun simulation for today

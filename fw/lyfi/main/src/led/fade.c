@@ -27,8 +27,7 @@
 
 #define TAG "led.fade"
 
-#define FADE_PERIOD_MS 10000
-#define FADE_ON_PERIOD_MS 7000
+#define FADE_ON_PERIOD_MS 5000
 #define FADE_OFF_PERIOD_MS 3000
 
 int led_fade_to_color(const led_color_t color, uint32_t duration_ms)
@@ -54,6 +53,8 @@ int led_fade_to_color(const led_color_t color, uint32_t duration_ms)
     portENTER_CRITICAL(&g_led_spinlock);
     memcpy(_led.fade_end_color, color, sizeof(led_color_t));
     portEXIT_CRITICAL(&g_led_spinlock);
+    // publish fade active after all state is set
+    atomic_store_explicit(&_led.fade_active, true, memory_order_release);
     return 0;
 }
 
@@ -102,6 +103,7 @@ int led_fade_stop()
     portENTER_CRITICAL(&g_led_spinlock);
     _led.fade_start_time_ms = 0LL;
     portEXIT_CRITICAL(&g_led_spinlock);
+    atomic_store_explicit(&_led.fade_active, false, memory_order_release);
     return 0;
 }
 
@@ -115,11 +117,6 @@ int led_fade_black()
 
 void led_fade_drive()
 {
-    if (!led_is_fading()) {
-        return;
-    }
-
-    int64_t now = bo_timer_uptime_ms();
     portENTER_CRITICAL(&g_led_spinlock);
     int64_t fade_start_time_ms = _led.fade_start_time_ms;
     int64_t fade_duration_ms = _led.fade_duration_ms;
@@ -128,6 +125,8 @@ void led_fade_drive()
     memcpy(fade_start_color, _led.fade_start_color, sizeof(led_color_t));
     memcpy(fade_end_color, _led.fade_end_color, sizeof(led_color_t));
     portEXIT_CRITICAL(&g_led_spinlock);
+
+    int64_t now = bo_timer_uptime_ms();
     if (now >= fade_start_time_ms + fade_duration_ms) {
         BO_MUST(led_fade_stop());
         BO_MUST(led_update_color(fade_end_color));
@@ -147,8 +146,6 @@ void led_fade_drive()
 
 inline bool led_is_fading()
 {
-    portENTER_CRITICAL(&g_led_spinlock);
-    bool fading = _led.fade_start_time_ms > 0LL;
-    portEXIT_CRITICAL(&g_led_spinlock);
-    return fading;
+    //
+    return atomic_load_explicit(&_led.fade_active, memory_order_acquire);
 }
