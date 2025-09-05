@@ -45,7 +45,6 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   provider: ^6.1.2
-  flutter_riverpod: ^2.6.1
   uuid: ^4.4.2
 
   http: ^1.2.2
@@ -69,7 +68,7 @@ dependencies:
   slide_to_act: ^2.0.2
   url_launcher: ^6.3.1
   package_info_plus: ^8.1.1
-  image_picker: ^1.1.2
+  image_picker: ^1.2.0
   image_cropper: ^9.0.0
   flutter_svg: ^2.0.16
   wifi_scan: ^0.4.1+1
@@ -119,7 +118,7 @@ dev_dependencies:
   test: ^1.25.0
   build_runner: ^2.4.13
   mockito: ^5.4.4
-  melos: ^7.0.0-dev.9
+  melos: ^7.1.0
   flutter_launcher_icons: ^0.14.4
 
   # The "flutter_lints" package below contains a set of recommended lints to

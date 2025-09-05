@@ -1,85 +1,49 @@
-import 'package:borneo_app/core/services/scene_manager.dart';
-import 'package:borneo_app/core/services/app_notification_service.dart';
-import 'package:borneo_app/features/scenes/providers/scene_edit_provider.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart' as provider;
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
+import '../../../core/services/scene_manager.dart';
+import '../../../core/services/app_notification_service.dart';
+import '../models/scene_edit_arguments.dart';
+import '../view_models/scene_edit_view_model.dart';
 import '../../../shared/widgets/confirmation_sheet.dart';
 
-class SceneEditScreen extends ConsumerStatefulWidget {
+class SceneEditScreen extends StatefulWidget {
   final SceneEditArguments args;
-
   const SceneEditScreen({required this.args, super.key});
-
   @override
-  ConsumerState<SceneEditScreen> createState() => _SceneEditScreenState();
+  State<SceneEditScreen> createState() => _SceneEditScreenState();
 }
 
-class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
+class _SceneEditScreenState extends State<SceneEditScreen> {
   final _formKey = GlobalKey<FormState>();
-  late final StateNotifierProvider<SceneEditNotifier, SceneEditState> _sceneEditProvider;
-  @override
-  void initState() {
-    super.initState();
-    _sceneEditProvider = StateNotifierProvider<SceneEditNotifier, SceneEditState>((ref) {
-      return SceneEditNotifier(
-        ref.watch(_sceneManagerProvider),
-        isCreation: widget.args.isCreation,
-        model: widget.args.model,
-      );
-    }, dependencies: [_sceneManagerProvider]);
-  }
-
-  late final Provider<ISceneManager> _sceneManagerProvider = Provider<ISceneManager>((ref) {
-    throw UnimplementedError('SceneManager must be provided by context');
-  });
-
-  late final Provider<IAppNotificationService> _notificationServiceProvider = Provider<IAppNotificationService>((ref) {
-    throw UnimplementedError('NotificationService must be provided by context');
-  });
 
   @override
   Widget build(BuildContext context) {
-    return provider.Consumer<ISceneManager>(
-      builder: (context, sceneManager, child) {
-        return provider.Consumer<IAppNotificationService>(
-          builder: (context, notificationService, child) {
-            return ProviderScope(
-              overrides: [
-                _sceneManagerProvider.overrideWithValue(sceneManager),
-                _notificationServiceProvider.overrideWithValue(notificationService),
-              ],
-              child: Consumer(
-                builder: (context, ref, child) {
-                  final state = ref.watch(_sceneEditProvider);
-                  final notifier = ref.read(_sceneEditProvider.notifier);
-
-                  return Scaffold(
-                    appBar: AppBar(
-                      title: Text(
-                        widget.args.isCreation ? context.translate('New Scene') : context.translate('Edit Scene'),
-                      ),
-                      backgroundColor: Theme.of(context).colorScheme.surface,
-                      actions: _buildActions(context, ref, state, notifier),
-                    ),
-                    body: _buildBody(context, ref, state, notifier),
-                  );
-                },
-              ),
-            );
-          },
-        );
-      },
+    return ChangeNotifierProvider<SceneEditViewModel>(
+      create: (ctx) =>
+          SceneEditViewModel(ctx.read<ISceneManager>(), isCreation: widget.args.isCreation, model: widget.args.model),
+      child: Builder(
+        builder: (context) {
+          final vm = context.watch<SceneEditViewModel>();
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(widget.args.isCreation ? context.translate('New Scene') : context.translate('Edit Scene')),
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              actions: _buildActions(context, vm),
+            ),
+            body: _buildBody(context, vm),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildBody(BuildContext context, WidgetRef ref, SceneEditState state, SceneEditNotifier notifier) {
+  Widget _buildBody(BuildContext context, SceneEditViewModel vm) {
     return Container(
       color: Theme.of(context).colorScheme.surfaceContainer,
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
@@ -87,20 +51,20 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
         key: _formKey,
         child: ListView(
           children: [
-            _buildImageSection(context, state, notifier),
+            _buildImageSection(context, vm),
             const SizedBox(height: 16),
-            _buildNameField(context, state, notifier),
+            _buildNameField(context, vm),
             const SizedBox(height: 16),
-            _buildNotesField(context, state, notifier),
+            _buildNotesField(context, vm),
             const SizedBox(height: 24),
-            _buildSubmitButton(context, state, notifier),
+            _buildSubmitButton(context, vm),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildImageSection(BuildContext context, SceneEditState state, SceneEditNotifier notifier) {
+  Widget _buildImageSection(BuildContext context, SceneEditViewModel vm) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -110,7 +74,7 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
           children: [
             InkWell(
               borderRadius: BorderRadius.circular(8),
-              onTap: () => _pickImage(notifier, Theme.of(context)),
+              onTap: () => _pickImage(vm, Theme.of(context)),
               child: Container(
                 width: double.infinity,
                 height: 120,
@@ -119,20 +83,15 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
                   borderRadius: BorderRadius.circular(8),
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 ),
-                child: state.imagePath != null && state.imagePath!.isNotEmpty && File(state.imagePath!).existsSync()
+                child: vm.imagePath != null && vm.imagePath!.isNotEmpty && File(vm.imagePath!).existsSync()
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.file(
-                          File(state.imagePath!),
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: 120,
-                        ),
+                        child: Image.file(File(vm.imagePath!), fit: BoxFit.cover, width: double.infinity, height: 120),
                       )
                     : Center(child: Icon(Icons.add_a_photo_outlined, size: 40, color: Theme.of(context).hintColor)),
               ),
             ),
-            if (state.imagePath != null && state.imagePath!.isNotEmpty && File(state.imagePath!).existsSync())
+            if (vm.imagePath != null && vm.imagePath!.isNotEmpty && File(vm.imagePath!).existsSync())
               Positioned(
                 top: 4,
                 right: 4,
@@ -141,7 +100,7 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
                   shape: const CircleBorder(),
                   child: InkWell(
                     customBorder: const CircleBorder(),
-                    onTap: () => notifier.setImagePath(null),
+                    onTap: () => vm.setImagePath(null),
                     child: const Padding(
                       padding: EdgeInsets.all(4),
                       child: Icon(Icons.close, color: Colors.white, size: 20),
@@ -155,9 +114,9 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
     );
   }
 
-  Widget _buildNameField(BuildContext context, SceneEditState state, SceneEditNotifier notifier) {
+  Widget _buildNameField(BuildContext context, SceneEditViewModel vm) {
     return TextFormField(
-      initialValue: state.name,
+      initialValue: vm.name,
       decoration: InputDecoration(
         labelText: context.translate('Name'),
         hintStyle: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
@@ -170,14 +129,14 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
         return null;
       },
       onSaved: (value) {
-        notifier.updateName(value ?? '');
+        vm.updateName(value ?? '');
       },
     );
   }
 
-  Widget _buildNotesField(BuildContext context, SceneEditState state, SceneEditNotifier notifier) {
+  Widget _buildNotesField(BuildContext context, SceneEditViewModel vm) {
     return TextFormField(
-      initialValue: state.notes,
+      initialValue: vm.notes,
       maxLines: null,
       keyboardType: TextInputType.multiline,
       decoration: InputDecoration(
@@ -186,21 +145,21 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
         labelText: context.translate('Notes'),
       ),
       onSaved: (value) {
-        notifier.updateNotes(value ?? '');
+        vm.updateNotes(value ?? '');
       },
     );
   }
 
-  Widget _buildSubmitButton(BuildContext context, SceneEditState state, SceneEditNotifier notifier) {
+  Widget _buildSubmitButton(BuildContext context, SceneEditViewModel vm) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: state.isLoading
+        onPressed: vm.isLoading
             ? null
             : () async {
                 if (_formKey.currentState?.validate() ?? false) {
                   _formKey.currentState!.save();
-                  final success = await notifier.submit();
+                  final success = await vm.submit();
                   if (success) {
                     if (context.mounted) {
                       Navigator.pop(context);
@@ -208,19 +167,19 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
                   }
                 }
               },
-        child: state.isLoading
+        child: vm.isLoading
             ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
             : Text(context.translate('Submit')),
       ),
     );
   }
 
-  List<Widget> _buildActions(BuildContext context, WidgetRef ref, SceneEditState state, SceneEditNotifier notifier) {
-    final notificationService = ref.read(_notificationServiceProvider);
+  List<Widget> _buildActions(BuildContext context, SceneEditViewModel vm) {
+    final notificationService = context.read<IAppNotificationService>();
     return [
-      if (notifier.deletionAvailable)
+      if (vm.deletionAvailable)
         IconButton(
-          onPressed: state.isLoading
+          onPressed: vm.isLoading
               ? null
               : () {
                   showModalBottomSheet(
@@ -231,14 +190,13 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
                           'Are you sure you want to delete this scene? This action cannot be undone.',
                         ),
                         okPressed: () async {
-                          final success = await notifier.delete();
+                          final success = await vm.delete();
                           if (success) {
                             if (context.mounted) {
                               Navigator.of(context).pop(true);
                             }
                           } else if (context.mounted) {
-                            // Show error notification if deletion was blocked
-                            final error = ref.read(_sceneEditProvider).error;
+                            final error = vm.error;
                             switch (error) {
                               case 'last_scene':
                                 notificationService.showWarning(
@@ -266,13 +224,13 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
     ];
   }
 
-  Future<void> _pickImage(SceneEditNotifier notifier, ThemeData theme) async {
+  Future<void> _pickImage(SceneEditViewModel vm, ThemeData theme) async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
 
     if (picked != null) {
       if (!kIsWeb && Platform.isWindows) {
-        notifier.setImagePath(picked.path);
+        vm.setImagePath(picked.path);
       } else {
         final cropped = await ImageCropper().cropImage(
           sourcePath: picked.path,
@@ -300,7 +258,7 @@ class _SceneEditScreenState extends ConsumerState<SceneEditScreen> {
           ],
         );
         if (cropped != null) {
-          notifier.setImagePath(cropped.path);
+          vm.setImagePath(cropped.path);
         }
       }
     }

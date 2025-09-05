@@ -1,58 +1,64 @@
 import 'dart:async';
-
-import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 
-import 'package:borneo_app/features/routines/models/abstract_routine.dart';
-import 'package:borneo_app/features/routines/providers/routine_summary_provider.dart';
+import '../models/abstract_routine.dart';
+import '../view_models/routine_summary_view_model.dart';
+import '../../../core/services/routine_manager.dart';
+import '../../../core/services/app_notification_service.dart';
+import 'package:logger/logger.dart';
 
-class RoutineCardRiverpod extends ConsumerWidget {
+class RoutineCard extends StatelessWidget {
   final AbstractRoutine routine;
-  const RoutineCardRiverpod(this.routine, {super.key});
+  const RoutineCard(this.routine, {super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final routineSummaryState = ref.watch(routineSummaryProvider(routine));
-    final routineSummaryNotifier = ref.read(routineSummaryProvider(routine).notifier);
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<RoutineSummaryViewModel>(
+      create: (ctx) => RoutineSummaryViewModel(
+        routine,
+        routineManager: ctx.read<IRoutineManager>(),
+        notification: ctx.read<IAppNotificationService>(),
+        logger: ctx.read<Logger?>(),
+      ),
+      child: const _RoutineCardContentWrapper(),
+    );
+  }
+}
 
+class _RoutineCardContentWrapper extends StatelessWidget {
+  const _RoutineCardContentWrapper();
+  @override
+  Widget build(BuildContext context) {
+    final vm = context.watch<RoutineSummaryViewModel>();
     final colorScheme = Theme.of(context).colorScheme;
-    final isActive = routineSummaryState.isActive;
+    final isActive = vm.isActive;
     final bgColor = isActive ? colorScheme.primaryContainer : colorScheme.surfaceContainer;
     final fgColor = isActive ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
-
     return _RoutineCardContent(
-      isBusy: routineSummaryState.isBusy,
+      vm: vm,
       bgColor: bgColor,
       fgColor: fgColor,
-      state: routineSummaryState,
-      notifier: routineSummaryNotifier,
-      colorScheme: colorScheme,
       isActive: isActive,
+      colorScheme: colorScheme,
     );
   }
 }
 
 class _RoutineCardContent extends StatefulWidget {
-  final bool isBusy;
+  final RoutineSummaryViewModel vm;
   final Color bgColor;
   final Color fgColor;
-  final RoutineSummaryState state;
-  final RoutineSummaryNotifier notifier;
-  final ColorScheme colorScheme;
   final bool isActive;
-
+  final ColorScheme colorScheme;
   const _RoutineCardContent({
-    required this.isBusy,
+    required this.vm,
     required this.bgColor,
     required this.fgColor,
-    required this.state,
-    required this.notifier,
-    required this.colorScheme,
     required this.isActive,
+    required this.colorScheme,
   });
-
   @override
   State<_RoutineCardContent> createState() => _RoutineCardContentState();
 }
@@ -60,18 +66,15 @@ class _RoutineCardContent extends StatefulWidget {
 class _RoutineCardContentState extends State<_RoutineCardContent> {
   bool _showProgress = false;
   Timer? _timer;
-
   @override
   void didUpdateWidget(covariant _RoutineCardContent oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isBusy && !_showProgress) {
+    if (widget.vm.isBusy && !_showProgress) {
       _timer?.cancel();
       _timer = Timer(const Duration(milliseconds: 800), () {
-        if (mounted && widget.isBusy) {
-          setState(() => _showProgress = true);
-        }
+        if (mounted && widget.vm.isBusy) setState(() => _showProgress = true);
       });
-    } else if (!widget.isBusy) {
+    } else if (!widget.vm.isBusy) {
       _timer?.cancel();
       if (_showProgress) setState(() => _showProgress = false);
     }
@@ -85,65 +88,60 @@ class _RoutineCardContentState extends State<_RoutineCardContent> {
 
   @override
   Widget build(BuildContext context) {
-    final state = widget.state;
-    final bgColor = widget.bgColor;
-    final fgColor = widget.fgColor;
-    final colorScheme = widget.colorScheme;
+    final vm = widget.vm;
     final isActive = widget.isActive;
-
+    final fgColor = widget.fgColor;
+    final bgColor = widget.bgColor;
+    final colorScheme = widget.colorScheme;
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Stack(
         children: [
           Card.filled(
-            margin: EdgeInsets.all(0),
+            margin: EdgeInsets.zero,
             elevation: 0,
             color: bgColor,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 350),
-                switchInCurve: Curves.easeInOut,
-                switchOutCurve: Curves.easeInOut,
                 child: Column(
-                  key: ValueKey(isActive.toString() + state.name),
-                  mainAxisSize: MainAxisSize.max,
+                  key: ValueKey(isActive.toString() + vm.name),
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Expanded(
                       child: LayoutBuilder(
-                        builder: (BuildContext context, BoxConstraints constraints) {
+                        builder: (context, constraints) {
                           final iconSize = constraints.maxHeight - 16.0;
                           return Align(
                             alignment: Alignment.centerLeft,
-                            child: _buildIcon(state.iconAssetPath, iconSize, fgColor),
+                            child: _buildIcon(vm.iconAssetPath, iconSize, fgColor),
                           );
                         },
                       ),
                     ),
                     Text(
-                      state.name,
+                      vm.name,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(fontSize: 14.0, color: fgColor),
                     ),
                     Divider(height: 16, thickness: 1, color: fgColor.withValues(alpha: 0.2)),
                     Row(
-                      mainAxisSize: MainAxisSize.max,
                       children: [
                         Text(
-                          isActive ? context.translate('ACTIVE') : context.translate('INACTIVE'),
+                          isActive ? 'ACTIVE' : 'INACTIVE',
                           style: TextStyle(fontSize: 12, color: fgColor.withValues(alpha: 0.7)),
                         ),
-                        Spacer(),
+                        const Spacer(),
                         Switch(
                           value: isActive,
-                          onChanged: widget.isBusy
+                          onChanged: vm.isBusy
                               ? null
                               : (v) async {
                                   if (v) {
-                                    await widget.notifier.executeRoutine();
+                                    await vm.executeRoutine();
                                   } else {
-                                    await widget.notifier.undoRoutine();
+                                    await vm.undoRoutine();
                                   }
                                 },
                           activeColor: colorScheme.primary,
@@ -158,11 +156,11 @@ class _RoutineCardContentState extends State<_RoutineCardContent> {
               ),
             ),
           ),
-          if (_showProgress && widget.isBusy)
+          if (_showProgress && vm.isBusy)
             Positioned.fill(
               child: Container(
                 color: bgColor.withValues(alpha: 0.6),
-                child: Center(child: CircularProgressIndicator()),
+                child: const Center(child: CircularProgressIndicator()),
               ),
             ),
         ],

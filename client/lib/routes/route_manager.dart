@@ -3,7 +3,7 @@
 import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/features/devices/views/device_discovery_screen.dart';
-import 'package:borneo_app/features/scenes/views/scenes_screen_riverpod.dart';
+// Removed Riverpod scenes import after migration
 import 'package:flutter/material.dart';
 
 import '../routes/app_routes.dart';
@@ -14,7 +14,8 @@ import '../features/my/views/my_screen.dart';
 class RouteManager {
   final Map<String, WidgetBuilder> _routes = {
     AppRoutes.kMainScreen: (_) => MainScreen(),
-    AppRoutes.kScreens: (_) => const ScenesScreenRiverpod(),
+    // Updated to use provider-based ScenesScreen is handled elsewhere (main_screen tab). If needed as a route:
+    // AppRoutes.kScreens: (_) => const ScenesScreen(),
     AppRoutes.kDevices: (_) => const DevicesScreen(),
     AppRoutes.kDeviceDiscovery: (_) => const DeviceDiscoveryScreen(),
     AppRoutes.kAccount: (_) => const MyScreen(),

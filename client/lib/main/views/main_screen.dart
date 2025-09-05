@@ -6,8 +6,8 @@ import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/features/devices/view_models/group_edit_view_model.dart';
-import 'package:borneo_app/features/scenes/providers/scene_edit_provider.dart';
-import 'package:borneo_app/features/scenes/widgets/riverpod_scenes_widget.dart';
+import 'package:borneo_app/features/scenes/models/scene_edit_arguments.dart';
+import 'package:borneo_app/features/scenes/views/scenes_screen.dart';
 import 'package:borneo_app/features/devices/views/group_edit_screen.dart';
 import 'package:borneo_app/features/scenes/views/scene_edit_screen.dart';
 import 'package:event_bus/event_bus.dart';
@@ -149,7 +149,7 @@ class MainScreen extends StatelessWidget {
             transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
             child: switch (tabIndex) {
               TabIndices.devices => const DevicesScreen(key: ValueKey('devices')),
-              TabIndices.scenes => const RiverpodScenesWidget(key: ValueKey('scenes')),
+              TabIndices.scenes => const ProvideScenesViewModel(child: ScenesScreen(key: ValueKey('scenes'))),
               TabIndices.my => const MyScreen(key: ValueKey('my')),
             },
           ),
