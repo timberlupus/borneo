@@ -167,10 +167,8 @@ class _SceneListState extends State<_SceneList> {
             itemCount: scenes.length,
             itemBuilder: (_, index) {
               final scene = scenes[index];
-              return SizedBox(
-                width: (screenHeight / 4.0) * (16.0 / 9.0),
-                child: SceneCard(scene, onCentered: () => _scrollToSelected(index)),
-              );
+              // Width now driven purely by card's internal AspectRatio (16:9) and list height
+              return SceneCard(scene, onCentered: () => _scrollToSelected(index));
             },
           ),
         ),

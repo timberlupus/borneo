@@ -33,7 +33,22 @@ class SceneCard extends StatelessWidget {
                 await context.read<ScenesViewModel>().switchCurrentScene(scene.id);
               }
             },
-            child: _buildContent(context),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              layoutBuilder: (currentChild, previousChildren) => Stack(
+                fit: StackFit.expand,
+                children: [
+                  ...previousChildren,
+                  if (currentChild != null) currentChild,
+                ],
+              ),
+              transitionBuilder: (child, animation) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              child: _buildContent(context),
+            ),
           ),
         ),
       ),
@@ -75,32 +90,17 @@ class SceneCard extends StatelessWidget {
       );
     }
     return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: scene.isSelected ? 0.0 : 1.0, end: scene.isSelected ? 0.0 : 1.0),
+      tween: Tween<double>(begin: 1.0, end: 1.0),
       duration: const Duration(milliseconds: 300),
       builder: (context, value, child) {
-        final double s = 1.0 - 0.1 * value;
-        final double b = 1.0 - 0.1 * value;
+        // Keep same dimming matrix for unselected state (value fixed to 1.0 here)
+        final double s = 0.9; // subtle saturation retain
+        final double b = 0.9; // brightness
         final matrix = <double>[
-          s * b,
-          (1 - s) * b,
-          (1 - s) * b,
-          0,
-          0,
-          (1 - s) * b,
-          s * b,
-          (1 - s) * b,
-          0,
-          0,
-          (1 - s) * b,
-          (1 - s) * b,
-          s * b,
-          0,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
+          s * b, (1 - s) * b, (1 - s) * b, 0, 0, // R
+          (1 - s) * b, s * b, (1 - s) * b, 0, 0, // G
+          (1 - s) * b, (1 - s) * b, s * b, 0, 0, // B
+          0, 0, 0, 1, 0, // A
         ];
         return ColorFiltered(
           colorFilter: ColorFilter.matrix(matrix),
@@ -109,28 +109,17 @@ class SceneCard extends StatelessWidget {
             children: [
               _buildSceneImage(context),
               _buildSceneInfo(context),
-              if (scene.isSelected)
-                Positioned.fill(
-                  child: ShaderMask(
-                    shaderCallback: (Rect bounds) {
-                      return RadialGradient(
-                        center: Alignment.center,
-                        radius: 0.5,
-                        colors: [Colors.white.withAlpha(200), Colors.white],
-                        stops: const [0.0, 1.0],
-                        tileMode: TileMode.clamp,
-                      ).createShader(bounds);
-                    },
-                    blendMode: BlendMode.srcATop,
-                    child: Container(color: Colors.transparent),
-                  ),
-                ),
               Positioned(
                 top: 8.0,
                 right: 8.0,
                 child: IconButton(
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.black.withOpacity(0.25),
+                    padding: const EdgeInsets.all(4),
+                    visualDensity: VisualDensity.compact,
+                  ),
                   onPressed: () => _showEditSceneScreen(context),
-                  icon: const Icon(Icons.edit_outlined, color: Colors.white, shadows: [_smallShadow]),
+                  icon: const Icon(Icons.edit_outlined, color: Colors.white, size: 20, shadows: [_smallShadow]),
                 ),
               ),
             ],
