@@ -107,6 +107,7 @@ class _BorneoAppState extends State<BorneoApp> {
               locale: _locale,
               supportedLocales: kSupportedLocales,
               onGenerateRoute: context.read<RouteManager>().onGenerateRoute,
+              debugShowCheckedModeBanner: false,
               localizationsDelegates: [
                 GettextLocalizationsDelegate(),
                 GlobalMaterialLocalizations.delegate,

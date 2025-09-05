@@ -73,7 +73,7 @@ class ScenesViewModel extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      await _reload();
+      await _reload(preserveOrder: false); // initial load sorts by lastAccessTime
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -82,7 +82,8 @@ class ScenesViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> _reload() async {
+  Future<void> _reload({bool preserveOrder = true}) async {
+    _logger?.d('ScenesViewModel._reload(preserveOrder=$preserveOrder)');
     final scenes = await _sceneManager.all();
     final sceneStates = <SceneSummaryModel>[];
     for (final scene in scenes) {
@@ -96,12 +97,24 @@ class ScenesViewModel extends ChangeNotifier {
         ),
       );
     }
-    sceneStates.sort((a, b) {
-      if (a.isSelected && !b.isSelected) return -1;
-      if (!a.isSelected && b.isSelected) return 1;
-      return b.scene.lastAccessTime.compareTo(a.scene.lastAccessTime);
-    });
-    _scenes = sceneStates;
+    if (preserveOrder && _scenes.isNotEmpty) {
+      // Rebuild list in the existing order; append any new scenes at the end (by recent first)
+      final mapById = {for (final s in sceneStates) s.id: s};
+      final rebuilt = <SceneSummaryModel>[];
+      for (final existing in _scenes) {
+        final updated = mapById.remove(existing.id);
+        if (updated != null) rebuilt.add(updated);
+      }
+      // Append remaining (newly added) scenes in lastAccessTime desc
+      final remaining = mapById.values.toList()
+        ..sort((a, b) => b.scene.lastAccessTime.compareTo(a.scene.lastAccessTime));
+      rebuilt.addAll(remaining);
+      _scenes = rebuilt;
+    } else {
+      // Initial or explicit resort: order by lastAccessTime desc
+      sceneStates.sort((a, b) => b.scene.lastAccessTime.compareTo(a.scene.lastAccessTime));
+      _scenes = sceneStates;
+    }
     notifyListeners();
   }
 
@@ -125,14 +138,16 @@ class ScenesViewModel extends ChangeNotifier {
   }
 
   void _onSceneCreated(SceneCreatedEvent event) {
-    if (!_isLoading) _sceneManager.changeCurrent(event.scene.id).then((_) => _reload());
+    if (!_isLoading) {
+      _sceneManager.changeCurrent(event.scene.id).then((_) => _reload(preserveOrder: true));
+    }
   }
 
   void _onSceneDeleted(SceneDeletedEvent event) {
     if (!_isLoading)
       _sceneManager.getLastAccessed().then((scene) async {
         await _sceneManager.changeCurrent(scene.id);
-        _reload();
+        _reload(preserveOrder: true);
       });
   }
 
@@ -142,7 +157,7 @@ class ScenesViewModel extends ChangeNotifier {
   }
 
   void _onDeviceManagerReady(DeviceManagerReadyEvent _) {
-    if (!_isLoading) _reload();
+    if (!_isLoading) _reload(preserveOrder: true);
   }
 
   @override
