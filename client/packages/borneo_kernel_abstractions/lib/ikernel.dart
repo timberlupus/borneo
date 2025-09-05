@@ -12,6 +12,8 @@ abstract class IKernel implements IDisposable {
   bool get isInitialized;
   GlobalDevicesEventBus get events;
   Iterable<IDriver> get activatedDrivers;
+  bool get isBusy;
+  bool get isScanning;
 
   Future<void> start();
 
@@ -25,8 +27,6 @@ abstract class IKernel implements IDisposable {
 
   Future<void> unbind(String deviceID, {CancellationToken? cancelToken});
   Future<void> unbindAll({CancellationToken? cancelToken});
-
-  bool get isScanning;
 
   Future<void> startDevicesScanning({Duration? timeout, CancellationToken? cancelToken});
   Future<void> stopDevicesScanning();

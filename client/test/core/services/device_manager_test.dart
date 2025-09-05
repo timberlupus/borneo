@@ -426,6 +426,9 @@ class TestKernel implements IKernel {
 
   @override
   void dispose() {}
+
+  @override
+  bool get isBusy => false;
 }
 
 class TestBoundDevice {

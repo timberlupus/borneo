@@ -68,6 +68,9 @@ final class DefaultKernel implements IKernel {
   Iterable<BoundDevice> get boundDevices => _boundDevices.values;
 
   @override
+  bool get isBusy => _deviceOpLock.inLock;
+
+  @override
   bool get isScanning => _isScanning;
 
   DefaultKernel(this._logger, this._driverRegistry, {this.mdnsProvider}) {
@@ -455,6 +458,12 @@ final class DefaultKernel implements IKernel {
     if (!isInitialized) {
       return;
     }
+
+    if (isBusy) {
+      _logger.t('Heartbeat polling skipped due to kernel is busy.');
+      return;
+    }
+
     if (_hbLock.locked) {
       _logger.t('Heartbeat polling skipped due to device operation lock.');
       return;

@@ -162,7 +162,7 @@ class _SceneListState extends State<_SceneList> {
           child: ListView.separated(
             controller: _scrollController,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            separatorBuilder: (_, _) => const SizedBox(width: 16),
             scrollDirection: Axis.horizontal,
             itemCount: scenes.length,
             itemBuilder: (_, index) {

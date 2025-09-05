@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
@@ -105,6 +106,8 @@ class _RoutineCardContentState extends State<_RoutineCardContent> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 350),
+                switchInCurve: Curves.easeInOut,
+                switchOutCurve: Curves.easeInOut,
                 child: Column(
                   key: ValueKey(isActive.toString() + vm.name),
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -129,7 +132,7 @@ class _RoutineCardContentState extends State<_RoutineCardContent> {
                     Row(
                       children: [
                         Text(
-                          isActive ? 'ACTIVE' : 'INACTIVE',
+                          isActive ? context.translate('ACTIVE') : context.translate('INACTIVE'),
                           style: TextStyle(fontSize: 12, color: fgColor.withValues(alpha: 0.7)),
                         ),
                         const Spacer(),

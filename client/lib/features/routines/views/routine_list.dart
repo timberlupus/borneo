@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import '../view_models/routines_view_model.dart';
+import '../../scenes/view_models/scenes_view_model.dart';
 import 'routine_card.dart';
 import '../models/abstract_routine.dart';
 import '../../../core/services/routine_manager.dart';
@@ -29,6 +31,18 @@ class _RoutineListState extends State<RoutineList> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<RoutinesViewModel>();
+    // Also watch scenes to trigger animation when scene changes
+    final scenesVm = context.watch<ScenesViewModel?>();
+    String? selectedSceneId;
+    if (scenesVm != null) {
+      try {
+        selectedSceneId = scenesVm.scenes.firstWhere((s) => s.isSelected).id;
+      } catch (_) {}
+    }
+    final shouldShowLoading = state.isLoading && state.routines.isEmpty;
+    final shouldShowSceneLoading = scenesVm?.isLoading == true;
+    final showLoading = shouldShowLoading || shouldShowSceneLoading;
+
     return SliverToBoxAdapter(
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -37,20 +51,32 @@ class _RoutineListState extends State<RoutineList> {
           children: [
             Text(context.translate('Routines'), style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
-            _buildContent(context, state),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                switchInCurve: Curves.easeIn,
+                switchOutCurve: Curves.easeOut,
+                child: showLoading
+                    ? SizedBox(
+                        key: const ValueKey('scene_loading_text'),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 32),
+                          child: Center(child: _FlowingLoadingText()),
+                        ),
+                      )
+                    : _buildContent(context, state, selectedSceneId),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context, RoutinesViewModel vm) {
+  Widget _buildContent(BuildContext context, RoutinesViewModel vm, String? selectedSceneId) {
     final theme = Theme.of(context);
-    if (vm.isLoading && vm.routines.isEmpty) {
-      return const Center(
-        child: Padding(padding: EdgeInsets.symmetric(vertical: 32), child: CircularProgressIndicator()),
-      );
-    }
     if (vm.error != null && vm.routines.isEmpty) {
       return Center(
         child: Padding(
@@ -111,7 +137,20 @@ class _RoutineListState extends State<RoutineList> {
             ),
             padding: EdgeInsets.zero,
             itemCount: routines.length,
-            itemBuilder: (_, index) => RoutineCard(routines[index]),
+            itemBuilder: (_, index) {
+              final routine = routines[index];
+              return TweenAnimationBuilder<double>(
+                key: ValueKey('${selectedSceneId ?? 'none'}-${routine.runtimeType}-${routine.hashCode}'),
+                tween: Tween(begin: 0, end: 1),
+                duration: Duration(milliseconds: 300 + index * 40),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) => Opacity(
+                  opacity: value,
+                  child: Transform.translate(offset: Offset(0, (1 - value) * 16), child: child),
+                ),
+                child: RoutineCard(routine),
+              );
+            },
           ),
         ),
         if (vm.isLoading && routines.isNotEmpty)
@@ -140,6 +179,76 @@ class _RoutineListState extends State<RoutineList> {
           ),
       ],
     );
+  }
+}
+
+class _FlowingLoadingText extends StatefulWidget {
+  const _FlowingLoadingText({Key? key}) : super(key: key);
+
+  @override
+  State<_FlowingLoadingText> createState() => _FlowingLoadingTextState();
+}
+
+class _FlowingLoadingTextState extends State<_FlowingLoadingText> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final baseColor = theme.colorScheme.onSurface.withValues(alpha: 0.45);
+    final highlight = theme.colorScheme.onSurface.withValues(alpha: 0.9);
+
+    return Semantics(
+      label: 'Loading routines',
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return ShaderMask(
+            shaderCallback: (bounds) {
+              final width = bounds.width;
+              final animationValue = _controller.value;
+              final gradientWidth = width * 0.35;
+              final dx = (width + gradientWidth) * animationValue - gradientWidth;
+
+              return LinearGradient(
+                colors: [baseColor, highlight, baseColor],
+                stops: const [0.0, 0.5, 1.0],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                transform: GradientTranslation(dx),
+              ).createShader(bounds);
+            },
+            blendMode: BlendMode.srcIn,
+            child: Text(
+              'Loading...',
+              style: (theme.textTheme.titleSmall ?? theme.textTheme.bodyLarge)?.copyWith(fontWeight: FontWeight.w600),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class GradientTranslation extends GradientTransform {
+  final double dx;
+  const GradientTranslation(this.dx);
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    return Matrix4.translationValues(dx, 0.0, 0.0);
   }
 }
 

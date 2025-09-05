@@ -33,22 +33,7 @@ class SceneCard extends StatelessWidget {
                 await context.read<ScenesViewModel>().switchCurrentScene(scene.id);
               }
             },
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              switchInCurve: Curves.easeOut,
-              switchOutCurve: Curves.easeIn,
-              layoutBuilder: (currentChild, previousChildren) => Stack(
-                fit: StackFit.expand,
-                children: [
-                  ...previousChildren,
-                  if (currentChild != null) currentChild,
-                ],
-              ),
-              transitionBuilder: (child, animation) {
-                return FadeTransition(opacity: animation, child: child);
-              },
-              child: _buildContent(context),
-            ),
+            child: _buildContent(context),
           ),
         ),
       ),
@@ -78,29 +63,37 @@ class SceneCard extends StatelessWidget {
               child: Container(color: Colors.transparent),
             ),
           ),
-          Positioned(
-            top: 8.0,
-            right: 8.0,
-            child: IconButton(
-              onPressed: () => _showEditSceneScreen(context),
-              icon: const Icon(Icons.edit_outlined, color: Colors.white, shadows: [_smallShadow]),
-            ),
-          ),
+          Positioned(top: 0.0, right: 0.0, child: _buildEditButton(context)),
         ],
       );
     }
     return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 1.0, end: 1.0),
+      tween: Tween<double>(begin: scene.isSelected ? 0.0 : 1.0, end: scene.isSelected ? 0.0 : 1.0),
       duration: const Duration(milliseconds: 300),
       builder: (context, value, child) {
-        // Keep same dimming matrix for unselected state (value fixed to 1.0 here)
-        final double s = 0.9; // subtle saturation retain
-        final double b = 0.9; // brightness
+        final double s = 1.0 - 0.1 * value;
+        final double b = 1.0 - 0.1 * value;
         final matrix = <double>[
-          s * b, (1 - s) * b, (1 - s) * b, 0, 0, // R
-          (1 - s) * b, s * b, (1 - s) * b, 0, 0, // G
-          (1 - s) * b, (1 - s) * b, s * b, 0, 0, // B
-          0, 0, 0, 1, 0, // A
+          s * b,
+          (1 - s) * b,
+          (1 - s) * b,
+          0,
+          0,
+          (1 - s) * b,
+          s * b,
+          (1 - s) * b,
+          0,
+          0,
+          (1 - s) * b,
+          (1 - s) * b,
+          s * b,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
         ];
         return ColorFiltered(
           colorFilter: ColorFilter.matrix(matrix),
@@ -109,23 +102,57 @@ class SceneCard extends StatelessWidget {
             children: [
               _buildSceneImage(context),
               _buildSceneInfo(context),
-              Positioned(
-                top: 8.0,
-                right: 8.0,
-                child: IconButton(
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.black.withOpacity(0.25),
-                    padding: const EdgeInsets.all(4),
-                    visualDensity: VisualDensity.compact,
+              if (scene.isSelected)
+                Positioned.fill(
+                  child: ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return RadialGradient(
+                        center: Alignment.center,
+                        radius: 0.5,
+                        colors: [Colors.white.withAlpha(200), Colors.white],
+                        stops: const [0.0, 1.0],
+                        tileMode: TileMode.clamp,
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.srcATop,
+                    child: Container(color: Colors.transparent),
                   ),
-                  onPressed: () => _showEditSceneScreen(context),
-                  icon: const Icon(Icons.edit_outlined, color: Colors.white, size: 20, shadows: [_smallShadow]),
                 ),
-              ),
+              Positioned(top: 0.0, right: 0.0, child: _buildEditButton(context)),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildEditButton(BuildContext context) {
+    // Corner overlay matching card's 16px radius, flush to edges
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topRight: Radius.circular(16),
+        topLeft: Radius.circular(0),
+        bottomLeft: Radius.circular(16), // Keep symmetry if height shrinks; adjust if undesired
+        bottomRight: Radius.circular(0),
+      ),
+      child: Material(
+        color: Colors.black.withValues(alpha: 0.32),
+        child: InkWell(
+          onTap: () => _showEditSceneScreen(context),
+          child: const SizedBox(
+            width: 44,
+            height: 44,
+            child: Center(
+              child: Icon(
+                Icons.edit_outlined,
+                color: Colors.white,
+                size: 20,
+                shadows: [Shadow(offset: Offset(1, 1), blurRadius: 2, color: Color.fromARGB(160, 0, 0, 0))],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

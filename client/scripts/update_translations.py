@@ -7,6 +7,7 @@ import sys
 
 __LANGUAGES = [
     'en_US',
+    'de_DE',
     'zh_CN',
 ]
 
