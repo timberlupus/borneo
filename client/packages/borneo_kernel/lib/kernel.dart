@@ -21,9 +21,9 @@ import 'package:borneo_kernel_abstractions/models/driver_descriptor.dart';
 import 'package:borneo_kernel_abstractions/mdns.dart';
 
 final class DefaultKernel implements IKernel {
-  static const Duration kStartupDiscoveryDuration = Duration(seconds: 15);
+  static const Duration kStartupDiscoveryDuration = Duration(seconds: 10);
   static const Duration kLocalProbeTimeOut = Duration(seconds: 10);
-  static const Duration kLocalBindTimeOut = Duration(seconds: 30);
+  static const Duration kLocalBindTimeOut = Duration(seconds: 20);
   static const Duration kHeartbeatPollingInterval = Duration(seconds: 15);
 
   Timer? _timer;
@@ -381,13 +381,16 @@ final class DefaultKernel implements IKernel {
           _onHeartbeatReceived(deviceId, timestamp);
         },
         onError: (error) {
-          if (error.toString().contains('CoapRequestException') || error.toString().contains('timed out')) {
-            _logger.w('Heartbeat observation error for device $deviceId: $error');
-            _onHeartbeatMissed(device.id);
+          final errStr = error.toString();
+          final isTransient = errStr.contains('CoapRequestException') || errStr.contains('timed out');
+          if (isTransient) {
+            _logger.w('Heartbeat observation transient error for device $deviceId: $error');
+            _onHeartbeatMissed(deviceId); // count as a single missed heartbeat
           } else {
-            _logger.e('Unknown heartbeat observation error for device $deviceId: $error');
+            _logger.e('Heartbeat observation unexpected error for device $deviceId: $error');
+            // For unexpected errors we still treat it as a single miss (not double)
+            _onHeartbeatMissed(deviceId);
           }
-          _onHeartbeatMissed(deviceId);
         },
         onDone: () {
           _logger.w('Heartbeat observation ended for device $deviceId');
