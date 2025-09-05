@@ -47,6 +47,22 @@ class SceneCard extends StatelessWidget {
         children: [
           _buildSceneImage(context),
           _buildSceneInfo(context),
+          // Radial highlight overlay replicated from riverpod implementation
+          Positioned.fill(
+            child: ShaderMask(
+              shaderCallback: (Rect bounds) {
+                return RadialGradient(
+                  center: Alignment.center,
+                  radius: 0.5,
+                  colors: [Colors.white.withAlpha(200), Colors.white],
+                  stops: const [0.0, 1.0],
+                  tileMode: TileMode.clamp,
+                ).createShader(bounds);
+              },
+              blendMode: BlendMode.srcATop,
+              child: Container(color: Colors.transparent),
+            ),
+          ),
           Positioned(
             top: 8.0,
             right: 8.0,
@@ -93,6 +109,22 @@ class SceneCard extends StatelessWidget {
             children: [
               _buildSceneImage(context),
               _buildSceneInfo(context),
+              if (scene.isSelected)
+                Positioned.fill(
+                  child: ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return RadialGradient(
+                        center: Alignment.center,
+                        radius: 0.5,
+                        colors: [Colors.white.withAlpha(200), Colors.white],
+                        stops: const [0.0, 1.0],
+                        tileMode: TileMode.clamp,
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.srcATop,
+                    child: Container(color: Colors.transparent),
+                  ),
+                ),
               Positioned(
                 top: 8.0,
                 right: 8.0,
