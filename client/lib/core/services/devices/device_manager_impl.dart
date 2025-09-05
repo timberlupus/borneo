@@ -152,15 +152,13 @@ final class DeviceManagerImpl extends IDeviceManager {
   }
 
   Future<void> _rebindAll(Iterable<DeviceEntity> devices) async {
-    await _deviceOperLock.synchronized(() async {
-      await _kernel.unbindAll();
-      final futures = <Future>[];
-      for (var device in devices) {
-        futures.add(tryBind(device));
-      }
-      await Future.wait(futures);
-      _globalBus.fire(DeviceManagerReadyEvent());
-    });
+    await _kernel.unbindAll();
+    final futures = <Future>[];
+    for (var device in devices) {
+      futures.add(tryBind(device));
+    }
+    await Future.wait(futures);
+    _globalBus.fire(DeviceManagerReadyEvent());
   }
 
   @override
@@ -435,18 +433,16 @@ final class DeviceManagerImpl extends IDeviceManager {
 
   /// Reload WotThings for current scene only
   Future<void> _reloadWotThingsForCurrentScene() async {
-    await _deviceOperLock.synchronized(() async {
-      // Dispose of all existing WotThings
-      _disposeAllWotThings();
+    // Dispose of all existing WotThings
+    _disposeAllWotThings();
 
-      // Load WotThings for devices in current scene
-      await _loadWotThingsForCurrentScene();
+    // Load WotThings for devices in current scene
+    await _loadWotThingsForCurrentScene();
 
-      // Fire event to notify that devices for current scene have been reloaded
-      final currentScene = _sceneManager.current;
-      _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
-      logger?.d('Fired CurrentSceneDevicesReloadedEvent for scene: ${currentScene.name}');
-    });
+    // Fire event to notify that devices for current scene have been reloaded
+    final currentScene = _sceneManager.current;
+    _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
+    logger?.d('Fired CurrentSceneDevicesReloadedEvent for scene: ${currentScene.name}');
   }
 
   /// Dispose all existing WotThings
