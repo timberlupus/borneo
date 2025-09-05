@@ -365,6 +365,8 @@ class BorneoTheme {
       type: BottomNavigationBarType.fixed,
       selectedItemColor: colorScheme.primary,
       unselectedItemColor: colorScheme.outline,
+      selectedLabelStyle: textTheme.bodySmall?.copyWith(color: colorScheme.primary),
+      unselectedLabelStyle: textTheme.bodySmall?.copyWith(color: colorScheme.outline),
       showSelectedLabels: true,
       showUnselectedLabels: true,
       elevation: 8.0,
