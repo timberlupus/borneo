@@ -28,6 +28,12 @@ class ManualRunningChart extends StatelessWidget {
 
   BarChartGroupData makeGroupData(BuildContext context, LyfiChannelInfo ch, int x, double y) {
     final primaryColor = HexColor.fromHex(ch.color);
+    // Compute a compressed gradient where small values remain light.
+    // Define the full (100%) gradient as: lightStart -> primaryColor (darker).
+    // For current value (x%), only show 0..x% of that gradient: lightStart -> colorAt(x%).
+    final lightStart = Color.lerp(primaryColor, Colors.white, 0.7)!; // lighter start
+    final double fraction = (y / lyfiBrightnessMax).clamp(0.0, 1.0).toDouble();
+    final currentEndColor = Color.lerp(lightStart, primaryColor, fraction)!;
     return BarChartGroupData(
       x: x,
       barRods: [
@@ -35,11 +41,12 @@ class ManualRunningChart extends StatelessWidget {
           borderRadius: BorderRadius.circular(5),
           toY: y,
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [primaryColor, Color.lerp(primaryColor, Colors.white, 0.7)!],
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            // Start from light -> progress toward primary only up to x% to keep small values light.
+            colors: [lightStart, currentEndColor],
           ),
-          width: 16,
+          width: 24,
           backDrawRodData: BackgroundBarChartRodData(
             show: true,
             fromY: 0,
