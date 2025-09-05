@@ -16,59 +16,60 @@ class DashboardTemperatureTile extends StatelessWidget {
     final yellowBg = isDark ? Colors.amber[800]!.withValues(alpha: 0.38) : Colors.amber[100]!;
     final redBg = isDark ? Colors.red[800]!.withValues(alpha: 0.38) : Colors.red[100]!;
 
+    final (currentTempRaw, currentTemp, temperatureUnitText) = context.select<LyfiViewModel, (int?, int?, String)>(
+      (vm) => (vm.currentTempRaw, vm.currentTemp, vm.localeService.temperatureUnitText),
+    );
+
     Color progressColor;
-    final temp = context.select<LyfiViewModel, int?>((vm) => vm.currentTempRaw);
-    if (temp != null && temp <= 45) {
+    if (currentTempRaw != null && currentTempRaw <= 45) {
       progressColor = theme.colorScheme.primary;
-    } else if (temp != null && temp > 45 && temp < 65) {
+    } else if (currentTempRaw != null && currentTempRaw > 45 && currentTempRaw < 65) {
       progressColor = theme.colorScheme.secondary;
-    } else if (temp != null && temp >= 65) {
+    } else if (currentTempRaw != null && currentTempRaw >= 65) {
       progressColor = theme.colorScheme.error;
     } else {
       progressColor = theme.disabledColor;
     }
 
-    return Consumer<LyfiViewModel>(
-      builder: (context, vm, _) => DashboardToufu(
-        title: context.translate("Temperature"),
-        icon: Icons.thermostat,
-        foregroundColor: theme.colorScheme.onSurface,
-        backgroundColor: theme.colorScheme.surfaceContainerHighest,
-        arcColor: null,
-        progressColor: progressColor,
-        value: vm.currentTempRaw?.toDouble() ?? 0.0,
-        minValue: 0,
-        maxValue: 105,
-        center: Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          mainAxisAlignment: MainAxisAlignment.center,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
+    return DashboardToufu(
+      title: context.translate("Temperature"),
+      icon: Icons.thermostat,
+      foregroundColor: theme.colorScheme.onSurface,
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      arcColor: null,
+      progressColor: progressColor,
+      value: currentTempRaw?.toDouble() ?? 0.0,
+      minValue: 0,
+      maxValue: 105,
+      center: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        mainAxisAlignment: MainAxisAlignment.center,
+        textBaseline: TextBaseline.alphabetic,
+        children: [
+          Text(
+            currentTemp != null ? '$currentTemp' : context.translate("N/A"),
+            style: theme.textTheme.headlineLarge?.copyWith(
+              fontFeatures: [FontFeature.tabularFigures()],
+              color: progressColor,
+              fontSize: 24,
+            ),
+          ),
+          if (currentTemp != null)
             Text(
-              vm.currentTemp != null ? '${vm.currentTemp}' : context.translate("N/A"),
-              style: theme.textTheme.headlineLarge?.copyWith(
+              temperatureUnitText,
+              style: theme.textTheme.labelMedium?.copyWith(
                 fontFeatures: [FontFeature.tabularFigures()],
                 color: progressColor,
-                fontSize: 24,
+                fontSize: 12,
               ),
             ),
-            if (vm.currentTemp != null)
-              Text(
-                vm.localeService.temperatureUnitText,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontFeatures: [FontFeature.tabularFigures()],
-                  color: progressColor,
-                  fontSize: 12,
-                ),
-              ),
-          ],
-        ),
-        segments: [
-          GaugeSegment(from: 0, to: 45, color: greenBg),
-          GaugeSegment(from: 45, to: 65, color: yellowBg),
-          GaugeSegment(from: 65, to: 105, color: redBg),
         ],
       ),
+      segments: [
+        GaugeSegment(from: 0, to: 45, color: greenBg),
+        GaugeSegment(from: 45, to: 65, color: yellowBg),
+        GaugeSegment(from: 65, to: 105, color: redBg),
+      ],
     );
   }
 }

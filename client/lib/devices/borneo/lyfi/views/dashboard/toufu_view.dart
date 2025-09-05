@@ -70,7 +70,7 @@ class DashboardToufu extends StatelessWidget {
                         Expanded(
                           child: AnimatedRadialGauge(
                             initialValue: minValue.roundToDouble(),
-                            duration: const Duration(milliseconds: 300),
+                            duration: const Duration(milliseconds: 1000),
                             curve: Curves.decelerate,
                             value: value.roundToDouble(),
                             radius: null,
