@@ -85,6 +85,7 @@ class ManualRunningChart extends StatelessWidget {
             barTouchData: BarTouchData(enabled: true),
             gridData: FlGridData(show: false),
           ),
+          duration: Duration(seconds: 1),
         ),
       ),
     );
