@@ -112,7 +112,7 @@ jobs:
           melos run test:dart --no-select
 
   build-apk:
-    needs: [setup, test]
+    needs: [setup]
     runs-on: ubuntu-latest
     defaults:
       run:
