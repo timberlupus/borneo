@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import '../view_models/scenes_view_model.dart';
+import 'scene_edit_screen.dart';
+import '../models/scene_edit_arguments.dart';
 
 class SceneCard extends StatelessWidget {
   final SceneSummaryModel scene;
@@ -222,7 +224,11 @@ class SceneCard extends StatelessWidget {
   }
 
   Future<void> _showEditSceneScreen(BuildContext context) async {
-    // We still reuse old arguments class for now
-    await Navigator.pushNamed(context, '/scene_edit', arguments: scene.scene);
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SceneEditScreen(args: SceneEditArguments(isCreation: false, model: scene.scene)),
+      ),
+    );
   }
 }
