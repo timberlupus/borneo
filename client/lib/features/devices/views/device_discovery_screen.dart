@@ -211,30 +211,33 @@ class DeviceDiscoveryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<DeviceDiscoveryViewModel>(
       create: createViewModel,
-      builder: (context, child) => FutureBuilder(
-        future: context.read<DeviceDiscoveryViewModel>().initFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Scaffold(body: Center(child: CircularProgressIndicator()));
-          } else if (snapshot.hasError) {
-            return Scaffold(body: Center(child: Text('Error: ︀{snapshot.error}')));
-          } else {
-            return Selector<DeviceDiscoveryViewModel, bool>(
-              selector: (_, vm) => vm.isBusy,
-              builder: (context, isBusy, _) => Scaffold(
-                appBar: AppBar(
-                  title: Text('Add new device'),
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                  leading: IconButton(
-                    icon: Icon(Icons.arrow_back),
-                    onPressed: isBusy ? null : () => Navigator.of(context).maybePop(),
+      builder: (context, child) => SafeArea(
+        bottom: true,
+        child: FutureBuilder(
+          future: context.read<DeviceDiscoveryViewModel>().initFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Scaffold(body: Center(child: CircularProgressIndicator()));
+            } else if (snapshot.hasError) {
+              return Scaffold(body: Center(child: Text('Error: ︀{snapshot.error}')));
+            } else {
+              return Selector<DeviceDiscoveryViewModel, bool>(
+                selector: (_, vm) => vm.isBusy,
+                builder: (context, isBusy, _) => Scaffold(
+                  appBar: AppBar(
+                    title: Text('Add new device'),
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    leading: IconButton(
+                      icon: Icon(Icons.arrow_back),
+                      onPressed: isBusy ? null : () => Navigator.of(context).maybePop(),
+                    ),
                   ),
+                  body: buildBody(context, isBusy),
                 ),
-                body: SafeArea(child: buildBody(context, isBusy)),
-              ),
-            );
-          }
-        },
+              );
+            }
+          },
+        ),
       ),
     );
   }
