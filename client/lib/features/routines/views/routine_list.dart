@@ -211,7 +211,7 @@ class _FlowingLoadingTextState extends State<_FlowingLoadingText> with SingleTic
     final highlight = theme.colorScheme.onSurface.withValues(alpha: 0.9);
 
     return Semantics(
-      label: 'Loading routines',
+      label: context.translate('Loading routines'),
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
@@ -232,7 +232,7 @@ class _FlowingLoadingTextState extends State<_FlowingLoadingText> with SingleTic
             },
             blendMode: BlendMode.srcIn,
             child: Text(
-              'Loading...',
+              context.translate('Loading...'),
               style: (theme.textTheme.titleSmall ?? theme.textTheme.bodyLarge)?.copyWith(fontWeight: FontWeight.w600),
             ),
           );

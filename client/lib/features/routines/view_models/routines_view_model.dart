@@ -70,10 +70,25 @@ class RoutinesViewModel extends ChangeNotifier {
 
   void _onCurrentSceneChanged(CurrentSceneChangedEvent event) {
     _logger?.d('Scene changed from ${event.from.name} to ${event.to.name}, waiting for devices to reload...');
+    // Enter loading state immediately when the current scene changes so the UI
+    // can show a loading indicator while devices and routines are reloaded.
+    _isLoading = true;
+    _error = null;
+    _routines = [];
+    notifyListeners();
   }
 
   void _onDevicesReloaded(CurrentSceneDevicesReloadedEvent event) {
-    _reloadRoutines();
+    // Devices for the new scene have finished reloading. Refresh routines and
+    // exit loading state after refresh completes so the UI updates smoothly.
+    unawaited(() async {
+      try {
+        await _reloadRoutines();
+      } finally {
+        _isLoading = false;
+        notifyListeners();
+      }
+    }());
   }
 
   void _onDeviceManagerReady(DeviceManagerReadyEvent event) {
