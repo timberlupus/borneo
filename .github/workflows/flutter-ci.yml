@@ -182,13 +182,13 @@ jobs:
       - name: Rename APK with version
         run: |
           mv build/app/outputs/flutter-apk/app-release.apk \
-             build/app/outputs/flutter-apk/borneo-app-${{ steps.get_version.outputs.version }}.apk
+             build/app/outputs/flutter-apk/borneo-app-ce-${{ steps.get_version.outputs.version }}.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: borneo-app-${{ steps.get_version.outputs.version }}
-          path: ${{ github.workspace }}/${{ env.FLUTTER_WORKING_DIR }}/build/app/outputs/flutter-apk/borneo-app-${{ steps.get_version.outputs.version }}.apk
+          name: borneo-app-ce-${{ steps.get_version.outputs.version }}
+          path: ${{ github.workspace }}/${{ env.FLUTTER_WORKING_DIR }}/build/app/outputs/flutter-apk/borneo-app-ce-${{ steps.get_version.outputs.version }}.apk
 
   build-windows:
     needs: [setup, test]
@@ -248,8 +248,8 @@ jobs:
       - name: Upload Windows zip artifact
         uses: actions/upload-artifact@v4
         with:
-          name: borneo-app-${{ steps.get_version.outputs.version }}-windows-x64
-          path: client\build\windows\dist\borneo-app-${{ steps.get_version.outputs.version }}-windows-x64.zip
+          name: borneo-app-ce-${{ steps.get_version.outputs.version }}-windows-x64
+          path: client\build\windows\dist\borneo-app-ce-${{ steps.get_version.outputs.version }}-windows-x64.zip
 
   release:
     needs: [build-apk, build-windows]
@@ -275,10 +275,10 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: app-v${{ needs.build-apk.outputs.version }}
-          name: Borneo-IoT App Release app-v${{ needs.build-apk.outputs.version }}
+          tag_name: app-ce-v${{ needs.build-apk.outputs.version }}
+          name: Borneo-IoT App Release app-ce-v${{ needs.build-apk.outputs.version }}
           draft: false
           prerelease: ${{ steps.set_prerelease.outputs.prerelease }}
           files: |
-            release-artifacts/borneo-app-${{ needs.build-apk.outputs.version }}.apk
-            release-artifacts/borneo-app-${{ needs.build-windows.outputs.version }}-windows-x64.zip
+            release-artifacts/borneo-app-ce-${{ needs.build-apk.outputs.version }}.apk
+            release-artifacts/borneo-app-ce-${{ needs.build-windows.outputs.version }}-windows-x64.zip
