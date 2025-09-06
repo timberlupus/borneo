@@ -133,45 +133,92 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: 0);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   Widget buildScaffold(BuildContext context) {
     final mainVM = context.read<MainViewModel>();
     return Selector<MainViewModel, TabIndices>(
       selector: (context, vm) => vm.currentTabIndex,
-      builder: (context, tabIndex, child) => AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.dark),
-        child: Scaffold(
-          appBar: null, // page body
-          body: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-            child: switch (tabIndex) {
-              TabIndices.devices => const DevicesScreen(key: ValueKey('devices')),
-              TabIndices.scenes => const ProvideScenesViewModel(child: ScenesScreen(key: ValueKey('scenes'))),
-              TabIndices.my => const MyScreen(key: ValueKey('my')),
-            },
-          ),
+      builder: (context, tabIndex, child) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_pageController.hasClients) {
+            final current = _pageController.page?.round() ?? _pageController.initialPage;
+            if (current != tabIndex.index) {
+              _pageController.animateToPage(
+                tabIndex.index,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+              );
+            }
+          }
+        });
 
-          // bottom
-          bottomNavigationBar: SafeArea(
-            child: BottomNavigationBar(
-              currentIndex: tabIndex.index,
-              onTap: (index) {
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+          ),
+          child: Scaffold(
+            appBar: null,
+            body: PageView(
+              controller: _pageController,
+              // Enable user swipe to switch tabs
+              physics: const PageScrollPhysics(),
+              onPageChanged: (index) {
                 if (index != tabIndex.index) {
                   mainVM.setIndex(TabIndices.values[index]);
                 }
               },
-              items: [
-                BottomNavigationBarItem(icon: const Icon(Icons.house_outlined), label: context.translate('Scenes')),
-                BottomNavigationBarItem(icon: const Icon(Icons.device_hub), label: context.translate('Devices')),
-                BottomNavigationBarItem(icon: const Icon(Icons.person), label: context.translate('My')),
+              children: const [
+                ProvideScenesViewModel(child: ScenesScreen(key: ValueKey('scenes'))),
+                DevicesScreen(key: ValueKey('devices')),
+                MyScreen(key: ValueKey('my')),
               ],
             ),
+
+            bottomNavigationBar: SafeArea(
+              child: BottomNavigationBar(
+                currentIndex: tabIndex.index,
+                onTap: (index) {
+                  if (index != tabIndex.index) {
+                    _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOutCubic,
+                    );
+                    // onPageChanged will sync the VM index
+                  }
+                },
+                items: [
+                  BottomNavigationBarItem(icon: const Icon(Icons.house_outlined), label: context.translate('Scenes')),
+                  BottomNavigationBarItem(icon: const Icon(Icons.device_hub), label: context.translate('Devices')),
+                  BottomNavigationBarItem(icon: const Icon(Icons.person), label: context.translate('My')),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
