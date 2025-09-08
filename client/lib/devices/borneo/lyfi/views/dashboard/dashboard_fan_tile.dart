@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
+import '../widgets/rolling_integer.dart';
 
 class DashboardFanTile extends StatelessWidget {
   const DashboardFanTile({super.key});
@@ -28,13 +29,14 @@ class DashboardFanTile extends StatelessWidget {
           textBaseline: TextBaseline.alphabetic,
           children: vm.isOnline && vm.fanPowerRatio != null
               ? [
-                  Text(
-                    '${vm.fanPowerRatio!.toInt()}',
-                    style: theme.textTheme.headlineLarge?.copyWith(
+                  RollingInteger(
+                    value: vm.fanPowerRatio!.toInt(),
+                    textStyle: theme.textTheme.headlineLarge?.copyWith(
                       fontFeatures: [FontFeature.tabularFigures()],
                       fontSize: 24,
                       color: theme.colorScheme.primary,
                     ),
+                    duration: const Duration(milliseconds: 300),
                   ),
                   Text(
                     '%',

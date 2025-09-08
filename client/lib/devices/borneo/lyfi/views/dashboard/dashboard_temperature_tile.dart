@@ -4,6 +4,7 @@ import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 import 'package:gauge_indicator/gauge_indicator.dart';
+import '../widgets/rolling_integer.dart';
 
 class DashboardTemperatureTile extends StatelessWidget {
   const DashboardTemperatureTile({super.key});
@@ -46,14 +47,25 @@ class DashboardTemperatureTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         textBaseline: TextBaseline.alphabetic,
         children: [
-          Text(
-            currentTemp != null ? '$currentTemp' : context.translate("N/A"),
-            style: theme.textTheme.headlineLarge?.copyWith(
-              fontFeatures: [FontFeature.tabularFigures()],
-              color: progressColor,
-              fontSize: 24,
+          if (currentTemp != null)
+            RollingInteger(
+              value: currentTemp,
+              textStyle: theme.textTheme.headlineLarge?.copyWith(
+                fontFeatures: [FontFeature.tabularFigures()],
+                color: progressColor,
+                fontSize: 24,
+              ),
+              duration: const Duration(milliseconds: 360),
+            )
+          else
+            Text(
+              context.translate("N/A"),
+              style: theme.textTheme.headlineLarge?.copyWith(
+                fontFeatures: [FontFeature.tabularFigures()],
+                color: progressColor,
+                fontSize: 24,
+              ),
             ),
-          ),
           if (currentTemp != null)
             Text(
               temperatureUnitText,
@@ -73,3 +85,5 @@ class DashboardTemperatureTile extends StatelessWidget {
     );
   }
 }
+
+// rolling integer moved to widgets/rolling_integer.dart

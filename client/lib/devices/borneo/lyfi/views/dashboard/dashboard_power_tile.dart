@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
+import '../widgets/rolling_integer.dart';
 
 class DashboardPowerTile extends StatelessWidget {
   const DashboardPowerTile({super.key});
@@ -57,15 +58,16 @@ class DashboardPowerTile extends StatelessWidget {
                       ...() {
                         final double watts = vm.currentWatts.value!;
                         final int intPart = watts.floor();
-                        final int decimalPart = ((watts - intPart) * 10).round();
+                        final String decimalStr = watts.toStringAsFixed(1).split('.')[1];
                         final bool isZero = watts == 0;
                         return [
-                          Text(
-                            isZero ? '0' : intPart.toString(),
-                            style: theme.textTheme.titleLarge?.copyWith(
+                          RollingInteger(
+                            value: isZero ? 0 : intPart,
+                            textStyle: theme.textTheme.titleLarge?.copyWith(
                               color: textPrimary,
                               fontFeatures: [FontFeature.tabularFigures()],
                             ),
+                            duration: const Duration(milliseconds: 300),
                           ),
                           if (!isZero) ...[
                             Text(
@@ -76,7 +78,7 @@ class DashboardPowerTile extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              decimalPart.toString(),
+                              decimalStr,
                               style: theme.textTheme.titleSmall?.copyWith(
                                 fontFeatures: [FontFeature.tabularFigures()],
                                 color: textPrimary,
@@ -137,3 +139,5 @@ class DashboardPowerTile extends StatelessWidget {
     );
   }
 }
+
+// rolling integer moved to widgets/rolling_integer.dart
