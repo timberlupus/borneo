@@ -44,7 +44,7 @@ class ManualEditorView extends StatelessWidget {
 
   BarChartGroupData makeGroupData(BuildContext context, LyfiChannelInfo ch, int x, double y) {
     final primaryColor = HexColor.fromHex(ch.color);
-    final barBackColor = Theme.of(context).colorScheme.surfaceContainerLow;
+    final barBackColor = Theme.of(context).colorScheme.surfaceContainerHighest;
     // Use a compressed gradient where small values remain light.
     // Full gradient (100%) is lightStart -> primaryColor; for x%, show only 0..x%.
     final lightStart = Color.lerp(primaryColor, Colors.white, 0.7)!;

@@ -51,7 +51,7 @@ class ManualRunningChart extends StatelessWidget {
             show: true,
             fromY: 0,
             toY: lyfiBrightnessMax.toDouble(),
-            color: Theme.of(context).colorScheme.surfaceContainerLowest,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
           ),
         ),
       ],
