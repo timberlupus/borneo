@@ -57,8 +57,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   String get temperatureUnitText => localeService.temperatureUnitText;
 
   // LyFi device status and info
-  double _fanPowerRatio = 0.0;
-  double get fanPowerRatio => _fanPowerRatio;
+  double? _fanPowerRatio = 0.0;
+  double? get fanPowerRatio => _fanPowerRatio;
 
   double _overallBrightness = 0;
   double get overallBrightness => _overallBrightness;
@@ -199,7 +199,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
     await super.refreshStatus(cancelToken: cancelToken);
 
-    _fanPowerRatio = super.lyfiDeviceStatus?.fanPower.toDouble() ?? 0;
+    _fanPowerRatio = super.lyfiDeviceStatus?.fanPower.toDouble();
 
     _temporaryRemaining.value = lyfiDeviceStatus?.temporaryRemaining ?? Duration.zero;
 

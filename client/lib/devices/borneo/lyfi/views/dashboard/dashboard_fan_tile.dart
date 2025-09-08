@@ -9,40 +9,51 @@ class DashboardFanTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<LyfiViewModel, ({double fanPowerRatio})>(
-      selector: (_, vm) => (fanPowerRatio: vm.fanPowerRatio),
+    final theme = Theme.of(context);
+    return Selector<LyfiViewModel, ({bool isOnline, double? fanPowerRatio})>(
+      selector: (_, vm) => (isOnline: vm.isOnline, fanPowerRatio: vm.fanPowerRatio),
       builder: (context, vm, _) => DashboardToufu(
         title: context.translate("Fan"),
         icon: Icons.air,
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-        arcColor: Theme.of(context).colorScheme.outlineVariant,
-        progressColor: Theme.of(context).colorScheme.secondary,
+        foregroundColor: theme.colorScheme.onSurface,
+        backgroundColor: theme.colorScheme.surfaceContainerHighest,
+        arcColor: theme.colorScheme.outlineVariant,
+        progressColor: theme.colorScheme.secondary,
         minValue: 0,
         maxValue: 100,
-        value: vm.fanPowerRatio,
+        value: vm.fanPowerRatio ?? 0,
         center: Row(
           crossAxisAlignment: CrossAxisAlignment.baseline,
           mainAxisAlignment: MainAxisAlignment.center,
           textBaseline: TextBaseline.alphabetic,
-          children: [
-            Text(
-              '${vm.fanPowerRatio.toInt()}',
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                fontFeatures: [FontFeature.tabularFigures()],
-                fontSize: 24,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            Text(
-              '%',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontFeatures: [FontFeature.tabularFigures()],
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-          ],
+          children: vm.isOnline && vm.fanPowerRatio != null
+              ? [
+                  Text(
+                    '${vm.fanPowerRatio!.toInt()}',
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      fontFeatures: [FontFeature.tabularFigures()],
+                      fontSize: 24,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  Text(
+                    '%',
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontFeatures: [FontFeature.tabularFigures()],
+                      fontSize: 12,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ]
+              : [
+                  Text(
+                    context.translate("N/A"),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ],
         ),
       ),
     );

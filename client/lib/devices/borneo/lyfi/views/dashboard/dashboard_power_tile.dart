@@ -21,25 +21,23 @@ class DashboardPowerTile extends StatelessWidget {
         canMeasurePower: vm.canMeasurePower,
       ),
       builder: (context, props, _) {
+        final theme = Theme.of(context);
         final vm = context.read<LyfiViewModel>();
         final mergedListenable = Listenable.merge([vm.currentVoltage, vm.currentCurrent, vm.currentWatts]);
         final bool isOnline = props.isOnline;
-        final Color disabledColor = Theme.of(context).disabledColor;
-        final Color fgColor = Theme.of(context).colorScheme.onSurface;
-        final Color bgColor = isOnline
-            ? Theme.of(context).colorScheme.surfaceContainerHighest
-            : Theme.of(context).colorScheme.surfaceContainerLow;
-        final Color arcColor = isOnline ? Theme.of(context).colorScheme.outlineVariant : disabledColor;
-        final Color progressColor = isOnline ? Theme.of(context).colorScheme.tertiary : disabledColor;
-        final Color textPrimary = Theme.of(context).colorScheme.primary;
-        final Color textOnSurface = Theme.of(context).colorScheme.onSurface;
+        final disabledColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
+        final Color fgColor = theme.colorScheme.onSurface;
+        final Color arcColor = theme.colorScheme.outlineVariant;
+        final Color progressColor = isOnline ? theme.colorScheme.tertiary : disabledColor;
+        final Color textPrimary = theme.colorScheme.primary;
+        final Color textOnSurface = theme.colorScheme.onSurface;
         return ListenableBuilder(
           listenable: mergedListenable,
           builder: (context, _) => DashboardToufu(
             title: context.translate("LED Power"),
             icon: Icons.power_outlined,
             foregroundColor: fgColor,
-            backgroundColor: bgColor,
+            backgroundColor: theme.colorScheme.surfaceContainerHighest,
             arcColor: arcColor,
             progressColor: progressColor,
             minValue: 0.0,
@@ -64,7 +62,7 @@ class DashboardPowerTile extends StatelessWidget {
                         return [
                           Text(
                             isZero ? '0' : intPart.toString(),
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            style: theme.textTheme.titleLarge?.copyWith(
                               color: textPrimary,
                               fontFeatures: [FontFeature.tabularFigures()],
                             ),
@@ -72,14 +70,14 @@ class DashboardPowerTile extends StatelessWidget {
                           if (!isZero) ...[
                             Text(
                               '.',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              style: theme.textTheme.titleSmall?.copyWith(
                                 color: textPrimary,
                                 fontFeatures: [FontFeature.tabularFigures()],
                               ),
                             ),
                             Text(
                               decimalPart.toString(),
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              style: theme.textTheme.titleSmall?.copyWith(
                                 fontFeatures: [FontFeature.tabularFigures()],
                                 color: textPrimary,
                               ),
@@ -87,7 +85,7 @@ class DashboardPowerTile extends StatelessWidget {
                           ],
                           Text(
                             'W',
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            style: theme.textTheme.titleSmall?.copyWith(
                               fontFeatures: [FontFeature.tabularFigures()],
                               color: textPrimary,
                             ),
@@ -97,7 +95,7 @@ class DashboardPowerTile extends StatelessWidget {
                     else ...[
                       Text(
                         context.translate("N/A"),
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        style: theme.textTheme.titleLarge?.copyWith(
                           color: textPrimary,
                           fontFeatures: [FontFeature.tabularFigures()],
                         ),
@@ -112,19 +110,19 @@ class DashboardPowerTile extends StatelessWidget {
                     if (props.canMeasureVoltage && isOnline)
                       Text(
                         '${vm.currentVoltage.value!.toStringAsFixed(1)}V',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           color: textOnSurface,
                           fontFeatures: [FontFeature.tabularFigures()],
                         ),
                       ),
                     if (props.canMeasureCurrent && isOnline) const SizedBox(width: 4),
                     if (props.canMeasureCurrent && isOnline)
-                      Text("·", style: Theme.of(context).textTheme.bodySmall?.copyWith(color: textOnSurface)),
+                      Text("·", style: theme.textTheme.bodySmall?.copyWith(color: textOnSurface)),
                     if (props.canMeasureCurrent && isOnline) const SizedBox(width: 4),
                     if (vm.canMeasureCurrent && isOnline)
                       Text(
                         '${vm.currentCurrent.value!.toStringAsFixed(1)}A',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           color: textOnSurface,
                           fontFeatures: [FontFeature.tabularFigures()],
                         ),
