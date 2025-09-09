@@ -9,8 +9,8 @@ import '../view_models/scenes_view_model.dart';
 import '../../../core/services/scene_manager.dart';
 import '../../../core/services/devices/device_manager.dart';
 import 'scene_edit_screen.dart';
-import '../../routines/views/routine_list.dart';
-import '../../routines/views/routine_list.dart' show ProvideRoutinesViewModel; // wrapper
+import '../../chores/views/chore_list.dart';
+import '../../chores/views/chore_list.dart' show ProvideChoresViewModel; // wrapper
 import '../models/scene_edit_arguments.dart';
 import 'scene_card.dart';
 
@@ -66,7 +66,7 @@ class _ScenesScreenState extends State<ScenesScreen> {
             ],
           ),
           const _SceneList(),
-          const ProvideRoutinesViewModel(child: RoutineList()),
+          const ProvideChoresViewModel(child: ChoreList()),
           if (vm.error != null && vm.scenes.isNotEmpty)
             SliverToBoxAdapter(
               child: Container(

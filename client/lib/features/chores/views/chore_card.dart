@@ -4,56 +4,50 @@ import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
-import '../models/abstract_routine.dart';
-import '../view_models/routine_summary_view_model.dart';
-import '../../../core/services/routine_manager.dart';
+import '../models/abstract_chore.dart';
+import '../view_models/chore_summary_view_model.dart';
+import '../../../core/services/chore_manager.dart';
 import '../../../core/services/app_notification_service.dart';
 import 'package:logger/logger.dart';
 
-class RoutineCard extends StatelessWidget {
-  final AbstractRoutine routine;
-  const RoutineCard(this.routine, {super.key});
+class ChoreCard extends StatelessWidget {
+  final AbstractChore chore;
+  const ChoreCard(this.chore, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<RoutineSummaryViewModel>(
-      create: (ctx) => RoutineSummaryViewModel(
-        routine,
-        routineManager: ctx.read<IRoutineManager>(),
+    return ChangeNotifierProvider<ChoreSummaryViewModel>(
+      create: (ctx) => ChoreSummaryViewModel(
+        chore,
+        choreManager: ctx.read<IChoreManager>(),
         notification: ctx.read<IAppNotificationService>(),
         logger: ctx.read<Logger?>(),
       ),
-      child: const _RoutineCardContentWrapper(),
+      child: const _ChoreCardContentWrapper(),
     );
   }
 }
 
-class _RoutineCardContentWrapper extends StatelessWidget {
-  const _RoutineCardContentWrapper();
+class _ChoreCardContentWrapper extends StatelessWidget {
+  const _ChoreCardContentWrapper();
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<RoutineSummaryViewModel>();
+    final vm = context.watch<ChoreSummaryViewModel>();
     final colorScheme = Theme.of(context).colorScheme;
     final isActive = vm.isActive;
     final bgColor = isActive ? colorScheme.primaryContainer : colorScheme.surfaceContainer;
     final fgColor = isActive ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
-    return _RoutineCardContent(
-      vm: vm,
-      bgColor: bgColor,
-      fgColor: fgColor,
-      isActive: isActive,
-      colorScheme: colorScheme,
-    );
+    return _ChoreCardContent(vm: vm, bgColor: bgColor, fgColor: fgColor, isActive: isActive, colorScheme: colorScheme);
   }
 }
 
-class _RoutineCardContent extends StatefulWidget {
-  final RoutineSummaryViewModel vm;
+class _ChoreCardContent extends StatefulWidget {
+  final ChoreSummaryViewModel vm;
   final Color bgColor;
   final Color fgColor;
   final bool isActive;
   final ColorScheme colorScheme;
-  const _RoutineCardContent({
+  const _ChoreCardContent({
     required this.vm,
     required this.bgColor,
     required this.fgColor,
@@ -61,14 +55,14 @@ class _RoutineCardContent extends StatefulWidget {
     required this.colorScheme,
   });
   @override
-  State<_RoutineCardContent> createState() => _RoutineCardContentState();
+  State<_ChoreCardContent> createState() => _ChoreCardContentState();
 }
 
-class _RoutineCardContentState extends State<_RoutineCardContent> {
+class _ChoreCardContentState extends State<_ChoreCardContent> {
   bool _showProgress = false;
   Timer? _timer;
   @override
-  void didUpdateWidget(covariant _RoutineCardContent oldWidget) {
+  void didUpdateWidget(covariant _ChoreCardContent oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.vm.isBusy && !_showProgress) {
       _timer?.cancel();
@@ -142,9 +136,9 @@ class _RoutineCardContentState extends State<_RoutineCardContent> {
                               ? null
                               : (v) async {
                                   if (v) {
-                                    await vm.executeRoutine();
+                                    await vm.executeChore();
                                   } else {
-                                    await vm.undoRoutine();
+                                    await vm.undoChore();
                                   }
                                 },
                           activeColor: colorScheme.primary,

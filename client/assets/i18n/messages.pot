@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-08 23:19+0800\n"
+"POT-Creation-Date: 2025-09-09 14:10+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -125,7 +125,7 @@ msgstr ""
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:64
 #: features\devices\views\group_edit_screen.dart:91
-#: features\scenes\views\scene_edit_screen.dart:213
+#: features\scenes\views\scene_edit_screen.dart:172
 msgid "Submit"
 msgstr ""
 
@@ -137,19 +137,19 @@ msgstr ""
 msgid "Enabled"
 msgstr ""
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:94
+#: devices\borneo\lyfi\views\acclimation_screen.dart:95
 msgid "Start date"
 msgstr ""
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:131
+#: devices\borneo\lyfi\views\acclimation_screen.dart:132
 msgid "Duration"
 msgstr ""
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:142
+#: devices\borneo\lyfi\views\acclimation_screen.dart:143
 msgid "Start percent"
 msgstr ""
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:165
+#: devices\borneo\lyfi\views\acclimation_screen.dart:166
 msgid "Update acclimation settings succeed."
 msgstr ""
 
@@ -157,41 +157,41 @@ msgstr ""
 msgid "Acclimation"
 msgstr ""
 
-#: devices\borneo\lyfi\views\dashboard\dashboard_fan_tile.dart:15
+#: devices\borneo\lyfi\views\dashboard\dashboard_fan_tile.dart:17
 msgid "Fan"
 msgstr ""
 
-#: devices\borneo\lyfi\views\dashboard\dashboard_power_tile.dart:39
-msgid "LED Power"
-msgstr ""
-
+#: devices\borneo\lyfi\views\dashboard\dashboard_fan_tile.dart:52
 #: devices\borneo\lyfi\views\dashboard\dashboard_power_tile.dart:99
-#: devices\borneo\lyfi\views\dashboard\dashboard_temperature_tile.dart:48
+#: devices\borneo\lyfi\views\dashboard\dashboard_temperature_tile.dart:62
 #: devices\borneo\lyfi\views\editor\sun_editor_view.dart:37
 #: devices\borneo\lyfi\views\settings_screen.dart:167
 msgid "N/A"
 msgstr ""
 
+#: devices\borneo\lyfi\views\dashboard\dashboard_power_tile.dart:38
+msgid "LED Power"
+msgstr ""
+
 #: devices\borneo\lyfi\views\dashboard\dashboard_settings_tile.dart:54
 #: devices\borneo\lyfi\views\settings_screen.dart:24
 #: features\my\views\my_screen.dart:24
-#: features\my\views\my_screen_riverpod.dart:19
 msgid "Settings"
 msgstr ""
 
-#: devices\borneo\lyfi\views\dashboard\dashboard_temperature_tile.dart:33
+#: devices\borneo\lyfi\views\dashboard\dashboard_temperature_tile.dart:36
 msgid "Temperature"
 msgstr ""
 
-#: devices\borneo\lyfi\views\dimming_screen.dart:74
+#: devices\borneo\lyfi\views\dimming_screen.dart:72
 msgid "MANU"
 msgstr ""
 
-#: devices\borneo\lyfi\views\dimming_screen.dart:79
+#: devices\borneo\lyfi\views\dimming_screen.dart:77
 msgid "SCHED"
 msgstr ""
 
-#: devices\borneo\lyfi\views\dimming_screen.dart:84
+#: devices\borneo\lyfi\views\dimming_screen.dart:82
 msgid "SUN"
 msgstr ""
 
@@ -207,57 +207,57 @@ msgstr ""
 msgid "Mins"
 msgstr ""
 
-#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:26
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:27
 msgid "Add time point"
 msgstr ""
 
-#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:162
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:157
 msgid "Easy"
 msgstr ""
 
-#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:171
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:166
 msgid ""
 "Using Easy Setup will clear your current dimming settings. Are you sure you "
 "want to proceed?"
 msgstr ""
 
-#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:189
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:184
 msgid "Add"
 msgstr ""
 
-#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:206
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:201
 msgid "Remove"
 msgstr ""
 
-#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:215
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:210
 msgid "Clear"
 msgstr ""
 
-#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:224
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:219
 msgid "Prev"
 msgstr ""
 
-#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:233
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:228
 msgid "Next"
 msgstr ""
 
-#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:258
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:253
 msgid "Confirmation"
 msgstr ""
 
-#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:260
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:255
 msgid "Are you sure you want to remove all schedule entries?"
 msgstr ""
 
-#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:269
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:264
 #: devices\borneo\lyfi\views\settings_screen.dart:371
 #: features\devices\widgets\delete_group_dialog.dart:19
-#: main\views\main_screen.dart:195
+#: main\views\main_screen.dart:242
 #: shared\widgets\generic_settings_screen.dart:69
 msgid "Cancel"
 msgstr ""
 
-#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:275
+#: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:270
 msgid "Confirm"
 msgstr ""
 
@@ -267,7 +267,7 @@ msgstr ""
 
 #: devices\borneo\lyfi\views\settings_screen.dart:78
 #: features\devices\views\group_edit_screen.dart:23
-#: features\scenes\views\scene_edit_screen.dart:162
+#: features\scenes\views\scene_edit_screen.dart:121
 msgid "Name"
 msgstr ""
 
@@ -466,6 +466,45 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
+#: features\chores\views\chore_card.dart:129
+msgid "ACTIVE"
+msgstr ""
+
+#: features\chores\views\chore_card.dart:129
+msgid "INACTIVE"
+msgstr ""
+
+#: features\chores\views\chore_list.dart:52
+msgid "Chores"
+msgstr ""
+
+#: features\chores\views\chore_list.dart:86
+msgid "Error loading chores"
+msgstr ""
+
+#: features\chores\views\chore_list.dart:90
+#: features\chores\views\chore_list.dart:175
+#: features\scenes\views\scenes_screen.dart:47
+#: features\scenes\views\scenes_screen.dart:88
+msgid "Retry"
+msgstr ""
+
+#: features\chores\views\chore_list.dart:108
+msgid "No chores"
+msgstr ""
+
+#: features\chores\views\chore_list.dart:116
+msgid "No chores available for devices in the current scene."
+msgstr ""
+
+#: features\chores\views\chore_list.dart:214
+msgid "Loading chores"
+msgstr ""
+
+#: features\chores\views\chore_list.dart:235 main\views\main_screen.dart:235
+msgid "Loading..."
+msgstr ""
+
 #: features\devices\views\device_discovery_screen.dart:42
 msgid "Stop"
 msgstr ""
@@ -478,11 +517,11 @@ msgstr ""
 msgid "A new device has been added."
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:293
+#: features\devices\views\device_discovery_screen.dart:296
 msgid "Discovered Devices:"
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:405
+#: features\devices\views\device_discovery_screen.dart:408
 msgid "Select the group to which the new device belongs:"
 msgstr ""
 
@@ -526,7 +565,7 @@ msgid "Select the group to which device \"{deviceName}\" belongs:"
 msgstr ""
 
 #: features\devices\views\devices_screen.dart:134
-#: features\scenes\views\scenes_screen_riverpod.dart:122
+#: features\scenes\views\scenes_screen.dart:43
 #, python-brace-format
 msgid "Error: {errMsg}"
 msgstr ""
@@ -547,22 +586,22 @@ msgid "Devices in {currentScene}"
 msgstr ""
 
 #: features\devices\views\group_edit_screen.dart:25
-#: features\scenes\views\scene_edit_screen.dart:164
+#: features\scenes\views\scene_edit_screen.dart:123
 msgid "Enter the required scene name"
 msgstr ""
 
 #: features\devices\views\group_edit_screen.dart:29
-#: features\scenes\views\scene_edit_screen.dart:168
+#: features\scenes\views\scene_edit_screen.dart:127
 msgid "Please enter the scene name"
 msgstr ""
 
 #: features\devices\views\group_edit_screen.dart:44
-#: features\scenes\views\scene_edit_screen.dart:185
+#: features\scenes\views\scene_edit_screen.dart:144
 msgid "Enter the optional notes for this scene"
 msgstr ""
 
 #: features\devices\views\group_edit_screen.dart:45
-#: features\scenes\views\scene_edit_screen.dart:186
+#: features\scenes\views\scene_edit_screen.dart:145
 msgid "Notes"
 msgstr ""
 
@@ -603,28 +642,23 @@ msgid "Create First Group"
 msgstr ""
 
 #: features\my\views\about_screen.dart:64
-#: features\my\views\about_screen_riverpod.dart:63
 #, python-brace-format
 msgid "Version: {verText} Build: {buildNumberText}"
 msgstr ""
 
 #: features\my\views\about_screen.dart:87
-#: features\my\views\about_screen_riverpod.dart:84
 msgid "Copyright © Li Wei. All rights reserved."
 msgstr ""
 
 #: features\my\views\about_screen.dart:103
-#: features\my\views\about_screen_riverpod.dart:100
 msgid "Website"
 msgstr ""
 
 #: features\my\views\about_screen.dart:134
-#: features\my\views\about_screen_riverpod.dart:133
 msgid "Documentation"
 msgstr ""
 
 #: features\my\views\about_screen.dart:163
-#: features\my\views\about_screen_riverpod.dart:162
 msgid ""
 "This mobile application is free software licensed under GNU General Public "
 "License version 3 or later, with no warranty.\n"
@@ -634,7 +668,6 @@ msgstr ""
 
 #: features\my\views\donation_screen.dart:28
 #: features\my\views\my_screen.dart:55
-#: features\my\views\my_screen_riverpod.dart:31
 msgid "Back This Project"
 msgstr ""
 
@@ -667,125 +700,85 @@ msgid "Support via PayPal"
 msgstr ""
 
 #: features\my\views\my_screen.dart:33
-#: features\my\views\my_screen_riverpod.dart:45
 msgid "About"
 msgstr ""
 
-#: features\routines\views\routine_card_riverpod.dart:134
-msgid "ACTIVE"
-msgstr ""
-
-#: features\routines\views\routine_card_riverpod.dart:134
-msgid "INACTIVE"
-msgstr ""
-
-#: features\routines\views\routine_list_riverpod.dart:36
-msgid "Routines"
-msgstr ""
-
-#: features\routines\views\routine_list_riverpod.dart:59
-msgid "Error loading routines"
-msgstr ""
-
-#: features\routines\views\routine_list_riverpod.dart:63
-#: features\routines\views\routine_list_riverpod.dart:145
-#: features\scenes\views\scenes_screen_riverpod.dart:129
-#: features\scenes\views\scenes_screen_riverpod.dart:175
-msgid "Retry"
-msgstr ""
-
-#: features\routines\views\routine_list_riverpod.dart:86
-msgid "No routines"
-msgstr ""
-
-#: features\routines\views\routine_list_riverpod.dart:94
-msgid "No routines available for devices in the current scene."
-msgstr ""
-
-#: features\scenes\views\scene_card_riverpod.dart:190
+#: features\scenes\views\scene_card.dart:203
 #, python-brace-format
 msgid "{0} devices"
 msgstr ""
 
-#: features\scenes\views\scene_card_riverpod.dart:200
+#: features\scenes\views\scene_card.dart:212
 #, python-brace-format
 msgid "{0} active"
 msgstr ""
 
-#: features\scenes\views\scene_edit_screen.dart:66
+#: features\scenes\views\scene_edit_screen.dart:35
 msgid "New Scene"
 msgstr ""
 
-#: features\scenes\views\scene_edit_screen.dart:66
+#: features\scenes\views\scene_edit_screen.dart:35
 msgid "Edit Scene"
 msgstr ""
 
-#: features\scenes\views\scene_edit_screen.dart:107
+#: features\scenes\views\scene_edit_screen.dart:71
 msgid "Scene Image"
 msgstr ""
 
-#: features\scenes\views\scene_edit_screen.dart:231
+#: features\scenes\views\scene_edit_screen.dart:190
 msgid ""
 "Are you sure you want to delete this scene? This action cannot be undone."
 msgstr ""
 
-#: features\scenes\views\scene_edit_screen.dart:245
-#: features\scenes\views\scene_edit_screen.dart:251
+#: features\scenes\views\scene_edit_screen.dart:203
+#: features\scenes\views\scene_edit_screen.dart:209
 msgid "Cannot Delete Scene"
 msgstr ""
 
-#: features\scenes\views\scene_edit_screen.dart:246
+#: features\scenes\views\scene_edit_screen.dart:204
 msgid "Cannot delete the last remaining scene."
 msgstr ""
 
-#: features\scenes\views\scene_edit_screen.dart:253
+#: features\scenes\views\scene_edit_screen.dart:211
 msgid ""
 "This scene contains devices or device groups. Please remove all devices and "
 "groups from this scene before deleting it."
 msgstr ""
 
-#: features\scenes\views\scenes_screen_riverpod.dart:141
-#: main\views\main_screen.dart:38 main\views\main_screen.dart:167
+#: features\scenes\views\scenes_screen.dart:58 main\views\main_screen.dart:38
+#: main\views\main_screen.dart:213
 msgid "Scenes"
 msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:46
-#: features\settings\views\app_settings_screen_riverpod.dart:24
 msgid "App Settings"
 msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:56
-#: features\settings\views\app_settings_screen_riverpod.dart:32
 msgid "APPEARANCE"
 msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:60
-#: features\settings\views\app_settings_screen_riverpod.dart:36
 msgid "Theme"
 msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:69
-#: features\settings\views\app_settings_screen_riverpod.dart:45
 msgid "System"
 msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:70
-#: features\settings\views\app_settings_screen_riverpod.dart:46
 msgid "Light"
 msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:71
-#: features\settings\views\app_settings_screen_riverpod.dart:47
 msgid "Dark"
 msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:78
-#: features\settings\views\app_settings_screen_riverpod.dart:53
 msgid "Language"
 msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:94
-#: features\settings\views\app_settings_screen_riverpod.dart:69
 msgid "Temperature Unit"
 msgstr ""
 
@@ -798,17 +791,14 @@ msgid "℉ (Fahrenheit)"
 msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:113
-#: features\settings\views\app_settings_screen_riverpod.dart:86
 msgid "FEEDBACK"
 msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:117
-#: features\settings\views\app_settings_screen_riverpod.dart:90
 msgid "Rate in application store"
 msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:122
-#: features\settings\views\app_settings_screen_riverpod.dart:97
 msgid "Report an issue on GitHub"
 msgstr ""
 
@@ -816,7 +806,7 @@ msgstr ""
 msgid "ERROR"
 msgstr ""
 
-#: main\views\main_screen.dart:40 main\views\main_screen.dart:169
+#: main\views\main_screen.dart:40 main\views\main_screen.dart:215
 msgid "My"
 msgstr ""
 
@@ -824,15 +814,11 @@ msgstr ""
 msgid "Add Scene"
 msgstr ""
 
-#: main\views\main_screen.dart:168
+#: main\views\main_screen.dart:214
 msgid "Devices"
 msgstr ""
 
-#: main\views\main_screen.dart:188
-msgid "Loading..."
-msgstr ""
-
-#: main\views\main_screen.dart:243
+#: main\views\main_screen.dart:290
 msgid "Press back again to exit"
 msgstr ""
 

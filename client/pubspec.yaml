@@ -190,11 +190,11 @@ flutter:
     - assets/images/scenes/scene-default-noimage.jpg
     - assets/images/scenes/scene-default-home.jpg
     - assets/images/scenes/scene-default-office.jpg
-    # routine icons
-    - assets/images/routines/icons/dry-scape.svg
-    - assets/images/routines/icons/feed.svg
-    - assets/images/routines/icons/power-off.svg
-    - assets/images/routines/icons/water-change.svg
+    # Chore icons
+    - assets/images/chores/icons/dry-scape.svg
+    - assets/images/chores/icons/feed.svg
+    - assets/images/chores/icons/power-off.svg
+    - assets/images/chores/icons/water-change.svg
     # data
     - assets/data/
     - assets/data/zones.json

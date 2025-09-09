@@ -24,7 +24,7 @@ import '../routes/route_manager.dart';
 import '../core/services/blob_manager.dart';
 import '../core/services/devices/device_manager.dart';
 import '../core/services/group_manager.dart';
-import '../core/services/routine_manager.dart';
+import '../core/services/chore_manager.dart';
 import '../core/services/scene_manager.dart';
 import 'app_theme.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
@@ -165,9 +165,9 @@ class _BorneoAppState extends State<BorneoApp> {
                       dispose: (context, dm) => dm.dispose(),
                     ),
 
-                    // RoutineManager
-                    Provider<IRoutineManager>(
-                      create: (context) => IRoutineManager(
+                    // ChoreManager
+                    Provider<IChoreManager>(
+                      create: (context) => IChoreManager(
                         context.read<EventBus>(),
                         context.read<Database>(),
                         context.read<ISceneManager>(),

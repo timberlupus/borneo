@@ -2,21 +2,21 @@ import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 
 import '../../../core/services/app_notification_service.dart';
-import '../../../core/services/routine_manager.dart';
-import '../models/abstract_routine.dart';
+import '../../../core/services/chore_manager.dart';
+import '../models/abstract_chore.dart';
 
-class RoutineSummaryViewModel extends ChangeNotifier {
-  final IRoutineManager _routineManager;
+class ChoreSummaryViewModel extends ChangeNotifier {
+  final IChoreManager _choreManager;
   final IAppNotificationService _notification;
   final Logger? _logger;
-  final AbstractRoutine routine;
+  final AbstractChore chore;
 
-  RoutineSummaryViewModel(
-    this.routine, {
-    required IRoutineManager routineManager,
+  ChoreSummaryViewModel(
+    this.chore, {
+    required IChoreManager choreManager,
     required IAppNotificationService notification,
     required Logger? logger,
-  }) : _routineManager = routineManager,
+  }) : _choreManager = choreManager,
        _notification = notification,
        _logger = logger;
 
@@ -27,20 +27,20 @@ class RoutineSummaryViewModel extends ChangeNotifier {
   bool get isActive => _isActive;
   bool get isBusy => _isBusy;
   String? get error => _error;
-  String get name => routine.name;
-  String get iconAssetPath => routine.iconAssetPath;
+  String get name => chore.name;
+  String get iconAssetPath => chore.iconAssetPath;
 
-  Future<void> executeRoutine() async {
+  Future<void> executeChore() async {
     if (_isBusy) return;
     _isBusy = true;
     _error = null;
     notifyListeners();
     try {
-      await _routineManager.executeRoutine(routine.id);
+      await _choreManager.executeChore(chore.id);
       _isActive = true;
     } catch (e, st) {
       _logger?.e(e.toString(), error: e, stackTrace: st);
-      _notification.showError('Routine execution failed', body: e.toString());
+      _notification.showError('Chore execution failed', body: e.toString());
       _error = e.toString();
     } finally {
       _isBusy = false;
@@ -48,17 +48,17 @@ class RoutineSummaryViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> undoRoutine() async {
+  Future<void> undoChore() async {
     if (_isBusy) return;
     _isBusy = true;
     _error = null;
     notifyListeners();
     try {
-      await _routineManager.undoRoutine(routine.id);
+      await _choreManager.undoChore(chore.id);
       _isActive = false;
     } catch (e, st) {
       _logger?.e(e.toString(), error: e, stackTrace: st);
-      _notification.showError('Undo routine failed', body: e.toString());
+      _notification.showError('Undo chore failed', body: e.toString());
       _error = e.toString();
     } finally {
       _isBusy = false;

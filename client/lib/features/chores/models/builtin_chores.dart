@@ -1,17 +1,17 @@
-import 'package:borneo_app/features/routines/models/actions/power_action.dart';
-import 'package:borneo_app/features/routines/models/abstract_routine.dart';
+import 'package:borneo_app/features/chores/models/actions/power_action.dart';
+import 'package:borneo_app/features/chores/models/abstract_chore.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
 
-final class PowerOffAllRoutine extends AbstractBuiltinRoutine {
-  PowerOffAllRoutine()
+final class PowerOffAllChore extends AbstractBuiltinChore {
+  PowerOffAllChore()
     : super(
         name: 'Power off all',
-        iconAssetPath: 'assets/images/routines/icons/power-off.svg',
+        iconAssetPath: 'assets/images/chores/icons/power-off.svg',
         requiredCapabilities: ["OnOffSwitch"],
       );
 
-  /// Execute routine
+  /// Execute chore
   @override
   Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, IDeviceManager deviceManager) async {
     final steps = <PowerAction>[];
@@ -32,11 +32,11 @@ final class PowerOffAllRoutine extends AbstractBuiltinRoutine {
   }
 }
 
-final class FeedModeRoutine extends AbstractBuiltinRoutine {
-  FeedModeRoutine()
+final class FeedModeChore extends AbstractBuiltinChore {
+  FeedModeChore()
     : super(
         name: 'Feed mode',
-        iconAssetPath: 'assets/images/routines/icons/feed.svg',
+        iconAssetPath: 'assets/images/chores/icons/feed.svg',
 
         requiredCapabilities: ["OnOffSwitch"],
       );
@@ -48,11 +48,11 @@ final class FeedModeRoutine extends AbstractBuiltinRoutine {
   }
 }
 
-final class WaterChangeModeRoutine extends AbstractBuiltinRoutine {
-  WaterChangeModeRoutine()
+final class WaterChangeModeChore extends AbstractBuiltinChore {
+  WaterChangeModeChore()
     : super(
         name: 'Water change mode',
-        iconAssetPath: 'assets/images/routines/icons/water-change.svg',
+        iconAssetPath: 'assets/images/chores/icons/water-change.svg',
         requiredCapabilities: ["OnOffSwitch"],
       );
 
@@ -63,11 +63,11 @@ final class WaterChangeModeRoutine extends AbstractBuiltinRoutine {
   }
 }
 
-final class DryScapeModeRoutine extends AbstractBuiltinRoutine {
-  DryScapeModeRoutine()
+final class DryScapeModeChore extends AbstractBuiltinChore {
+  DryScapeModeChore()
     : super(
         name: 'Dry scape mode',
-        iconAssetPath: 'assets/images/routines/icons/dry-scape.svg',
+        iconAssetPath: 'assets/images/chores/icons/dry-scape.svg',
 
         requiredCapabilities: ["OnOffSwitch"],
       );

@@ -1,17 +1,17 @@
-# English translations for PACKAGE package.
+# German translations for PACKAGE package.
 # Copyright (C) 2025 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # Automatically generated, 2025.
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-09 14:10+0800\n"
-"PO-Revision-Date: 2025-06-01 20:57+0800\n"
+"PO-Revision-Date: 2025-09-09 14:10+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
-"Language: en\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -143,7 +143,7 @@ msgstr ""
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:132
 msgid "Duration"
-msgstr "Documentation"
+msgstr ""
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:143
 msgid "Start percent"
@@ -515,11 +515,11 @@ msgstr ""
 
 #: features\devices\views\device_discovery_screen.dart:189
 msgid "A new device has been added."
-msgstr "A new device has been added."
+msgstr ""
 
 #: features\devices\views\device_discovery_screen.dart:296
 msgid "Discovered Devices:"
-msgstr "Discovered Devices:"
+msgstr ""
 
 #: features\devices\views\device_discovery_screen.dart:408
 msgid "Select the group to which the new device belongs:"
@@ -568,42 +568,42 @@ msgstr ""
 #: features\scenes\views\scenes_screen.dart:43
 #, python-brace-format
 msgid "Error: {errMsg}"
-msgstr "Error: {errMsg}"
+msgstr ""
 
 #: features\devices\views\devices_screen.dart:202
 #: main\views\main_screen.dart:92
 msgid "Add New Devices"
-msgstr "Add New Devices"
+msgstr ""
 
 #: features\devices\views\devices_screen.dart:206
 #: main\views\main_screen.dart:98
 msgid "Add Devices Group"
-msgstr "Add Devices Group"
+msgstr ""
 
 #: features\devices\views\devices_screen.dart:219
 #, python-brace-format
 msgid "Devices in {currentScene}"
-msgstr "Devices in {currentScene}"
+msgstr ""
 
 #: features\devices\views\group_edit_screen.dart:25
 #: features\scenes\views\scene_edit_screen.dart:123
 msgid "Enter the required scene name"
-msgstr "Enter the required scene name"
+msgstr ""
 
 #: features\devices\views\group_edit_screen.dart:29
 #: features\scenes\views\scene_edit_screen.dart:127
 msgid "Please enter the scene name"
-msgstr "Please enter the scene name"
+msgstr ""
 
 #: features\devices\views\group_edit_screen.dart:44
 #: features\scenes\views\scene_edit_screen.dart:144
 msgid "Enter the optional notes for this scene"
-msgstr "Enter the optional notes for this scene"
+msgstr ""
 
 #: features\devices\views\group_edit_screen.dart:45
 #: features\scenes\views\scene_edit_screen.dart:145
 msgid "Notes"
-msgstr "Notes"
+msgstr ""
 
 #: features\devices\views\group_edit_screen.dart:82
 msgid "Operation failed"
@@ -619,11 +619,11 @@ msgstr ""
 
 #: features\devices\views\group_edit_screen.dart:194
 msgid "New Device Group"
-msgstr "New Device Group"
+msgstr ""
 
 #: features\devices\views\group_edit_screen.dart:195
 msgid "Edit Device Group"
-msgstr "Edit Device Group"
+msgstr ""
 
 #: features\devices\widgets\delete_group_dialog.dart:23
 msgid "Delete"
@@ -644,15 +644,15 @@ msgstr ""
 #: features\my\views\about_screen.dart:64
 #, python-brace-format
 msgid "Version: {verText} Build: {buildNumberText}"
-msgstr "Version: {verText} Build: {buildNumberText}"
+msgstr ""
 
 #: features\my\views\about_screen.dart:87
 msgid "Copyright © Li Wei. All rights reserved."
-msgstr "Copyright © Li Wei. All rights reserved."
+msgstr ""
 
 #: features\my\views\about_screen.dart:103
 msgid "Website"
-msgstr "Website"
+msgstr ""
 
 #: features\my\views\about_screen.dart:134
 msgid "Documentation"
@@ -748,31 +748,31 @@ msgstr ""
 #: features\scenes\views\scenes_screen.dart:58 main\views\main_screen.dart:38
 #: main\views\main_screen.dart:213
 msgid "Scenes"
-msgstr "Scenes"
+msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:46
 msgid "App Settings"
-msgstr "App Settings"
+msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:56
 msgid "APPEARANCE"
-msgstr "APPEARANCE"
+msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:60
 msgid "Theme"
-msgstr "Theme"
+msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:69
 msgid "System"
-msgstr "System"
+msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:70
 msgid "Light"
-msgstr "Light"
+msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:71
 msgid "Dark"
-msgstr "Dark"
+msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:78
 msgid "Language"
@@ -792,15 +792,15 @@ msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:113
 msgid "FEEDBACK"
-msgstr "FEEDBACK"
+msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:117
 msgid "Rate in application store"
-msgstr "Rate in application store"
+msgstr ""
 
 #: features\settings\views\app_settings_screen.dart:122
 msgid "Report an issue on GitHub"
-msgstr "Report an issue on GitHub"
+msgstr ""
 
 #: main\view_models\main_view_model.dart:120
 msgid "ERROR"
@@ -808,15 +808,15 @@ msgstr ""
 
 #: main\views\main_screen.dart:40 main\views\main_screen.dart:215
 msgid "My"
-msgstr "My"
+msgstr ""
 
 #: main\views\main_screen.dart:95
 msgid "Add Scene"
-msgstr "Add Scene"
+msgstr ""
 
 #: main\views\main_screen.dart:214
 msgid "Devices"
-msgstr "Devices"
+msgstr ""
 
 #: main\views\main_screen.dart:290
 msgid "Press back again to exit"
@@ -829,18 +829,3 @@ msgstr ""
 #: shared\widgets\generic_settings_screen.dart:55
 msgid "Save"
 msgstr ""
-
-#~ msgid "Add new devices"
-#~ msgstr "Add new devices"
-
-#~ msgid ""
-#~ "Are you sure you want to delete this device group? The devices within "
-#~ "this group will not be deleted but will be moved to the \"Ungrouped\" "
-#~ "group."
-#~ msgstr ""
-#~ "Are you sure you want to delete this device group? The devices within "
-#~ "this group will not be deleted but will be moved to the \"Ungrouped\" "
-#~ "group."
-
-#~ msgid "New Routine"
-#~ msgstr "New Routine"

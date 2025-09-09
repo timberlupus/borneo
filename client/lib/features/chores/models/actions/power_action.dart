@@ -1,7 +1,7 @@
-import 'package:borneo_app/features/routines/models/actions/routine_action.dart';
+import 'package:borneo_app/features/chores/models/actions/chore_action.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 
-class PowerAction extends RoutineAction {
+class PowerAction extends ChoreAction {
   static const String type = "common.power";
   static const String kPrevState = "prevState";
 
@@ -38,8 +38,8 @@ class PowerAction extends RoutineAction {
     }
   }
 
-  Map<String, dynamic> toJson() => {'type': type, RoutineAction.kDeviceID: deviceId, kPrevState: prevState};
+  Map<String, dynamic> toJson() => {'type': type, ChoreAction.kDeviceID: deviceId, kPrevState: prevState};
 
   static PowerAction fromJson(Map<String, dynamic> json) =>
-      PowerAction(deviceId: json[RoutineAction.kDeviceID] as String, prevState: json[kPrevState] as bool);
+      PowerAction(deviceId: json[ChoreAction.kDeviceID] as String, prevState: json[kPrevState] as bool);
 }

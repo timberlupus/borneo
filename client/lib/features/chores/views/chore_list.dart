@@ -3,34 +3,34 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
-import '../view_models/routines_view_model.dart';
+import '../view_models/chores_view_model.dart';
 import '../../scenes/view_models/scenes_view_model.dart';
-import 'routine_card.dart';
-import '../models/abstract_routine.dart';
-import '../../../core/services/routine_manager.dart';
+import 'chore_card.dart';
+import '../models/abstract_chore.dart';
+import '../../../core/services/chore_manager.dart';
 import '../../../core/services/scene_manager.dart';
 import '../../../core/services/app_notification_service.dart';
 import 'package:logger/logger.dart';
 import 'package:event_bus/event_bus.dart';
 
-class RoutineList extends StatefulWidget {
-  const RoutineList({super.key});
+class ChoreList extends StatefulWidget {
+  const ChoreList({super.key});
   @override
-  State<RoutineList> createState() => _RoutineListState();
+  State<ChoreList> createState() => _ChoreListState();
 }
 
-class _RoutineListState extends State<RoutineList> {
+class _ChoreListState extends State<ChoreList> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RoutinesViewModel>().initialize();
+      context.read<ChoresViewModel>().initialize();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<RoutinesViewModel>();
+    final state = context.watch<ChoresViewModel>();
     // Also watch scenes to trigger animation when scene changes
     final scenesVm = context.watch<ScenesViewModel?>();
     String? selectedSceneId;
@@ -39,7 +39,7 @@ class _RoutineListState extends State<RoutineList> {
         selectedSceneId = scenesVm.scenes.firstWhere((s) => s.isSelected).id;
       } catch (_) {}
     }
-    final shouldShowLoading = state.isLoading && state.routines.isEmpty;
+    final shouldShowLoading = state.isLoading && state.chores.isEmpty;
     final shouldShowSceneLoading = scenesVm?.isLoading == true;
     final showLoading = shouldShowLoading || shouldShowSceneLoading;
 
@@ -49,7 +49,7 @@ class _RoutineListState extends State<RoutineList> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(context.translate('Routines'), style: Theme.of(context).textTheme.titleMedium),
+            Text(context.translate('Chores'), style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
             AnimatedSize(
               duration: const Duration(milliseconds: 300),
@@ -75,18 +75,18 @@ class _RoutineListState extends State<RoutineList> {
     );
   }
 
-  Widget _buildContent(BuildContext context, RoutinesViewModel vm, String? selectedSceneId) {
+  Widget _buildContent(BuildContext context, ChoresViewModel vm, String? selectedSceneId) {
     final theme = Theme.of(context);
-    if (vm.error != null && vm.routines.isEmpty) {
+    if (vm.error != null && vm.chores.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 32),
           child: Column(
             children: [
-              Text(context.translate('Error loading routines'), style: TextStyle(color: theme.colorScheme.error)),
+              Text(context.translate('Error loading chores'), style: TextStyle(color: theme.colorScheme.error)),
               const SizedBox(height: 8),
               ElevatedButton(
-                onPressed: () => context.read<RoutinesViewModel>().initialize(),
+                onPressed: () => context.read<ChoresViewModel>().initialize(),
                 child: Text(context.translate('Retry')),
               ),
             ],
@@ -94,8 +94,8 @@ class _RoutineListState extends State<RoutineList> {
         ),
       );
     }
-    final List<AbstractRoutine> routines = vm.routines;
-    if (routines.isEmpty) {
+    final List<AbstractChore> chores = vm.chores;
+    if (chores.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
@@ -105,7 +105,7 @@ class _RoutineListState extends State<RoutineList> {
               Icon(Icons.block, size: 56, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
               const SizedBox(height: 16),
               Text(
-                context.translate('No routines'),
+                context.translate('No chores'),
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: theme.colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
@@ -113,7 +113,7 @@ class _RoutineListState extends State<RoutineList> {
               ),
               const SizedBox(height: 8),
               Text(
-                context.translate('No routines available for devices in the current scene.'),
+                context.translate('No chores available for devices in the current scene.'),
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
               ),
@@ -127,7 +127,7 @@ class _RoutineListState extends State<RoutineList> {
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 500),
           child: GridView.builder(
-            key: ValueKey(routines.length),
+            key: ValueKey(chores.length),
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -136,11 +136,11 @@ class _RoutineListState extends State<RoutineList> {
               mainAxisSpacing: 16.0,
             ),
             padding: EdgeInsets.zero,
-            itemCount: routines.length,
+            itemCount: chores.length,
             itemBuilder: (_, index) {
-              final routine = routines[index];
+              final chore = chores[index];
               return TweenAnimationBuilder<double>(
-                key: ValueKey('${selectedSceneId ?? 'none'}-${routine.runtimeType}-${routine.hashCode}'),
+                key: ValueKey('${selectedSceneId ?? 'none'}-${chore.runtimeType}-${chore.hashCode}'),
                 tween: Tween(begin: 0, end: 1),
                 duration: Duration(milliseconds: 300 + index * 40),
                 curve: Curves.easeOutCubic,
@@ -148,17 +148,17 @@ class _RoutineListState extends State<RoutineList> {
                   opacity: value,
                   child: Transform.translate(offset: Offset(0, (1 - value) * 16), child: child),
                 ),
-                child: RoutineCard(routine),
+                child: ChoreCard(chore),
               );
             },
           ),
         ),
-        if (vm.isLoading && routines.isNotEmpty)
+        if (vm.isLoading && chores.isNotEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
           ),
-        if (vm.error != null && routines.isNotEmpty)
+        if (vm.error != null && chores.isNotEmpty)
           Container(
             margin: const EdgeInsets.only(top: 16),
             padding: const EdgeInsets.all(12),
@@ -171,7 +171,7 @@ class _RoutineListState extends State<RoutineList> {
                   child: Text(vm.error!, style: TextStyle(color: theme.colorScheme.onErrorContainer)),
                 ),
                 TextButton(
-                  onPressed: () => context.read<RoutinesViewModel>().initialize(),
+                  onPressed: () => context.read<ChoresViewModel>().initialize(),
                   child: Text(context.translate('Retry')),
                 ),
               ],
@@ -211,7 +211,7 @@ class _FlowingLoadingTextState extends State<_FlowingLoadingText> with SingleTic
     final highlight = theme.colorScheme.onSurface.withValues(alpha: 0.9);
 
     return Semantics(
-      label: context.translate('Loading routines'),
+      label: context.translate('Loading chores'),
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
@@ -252,15 +252,15 @@ class GradientTranslation extends GradientTransform {
   }
 }
 
-/// Helper wrapper to provide RoutinesViewModel in a scope where underlying services exist.
-class ProvideRoutinesViewModel extends StatelessWidget {
+/// Helper wrapper to provide ChoresViewModel in a scope where underlying services exist.
+class ProvideChoresViewModel extends StatelessWidget {
   final Widget child;
-  const ProvideRoutinesViewModel({required this.child, super.key});
+  const ProvideChoresViewModel({required this.child, super.key});
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<RoutinesViewModel>(
-      create: (ctx) => RoutinesViewModel(
-        ctx.read<IRoutineManager>(),
+    return ChangeNotifierProvider<ChoresViewModel>(
+      create: (ctx) => ChoresViewModel(
+        ctx.read<IChoreManager>(),
         ctx.read<ISceneManager>(),
         ctx.read<IAppNotificationService>(),
         ctx.read<EventBus>(),
