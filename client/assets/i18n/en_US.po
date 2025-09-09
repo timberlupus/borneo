@@ -2,7 +2,7 @@
 # Copyright (C) 2025 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # Automatically generated, 2025.
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -829,18 +829,3 @@ msgstr ""
 #: shared\widgets\generic_settings_screen.dart:55
 msgid "Save"
 msgstr ""
-
-#~ msgid "Add new devices"
-#~ msgstr "Add new devices"
-
-#~ msgid ""
-#~ "Are you sure you want to delete this device group? The devices within "
-#~ "this group will not be deleted but will be moved to the \"Ungrouped\" "
-#~ "group."
-#~ msgstr ""
-#~ "Are you sure you want to delete this device group? The devices within "
-#~ "this group will not be deleted but will be moved to the \"Ungrouped\" "
-#~ "group."
-
-#~ msgid "New Routine"
-#~ msgstr "New Routine"
