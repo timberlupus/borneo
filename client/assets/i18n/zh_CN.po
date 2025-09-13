@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-09 14:10+0800\n"
+"POT-Creation-Date: 2025-09-13 17:50+0800\n"
 "PO-Revision-Date: 2024-12-22 15:38+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -174,7 +174,7 @@ msgstr "LED 功率"
 
 #: devices\borneo\lyfi\views\dashboard\dashboard_settings_tile.dart:54
 #: devices\borneo\lyfi\views\settings_screen.dart:24
-#: features\my\views\my_screen.dart:24
+#: features\my\views\my_screen.dart:23
 msgid "Settings"
 msgstr "设置"
 
@@ -646,8 +646,9 @@ msgid "Version: {verText} Build: {buildNumberText}"
 msgstr "版本：{verText} 构建号：{buildNumberText}"
 
 #: features\my\views\about_screen.dart:87
-msgid "Copyright © Li Wei. All rights reserved."
-msgstr "版权所有 © 李维。保留所有权利。"
+msgid ""
+"Copyright © Yunnan BinaryStar Technologies, Co., Ltd. All rights reserved."
+msgstr "版权所有 © 云南伴星科技有限公司。保留所有权利。"
 
 #: features\my\views\about_screen.dart:103
 msgid "Website"
@@ -667,43 +668,7 @@ msgstr ""
 "此移动端应用程序是基于 GPL 3 或更新版本协议授权的自由软件，不提供任何担保。\n"
 "作者不对使用此软件造成的任何直接和间接后果负责。\n"
 
-#: features\my\views\donation_screen.dart:28
-#: features\my\views\my_screen.dart:55
-msgid "Back This Project"
-msgstr "支持这个项目"
-
-#: features\my\views\donation_screen.dart:54
-msgid "Support Open Source Aquarium Tech"
-msgstr "支持开源水族技术"
-
-#: features\my\views\donation_screen.dart:73
-msgid "Why Your Support Matters"
-msgstr "为何你的支持很重要"
-
-#: features\my\views\donation_screen.dart:79
-msgid ""
-"Your donation helps cover development costs, server expenses, and continuous "
-"improvements that benefit the entire aquarium community. Every contribution, "
-"no matter how small, helps keep this project alive and thriving. Thank you "
-"for being part of this journey!"
-msgstr ""
-"你的捐赠可以帮助覆盖开发成本、服务器支出，并带来对整个水族社区都有益的持续改"
-"进。无论多小的贡献都可以帮助此项目存在和壮大。感谢和你一起经历这个奇妙的旅"
-"程！"
-
-#: features\my\views\donation_screen.dart:94
-msgid "Choose Your Support Method"
-msgstr "选择你的支持方式"
-
-#: features\my\views\donation_screen.dart:108
-msgid "Buy me a coffee"
-msgstr "请我喝杯咖啡"
-
-#: features\my\views\donation_screen.dart:120
-msgid "Support via PayPal"
-msgstr "通过 PayPal 捐赠"
-
-#: features\my\views\my_screen.dart:33
+#: features\my\views\my_screen.dart:32
 msgid "About"
 msgstr "关于"
 

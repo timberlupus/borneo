@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-09 14:26+0800\n"
+"POT-Creation-Date: 2025-09-13 17:50+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -175,7 +175,7 @@ msgstr ""
 
 #: devices\borneo\lyfi\views\dashboard\dashboard_settings_tile.dart:54
 #: devices\borneo\lyfi\views\settings_screen.dart:24
-#: features\my\views\my_screen.dart:24
+#: features\my\views\my_screen.dart:23
 msgid "Settings"
 msgstr ""
 
@@ -647,7 +647,8 @@ msgid "Version: {verText} Build: {buildNumberText}"
 msgstr ""
 
 #: features\my\views\about_screen.dart:87
-msgid "Copyright © Li Wei. All rights reserved."
+msgid ""
+"Copyright © Yunnan BinaryStar Technologies, Co., Ltd. All rights reserved."
 msgstr ""
 
 #: features\my\views\about_screen.dart:103
@@ -666,40 +667,7 @@ msgid ""
 "consequences resulting from the use of this software."
 msgstr ""
 
-#: features\my\views\donation_screen.dart:28
-#: features\my\views\my_screen.dart:55
-msgid "Back This Project"
-msgstr ""
-
-#: features\my\views\donation_screen.dart:54
-msgid "Support Open Source Aquarium Tech"
-msgstr ""
-
-#: features\my\views\donation_screen.dart:73
-msgid "Why Your Support Matters"
-msgstr ""
-
-#: features\my\views\donation_screen.dart:79
-msgid ""
-"Your donation helps cover development costs, server expenses, and continuous "
-"improvements that benefit the entire aquarium community. Every contribution, "
-"no matter how small, helps keep this project alive and thriving. Thank you "
-"for being part of this journey!"
-msgstr ""
-
-#: features\my\views\donation_screen.dart:94
-msgid "Choose Your Support Method"
-msgstr ""
-
-#: features\my\views\donation_screen.dart:108
-msgid "Buy me a coffee"
-msgstr ""
-
-#: features\my\views\donation_screen.dart:120
-msgid "Support via PayPal"
-msgstr ""
-
-#: features\my\views\my_screen.dart:33
+#: features\my\views\my_screen.dart:32
 msgid "About"
 msgstr ""
 

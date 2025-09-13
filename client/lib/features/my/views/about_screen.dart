@@ -84,7 +84,7 @@ class AboutScreen extends StatelessWidget {
               margin: const EdgeInsets.fromLTRB(16, 24, 16, 24),
               child: Center(
                 child: Text(
-                  context.translate('Copyright © Li Wei. All rights reserved.'),
+                  context.translate('Copyright © Yunnan BinaryStar Technologies, Co., Ltd. All rights reserved.'),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),

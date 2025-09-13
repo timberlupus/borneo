@@ -1,4 +1,3 @@
-import 'package:borneo_app/features/my/views/donation_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter/material.dart';
@@ -41,24 +40,6 @@ class MyScreen extends StatelessWidget {
               },
             ),
           ],
-        ),
-      ),
-
-      const SizedBox(height: 8),
-
-      // Support Card
-      Card(
-        elevation: 0.25,
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        clipBehavior: Clip.antiAlias,
-        child: ListTile(
-          title: Text(context.translate('Back This Project')),
-          leading: Icon(Icons.favorite_outline, color: Theme.of(context).colorScheme.error),
-          trailing: const CupertinoListTileChevron(),
-          onTap: () {
-            final route = MaterialPageRoute(builder: (context) => DonationScreen());
-            Navigator.push(context, route);
-          },
         ),
       ),
 
