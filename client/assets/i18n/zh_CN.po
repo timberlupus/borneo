@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-13 17:50+0800\n"
+"POT-Creation-Date: 2025-09-13 17:53+0800\n"
 "PO-Revision-Date: 2024-12-22 15:38+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -647,7 +647,7 @@ msgstr "版本：{verText} 构建号：{buildNumberText}"
 
 #: features\my\views\about_screen.dart:87
 msgid ""
-"Copyright © Yunnan BinaryStar Technologies, Co., Ltd. All rights reserved."
+"Copyright © Yunnan BinaryStars Technologies, Co., Ltd. All rights reserved."
 msgstr "版权所有 © 云南伴星科技有限公司。保留所有权利。"
 
 #: features\my\views\about_screen.dart:103
@@ -798,3 +798,7 @@ msgstr "设备离线"
 #: shared\widgets\generic_settings_screen.dart:55
 msgid "Save"
 msgstr "保存"
+
+#~ msgid ""
+#~ "Copyright © Yunnan BinaryStar Technologies, Co., Ltd. All rights reserved."
+#~ msgstr "版权所有 © 云南伴星科技有限公司。保留所有权利。"

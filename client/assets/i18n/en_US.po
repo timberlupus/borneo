@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-13 17:50+0800\n"
+"POT-Creation-Date: 2025-09-13 17:53+0800\n"
 "PO-Revision-Date: 2025-06-01 20:57+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -648,7 +648,7 @@ msgstr "Version: {verText} Build: {buildNumberText}"
 
 #: features\my\views\about_screen.dart:87
 msgid ""
-"Copyright © Yunnan BinaryStar Technologies, Co., Ltd. All rights reserved."
+"Copyright © Yunnan BinaryStars Technologies, Co., Ltd. All rights reserved."
 msgstr ""
 
 #: features\my\views\about_screen.dart:103
