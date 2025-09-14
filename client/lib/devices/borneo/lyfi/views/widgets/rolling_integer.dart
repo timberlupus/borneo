@@ -6,11 +6,11 @@ class RollingInteger extends StatefulWidget {
   final Duration duration;
 
   const RollingInteger({
-    Key? key,
+    super.key,
     required this.value,
     this.textStyle,
     this.duration = const Duration(milliseconds: 300),
-  }) : super(key: key);
+  });
 
   @override
   _RollingIntegerState createState() => _RollingIntegerState();

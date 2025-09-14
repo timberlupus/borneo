@@ -144,11 +144,12 @@ class ScenesViewModel extends ChangeNotifier {
   }
 
   void _onSceneDeleted(SceneDeletedEvent event) {
-    if (!_isLoading)
+    if (!_isLoading) {
       _sceneManager.getLastAccessed().then((scene) async {
         await _sceneManager.changeCurrent(scene.id);
         _reload(preserveOrder: true);
       });
+    }
   }
 
   void _onSceneUpdated(SceneUpdatedEvent event) {

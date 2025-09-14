@@ -141,7 +141,7 @@ class _ChoreCardContentState extends State<_ChoreCardContent> {
                                     await vm.undoChore();
                                   }
                                 },
-                          activeColor: colorScheme.primary,
+                          activeThumbColor: colorScheme.primary,
                           inactiveThumbColor: colorScheme.primary,
                           inactiveTrackColor: colorScheme.surfaceBright,
                           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

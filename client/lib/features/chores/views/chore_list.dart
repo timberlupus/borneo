@@ -183,7 +183,7 @@ class _ChoreListState extends State<ChoreList> {
 }
 
 class _FlowingLoadingText extends StatefulWidget {
-  const _FlowingLoadingText({Key? key}) : super(key: key);
+  const _FlowingLoadingText({super.key});
 
   @override
   State<_FlowingLoadingText> createState() => _FlowingLoadingTextState();

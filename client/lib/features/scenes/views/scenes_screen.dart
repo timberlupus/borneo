@@ -10,7 +10,6 @@ import '../../../core/services/scene_manager.dart';
 import '../../../core/services/devices/device_manager.dart';
 import 'scene_edit_screen.dart';
 import '../../chores/views/chore_list.dart';
-import '../../chores/views/chore_list.dart' show ProvideChoresViewModel; // wrapper
 import '../models/scene_edit_arguments.dart';
 import 'scene_card.dart';
 
