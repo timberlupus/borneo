@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:logger/logger.dart';
 
 import 'package:provider/provider.dart';
 
@@ -48,18 +49,30 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Future<void> _pickLocation(BuildContext context, SettingsViewModel vm) async {
-    final route = MaterialPageRoute(
-      builder: (context) =>
-          MapLocationPicker(initialLocation: vm.location != null ? LatLng(vm.location!.lat, vm.location!.lng) : null),
+    // Build the route with the existing device location if available
+    final LatLng? initialLocation = vm.location != null ? LatLng(vm.location!.lat, vm.location!.lng) : null;
+
+    final route = MaterialPageRoute<LatLng?>(
+      builder: (context) => MapLocationPicker(initialLocation: initialLocation),
+      fullscreenDialog: true,
     );
+
     try {
-      final selectedLocation = await Navigator.push(context, route);
-      if (selectedLocation != null) {
-        // Update the location in the view model
-        vm.enqueueUIJob(() async => await vm.updateGeoLocation(selectedLocation!));
+      // Navigate to the picker and await a LatLng (null if cancelled)
+      final LatLng? selectedLocation = await Navigator.of(context).push<LatLng?>(route);
+
+      if (!context.mounted) {
+        return;
       }
-    } finally {
-      //TODO
+
+      if (selectedLocation != null) {
+        await vm.updateGeoLocation(selectedLocation);
+      }
+    } catch (e, stackTrace) {
+      if (context.mounted) {
+        final log = context.read<Logger>();
+        log.e("Failed select location", error: e, stackTrace: stackTrace);
+      }
     }
   }
 
