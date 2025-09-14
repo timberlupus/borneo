@@ -95,96 +95,97 @@ class _BorneoAppState extends State<BorneoApp> {
         Provider<EventBus>(create: (_) => widget._globalEventBus),
         Provider<IBlobManager>(create: (_) => FlutterAppBlobManager()),
       ],
-      child: ToastificationWrapper(
-        config: ToastificationConfig(animationDuration: Duration(milliseconds: 300), maxToastLimit: 3),
-        child: Builder(
-          builder: (context) {
-            return MaterialApp(
-              title: 'Borneo-IoT',
-              theme: BorneoTheme(Theme.of(context).textTheme).light(),
-              darkTheme: BorneoTheme(Theme.of(context).textTheme).dark(),
-              themeMode: _themeMode,
-              locale: _locale,
-              supportedLocales: kSupportedLocales,
-              onGenerateRoute: context.read<RouteManager>().onGenerateRoute,
-              debugShowCheckedModeBanner: false,
-              localizationsDelegates: [
-                GettextLocalizationsDelegate(),
-                GlobalMaterialLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-              ],
-              builder: (context, child) {
-                final gt = GettextLocalizations.of(context);
-                return MultiProvider(
-                  providers: [
-                    Provider<IAppNotificationService>(create: (context) => DefaultAppNotificationService()),
+      child: Builder(
+        builder: (context) {
+          return MaterialApp(
+            title: 'Borneo-IoT',
+            theme: BorneoTheme(Theme.of(context).textTheme).light(),
+            darkTheme: BorneoTheme(Theme.of(context).textTheme).dark(),
+            themeMode: _themeMode,
+            locale: _locale,
+            supportedLocales: kSupportedLocales,
+            onGenerateRoute: context.read<RouteManager>().onGenerateRoute,
+            debugShowCheckedModeBanner: false,
+            localizationsDelegates: [
+              GettextLocalizationsDelegate(),
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            builder: (context, child) {
+              final gt = GettextLocalizations.of(context);
+              final theme = Theme.of(context);
+              return MultiProvider(
+                providers: [
+                  Provider<IAppNotificationService>(create: (context) => DefaultAppNotificationService(theme)),
 
-                    Provider<UrlLauncherService>(
-                      create: (context) => UrlLauncherService(
-                        notification: Provider.of<IAppNotificationService>(context, listen: false),
-                        logger: Provider.of<Logger>(context, listen: false),
-                      ),
-                      lazy: false,
+                  Provider<UrlLauncherService>(
+                    create: (context) => UrlLauncherService(
+                      notification: Provider.of<IAppNotificationService>(context, listen: false),
+                      logger: Provider.of<Logger>(context, listen: false),
                     ),
+                    lazy: false,
+                  ),
 
-                    // Here >>> register all providers that need to access the gettext interface <<<
-                    // SceneManager
-                    Provider<ISceneManager>(
-                      create: (context) => SceneManagerImpl(
-                        gt,
-                        context.read<Database>(),
-                        context.read<EventBus>(),
-                        context.read<IBlobManager>(),
-                        clock: context.read<IClock>(),
-                        logger: context.read<Logger>(),
-                      ),
+                  // Here >>> register all providers that need to access the gettext interface <<<
+                  // SceneManager
+                  Provider<ISceneManager>(
+                    create: (context) => SceneManagerImpl(
+                      gt,
+                      context.read<Database>(),
+                      context.read<EventBus>(),
+                      context.read<IBlobManager>(),
+                      clock: context.read<IClock>(),
+                      logger: context.read<Logger>(),
                     ),
+                  ),
 
-                    // GroupManager
-                    Provider<IGroupManager>(
-                      create: (context) => GroupManagerImpl(
-                        context.read<Logger>(),
-                        context.read<EventBus>(),
-                        context.read<Database>(),
-                        context.read<ISceneManager>(),
-                      ),
+                  // GroupManager
+                  Provider<IGroupManager>(
+                    create: (context) => GroupManagerImpl(
+                      context.read<Logger>(),
+                      context.read<EventBus>(),
+                      context.read<Database>(),
+                      context.read<ISceneManager>(),
                     ),
+                  ),
 
-                    // DeviceManager
-                    Provider<IDeviceManager>(
-                      create: (context) => DeviceManagerImpl(
-                        context.read<Database>(),
-                        context.read<IKernel>(),
-                        context.read<EventBus>(),
-                        context.read<ISceneManager>(),
-                        context.read<IGroupManager>(),
-                        context.read<IDeviceModuleRegistry>(),
-                        logger: context.read<Logger>(),
-                      ),
-                      dispose: (context, dm) => dm.dispose(),
+                  // DeviceManager
+                  Provider<IDeviceManager>(
+                    create: (context) => DeviceManagerImpl(
+                      context.read<Database>(),
+                      context.read<IKernel>(),
+                      context.read<EventBus>(),
+                      context.read<ISceneManager>(),
+                      context.read<IGroupManager>(),
+                      context.read<IDeviceModuleRegistry>(),
+                      logger: context.read<Logger>(),
                     ),
+                    dispose: (context, dm) => dm.dispose(),
+                  ),
 
-                    // ChoreManager
-                    Provider<IChoreManager>(
-                      create: (context) => IChoreManager(
-                        context.read<EventBus>(),
-                        context.read<Database>(),
-                        context.read<ISceneManager>(),
-                        context.read<IDeviceManager>(),
-                        clock: context.read<IClock>(),
-                        logger: context.read<Logger>(),
-                      ),
-                      dispose: (context, rm) => rm.dispose(),
+                  // ChoreManager
+                  Provider<IChoreManager>(
+                    create: (context) => IChoreManager(
+                      context.read<EventBus>(),
+                      context.read<Database>(),
+                      context.read<ISceneManager>(),
+                      context.read<IDeviceManager>(),
+                      clock: context.read<IClock>(),
+                      logger: context.read<Logger>(),
                     ),
-                  ],
-                  child: child,
-                );
-              },
-              home: MainScreen(),
-            );
-          },
-        ),
+                    dispose: (context, rm) => rm.dispose(),
+                  ),
+                ],
+                child: ToastificationWrapper(
+                  config: ToastificationConfig(animationDuration: Duration(milliseconds: 300), maxToastLimit: 3),
+                  child: child!,
+                ),
+              );
+            },
+            home: MainScreen(),
+          );
+        },
       ),
     );
   }
