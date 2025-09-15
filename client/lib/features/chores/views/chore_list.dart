@@ -153,11 +153,6 @@ class _ChoreListState extends State<ChoreList> {
             },
           ),
         ),
-        if (vm.isLoading && chores.isNotEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-          ),
         if (vm.error != null && chores.isNotEmpty)
           Container(
             margin: const EdgeInsets.only(top: 16),
