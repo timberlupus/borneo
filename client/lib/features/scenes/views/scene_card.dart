@@ -49,7 +49,6 @@ class SceneCard extends StatelessWidget {
         children: [
           _buildSceneImage(context),
           _buildSceneInfo(context),
-          // Radial highlight overlay replicated from riverpod implementation
           Positioned.fill(
             child: ShaderMask(
               shaderCallback: (Rect bounds) {

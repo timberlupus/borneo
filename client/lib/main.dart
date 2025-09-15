@@ -18,6 +18,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'features/settings/view_models/settings_view_model.dart';
 import 'dart:async';
@@ -52,7 +53,8 @@ Future<void> main() async {
   // Ensure binding initialization and app startup occur in the SAME zone as runApp
   runZonedGuarded(
     () async {
-      WidgetsFlutterBinding.ensureInitialized();
+      WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+      FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
       final db = await openDatabase();
 
@@ -131,7 +133,7 @@ Future<void> main() async {
             // LocaleService
             provider.Provider<ILocaleService>(create: (_) => AppLocaleService(), lazy: false),
 
-            // EventBus (was riverpod eventBusProvider)
+            // EventBus
             provider.Provider<EventBus>(create: (_) => eventBus, lazy: false),
 
             // SharedPreferences

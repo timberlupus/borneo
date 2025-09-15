@@ -17,6 +17,8 @@ import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+
 import '../../core/services/devices/device_manager.dart';
 import '../../core/services/scene_manager.dart';
 import '../../features/devices/view_models/grouped_devices_view_model.dart';
@@ -257,7 +259,7 @@ class _MainScreenState extends State<MainScreen> {
         final gm = ctx.read<IGroupManager>();
         final dm = ctx.read<IDeviceManager>();
         final ls = ctx.read<ILocaleService>();
-        return MainViewModel(
+        final vm = MainViewModel(
           bus,
           bm,
           sm,
@@ -269,6 +271,15 @@ class _MainScreenState extends State<MainScreen> {
           clock: ctx.read<IClock>(),
           logger: ctx.read<Logger>(),
         );
+
+        final f = vm.initFuture;
+        if (f != null) {
+          // TODO exceptions
+          f.whenComplete(() => FlutterNativeSplash.remove());
+        } else {
+          FlutterNativeSplash.remove();
+        }
+        return vm;
       },
       lazy: false,
       child: Builder(
@@ -298,21 +309,8 @@ class _MainScreenState extends State<MainScreen> {
             },
             child: Selector<MainViewModel, bool>(
               selector: (context, vm) => vm.isInitialized,
-              builder: (context, isInitialized, child) {
-                return FutureBuilder(
-                  future: isInitialized ? null : vm.initFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-                    }
-
-                    if (snapshot.hasError) {
-                      return Scaffold(body: Center(child: Text('Error: ${snapshot.error}')));
-                    }
-
-                    return _buildInitializedContent(context);
-                  },
-                );
+              builder: (context, isInitialized, _) {
+                return isInitialized ? _buildInitializedContent(context) : const SizedBox.shrink();
               },
             ),
           );

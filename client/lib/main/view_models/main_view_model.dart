@@ -76,7 +76,9 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   }
 
   Future<void> initialize() async {
-    assert(!isInitialized);
+    if (_isInitialized) {
+      return;
+    }
     logger?.i('Starting to initialize MainViewModel...');
     try {
       await _blobManager.initialize();
@@ -85,8 +87,13 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
       await _deviceManager.initialize();
       await _localeService.initialize();
       logger?.i('MainViewModel initialized.');
+    } catch (e, stackTrace) {
+      logger?.e("Failed to initialize MainViewModel: $e", error: e, stackTrace: stackTrace);
     } finally {
       _isInitialized = true;
+      if (!isDisposed) {
+        notifyListeners();
+      }
     }
   }
 

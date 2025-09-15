@@ -3,7 +3,6 @@
 import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/features/devices/views/device_discovery_screen.dart';
-// Removed Riverpod scenes import after migration
 import 'package:flutter/material.dart';
 
 import '../routes/app_routes.dart';

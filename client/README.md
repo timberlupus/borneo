@@ -36,7 +36,7 @@ The Borneo Mobile Application is a cross-platform app built with Flutter, design
 - Use `melos` for managing multiple packages if working across the monorepo
 - Code style and analysis are enforced via `analysis_options.yaml`
 - Localization files are in `assets/i18n/`
-- Main entry points: `lib/main.dart`, `lib/main_riverpod.dart`
+- Main entry points: `lib/main.dart`
 
 ## Testing
 
