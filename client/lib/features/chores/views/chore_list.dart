@@ -77,7 +77,7 @@ class _ChoreListState extends State<ChoreList> {
 
   Widget _buildContent(BuildContext context, ChoresViewModel vm, String? selectedSceneId) {
     final theme = Theme.of(context);
-    if (vm.error != null && vm.chores.isEmpty) {
+    if (vm.error != null && vm.chores.isEmpty && !vm.isLoading) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 32),

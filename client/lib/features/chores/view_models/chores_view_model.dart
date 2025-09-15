@@ -27,7 +27,7 @@ class ChoresViewModel extends ChangeNotifier {
   }
 
   List<AbstractChore> _chores = [];
-  bool _isLoading = false;
+  bool _isLoading = true;
   String? _error;
 
   List<AbstractChore> get chores => _chores;
@@ -36,25 +36,20 @@ class ChoresViewModel extends ChangeNotifier {
 
   late final StreamSubscription<CurrentSceneChangedEvent> _currentSceneChangedSub;
   late final StreamSubscription<CurrentSceneDevicesReloadedEvent> _devicesReloadedSub;
-  late final StreamSubscription<DeviceManagerReadyEvent> _deviceManagerReadySub;
 
   void _setupEventListeners() {
     _currentSceneChangedSub = _eventBus.on<CurrentSceneChangedEvent>().listen(_onCurrentSceneChanged);
     _devicesReloadedSub = _eventBus.on<CurrentSceneDevicesReloadedEvent>().listen(_onDevicesReloaded);
-    _deviceManagerReadySub = _eventBus.on<DeviceManagerReadyEvent>().listen(_onDeviceManagerReady);
   }
 
   Future<void> initialize() async {
-    _isLoading = true;
+    assert(_isLoading);
     _error = null;
-    notifyListeners();
     try {
       await _reloadChores();
     } catch (e) {
       _error = e.toString();
-    } finally {
       _isLoading = false;
-      notifyListeners();
     }
   }
 
@@ -64,8 +59,9 @@ class ChoresViewModel extends ChangeNotifier {
     } catch (e) {
       _logger?.e('Failed to reload chores: $e');
       _error = e.toString();
+    } finally {
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   void _onCurrentSceneChanged(CurrentSceneChangedEvent event) {
@@ -91,15 +87,10 @@ class ChoresViewModel extends ChangeNotifier {
     }());
   }
 
-  void _onDeviceManagerReady(DeviceManagerReadyEvent event) {
-    _reloadChores();
-  }
-
   @override
   void dispose() {
     _currentSceneChangedSub.cancel();
     _devicesReloadedSub.cancel();
-    _deviceManagerReadySub.cancel();
     super.dispose();
   }
 }
