@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:borneo_app/core/events/app_events.dart';
 import 'package:borneo_app/core/services/clock.dart';
-import 'package:borneo_app/core/services/default_app_notification_service.dart';
+import 'package:borneo_app/core/services/app_notification_service_impl.dart';
 import 'package:borneo_app/core/services/devices/device_manager_impl.dart';
 import 'package:borneo_app/core/services/group_manager_impl.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
@@ -117,7 +117,7 @@ class _BorneoAppState extends State<BorneoApp> {
               final theme = Theme.of(context);
               return MultiProvider(
                 providers: [
-                  Provider<IAppNotificationService>(create: (context) => DefaultAppNotificationService(theme)),
+                  Provider<IAppNotificationService>(create: (context) => AppNotificationServiceImpl(theme)),
 
                   Provider<UrlLauncherService>(
                     create: (context) => UrlLauncherService(

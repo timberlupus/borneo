@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
-import 'package:toastification/toastification.dart';
 
 import '../../../core/services/devices/device_manager.dart';
 import '../view_models/device_discovery_view_model.dart';
@@ -182,7 +181,6 @@ class NewDeviceAddedSnackBarListener extends StatelessWidget {
       builder: (context, lastestAdded, child) {
         if (lastestAdded != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            toastification.dismissAll();
             Provider.of<IAppNotificationService>(
               context,
               listen: false,

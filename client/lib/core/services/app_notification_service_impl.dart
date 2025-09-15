@@ -2,10 +2,10 @@ import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
 
-class DefaultAppNotificationService implements IAppNotificationService {
+class AppNotificationServiceImpl implements IAppNotificationService {
   final ThemeData theme;
 
-  DefaultAppNotificationService(this.theme);
+  AppNotificationServiceImpl(this.theme);
   @override
   void showError(String title, {String? body}) {
     toastification.show(
