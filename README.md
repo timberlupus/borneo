@@ -127,7 +127,7 @@ We welcome your feedback! If you encounter any issues or have suggestions, pleas
 - Website：[www.borneoiot.com](https://www.borneoiot.com)
 - Online documentation：[docs.borneoiot.com](https://docs.borneoiot.com)
 - GutHub Discussions: [github.com/borneo-iot/borneo/discussions](https://github.com/borneo-iot/borneo/discussions)
-- Author's e-mail: [oldrev@gmail.com](mailto:oldrev@gmail.com)
+- E-mail: [info@binarystarstech.com](mailto:info@binarystarstech.com)
 - Borneo-IoT Discord Server: [discord.gg/EFJTm7PpEs](https://discord.gg/EFJTm7PpEs)
 
 ## License
@@ -145,5 +145,5 @@ The hardware design in this project is licensed under the CERN Open Hardware Lic
 
 In addition to the GPL-3.0 license, I also offer proprietary licensing options for those who wish to use this software in proprietary products.
 
-If you are interested in obtaining a proprietary license, please contact me at [oldrev@gmail.com](mailto:oldrev@gmail.com).
+If you are interested in obtaining a proprietary license, please contact me at [info@binarystarstech.com](mailto:info@binarystarstech.com).
 
