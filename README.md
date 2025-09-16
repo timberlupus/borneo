@@ -70,12 +70,6 @@ The Buce (Model BLC06MK1) LED controller in this project is an [OSHWA (Open Sour
 
 [^1]: The open-source project does not provide mass production-related fixtures and software.
 
-## Demo Pictures & Videos
-
-### Demo Short Video:
-
-[![YouTube](http://i.ytimg.com/vi/Z78nOzLQvq0/hqdefault.jpg)](https://www.youtube.com/watch?v=Z78nOzLQvq0)
-
 ## Project Status
 
 ### Hardware & Firmware
