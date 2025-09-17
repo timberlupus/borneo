@@ -11,9 +11,9 @@
 #include <borneo/system.h>
 
 #define TAG "indicator"
-#define TASK_STACK_SIZE 512
+#define TASK_STACK_SIZE 1024
 
-static void indicator_task();
+static void indicator_task(void* args);
 static void got_ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 static void lost_ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
@@ -42,7 +42,7 @@ int bo_indicator_init()
     io_conf.pull_up_en = 1;
     BO_TRY(gpio_config(&io_conf));
 
-#if CONFIG_BORNEO_INDICATOR__ENABLED
+#if CONFIG_BORNEO_INDICATOR_ENABLED
     BO_TRY(gpio_set_level(CONFIG_BORNEO_INDICATOR_GPIO, 0));
 #endif
 
@@ -55,7 +55,7 @@ int bo_indicator_init()
     return res;
 }
 
-void indicator_task(void* args)
+static void indicator_task(void* args)
 {
     uint32_t x = 0;
     int delay = pdMS_TO_TICKS(1000);
