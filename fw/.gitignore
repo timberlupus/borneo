@@ -3,3 +3,4 @@ managed_components
 .vscode/*.local.*
 __pycache__
 *.pyc
+dependencies.lock
