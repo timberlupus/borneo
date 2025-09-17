@@ -140,8 +140,8 @@ int fan_set_power(uint8_t value)
             if (duty >= CONFIG_LYFI_FAN_CTRL_DAC_DUTY_MAX) {
                 duty = 0xFF; // DAC_MAX_DUTY
             }
-            BO_TRY(dac_output_voltage(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL, dac_value));
-            ESP_LOGI(TAG, "Set fan power, method: DAC, power=%u/100, DAC-value=%hhu", value, dac_value);
+            BO_TRY(dac_output_voltage(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL, duty));
+            ESP_LOGI(TAG, "Set fan power, method: DAC, power=%u/100, DAC-value=%hhu", value, duty);
         }
 #else
         // PWMDAC
