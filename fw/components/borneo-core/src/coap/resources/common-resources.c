@@ -20,6 +20,7 @@
 #include <borneo/nvs.h>
 #include <borneo/power-meas.h>
 #include <borneo/timer.h>
+#include <borneo/product.h>
 
 #define TAG "borneo-core-coap"
 
@@ -56,6 +57,18 @@ static void coap_hnd_borneo_info_get(coap_resource_t* resource, coap_session_t* 
     {
         BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "serno"), response);
         BO_COAP_TRY(cbor_encode_text_stringz(&root_map, sysinfo->hex_id), response);
+    }
+
+    // Product Mode
+    {
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "productMode"), response);
+#if CONFIG_BORNEO_PRODUCT_MODE_STANDALONE == 1
+        BO_COAP_TRY(cbor_encode_uint(&root_map, BORNEO_PRODUCT_MODE_STANDALONE), response);
+#elif CONFIG_BORNEO_PRODUCT_MODE_FULL == 1
+        BO_COAP_TRY(cbor_encode_uint(&root_map, BORNEO_PRODUCT_MODE_FULL), response);
+#else
+        BO_COAP_TRY(cbor_encode_uint(&root_map, BORNEO_PRODUCT_MODE_OEM), response);
+#endif
     }
 
     {

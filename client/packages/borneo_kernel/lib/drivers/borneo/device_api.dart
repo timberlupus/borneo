@@ -25,6 +25,21 @@ class BorneoPaths {
   static final Uri rtcLocal = Uri(path: '/borneo/rtc/local');
 }
 
+enum ProductMode {
+  standalone,
+  full,
+  oem;
+
+  static ProductMode fromInt(int value) {
+    return switch (value) {
+      0 => ProductMode.standalone,
+      1 => ProductMode.full,
+      2 => ProductMode.oem,
+      _ => throw ArgumentError('Invalid value for ProductMode: $value'),
+    };
+  }
+}
+
 /// Defines the power behavior of a device.
 ///
 /// This enum specifies how a device should handle its power state in different scenarios,
@@ -83,6 +98,7 @@ class GeneralBorneoDeviceInfo {
   final String name;
   final String compatible;
   final String serno;
+  final ProductMode productMode;
   final bool hasBT;
   final List<int> btMac;
   final bool hasWifi;
@@ -99,6 +115,7 @@ class GeneralBorneoDeviceInfo {
     required this.name,
     required this.compatible,
     required this.serno,
+    required this.productMode,
     this.hasBT = false,
     this.btMac = const [],
     this.hasWifi = false,
@@ -117,6 +134,7 @@ class GeneralBorneoDeviceInfo {
       compatible: map['compatible'],
       name: map['name'],
       serno: map['serno'],
+      productMode: ProductMode.fromInt(map['productMode']),
       hasBT: map['hasBT'],
       hasWifi: map['hasWifi'],
       wifiMac: map['wifiMac'], // Convert bytes to String

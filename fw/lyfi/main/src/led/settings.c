@@ -297,8 +297,8 @@ int led_load_user_settings()
 
     // TODO
     // Loading the brightness and power settings...
-#ifdef CONFIG_LYFI_STANDALONE_CONTROLLER
-#endif // CONFIG_LYFI_STANDALONE_CONTROLLER
+    // #ifdef CONFIG_LYFI_STANDALONE_CONTROLLER
+    // #endif // CONFIG_LYFI_STANDALONE_CONTROLLER
 
     return rc;
 }

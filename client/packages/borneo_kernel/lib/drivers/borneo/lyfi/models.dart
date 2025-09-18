@@ -21,13 +21,11 @@ class LyfiChannelInfo {
 }
 
 class LyfiDeviceInfo {
-  final bool isStandaloneController;
   final double? nominalPower;
   final int channelCount;
   final List<LyfiChannelInfo> channels;
 
   const LyfiDeviceInfo({
-    required this.isStandaloneController,
     required this.nominalPower,
     required this.channelCount,
     required this.channels,
@@ -35,7 +33,6 @@ class LyfiDeviceInfo {
 
   factory LyfiDeviceInfo.fromMap(Map map) {
     return LyfiDeviceInfo(
-      isStandaloneController: map['isStandaloneController'],
       nominalPower: map['nominalPower']?.toDouble(),
       channelCount: map['channelCount'],
       channels: List<LyfiChannelInfo>.from(map['channels'].map((x) => LyfiChannelInfo.fromMap(x))),

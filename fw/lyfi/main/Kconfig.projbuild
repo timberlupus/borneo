@@ -1,8 +1,5 @@
 menu "Borneo LyFi"
 
-    config LYFI_STANDALONE_CONTROLLER
-        bool "Is a standalone controller/dimmer?"
-
     menu "Power measursment"
         config LYFI_POWER_MEAS_ENABLED
             bool "LED Power measurement anbaled"

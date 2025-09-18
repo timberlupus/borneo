@@ -241,14 +241,6 @@ static void coap_hnd_info_get(coap_resource_t* resource, coap_session_t* session
 
     CborEncoder root_map;
     BO_COAP_TRY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength), response);
-    {
-        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "isStandaloneController"), response);
-#if CONFIG_LYFI_STANDALONE_CONTROLLER
-        BO_COAP_TRY(cbor_encode_boolean(&root_map, true), response);
-#else
-        BO_COAP_TRY(cbor_encode_boolean(&root_map, false), response);
-#endif // CONFIG_LYFI_STANDALONE_CONTROLLER
-    }
 
 #if CONFIG_LYFI_LED_NOMINAL_POWER
     {

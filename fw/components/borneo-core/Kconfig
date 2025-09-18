@@ -23,6 +23,20 @@ menu "Borneo Core"
 
         config BORNEO_HW_VER
             string "Borneo hardware version"
+
+        choice
+            prompt "Select product mode"
+
+            config BORNEO_PRODUCT_MODE_STANDALONE
+                bool "Standalone Controller"
+
+            config BORNEO_PRODUCT_MODE_FULL
+                bool "Proprietary Product"
+
+            config BORNEO_PRODUCT_MODE_OEM
+                bool "OEM / Custom"
+        endchoice
+
     endmenu
 
     menu "ADC settings"
