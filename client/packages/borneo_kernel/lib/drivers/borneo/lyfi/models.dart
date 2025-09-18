@@ -25,11 +25,7 @@ class LyfiDeviceInfo {
   final int channelCount;
   final List<LyfiChannelInfo> channels;
 
-  const LyfiDeviceInfo({
-    required this.nominalPower,
-    required this.channelCount,
-    required this.channels,
-  });
+  const LyfiDeviceInfo({required this.nominalPower, required this.channelCount, required this.channels});
 
   factory LyfiDeviceInfo.fromMap(Map map) {
     return LyfiDeviceInfo(
