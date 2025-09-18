@@ -75,8 +75,10 @@ int fan_init()
 #if SOC_DAC_SUPPORTED
         ESP_LOGI(TAG, "Fan driver using DAC, channel=%u", CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL);
         BO_TRY(dac_output_enable(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL));
+        BO_TRY(dac_output_voltage(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL, 0xFF));
 #else
         BO_TRY(rmtpwm_dac_init());
+        BO_TRY(rmtpwm_set_dac_duty(RMTPWM_DUTY_MAX));
 #endif
     }
 
@@ -84,10 +86,9 @@ int fan_init()
     if (pwm_enabled) {
         ESP_LOGI(TAG, "Fan PWM output enabled, GPIO=%i", CONFIG_LYFI_FAN_CTRL_PWM_GPIO);
         BO_TRY(rmtpwm_pwm_init());
+        BO_TRY(rmtpwm_set_pwm_duty(0));
     }
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_ENABLED
-
-    BO_TRY(fan_set_power(FAN_POWER_MIN));
 
     ESP_LOGI(TAG, "Fan driver initizlied.");
     return 0;
