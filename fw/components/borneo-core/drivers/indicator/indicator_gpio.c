@@ -10,6 +10,8 @@
 #include <borneo/devices/indicator.h>
 #include <borneo/system.h>
 
+#if CONFIG_BORNEO_INDICATOR_ENABLED && CONFIG_BORNEO_INDICATOR_GPIO_ENABLED
+
 #define TAG "indicator"
 #define TASK_STACK_SIZE 1024
 
@@ -30,9 +32,7 @@ int bo_indicator_init()
 
     uint64_t selected_gpios = 0ULL;
 
-#if CONFIG_BORNEO_INDICATOR_ENABLED
     selected_gpios |= 1ULL << CONFIG_BORNEO_INDICATOR_GPIO;
-#endif // CONFIG_BORNEO_INDICATOR_ENABLED
 
     gpio_config_t io_conf;
     io_conf.intr_type = GPIO_INTR_DISABLE;
@@ -42,9 +42,7 @@ int bo_indicator_init()
     io_conf.pull_up_en = 1;
     BO_TRY(gpio_config(&io_conf));
 
-#if CONFIG_BORNEO_INDICATOR_ENABLED
     BO_TRY(gpio_set_level(CONFIG_BORNEO_INDICATOR_GPIO, 0));
-#endif
 
     BO_TRY(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &got_ip_event_handler, NULL));
     BO_TRY(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_LOST_IP, &lost_ip_event_handler, NULL));
@@ -118,3 +116,5 @@ static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_
         break;
     }
 }
+
+#endif // CONFIG_BORNEO_INDICATOR_ENABLED && CONFIG_BORNEO_INDICATOR_GPIO_ENABLED

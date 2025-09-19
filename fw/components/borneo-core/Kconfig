@@ -69,12 +69,31 @@ menu "Borneo Core"
 
     menu "LED Indicator"
         config BORNEO_INDICATOR_ENABLED
-            bool "WiFi indicator enabled"
+            bool "Indicator enabled"
             default y
 
+        choice
+            prompt "Select indicator type"
+
+            config BORNEO_INDICATOR_GPIO_ENABLED
+                bool "Simple GPIO LED"
+                default y
+                depends on BORNEO_INDICATOR_ENABLED
+
+            config BORNEO_INDICATOR_ADDRESSABLE_ENABLED
+                bool "Addressable LED"
+                depends on BORNEO_INDICATOR_ENABLED
+        endchoice
+
         config BORNEO_INDICATOR_GPIO
-            int "WiFi indicator pin"
+            int "Indicator pin"
             depends on BORNEO_INDICATOR_ENABLED
+
+        config BORNEO_INDICATOR_ADDRESSABLE_BRIGHTNESS
+            hex "Indicator brightness (0x01-0xFF)"
+            range 0x1 0xFF
+            default 0x3C
+            depends on BORNEO_INDICATOR_ADDRESSABLE_ENABLED
     endmenu
 
     menu "OTA"
