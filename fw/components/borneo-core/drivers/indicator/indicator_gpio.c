@@ -46,7 +46,7 @@ int bo_indicator_init()
 
     BO_TRY(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &got_ip_event_handler, NULL));
     BO_TRY(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_LOST_IP, &lost_ip_event_handler, NULL));
-    BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, BO_EVENT_FATAL_ERROR, &_system_event_handler, NULL));
+    BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &_system_event_handler, NULL));
 
     xTaskCreateStatic(indicator_task, "indicator_task", TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY, _task_stack,
                       &_task_tcb);
