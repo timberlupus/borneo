@@ -6,10 +6,16 @@
 ![BorneoIoT Banner](assets/borneo-repo-banner.jpg)
 
 <p align="center">
-    <a href="https://www.borneoiot.com"><b>Website</b></a> •
-    <a href="https://docs.borneoiot.com"><b>Documentation</b></a> •
-    <a href="https://github.com/borneo-iot/borneo/discussions"><b>Forum</b></a> •
-    <a href="https://discord.gg/EFJTm7PpEs"><b>Discord</b></a>
+        <a href="https://www.borneoiot.com"><b>Website</b></a> •
+        <a href="https://docs.borneoiot.com"><b>Documentation</b></a> •
+        <a href="https://github.com/borneo-iot/borneo/discussions"><b>Forum</b></a> •
+        <a href="https://discord.gg/EFJTm7PpEs"><b>Discord</b></a>
+</p>
+
+<p align="center">
+    <a href="https://www.crowdsupply.com/borneo-iot/buce-aquarium-led-controller" target="_blank" rel="noopener">
+        <img alt="Crowd Supply: Subscribe" src="https://img.shields.io/badge/Subscribe-Crowd%20Supply-009999?style=for-the-badge&logo=crowdsupply" />
+    </a>
 </p>
 
 
