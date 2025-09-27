@@ -1596,12 +1596,12 @@
     },
     "project_meta": {
         "author": "Li Wei",
-        "date": "2025-2-4",
+        "date": "2025-09-26",
         "license": "CERN-OHL-S-2.0",
         "model": "BLC06MK1",
         "project_name": "blc06mk1",
         "project_title": "BLC06-MK1",
-        "rev": "6"
+        "rev": "7"
     },
     "tag_names": {
         "1950d0de-3935-459f-8675-9440a5a19dce": "9",
