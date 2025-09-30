@@ -25,19 +25,12 @@ jobs:
       run:
         working-directory: ${{ env.FLUTTER_WORKING_DIR }}
     outputs:
-      flutter-version: ${{ steps.read-flutter-version.outputs.FLUTTER_VERSION }}
       cache-key-pub: ${{ steps.cache-keys.outputs.pub }}
       cache-key-gradle: ${{ steps.cache-keys.outputs.gradle }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Read Flutter version
-        id: read-flutter-version
-        run: |
-          FLUTTER_VERSION=$(cat flutter_version)
-          echo "FLUTTER_VERSION=$FLUTTER_VERSION" >> $GITHUB_OUTPUT
 
       - name: Generate cache keys
         id: cache-keys
@@ -55,7 +48,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: ${{ steps.read-flutter-version.outputs.FLUTTER_VERSION }}
+          flutter-version-file: pubspec.yaml
           cache: true
 
       - name: Cache pub dependencies
@@ -85,7 +78,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: ${{ needs.setup.outputs.flutter-version }}
+          flutter-version-file: pubspec.yaml
           cache: true
 
       - name: Cache pub dependencies
@@ -143,7 +136,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: ${{ needs.setup.outputs.flutter-version }}
+          flutter-version-file: pubspec.yaml
           cache: true
 
       - name: Cache pub dependencies
@@ -207,7 +200,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: ${{ needs.setup.outputs.flutter-version }}
+          flutter-version-file: pubspec.yaml
           cache: true
 
       - name: Cache pub dependencies
