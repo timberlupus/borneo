@@ -11,11 +11,9 @@ class GenericSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.translate(title)), actions: appBarActions),
-      body: ListView.builder(
-        shrinkWrap: true,
-        itemCount: children.length,
-        itemBuilder: (context, index) => children[index],
+      appBar: AppBar(title: Text(title), actions: appBarActions),
+      body: SafeArea(
+        child: ListView.builder(itemCount: children.length, itemBuilder: (context, index) => children[index]),
       ),
     );
   }
@@ -28,21 +26,17 @@ class GenericSettingsGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final allChildren =
-        <Widget>[
-          ListTile(tileColor: Theme.of(context).scaffoldBackgroundColor, title: Text(context.translate(title))),
-        ] +
-        children;
-    return Wrap(
-      children: [
-        ListView.separated(
-          shrinkWrap: true,
-          itemBuilder: (context, index) => allChildren[index],
-          separatorBuilder: (context, index) => Divider(height: 0, color: Theme.of(context).scaffoldBackgroundColor),
-          itemCount: allChildren.length,
-        ),
-      ],
-    );
+    final dividerColor = Theme.of(context).scaffoldBackgroundColor;
+    final tiles = <Widget>[ListTile(tileColor: dividerColor, title: Text(title))];
+
+    for (var i = 0; i < children.length; i++) {
+      tiles.add(children[i]);
+      if (i != children.length - 1) {
+        tiles.add(Divider(height: 0, color: dividerColor));
+      }
+    }
+
+    return Column(mainAxisSize: MainAxisSize.min, children: tiles);
   }
 }
 
