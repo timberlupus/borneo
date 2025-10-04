@@ -27,7 +27,16 @@ class GenericSettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dividerColor = Theme.of(context).scaffoldBackgroundColor;
-    final tiles = <Widget>[ListTile(tileColor: dividerColor, title: Text(title))];
+    final tiles = <Widget>[
+      ListTile(
+        dense: true,
+        tileColor: dividerColor,
+        title: Text(
+          title,
+          style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+        ),
+      ),
+    ];
 
     for (var i = 0; i < children.length; i++) {
       tiles.add(children[i]);
@@ -46,6 +55,7 @@ class SaveButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      dense: true,
       title: Text(context.translate('Save')),
       onTap: () {
         // Save action
@@ -60,6 +70,7 @@ class CancelButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      dense: true,
       title: Text(context.translate('Cancel')),
       onTap: () {
         // Cancel action

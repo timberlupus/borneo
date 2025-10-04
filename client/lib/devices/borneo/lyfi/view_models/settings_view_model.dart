@@ -39,6 +39,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   PowerBehavior _powerBehavior;
   PowerBehavior get powerBehavior => _powerBehavior;
   bool get canUpdatePowerBehavior => !isBusy && isOnline;
+  bool get isControllerSettingsAvailable => borneoInfo.productMode == ProductMode.standalone;
 
   SettingsViewModel(
     this._gt, {

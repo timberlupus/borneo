@@ -1,4 +1,6 @@
+import 'package:borneo_app/devices/borneo/lyfi/view_models/controller_settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
+import 'package:borneo_app/devices/borneo/lyfi/views/controller_settings_screen.dart';
 import 'package:borneo_app/shared/widgets/generic_settings_screen.dart';
 import 'package:borneo_app/shared/widgets/map_location_picker.dart';
 import 'package:borneo_common/io/net/rssi.dart';
@@ -6,6 +8,8 @@ import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
+import 'package:flutter_gettext/gettext/gettext.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
@@ -84,7 +88,7 @@ class SettingsScreen extends StatelessWidget {
           ListTile(
             dense: true,
             tileColor: tileColor,
-            leading: Icon(Icons.factory_outlined),
+            leading: Icon(Icons.info_outline),
             title: Text(context.translate('Manufacturer & Model')),
             trailing: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -105,6 +109,15 @@ class SettingsScreen extends StatelessWidget {
             title: Text(context.translate('Device address')),
             trailing: Text(vm.address.toString()),
           ),
+          if (vm.isControllerSettingsAvailable)
+            ListTile(
+              dense: true,
+              tileColor: tileColor,
+              leading: const Icon(Icons.factory_outlined),
+              title: Text(context.translate('Controller Settings')),
+              trailing: rightChevron,
+              onTap: () => _goControllerSettings(context, vm),
+            ),
         ],
       ),
       GenericSettingsGroup(
@@ -316,6 +329,18 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     ];
+  }
+
+  void _goControllerSettings(BuildContext context, SettingsViewModel svm) {
+    final csvm = ControllerSettingsViewModel(
+      GettextLocalizations.of(context),
+      deviceID: svm.deviceID,
+      deviceManager: svm.deviceManager,
+      globalEventBus: svm.globalEventBus,
+      notification: svm.notification,
+    );
+    final route = MaterialPageRoute(builder: (context) => ControllerSettingsScreen(csvm));
+    Navigator.push(context, route);
   }
 
   void _showFactoryResetDialog(BuildContext context, SettingsViewModel vm) {

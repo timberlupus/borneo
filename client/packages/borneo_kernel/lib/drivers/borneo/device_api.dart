@@ -16,6 +16,7 @@ class BorneoPaths {
   static final Uri heartbeat = Uri(path: '/borneo/heartbeat');
   static final Uri deviceInfo = Uri(path: '/borneo/info');
   static final Uri power = Uri(path: '/borneo/power');
+  static final Uri reboot = Uri(path: '/borneo/reboot');
   static final Uri powerBehavior = Uri(path: '/borneo/power/behavior');
   static final Uri status = Uri(path: '/borneo/status');
   static final Uri timezone = Uri(path: '/borneo/settings/timezone');
@@ -23,6 +24,15 @@ class BorneoPaths {
   static final Uri firmwareVersion = Uri(path: '/borneo/fwver');
   static final Uri compatible = Uri(path: '/borneo/compatible');
   static final Uri rtcLocal = Uri(path: '/borneo/rtc/local');
+
+  static final Uri nvsU8 = Uri(path: '/borneo/factory/nvs/u8');
+  static final Uri nvsU16 = Uri(path: '/borneo/factory/nvs/u16');
+  static final Uri nvsU32 = Uri(path: '/borneo/factory/nvs/u32');
+  static final Uri nvsI8 = Uri(path: '/borneo/factory/nvs/i8');
+  static final Uri nvsI16 = Uri(path: '/borneo/factory/nvs/i16');
+  static final Uri nvsI32 = Uri(path: '/borneo/factory/nvs/i32');
+  static final Uri nvsString = Uri(path: '/borneo/factory/nvs/str');
+  static final Uri nvsBlob = Uri(path: '/borneo/factory/nvs/blob');
 }
 
 enum ProductMode {
@@ -236,6 +246,8 @@ abstract class IBorneoDeviceApi extends IDeviceApi {
 
   Future<String> getTimeZone(Device dev, {CancellationToken? cancelToken});
   Future<void> setTimeZone(Device dev, String timezone, {CancellationToken? cancelToken});
+
+  Future<void> reboot(Device dev, {CancellationToken? cancelToken});
   Future<void> factoryReset(Device dev, {CancellationToken? cancelToken});
 
   Future<void> beginCheckNewVersion({CancellationToken? cancelToken});
@@ -243,9 +255,113 @@ abstract class IBorneoDeviceApi extends IDeviceApi {
   Future<BorneoDeviceUpgradeInfo> getNewVersion({CancellationToken? cancelToken});
   Future<void> beginUpgrade({CancellationToken? cancelToken});
   Future<bool> isUpgrading({CancellationToken? cancelToken});
+
+  Future<int> getFactoryNvsU8(Device dev, String ns, String key, {CancellationToken? cancelToken});
+  Future<void> setFactoryNvsU8(Device dev, String ns, String key, int u8, {CancellationToken? cancelToken});
+  Future<int> getFactoryNvsU16(Device dev, String ns, String key, {CancellationToken? cancelToken});
+  Future<void> setFactoryNvsU16(Device dev, String ns, String key, int u16, {CancellationToken? cancelToken});
+  Future<int> getFactoryNvsU32(Device dev, String ns, String key, {CancellationToken? cancelToken});
+  Future<void> setFactoryNvsU32(Device dev, String ns, String key, int u32, {CancellationToken? cancelToken});
+  Future<int> getFactoryNvsI8(Device dev, String ns, String key, {CancellationToken? cancelToken});
+  Future<void> setFactoryNvsI8(Device dev, String ns, String key, int i8, {CancellationToken? cancelToken});
+  Future<int> getFactoryNvsI16(Device dev, String ns, String key, {CancellationToken? cancelToken});
+  Future<void> setFactoryNvsI16(Device dev, String ns, String key, int i16, {CancellationToken? cancelToken});
+  Future<int> getFactoryNvsI32(Device dev, String ns, String key, {CancellationToken? cancelToken});
+  Future<void> setFactoryNvsI32(Device dev, String ns, String key, int i32, {CancellationToken? cancelToken});
+  Future<String> getFactoryNvsString(Device dev, String ns, String key, {CancellationToken? cancelToken});
+  Future<void> setFactoryNvsString(Device dev, String ns, String key, String value, {CancellationToken? cancelToken});
+  Future<List<int>> getFactoryNvsBlob(Device dev, String ns, String key, {CancellationToken? cancelToken});
+  Future<void> setFactoryNvsBlob(Device dev, String ns, String key, List<int> value, {CancellationToken? cancelToken});
 }
 
 mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
+  Future<int> _getFactoryNvs(Device dev, Uri path, String ns, String key, {CancellationToken? cancelToken}) async {
+    final dd = dev.driverData as BorneoCoapDriverData;
+    final uri = path.replace(queryParameters: {'ns': ns, 'k': key});
+    return await dd.coap.getCbor<int>(uri, cancelToken: cancelToken);
+  }
+
+  Future<void> _setFactoryNvs(
+    Device dev,
+    Uri path,
+    String ns,
+    String key,
+    int value, {
+    CancellationToken? cancelToken,
+  }) async {
+    final dd = dev.driverData as BorneoCoapDriverData;
+    final response = await dd.coap.postBytes(
+      path,
+      payload: simple_cbor.cbor.encode({"ns": ns, "k": key, "v": value}),
+      accept: CoapMediaType.applicationCbor,
+    );
+    if (!response.isSuccess) {
+      throw DeviceError("Failed to post `${response.location}`", dev);
+    }
+  }
+
+  Future<String> _getFactoryNvsString(
+    Device dev,
+    Uri path,
+    String ns,
+    String key, {
+    CancellationToken? cancelToken,
+  }) async {
+    final dd = dev.driverData as BorneoCoapDriverData;
+    final uri = path.replace(queryParameters: {'ns': ns, 'k': key});
+    return await dd.coap.getCbor<String>(uri, cancelToken: cancelToken);
+  }
+
+  Future<void> _setFactoryNvsString(
+    Device dev,
+    Uri path,
+    String ns,
+    String key,
+    String value, {
+    CancellationToken? cancelToken,
+  }) async {
+    final dd = dev.driverData as BorneoCoapDriverData;
+    final response = await dd.coap.postBytes(
+      path,
+      payload: simple_cbor.cbor.encode({"ns": ns, "k": key, "v": value}),
+      accept: CoapMediaType.applicationCbor,
+    );
+    if (!response.isSuccess) {
+      throw DeviceError("Failed to post `${response.location}`", dev);
+    }
+  }
+
+  Future<List<int>> _getFactoryNvsBlob(
+    Device dev,
+    Uri path,
+    String ns,
+    String key, {
+    CancellationToken? cancelToken,
+  }) async {
+    final dd = dev.driverData as BorneoCoapDriverData;
+    final uri = path.replace(queryParameters: {'ns': ns, 'k': key});
+    return await dd.coap.getCbor<List<int>>(uri, cancelToken: cancelToken);
+  }
+
+  Future<void> _setFactoryNvsBlob(
+    Device dev,
+    Uri path,
+    String ns,
+    String key,
+    List<int> value, {
+    CancellationToken? cancelToken,
+  }) async {
+    final dd = dev.driverData as BorneoCoapDriverData;
+    final response = await dd.coap.postBytes(
+      path,
+      payload: simple_cbor.cbor.encode({"ns": ns, "k": key, "v": value}),
+      accept: CoapMediaType.applicationCbor,
+    );
+    if (!response.isSuccess) {
+      throw DeviceError("Failed to post `${response.location}`", dev);
+    }
+  }
+
   @override
   Future<String> getCompatible(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as BorneoCoapDriverData;
@@ -343,6 +459,12 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   }
 
   @override
+  Future<void> reboot(Device dev, {CancellationToken? cancelToken}) async {
+    final dd = dev.driverData as BorneoCoapDriverData;
+    await dd.coap.postCbor<void>(BorneoPaths.reboot, null, cancelToken: cancelToken);
+  }
+
+  @override
   Future<void> factoryReset(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as BorneoCoapDriverData;
     final response = await dd.coap.postBytes(
@@ -402,5 +524,97 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
     if (!response.isSuccess) {
       throw DeviceError("Failed to put to `${response.location}`", dev);
     }
+  }
+
+  @override
+  Future<int> getFactoryNvsU8(Device dev, String ns, String key, {CancellationToken? cancelToken}) async {
+    return await _getFactoryNvs(dev, BorneoPaths.nvsU8, ns, key, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<void> setFactoryNvsU8(Device dev, String ns, String key, int u8, {CancellationToken? cancelToken}) async {
+    await _setFactoryNvs(dev, BorneoPaths.nvsU8, ns, key, u8, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<int> getFactoryNvsU16(Device dev, String ns, String key, {CancellationToken? cancelToken}) async {
+    return await _getFactoryNvs(dev, BorneoPaths.nvsU16, ns, key, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<void> setFactoryNvsU16(Device dev, String ns, String key, int u16, {CancellationToken? cancelToken}) async {
+    await _setFactoryNvs(dev, BorneoPaths.nvsU16, ns, key, u16, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<int> getFactoryNvsU32(Device dev, String ns, String key, {CancellationToken? cancelToken}) async {
+    return await _getFactoryNvs(dev, BorneoPaths.nvsU32, ns, key, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<void> setFactoryNvsU32(Device dev, String ns, String key, int u32, {CancellationToken? cancelToken}) async {
+    await _setFactoryNvs(dev, BorneoPaths.nvsU32, ns, key, u32, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<int> getFactoryNvsI8(Device dev, String ns, String key, {CancellationToken? cancelToken}) async {
+    return await _getFactoryNvs(dev, BorneoPaths.nvsI8, ns, key, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<void> setFactoryNvsI8(Device dev, String ns, String key, int i8, {CancellationToken? cancelToken}) async {
+    await _setFactoryNvs(dev, BorneoPaths.nvsI8, ns, key, i8, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<int> getFactoryNvsI16(Device dev, String ns, String key, {CancellationToken? cancelToken}) async {
+    return await _getFactoryNvs(dev, BorneoPaths.nvsI16, ns, key, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<void> setFactoryNvsI16(Device dev, String ns, String key, int i16, {CancellationToken? cancelToken}) async {
+    await _setFactoryNvs(dev, BorneoPaths.nvsI16, ns, key, i16, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<int> getFactoryNvsI32(Device dev, String ns, String key, {CancellationToken? cancelToken}) async {
+    return await _getFactoryNvs(dev, BorneoPaths.nvsI32, ns, key, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<void> setFactoryNvsI32(Device dev, String ns, String key, int i32, {CancellationToken? cancelToken}) async {
+    await _setFactoryNvs(dev, BorneoPaths.nvsI32, ns, key, i32, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<String> getFactoryNvsString(Device dev, String ns, String key, {CancellationToken? cancelToken}) async {
+    return await _getFactoryNvsString(dev, BorneoPaths.nvsString, ns, key, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<void> setFactoryNvsString(
+    Device dev,
+    String ns,
+    String key,
+    String value, {
+    CancellationToken? cancelToken,
+  }) async {
+    await _setFactoryNvsString(dev, BorneoPaths.nvsString, ns, key, value, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<List<int>> getFactoryNvsBlob(Device dev, String ns, String key, {CancellationToken? cancelToken}) async {
+    return await _getFactoryNvsBlob(dev, BorneoPaths.nvsBlob, ns, key, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<void> setFactoryNvsBlob(
+    Device dev,
+    String ns,
+    String key,
+    List<int> value, {
+    CancellationToken? cancelToken,
+  }) async {
+    await _setFactoryNvsBlob(dev, BorneoPaths.nvsBlob, ns, key, value, cancelToken: cancelToken);
   }
 }
