@@ -49,10 +49,10 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   final ScheduleTable scheduledInstants = [];
   final ScheduleTable sunInstants = [];
 
-  int? get currentTempRaw => borneoDeviceStatus?.temperature;
-  int? get currentTemp => borneoDeviceStatus?.temperature == null
+  int? get currentTempRaw => super.lyfiDeviceStatus?.temperature;
+  int? get currentTemp => super.lyfiDeviceStatus?.temperature == null
       ? null
-      : localeService.convertTemperatureValue(borneoDeviceStatus!.temperature!.toDouble()).toInt();
+      : localeService.convertTemperatureValue(super.lyfiDeviceStatus!.temperature!.toDouble()).toInt();
 
   String get temperatureUnitText => localeService.temperatureUnitText;
 

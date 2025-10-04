@@ -18,9 +18,6 @@ CONFIG_BT_ENABLED=n
 #CONFIG_MBEDTLS_HARDWARE_MPI=n
 #CONFIG_MBEDTLS_DHM_C=y
 
-################## NTC #########################
-CONFIG_BORNEO_NTC_ENABLED=n
-
 ################## Indicator #########################
 CONFIG_BORNEO_INDICATOR_ENABLED=y
 CONFIG_BORNEO_INDICATOR_GPIO=4

@@ -174,6 +174,7 @@ class LyfiDeviceStatus {
   final List<int> sunColor;
   final bool acclimationEnabled;
   final bool acclimationActivated;
+  final int? temperature;
 
   double get brightness => currentColor.fold(0, (p, v) => p + v).toDouble() * 100.0 / (currentColor.length * 100.0);
 
@@ -186,6 +187,7 @@ class LyfiDeviceStatus {
     required this.currentColor,
     required this.manualColor,
     required this.sunColor,
+    required this.temperature,
     this.acclimationEnabled = false,
     this.acclimationActivated = false,
   });
@@ -200,6 +202,7 @@ class LyfiDeviceStatus {
       currentColor: List<int>.from(map['currentColor']),
       manualColor: List<int>.from(map['manualColor']),
       sunColor: List<int>.from(map['sunColor']),
+      temperature: map['temperature'],
       acclimationEnabled: map['acclimationEnabled'] ?? false,
       acclimationActivated: map['acclimationActivated'] ?? false,
     );

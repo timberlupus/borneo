@@ -160,7 +160,6 @@ class GeneralBorneoDeviceStatus {
   final int error;
   final int shutdownReason;
   final DateTime? shutdownTimestamp;
-  final int? temperature;
   final double? powerVoltage;
   final double? powerCurrent;
 
@@ -176,7 +175,6 @@ class GeneralBorneoDeviceStatus {
     this.error = 0,
     this.shutdownReason = 0,
     this.shutdownTimestamp,
-    this.temperature,
     this.powerVoltage,
     this.powerCurrent,
   });
@@ -195,7 +193,6 @@ class GeneralBorneoDeviceStatus {
       shutdownTimestamp: map['shutdownTimestamp'] > 0
           ? DateTime.fromMillisecondsSinceEpoch(map['shutdownTimestamp'] * 1000, isUtc: true)
           : null,
-      temperature: map['temperature'],
       powerVoltage: map['powerVoltage'] != null ? map['powerVoltage'] / 1000.0 : null,
       powerCurrent: map['powerCurrent'] != null ? map['powerCurrent'] / 1000.0 : null,
     );

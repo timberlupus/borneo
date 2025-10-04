@@ -11,7 +11,6 @@
 #include <cbor.h>
 
 #include <borneo/rtc.h>
-#include <borneo/ntc.h>
 #include <borneo/common.h>
 #include <borneo/coap.h>
 #include <borneo/wifi.h>
@@ -215,20 +214,6 @@ static void coap_hnd_borneo_status_get(coap_resource_t* resource, coap_session_t
     BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "shutdownTimestamp"), response);
     BO_COAP_TRY(cbor_encode_uint(&root_map, bo_system_get_shutdown_timestamp()), response);
 
-#if CONFIG_BORNEO_NTC_ENABLED
-    {
-        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "temperature"), response);
-        int temp;
-        int rc = ntc_read_temp(&temp);
-        if (rc != 0) {
-            BO_COAP_TRY(cbor_encode_null(&root_map), response);
-        }
-        else {
-            BO_COAP_TRY(cbor_encode_int(&root_map, temp), response);
-        }
-    }
-#endif // CONFIG_BORNEO_NTC_ENABLED
-
 #if CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT
     {
         BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "powerVoltage"), response);
@@ -323,36 +308,6 @@ static void coap_hnd_heartbeat_get(coap_resource_t* resource, coap_session_t* se
     return;
 }
 
-static void coap_hnd_temp_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
-                              const coap_string_t* query, coap_pdu_t* response)
-{
-    CborEncoder encoder;
-    size_t encoded_size = 0;
-    uint8_t buf[128] = { 0 };
-
-    cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
-
-#if CONFIG_BORNEO_NTC_ENABLED
-    int temp;
-    int rc = ntc_read_temp(&temp);
-    if (rc != 0) {
-        BO_COAP_TRY(cbor_encode_int(&encoder, temp), response);
-    }
-    else {
-        BO_COAP_TRY(cbor_encode_null(&encoder), response);
-    }
-#else
-    BO_COAP_TRY(cbor_encode_null(&encoder), response);
-#endif // CONFIG_BORNEO_NTC_ENABLED
-
-    encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
-
-    coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
-
-    coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
-    return;
-}
-
 COAP_RESOURCE_DEFINE("borneo/info", false, coap_hnd_borneo_info_get, NULL, NULL, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/reboot", false, NULL, coap_hnd_borneo_reboot_post, NULL, NULL);
@@ -364,5 +319,3 @@ COAP_RESOURCE_DEFINE("borneo/fwver", false, coap_hnd_borneo_fw_ver_get, NULL, NU
 COAP_RESOURCE_DEFINE("borneo/compatible", false, coap_hnd_borneo_compatible_get, NULL, NULL, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/heartbeat", true, coap_hnd_heartbeat_get, NULL, NULL, NULL);
-
-COAP_RESOURCE_DEFINE(BO_COAP_PATH_STATUS_TEMPERATURE, true, coap_hnd_temp_get, NULL, NULL, NULL);

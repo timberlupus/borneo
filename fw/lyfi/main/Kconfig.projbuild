@@ -360,6 +360,29 @@ menu "Borneo LyFi"
 
     endmenu
 
+    menu "NTC settings"
+        config LYFI_NTC_SUPPORT
+            bool "NTC enabled"
+            depends on BORNEO_ADC_ENABLED
+            default n
+
+        config LYFI_NTC_ADC_CHANNEL
+            int "NTC ADC channel"
+            depends on LYFI_NTC_SUPPORT
+
+        choice
+            prompt "NTC Pull-up resistor option"
+            default LYFI_NTC_PU_4K7
+            depends on LYFI_NTC_SUPPORT
+
+            config LYFI_NTC_PU_10K
+                bool "10k pull-up resistor with 3.3V"
+
+            config LYFI_NTC_PU_4K7
+                bool "4.7k pull-up resistor with 2.5V"
+        endchoice
+    endmenu
+
     menu "Fan"
         config LYFI_FAN_CTRL_ENABLED
             bool "The Controlling Method of Fan Speed"
@@ -412,7 +435,7 @@ menu "Borneo LyFi"
         config LYFI_THERMAL_ENABLED
             bool "Enable The Thermal Management Sub-system"
             default y
-            depends on LYFI_FAN_CTRL_ENABLED && BORNEO_NTC_ENABLED
+            depends on LYFI_FAN_CTRL_ENABLED && LYFI_NTC_SUPPORT
     endmenu
 
     menu "Press Button"
@@ -434,7 +457,7 @@ menu "Borneo LyFi"
         config LYFI_PROTECTION_OVER_HEATED_ENABLED
             bool "Enable the over-power protection"
             default y
-            depends on  LYFI_PROTECTION_ENABLED && BORNEO_NTC_ENABLED
+            depends on  LYFI_PROTECTION_ENABLED && LYFI_NTC_SUPPORT
 
         config LYFI_PROTECTION_OVER_POWER_ENABLED
             bool "Enable the over-power protection"

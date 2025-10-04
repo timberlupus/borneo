@@ -43,27 +43,6 @@ menu "Borneo Core"
         config BORNEO_ADC_ENABLED
             bool "ADC enabled"
             default y
-
-        config BORNEO_NTC_ENABLED
-            bool "NTC enabled"
-            depends on BORNEO_ADC_ENABLED
-            default n
-
-        config BORNEO_NTC_ADC_CHANNEL
-            int "NTC ADC channel"
-            depends on BORNEO_NTC_ENABLED
-
-        choice
-            prompt "NTC Pull-up resistor option"
-            default BORNEO_NTC_PU_4K7
-            depends on BORNEO_NTC_ENABLED
-
-            config BORNEO_NTC_PU_10K
-                bool "10k pull-up resistor with 3.3V"
-
-            config BORNEO_NTC_PU_4K7
-                bool "4.7k pull-up resistor with 2.5V"
-        endchoice
     endmenu
 
 

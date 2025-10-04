@@ -10,7 +10,6 @@
 #include <cbor.h>
 
 #include <borneo/rtc.h>
-#include <borneo/ntc.h>
 #include <borneo/common.h>
 #include <borneo/coap.h>
 #include <borneo/wifi.h>

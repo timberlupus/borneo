@@ -13,10 +13,10 @@
 #include <nvs_flash.h>
 
 #include <borneo/system.h>
-#include <borneo/ntc.h>
 #include <borneo/power.h>
 #include <borneo/nvs.h>
 
+#include "ntc.h"
 #include "fan.h"
 #include "protect.h"
 #include "thermal.h"

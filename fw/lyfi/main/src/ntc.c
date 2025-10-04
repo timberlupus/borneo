@@ -17,9 +17,10 @@
 #include <borneo/system.h>
 #include <borneo/algo/filters.h>
 #include <borneo/devices/adc.h>
-#include <borneo/ntc.h>
 
-#if CONFIG_BORNEO_NTC_ENABLED
+#include "ntc.h"
+
+#if CONFIG_LYFI_NTC_SUPPORT
 
 #define TAG "NTC"
 
@@ -34,7 +35,7 @@ static int8_t ntc_table_lookup(int r);
 
 // 0~105 ℃
 
-#if CONFIG_BORNEO_NTC_PU_4K7
+#if CONFIG_LYFI_NTC_PU_4K7
     // VRef=2.5V, 4.7kΩ Pull-up
 const uint16_t NTC_MAPPING_TABLE[] = {
     2193, 2179, 2164, 2149, 2133, 2116, 2100, 2082, 2064, 2046,
@@ -49,7 +50,7 @@ const uint16_t NTC_MAPPING_TABLE[] = {
     414, 404, 394, 384, 375, 366, 357, 348, 339, 331,
     323, 315, 308, 300, 293, 286,
 };
-#elif CONFIG_BORNEO_NTC_PU_10K
+#elif CONFIG_LYFI_NTC_PU_10K
     // VRef=3.3V, 10kΩ Pull-up
 const uint16_t NTC_MAPPING_TABLE[] = {
     2549, 2518, 2486, 2453, 2420, 2386, 2352, 2318, 2283, 2247,
@@ -78,7 +79,7 @@ int ntc_init()
 {
     ESP_LOGI(TAG, "Initializing NTC...");
 
-    BO_TRY(bo_adc_channel_config(CONFIG_BORNEO_NTC_ADC_CHANNEL));
+    BO_TRY(bo_adc_channel_config(CONFIG_LYFI_NTC_ADC_CHANNEL));
     return 0;
 }
 
@@ -88,7 +89,7 @@ int ntc_init()
 int ntc_read_temp(int* temp)
 {
     int adc_mv;
-    BO_TRY(bo_adc_read_mv(CONFIG_BORNEO_NTC_ADC_CHANNEL, &adc_mv));
+    BO_TRY(bo_adc_read_mv(CONFIG_LYFI_NTC_ADC_CHANNEL, &adc_mv));
     if (adc_mv == 0 || adc_mv == 4095) {
         ESP_LOGE(TAG, "No NTC connected! sample_avg=%d", adc_mv);
         return -EIO;
@@ -134,4 +135,4 @@ static int8_t ntc_table_lookup(int value)
     return closest_index;
 }
 
-#endif // CONFIG_BORNEO_NTC_ENABLED
+#endif // CONFIG_LYFI_NTC_SUPPORT

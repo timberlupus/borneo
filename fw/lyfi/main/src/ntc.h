@@ -5,7 +5,7 @@ extern "C" {
 #endif
 /* Declarations of this file */
 
-#if CONFIG_BORNEO_NTC_ENABLED
+#if CONFIG_LYFI_NTC_SUPPORT
 
 enum {
 
@@ -19,7 +19,7 @@ enum {
 int ntc_init();
 int ntc_read_temp(int* temp);
 
-#endif // CONFIG_BORNEO_NTC_ENABLED
+#endif // CONFIG_LYFI_NTC_SUPPORT
 
 #ifdef __cplusplus
 }
