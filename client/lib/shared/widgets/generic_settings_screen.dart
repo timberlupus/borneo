@@ -11,7 +11,7 @@ class GenericSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title), actions: appBarActions),
+      appBar: AppBar(title: Text(title), actions: appBarActions, elevation: 1),
       body: SafeArea(
         child: ListView.builder(itemCount: children.length, itemBuilder: (context, index) => children[index]),
       ),

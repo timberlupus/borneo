@@ -29,34 +29,40 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
       future: _initFuture,
       builder: (context, snapshot) {
         final isInitialized = snapshot.connectionState == ConnectionState.done && !snapshot.hasError;
-        final appBarActions = [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: snapshot.connectionState == ConnectionState.waiting
-              ? const SizedBox(
-                  key: ValueKey('loading'),
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : TextButton.icon(
-                  key: const ValueKey('submit'),
-                  onPressed: isInitialized ? () => _showSubmitConfirmationDialog(context) : null,
-                  icon: const Icon(Icons.upload),
-                  label: Text(context.translate('Submit')),
-                ),
-          ),
-        ];
 
         return ChangeNotifierProvider.value(
           value: widget.vm,
           builder: (context, child) => GenericSettingsScreen(
-            appBarActions: appBarActions,
+            appBarActions: _buildAppBarActions(context, snapshot, isInitialized),
             children: _buildSettingGroups(context, isInitialized),
           ),
         );
       },
     );
+  }
+
+  List<Widget> _buildAppBarActions(BuildContext context, AsyncSnapshot<void> snapshot, bool isInitialized) {
+    return [
+      AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: snapshot.connectionState == ConnectionState.waiting
+            ? const SizedBox(
+                key: ValueKey('loading'),
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Selector<ControllerSettingsViewModel, bool>(
+                selector: (context, vm) => vm.hasChanges,
+                builder: (context, hasChanges, child) => TextButton.icon(
+                  key: const ValueKey('submit'),
+                  onPressed: isInitialized && hasChanges ? () => _showSubmitConfirmationDialog(context) : null,
+                  icon: const Icon(Icons.upload),
+                  label: Text(context.translate('Submit')),
+                ),
+              ),
+      ),
+    ];
   }
 
   List<Widget> _buildSettingGroups(BuildContext context, bool isInitialized) {
@@ -70,18 +76,21 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
             dense: true,
             tileColor: tileColor,
             title: Text(context.translate('PWM frequency')),
-            trailing: DropdownButton<int>(
-              value: widget.vm.pwmFreq,
-              items: [
-                DropdownMenuItem<int>(value: 500, child: Text(context.translate("500 Hz"))),
-                DropdownMenuItem<int>(value: 1000, child: Text(context.translate("1 kHz"))),
-                DropdownMenuItem<int>(value: 2000, child: Text(context.translate("2 kHz"))),
-                DropdownMenuItem<int>(value: 3000, child: Text(context.translate("3 kHz"))),
-                DropdownMenuItem<int>(value: 4000, child: Text(context.translate("4 kHz"))),
-                DropdownMenuItem<int>(value: 8000, child: Text(context.translate("8 kHz"))),
-                DropdownMenuItem<int>(value: 19000, child: Text(context.translate("19 kHz"))),
-              ],
-              onChanged: isInitialized ? widget.vm.setPwmFreq : null,
+            trailing: Selector<ControllerSettingsViewModel, int>(
+              selector: (context, vm) => vm.pwmFreq,
+              builder: (context, pwmFreq, child) => DropdownButton<int>(
+                value: pwmFreq,
+                items: [
+                  DropdownMenuItem<int>(value: 500, child: Text(context.translate("500 Hz"))),
+                  DropdownMenuItem<int>(value: 1000, child: Text(context.translate("1 kHz"))),
+                  DropdownMenuItem<int>(value: 2000, child: Text(context.translate("2 kHz"))),
+                  DropdownMenuItem<int>(value: 3000, child: Text(context.translate("3 kHz"))),
+                  DropdownMenuItem<int>(value: 4000, child: Text(context.translate("4 kHz"))),
+                  DropdownMenuItem<int>(value: 8000, child: Text(context.translate("8 kHz"))),
+                  DropdownMenuItem<int>(value: 19000, child: Text(context.translate("19 kHz"))),
+                ],
+                onChanged: isInitialized ? widget.vm.setPwmFreq : null,
+              ),
             ),
           ),
         ],
@@ -190,17 +199,17 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
           title: Text(context.translate('Confirm Submit')),
           content: Text(
             context.translate(
-              'Please carefully check the configuration. Incorrect configuration may cause hardware damage or other dangerous situations. Do you want to proceed?',
+              'Please carefully check the configuration. Incorrect configuration may cause hardware damage or other dangerous situations. Submitting will reboot the device.\nDo you want to proceed?',
             ),
           ),
           actions: [
             TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text(context.translate('Cancel'))),
             TextButton(
               onPressed: () async {
-                Navigator.of(dialogContext).pop(); // 关闭对话框
-                await widget.vm.submit(); // 异步提交
-                Navigator.of(context).pop(); // 退出设置屏幕
-                Navigator.of(context).pop(); // 再次退出上一级
+                Navigator.of(dialogContext).pop();
+                await widget.vm.submit();
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
               },
               child: Text(context.translate('Confirm')),
             ),
