@@ -462,11 +462,26 @@ menu "Borneo LyFi"
         config LYFI_PROTECTION_OVER_POWER_ENABLED
             bool "Enable the over-power protection"
             default n
-            depends on  LYFI_PROTECTION_ENABLED && BORNEO_MEAS_CURRENT_SUPPORT && BORNEO_MEAS_VOLTAGE_SUPPORT
+            depends on  LYFI_PROTECTION_ENABLED && LYFI_MEAS_CURRENT_SUPPORT && BORNEO_MEAS_VOLTAGE_SUPPORT
 
         config LYFI_PROTECTION_OVER_POWER_DEFAULT_VALUE
             int "Over-power protection default value"
             depends on LYFI_PROTECTION_OVER_POWER_ENABLED
+    endmenu
+
+    menu "LED Current Measurement"
+        config LYFI_MEAS_CURRENT_SUPPORT
+            bool "Power supply current measurement enabled"
+            default n
+
+        config LYFI_MEAS_CURRENT_ADC_CHANNEL
+            int "Power supply current ADC channel"
+            depends on LYFI_MEAS_CURRENT_SUPPORT
+
+        config LYFI_MEAS_CURRENT_FACTOR
+            int "Power supply current ADC factor in mV/A"
+            depends on LYFI_MEAS_CURRENT_SUPPORT
+            default 235
     endmenu
 
 

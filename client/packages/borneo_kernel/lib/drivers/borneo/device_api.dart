@@ -161,7 +161,6 @@ class GeneralBorneoDeviceStatus {
   final int shutdownReason;
   final DateTime? shutdownTimestamp;
   final double? powerVoltage;
-  final double? powerCurrent;
 
   const GeneralBorneoDeviceStatus({
     this.power = false,
@@ -176,7 +175,6 @@ class GeneralBorneoDeviceStatus {
     this.shutdownReason = 0,
     this.shutdownTimestamp,
     this.powerVoltage,
-    this.powerCurrent,
   });
 
   factory GeneralBorneoDeviceStatus.fromMap(Map map) {
@@ -194,7 +192,6 @@ class GeneralBorneoDeviceStatus {
           ? DateTime.fromMillisecondsSinceEpoch(map['shutdownTimestamp'] * 1000, isUtc: true)
           : null,
       powerVoltage: map['powerVoltage'] != null ? map['powerVoltage'] / 1000.0 : null,
-      powerCurrent: map['powerCurrent'] != null ? map['powerCurrent'] / 1000.0 : null,
     );
   }
 }

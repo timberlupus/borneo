@@ -113,30 +113,6 @@ static void coap_hnd_borneo_power_behavior_put(coap_resource_t* resource, coap_s
     coap_pdu_set_code(response, COAP_RESPONSE_CODE(204));
 }
 
-#if CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT && CONFIG_BORNEO_MEAS_CURRENT_SUPPORT
-static void coap_hnd_power_meas_power_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
-                                          const coap_string_t* query, coap_pdu_t* response)
-{
-    CborEncoder encoder;
-    size_t encoded_size = 0;
-    uint8_t buf[32] = { 0 };
-    int32_t power_mw;
-    cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
-    BO_COAP_TRY(bo_power_read(&power_mw), response);
-    BO_COAP_TRY(cbor_encode_uint(&encoder, power_mw), response);
-    encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
-
-    coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
-
-    coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
-    return;
-}
-#endif // CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT && CONFIG_BORNEO_MEAS_CURRENT_SUPPORT
-
 COAP_RESOURCE_DEFINE(BO_COAP_PATH_POWER, true, coap_hnd_borneo_power_get, NULL, coap_hnd_borneo_power_put, NULL);
 COAP_RESOURCE_DEFINE("borneo/power/behavior", false, coap_hnd_borneo_power_behavior_get, NULL,
                      coap_hnd_borneo_power_behavior_put, NULL);
-
-#if CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT && CONFIG_BORNEO_MEAS_CURRENT_SUPPORT
-COAP_RESOURCE_DEFINE("borneo/power/meas/power", false, coap_hnd_power_meas_power_get, NULL, NULL, NULL);
-#endif // CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT && CONFIG_BORNEO_MEAS_CURRENT_SUPPORT

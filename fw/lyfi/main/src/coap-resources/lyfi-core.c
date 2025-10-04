@@ -17,6 +17,7 @@
 #include "../led/led.h"
 #include "../fan.h"
 #include "../ntc.h"
+#include "../power-meas.h"
 #include "../coap-paths.h"
 #include "cbor-common.h"
 
@@ -309,6 +310,20 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
         }
     }
 #endif // CONFIG_LYFI_NTC_SUPPORT
+
+#if CONFIG_LYFI_MEAS_CURRENT_SUPPORT
+    {
+        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "powerCurrent"), response);
+        int ma;
+        int rc = lyfi_power_current_read(&ma);
+        if (rc != 0) {
+            BO_COAP_TRY(cbor_encode_null(&root_map), response);
+        }
+        else {
+            BO_COAP_TRY(cbor_encode_int(&root_map, ma), response);
+        }
+    }
+#endif // CONFIG_LYFI_MEAS_CURRENT_SUPPORT
 
     {
         BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "tempRemain"), response);

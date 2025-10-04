@@ -2,6 +2,7 @@ import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_mo
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
+import 'package:flutter/material.dart';
 
 abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   LyfiDeviceStatus? _lyfiStatus;
@@ -13,8 +14,14 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
 
   double? get nominalPower => lyfiDeviceInfo.nominalPower;
 
+  bool get canMeasureCurrent => super.isOnline && isOn && lyfiDeviceStatus?.powerCurrent != null;
+  bool get canMeasurePower => canMeasureCurrent && canMeasureVoltage;
+
   LyfiMode _mode = LyfiMode.manual;
   LyfiState _state = LyfiState.normal;
+
+  final ValueNotifier<double?> currentCurrent = ValueNotifier<double?>(null);
+  final ValueNotifier<double?> currentWatts = ValueNotifier<double?>(null);
 
   @override
   Future<void> onInitialize() async {
@@ -71,5 +78,10 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
     _lyfiStatus = await lyfiDeviceApi.getLyfiStatus(boundDevice!.device, cancelToken: cancelToken);
     _mode = _lyfiStatus?.mode ?? LyfiMode.manual;
     _state = _lyfiStatus?.state ?? LyfiState.normal;
+
+    currentCurrent.value = _lyfiStatus?.powerCurrent;
+    currentWatts.value = currentVoltage.value != null && currentCurrent.value != null
+        ? currentVoltage.value! * currentCurrent.value!
+        : null;
   }
 }

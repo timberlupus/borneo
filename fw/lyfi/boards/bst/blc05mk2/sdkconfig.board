@@ -13,7 +13,7 @@ CONFIG_BORNEO_ADC_ENABLED=y
 
 ################################# Power Supply Measurement ###############################
 CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT=n
-CONFIG_BORNEO_MEAS_CURRENT_SUPPORT=n
+CONFIG_LYFI_MEAS_CURRENT_SUPPORT=n
 
 ################## BLE #################################
 CONFIG_BT_ENABLED=n

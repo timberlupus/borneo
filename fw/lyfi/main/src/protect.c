@@ -23,6 +23,7 @@
 #include "thermal.h"
 #include "protect.h"
 #include "fan.h"
+#include "power-meas.h"
 
 #if CONFIG_LYFI_PROTECTION_ENABLED
 
@@ -178,7 +179,7 @@ void protect_task()
 #if CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
             static int power_read_fail_count = 0;
             int32_t power_mw;
-            int ret = bo_power_read(&power_mw);
+            int ret = lyfi_power_read(&power_mw);
             if (ret != 0) {
                 power_read_fail_count++;
                 if (power_read_fail_count >= 5) {

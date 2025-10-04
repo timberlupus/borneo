@@ -19,14 +19,9 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   bool _isOn = false;
   bool get isOn => _isOn;
 
-  bool get canMeasureCurrent => super.isOnline && isOn && borneoDeviceStatus?.powerCurrent != null;
   bool get canMeasureVoltage => super.isOnline && isOn && borneoDeviceStatus?.powerVoltage != null;
-  bool get canMeasurePower => canMeasureCurrent && canMeasureVoltage;
 
   final ValueNotifier<double?> currentVoltage = ValueNotifier<double?>(null);
-  final ValueNotifier<double?> currentCurrent = ValueNotifier<double?>(null);
-  final ValueNotifier<double?> currentWatts = ValueNotifier<double?>(null);
-
   final IAppNotificationService notification;
 
   @override
@@ -117,9 +112,5 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
     _deviceTimezone = _borneoDeviceStatus?.timezone;
 
     currentVoltage.value = _borneoDeviceStatus?.powerVoltage;
-    currentCurrent.value = _borneoDeviceStatus?.powerCurrent;
-    currentWatts.value = currentVoltage.value != null && currentCurrent.value != null
-        ? currentVoltage.value! * currentCurrent.value!
-        : null;
   }
 }

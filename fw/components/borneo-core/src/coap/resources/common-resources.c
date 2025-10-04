@@ -228,20 +228,6 @@ static void coap_hnd_borneo_status_get(coap_resource_t* resource, coap_session_t
     }
 #endif // CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT
 
-#if CONFIG_BORNEO_MEAS_CURRENT_SUPPORT
-    {
-        BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "powerCurrent"), response);
-        int ma;
-        int rc = bo_power_current_read(&ma);
-        if (rc != 0) {
-            BO_COAP_TRY(cbor_encode_null(&root_map), response);
-        }
-        else {
-            BO_COAP_TRY(cbor_encode_int(&root_map, ma), response);
-        }
-    }
-#endif // CONFIG_BORNEO_MEAS_CURRENT_SUPPORT
-
     BO_COAP_TRY(cbor_encoder_close_container(&encoder, &root_map), response);
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
