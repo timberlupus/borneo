@@ -24,18 +24,18 @@ int bo_power_meas_init()
 {
     ESP_LOGI(TAG, "Initializing power measurement...");
 
-#if CONFIG_BORNEO_MEAS_VOLTAGE_ENABLED
+#if CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT
     BO_TRY(bo_adc_channel_config(CONFIG_BORNEO_MEAS_VOLTAGE_ADC_CHANNEL));
 #endif
 
-#if CONFIG_BORNEO_MEAS_CURRENT_ENABLED
+#if CONFIG_BORNEO_MEAS_CURRENT_SUPPORT
     BO_TRY(bo_adc_channel_config(CONFIG_BORNEO_MEAS_CURRENT_ADC_CHANNEL));
 #endif
 
     return 0;
 }
 
-#if CONFIG_BORNEO_MEAS_VOLTAGE_ENABLED
+#if CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT
 int bo_power_volt_read(int* mv)
 {
     if (mv == NULL) {
@@ -48,7 +48,7 @@ int bo_power_volt_read(int* mv)
 }
 #endif
 
-#if CONFIG_BORNEO_MEAS_CURRENT_ENABLED
+#if CONFIG_BORNEO_MEAS_CURRENT_SUPPORT
 int bo_power_current_read(int* ma)
 {
     if (ma == NULL) {
@@ -61,7 +61,7 @@ int bo_power_current_read(int* ma)
 }
 #endif
 
-#if CONFIG_BORNEO_MEAS_VOLTAGE_ENABLED && CONFIG_BORNEO_MEAS_CURRENT_ENABLED
+#if CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT && CONFIG_BORNEO_MEAS_CURRENT_SUPPORT
 int bo_power_read(int32_t* mw)
 {
     if (mw == NULL) {
