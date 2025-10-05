@@ -211,9 +211,21 @@ class _MainScreenState extends State<MainScreen> {
                   }
                 },
                 items: [
-                  BottomNavigationBarItem(icon: const Icon(Icons.house_outlined), label: context.translate('Scenes')),
-                  BottomNavigationBarItem(icon: const Icon(Icons.device_hub), label: context.translate('Devices')),
-                  BottomNavigationBarItem(icon: const Icon(Icons.person), label: context.translate('My')),
+                  BottomNavigationBarItem(
+                    icon: const Icon(Icons.house_outlined),
+                    activeIcon: const Icon(Icons.house),
+                    label: context.translate('Scenes'),
+                  ),
+                  BottomNavigationBarItem(
+                    icon: const Icon(Icons.device_hub_outlined),
+                    activeIcon: const Icon(Icons.device_hub),
+                    label: context.translate('Devices'),
+                  ),
+                  BottomNavigationBarItem(
+                    icon: const Icon(Icons.person_outline),
+                    activeIcon: const Icon(Icons.person),
+                    label: context.translate('My'),
+                  ),
                 ],
               ),
             ),
