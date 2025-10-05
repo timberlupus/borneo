@@ -385,17 +385,17 @@ menu "Borneo LyFi"
 
     menu "Fan"
         config LYFI_FAN_CTRL_ENABLED
-            bool "The Controlling Method of Fan Speed"
+            bool "The controlling method of fan speed"
             default y
 
-        config LYFI_FAN_CTRL_PWM_ENABLED
-            bool "The GPIO number for PWM fan"
+        config LYFI_FAN_CTRL_PWM_SUPPORT
+            bool "PWM fan support"
             default y
             depends on LYFI_FAN_CTRL_ENABLED
 
         config LYFI_FAN_CTRL_PWM_GPIO
             int "The GPIO number for PWM fan"
-            depends on LYFI_FAN_CTRL_PWM_ENABLED
+            depends on LYFI_FAN_CTRL_PWM_SUPPORT
 
         config LYFI_FAN_CTRL_PWMDAC_GPIO
             int "The Output PWM-DAC GPIO for the voltage regulator"

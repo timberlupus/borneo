@@ -137,61 +137,43 @@ int bo_system_factory_reset()
 
 int bo_system_set_name(const char* name)
 {
-    if (name == NULL) {
+    if (name == NULL || strlen(name) >= BO_DEVICE_NAME_MAX) {
         return -EINVAL;
     }
 
     nvs_handle_t nvs_handle;
-    int rc;
     BO_TRY(bo_nvs_factory_open(SYSTEM_NVS_NS, NVS_READWRITE, &nvs_handle));
-
-    rc = nvs_set_str(nvs_handle, SYSTEM_NVS_KEY_NAME, name);
-    if (rc) {
-        strncpy(_sysinfo.name, name, BO_DEVICE_NAME_MAX);
-        rc = 0;
-    }
-
-    bo_nvs_close(nvs_handle);
+    BO_NVS_AUTO_CLOSE(nvs_handle);
+    BO_TRY(nvs_set_str(nvs_handle, SYSTEM_NVS_KEY_NAME, name));
+    BO_TRY(nvs_commit(nvs_handle));
     return 0;
 }
 
 int bo_system_set_model(const char* model)
 {
-    if (model == NULL) {
+    if (model == NULL || strlen(model) >= BO_DEVICE_MODEL_MAX) {
         return -EINVAL;
     }
 
     nvs_handle_t nvs_handle;
-    int rc;
     BO_TRY(bo_nvs_factory_open(SYSTEM_NVS_NS, NVS_READWRITE, &nvs_handle));
-
-    rc = nvs_set_str(nvs_handle, SYSTEM_NVS_KEY_MODEL, model);
-    if (rc) {
-        strncpy(_sysinfo.model, model, BO_DEVICE_MODEL_MAX);
-        rc = 0;
-    }
-
-    bo_nvs_close(nvs_handle);
+    BO_NVS_AUTO_CLOSE(nvs_handle);
+    BO_TRY(nvs_set_str(nvs_handle, SYSTEM_NVS_KEY_MODEL, model));
+    BO_TRY(nvs_commit(nvs_handle));
     return 0;
 }
 
 int bo_system_set_manuf(const char* manuf)
 {
-    if (manuf == NULL) {
+    if (manuf == NULL || strlen(manuf) >= BO_DEVICE_MANUF_MAX) {
         return -EINVAL;
     }
 
     nvs_handle_t nvs_handle;
-    int rc;
     BO_TRY(bo_nvs_factory_open(SYSTEM_NVS_NS, NVS_READWRITE, &nvs_handle));
-
-    rc = nvs_set_str(nvs_handle, SYSTEM_NVS_KEY_MANUF, manuf);
-    if (rc) {
-        strncpy(_sysinfo.manuf, manuf, BO_DEVICE_MANUF_MAX);
-        rc = 0;
-    }
-
-    bo_nvs_close(nvs_handle);
+    BO_NVS_AUTO_CLOSE(nvs_handle);
+    BO_TRY(nvs_set_str(nvs_handle, SYSTEM_NVS_KEY_MANUF, manuf));
+    BO_TRY(nvs_commit(nvs_handle));
     return 0;
 }
 
@@ -252,32 +234,28 @@ void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event
 int load_factory_settings()
 {
     nvs_handle_t nvs_handle;
-    int rc;
     size_t len;
     BO_TRY(bo_nvs_factory_open(SYSTEM_NVS_NS, NVS_READWRITE, &nvs_handle));
+    BO_NVS_AUTO_CLOSE(nvs_handle);
+
+    bool changed = false;
 
     len = BO_DEVICE_NAME_MAX;
-    rc = nvs_get_str(nvs_handle, SYSTEM_NVS_KEY_NAME, _sysinfo.name, &len);
-    if (rc) {
-        strncpy(_sysinfo.name, CONFIG_BORNEO_DEVICE_NAME_DEFAULT, BO_DEVICE_NAME_MAX);
-        rc = 0;
-    }
+    BO_TRY(bo_nvs_get_or_set_str(nvs_handle, SYSTEM_NVS_KEY_NAME, _sysinfo.name, &len,
+                                 CONFIG_BORNEO_DEVICE_NAME_DEFAULT, &changed));
 
     len = BO_DEVICE_MODEL_MAX;
-    rc = nvs_get_str(nvs_handle, SYSTEM_NVS_KEY_MODEL, _sysinfo.model, &len);
-    if (rc) {
-        strncpy(_sysinfo.model, CONFIG_BORNEO_BOARD_NAME, BO_DEVICE_MODEL_MAX);
-        rc = 0;
-    }
+    BO_TRY(bo_nvs_get_or_set_str(nvs_handle, SYSTEM_NVS_KEY_MODEL, _sysinfo.model, &len, CONFIG_BORNEO_BOARD_ID,
+                                 &changed));
 
     len = BO_DEVICE_MANUF_MAX;
-    rc = nvs_get_str(nvs_handle, SYSTEM_NVS_KEY_MANUF, _sysinfo.manuf, &len);
-    if (rc) {
-        strncpy(_sysinfo.manuf, SYSTEM_DEFAULT_MANUF, BO_DEVICE_MANUF_MAX);
-        rc = 0;
+    BO_TRY(
+        bo_nvs_get_or_set_str(nvs_handle, SYSTEM_NVS_KEY_MANUF, _sysinfo.manuf, &len, SYSTEM_DEFAULT_MANUF, &changed));
+
+    if (changed) {
+        BO_TRY(nvs_commit(nvs_handle));
     }
 
-    bo_nvs_close(nvs_handle);
     return 0;
 }
 

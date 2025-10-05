@@ -147,53 +147,23 @@ int thermal_get_current_temp() { return _thermal.current_temp; }
 
 int load_factory_settings()
 {
-    int rc;
     nvs_handle_t handle;
-    rc = bo_nvs_factory_open(THERMAL_NVS_FACTORY_NS, NVS_READWRITE, &handle);
-    if (rc) {
-        goto _EXIT_WITHOUT_CLOSE;
+    BO_TRY(bo_nvs_factory_open(THERMAL_NVS_FACTORY_NS, NVS_READWRITE, &handle));
+    BO_NVS_AUTO_CLOSE(handle);
+
+    bool changed = false;
+
+    BO_TRY(bo_nvs_get_or_set_i32(handle, THERMAL_NVS_KEY_KP, &_settings.kp, THERMAL_DEFAULT_SETTINGS.kp, &changed));
+    BO_TRY(bo_nvs_get_or_set_i32(handle, THERMAL_NVS_KEY_KI, &_settings.ki, THERMAL_DEFAULT_SETTINGS.ki, &changed));
+    BO_TRY(bo_nvs_get_or_set_i32(handle, THERMAL_NVS_KEY_KD, &_settings.kd, THERMAL_DEFAULT_SETTINGS.kd, &changed));
+    BO_TRY(bo_nvs_get_or_set_u8(handle, THERMAL_NVS_KEY_KEEP_TEMP, &_settings.keep_temp,
+                                THERMAL_DEFAULT_SETTINGS.keep_temp, &changed));
+
+    if (changed) {
+        BO_TRY(nvs_commit(handle));
     }
 
-    rc = nvs_get_i32(handle, THERMAL_NVS_KEY_KP, &_settings.kp);
-    if (rc == ESP_ERR_NVS_NOT_FOUND) {
-        _settings.kp = THERMAL_DEFAULT_SETTINGS.kp;
-        rc = 0;
-    }
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_get_i32(handle, THERMAL_NVS_KEY_KI, &_settings.ki);
-    if (rc == ESP_ERR_NVS_NOT_FOUND) {
-        _settings.ki = THERMAL_DEFAULT_SETTINGS.ki;
-        rc = 0;
-    }
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_get_i32(handle, THERMAL_NVS_KEY_KD, &_settings.kd);
-    if (rc == ESP_ERR_NVS_NOT_FOUND) {
-        _settings.kd = THERMAL_DEFAULT_SETTINGS.kd;
-        rc = 0;
-    }
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-    rc = nvs_get_u8(handle, THERMAL_NVS_KEY_KEEP_TEMP, &_settings.keep_temp);
-    if (rc == ESP_ERR_NVS_NOT_FOUND) {
-        _settings.keep_temp = THERMAL_DEFAULT_SETTINGS.keep_temp;
-        rc = 0;
-    }
-    if (rc) {
-        goto _EXIT_CLOSE;
-    }
-
-_EXIT_CLOSE:
-    bo_nvs_close(handle);
-_EXIT_WITHOUT_CLOSE:
-    return rc;
+    return 0;
 }
 
 int load_user_settings()
@@ -201,26 +171,18 @@ int load_user_settings()
     nvs_handle_t handle;
     BO_TRY(bo_nvs_user_open(THERMAL_NVS_USER_NS, NVS_READWRITE, &handle));
     BO_NVS_AUTO_CLOSE(handle);
+    bool changed = false;
 
-    int rc = nvs_get_u8(handle, THERMAL_NVS_KEY_FAN_MODE, &_settings.fan_mode);
-    if (rc == ESP_ERR_NVS_NOT_FOUND) {
-        _settings.fan_mode = THERMAL_DEFAULT_SETTINGS.fan_mode;
-        rc = 0;
-    }
-    if (rc) {
-        return rc;
-    }
+    BO_TRY(bo_nvs_get_or_set_u8(handle, THERMAL_NVS_KEY_FAN_MODE, &_settings.fan_mode,
+                                THERMAL_DEFAULT_SETTINGS.fan_mode, &changed));
 
-    rc = nvs_get_u8(handle, THERMAL_NVS_KEY_FAN_MANUAL_POWER, &_settings.fan_manual_power);
-    if (rc == ESP_ERR_NVS_NOT_FOUND) {
-        _settings.fan_manual_power = THERMAL_DEFAULT_SETTINGS.fan_manual_power;
-        rc = 0;
-    }
-    if (rc) {
-        return rc;
-    }
+    BO_TRY(bo_nvs_get_or_set_u8(handle, THERMAL_NVS_KEY_FAN_MANUAL_POWER, &_settings.fan_manual_power,
+                                THERMAL_DEFAULT_SETTINGS.fan_manual_power, &changed));
 
-    return rc;
+    if (changed) {
+        BO_TRY(nvs_commit(handle));
+    }
+    return 0;
 }
 
 uint8_t thermal_pid_step(int32_t current_temp)

@@ -61,11 +61,11 @@ int fan_init()
 #endif // CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED
 
     bool dac_enabled = _factory_settings.flags & FAN_FLAG_DAC_ENABLED;
-#if CONFIG_LYFI_FAN_CTRL_PWM_ENABLED
+#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
     bool pwm_enabled = _factory_settings.flags & FAN_FLAG_PWM_ENABLED;
 #else
     bool pwm_enabled = false;
-#endif // CONFIG_LYFI_FAN_CTRL_PWM_ENABLED
+#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
     if (dac_enabled || pwm_enabled) {
         BO_TRY(rmtpwm_init());
@@ -82,13 +82,13 @@ int fan_init()
 #endif
     }
 
-#if CONFIG_LYFI_FAN_CTRL_PWM_ENABLED
+#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
     if (pwm_enabled) {
         ESP_LOGI(TAG, "Fan PWM output enabled, GPIO=%i", CONFIG_LYFI_FAN_CTRL_PWM_GPIO);
         BO_TRY(rmtpwm_pwm_init());
         BO_TRY(rmtpwm_set_pwm_duty(0));
     }
-#endif // CONFIG_LYFI_FAN_CTRL_PWM_ENABLED
+#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
     ESP_LOGI(TAG, "Fan driver initizlied.");
     return 0;
@@ -119,12 +119,12 @@ int fan_set_power(uint8_t value)
     }
 #endif // LYFI_FAN_CTRL_SHUTDOWN_ENABLED
 
-#if CONFIG_LYFI_FAN_CTRL_PWM_ENABLED
+#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
     if (_factory_settings.flags & FAN_FLAG_PWM_ENABLED) {
         BO_TRY(rmtpwm_set_pwm_duty(value));
         ESP_LOGI(TAG, "Set fan power, method: PWM, power=%u%%", value);
     }
-#endif // CONFIG_LYFI_FAN_CTRL_PWM_ENABLED
+#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
     if (_factory_settings.flags & FAN_FLAG_DAC_ENABLED) {
 #if SOC_DAC_SUPPORTED
@@ -187,42 +187,32 @@ int fan_factory_settings_load()
 {
     nvs_handle_t nvs_handle;
     BO_TRY(bo_nvs_factory_open(NVS_FAN_NAMESPACE, NVS_READWRITE, &nvs_handle));
+    BO_NVS_AUTO_CLOSE(nvs_handle);
+    bool changed = false;
 
-    {
-        uint8_t en = 0;
-        int rc = nvs_get_u8(nvs_handle, FAN_NVS_KEY_DAC_ENABLED, &en);
-        if (rc == 0) {
-            if (en) {
-                _factory_settings.flags |= FAN_FLAG_DAC_ENABLED;
-            }
-            else {
-                _factory_settings.flags &= ~FAN_FLAG_DAC_ENABLED;
-            }
-        }
-        else {
-            _factory_settings.flags |= FAN_FLAG_DAC_ENABLED;
-        }
+    uint8_t en = 0;
+
+    BO_TRY(bo_nvs_get_or_set_u8(nvs_handle, FAN_NVS_KEY_DAC_ENABLED, &en, 1, &changed));
+    if (en) {
+        _factory_settings.flags |= FAN_FLAG_DAC_ENABLED;
+    }
+    else {
+        _factory_settings.flags &= ~FAN_FLAG_DAC_ENABLED;
     }
 
-#if CONFIG_LYFI_FAN_CTRL_PWM_ENABLED
-    {
-        uint8_t en = 0;
-        int rc = nvs_get_u8(nvs_handle, FAN_NVS_KEY_PWM_ENABLED, &en);
-        if (rc == 0) {
-            if (en) {
-                _factory_settings.flags |= FAN_FLAG_PWM_ENABLED;
-            }
-            else {
-                _factory_settings.flags &= ~FAN_FLAG_PWM_ENABLED;
-            }
-        }
-        else {
-            _factory_settings.flags &= ~FAN_FLAG_PWM_ENABLED;
-        }
+#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
+    BO_TRY(bo_nvs_get_or_set_u8(nvs_handle, FAN_NVS_KEY_PWM_ENABLED, &en, 0, &changed));
+    if (en) {
+        _factory_settings.flags |= FAN_FLAG_PWM_ENABLED;
     }
-#endif // CONFIG_LYFI_FAN_CTRL_PWM_ENABLED
+    else {
+        _factory_settings.flags &= ~FAN_FLAG_PWM_ENABLED;
+    }
+#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
-    bo_nvs_close(nvs_handle);
+    if (changed) {
+        BO_TRY(nvs_commit(nvs_handle));
+    }
 
     return 0;
 }

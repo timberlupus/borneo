@@ -139,36 +139,26 @@ __EXIT_CLOSE:
 
 int load_factory_settings()
 {
-    // 1) defaults
-#if CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
-    _settings.over_power_mw = CONFIG_LYFI_PROTECTION_OVER_POWER_DEFAULT_VALUE;
-#endif
-#if CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
-    _settings.overheated_temp = PROTECT_OVERHEATED_TEMP_DEFAULT;
-#endif
-
-    // 2) open NVS (read-only is enough if not persisting defaults)
-    nvs_handle_t nvs_handle;
-    int rc;
-    BO_TRY_ESP(bo_nvs_factory_open(PROTECT_NVS_NAMESPACE, NVS_READWRITE, &nvs_handle));
+    nvs_handle_t handle;
+    BO_TRY_ESP(bo_nvs_factory_open(PROTECT_NVS_NAMESPACE, NVS_READWRITE, &handle));
+    BO_NVS_AUTO_CLOSE(handle);
+    bool changed = false;
 
 #if CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
-    rc = bo_nvs_get_i32_or(nvs_handle, NVS_KEY_OPP_VALUE, &_settings.over_power_mw);
-    if (rc != ESP_OK) {
-        goto _EXIT_CLOSE;
-    }
+    BO_TRY(bo_nvs_get_or_set_i32(handle, NVS_KEY_OPP_VALUE, &_settings.over_power_mw,
+                                 CONFIG_LYFI_PROTECTION_OVER_POWER_DEFAULT_VALUE, &changed));
 #endif // CONFIG_LYFI_PROTECTION_OVER_POWER_ENABLED
 
 #if CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
-    rc = bo_nvs_get_u8_or(nvs_handle, NVS_KEY_OVERHEATED_TEMP, &_settings.overheated_temp);
-    if (rc != ESP_OK) {
-        goto _EXIT_CLOSE;
-    }
+    BO_TRY(bo_nvs_get_or_set_u8(handle, NVS_KEY_OVERHEATED_TEMP, &_settings.overheated_temp,
+                                PROTECT_OVERHEATED_TEMP_DEFAULT, &changed));
 #endif // CONFIG_LYFI_PROTECTION_OVER_HEATED_ENABLED
 
-_EXIT_CLOSE:
-    bo_nvs_close(nvs_handle);
-    return rc;
+    if (changed) {
+        BO_TRY(nvs_commit(handle));
+    }
+
+    return 0;
 }
 
 void protect_task()

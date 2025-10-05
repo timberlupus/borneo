@@ -106,29 +106,14 @@ int led_load_factory_settings(struct led_factory_settings* factory_settings)
     BO_NVS_AUTO_CLOSE(handle);
 
     bool changed = false;
-    int rc;
-    {
-        rc = nvs_get_u16(handle, LED_NVS_KEY_PWM_FREQ, &factory_settings->pwm_freq);
-        if (rc == ESP_ERR_NVS_NOT_FOUND) {
-            factory_settings->pwm_freq = CONFIG_LYFI_DEFAULT_PWM_FREQ;
-            rc = nvs_set_u16(handle, LED_NVS_KEY_PWM_FREQ, factory_settings->pwm_freq);
-            if (rc == 0) {
-                changed = true;
-            }
-        }
-        if (rc) {
-            return rc;
-        }
-    }
+    BO_TRY(bo_nvs_get_or_set_u16(handle, LED_NVS_KEY_PWM_FREQ, &factory_settings->pwm_freq,
+                                 CONFIG_LYFI_DEFAULT_PWM_FREQ, &changed));
 
     if (changed) {
-        rc = nvs_commit(handle);
-        if (rc) {
-            return rc;
-        }
+        BO_TRY(nvs_commit(handle));
     }
 
-    return rc;
+    return 0;
 }
 
 int led_load_user_settings()
