@@ -454,19 +454,19 @@ menu "Borneo LyFi"
             bool "Enable the protection feature"
             default y
 
-        config LYFI_PROTECTION_OVER_HEATED_ENABLED
+        config LYFI_PROTECTION_OVERHEATED_SUPPORT
             bool "Enable the over-power protection"
             default y
             depends on  LYFI_PROTECTION_ENABLED && LYFI_NTC_SUPPORT
 
-        config LYFI_PROTECTION_OVER_POWER_ENABLED
+        config LYFI_PROTECTION_OVERPOWER_SUPPORT
             bool "Enable the over-power protection"
             default n
             depends on  LYFI_PROTECTION_ENABLED && LYFI_MEAS_CURRENT_SUPPORT && BORNEO_MEAS_VOLTAGE_SUPPORT
 
         config LYFI_PROTECTION_OVER_POWER_DEFAULT_VALUE
             int "Over-power protection default value"
-            depends on LYFI_PROTECTION_OVER_POWER_ENABLED
+            depends on LYFI_PROTECTION_OVERPOWER_SUPPORT
     endmenu
 
     menu "LED Current Measurement"
