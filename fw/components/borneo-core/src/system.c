@@ -124,8 +124,6 @@ void bo_system_reboot_later(uint32_t delay_ms)
     if (bo_power_is_on()) {
         BO_MUST(bo_power_shutdown(0));
     }
-
-    BO_MUST_ESP(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_REBOOTING, NULL, 0, portMAX_DELAY));
 }
 
 int bo_system_factory_reset()
@@ -202,7 +200,12 @@ uint64_t bo_system_get_shutdown_timestamp()
     return timestamp;
 }
 
-void _reboot_callback() { esp_restart(); }
+void _reboot_callback()
+{
+    BO_MUST_ESP(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_REBOOTING, NULL, 0, portMAX_DELAY));
+    vTaskDelay(pdMS_TO_TICKS(500));
+    esp_restart();
+}
 
 void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
