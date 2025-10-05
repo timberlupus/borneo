@@ -98,7 +98,7 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
       ),
 
       GenericSettingsGroup(
-        title: context.translate('CHANNELS'),
+        title: context.translate('LED CHANNELS'),
         children: [
           ListTile(
             dense: true,
@@ -126,7 +126,7 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
 
       // Thermal
       GenericSettingsGroup(
-        title: context.translate('THERMAL'),
+        title: context.translate('THERMAL MANAGEMENT'),
         children: [
           SwitchListTile.adaptive(
             dense: true,
