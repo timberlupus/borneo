@@ -41,6 +41,8 @@ static void coap_hnd_borneo_factory_reset_post(coap_resource_t* resource, coap_s
     coap_pdu_set_code(response, COAP_RESPONSE_CODE(204));
 }
 
+#if CONFIG_BORNEO_PRODUCT_MODE_STANDALONE
+
 typedef enum {
     FACTORY_NVS_KIND_U8,
     FACTORY_NVS_KIND_U16,
@@ -638,7 +640,48 @@ static void coap_hnd_factory_nvs_str_set(coap_resource_t* resource, coap_session
     factory_nvs_handle_string_set(request, response);
 }
 
+static void coap_hnd_factory_nvs_exists_get(coap_resource_t* resource, coap_session_t* session,
+                                            const coap_pdu_t* request, const coap_string_t* query, coap_pdu_t* response)
+{
+    char ns[32] = { 0 };
+    char key[32] = { 0 };
+
+    if (!factory_nvs_parse_query(request, query, response, ns, sizeof(ns), key, sizeof(key))) {
+        return;
+    }
+
+    nvs_handle_t nvs;
+    BO_COAP_TRY(bo_nvs_factory_open(ns, NVS_READONLY, &nvs), response);
+    BO_NVS_AUTO_CLOSE(nvs);
+
+    nvs_type_t type;
+    esp_err_t err = nvs_find_key(nvs, key, &type);
+    bool exists = (err == ESP_OK);
+    if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND) {
+        BO_COAP_TRY(err, response);
+        return;
+    }
+
+    uint8_t encode_buf[16] = { 0 };
+    CborEncoder encoder;
+    cbor_encoder_init(&encoder, encode_buf, sizeof(encode_buf), 0);
+    CborError cbor_err = cbor_encode_boolean(&encoder, exists);
+    if (cbor_err != CborNoError) {
+        coap_pdu_set_code(response, BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
+        return;
+    }
+
+    size_t encoded_size = cbor_encoder_get_buffer_size(&encoder, encode_buf);
+    coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, encode_buf);
+    coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
+}
+
+#endif // CONFIG_BORNEO_PRODUCT_MODE_STANDALONE
+
 COAP_RESOURCE_DEFINE("borneo/factory/reset", false, NULL, coap_hnd_borneo_factory_reset_post, NULL, NULL);
+
+#if CONFIG_BORNEO_PRODUCT_MODE_STANDALONE
+
 COAP_RESOURCE_DEFINE("borneo/factory/nvs/u8", false, coap_hnd_factory_nvs_u8_get, coap_hnd_factory_nvs_u8_set, NULL,
                      NULL);
 COAP_RESOURCE_DEFINE("borneo/factory/nvs/u16", false, coap_hnd_factory_nvs_u16_get, coap_hnd_factory_nvs_u16_set, NULL,
@@ -657,3 +700,6 @@ COAP_RESOURCE_DEFINE("borneo/factory/nvs/blob", false, coap_hnd_factory_nvs_blob
                      NULL, NULL);
 COAP_RESOURCE_DEFINE("borneo/factory/nvs/str", false, coap_hnd_factory_nvs_str_get, coap_hnd_factory_nvs_str_set, NULL,
                      NULL);
+COAP_RESOURCE_DEFINE("borneo/factory/nvs/exists", false, coap_hnd_factory_nvs_exists_get, NULL, NULL, NULL);
+
+#endif // CONFIG_BORNEO_PRODUCT_MODE_STANDALONE

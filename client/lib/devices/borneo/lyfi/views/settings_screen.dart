@@ -333,7 +333,6 @@ class SettingsScreen extends StatelessWidget {
 
   void _goControllerSettings(BuildContext context, SettingsViewModel svm) {
     final csvm = ControllerSettingsViewModel(
-      GettextLocalizations.of(context),
       deviceID: svm.deviceID,
       deviceManager: svm.deviceManager,
       globalEventBus: svm.globalEventBus,

@@ -33,6 +33,7 @@ class BorneoPaths {
   static final Uri nvsI32 = Uri(path: '/borneo/factory/nvs/i32');
   static final Uri nvsString = Uri(path: '/borneo/factory/nvs/str');
   static final Uri nvsBlob = Uri(path: '/borneo/factory/nvs/blob');
+  static final Uri nvsExists = Uri(path: '/borneo/factory/nvs/exists');
 }
 
 enum ProductMode {
@@ -272,6 +273,7 @@ abstract class IBorneoDeviceApi extends IDeviceApi {
   Future<void> setFactoryNvsString(Device dev, String ns, String key, String value, {CancellationToken? cancelToken});
   Future<List<int>> getFactoryNvsBlob(Device dev, String ns, String key, {CancellationToken? cancelToken});
   Future<void> setFactoryNvsBlob(Device dev, String ns, String key, List<int> value, {CancellationToken? cancelToken});
+  Future<bool> factoryNvsExists(Device dev, String ns, String key, {CancellationToken? cancelToken});
 }
 
 mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
@@ -589,6 +591,13 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
   @override
   Future<String> getFactoryNvsString(Device dev, String ns, String key, {CancellationToken? cancelToken}) async {
     return await _getFactoryNvsString(dev, BorneoPaths.nvsString, ns, key, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<bool> factoryNvsExists(Device dev, String ns, String key, {CancellationToken? cancelToken}) async {
+    final dd = dev.driverData as BorneoCoapDriverData;
+    final uri = BorneoPaths.nvsExists.replace(queryParameters: {'ns': ns, 'k': key});
+    return await dd.coap.getCbor<bool>(uri, cancelToken: cancelToken);
   }
 
   @override

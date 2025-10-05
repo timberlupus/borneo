@@ -1,25 +1,53 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
-import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 
-class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
-  final GettextLocalizations _gt;
+class NvsSettingEntry<T> {
+  final String namespace;
+  final String key;
+  T _value;
+  T _initialValue;
+  final void Function() _notifyListeners;
+  bool available;
 
-  ILyfiDeviceApi get api => deviceManager.getBoundDevice(deviceID).api<ILyfiDeviceApi>();
-
-  int _pwmFreq = 500;
-  int _initialPwmFreq = 500;
-  int get pwmFreq => _pwmFreq;
-  bool get pwmFreqChanged => _pwmFreq != _initialPwmFreq;
-  void setPwmFreq(int? freq) {
-    _pwmFreq = freq!;
-    notifyListeners();
+  T get value => _value;
+  bool get changed => available && _value != _initialValue;
+  void setValue(T value) {
+    _value = value;
+    _notifyListeners();
   }
 
-  bool get hasChanges => pwmFreqChanged;
+  void reset() {
+    _value = _initialValue;
+    _notifyListeners();
+  }
 
-  ControllerSettingsViewModel(
-    this._gt, {
+  NvsSettingEntry(
+    T initialValue,
+    this._notifyListeners, {
+    required this.namespace,
+    required this.key,
+    this.available = true,
+  }) : _value = initialValue,
+       _initialValue = initialValue;
+}
+
+class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
+  ILyfiDeviceApi get api => deviceManager.getBoundDevice(deviceID).api<ILyfiDeviceApi>();
+
+  late final NvsSettingEntry<int> pwmFreq;
+  late final NvsSettingEntry<bool> overpowerEnabled;
+  late final NvsSettingEntry<int> overpowerCutoff;
+  late final NvsSettingEntry<bool> overtempEnabled;
+  late final NvsSettingEntry<int> overtempCutoff;
+
+  bool get hasChanges =>
+      pwmFreq.changed ||
+      overpowerEnabled.changed ||
+      overpowerCutoff.changed ||
+      overtempEnabled.changed ||
+      overtempCutoff.changed;
+
+  ControllerSettingsViewModel({
     required super.deviceID,
     required super.deviceManager,
     required super.globalEventBus,
@@ -30,14 +58,115 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
   Future<void> onInitialize() async {
     await super.onInitialize();
 
-    _pwmFreq = await this.borneoDeviceApi.getFactoryNvsU16(boundDevice!.device, "led", "pwmfreq");
-    _initialPwmFreq = _pwmFreq;
+    pwmFreq = NvsSettingEntry<int>(500, notifyListeners, namespace: "led", key: "pwmfreq");
+    overpowerEnabled = NvsSettingEntry<bool>(true, notifyListeners, namespace: "protect", key: "opp.en");
+    overpowerCutoff = NvsSettingEntry<int>(999999, notifyListeners, namespace: "protect", key: "opp.v");
+    overtempEnabled = NvsSettingEntry<bool>(true, notifyListeners, namespace: "protect", key: "ot.en");
+    overtempCutoff = NvsSettingEntry<int>(65, notifyListeners, namespace: "protect", key: "ot.v");
+
+    await _initSetting(
+      pwmFreq,
+      () async => await this.borneoDeviceApi.getFactoryNvsU16(boundDevice!.device, pwmFreq.namespace, pwmFreq.key),
+    );
+    await _initSetting(
+      overpowerEnabled,
+      () async =>
+          (await this.borneoDeviceApi.getFactoryNvsU8(
+            boundDevice!.device,
+            overpowerEnabled.namespace,
+            overpowerEnabled.key,
+          )) !=
+          0,
+    );
+    await _initSetting(
+      overpowerCutoff,
+      () async => await this.borneoDeviceApi.getFactoryNvsI32(
+        boundDevice!.device,
+        overpowerCutoff.namespace,
+        overpowerCutoff.key,
+      ),
+    );
+    await _initSetting(
+      overtempEnabled,
+      () async =>
+          (await this.borneoDeviceApi.getFactoryNvsU8(
+            boundDevice!.device,
+            overtempEnabled.namespace,
+            overtempEnabled.key,
+          )) !=
+          0,
+    );
+    await _initSetting(
+      overtempCutoff,
+      () async =>
+          await this.borneoDeviceApi.getFactoryNvsU8(boundDevice!.device, overtempCutoff.namespace, overtempCutoff.key),
+    );
+  }
+
+  Future<void> _initSetting<T>(NvsSettingEntry<T> setting, Future<T> Function() getter) async {
+    if (await this.borneoDeviceApi.factoryNvsExists(boundDevice!.device, setting.namespace, setting.key)) {
+      setting._value = await getter();
+      setting._initialValue = setting._value;
+      setting.available = true;
+    } else {
+      setting.available = false;
+    }
   }
 
   Future<void> submit() async {
-    if (pwmFreqChanged) {
-      await this.borneoDeviceApi.setFactoryNvsU16(boundDevice!.device, "led", "pwmfreq", _pwmFreq);
-      _initialPwmFreq = _pwmFreq;
+    try {
+      await doSubmit();
+    } catch (error) {
+      notification.showError("Failed to update controller settings", body: error.toString());
+      // Optionally log the error if logging is available in BaseLyfiDeviceViewModel.
+      rethrow;
+    }
+  }
+
+  Future<void> doSubmit() async {
+    if (pwmFreq.changed) {
+      await this.borneoDeviceApi.setFactoryNvsU16(boundDevice!.device, pwmFreq.namespace, pwmFreq.key, pwmFreq.value);
+      pwmFreq.reset();
+    }
+
+    if (overpowerEnabled.changed) {
+      await this.borneoDeviceApi.setFactoryNvsU8(
+        boundDevice!.device,
+        overpowerEnabled.namespace,
+        overpowerEnabled.key,
+        overpowerEnabled.value ? 1 : 0,
+      );
+      overpowerEnabled.reset();
+    }
+
+    if (overpowerCutoff.changed) {
+      await this.borneoDeviceApi.setFactoryNvsI32(
+        boundDevice!.device,
+        overpowerCutoff.namespace,
+        overpowerCutoff.key,
+        overpowerCutoff.value,
+      );
+      overpowerCutoff.reset();
+    }
+
+    if (overtempEnabled.changed) {
+      await this.borneoDeviceApi.setFactoryNvsU8(
+        boundDevice!.device,
+        overtempEnabled.namespace,
+        overtempEnabled.key,
+        overtempEnabled.value ? 1 : 0,
+      );
+      overtempEnabled.reset();
+    }
+
+    if (overtempCutoff.changed) {
+      await this.borneoDeviceApi.setFactoryNvsU8(
+        boundDevice!.device,
+        overtempCutoff.namespace,
+        overtempCutoff.key,
+        overtempCutoff.value,
+      );
+      overtempCutoff.reset();
     }
 
     this.borneoDeviceApi.reboot(boundDevice!.device);

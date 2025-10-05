@@ -34,10 +34,10 @@ static void protect_task();
 
 #define PROTECT_NVS_NAMESPACE "protect"
 #define NVS_KEY_ENABLED "en"
-#define NVS_KEY_OPP_VALUE "opp"
-#define NVS_KEY_OPP_ENABLED "oppen"
-#define NVS_KEY_OVERHEATED_TEMP "ohtemp"
-#define NVS_KEY_OVERHEATED_ENABLED "ohen"
+#define NVS_KEY_OPP_VALUE "opp.v"
+#define NVS_KEY_OPP_ENABLED "opp.en"
+#define NVS_KEY_OVERHEATED_TEMP "ot.v"
+#define NVS_KEY_OVERHEATED_ENABLED "ot.en"
 
 #define OVERHEATED_TEMP_COUNT_MAX 5
 #define PROTECT_OVERHEATED_TEMP_DEFAULT 65
@@ -48,7 +48,7 @@ struct bo_protect_settings {
 
 #if CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
     uint8_t overpower_enabled; // Overpower protection enabled
-    int32_t over_power_mw; // Overpower protection value
+    int32_t overpower_mw; // Overpower protection value
 #endif // CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
 
 #if CONFIG_LYFI_PROTECTION_OVERHEATED_SUPPORT
@@ -111,33 +111,10 @@ __EXIT_CLOSE:
 }
 
 #if CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
-int32_t bo_protect_get_over_power_mw() { return _settings.over_power_mw; }
-
-int(int32_t power_mw)
+int32_t bo_protect_get_over_power_mw()
 {
-    if (power_mw < 0) {
-        ESP_LOGE(TAG, "Invalid over power value: %ld", power_mw);
-        return -1;
-    }
-
-    _settings.over_power_mw = power_mw;
-
-    nvs_handle_t nvs_handle;
-    BO_TRY_ESP(nvs_open(PROTECT_NVS_NAMESPACE, NVS_READWRITE, &nvs_handle));
-
-    int rc = nvs_set_i32(nvs_handle, NVS_KEY_OPP_VALUE, power_mw);
-    if (rc) {
-        goto __EXIT_CLOSE;
-    }
-
-    rc = nvs_commit(nvs_handle);
-    if (rc) {
-        goto __EXIT_CLOSE;
-    }
-
-__EXIT_CLOSE:
-    nvs_close(nvs_handle);
-    return rc;
+    //
+    return _settings.overpower_mw;
 }
 #endif // CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
 
@@ -150,7 +127,7 @@ int load_factory_settings()
 
 #if CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
     BO_TRY(bo_nvs_get_or_set_u8(handle, NVS_KEY_OPP_ENABLED, &_settings.overpower_enabled, 1, &changed));
-    BO_TRY(bo_nvs_get_or_set_i32(handle, NVS_KEY_OPP_VALUE, &_settings.over_power_mw,
+    BO_TRY(bo_nvs_get_or_set_i32(handle, NVS_KEY_OPP_VALUE, &_settings.overpower_mw,
                                  CONFIG_LYFI_PROTECTION_OVER_POWER_DEFAULT_VALUE, &changed));
 #endif // CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
 
@@ -163,7 +140,6 @@ int load_factory_settings()
     if (changed) {
         BO_TRY(nvs_commit(handle));
     }
-
     return 0;
 }
 
@@ -227,9 +203,9 @@ static void check_overpower_protection()
     }
     else {
         power_read_fail_count = 0;
-        if (_settings.over_power_mw > 0 && power_mw > _settings.over_power_mw) {
+        if (_settings.overpower_mw > 0 && power_mw > _settings.overpower_mw) {
             ESP_LOGE(TAG, "Over-power protection triggered! Shutdown in progress...");
-            ESP_LOGE(TAG, "%ld mW >= %ld mW", power_mw, _settings.over_power_mw);
+            ESP_LOGE(TAG, "%ld mW >= %ld mW", power_mw, _settings.overpower_mw);
             BO_MUST(bo_power_shutdown(BO_SHUTDOWN_REASON_OVER_POWER));
         }
     }

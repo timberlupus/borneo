@@ -2,6 +2,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/controller_settings_v
 import 'package:borneo_app/shared/widgets/generic_settings_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import 'package:provider/provider.dart';
@@ -16,11 +17,19 @@ class ControllerSettingsScreen extends StatefulWidget {
 
 class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
   late Future<void> _initFuture;
+  late final TextEditingController _overpowerCutoffController;
 
   @override
   void initState() {
     super.initState();
+    _overpowerCutoffController = TextEditingController();
     _initFuture = widget.vm.initialize();
+  }
+
+  @override
+  void dispose() {
+    _overpowerCutoffController.dispose();
+    super.dispose();
   }
 
   @override
@@ -73,30 +82,32 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
       GenericSettingsGroup(
         title: context.translate('LED CONFIGURATION'),
         children: [
-          ListTile(
-            dense: true,
-            tileColor: tileColor,
-            title: Text(context.translate('PWM frequency')),
-            trailing: Selector<ControllerSettingsViewModel, int>(
-              selector: (context, vm) => vm.pwmFreq,
-              builder: (context, pwmFreq, child) => DropdownButton<int>(
-                value: pwmFreq,
-                items: [
-                  DropdownMenuItem<int>(value: 500, child: Text(context.translate("500 Hz"))),
-                  DropdownMenuItem<int>(value: 1000, child: Text(context.translate("1 kHz"))),
-                  DropdownMenuItem<int>(value: 2000, child: Text(context.translate("2 kHz"))),
-                  DropdownMenuItem<int>(value: 3000, child: Text(context.translate("3 kHz"))),
-                  DropdownMenuItem<int>(value: 4000, child: Text(context.translate("4 kHz"))),
-                  DropdownMenuItem<int>(value: 8000, child: Text(context.translate("8 kHz"))),
-                  DropdownMenuItem<int>(value: 19000, child: Text(context.translate("19 kHz"))),
-                ],
-                onChanged: isInitialized ? widget.vm.setPwmFreq : null,
+          if (isInitialized && widget.vm.pwmFreq.available)
+            ListTile(
+              dense: true,
+              tileColor: tileColor,
+              title: Text(context.translate('PWM frequency')),
+              trailing: Selector<ControllerSettingsViewModel, int?>(
+                selector: (context, vm) => vm.pwmFreq.value,
+                builder: (context, pwmFreq, child) => DropdownButton<int>(
+                  value: pwmFreq,
+                  items: [
+                    DropdownMenuItem<int>(value: 500, child: Text(context.translate("500 Hz"))),
+                    DropdownMenuItem<int>(value: 1000, child: Text(context.translate("1 kHz"))),
+                    DropdownMenuItem<int>(value: 2000, child: Text(context.translate("2 kHz"))),
+                    DropdownMenuItem<int>(value: 3000, child: Text(context.translate("3 kHz"))),
+                    DropdownMenuItem<int>(value: 4000, child: Text(context.translate("4 kHz"))),
+                    DropdownMenuItem<int>(value: 8000, child: Text(context.translate("8 kHz"))),
+                    DropdownMenuItem<int>(value: 19000, child: Text(context.translate("19 kHz"))),
+                  ],
+                  onChanged: (v) => widget.vm.pwmFreq.setValue(v!),
+                ),
               ),
             ),
-          ),
         ],
       ),
 
+      /*
       GenericSettingsGroup(
         title: context.translate('LED CHANNELS'),
         children: [
@@ -123,8 +134,10 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
           ),
         ],
       ),
+      */
 
       // Thermal
+      /*
       GenericSettingsGroup(
         title: context.translate('THERMAL MANAGEMENT'),
         children: [
@@ -152,44 +165,113 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
           ),
         ],
       ),
+      */
 
       // Power & Protection
       GenericSettingsGroup(
         title: context.translate('POWER & PROTECTION'),
         children: [
-          SwitchListTile.adaptive(
-            dense: true,
-            tileColor: tileColor,
-            title: Text(context.translate("Overpower enabled")),
-            value: true,
-            onChanged: isInitialized ? (bool value) {} : null,
-          ),
-          SwitchListTile.adaptive(
-            dense: true,
-            tileColor: tileColor,
-            title: Text(context.translate("Overtemperature enabled")),
-            value: true,
-            onChanged: isInitialized ? (bool value) {} : null,
-          ),
-          ListTile(
-            dense: true,
-            tileColor: tileColor,
-            title: Text(context.translate('Overtemperature cut-off')),
-            trailing: DropdownButton<int>(
-              value: 70,
-              items: [
-                DropdownMenuItem<int>(value: 55, child: Text("55 ℃")),
-                DropdownMenuItem<int>(value: 60, child: Text("60 ℃")),
-                DropdownMenuItem<int>(value: 65, child: Text("65 ℃")),
-                DropdownMenuItem<int>(value: 70, child: Text("70 ℃")),
-                DropdownMenuItem<int>(value: 75, child: Text("75 ℃")),
-              ],
-              onChanged: isInitialized ? (int? value) {} : null,
+          if (isInitialized && widget.vm.overpowerEnabled.available)
+            Selector<ControllerSettingsViewModel, bool>(
+              selector: (context, vm) => vm.overpowerEnabled.value,
+              builder: (context, enabled, child) => SwitchListTile.adaptive(
+                dense: true,
+                tileColor: tileColor,
+                title: Text(context.translate("Overpower enabled")),
+                value: enabled,
+                onChanged: (bool value) => context.read<ControllerSettingsViewModel>().overpowerEnabled.setValue(value),
+              ),
             ),
-          ),
+          if (isInitialized && widget.vm.overpowerCutoff.available)
+            ListTile(
+              dense: true,
+              tileColor: tileColor,
+              title: Text(context.translate('Overpower cut-off')),
+              trailing: Selector<ControllerSettingsViewModel, int>(
+                selector: (context, vm) => vm.overpowerCutoff.value,
+                builder: (context, cutoff, child) {
+                  final cutoffText = cutoff.toString();
+                  if (_overpowerCutoffController.text != cutoffText) {
+                    _overpowerCutoffController.value = TextEditingValue(
+                      text: cutoffText,
+                      selection: TextSelection.collapsed(offset: cutoffText.length),
+                    );
+                  }
+                  return SizedBox(
+                    width: 120,
+                    child: TextField(
+                      controller: _overpowerCutoffController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      textAlign: TextAlign.end,
+                      decoration: InputDecoration(isDense: true, hintText: '1 - 99999'),
+                      onChanged: _onOverpowerCutoffChanged,
+                      onSubmitted: _onOverpowerCutoffChanged,
+                    ),
+                  );
+                },
+              ),
+            ),
+          if (isInitialized && widget.vm.overtempEnabled.available)
+            Selector<ControllerSettingsViewModel, bool>(
+              selector: (context, vm) => vm.overtempEnabled.value,
+              builder: (context, enabled, child) => SwitchListTile.adaptive(
+                dense: true,
+                tileColor: tileColor,
+                title: Text(context.translate("Overtemperature enabled")),
+                value: enabled,
+                onChanged: (bool value) => context.read<ControllerSettingsViewModel>().overtempEnabled.setValue(value),
+              ),
+            ),
+          if (isInitialized && widget.vm.overtempCutoff.available)
+            ListTile(
+              dense: true,
+              tileColor: tileColor,
+              title: Text(context.translate('Overtemperature cut-off')),
+              trailing: Selector<ControllerSettingsViewModel, int?>(
+                selector: (context, vm) => vm.overtempCutoff.value,
+                builder: (context, cutoff, child) => DropdownButton<int>(
+                  value: cutoff,
+                  items: [
+                    DropdownMenuItem<int>(value: 55, child: Text("55 ℃")),
+                    DropdownMenuItem<int>(value: 60, child: Text("60 ℃")),
+                    DropdownMenuItem<int>(value: 65, child: Text("65 ℃")),
+                    DropdownMenuItem<int>(value: 70, child: Text("70 ℃")),
+                    DropdownMenuItem<int>(value: 75, child: Text("75 ℃")),
+                  ],
+                  onChanged: (v) => widget.vm.overtempCutoff.setValue(v!),
+                ),
+              ),
+            ),
         ],
       ),
     ];
+  }
+
+  void _onOverpowerCutoffChanged(String value) {
+    if (value.isEmpty) {
+      return;
+    }
+
+    final parsed = int.tryParse(value);
+    if (parsed == null) {
+      return;
+    }
+
+    final clamped = parsed.clamp(1, 99999);
+    if (clamped != parsed) {
+      final clampedText = clamped.toString();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _overpowerCutoffController.value = TextEditingValue(
+          text: clampedText,
+          selection: TextSelection.collapsed(offset: clampedText.length),
+        );
+      });
+    }
+
+    if (widget.vm.overpowerCutoff.value != clamped) {
+      widget.vm.overpowerCutoff.setValue(clamped);
+    }
   }
 
   void _showSubmitConfirmationDialog(BuildContext context) {
