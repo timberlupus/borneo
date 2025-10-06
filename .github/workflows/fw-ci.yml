@@ -24,6 +24,7 @@ jobs:
       run: |
         docker run -t -v "${GITHUB_WORKSPACE}:/app/${{ github.repository }}" -w "/app/${{ github.repository }}/fw/lyfi" espressif/idf:v5.5 /bin/bash -c 'git config --global --add safe.directory "*" && idf.py build -DPRODUCT_ID=bst/ulva6 -DCMAKE_BUILD_TYPE=Release'
         docker run -t -v "${GITHUB_WORKSPACE}:/app/${{ github.repository }}" -w "/app/${{ github.repository }}/fw/lyfi" espressif/idf:v5.5 /bin/bash -c 'git config --global --add safe.directory "*" && idf.py build -DPRODUCT_ID=bst/blc06mk1 -DCMAKE_BUILD_TYPE=Release'
+        docker run -t -v "${GITHUB_WORKSPACE}:/app/${{ github.repository }}" -w "/app/${{ github.repository }}/fw/lyfi" espressif/idf:v5.5 /bin/bash -c 'git config --global --add safe.directory "*" && idf.py build -DPRODUCT_ID=bst/xiaoc3 -DCMAKE_BUILD_TYPE=Release'
 
 #    - name: Build Doser firmware in Docker
 #      run: |
