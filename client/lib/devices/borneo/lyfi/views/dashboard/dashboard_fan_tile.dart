@@ -51,7 +51,7 @@ class DashboardFanTile extends StatelessWidget {
                   Text(
                     context.translate("N/A"),
                     style: theme.textTheme.titleLarge?.copyWith(
-                      color: theme.colorScheme.primary,
+                      color: theme.colorScheme.outlineVariant,
                       fontFeatures: [FontFeature.tabularFigures()],
                     ),
                   ),

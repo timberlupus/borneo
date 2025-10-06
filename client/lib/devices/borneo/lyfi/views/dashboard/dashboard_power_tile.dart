@@ -98,7 +98,7 @@ class DashboardPowerTile extends StatelessWidget {
                       Text(
                         context.translate("N/A"),
                         style: theme.textTheme.titleLarge?.copyWith(
-                          color: textPrimary,
+                          color: theme.colorScheme.outlineVariant,
                           fontFeatures: [FontFeature.tabularFigures()],
                         ),
                       ),

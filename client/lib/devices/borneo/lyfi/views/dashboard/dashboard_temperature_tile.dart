@@ -17,9 +17,10 @@ class DashboardTemperatureTile extends StatelessWidget {
     final yellowBg = isDark ? Colors.amber[800]!.withValues(alpha: 0.38) : Colors.amber[100]!;
     final redBg = isDark ? Colors.red[800]!.withValues(alpha: 0.38) : Colors.red[100]!;
 
-    final (currentTempRaw, currentTemp, temperatureUnitText) = context.select<LyfiViewModel, (int?, int?, String)>(
-      (vm) => (vm.currentTempRaw, vm.currentTemp, vm.localeService.temperatureUnitText),
-    );
+    final (isOnline, currentTempRaw, currentTemp, temperatureUnitText) = context
+        .select<LyfiViewModel, (bool, int?, int?, String)>(
+          (vm) => (vm.isOnline, vm.currentTempRaw, vm.currentTemp, vm.localeService.temperatureUnitText),
+        );
 
     Color progressColor;
     if (currentTempRaw != null && currentTempRaw <= 45) {
@@ -47,7 +48,7 @@ class DashboardTemperatureTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         textBaseline: TextBaseline.alphabetic,
         children: [
-          if (currentTemp != null)
+          if (isOnline && currentTemp != null)
             RollingInteger(
               value: currentTemp,
               textStyle: theme.textTheme.headlineLarge?.copyWith(
@@ -62,11 +63,11 @@ class DashboardTemperatureTile extends StatelessWidget {
               context.translate("N/A"),
               style: theme.textTheme.headlineLarge?.copyWith(
                 fontFeatures: [FontFeature.tabularFigures()],
-                color: progressColor,
+                color: theme.colorScheme.outlineVariant,
                 fontSize: 24,
               ),
             ),
-          if (currentTemp != null)
+          if (isOnline && currentTemp != null)
             Text(
               temperatureUnitText,
               style: theme.textTheme.labelMedium?.copyWith(
