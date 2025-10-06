@@ -28,13 +28,7 @@ async def main():
     print("Current LyFi status:")
     print(await client.get_lyfi_status())
 
-    print("Current thermal PID:")
-    print(await client.get_thermal_pid())
-
     #await client.set_thermal_pid(250, 10, 50)
-
-    print("changed thermal PID:")
-    print(await client.get_thermal_pid())
 
     print("keep temp:")
     print(await client.get_keep_temp())

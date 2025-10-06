@@ -13,7 +13,7 @@
 #include <nvs_flash.h>
 #include <driver/gpio.h>
 
-#if SOC_DAC_SUPPORTED
+#if SOC_DAC_SUPPORTED && CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
 #include <driver/dac.h>
 #endif
 
@@ -28,6 +28,8 @@
 #define FAN_NVS_KEY_PWM_ENABLED "pwm_en"
 
 #define TAG "fan"
+
+#if CONFIG_LYFI_FAN_CTRL_SUPPORT
 
 int fan_factory_settings_load();
 
@@ -60,13 +62,17 @@ int fan_init()
     }
 #endif // CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED
 
+#if CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
     bool dac_enabled = _factory_settings.flags & FAN_FLAG_DAC_ENABLED;
+#endif // CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
+
 #if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
     bool pwm_enabled = _factory_settings.flags & FAN_FLAG_PWM_ENABLED;
 #else
     bool pwm_enabled = false;
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
+#if CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
     if (dac_enabled || pwm_enabled) {
         BO_TRY(rmtpwm_init());
     }
@@ -81,6 +87,8 @@ int fan_init()
         BO_TRY(rmtpwm_set_dac_duty(RMTPWM_DUTY_MAX));
 #endif
     }
+
+#endif // CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
 
 #if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
     if (pwm_enabled) {
@@ -216,3 +224,5 @@ int fan_factory_settings_load()
 
     return 0;
 }
+
+#endif // CONFIG_LYFI_FAN_CTRL_SUPPORT

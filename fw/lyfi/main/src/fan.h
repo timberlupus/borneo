@@ -4,6 +4,8 @@
 extern "C" {
 #endif
 
+#if CONFIG_LYFI_FAN_CTRL_SUPPORT
+
 enum fan_flags_enum {
     FAN_FLAG_DAC_ENABLED = 1,
     FAN_FLAG_PWM_ENABLED = 2,
@@ -28,6 +30,8 @@ int fan_set_power(uint8_t value);
 uint8_t fan_get_power();
 
 struct fan_status fan_get_status();
+
+#endif // CONFIG_LYFI_FAN_CTRL_SUPPORT
 
 #ifdef __cplusplus
 }

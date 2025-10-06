@@ -384,46 +384,51 @@ menu "Borneo LyFi"
     endmenu
 
     menu "Fan"
-        config LYFI_FAN_CTRL_ENABLED
+        config LYFI_FAN_CTRL_SUPPORT
             bool "The controlling method of fan speed"
             default y
 
         config LYFI_FAN_CTRL_PWM_SUPPORT
             bool "PWM fan support"
             default y
-            depends on LYFI_FAN_CTRL_ENABLED
+            depends on LYFI_FAN_CTRL_SUPPORT
 
         config LYFI_FAN_CTRL_PWM_GPIO
             int "The GPIO number for PWM fan"
             depends on LYFI_FAN_CTRL_PWM_SUPPORT
 
+        config LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
+            bool "PWM fan internal voltage regulator support"
+            default y
+            depends on LYFI_FAN_CTRL_SUPPORT
+
         config LYFI_FAN_CTRL_PWMDAC_GPIO
             int "The Output PWM-DAC GPIO for the voltage regulator"
-            depends on LYFI_FAN_CTRL_ENABLED && IDF_TARGET_ESP32C3
+            depends on LYFI_FAN_CTRL_SUPPORT && IDF_TARGET_ESP32C3 && LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
 
         config LYFI_FAN_CTRL_PWMDAC_DUTY_MIN
             int "The Minimum Duty for the PWM-DAC"
-            depends on LYFI_FAN_CTRL_ENABLED && IDF_TARGET_ESP32C3
+            depends on LYFI_FAN_CTRL_SUPPORT && IDF_TARGET_ESP32C3 && LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
 
         config LYFI_FAN_CTRL_PWMDAC_DUTY_MAX
             int "The Maximum Duty for the PWM-DAC"
-            depends on LYFI_FAN_CTRL_ENABLED && IDF_TARGET_ESP32C3
+            depends on LYFI_FAN_CTRL_SUPPORT && IDF_TARGET_ESP32C3 && LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
 
         config LYFI_FAN_CTRL_DAC_CHANNEL
             int "DAC Channel for DAC"
-            depends on LYFI_FAN_CTRL_ENABLED && (IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2)
+            depends on LYFI_FAN_CTRL_SUPPORT && (IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2) && LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
 
         config LYFI_FAN_CTRL_DAC_DUTY_MIN
             int "The Minimum Duty for the DAC"
-            depends on LYFI_FAN_CTRL_ENABLED && (IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2)
+            depends on LYFI_FAN_CTRL_SUPPORT && (IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2) && LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
 
         config LYFI_FAN_CTRL_DAC_DUTY_MAX
             int "The Maximum Duty for the DAC"
-            depends on LYFI_FAN_CTRL_ENABLED && (IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2)
+            depends on LYFI_FAN_CTRL_SUPPORT && (IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2) && LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
 
         config LYFI_FAN_CTRL_SHUTDOWN_ENABLED
             bool "Enable The Shutdown Pin for The Power of Fan"
-            depends on LYFI_FAN_CTRL_ENABLED
+            depends on LYFI_FAN_CTRL_SUPPORT
             default n
 
         config LYFI_FAN_CTRL_SHUTDOWN_GPIO
@@ -435,7 +440,7 @@ menu "Borneo LyFi"
         config LYFI_THERMAL_ENABLED
             bool "Enable The Thermal Management Sub-system"
             default y
-            depends on LYFI_FAN_CTRL_ENABLED && LYFI_NTC_SUPPORT
+            depends on LYFI_FAN_CTRL_SUPPORT && LYFI_NTC_SUPPORT
     endmenu
 
     menu "Press Button"

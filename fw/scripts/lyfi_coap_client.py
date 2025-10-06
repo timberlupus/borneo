@@ -174,18 +174,6 @@ class LyfiDeviceCoapClient(AbstractBorneoDeviceCoapClient):
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
-    async def set_thermal_pid(self, kp: int, ki: int, kd: int):
-        uri = self.address + '/borneo/lyfi/thermal/pid'
-        payload = dumps([kp, ki, kd], canonical=True)
-        request = Message(code=PUT, payload=payload, uri=uri)
-        response = await self._context.request(request).response
-
-    async def get_thermal_pid(self) -> int:
-        uri = self.address + '/borneo/lyfi/thermal/pid'
-        request = Message(code=GET, uri=uri)
-        response = await self._context.request(request).response
-        return loads(response.payload)
-
     async def set_keep_temp(self, kp: int):
         uri = self.address + '/borneo/lyfi/thermal/temp/keep'
         payload = dumps(kp)

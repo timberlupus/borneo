@@ -15,6 +15,8 @@
 
 #define TAG "protect"
 
+#if CONFIG_LYFI_PROTECTION_OVERHEATED_SUPPORT
+
 static void _coap_hnd_overheated_temp_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
                                           const coap_string_t* query, coap_pdu_t* response)
 {
@@ -32,3 +34,5 @@ static void _coap_hnd_overheated_temp_get(coap_resource_t* resource, coap_sessio
 }
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/protection/overheated-temp", false, _coap_hnd_overheated_temp_get, NULL, NULL, NULL);
+
+#endif // CONFIG_LYFI_PROTECTION_OVERHEATED_SUPPORT

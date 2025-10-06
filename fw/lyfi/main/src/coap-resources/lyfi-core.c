@@ -335,9 +335,13 @@ static void coap_hnd_status_get(coap_resource_t* resource, coap_session_t* sessi
     }
 
     {
-        const struct fan_status fs = fan_get_status();
         BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "fanPower"), response);
+#if CONFIG_LYFI_PROTECTION_OVERHEATED_SUPPORT
+        const struct fan_status fs = fan_get_status();
         BO_COAP_TRY(cbor_encode_uint(&root_map, fs.power), response);
+#else
+        BO_COAP_TRY(cbor_encode_null(&root_map), response);
+#endif // CONFIG_LYFI_PROTECTION_OVERHEATED_SUPPORT
     }
 
     {

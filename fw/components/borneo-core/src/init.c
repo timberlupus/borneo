@@ -44,9 +44,9 @@
 
 static int _borneo_early_init(const struct drvfx_device* dev)
 {
-#if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED
+#if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED && (!CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG)
     CLEAR_PERI_REG_MASK(USB_SERIAL_JTAG_CONF0_REG, USB_SERIAL_JTAG_DP_PULLUP);
-#endif // CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED
+#endif
 
     ESP_LOGI(TAG, "Initializing early stuff...");
 
@@ -61,7 +61,10 @@ static int _borneo_core_init(const struct drvfx_device* dev)
 {
     ESP_LOGI(TAG, "Initializing Borneo Core...");
 
+#if CONFIG_BORNEO_INDICATOR_ENABLED
     BO_TRY(bo_indicator_init());
+#endif
+
     BO_TRY(bo_system_init());
     BO_TRY(bo_power_init());
     BO_TRY(bo_rtc_init());

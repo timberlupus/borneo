@@ -23,6 +23,8 @@
 
 #define TEMP_WINDOW_SIZE 8
 
+#if CONFIG_LYFI_THERMAL_ENABLED
+
 struct pid {
     int32_t prev_error;
     int32_t integral;
@@ -41,6 +43,7 @@ static int load_factory_settings();
 static int load_user_settings();
 static void thermal_timer_callback(void* args);
 static int thermal_reinit();
+
 static uint8_t thermal_pid_step(int32_t current_temp);
 static int update_temp_average(int new_sample);
 
@@ -103,9 +106,11 @@ int thermal_init()
     BO_TRY(load_user_settings());
 
     if (ntc_init() != 0) {
+#if CONFIG_LYFI_FAN_CTRL_SUPPORT
         if (_settings.fan_mode != THERMAL_FAN_MODE_DISABLED) {
             fan_set_power(OUTPUT_MAX);
         }
+#endif // CONFIG_LYFI_FAN_CTRL_SUPPORT
         return -1;
     }
 
@@ -124,7 +129,9 @@ int thermal_init()
     }
 
     if (_settings.fan_mode != THERMAL_FAN_MODE_DISABLED) {
+#if CONFIG_LYFI_FAN_CTRL_SUPPORT
         fan_set_power(0);
+#endif // CONFIG_LYFI_FAN_CTRL_SUPPORT
     }
 
     if (THERMAL_FAN_MODE_PID == _settings.fan_mode) {
@@ -274,16 +281,20 @@ static void thermal_timer_callback(void* args)
     int rc = ntc_read_temp(&new_temp);
     if (rc != 0) {
         ESP_LOGE(TAG, "Temperature sensor fault or not connected.");
+#if CONFIG_LYFI_FAN_CTRL_SUPPORT
         if (bo_power_is_on()) {
+
             fan_set_power(OUTPUT_MAX);
         }
         else {
             fan_set_power(0);
         }
+#endif // CONFIG_LYFI_FAN_CTRL_SUPPORT
         return;
     }
     update_temp_average(new_temp);
 
+#if CONFIG_LYFI_FAN_CTRL_SUPPORT
     uint8_t fan_power_to_set = OUTPUT_MAX;
 
     // If the device has been shut down and the temperature is suitable, turn off the fan.
@@ -304,6 +315,7 @@ static void thermal_timer_callback(void* args)
         ESP_LOGI(TAG, "Changing fan power: temp=%d, keep_temp=%d, fan=%u%%\t", _thermal.current_temp,
                  _settings.keep_temp, fan_power_to_set);
     }
+#endif // CONFIG_LYFI_FAN_CTRL_SUPPORT
 }
 
 const struct thermal_settings* thermal_get_settings() { return &_settings; }
@@ -315,17 +327,6 @@ int thermal_set_pid(int32_t kp, int32_t ki, int32_t kd)
     _settings.kd = kd;
 
     BO_TRY(thermal_reinit());
-    return 0;
-}
-
-int thermal_set_keep_temp(uint8_t keep_temp)
-{
-    if (keep_temp < KEEP_TEMP_MIN || keep_temp >= bo_protect_get_overheated_temp()) {
-        return -EINVAL;
-    }
-
-    _settings.keep_temp = keep_temp;
-
     return 0;
 }
 
@@ -348,3 +349,5 @@ int update_temp_average(int new_sample)
     _thermal.current_temp = (int)((sum + (n / 2)) / n);
     return 0;
 }
+
+#endif // CONFIG_LYFI_THERMAL_ENABLED

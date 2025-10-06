@@ -73,7 +73,7 @@ int rmtpwm_init()
     return 0;
 }
 
-#if !SOC_DAC_SUPPORTED
+#if !SOC_DAC_SUPPORTED && CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
 int rmtpwm_dac_init()
 {
     ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan PWM-DAC...", CONFIG_LYFI_FAN_CTRL_PWMDAC_GPIO);
