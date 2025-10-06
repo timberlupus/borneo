@@ -168,7 +168,7 @@ class LyfiDeviceStatus {
   final LyfiMode mode;
   final bool unscheduled;
   final Duration temporaryRemaining;
-  final int fanPower;
+  final int? fanPower;
   final List<int> currentColor;
   final List<int> manualColor;
   final List<int> sunColor;
@@ -184,7 +184,7 @@ class LyfiDeviceStatus {
     required this.mode,
     required this.unscheduled,
     required this.temporaryRemaining,
-    required this.fanPower,
+    this.fanPower,
     required this.currentColor,
     required this.manualColor,
     required this.sunColor,
@@ -200,7 +200,7 @@ class LyfiDeviceStatus {
       mode: LyfiMode.values[map['mode']],
       unscheduled: map['unscheduled'],
       temporaryRemaining: Duration(seconds: map['tempRemain']),
-      fanPower: map['fanPower'],
+      fanPower: map['fanPower'] == null ? null : (map['fanPower'] as int),
       currentColor: List<int>.from(map['currentColor']),
       manualColor: List<int>.from(map['manualColor']),
       sunColor: List<int>.from(map['sunColor']),

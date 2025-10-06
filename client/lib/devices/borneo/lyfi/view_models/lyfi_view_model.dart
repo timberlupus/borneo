@@ -199,7 +199,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
     await super.refreshStatus(cancelToken: cancelToken);
 
-    _fanPowerRatio = super.lyfiDeviceStatus?.fanPower.toDouble();
+    _fanPowerRatio = super.lyfiDeviceStatus?.fanPower == null ? null : super.lyfiDeviceStatus!.fanPower!.toDouble();
 
     _temporaryRemaining.value = lyfiDeviceStatus?.temporaryRemaining ?? Duration.zero;
 
