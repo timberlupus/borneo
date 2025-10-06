@@ -134,6 +134,7 @@ int fan_set_power(uint8_t value)
     }
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
+#if CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
     if (_factory_settings.flags & FAN_FLAG_DAC_ENABLED) {
 #if SOC_DAC_SUPPORTED
         // Built-in DAC
@@ -169,6 +170,7 @@ int fan_set_power(uint8_t value)
         }
 #endif // CONFIG_IDF_TARGET_ESP32C3
     }
+#endif // CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
 
     return 0;
 }
