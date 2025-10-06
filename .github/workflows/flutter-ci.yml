@@ -38,12 +38,6 @@ jobs:
           echo "pub=${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock', 'client/packages/*/pubspec.yaml') }}" >> $GITHUB_OUTPUT
           echo "gradle=${{ runner.os }}-gradle-${{ hashFiles('client/**/*.gradle*', 'client/**/gradle-wrapper.properties') }}" >> $GITHUB_OUTPUT
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -105,7 +99,7 @@ jobs:
           melos run test:dart --no-select
 
   build-apk:
-    needs: [setup]
+    needs: [setup, test]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -131,6 +125,12 @@ jobs:
           storePassword=${{ secrets.KEYSTORE_PASSWORD }}
           keyPassword=${{ secrets.KEYSTORE_PASSWORD }}
           EOF
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -210,12 +210,24 @@ jobs:
           key: ${{ needs.setup.outputs.cache-key-pub }}
           restore-keys: ${{ runner.os }}-pub-cache-
 
+      # Cache NuGet packages to speed MSBuild / CMake native deps
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.USERPROFILE }}\\.nuget\\packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('client/windows/**') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
       - name: Cache MSBuild
         uses: actions/cache@v4
         with:
           path: ~/AppData/Local/Microsoft/VisualStudio
           key: ${{ runner.os }}-msbuild-${{ hashFiles('client/windows/**') }}
           restore-keys: ${{ runner.os }}-msbuild-
+
+      # Pre-download Flutter engine/artifacts for Windows (avoid on-the-fly downloads)
+      - name: Flutter precache (windows)
+        run: flutter precache --windows
 
       - name: Activate melos and bootstrap
         run: |
@@ -236,13 +248,13 @@ jobs:
 
       - name: Create and zip Windows release
         run: |
-          pwsh ./scripts/windows-dist-pack.ps1 ${{ steps.get_version.outputs.version }}
+          pwsh ./scripts/windows-dist-pack.ps1 ce-${{ steps.get_version.outputs.version }}
 
       - name: Upload Windows zip artifact
         uses: actions/upload-artifact@v4
         with:
           name: borneo-app-ce-${{ steps.get_version.outputs.version }}-windows-x64
-          path: client\build\windows\dist\borneo-app-${{ steps.get_version.outputs.version }}-windows-x64.zip
+          path: client\build\windows\dist\borneo-app-ce-${{ steps.get_version.outputs.version }}-windows-x64.zip
 
   release:
     needs: [build-apk, build-windows]
