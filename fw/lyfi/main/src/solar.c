@@ -95,7 +95,8 @@ int solar_day_of_year(const struct tm* tm_local)
 float solar_calculate_local_tz_offset(const struct tm* tm_local)
 {
     // Convert to time_t, accounting for local timezone
-    time_t local_time = mktime(tm_local);
+    struct tm tm_copy = *tm_local;
+    time_t local_time = mktime(&tm_copy);
 
     // Get UTC time
     struct tm tm_utc;

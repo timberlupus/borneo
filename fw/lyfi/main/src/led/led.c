@@ -66,7 +66,7 @@ static void dimming_state_exit();
 static inline led_duty_t channel_brightness_to_duty(led_brightness_t power);
 static inline void color_to_duties(const led_color_t color, led_duty_t* duties);
 static int led_set_channel_duty(uint8_t ch, led_duty_t duty);
-static int led_set_duties(const led_duty_t* duties);
+static int __attribute__((unused)) led_set_duties(const led_duty_t* duties);
 
 static int led_mode_manual_entry();
 static int led_mode_scheduled_entry();
