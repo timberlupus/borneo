@@ -440,7 +440,34 @@ menu "Borneo LyFi"
         config LYFI_THERMAL_ENABLED
             bool "Enable The Thermal Management Sub-system"
             default y
-            depends on LYFI_FAN_CTRL_SUPPORT && LYFI_NTC_SUPPORT
+            depends on LYFI_FAN_CTRL_SUPPORT || LYFI_NTC_SUPPORT
+
+        choice
+            prompt "Default Fan mode"
+            default LYFI_THERMAL_FAN_MODE_PID
+            depends on LYFI_THERMAL_ENABLED
+
+            config LYFI_THERMAL_FAN_MODE_DISABLED
+                bool "Fan disabled"
+                depends on LYFI_THERMAL_ENABLED
+
+            config LYFI_THERMAL_FAN_MODE_PID
+                bool "Using PID adaptive algorithm"
+                depends on LYFI_THERMAL_ENABLED && LYFI_FAN_CTRL_SUPPORT && LYFI_NTC_SUPPORT
+
+            config LYFI_THERMAL_FAN_MODE_MANUAL
+                bool "Manual fan setting"
+                depends on LYFI_THERMAL_ENABLED
+        endchoice
+
+        config LYFI_THERMAL_FAN_MODE_DEFAULT
+            int
+            depends on (LYFI_THERMAL_FAN_MODE_DISABLED || LYFI_THERMAL_FAN_MODE_PID || LYFI_THERMAL_FAN_MODE_MANUAL) && LYFI_THERMAL_ENABLED
+
+            default 0 if LYFI_THERMAL_FAN_MODE_DISABLED
+            default 1 if LYFI_THERMAL_FAN_MODE_PID
+            default 2 if LYFI_THERMAL_FAN_MODE_MANUAL
+
     endmenu
 
     menu "Press Button"
@@ -457,6 +484,7 @@ menu "Borneo LyFi"
 
         config LYFI_PROTECTION_ENABLED
             bool "Enable the protection feature"
+            depends on  LYFI_NTC_SUPPORT || (LYFI_MEAS_CURRENT_SUPPORT && BORNEO_MEAS_VOLTAGE_SUPPORT)
             default y
 
         config LYFI_PROTECTION_OVERHEATED_SUPPORT

@@ -10,6 +10,8 @@ enum thermal_fan_mode {
     THERMAL_FAN_MODE_DISABLED = 0,
     THERMAL_FAN_MODE_PID = 1,
     THERMAL_FAN_MODE_MANUAL = 2,
+
+    THERMAL_FAN_MODE_SIZE,
 };
 
 struct thermal_settings {
@@ -24,7 +26,14 @@ struct thermal_settings {
 int thermal_init();
 const struct thermal_settings* thermal_get_settings();
 int thermal_set_pid(int32_t kp, int32_t ki, int32_t kd);
+
+int thermal_set_manual_fan_power(uint8_t power);
+
+#if CONFIG_LYFI_NTC_SUPPORT
 int thermal_get_current_temp();
+#endif
+
+int thermal_set_fan_mode(int fan_mode);
 int thermal_set_fan_manual(uint8_t fan_power);
 
 #endif // CONFIG_LYFI_THERMAL_ENABLED

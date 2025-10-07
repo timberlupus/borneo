@@ -17,9 +17,11 @@
 #include <borneo/algo/filters.h>
 #include <borneo/devices/adc.h>
 
-static int bo_adc_cali(adc_cali_handle_t* out_handle);
-
 #define TAG "adc"
+
+#if CONFIG_BORNEO_ADC_ENABLED
+
+static int bo_adc_cali(adc_cali_handle_t* out_handle);
 
 #define AVAILABLE_ADC_UNIT ADC_UNIT_1
 
@@ -130,8 +132,6 @@ static int adc_init()
     BO_TRY(bo_adc_cali(&s_adc_cali_handle));
     return 0;
 }
-
-#if CONFIG_BORNEO_ADC_ENABLED
 
 DRVFX_SYS_INIT(adc_init, POST_KERNEL, DRVFX_INIT_KERNEL_DEFAULT_PRIORITY);
 

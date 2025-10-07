@@ -35,7 +35,7 @@ Available level:
 #define DRVFX_INIT_ENTRY_NAME(init_id) _CONCAT(__init_, init_id)
 
 #define DRVFX_INIT_ENTRY_SECTION(level, prio)                                                                          \
-    __attribute__((__section__(".drvfx_init_" #level "." _STRINGIFY(prio) "_")))
+    __attribute__((__section__(".drvfx_init_" #level "." _STRINGIFY(prio) "_"), used))
 
 #define DRVFX_INIT_ENTRY_DEFINE(init_id, init_fn, device, level, prio)                                                 \
     static const DRVFX_DECL_ALIGN(struct drvfx_init_entry) DRVFX_INIT_ENTRY_SECTION(level, prio)                       \

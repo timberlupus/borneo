@@ -44,8 +44,14 @@ static int load_user_settings();
 static void thermal_timer_callback(void* args);
 static int thermal_reinit();
 
+#if CONFIG_LYFI_NTC_SUPPORT
 static uint8_t thermal_pid_step(int32_t current_temp);
 static int update_temp_average(int new_sample);
+#endif
+
+#if CONFIG_LYFI_NTC_SUPPORT
+static void _timer_callback_pid(void* args);
+#endif // CONFIG_LYFI_NTC_SUPPORT
 
 #define CLAMP(x, _min, _max)                                                                                           \
     if ((x) > (_max))                                                                                                  \
@@ -80,8 +86,8 @@ const struct thermal_settings THERMAL_DEFAULT_SETTINGS = {
     .ki = 10,
     .kd = 50,
     .keep_temp = 45,
-    .fan_mode = THERMAL_FAN_MODE_PID,
-    .fan_manual_power = 75,
+    .fan_mode = CONFIG_LYFI_THERMAL_FAN_MODE_DEFAULT,
+    .fan_manual_power = 100,
 };
 
 static struct thermal_settings _settings = { 0 };
@@ -89,12 +95,10 @@ static struct thermal_state _thermal = { 0 };
 
 static int thermal_reinit()
 {
-    if (THERMAL_FAN_MODE_PID == _settings.fan_mode) {
-        _thermal.pid.integral = 0;
-        _thermal.pid.prev_error = 0;
-        _thermal.pid.last_output = 0;
-        thermal_timer_callback(NULL);
-    }
+    _thermal.pid.integral = 0;
+    _thermal.pid.prev_error = 0;
+    _thermal.pid.last_output = 0;
+    thermal_timer_callback(NULL);
     return 0;
 }
 
@@ -105,12 +109,13 @@ int thermal_init()
     BO_TRY(load_factory_settings());
     BO_TRY(load_user_settings());
 
+#if CONFIG_LYFI_NTC_SUPPORT
     if (ntc_init() != 0) {
-#if CONFIG_LYFI_FAN_CTRL_SUPPORT
         if (_settings.fan_mode != THERMAL_FAN_MODE_DISABLED) {
+#if CONFIG_LYFI_FAN_CTRL_SUPPORT
             fan_set_power(OUTPUT_MAX);
+#endif
         }
-#endif // CONFIG_LYFI_FAN_CTRL_SUPPORT
         return -1;
     }
 
@@ -127,21 +132,18 @@ int thermal_init()
             vTaskDelay(pdMS_TO_TICKS(10));
         }
     }
+#endif // CONFIG_LYFI_NTC_SUPPORT
 
-    if (_settings.fan_mode != THERMAL_FAN_MODE_DISABLED) {
 #if CONFIG_LYFI_FAN_CTRL_SUPPORT
-        fan_set_power(0);
-#endif // CONFIG_LYFI_FAN_CTRL_SUPPORT
-    }
+    fan_set_power(0);
+#endif
 
-    if (THERMAL_FAN_MODE_PID == _settings.fan_mode) {
-        const esp_timer_create_args_t timer_args = {
-            .callback = &thermal_timer_callback,
-            .name = "thermal_timer",
-        };
-        BO_TRY_ESP(esp_timer_create(&timer_args, &_thermal.timer));
-        BO_TRY_ESP(esp_timer_start_periodic(_thermal.timer, (uint64_t)PID_PERIOD * 1000));
-    }
+    const esp_timer_create_args_t timer_args = {
+        .callback = &thermal_timer_callback,
+        .name = "thermal_timer",
+    };
+    BO_TRY_ESP(esp_timer_create(&timer_args, &_thermal.timer));
+    BO_TRY_ESP(esp_timer_start_periodic(_thermal.timer, (uint64_t)PID_PERIOD * 1000));
 
     BO_TRY(thermal_reinit());
 
@@ -149,8 +151,6 @@ int thermal_init()
 
     return 0;
 }
-
-int thermal_get_current_temp() { return _thermal.current_temp; }
 
 int load_factory_settings()
 {
@@ -189,6 +189,104 @@ int load_user_settings()
     if (changed) {
         BO_TRY(nvs_commit(handle));
     }
+    return 0;
+}
+
+static void thermal_timer_callback(void* args)
+{
+
+    switch (_settings.fan_mode) {
+    case THERMAL_FAN_MODE_PID: {
+#if CONFIG_LYFI_NTC_SUPPORT
+        _timer_callback_pid(args);
+#endif
+    } break;
+
+    case THERMAL_FAN_MODE_MANUAL: {
+#if CONFIG_LYFI_FAN_CTRL_SUPPORT
+        fan_set_power(_settings.fan_manual_power);
+#endif
+    } break;
+
+    default:
+#if CONFIG_LYFI_FAN_CTRL_SUPPORT
+        fan_set_power(0);
+#endif
+    }
+}
+
+const struct thermal_settings* thermal_get_settings() { return &_settings; }
+
+int thermal_set_pid(int32_t kp, int32_t ki, int32_t kd)
+{
+    _settings.kp = kp;
+    _settings.ki = ki;
+    _settings.kd = kd;
+
+    BO_TRY(thermal_reinit());
+    return 0;
+}
+
+#if CONFIG_LYFI_NTC_SUPPORT
+
+int thermal_get_current_temp() { return _thermal.current_temp; }
+
+static void _timer_callback_pid(void* args)
+{
+    int new_temp = -1;
+    int rc = ntc_read_temp(&new_temp);
+    if (rc != 0) {
+        ESP_LOGE(TAG, "Temperature sensor fault or not connected.");
+        if (bo_power_is_on()) {
+
+            fan_set_power(OUTPUT_MAX);
+        }
+        else {
+            fan_set_power(0);
+        }
+        return;
+    }
+    update_temp_average(new_temp);
+
+    uint8_t fan_power_to_set = OUTPUT_MAX;
+
+    // If the device has been shut down and the temperature is suitable, turn off the fan.
+    if (_thermal.current_temp <= _settings.keep_temp && !bo_power_is_on()) {
+        if (fan_get_power() > 0) {
+            fan_set_power(0);
+            // pid_clear(&_pid);
+            // Respond to shutdown event to clear PID.
+        }
+        return;
+    }
+
+    // Below the emergency shutdown temperature, execute PID fan speed control.
+    fan_power_to_set = thermal_pid_step(_thermal.current_temp);
+
+    if (fan_power_to_set != fan_get_power()) {
+        fan_set_power(fan_power_to_set);
+        ESP_LOGI(TAG, "Changing fan power: temp=%d, keep_temp=%d, fan=%u%%\t", _thermal.current_temp,
+                 _settings.keep_temp, fan_power_to_set);
+    }
+}
+
+int update_temp_average(int new_sample)
+{
+    _thermal.temp_window[_thermal.temp_window_index % TEMP_WINDOW_SIZE] = new_sample;
+    _thermal.temp_window_index++;
+
+    int sum = 0;
+    int n = 0;
+    for (size_t i = 0; i < TEMP_WINDOW_SIZE; i++) {
+        if (_thermal.temp_window[i] >= 0) {
+            sum += _thermal.temp_window[i];
+            n++;
+        }
+    }
+    if (n == 0) {
+        return -1;
+    }
+    _thermal.current_temp = (int)((sum + (n / 2)) / n);
     return 0;
 }
 
@@ -275,78 +373,47 @@ uint8_t thermal_pid_step(int32_t current_temp)
     return out;
 }
 
-static void thermal_timer_callback(void* args)
+#endif // CONFIG_LYFI_NTC_SUPPORT
+
+int thermal_set_fan_mode(int fan_mode)
 {
-    int new_temp = -1;
-    int rc = ntc_read_temp(&new_temp);
-    if (rc != 0) {
-        ESP_LOGE(TAG, "Temperature sensor fault or not connected.");
-#if CONFIG_LYFI_FAN_CTRL_SUPPORT
-        if (bo_power_is_on()) {
-
-            fan_set_power(OUTPUT_MAX);
-        }
-        else {
-            fan_set_power(0);
-        }
-#endif // CONFIG_LYFI_FAN_CTRL_SUPPORT
-        return;
-    }
-    update_temp_average(new_temp);
-
-#if CONFIG_LYFI_FAN_CTRL_SUPPORT
-    uint8_t fan_power_to_set = OUTPUT_MAX;
-
-    // If the device has been shut down and the temperature is suitable, turn off the fan.
-    if (_thermal.current_temp <= _settings.keep_temp && !bo_power_is_on()) {
-        if (fan_get_power() > 0) {
-            fan_set_power(0);
-            // pid_clear(&_pid);
-            // Respond to shutdown event to clear PID.
-        }
-        return;
+    if (fan_mode < 0 || fan_mode >= THERMAL_FAN_MODE_SIZE) {
+        return -EINVAL;
     }
 
-    // Below the emergency shutdown temperature, execute PID fan speed control.
-    fan_power_to_set = thermal_pid_step(_thermal.current_temp);
-
-    if (fan_power_to_set != fan_get_power()) {
-        fan_set_power(fan_power_to_set);
-        ESP_LOGI(TAG, "Changing fan power: temp=%d, keep_temp=%d, fan=%u%%\t", _thermal.current_temp,
-                 _settings.keep_temp, fan_power_to_set);
+    if (fan_mode == _settings.fan_mode) {
+        return 0;
     }
-#endif // CONFIG_LYFI_FAN_CTRL_SUPPORT
-}
 
-const struct thermal_settings* thermal_get_settings() { return &_settings; }
+    nvs_handle_t handle;
+    BO_TRY(bo_nvs_user_open(THERMAL_NVS_USER_NS, NVS_READWRITE, &handle));
+    BO_NVS_AUTO_CLOSE(handle);
 
-int thermal_set_pid(int32_t kp, int32_t ki, int32_t kd)
-{
-    _settings.kp = kp;
-    _settings.ki = ki;
-    _settings.kd = kd;
+    BO_TRY(nvs_set_u8(handle, THERMAL_NVS_KEY_FAN_MODE, fan_mode));
+    _settings.fan_mode = fan_mode;
 
-    BO_TRY(thermal_reinit());
+    BO_TRY(nvs_commit(handle));
     return 0;
 }
 
-int update_temp_average(int new_sample)
+int thermal_set_manual_fan_power(uint8_t power)
 {
-    _thermal.temp_window[_thermal.temp_window_index % TEMP_WINDOW_SIZE] = new_sample;
-    _thermal.temp_window_index++;
+    if (power > 100) {
+        return -EINVAL;
+    }
 
-    int sum = 0;
-    int n = 0;
-    for (size_t i = 0; i < TEMP_WINDOW_SIZE; i++) {
-        if (_thermal.temp_window[i] >= 0) {
-            sum += _thermal.temp_window[i];
-            n++;
-        }
+    if (power == _settings.fan_manual_power) {
+        return 0;
     }
-    if (n == 0) {
-        return -1;
-    }
-    _thermal.current_temp = (int)((sum + (n / 2)) / n);
+
+    nvs_handle_t handle;
+    BO_TRY(bo_nvs_user_open(THERMAL_NVS_USER_NS, NVS_READWRITE, &handle));
+    BO_NVS_AUTO_CLOSE(handle);
+
+    BO_TRY(nvs_set_u8(handle, THERMAL_NVS_KEY_FAN_MANUAL_POWER, power));
+    _settings.fan_manual_power = power;
+
+    BO_TRY(nvs_commit(handle));
     return 0;
 }
 
