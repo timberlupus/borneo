@@ -36,6 +36,14 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   Duration get temporaryDuration => _temporaryDuration;
   bool get canUpdateTemporaryDuration => !isBusy && isOnline;
 
+  FanMode _fanMode = FanMode.manual;
+  FanMode get fanMode => _fanMode;
+  bool get canUpdateFanMode => !isBusy && isOnline;
+
+  int _manualFanPower = 0;
+  int get manualFanPower => _manualFanPower;
+  bool get canUpdateManualFanPower => !isBusy && isOnline && _fanMode == FanMode.manual;
+
   PowerBehavior _powerBehavior;
   PowerBehavior get powerBehavior => _powerBehavior;
   bool get canUpdatePowerBehavior => !isBusy && isOnline;
@@ -63,6 +71,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     await super.onInitialize();
     _correctionMethod = await api.getCorrectionMethod(boundDevice!.device);
     _temporaryDuration = await api.getTemporaryDuration(boundDevice!.device);
+    _fanMode = await api.getFanMode(boundDevice!.device);
+    _manualFanPower = await api.getFanManualPower(boundDevice!.device);
   }
 
   Future<void> updateGeoLocation(LatLng location) async {
@@ -158,6 +168,34 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
         notification.showSuccess(_gt.translate("Temporary duration updated successfully"));
       } catch (e) {
         notification.showError(_gt.translate("Failed to update temporary duration: $e"));
+      }
+    });
+  }
+
+  Future<void> updateFanMode(FanMode mode) async {
+    super.enqueueUIJob(() async {
+      isBusy = true;
+      notifyListeners();
+      try {
+        await api.setFanMode(boundDevice!.device, mode);
+        _fanMode = mode;
+        notification.showSuccess(_gt.translate("Fan mode updated successfully"));
+      } catch (e) {
+        notification.showError(_gt.translate("Failed to update fan mode: $e"));
+      }
+    });
+  }
+
+  Future<void> updateManualFanPower(int power) async {
+    super.enqueueUIJob(() async {
+      isBusy = true;
+      notifyListeners();
+      try {
+        await api.setFanManualPower(boundDevice!.device, power);
+        _manualFanPower = power;
+        notification.showSuccess(_gt.translate("Manual fan power updated successfully"));
+      } catch (e) {
+        notification.showError(_gt.translate("Failed to update manual fan power: $e"));
       }
     });
   }

@@ -292,6 +292,67 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
+
+      GenericSettingsGroup(
+        title: context.translate('THERMAL MANAGEMENT'),
+        children: [
+          Selector<SettingsViewModel, ({bool canUpdate, FanMode fanMode})>(
+            selector: (_, vm) => (canUpdate: vm.canUpdateFanMode, fanMode: vm.fanMode),
+            builder: (context, map, _) => ListTile(
+              dense: true,
+              tileColor: tileColor,
+              title: Text(context.translate('Fan mode')),
+              trailing: DropdownButton<FanMode>(
+                value: map.fanMode,
+                items: [
+                  DropdownMenuItem<FanMode>(
+                    value: FanMode.pid,
+                    child: Text("PID Adaptive", style: Theme.of(context).textTheme.bodySmall),
+                  ),
+                  DropdownMenuItem<FanMode>(
+                    value: FanMode.manual,
+                    child: Text(context.translate("Manual"), style: Theme.of(context).textTheme.bodySmall),
+                  ),
+                ],
+                onChanged: (FanMode? newValue) async {
+                  await vm.updateFanMode(newValue!);
+                },
+              ),
+            ),
+          ),
+          Selector<SettingsViewModel, ({bool canUpdate, int manualFanPower, FanMode fanMode})>(
+            selector: (_, vm) =>
+                (canUpdate: vm.canUpdateManualFanPower, manualFanPower: vm.manualFanPower, fanMode: vm.fanMode),
+            builder: (context, map, _) => ListTile(
+              dense: true,
+              tileColor: tileColor,
+              title: Text(
+                context.translate('Manual fan power'),
+                style: map.fanMode == FanMode.manual
+                    ? null
+                    : TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${map.manualFanPower}%',
+                    style: map.fanMode == FanMode.manual
+                        ? Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.primary)
+                        : Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+                          ),
+                  ),
+                  SizedBox(width: 8),
+                  rightChevron,
+                ],
+              ),
+              onTap: map.canUpdate ? () => _showManualFanPowerDialog(context, vm, map.manualFanPower) : null,
+            ),
+          ),
+        ],
+      ),
+
       GenericSettingsGroup(
         title: context.translate('VERSION & UPGRADE'),
         children: [
@@ -385,6 +446,45 @@ class SettingsScreen extends StatelessWidget {
             child: Text(context.translate('Restore')),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showManualFanPowerDialog(BuildContext context, SettingsViewModel vm, int currentValue) {
+    double tempValue = currentValue.toDouble();
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(context.translate('Set Manual Fan Power')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('${tempValue.toInt()}%'),
+              Slider(
+                value: tempValue,
+                min: 0,
+                max: 100,
+                divisions: 100,
+                onChanged: (value) {
+                  setState(() {
+                    tempValue = value;
+                  });
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.translate('Cancel'))),
+            FilledButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await vm.updateManualFanPower(tempValue.toInt());
+              },
+              child: Text(context.translate('Set')),
+            ),
+          ],
+        ),
       ),
     );
   }

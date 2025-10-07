@@ -379,7 +379,8 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   @override
   Future<void> setFanMode(Device dev, FanMode mode, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as LyfiCoapDriverData;
-    return await dd.coap.postCbor(LyfiPaths.fanMode, mode.toString(), cancelToken: cancelToken);
+    final modeStr = mode.toString();
+    return await dd.coap.putCbor(LyfiPaths.fanMode, modeStr, cancelToken: cancelToken);
   }
 
   @override
