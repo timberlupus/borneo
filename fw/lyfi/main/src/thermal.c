@@ -137,7 +137,7 @@ int thermal_init()
 #endif // CONFIG_LYFI_NTC_SUPPORT
 
 #if CONFIG_LYFI_FAN_CTRL_SUPPORT
-    if (_settings.fan_mode == THERMAL_FAN_MODE_MANUAL) {
+    if (_settings.fan_mode == THERMAL_FAN_MODE_MANUAL && bo_power_is_on()) {
         fan_set_power(_settings.fan_manual_power);
     }
     else {
