@@ -118,10 +118,6 @@ static void _coap_hnd_fan_mode_get(coap_resource_t* resource, coap_session_t* se
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
 
     switch (settings->fan_mode) {
-    case THERMAL_FAN_MODE_DISABLED:
-        BO_COAP_TRY_ENCODE(cbor_encode_text_stringz(&encoder, "disabled"), response);
-        break;
-
     case THERMAL_FAN_MODE_PID:
         BO_COAP_TRY_ENCODE(cbor_encode_text_stringz(&encoder, "pid"), response);
         break;
@@ -165,10 +161,7 @@ static void _coap_hnd_fan_mode_put(coap_resource_t* resource, coap_session_t* se
         goto _BAD_REQUEST;
     }
 
-    if (strcmp(mode_str, "disabled") == 0) {
-        mode = THERMAL_FAN_MODE_DISABLED;
-    }
-    else if (strcmp(mode_str, "pid") == 0) {
+    if (strcmp(mode_str, "pid") == 0) {
         mode = THERMAL_FAN_MODE_PID;
     }
     else if (strcmp(mode_str, "manual") == 0) {

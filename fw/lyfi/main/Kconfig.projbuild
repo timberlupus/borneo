@@ -447,10 +447,6 @@ menu "Borneo LyFi"
             default LYFI_THERMAL_FAN_MODE_PID
             depends on LYFI_THERMAL_ENABLED
 
-            config LYFI_THERMAL_FAN_MODE_DISABLED
-                bool "Fan disabled"
-                depends on LYFI_THERMAL_ENABLED
-
             config LYFI_THERMAL_FAN_MODE_PID
                 bool "Using PID adaptive algorithm"
                 depends on LYFI_THERMAL_ENABLED && LYFI_FAN_CTRL_SUPPORT && LYFI_NTC_SUPPORT
@@ -462,11 +458,10 @@ menu "Borneo LyFi"
 
         config LYFI_THERMAL_FAN_MODE_DEFAULT
             int
-            depends on (LYFI_THERMAL_FAN_MODE_DISABLED || LYFI_THERMAL_FAN_MODE_PID || LYFI_THERMAL_FAN_MODE_MANUAL) && LYFI_THERMAL_ENABLED
+            depends on (LYFI_THERMAL_FAN_MODE_PID || LYFI_THERMAL_FAN_MODE_MANUAL) && LYFI_THERMAL_ENABLED
 
-            default 0 if LYFI_THERMAL_FAN_MODE_DISABLED
+            default 0 if LYFI_THERMAL_FAN_MODE_MANUAL
             default 1 if LYFI_THERMAL_FAN_MODE_PID
-            default 2 if LYFI_THERMAL_FAN_MODE_MANUAL
 
     endmenu
 

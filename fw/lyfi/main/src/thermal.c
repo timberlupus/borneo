@@ -111,11 +111,9 @@ int thermal_init()
 
 #if CONFIG_LYFI_NTC_SUPPORT
     if (ntc_init() != 0) {
-        if (_settings.fan_mode != THERMAL_FAN_MODE_DISABLED) {
 #if CONFIG_LYFI_FAN_CTRL_SUPPORT
-            fan_set_power(OUTPUT_MAX);
+        fan_set_power(OUTPUT_MAX);
 #endif
-        }
         return -1;
     }
 
