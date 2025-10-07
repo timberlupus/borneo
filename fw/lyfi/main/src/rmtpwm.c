@@ -21,6 +21,10 @@ typedef struct {
     rmt_encoder_t base;
     rmt_encoder_t* copy_encoder;
     uint32_t resolution;
+    uint32_t ticks_per_period; ///< Precomputed for performance
+    uint64_t numerator; ///< Precomputed numerator for duty calculation
+    uint32_t high_ticks; ///< Precomputed high ticks
+    uint32_t low_ticks; ///< Precomputed low ticks
 } rmt_pwm_encoder_t;
 
 /**
@@ -115,6 +119,7 @@ int rmtpwm_pwm_init()
         .trans_queue_depth = 8, // set the maximum number of transactions that can pend in the background
     };
     BO_TRY_ESP(rmt_new_tx_channel(&fan_pwm_tx_chan_config, &s_pwm_channel.rmt_channel));
+    BO_TRY_ESP(gpio_pulldown_en(CONFIG_LYFI_FAN_CTRL_PWM_GPIO));
     BO_TRY_ESP(rmt_enable(s_pwm_channel.rmt_channel));
     BO_TRY_ESP(rmt_transmit(s_pwm_channel.rmt_channel, s_pwm_encoder, &s_pwm_channel.duty, sizeof(s_pwm_channel.duty),
                             &tx_config));
@@ -140,6 +145,14 @@ int rmtpwm_set_duty_internal(struct rmtpwm_channel* channel, uint8_t duty)
         BO_SEM_AUTO_RELEASE(channel->mutex);
 
         channel->duty = duty;
+        // Precompute PWM parameters for performance
+        rmt_pwm_encoder_t* pwm_enc = (rmt_pwm_encoder_t*)s_pwm_encoder;
+        uint32_t ticks_per_period = pwm_enc->ticks_per_period;
+        uint64_t numerator = (uint64_t)ticks_per_period * duty + RMTPWM_DUTY_MAX / 2;
+        pwm_enc->numerator = numerator;
+        pwm_enc->high_ticks = (uint32_t)(numerator / RMTPWM_DUTY_MAX);
+        pwm_enc->low_ticks = ticks_per_period - pwm_enc->high_ticks;
+
         rmt_transmit_config_t tx_config = {
             .loop_count = -1,
         };
@@ -161,14 +174,18 @@ static size_t rmt_encode_pwm(rmt_encoder_t* encoder, rmt_channel_handle_t channe
     rmt_pwm_encoder_t* pwm_encoder = __containerof(encoder, rmt_pwm_encoder_t, base);
     rmt_encoder_handle_t copy_encoder = pwm_encoder->copy_encoder;
     rmt_encode_state_t session_state = RMT_ENCODING_RESET;
-    uint32_t* duty = (uint32_t*)primary_data;
-    uint32_t rmt_raw_symbol_duration = pwm_encoder->resolution / (RMTPWM_FREQ_HZ) / RMTPWM_DUTY_MAX;
+
+    // Use precomputed values for performance
+    uint32_t high_ticks = pwm_encoder->high_ticks;
+    uint32_t low_ticks = pwm_encoder->low_ticks;
+
     rmt_symbol_word_t pwm_rmt_symbol = {
         .level0 = 0,
-        .duration0 = rmt_raw_symbol_duration * (RMTPWM_DUTY_MAX - (*duty)),
+        .duration0 = low_ticks,
         .level1 = 1,
-        .duration1 = rmt_raw_symbol_duration * (*duty),
+        .duration1 = high_ticks,
     };
+
     size_t encoded_symbols
         = copy_encoder->encode(copy_encoder, channel, &pwm_rmt_symbol, sizeof(pwm_rmt_symbol), &session_state);
     *ret_state = session_state;
@@ -201,6 +218,11 @@ esp_err_t rmt_new_pwm_encoder(const rmt_pwm_encoder_config_t* config, rmt_encode
     pwm_encoder->base.del = rmt_del_pwm_encoder;
     pwm_encoder->base.reset = rmt_pwm_encoder_reset;
     pwm_encoder->resolution = config->resolution;
+    pwm_encoder->ticks_per_period = pwm_encoder->resolution / RMTPWM_FREQ_HZ; // Precompute
+    if (pwm_encoder->ticks_per_period == 0) {
+        pwm_encoder->ticks_per_period = 1;
+    }
+
     rmt_copy_encoder_config_t copy_encoder_config = {};
     ESP_GOTO_ON_ERROR(rmt_new_copy_encoder(&copy_encoder_config, &pwm_encoder->copy_encoder), err, TAG,
                       "create copy encoder failed");

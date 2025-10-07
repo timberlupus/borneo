@@ -109,6 +109,10 @@ int thermal_init()
     BO_TRY(load_factory_settings());
     BO_TRY(load_user_settings());
 
+#if CONFIG_LYFI_FAN_CTRL_SUPPORT
+    BO_TRY(fan_init());
+#endif
+
 #if CONFIG_LYFI_NTC_SUPPORT
     if (ntc_init() != 0) {
 #if CONFIG_LYFI_FAN_CTRL_SUPPORT
@@ -133,7 +137,12 @@ int thermal_init()
 #endif // CONFIG_LYFI_NTC_SUPPORT
 
 #if CONFIG_LYFI_FAN_CTRL_SUPPORT
-    fan_set_power(0);
+    if (_settings.fan_mode == THERMAL_FAN_MODE_MANUAL) {
+        fan_set_power(_settings.fan_manual_power);
+    }
+    else {
+        fan_set_power(0);
+    }
 #endif
 
     const esp_timer_create_args_t timer_args = {
@@ -210,6 +219,7 @@ static void thermal_timer_callback(void* args)
 #if CONFIG_LYFI_FAN_CTRL_SUPPORT
         fan_set_power(0);
 #endif
+        break;
     }
 }
 

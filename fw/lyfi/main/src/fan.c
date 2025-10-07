@@ -72,11 +72,11 @@ int fan_init()
     bool pwm_enabled = false;
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
-#if CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
-    if (dac_enabled || pwm_enabled) {
-        BO_TRY(rmtpwm_init());
-    }
+#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT || (CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT && !SOC_DAC_SUPPORTED)
+    BO_TRY(rmtpwm_init());
+#endif
 
+#if CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
     if (dac_enabled) {
 #if SOC_DAC_SUPPORTED
         ESP_LOGI(TAG, "Fan driver using DAC, channel=%u", CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL);
@@ -85,9 +85,8 @@ int fan_init()
 #else
         BO_TRY(rmtpwm_dac_init());
         BO_TRY(rmtpwm_set_dac_duty(RMTPWM_DUTY_MAX));
-#endif
+#endif // SOC_DAC_SUPPORTED
     }
-
 #endif // CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
 
 #if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
@@ -129,7 +128,8 @@ int fan_set_power(uint8_t value)
 
 #if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
     if (_factory_settings.flags & FAN_FLAG_PWM_ENABLED) {
-        BO_TRY(rmtpwm_set_pwm_duty(value));
+        uint8_t duty = (value * RMTPWM_DUTY_MAX + FAN_POWER_MAX / 2) / FAN_POWER_MAX;
+        BO_TRY(rmtpwm_set_pwm_duty(duty));
         ESP_LOGI(TAG, "Set fan power, method: PWM, power=%u%%", value);
     }
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
@@ -210,15 +210,13 @@ int fan_factory_settings_load()
         _factory_settings.flags &= ~FAN_FLAG_DAC_ENABLED;
     }
 
-#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-    BO_TRY(bo_nvs_get_or_set_u8(nvs_handle, FAN_NVS_KEY_PWM_ENABLED, &en, 0, &changed));
+    BO_TRY(bo_nvs_get_or_set_u8(nvs_handle, FAN_NVS_KEY_PWM_ENABLED, &en, 1, &changed));
     if (en) {
         _factory_settings.flags |= FAN_FLAG_PWM_ENABLED;
     }
     else {
         _factory_settings.flags &= ~FAN_FLAG_PWM_ENABLED;
     }
-#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
     if (changed) {
         BO_TRY(nvs_commit(nvs_handle));
