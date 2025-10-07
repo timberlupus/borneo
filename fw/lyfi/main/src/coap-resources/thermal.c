@@ -113,11 +113,27 @@ static void _coap_hnd_fan_mode_get(coap_resource_t* resource, coap_session_t* se
     size_t encoded_size = 0;
     const struct thermal_settings* settings = thermal_get_settings();
 
-    uint8_t buf[32];
+    uint8_t buf[64];
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
 
-    BO_COAP_TRY_ENCODE(cbor_encode_uint(&encoder, (uint8_t)settings->fan_mode), response);
+    switch (settings->fan_mode) {
+    case THERMAL_FAN_MODE_DISABLED:
+        BO_COAP_TRY_ENCODE(cbor_encode_text_stringz(&encoder, "disabled"), response);
+        break;
+
+    case THERMAL_FAN_MODE_PID:
+        BO_COAP_TRY_ENCODE(cbor_encode_text_stringz(&encoder, "pid"), response);
+        break;
+
+    case THERMAL_FAN_MODE_MANUAL:
+        BO_COAP_TRY_ENCODE(cbor_encode_text_stringz(&encoder, "manual"), response);
+        break;
+
+    default:
+        BO_COAP_TRY_ENCODE(cbor_encode_undefined(&encoder), response);
+        break;
+    }
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
@@ -137,12 +153,32 @@ static void _coap_hnd_fan_mode_put(coap_resource_t* resource, coap_session_t* se
     CborValue it;
     BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &it), response);
 
-    int mode;
-    BO_COAP_TRY_DECODE(cbor_value_get_int(&it, &mode), response);
-    if (mode >= THERMAL_FAN_MODE_SIZE || mode < 0) {
+    int mode = -1;
+
+    /* Decode a text string from CBOR into a stack buffer and map it to enum */
+    char mode_str[16] = { 0 };
+    size_t mode_len = sizeof(mode_str);
+
+    BO_COAP_TRY_DECODE(cbor_value_copy_text_string(&it, mode_str, &mode_len, NULL), response);
+
+    if (mode_len == 0) {
         goto _BAD_REQUEST;
     }
-    BO_COAP_TRY(thermal_set_fan_mode((uint8_t)mode), response);
+
+    if (strcmp(mode_str, "disabled") == 0) {
+        mode = THERMAL_FAN_MODE_DISABLED;
+    }
+    else if (strcmp(mode_str, "pid") == 0) {
+        mode = THERMAL_FAN_MODE_PID;
+    }
+    else if (strcmp(mode_str, "manual") == 0) {
+        mode = THERMAL_FAN_MODE_MANUAL;
+    }
+    else {
+        goto _BAD_REQUEST;
+    }
+
+    BO_COAP_TRY(thermal_set_fan_mode(mode), response);
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
     return;
