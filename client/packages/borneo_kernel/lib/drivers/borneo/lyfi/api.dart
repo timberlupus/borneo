@@ -44,4 +44,16 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
 
   Future<ScheduleTable> getSunSchedule(Device dev, {CancellationToken? cancelToken});
   Future<List<SunCurveItem>> getSunCurve(Device dev, {CancellationToken? cancelToken});
+
+  /// Gets the current fan mode.
+  Future<FanMode> getFanMode(Device dev, {CancellationToken? cancelToken});
+
+  /// Sets the fan mode.
+  Future<void> setFanMode(Device dev, FanMode mode, {CancellationToken? cancelToken});
+
+  /// Gets the manual fan power level (0-100).
+  Future<int> getFanManualPower(Device dev, {CancellationToken? cancelToken});
+
+  /// Sets the manual fan power level (0-100).
+  Future<void> setFanManualPower(Device dev, int power, {CancellationToken? cancelToken});
 }

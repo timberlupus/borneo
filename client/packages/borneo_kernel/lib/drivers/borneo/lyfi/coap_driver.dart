@@ -44,6 +44,8 @@ class LyfiPaths {
 
   static final Uri currentTemp = Uri(path: '/borneo/lyfi/thermal/temp/current');
   static final Uri keepTemp = Uri(path: '/borneo/lyfi/thermal/temp/keep');
+  static final Uri fanMode = Uri(path: '/borneo/lyfi/thermal/fan/mode');
+  static final Uri fanManual = Uri(path: '/borneo/lyfi/thermal/fan/manual');
 }
 
 class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi implements IDriver, ILyfiDeviceApi {
@@ -365,5 +367,30 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
     final dd = dev.data<LyfiCoapDriverData>();
     final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.sunCurve, cancelToken: cancelToken);
     return items.map((x) => SunCurveItem.fromMap(x!)).toList();
+  }
+
+  @override
+  Future<FanMode> getFanMode(Device dev, {CancellationToken? cancelToken}) async {
+    final dd = dev.driverData as LyfiCoapDriverData;
+    final modeStr = await dd.coap.getCbor<String>(LyfiPaths.fanMode, cancelToken: cancelToken);
+    return FanMode.fromString(modeStr);
+  }
+
+  @override
+  Future<void> setFanMode(Device dev, FanMode mode, {CancellationToken? cancelToken}) async {
+    final dd = dev.driverData as LyfiCoapDriverData;
+    return await dd.coap.postCbor(LyfiPaths.fanMode, mode.toString(), cancelToken: cancelToken);
+  }
+
+  @override
+  Future<int> getFanManualPower(Device dev, {CancellationToken? cancelToken}) async {
+    final dd = dev.driverData as LyfiCoapDriverData;
+    return await dd.coap.getCbor<int>(LyfiPaths.fanManual, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<void> setFanManualPower(Device dev, int power, {CancellationToken? cancelToken}) async {
+    final dd = dev.driverData as LyfiCoapDriverData;
+    await dd.coap.putCbor(LyfiPaths.fanManual, power, cancelToken: cancelToken);
   }
 }

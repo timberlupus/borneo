@@ -260,3 +260,22 @@ class SunCurveItem {
   @override
   int get hashCode => Object.hash(instant, brightness);
 }
+
+/// Represents the fan mode for the device
+enum FanMode {
+  /// Disabled fan mode
+  disabled,
+
+  /// PID adaptive algorithm mode
+  pid,
+
+  /// Manual fan power setting mode (0-100% integer value)
+  manual;
+
+  factory FanMode.fromString(String item) => switch (item) {
+    "disabled" => FanMode.disabled,
+    "pid" => FanMode.pid,
+    "manual" => FanMode.manual,
+    _ => throw InvalidDataException(),
+  };
+}
