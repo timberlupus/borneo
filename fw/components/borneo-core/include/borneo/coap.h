@@ -65,6 +65,24 @@ struct coap_resource_desc {
         }                                                                                                              \
     })
 
+#define BO_COAP_TRY_ENCODE(expression, response)                                                                       \
+    ({                                                                                                                 \
+        CborError _rc = (expression);                                                                                  \
+        if (_rc != CborNoError) {                                                                                      \
+            coap_pdu_set_code(response, COAP_RESPONSE_CODE(501));                                                      \
+            return;                                                                                                    \
+        }                                                                                                              \
+    })
+
+#define BO_COAP_REQUIRES(expression, response)                                                                         \
+    ({                                                                                                                 \
+        typeof(expression) _rr = (expression);                                                                         \
+        if (!_rr) {                                                                                                    \
+            coap_pdu_set_code(response, COAP_RESPONSE_CODE(400));                                                      \
+            return;                                                                                                    \
+        }                                                                                                              \
+    })
+
 #define BO_COAP_CODE_201_CREATED COAP_RESPONSE_CODE(201)
 #define BO_COAP_CODE_202_DELETED COAP_RESPONSE_CODE(202)
 #define BO_COAP_CODE_203_VALID COAP_RESPONSE_CODE(203)

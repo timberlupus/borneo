@@ -55,48 +55,35 @@ typedef enum {
     FACTORY_NVS_KIND_STRING,
 } factory_nvs_kind_t;
 
-static bool factory_nvs_prepare(const coap_pdu_t* request, coap_pdu_t* response, CborParser* parser, CborValue* map,
-                                char* ns, size_t ns_len, char* key, size_t key_len)
+static int factory_nvs_prepare(const coap_pdu_t* request, CborParser* parser, CborValue* map, char* ns, size_t ns_len,
+                               char* key, size_t key_len)
 {
     size_t data_size = 0;
     const uint8_t* data = NULL;
     coap_get_data(request, &data_size, &data);
 
-    CborError err = cbor_parser_init(data, data_size, 0, parser, map);
-    if (err != CborNoError || !cbor_value_is_map(map)) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return false;
+    BO_TRY(cbor_parser_init(data, data_size, 0, parser, map));
+    if (!cbor_value_is_map(map)) {
+        return -EINVAL;
     }
 
     CborValue value;
+
     size_t len = ns_len;
-
-    err = cbor_value_map_find_value(map, "ns", &value);
-    if (err != CborNoError || !cbor_value_is_text_string(&value)) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return false;
+    BO_TRY(cbor_value_map_find_value(map, "ns", &value));
+    if (!cbor_value_is_text_string(&value)) {
+        return -EINVAL;
     }
-
-    err = cbor_value_copy_text_string(&value, ns, &len, NULL);
-    if (err != CborNoError) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return false;
-    }
+    BO_TRY(cbor_value_copy_text_string(&value, ns, &len, NULL));
 
     len = key_len;
-    err = cbor_value_map_find_value(map, "k", &value);
-    if (err != CborNoError || !cbor_value_is_text_string(&value)) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return false;
+    BO_TRY(cbor_value_map_find_value(map, "k", &value));
+    if (!cbor_value_is_text_string(&value)) {
+        return -EINVAL;
     }
+    BO_TRY(cbor_value_copy_text_string(&value, key, &len, NULL));
 
-    err = cbor_value_copy_text_string(&value, key, &len, NULL);
-    if (err != CborNoError) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return false;
-    }
-
-    return true;
+    return 0;
 }
 
 static int factory_nvs_hex(char c)
@@ -113,7 +100,7 @@ static int factory_nvs_hex(char c)
     return -1;
 }
 
-static bool factory_nvs_query_copy_value(const char* src, char* dst, size_t dst_len)
+static int factory_nvs_query_copy_value(const char* src, char* dst, size_t dst_len)
 {
     size_t out = 0;
     while (*src != '\0') {
@@ -123,29 +110,29 @@ static bool factory_nvs_query_copy_value(const char* src, char* dst, size_t dst_
         }
         else if (ch == '%') {
             if (src[0] == '\0' || src[1] == '\0') {
-                return false;
+                return -EINVAL;
             }
             int hi = factory_nvs_hex(src[0]);
             int lo = factory_nvs_hex(src[1]);
             if (hi < 0 || lo < 0) {
-                return false;
+                return -EINVAL;
             }
             ch = (char)((hi << 4) | lo);
             src += 2;
         }
 
         if (out + 1 >= dst_len) {
-            return false;
+            return -EINVAL;
         }
         dst[out++] = ch;
     }
 
     dst[out] = '\0';
-    return true;
+    return 0;
 }
 
-static bool factory_nvs_parse_query(const coap_pdu_t* request, const coap_string_t* query, coap_pdu_t* response,
-                                    char* ns, size_t ns_len, char* key, size_t key_len)
+static bool factory_nvs_parse_query(const coap_pdu_t* request, const coap_string_t* query, char* ns, size_t ns_len,
+                                    char* key, size_t key_len)
 {
     const coap_string_t* opt_query = query;
     if (opt_query == NULL || opt_query->length == 0) {
@@ -153,13 +140,11 @@ static bool factory_nvs_parse_query(const coap_pdu_t* request, const coap_string
     }
 
     if (opt_query == NULL || opt_query->length == 0) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return false;
+        return -EINVAL;
     }
 
     if (opt_query->length >= 128) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return false;
+        return -EINVAL;
     }
 
     char buf[128] = { 0 };
@@ -188,17 +173,11 @@ static bool factory_nvs_parse_query(const coap_pdu_t* request, const coap_string
                 *equal = '\0';
                 const char* value = equal + 1;
                 if (strcmp(token, "ns") == 0) {
-                    if (!factory_nvs_query_copy_value(value, ns, ns_len)) {
-                        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-                        return false;
-                    }
+                    BO_TRY(factory_nvs_query_copy_value(value, ns, ns_len));
                     has_ns = true;
                 }
                 else if (strcmp(token, "k") == 0) {
-                    if (!factory_nvs_query_copy_value(value, key, key_len)) {
-                        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-                        return false;
-                    }
+                    BO_TRY(factory_nvs_query_copy_value(value, key, key_len));
                     has_key = true;
                 }
             }
@@ -208,11 +187,10 @@ static bool factory_nvs_parse_query(const coap_pdu_t* request, const coap_string
     }
 
     if (!has_ns || !has_key) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return false;
+        return -EINVAL;
     }
 
-    return true;
+    return 0;
 }
 
 static bool factory_nvs_kind_is_signed(factory_nvs_kind_t kind)
@@ -277,9 +255,7 @@ static void factory_nvs_handle_numeric_get(const coap_pdu_t* request, const coap
     char ns[32] = { 0 };
     char key[32] = { 0 };
 
-    if (!factory_nvs_parse_query(request, query, response, ns, sizeof(ns), key, sizeof(key))) {
-        return;
-    }
+    BO_COAP_TRY(factory_nvs_parse_query(request, query, ns, sizeof(ns), key, sizeof(key)), response);
 
     nvs_handle_t nvs;
     BO_COAP_TRY(bo_nvs_factory_open(ns, NVS_READWRITE, &nvs), response);
@@ -358,16 +334,11 @@ static void factory_nvs_handle_numeric_set(const coap_pdu_t* request, coap_pdu_t
     char ns[32] = { 0 };
     char key[32] = { 0 };
 
-    if (!factory_nvs_prepare(request, response, &parser, &map, ns, sizeof(ns), key, sizeof(key))) {
-        return;
-    }
+    BO_COAP_TRY(factory_nvs_prepare(request, &parser, &map, ns, sizeof(ns), key, sizeof(key)), response);
 
     CborValue value_item;
-    CborError err = cbor_value_map_find_value(&map, "v", &value_item);
-    if (err != CborNoError || cbor_value_is_undefined(&value_item)) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return;
-    }
+    BO_COAP_TRY(cbor_value_map_find_value(&map, "v", &value_item), response);
+    BO_COAP_REQUIRES(!cbor_value_is_undefined(&value_item), response);
 
     nvs_handle_t nvs;
     BO_COAP_TRY(bo_nvs_factory_open(ns, NVS_READWRITE, &nvs), response);
@@ -430,9 +401,7 @@ static void factory_nvs_handle_blob_get(const coap_pdu_t* request, const coap_st
     char ns[32] = { 0 };
     char key[32] = { 0 };
 
-    if (!factory_nvs_parse_query(request, query, response, ns, sizeof(ns), key, sizeof(key))) {
-        return;
-    }
+    BO_COAP_TRY(factory_nvs_parse_query(request, query, ns, sizeof(ns), key, sizeof(key)), response);
 
     nvs_handle_t nvs;
     BO_COAP_TRY(bo_nvs_factory_open(ns, NVS_READWRITE, &nvs), response);
@@ -448,21 +417,13 @@ static void factory_nvs_handle_blob_get(const coap_pdu_t* request, const coap_st
 
     uint8_t blob[512] = { 0 };
     if (blob_len > 0) {
-        esp_err_t read_err = nvs_get_blob(nvs, key, blob, &blob_len);
-        if (read_err != ESP_OK) {
-            BO_COAP_TRY(read_err, response);
-            return;
-        }
+        BO_COAP_TRY(nvs_get_blob(nvs, key, blob, &blob_len), response);
     }
 
     uint8_t encode_buf[512 + 16] = { 0 };
     CborEncoder encoder;
     cbor_encoder_init(&encoder, encode_buf, sizeof(encode_buf), 0);
-    CborError err_enc = cbor_encode_byte_string(&encoder, blob, blob_len);
-    if (err_enc != CborNoError) {
-        coap_pdu_set_code(response, BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
-        return;
-    }
+    BO_COAP_TRY_ENCODE(cbor_encode_byte_string(&encoder, blob, blob_len), response);
 
     size_t encoded_size = cbor_encoder_get_buffer_size(&encoder, encode_buf);
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, encode_buf);
@@ -476,9 +437,7 @@ static void factory_nvs_handle_blob_set(const coap_pdu_t* request, coap_pdu_t* r
     char ns[32] = { 0 };
     char key[32] = { 0 };
 
-    if (!factory_nvs_prepare(request, response, &parser, &map, ns, sizeof(ns), key, sizeof(key))) {
-        return;
-    }
+    BO_COAP_TRY(factory_nvs_prepare(request, &parser, &map, ns, sizeof(ns), key, sizeof(key)), response);
 
     CborValue value_item;
     CborError err = cbor_value_map_find_value(&map, "v", &value_item);
@@ -513,9 +472,7 @@ static void factory_nvs_handle_string_get(const coap_pdu_t* request, const coap_
     char ns[32] = { 0 };
     char key[32] = { 0 };
 
-    if (!factory_nvs_parse_query(request, query, response, ns, sizeof(ns), key, sizeof(key))) {
-        return;
-    }
+    BO_COAP_TRY(factory_nvs_parse_query(request, query, ns, sizeof(ns), key, sizeof(key)), response);
 
     nvs_handle_t nvs;
     BO_COAP_TRY(bo_nvs_factory_open(ns, NVS_READWRITE, &nvs), response);
@@ -524,29 +481,18 @@ static void factory_nvs_handle_string_get(const coap_pdu_t* request, const coap_
     size_t str_len = 0;
     BO_COAP_TRY(nvs_get_str(nvs, key, NULL, &str_len), response);
 
-    if (str_len > FACTORY_NVS_STRING_MAX_SIZE) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return;
-    }
+    BO_COAP_REQUIRES(str_len <= FACTORY_NVS_STRING_MAX_SIZE, response);
 
     char str[FACTORY_NVS_STRING_MAX_SIZE] = { 0 };
     if (str_len > 0) {
-        esp_err_t read_err = nvs_get_str(nvs, key, str, &str_len);
-        if (read_err != ESP_OK) {
-            BO_COAP_TRY(read_err, response);
-            return;
-        }
+        BO_COAP_TRY_DECODE(nvs_get_str(nvs, key, str, &str_len), response);
     }
 
     size_t payload_len = str_len > 0 ? str_len - 1 : 0;
     uint8_t encode_buf[512 + 16] = { 0 };
     CborEncoder encoder;
     cbor_encoder_init(&encoder, encode_buf, sizeof(encode_buf), 0);
-    CborError err_enc = cbor_encode_text_string(&encoder, str, payload_len);
-    if (err_enc != CborNoError) {
-        coap_pdu_set_code(response, BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
-        return;
-    }
+    BO_COAP_TRY_ENCODE(cbor_encode_text_string(&encoder, str, payload_len), response);
 
     size_t encoded_size = cbor_encoder_get_buffer_size(&encoder, encode_buf);
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, encode_buf);
@@ -560,16 +506,11 @@ static void factory_nvs_handle_string_set(const coap_pdu_t* request, coap_pdu_t*
     char ns[32] = { 0 };
     char key[32] = { 0 };
 
-    if (!factory_nvs_prepare(request, response, &parser, &map, ns, sizeof(ns), key, sizeof(key))) {
-        return;
-    }
+    BO_COAP_TRY(factory_nvs_prepare(request, &parser, &map, ns, sizeof(ns), key, sizeof(key)), response);
 
     CborValue value_item;
-    CborError err = cbor_value_map_find_value(&map, "v", &value_item);
-    if (err != CborNoError || !cbor_value_is_text_string(&value_item)) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return;
-    }
+    BO_COAP_TRY(cbor_value_map_find_value(&map, "v", &value_item), response);
+    BO_COAP_REQUIRES(cbor_value_is_text_string(&value_item), response);
 
     size_t expected_len = 0;
     if (cbor_value_calculate_string_length(&value_item, &expected_len) != CborNoError
@@ -580,10 +521,7 @@ static void factory_nvs_handle_string_set(const coap_pdu_t* request, coap_pdu_t*
 
     char str[FACTORY_NVS_STRING_MAX_SIZE] = { 0 };
     size_t str_len = sizeof(str);
-    if (cbor_value_copy_text_string(&value_item, str, &str_len, NULL) != CborNoError) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return;
-    }
+    BO_COAP_TRY_DECODE(cbor_value_copy_text_string(&value_item, str, &str_len, NULL), response);
 
     nvs_handle_t nvs;
     BO_COAP_TRY(bo_nvs_factory_open(ns, NVS_READWRITE, &nvs), response);
@@ -646,31 +584,37 @@ static void coap_hnd_factory_nvs_exists_get(coap_resource_t* resource, coap_sess
     char ns[32] = { 0 };
     char key[32] = { 0 };
 
-    if (!factory_nvs_parse_query(request, query, response, ns, sizeof(ns), key, sizeof(key))) {
-        return;
-    }
+    BO_COAP_TRY(factory_nvs_parse_query(request, query, ns, sizeof(ns), key, sizeof(key)), response);
+
+    uint8_t encode_buf[16] = { 0 };
+    CborEncoder encoder;
+    cbor_encoder_init(&encoder, encode_buf, sizeof(encode_buf), 0);
 
     nvs_handle_t nvs;
-    BO_COAP_TRY(bo_nvs_factory_open(ns, NVS_READONLY, &nvs), response);
+    esp_err_t open_err = bo_nvs_factory_open(ns, NVS_READONLY, &nvs);
+    if (open_err == ESP_ERR_NVS_NOT_FOUND) {
+        // Namespace not found, so key doesn't exist
+        BO_COAP_TRY_ENCODE(cbor_encode_boolean(&encoder, false), response);
+        size_t encoded_size = cbor_encoder_get_buffer_size(&encoder, encode_buf);
+        coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, encode_buf);
+        coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
+        return;
+    }
+    else if (open_err != ESP_OK) {
+        coap_pdu_set_code(response, COAP_RESPONSE_CODE(400));
+        return;
+    }
     BO_NVS_AUTO_CLOSE(nvs);
 
     nvs_type_t type;
     esp_err_t err = nvs_find_key(nvs, key, &type);
     bool exists = (err == ESP_OK);
     if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND) {
-        BO_COAP_TRY(err, response);
+        coap_pdu_set_code(response, COAP_RESPONSE_CODE(400));
         return;
     }
 
-    uint8_t encode_buf[16] = { 0 };
-    CborEncoder encoder;
-    cbor_encoder_init(&encoder, encode_buf, sizeof(encode_buf), 0);
-    CborError cbor_err = cbor_encode_boolean(&encoder, exists);
-    if (cbor_err != CborNoError) {
-        coap_pdu_set_code(response, BO_COAP_CODE_500_INTERNAL_SERVER_ERROR);
-        return;
-    }
-
+    BO_COAP_TRY_ENCODE(cbor_encode_boolean(&encoder, exists), response);
     size_t encoded_size = cbor_encoder_get_buffer_size(&encoder, encode_buf);
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, encode_buf);
     coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);

@@ -24,7 +24,7 @@ extension CoapClientExtensions on CoapClient {
       confirmable: confirmable,
     ).asCancellable(cancelToken);
     if (!response.isSuccess) {
-      throw CoapException("Failed to request uri `$uri`", response);
+      throw CoapException("Failed to request uri (${response.code} - '${response.codeString}') `$uri`", response);
     }
     final cborPayload = simple_cbor.cbor.decode(response.payload) as T;
     return cborPayload;
