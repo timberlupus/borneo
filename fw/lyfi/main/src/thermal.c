@@ -211,7 +211,12 @@ static void thermal_timer_callback(void* args)
 
     case THERMAL_FAN_MODE_MANUAL: {
 #if CONFIG_LYFI_FAN_CTRL_SUPPORT
-        fan_set_power(_settings.fan_manual_power);
+        if (bo_power_is_on()) {
+            fan_set_power(_settings.fan_manual_power);
+        }
+        else {
+            fan_set_power(0);
+        }
 #endif
     } break;
 
