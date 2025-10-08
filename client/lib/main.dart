@@ -59,12 +59,50 @@ Future<void> main() async {
       final db = await openDatabase();
 
       if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-        const double aspectRatio = 9 / 19.5;
-        const double height = 960;
-        final double width = height * aspectRatio;
-        setWindowMinSize(Size(width, height));
-        setWindowMaxSize(Size(width, height));
-        setWindowFrame(Rect.fromLTWH(100, 100, width, height));
+        // Get current screen information
+        final screen = await getCurrentScreen();
+        if (screen != null) {
+          final screenSize = screen.visibleFrame.size;
+          final screenWidth = screenSize.width;
+          final screenHeight = screenSize.height;
+
+          // Define portrait aspect ratio (width/height ≈ 0.4615)
+          const double aspectRatio = 9 / 19.5;
+
+          // Calculate window height: set to 80% of screen height, clamped between 600 and 960
+          double height = screenHeight * 0.8;
+          if (height > 960) height = 960; // Upper limit
+          if (height < 600) height = 600; // Lower limit for usability
+
+          // Calculate width based on aspect ratio
+          double width = height * aspectRatio;
+
+          // Ensure width does not exceed 90% of screen width
+          if (width > screenWidth * 0.9) {
+            width = screenWidth * 0.9;
+            height = width / aspectRatio; // Recalculate height to maintain ratio
+          }
+
+          // Set window size and position
+          setWindowMinSize(Size(width * 0.5, height * 0.5)); // Min size is 50% of calculated
+          setWindowMaxSize(Size(width, height)); // Max size is calculated value
+          setWindowFrame(
+            Rect.fromLTWH(
+              (screenWidth - width) / 2, // Center horizontally
+              (screenHeight - height) / 2, // Center vertically
+              width,
+              height,
+            ),
+          );
+        } else {
+          // Fallback to fixed size if screen info unavailable
+          const double aspectRatio = 9 / 19.5;
+          const double height = 960;
+          final double width = height * aspectRatio;
+          setWindowMinSize(Size(width, height));
+          setWindowMaxSize(Size(width, height));
+          setWindowFrame(Rect.fromLTWH(100, 100, width, height));
+        }
       }
 
       // debugRepaintRainbowEnabled = true;

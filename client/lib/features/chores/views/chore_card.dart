@@ -109,7 +109,7 @@ class _ChoreCardContentState extends State<_ChoreCardContent> {
                     Expanded(
                       child: LayoutBuilder(
                         builder: (context, constraints) {
-                          final iconSize = constraints.maxHeight - 16.0;
+                          final iconSize = (constraints.maxHeight - 16.0).clamp(0.0, double.infinity);
                           return Align(
                             alignment: Alignment.centerLeft,
                             child: _buildIcon(vm.iconAssetPath, iconSize, fgColor),
