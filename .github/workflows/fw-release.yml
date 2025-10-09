@@ -47,9 +47,10 @@ jobs:
         git tag release-fw-latest
         git push origin release-fw-latest
 
-    - name: Create GitHub release
-      run: |
-        gh release create release-fw-latest \
-          --title "Latest Firmware Release" \
-          --notes "Automated firmware release with latest artifacts" \
-          artifacts/*
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: release-fw-latest
+        name: Latest Firmware Release
+        draft: false
+        files: artifacts/*
