@@ -8,7 +8,7 @@ import argparse
 def main():
     parser = argparse.ArgumentParser(description='Generate firmware manifest and copy binary')
     parser.add_argument('base_path', help='The base directory path (e.g., ./borneo/fw/lyfi)')
-    parser.add_argument('-o', '--output', help='Output directory (default: <base_path>/build)')
+    parser.add_argument('-o', '--output', help='Output directory (default: ./build)')
     args = parser.parse_args()
 
     base_dir = args.base_path
@@ -17,6 +17,7 @@ def main():
         print(f"Directory {base_dir} does not exist")
         sys.exit(1)
 
+    output_dir = args.output
     if output_dir is None:
         output_dir = os.path.join(base_dir, "build")
 
