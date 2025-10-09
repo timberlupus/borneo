@@ -1,0 +1,30 @@
+name: Borneo Firmware Release CI
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'fw/**'
+      - '.github/workflows/fw-release.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'fw/**'
+      - '.github/workflows/fw-release.yml'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      LYFI_PRODUCTS: bst/ulva6 bst/blc06mk1 bst/xiaoc3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build LyFi Firmware in Docker
+      run: |
+        for product in ${{ env.LYFI_PRODUCTS }}; do
+          rm -rf fw/lyfi/build
+          docker run -t -v "${GITHUB_WORKSPACE}:/app/${{ github.repository }}" -w "/app/${{ github.repository }}/fw/lyfi" espressif/idf:v5.5 /bin/bash -c "git config --global --add safe.directory '*' && idf.py build -DPRODUCT_ID=$product -DCMAKE_BUILD_TYPE=Release"
+        done
