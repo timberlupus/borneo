@@ -31,6 +31,22 @@ jobs:
             -w "/app/${{ github.repository }}/fw/lyfi" \
             espressif/idf:v5.5 \
             /bin/bash -c "rm -rf build && git config --global --add safe.directory '*' && idf.py build -DPRODUCT_ID=$product -DCMAKE_BUILD_TYPE=Release && idf.py merge-bin"
-            version=$(cat fw/lyfi/version.txt)
-            cp fw/lyfi/build/merged-binary.bin artifacts/${product//\//_}_firmware_ce_v${version}.bin
+            python fw/scripts/ci/generate_firmware_manifest.py fw/lyfi -o artifacts
         done
+
+    - name: Delete existing release and tag
+      run: |
+        gh release delete release-fw-latest --yes || true
+        git push origin --delete release-fw-latest || true
+
+    - name: Create and push new tag
+      run: |
+        git tag release-fw-latest
+        git push origin release-fw-latest
+
+    - name: Create GitHub release
+      run: |
+        gh release create release-fw-latest \
+          --title "Latest Firmware Release" \
+          --notes "Automated firmware release with latest artifacts" \
+          artifacts/*
