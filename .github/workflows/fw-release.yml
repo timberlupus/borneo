@@ -12,6 +12,9 @@ on:
       - 'fw/**'
       - '.github/workflows/fw-release.yml'
 
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
