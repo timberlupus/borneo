@@ -19,7 +19,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     env:
-      LYFI_PRODUCTS: bst/ulva6 bst/blc06mk1 bst/xiaoc3
+      LYFI_PRODUCTS: bst/ulva6 bst/blc06mk1 bst/xiaoc3 bst/c3devkitm1
 
     steps:
     - name: Checkout code

@@ -82,7 +82,7 @@ def main():
                 "chipFamily": chip_family,
                 "parts": [
                     {
-                        "path": bin_name,
+                        "path": "/firmware/" + bin_name,
                         "offset": 0
                     }
                 ]
