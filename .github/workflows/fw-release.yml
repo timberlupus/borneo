@@ -37,6 +37,9 @@ jobs:
             python fw/scripts/ci/generate_firmware_manifest.py fw/lyfi -o artifacts
         done
 
+    - name: Generate Manifests file
+      run: python fw/scripts/ci/merge_manifest.py ./artifacts -o ./artifacts/manifests.json
+
     - name: Delete existing release and tag
       run: |
         gh release delete release-fw-latest --yes || true
