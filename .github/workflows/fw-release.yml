@@ -58,7 +58,7 @@ jobs:
         draft: false
         files: artifacts/*
 
-    - name: Deploy to website repo (firmware branch)
+    - name: Deploy to web-flasher repo (firmware_ce branch)
       env:
         DEPLOY_KEY: ${{ secrets.FW_CE_DEPLOY_KEY }}
       run: |
@@ -73,7 +73,7 @@ jobs:
         git clone --depth 1 --branch firmware_ce git@github.com:borneo-iot/web-flasher.git _flasher_site || \
         (git clone --depth 1 git@github.com:borneo-iot/web-flasher.git _flasher_site && cd _flasher_site && git checkout --orphan firmware_ce)
 
-        cd _flasher_site/public/firmware
+        cd _flasher_site/
 
         rm -rf ./*
         cp -r ../artifacts/*.bin .
