@@ -58,7 +58,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         tag_name: release-fw-latest
-        name: Latest Firmware Release
+        name: Borneo-IoT Latest Firmware Release
         draft: false
         files: artifacts/*
 
