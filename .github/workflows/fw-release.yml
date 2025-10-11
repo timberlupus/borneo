@@ -42,8 +42,12 @@ jobs:
 
     - name: Delete existing release and tag
       run: |
-        gh release delete release-fw-latest --yes || true
-        git push origin --delete release-fw-latest || true
+        if gh release view release-fw-latest >/dev/null 2>&1; then
+          gh release delete release-fw-latest --yes
+        fi
+        if git ls-remote --tags origin | grep -q "release-fw-latest"; then
+          git push origin --delete release-fw-latest
+        fi
 
     - name: Create and push new tag
       run: |
