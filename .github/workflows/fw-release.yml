@@ -57,3 +57,28 @@ jobs:
         name: Latest Firmware Release
         draft: false
         files: artifacts/*
+
+    - name: Deploy to website repo (firmware branch)
+      env:
+        DEPLOY_KEY: ${{ secrets.FW_CE_DEPLOY_KEY }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$DEPLOY_KEY" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+
+        git clone --depth 1 --branch firmware_ce git@github.com:borneo-iot/web-flasher.git _flasher_site || \
+        (git clone --depth 1 git@github.com:borneo-iot/web-flasher.git _flasher_site && cd _flasher_site && git checkout --orphan firmware_ce)
+
+        cd _flasher_site/public/firmware
+
+        rm -rf ./*
+        cp -r ../artifacts/*.bin .
+        cp -r ../artifacts/manifests.json .
+
+        git add .
+        git commit -m "Update firmware CE $(date -u +'%Y-%m-%d %H:%M:%S')" || true
+        git push origin firmware_ce --force
