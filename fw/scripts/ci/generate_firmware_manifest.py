@@ -41,22 +41,48 @@ def main():
     with open(sdkconfig_file, 'r') as f:
         sdkconfig = json.load(f)
 
-    product_id = sdkconfig.get("BORNEO_PRODUCT_ID")
     idf_target = sdkconfig.get("IDF_TARGET")
+    product_id = sdkconfig.get("BORNEO_PRODUCT_ID")
+    device_name = sdkconfig.get("BORNEO_DEVICE_NAME_DEFAULT")
+    board_name = sdkconfig.get("BORNEO_BOARD_NAME")
+    manufacturer = sdkconfig.get("BORNEO_MANUF_DEFAULT")
+    compatible = sdkconfig.get("BORNEO_DEVICE_COMPATIBLE")
 
-    if not product_id or not idf_target:
-        print("BORNEO_PRODUCT_ID or IDF_TARGET not found in sdkconfig.json")
+    if not idf_target:
+        print("`IDF_TARGET` not found in `sdkconfig.json`")
         sys.exit(1)
 
-    # Map IDF_TARGET to chipFamily
-    chip_family_map = {
-        "esp32": "ESP32",
-        "esp32c3": "ESP32-C3",
-        "esp32s2": "ESP32-S2",
-        "esp32s3": "ESP32-S3",
-        # Add more mappings as needed
-    }
-    chip_family = chip_family_map.get(idf_target.lower(), idf_target.upper())
+    if not product_id:
+        print("`BORNEO_PRODUCT_ID` not found in `sdkconfig.json`")
+        sys.exit(1)
+
+    if not device_name:
+        print("`BORNEO_DEVICE_NAME_DEFAULT` not found in `sdkconfig.json`")
+        sys.exit(1)
+
+    if not board_name:
+        print("`BORNEO_BOARD_NAME` not found in `sdkconfig.json`")
+        sys.exit(1)
+
+    if not manufacturer:
+        print("`BORNEO_MANUF_DEFAULT` not found in `sdkconfig.json`")
+        sys.exit(1)
+
+    if not compatible:
+        print("`BORNEO_DEVICE_COMPATIBLE` not found in `sdkconfig.json`")
+        sys.exit(1)
+
+    # Map IDF_TARGET to chipFamily by extracting ESP32 prefix and adding hyphen
+    if idf_target.lower().startswith("esp32"):
+        # Extract the part after "esp32" and format it
+        suffix = idf_target.lower()[5:]  # Remove "esp32" prefix
+        if suffix:
+            chip_family = f"ESP32-{suffix.upper()}"
+        else:
+            chip_family = "ESP32"
+    else:
+        # Fallback for non-ESP32 targets
+        chip_family = idf_target.upper()
 
     # Source binary
     source_bin = os.path.join(base_dir, "build", "merged-binary.bin")
@@ -74,9 +100,14 @@ def main():
 
     # Generate manifest
     manifest = {
-        "name": product_id,
+        "name": device_name,
+        "product_id": product_id,
+        "board_name": board_name,
+        "manufacturer": manufacturer,
+        "compatible": compatible,
         "version": version,
         "new_install_prompt_erase": True,
+        "new_install_improv_wait_time": 0,
         "builds": [
             {
                 "chipFamily": chip_family,

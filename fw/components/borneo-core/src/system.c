@@ -27,7 +27,6 @@
 #define SYSTEM_NVS_KEY_NAME "name"
 #define SYSTEM_NVS_KEY_MODEL "model"
 #define SYSTEM_NVS_KEY_MANUF "manuf"
-#define SYSTEM_DEFAULT_MANUF "BorneoIoT"
 
 enum state_flags_enum {
     STATE_FLAG_OPERABLE = 1,
@@ -253,7 +252,7 @@ int load_factory_settings()
 
     len = BO_DEVICE_MANUF_MAX;
     BO_TRY(
-        bo_nvs_get_or_set_str(nvs_handle, SYSTEM_NVS_KEY_MANUF, _sysinfo.manuf, &len, SYSTEM_DEFAULT_MANUF, &changed));
+        bo_nvs_get_or_set_str(nvs_handle, SYSTEM_NVS_KEY_MANUF, _sysinfo.manuf, &len, CONFIG_BORNEO_MANUF_DEFAULT, &changed));
 
     if (changed) {
         BO_TRY(nvs_commit(nvs_handle));
