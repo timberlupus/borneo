@@ -88,7 +88,7 @@ int rmtpwm_dac_init()
     rmt_tx_channel_config_t fan_dac_tx_chan_config = {
         .clk_src = RMT_CLK_SRC_DEFAULT, // select source clock
         .gpio_num = CONFIG_LYFI_FAN_CTRL_PWMDAC_GPIO,
-        .mem_block_symbols = 48, // DO NOT CHANGE THIS!!!
+        .mem_block_symbols = 64, // DO NOT CHANGE THIS!!!
         .resolution_hz = RMT_PWM_RESOLUTION_HZ,
         .trans_queue_depth = 8, // set the maximum number of transactions that can pend in the background
     };
@@ -114,7 +114,7 @@ int rmtpwm_pwm_init()
     rmt_tx_channel_config_t fan_pwm_tx_chan_config = {
         .clk_src = RMT_CLK_SRC_DEFAULT, // select source clock
         .gpio_num = CONFIG_LYFI_FAN_CTRL_PWM_GPIO,
-        .mem_block_symbols = 48, // DO NOT CHANGE THIS!!!
+        .mem_block_symbols = 64, // DO NOT CHANGE THIS!!!
         .resolution_hz = RMT_PWM_RESOLUTION_HZ,
         .trans_queue_depth = 8, // set the maximum number of transactions that can pend in the background
     };

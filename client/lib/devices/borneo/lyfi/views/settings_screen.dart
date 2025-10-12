@@ -8,8 +8,6 @@ import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
-import 'package:flutter_gettext/gettext/gettext.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
