@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
@@ -41,6 +42,12 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
     }
   }
 
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
+  }
+
   Future<void> _getUserLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -63,7 +70,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
     });
   }
 
-  Future<void> _updateTimeZone(LatLng latLng) async {
+  void _updateTimeZone(LatLng latLng) {
     final tz = latLngToTimezoneString(latLng.latitude, latLng.longitude);
     if (!mounted) return;
     setState(() {
@@ -116,13 +123,13 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Select Location'),
+        title: Text(context.translate('Select Location')),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
             child: FilledButton.icon(
               icon: Icon(Icons.check, size: 28),
-              label: Text("Apply"),
+              label: Text(context.translate("Apply")),
               onPressed: (_selectedLocation == null || _isSameLocation(_selectedLocation, widget.initialLocation))
                   ? null
                   : () {
@@ -186,7 +193,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                         _updateTimeZone(_userLocation!);
                       }
                     },
-              tooltip: 'Current location',
+              tooltip: context.translate('Current location'),
               child: Icon(Icons.my_location, color: Theme.of(context).colorScheme.onSecondaryContainer),
             ),
           ),
@@ -215,7 +222,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                       children: [
                         Text(
                           _selectedLocation == null
-                              ? 'Please select a location'
+                              ? context.translate('Please select a location')
                               : '(${_selectedLocation!.latitude.toStringAsFixed(3)}, ${_selectedLocation!.longitude.toStringAsFixed(3)})',
                           textAlign: TextAlign.left,
                         ),
