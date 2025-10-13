@@ -22,7 +22,7 @@
 
 int lyfi_power_meas_init()
 {
-    ESP_LOGI(TAG, "Initializing power measurement...");
+    ESP_LOGI(TAG, "Initializing LyFi power measurement...");
 
 #if CONFIG_LYFI_MEAS_CURRENT_SUPPORT
     BO_TRY(bo_adc_channel_config(CONFIG_LYFI_MEAS_CURRENT_ADC_CHANNEL));

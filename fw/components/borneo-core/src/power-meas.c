@@ -22,14 +22,10 @@
 
 int bo_power_meas_init()
 {
-    ESP_LOGI(TAG, "Initializing power measurement...");
+    ESP_LOGI(TAG, "Initializing Borneo Core power measurement...");
 
 #if CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT
     BO_TRY(bo_adc_channel_config(CONFIG_BORNEO_MEAS_VOLTAGE_ADC_CHANNEL));
-#endif
-
-#if CONFIG_LYFI_MEAS_CURRENT_SUPPORT
-    BO_TRY(bo_adc_channel_config(CONFIG_LYFI_MEAS_CURRENT_ADC_CHANNEL));
 #endif
 
     return 0;
