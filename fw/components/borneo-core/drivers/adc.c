@@ -41,16 +41,14 @@ int bo_adc_channel_config(adc_channel_t channel)
         .bitwidth = ADC_BITWIDTH_12,
         .atten = ADC_ATTEN_DB_12,
     };
-    int ret;
-    ret = adc_oneshot_config_channel(s_adc_handle, channel, &adc_config);
-    return ret;
+    BO_TRY(adc_oneshot_config_channel(s_adc_handle, channel, &adc_config));
+    return 0;
 }
 
 int bo_adc_read_mv(adc_channel_t channel, int* value_mv)
 {
-    int ret;
-    ret = adc_oneshot_get_calibrated_result(s_adc_handle, s_adc_cali_handle, channel, value_mv);
-    return ret;
+    BO_TRY(adc_oneshot_get_calibrated_result(s_adc_handle, s_adc_cali_handle, channel, value_mv));
+    return 0;
 }
 
 int bo_adc_read_mv_filtered(adc_channel_t channel, int* value_mv)
@@ -84,7 +82,7 @@ int bo_adc_cali(adc_cali_handle_t* out_handle)
         adc_cali_curve_fitting_config_t cali_config = {
             .unit_id = AVAILABLE_ADC_UNIT,
             .atten = ADC_ATTEN_DB_12,
-            .bitwidth = ADC_BITWIDTH_DEFAULT,
+            .bitwidth = ADC_BITWIDTH_12,
         };
         ret = adc_cali_create_scheme_curve_fitting(&cali_config, &handle);
         if (ret == ESP_OK) {
@@ -99,7 +97,7 @@ int bo_adc_cali(adc_cali_handle_t* out_handle)
         adc_cali_line_fitting_config_t cali_config = {
             .unit_id = AVAILABLE_ADC_UNIT,
             .atten = ADC_ATTEN_DB_12,
-            .bitwidth = ADC_BITWIDTH_DEFAULT,
+            .bitwidth = ADC_BITWIDTH_12,
         };
         ret = adc_cali_create_scheme_line_fitting(&cali_config, &handle);
         if (ret == ESP_OK) {
@@ -126,7 +124,7 @@ static int adc_init()
 {
     ESP_LOGI(TAG, "Initializing ADC...");
     adc_oneshot_unit_init_cfg_t unit_config = { 0 };
-    unit_config.unit_id = 0;
+    unit_config.unit_id = AVAILABLE_ADC_UNIT;
     BO_TRY(adc_oneshot_new_unit(&unit_config, &s_adc_handle));
     ESP_LOGI(TAG, "Calibrating ADC...");
     BO_TRY(bo_adc_cali(&s_adc_cali_handle));
