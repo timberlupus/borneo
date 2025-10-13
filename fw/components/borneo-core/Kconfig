@@ -96,7 +96,7 @@ menu "Borneo Core"
         config BORNEO_MEAS_VOLTAGE_FACTOR
             int "Power supply ADC voltage attenuation coefficient in μV"
             depends on BORNEO_MEAS_VOLTAGE_SUPPORT
-            default 16242
+            default 15242
     endmenu
 
 
