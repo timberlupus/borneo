@@ -219,8 +219,8 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
       channels[index].value = value;
       currentEntry?.channels[index] = value;
       await super.syncDimmingColor(true);
-      isChanged = true;
-      notifyListeners();
+      super.isChanged = true;
+      super.notifyListeners();
     }
   }
 

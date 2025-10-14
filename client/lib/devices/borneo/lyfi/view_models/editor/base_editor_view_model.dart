@@ -67,9 +67,11 @@ abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
   Future<void> syncDimmingColor(bool isLimited, {CancellationToken? cancelToken}) async {
     final color = _channels.map((x) => x.value).toList(growable: false);
     if (isLimited) {
-      _colorChangeRateLimiter.add(
-        () => deviceApi.setColor(parent.boundDevice!.device, color, cancelToken: cancelToken),
-      );
+      _colorChangeRateLimiter.add(() async {
+        if (!parent.boundDevice!.device.driverData.isBusy) {
+          deviceApi.setColor(parent.boundDevice!.device, color, cancelToken: cancelToken);
+        }
+      });
     } else {
       await deviceApi.setColor(parent.boundDevice!.device, color, cancelToken: cancelToken);
     }

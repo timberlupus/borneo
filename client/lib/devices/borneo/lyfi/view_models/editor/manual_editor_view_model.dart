@@ -31,8 +31,8 @@ class ManualEditorViewModel extends BaseEditorViewModel {
   Future<void> updateChannelValue(int index, int value) async {
     if (index >= 0 && index < super.channels.length && value != super.channels[index].value) {
       super.channels[index].value = value;
-      final color = super.channels.map((x) => x.value).toList();
-      super.colorChangeRateLimiter.add(() => super.deviceApi.setColor(super.parent.boundDevice!.device, color));
+      channels[index].value = value;
+      await super.syncDimmingColor(true);
       super.isChanged = true;
     }
   }

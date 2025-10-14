@@ -44,14 +44,13 @@ class SunEditorViewModel extends BaseEditorViewModel {
   Future<void> updateChannelValue(int index, int value) async {
     if (index >= 0 && index < channels.length && value != channels[index].value) {
       channels[index].value = value;
-      final color = channels.map((x) => x.value).toList();
-      super.colorChangeRateLimiter.add(() => _deviceApi.setColor(parent.boundDevice!.device, color));
-      isChanged = true;
+      await super.syncDimmingColor(true);
+      super.isChanged = true;
       for (var i = 0; i < _sunInstants.length; i++) {
         _sunInstants[i].color[index] = (value * _sunCurve[i].brightness).round();
       }
     }
-    notifyListeners();
+    super.notifyListeners();
   }
 
   @override
