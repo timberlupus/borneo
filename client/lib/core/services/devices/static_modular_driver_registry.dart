@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
-import 'package:borneo_kernel_abstractions/idriver_registry.dart';
+import 'package:borneo_kernel_abstractions/driver_registry.dart';
 import 'package:borneo_kernel_abstractions/models/driver_descriptor.dart';
 
 class StaticModularDriverRegistry implements IDriverRegistry {

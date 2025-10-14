@@ -1,5 +1,5 @@
 import 'package:borneo_kernel/drivers/borneo/coap_driver_data.dart';
-import 'package:borneo_kernel_abstractions/idevice_api.dart';
+import 'package:borneo_kernel_abstractions/device_api.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 

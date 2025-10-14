@@ -8,7 +8,7 @@ import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/core/services/scene_manager_impl.dart';
 import 'package:borneo_app/core/services/url_launcher_service.dart';
 import 'package:borneo_app/main/views/main_screen.dart';
-import 'package:borneo_kernel_abstractions/ikernel.dart';
+import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';

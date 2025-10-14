@@ -1,9 +1,9 @@
 import 'package:borneo_common/borneo_common.dart';
 import 'package:borneo_common/exceptions.dart';
-import 'package:borneo_kernel_abstractions/idevice_api.dart';
+import 'package:borneo_kernel_abstractions/device_api.dart';
 
 import '../device.dart';
-import '../idriver.dart';
+import '../driver.dart';
 
 /// The meta data of the BoundDevice
 final class BoundDeviceDescriptor {

@@ -21,7 +21,7 @@ import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
 
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
-import 'package:borneo_kernel_abstractions/idriver.dart';
+import 'package:borneo_kernel_abstractions/driver.dart';
 import 'package:logger/logger.dart';
 import 'package:pub_semver/pub_semver.dart';
 

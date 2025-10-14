@@ -2,7 +2,7 @@ import 'package:borneo_kernel_abstractions/models/heartbeat_method.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:logger/logger.dart';
 
-import '../idriver.dart';
+import '../driver.dart';
 import 'discovered_device.dart';
 
 class DriverDescriptor {

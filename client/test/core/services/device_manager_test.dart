@@ -11,7 +11,7 @@ import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
-import 'package:borneo_kernel_abstractions/idriver.dart';
+import 'package:borneo_kernel_abstractions/driver.dart';
 import 'package:borneo_kernel_abstractions/ikernel.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 import 'package:borneo_kernel_abstractions/models/driver_data.dart';

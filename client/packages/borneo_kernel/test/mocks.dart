@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:borneo_kernel_abstractions/device.dart';
-import 'package:borneo_kernel_abstractions/idriver.dart';
-import 'package:borneo_kernel_abstractions/idriver_registry.dart';
+import 'package:borneo_kernel_abstractions/driver.dart';
+import 'package:borneo_kernel_abstractions/driver_registry.dart';
 import 'package:borneo_kernel_abstractions/mdns.dart';
 import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
 import 'package:borneo_kernel_abstractions/models/driver_data.dart';
