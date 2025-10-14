@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_common/io/net/network_interface_helper.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/base_lyfi_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/coap_client.dart';
@@ -100,7 +101,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
       final lyfiInfo = await _getLyfiInfo(coapClient, cancelToken: cancelToken);
       final driverData = LyfiCoapDriverData(dev, coapClient, probeCoapClient, generalDeviceInfo, lyfiInfo);
       driverData.load();
-      await dev.setDriverData(driverData, cancelToken: cancelToken);
+      dev.setDriverData(driverData);
       succeed = true;
     } on CoapRequestTimeoutException catch (e, stackTrace) {
       logger?.w("Failed to probe device($dev): $e", error: e, stackTrace: stackTrace);
@@ -122,6 +123,9 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
 
   @override
   Future<bool> heartbeat(Device dev, {CancellationToken? cancelToken}) async {
+    if (dev.driverData.isBusy) {
+      throw InvalidOperationException(message: "Device is busy");
+    }
     try {
       final dd = dev.driverData as LyfiCoapDriverData;
       return await dd.probeCoap.ping().asCancellable(cancelToken);

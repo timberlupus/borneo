@@ -473,18 +473,19 @@ final class DefaultKernel implements IKernel {
               final devices = <BoundDevice>[];
               for (final bd in _boundDevices.values) {
                 final driverDesc = _driverRegistry.metaDrivers[bd.driverID];
-                if (driverDesc?.heartbeatMethod == HeartbeatMethod.poll) {
+                if (driverDesc?.heartbeatMethod == HeartbeatMethod.poll && !bd.device.driverData.isBusy) {
                   futures.add(
-                    _tryDoHeartBeat(bd, kHeartbeatPollingInterval).asCancellable(_heartbeatPollingTaskCancelToken),
+                    _tryDoHeartBeat(
+                      bd,
+                      kHeartbeatPollingInterval,
+                    ).catchError((_) => false).asCancellable(_heartbeatPollingTaskCancelToken),
                   );
                   devices.add(bd);
                 }
               }
 
               _logger.d('Polling heartbeat for (${devices.length}) bound devices...');
-              final results = await Future.wait(
-                futures,
-              ).timeout(kHeartbeatPollingInterval).asCancellable(_heartbeatPollingTaskCancelToken);
+              final results = await Future.wait(futures).asCancellable(_heartbeatPollingTaskCancelToken);
               for (int i = 0; i < results.length; i++) {
                 final deviceId = devices[i].device.id;
                 if (!results[i]) {

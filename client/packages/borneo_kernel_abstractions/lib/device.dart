@@ -1,5 +1,4 @@
 import 'package:borneo_kernel_abstractions/models/driver_data.dart';
-import 'package:cancellation_token/cancellation_token.dart';
 
 abstract class Device {
   final String id;
@@ -12,5 +11,5 @@ abstract class Device {
 
   T data<T extends DriverData>() => driverData as T;
 
-  Future<void> setDriverData(DriverData driverData, {CancellationToken? cancelToken});
+  void setDriverData(DriverData driverData);
 }
