@@ -61,7 +61,7 @@ static rmt_encoder_handle_t s_pwm_encoder = NULL;
 static struct rmtpwm_channel s_pwm_channel = { 0 };
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
-#if !SOC_DAC_SUPPORTED
+#if !SOC_DAC_SUPPORTED && CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
 static struct rmtpwm_channel s_dac_channel = { 0 };
 #endif // !SOC_DAC_SUPPORTED
 
@@ -88,7 +88,11 @@ int rmtpwm_dac_init()
     rmt_tx_channel_config_t fan_dac_tx_chan_config = {
         .clk_src = RMT_CLK_SRC_DEFAULT, // select source clock
         .gpio_num = CONFIG_LYFI_FAN_CTRL_PWMDAC_GPIO,
-        .mem_block_symbols = 64, // DO NOT CHANGE THIS!!!
+#if CONFIG_IDF_TARGET_ESP32C3
+        .mem_block_symbols = 48,
+#else
+        .mem_block_symbols = 64,
+#endif
         .resolution_hz = RMT_PWM_RESOLUTION_HZ,
         .trans_queue_depth = 8, // set the maximum number of transactions that can pend in the background
     };
@@ -114,7 +118,11 @@ int rmtpwm_pwm_init()
     rmt_tx_channel_config_t fan_pwm_tx_chan_config = {
         .clk_src = RMT_CLK_SRC_DEFAULT, // select source clock
         .gpio_num = CONFIG_LYFI_FAN_CTRL_PWM_GPIO,
-        .mem_block_symbols = 64, // DO NOT CHANGE THIS!!!
+#if CONFIG_IDF_TARGET_ESP32C3
+        .mem_block_symbols = 48,
+#else
+        .mem_block_symbols = 64,
+#endif
         .resolution_hz = RMT_PWM_RESOLUTION_HZ,
         .trans_queue_depth = 8, // set the maximum number of transactions that can pend in the background
     };
@@ -131,7 +139,7 @@ int rmtpwm_set_pwm_duty(uint8_t duty) { return rmtpwm_set_duty_internal(&s_pwm_c
 
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
-#if !SOC_DAC_SUPPORTED
+#if !SOC_DAC_SUPPORTED && CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
 int rmtpwm_set_dac_duty(uint8_t duty) { return rmtpwm_set_duty_internal(&s_dac_channel, duty); }
 #endif // SOC_DAC_SUPPORTED
 
