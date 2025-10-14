@@ -5,10 +5,7 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:sembast/sembast.dart';
 import 'package:lw_wot/wot.dart';
 
-import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
-import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
-import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 
 abstract class IDeviceManager implements IDisposable {

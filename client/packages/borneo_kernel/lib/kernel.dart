@@ -1,24 +1,13 @@
 import 'dart:async';
 
 import 'package:borneo_kernel/drivers/borneo/lyfi/coap_driver.dart';
-import 'package:borneo_kernel_abstractions/errors.dart';
-import 'package:borneo_kernel_abstractions/models/heartbeat_method.dart';
-import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:logger/logger.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:retry/retry.dart';
 
 import 'package:borneo_common/exceptions.dart';
-import 'package:borneo_kernel_abstractions/events.dart';
-import 'package:borneo_kernel_abstractions/device.dart';
-import 'package:borneo_kernel_abstractions/driver.dart';
-import 'package:borneo_kernel_abstractions/driver_registry.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
-import 'package:borneo_kernel_abstractions/models/bound_device.dart';
-import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
-import 'package:borneo_kernel_abstractions/models/driver_descriptor.dart';
-import 'package:borneo_kernel_abstractions/mdns.dart';
 
 final class DefaultKernel implements IKernel {
   static const Duration kStartupDiscoveryDuration = Duration(seconds: 10);
