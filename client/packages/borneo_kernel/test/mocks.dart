@@ -25,7 +25,7 @@ class MockLogger extends Logger {
   }
 }
 
-class MockDriver implements IDriver {
+class MockDriver implements Driver {
   final String id;
   bool _isDisposed = false;
   final Map<String, bool> _probeResults = {};
@@ -75,6 +75,11 @@ class MockDriver implements IDriver {
   }
 
   bool get isDisposed => _isDisposed;
+
+  @override
+  Future<T> withBusyCheck<T>(Device dev, Future<T> Function() action, {CancellationToken? cancelToken}) {
+    return action();
+  }
 }
 
 class MockDriverRegistry implements IDriverRegistry {

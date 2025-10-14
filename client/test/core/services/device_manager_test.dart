@@ -332,7 +332,7 @@ class TestKernel implements IKernel {
   bool get isInitialized => _isInitialized;
 
   @override
-  Iterable<IDriver> get activatedDrivers => [];
+  Iterable<Driver> get activatedDrivers => [];
 
   @override
   Iterable<BoundDevice> get boundDevices => _boundDevices;
@@ -454,7 +454,7 @@ class TestDriverData extends DriverData {
   void dispose() {}
 }
 
-class TestDriver extends IDriver {
+class TestDriver extends Driver {
   @override
   Future<bool> probe(Device dev, {CancellationToken? cancelToken}) async => true;
 

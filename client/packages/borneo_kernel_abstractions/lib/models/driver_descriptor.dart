@@ -11,7 +11,7 @@ class DriverDescriptor {
   final HeartbeatMethod heartbeatMethod;
   final DeviceDiscoveryMethod discoveryMethod;
   final SupportedDeviceDescriptor? Function(DiscoveredDevice) matches;
-  final IDriver Function({Logger? logger}) factory;
+  final Driver Function({Logger? logger}) factory;
 
   const DriverDescriptor({
     required this.id,

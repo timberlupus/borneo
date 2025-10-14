@@ -26,7 +26,7 @@ abstract class IKernel implements IDisposable {
   Iterable<BoundDevice> get boundDevices;
   bool get isInitialized;
   GlobalDevicesEventBus get events;
-  Iterable<IDriver> get activatedDrivers;
+  Iterable<Driver> get activatedDrivers;
   bool get isBusy;
   bool get isScanning;
 

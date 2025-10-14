@@ -16,7 +16,7 @@ final class BoundDevice implements IDisposable {
   bool _isDisposed = false;
   final String driverID;
   final Device device;
-  final IDriver driver;
+  final Driver driver;
 
   BoundDevice(this.driverID, this.device, this.driver);
 

@@ -49,7 +49,7 @@ class LyfiPaths {
   static final Uri fanManual = Uri(path: '/borneo/lyfi/thermal/fan/manual');
 }
 
-class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi implements IDriver, ILyfiDeviceApi {
+class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi implements Driver, ILyfiDeviceApi {
   static const String lyfiCompatibleString = 'bst,borneo-lyfi';
   final Logger? logger;
 
@@ -195,10 +195,10 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   }
 
   @override
-  Future<int> getKeepTemp(Device dev, {CancellationToken? cancelToken}) async {
+  Future<int> getKeepTemp(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     return await dd.coap.getCbor<int>(LyfiPaths.keepTemp, cancelToken: cancelToken);
-  }
+  }, cancelToken: cancelToken);
 
   @override
   LyfiDeviceInfo getLyfiInfo(Device dev, {CancellationToken? cancelToken}) {
@@ -207,98 +207,102 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   }
 
   @override
-  Future<LyfiDeviceStatus> getLyfiStatus(Device dev, {CancellationToken? cancelToken}) async {
+  Future<LyfiDeviceStatus> getLyfiStatus(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     final payload = await dd.coap.getCbor<Map>(LyfiPaths.status, cancelToken: cancelToken);
     return LyfiDeviceStatus.fromMap(payload);
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<List<int>> getColor(Device dev, {CancellationToken? cancelToken}) async {
+  Future<List<int>> getColor(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     final result = await dd.coap.getCbor<List<Object?>>(LyfiPaths.color, cancelToken: cancelToken);
     return List<int>.from(result, growable: false);
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<void> setColor(Device dev, List<int> color, {CancellationToken? cancelToken}) async {
+  Future<void> setColor(Device dev, List<int> color, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     await dd.coap.putCbor(LyfiPaths.color, color, cancelToken: cancelToken);
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<LyfiState> getState(Device dev, {CancellationToken? cancelToken}) async {
+  Future<LyfiState> getState(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     final value = await dd.coap.getCbor<int>(LyfiPaths.state, cancelToken: cancelToken);
     return LyfiState.values[value];
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<void> switchState(Device dev, LyfiState state, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as LyfiCoapDriverData;
-    await dd.coap.putCbor(LyfiPaths.state, state.index, cancelToken: cancelToken);
-  }
+  Future<void> switchState(Device dev, LyfiState state, {CancellationToken? cancelToken}) =>
+      withBusyCheck(dev, () async {
+        final dd = dev.driverData as LyfiCoapDriverData;
+        await dd.coap.putCbor(LyfiPaths.state, state.index, cancelToken: cancelToken);
+      }, cancelToken: cancelToken);
 
   @override
-  Future<LyfiMode> getMode(Device dev, {CancellationToken? cancelToken}) async {
+  Future<LyfiMode> getMode(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     final value = await dd.coap.getCbor<int>(LyfiPaths.mode, cancelToken: cancelToken);
     return LyfiMode.values[value];
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<void> switchMode(Device dev, LyfiMode mode, {CancellationToken? cancelToken}) async {
+  Future<void> switchMode(Device dev, LyfiMode mode, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     return await dd.coap.putCbor(LyfiPaths.mode, mode.index, cancelToken: cancelToken);
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<ScheduleTable> getSchedule(Device dev, {CancellationToken? cancelToken}) async {
+  Future<ScheduleTable> getSchedule(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.schedule, cancelToken: cancelToken);
     return items.map((x) => ScheduledInstant.fromMap(x!)).toList();
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<void> setSchedule(Device dev, Iterable<ScheduledInstant> schedule, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as LyfiCoapDriverData;
-    final payload = schedule.map((x) => x.toPayload());
-    return await dd.coap.putCbor(LyfiPaths.schedule, payload, cancelToken: cancelToken);
-  }
+  Future<void> setSchedule(Device dev, Iterable<ScheduledInstant> schedule, {CancellationToken? cancelToken}) =>
+      withBusyCheck(dev, () async {
+        final dd = dev.driverData as LyfiCoapDriverData;
+        final payload = schedule.map((x) => x.toPayload());
+        return await dd.coap.putCbor(LyfiPaths.schedule, payload, cancelToken: cancelToken);
+      }, cancelToken: cancelToken);
 
   @override
-  Future<LedCorrectionMethod> getCorrectionMethod(Device dev, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as LyfiCoapDriverData;
-    final value = await dd.coap.getCbor<int>(LyfiPaths.correctionMethod, cancelToken: cancelToken);
-    return LedCorrectionMethod.values[value];
-  }
+  Future<LedCorrectionMethod> getCorrectionMethod(Device dev, {CancellationToken? cancelToken}) =>
+      withBusyCheck(dev, () async {
+        final dd = dev.driverData as LyfiCoapDriverData;
+        final value = await dd.coap.getCbor<int>(LyfiPaths.correctionMethod, cancelToken: cancelToken);
+        return LedCorrectionMethod.values[value];
+      }, cancelToken: cancelToken);
 
   @override
   Future<void> setCorrectionMethod(
     Device dev,
     LedCorrectionMethod correctionMethod, {
     CancellationToken? cancelToken,
-  }) async {
+  }) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     return await dd.coap.putCbor(LyfiPaths.correctionMethod, correctionMethod.index, cancelToken: cancelToken);
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<Duration> getTemporaryDuration(Device dev, {CancellationToken? cancelToken}) async {
+  Future<Duration> getTemporaryDuration(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     final minutes = await dd.coap.getCbor<int>(LyfiPaths.temporaryDuration, cancelToken: cancelToken);
     return Duration(minutes: minutes);
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<void> setTemporaryDuration(Device dev, Duration duration, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as LyfiCoapDriverData;
-    final minutes = duration.inMinutes;
-    return await dd.coap.putCbor(LyfiPaths.temporaryDuration, minutes, cancelToken: cancelToken);
-  }
+  Future<void> setTemporaryDuration(Device dev, Duration duration, {CancellationToken? cancelToken}) =>
+      withBusyCheck(dev, () async {
+        final dd = dev.driverData as LyfiCoapDriverData;
+        final minutes = duration.inMinutes;
+        return await dd.coap.putCbor(LyfiPaths.temporaryDuration, minutes, cancelToken: cancelToken);
+      }, cancelToken: cancelToken);
 
   @override
-  Future<GeoLocation?> getLocation(Device dev, {CancellationToken? cancelToken}) async {
+  Future<GeoLocation?> getLocation(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     final result = await dd.coap.getCbor<dynamic>(LyfiPaths.geoLocation, cancelToken: cancelToken);
     if (result != null) {
@@ -306,96 +310,102 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
     } else {
       return null;
     }
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<void> setLocation(Device dev, GeoLocation location, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as LyfiCoapDriverData;
-    return await dd.coap.putCbor(LyfiPaths.geoLocation, location, cancelToken: cancelToken);
-  }
+  Future<void> setLocation(Device dev, GeoLocation location, {CancellationToken? cancelToken}) =>
+      withBusyCheck(dev, () async {
+        final dd = dev.driverData as LyfiCoapDriverData;
+        return await dd.coap.putCbor(LyfiPaths.geoLocation, location, cancelToken: cancelToken);
+      }, cancelToken: cancelToken);
 
   @override
-  Future<bool> getTimeZoneEnabled(Device dev, {CancellationToken? cancelToken}) async {
+  Future<bool> getTimeZoneEnabled(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     final result = await dd.coap.getCbor<bool>(LyfiPaths.tzEnabled, cancelToken: cancelToken);
     return result;
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<void> setTimeZoneEnabled(Device dev, bool enabled, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as LyfiCoapDriverData;
-    await dd.coap.putCbor(LyfiPaths.tzEnabled, enabled, cancelToken: cancelToken);
-  }
+  Future<void> setTimeZoneEnabled(Device dev, bool enabled, {CancellationToken? cancelToken}) =>
+      withBusyCheck(dev, () async {
+        final dd = dev.driverData as LyfiCoapDriverData;
+        await dd.coap.putCbor(LyfiPaths.tzEnabled, enabled, cancelToken: cancelToken);
+      }, cancelToken: cancelToken);
 
   @override
-  Future<int> getTimeZoneOffset(Device dev, {CancellationToken? cancelToken}) async {
+  Future<int> getTimeZoneOffset(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     final result = await dd.coap.getCbor<int>(LyfiPaths.tzOffset, cancelToken: cancelToken);
     return result;
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<void> setTimeZoneOffset(Device dev, int offset, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as LyfiCoapDriverData;
-    await dd.coap.putCbor(LyfiPaths.tzOffset, offset, cancelToken: cancelToken);
-  }
+  Future<void> setTimeZoneOffset(Device dev, int offset, {CancellationToken? cancelToken}) =>
+      withBusyCheck(dev, () async {
+        final dd = dev.driverData as LyfiCoapDriverData;
+        await dd.coap.putCbor(LyfiPaths.tzOffset, offset, cancelToken: cancelToken);
+      }, cancelToken: cancelToken);
 
   @override
-  Future<AcclimationSettings> getAcclimation(Device dev, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as LyfiCoapDriverData;
-    final map = await dd.coap.getCbor<dynamic>(LyfiPaths.acclimation, cancelToken: cancelToken);
-    return AcclimationSettings.fromMap(map);
-  }
+  Future<AcclimationSettings> getAcclimation(Device dev, {CancellationToken? cancelToken}) =>
+      withBusyCheck(dev, () async {
+        final dd = dev.driverData as LyfiCoapDriverData;
+        final map = await dd.coap.getCbor<dynamic>(LyfiPaths.acclimation, cancelToken: cancelToken);
+        return AcclimationSettings.fromMap(map);
+      }, cancelToken: cancelToken);
 
   @override
-  Future<void> setAcclimation(Device dev, AcclimationSettings acc, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as LyfiCoapDriverData;
-    return await dd.coap.postCbor(LyfiPaths.acclimation, acc, cancelToken: cancelToken);
-  }
+  Future<void> setAcclimation(Device dev, AcclimationSettings acc, {CancellationToken? cancelToken}) =>
+      withBusyCheck(dev, () async {
+        final dd = dev.driverData as LyfiCoapDriverData;
+        return await dd.coap.postCbor(LyfiPaths.acclimation, acc, cancelToken: cancelToken);
+      }, cancelToken: cancelToken);
 
   @override
-  Future<void> terminateAcclimation(Device dev, {CancellationToken? cancelToken}) async {
+  Future<void> terminateAcclimation(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     await dd.coap.delete(LyfiPaths.acclimation);
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<ScheduleTable> getSunSchedule(Device dev, {CancellationToken? cancelToken}) async {
+  Future<ScheduleTable> getSunSchedule(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.sunSchedule, cancelToken: cancelToken);
     return items.map((x) => ScheduledInstant.fromMap(x!)).toList();
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<List<SunCurveItem>> getSunCurve(Device dev, {CancellationToken? cancelToken}) async {
+  Future<List<SunCurveItem>> getSunCurve(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.data<LyfiCoapDriverData>();
     final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.sunCurve, cancelToken: cancelToken);
     return items.map((x) => SunCurveItem.fromMap(x!)).toList();
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<FanMode> getFanMode(Device dev, {CancellationToken? cancelToken}) async {
+  Future<FanMode> getFanMode(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     final modeStr = await dd.coap.getCbor<String>(LyfiPaths.fanMode, cancelToken: cancelToken);
     return FanMode.fromString(modeStr);
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<void> setFanMode(Device dev, FanMode mode, {CancellationToken? cancelToken}) async {
+  Future<void> setFanMode(Device dev, FanMode mode, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     final modeStr = mode.toString();
     return await dd.coap.putCbor(LyfiPaths.fanMode, modeStr, cancelToken: cancelToken);
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<int> getFanManualPower(Device dev, {CancellationToken? cancelToken}) async {
+  Future<int> getFanManualPower(Device dev, {CancellationToken? cancelToken}) => withBusyCheck(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     return await dd.coap.getCbor<int>(LyfiPaths.fanManual, cancelToken: cancelToken);
-  }
+  }, cancelToken: cancelToken);
 
   @override
-  Future<void> setFanManualPower(Device dev, int power, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as LyfiCoapDriverData;
-    await dd.coap.putCbor(LyfiPaths.fanManual, power, cancelToken: cancelToken);
-  }
+  Future<void> setFanManualPower(Device dev, int power, {CancellationToken? cancelToken}) =>
+      withBusyCheck(dev, () async {
+        final dd = dev.driverData as LyfiCoapDriverData;
+        await dd.coap.putCbor(LyfiPaths.fanManual, power, cancelToken: cancelToken);
+      }, cancelToken: cancelToken);
 }

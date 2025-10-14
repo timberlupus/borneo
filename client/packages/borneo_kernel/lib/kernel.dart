@@ -27,7 +27,7 @@ final class DefaultKernel implements IKernel {
   final List<IMdnsDiscovery> _mdnsDiscoveryList = [];
 
   final Map<String, BoundDeviceDescriptor> _registeredDevices = {};
-  final Map<String, IDriver> _activatedDrivers = {};
+  final Map<String, Driver> _activatedDrivers = {};
   final Map<String, BoundDevice> _boundDevices = {};
   final Map<String, StreamSubscription> _deviceEventRouters = {};
   final GlobalDevicesEventBus _events = GlobalDevicesEventBus();
@@ -51,7 +51,7 @@ final class DefaultKernel implements IKernel {
   GlobalDevicesEventBus get events => _events;
 
   @override
-  Iterable<IDriver> get activatedDrivers => _activatedDrivers.values;
+  Iterable<Driver> get activatedDrivers => _activatedDrivers.values;
 
   @override
   Iterable<BoundDevice> get boundDevices => _boundDevices.values;
@@ -347,7 +347,7 @@ final class DefaultKernel implements IKernel {
     }
   }
 
-  Future<void> _startHeartbeatObservation(Device device, IDriver driver) async {
+  Future<void> _startHeartbeatObservation(Device device, Driver driver) async {
     try {
       // Check if the driver supports observation (has observation method)
       if (driver is! BorneoLyfiCoapDriver) {
@@ -545,7 +545,7 @@ final class DefaultKernel implements IKernel {
     assert(!_isDisposed);
   }
 
-  IDriver _ensureDriverActivated(String driverID) {
+  Driver _ensureDriverActivated(String driverID) {
     var driverDesc = _driverRegistry.metaDrivers[driverID]!;
     if (!_activatedDrivers.containsKey(driverID)) {
       _activatedDrivers[driverID] = driverDesc.factory(logger: _logger);
