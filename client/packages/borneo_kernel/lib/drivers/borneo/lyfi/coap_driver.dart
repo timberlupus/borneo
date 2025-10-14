@@ -124,21 +124,23 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   @override
   Future<bool> heartbeat(Device dev, {CancellationToken? cancelToken}) async {
     if (dev.driverData.isBusy) {
-      throw InvalidOperationException(message: "Device is busy");
+      return true;
     }
-    try {
-      final dd = dev.driverData as LyfiCoapDriverData;
-      return await dd.probeCoap.ping().asCancellable(cancelToken);
-    } catch (e) {
-      return false;
-    }
+    return withBusyCheck(dev, () async {
+      try {
+        final dd = dev.driverData as LyfiCoapDriverData;
+        return await dd.probeCoap.ping().asCancellable(cancelToken);
+      } catch (e) {
+        return false;
+      }
+    });
   }
 
   @override
   void dispose() {}
 
-  Future<Stream<dynamic>> startHeartbeatObservation(Device device) async {
-    final dd = device.driverData as LyfiCoapDriverData;
+  Future<Stream<dynamic>> startHeartbeatObservation(Device dev) async {
+    final dd = dev.driverData as LyfiCoapDriverData;
     final client = dd.coap;
     final request = CoapRequest.get(BorneoPaths.heartbeat);
     final obs = await client.observe(request);

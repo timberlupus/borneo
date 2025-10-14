@@ -36,7 +36,7 @@ class AsyncRateLimiter<T> {
         _lastExecutionTime = now;
         final valueToExecute = _pendingValue;
         _pendingValue = null; // Clear pending value before executing
-        await _executeTask(valueToExecute as T);
+        await _executeTask(valueToExecute as T).asCancellable(_cancel);
       }
       await Future.delayed(interval); // Ensures interval between executions
     }
