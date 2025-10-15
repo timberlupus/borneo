@@ -1,5 +1,6 @@
 import 'package:borneo_kernel/drivers/borneo/coap_driver_data.dart';
 import 'package:borneo_kernel_abstractions/device_api.dart';
+import 'package:borneo_kernel_abstractions/driver.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 
@@ -276,11 +277,13 @@ abstract class IBorneoDeviceApi extends IDeviceApi {
   Future<bool> factoryNvsExists(Device dev, String ns, String key, {CancellationToken? cancelToken});
 }
 
-mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
+mixin BorneoDeviceCoapApi on Driver implements IBorneoDeviceApi {
   Future<int> _getFactoryNvs(Device dev, Uri path, String ns, String key, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final uri = path.replace(queryParameters: {'ns': ns, 'k': key});
-    return await dd.coap.getCbor<int>(uri, cancelToken: cancelToken);
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final uri = path.replace(queryParameters: {'ns': ns, 'k': key});
+      return await dd.coap.getCbor<int>(uri, cancelToken: cancelToken);
+    }, cancelToken: cancelToken);
   }
 
   Future<void> _setFactoryNvs(
@@ -291,15 +294,17 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
     int value, {
     CancellationToken? cancelToken,
   }) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final response = await dd.coap.postBytes(
-      path,
-      payload: simple_cbor.cbor.encode({"ns": ns, "k": key, "v": value}),
-      accept: CoapMediaType.applicationCbor,
-    );
-    if (!response.isSuccess) {
-      throw DeviceError("Failed to post `${response.location}`", dev);
-    }
+    await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final response = await dd.coap.postBytes(
+        path,
+        payload: simple_cbor.cbor.encode({"ns": ns, "k": key, "v": value}),
+        accept: CoapMediaType.applicationCbor,
+      );
+      if (!response.isSuccess) {
+        throw DeviceError("Failed to post `${response.location}`", dev);
+      }
+    }, cancelToken: cancelToken);
   }
 
   Future<String> _getFactoryNvsString(
@@ -309,9 +314,11 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
     String key, {
     CancellationToken? cancelToken,
   }) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final uri = path.replace(queryParameters: {'ns': ns, 'k': key});
-    return await dd.coap.getCbor<String>(uri, cancelToken: cancelToken);
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final uri = path.replace(queryParameters: {'ns': ns, 'k': key});
+      return await dd.coap.getCbor<String>(uri, cancelToken: cancelToken);
+    }, cancelToken: cancelToken);
   }
 
   Future<void> _setFactoryNvsString(
@@ -322,15 +329,17 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
     String value, {
     CancellationToken? cancelToken,
   }) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final response = await dd.coap.postBytes(
-      path,
-      payload: simple_cbor.cbor.encode({"ns": ns, "k": key, "v": value}),
-      accept: CoapMediaType.applicationCbor,
-    );
-    if (!response.isSuccess) {
-      throw DeviceError("Failed to post `${response.location}`", dev);
-    }
+    await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final response = await dd.coap.postBytes(
+        path,
+        payload: simple_cbor.cbor.encode({"ns": ns, "k": key, "v": value}),
+        accept: CoapMediaType.applicationCbor,
+      );
+      if (!response.isSuccess) {
+        throw DeviceError("Failed to post `${response.location}`", dev);
+      }
+    }, cancelToken: cancelToken);
   }
 
   Future<List<int>> _getFactoryNvsBlob(
@@ -340,9 +349,11 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
     String key, {
     CancellationToken? cancelToken,
   }) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final uri = path.replace(queryParameters: {'ns': ns, 'k': key});
-    return await dd.coap.getCbor<List<int>>(uri, cancelToken: cancelToken);
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final uri = path.replace(queryParameters: {'ns': ns, 'k': key});
+      return await dd.coap.getCbor<List<int>>(uri, cancelToken: cancelToken);
+    }, cancelToken: cancelToken);
   }
 
   Future<void> _setFactoryNvsBlob(
@@ -353,61 +364,75 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
     List<int> value, {
     CancellationToken? cancelToken,
   }) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final response = await dd.coap.postBytes(
-      path,
-      payload: simple_cbor.cbor.encode({"ns": ns, "k": key, "v": value}),
-      accept: CoapMediaType.applicationCbor,
-    );
-    if (!response.isSuccess) {
-      throw DeviceError("Failed to post `${response.location}`", dev);
-    }
+    await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final response = await dd.coap.postBytes(
+        path,
+        payload: simple_cbor.cbor.encode({"ns": ns, "k": key, "v": value}),
+        accept: CoapMediaType.applicationCbor,
+      );
+      if (!response.isSuccess) {
+        throw DeviceError("Failed to post `${response.location}`", dev);
+      }
+    }, cancelToken: cancelToken);
   }
 
   @override
   Future<String> getCompatible(Device dev, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    return await dd.coap.getCbor<String>(BorneoPaths.compatible, cancelToken: cancelToken);
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      return await dd.coap.getCbor<String>(BorneoPaths.compatible, cancelToken: cancelToken);
+    }, cancelToken: cancelToken);
   }
 
   @override
   Future<Version> getFirmwareVersion(Device dev, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final verStr = await dd.coap.getCbor<String>(BorneoPaths.firmwareVersion, cancelToken: cancelToken);
-    return Version.parse(verStr);
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final verStr = await dd.coap.getCbor<String>(BorneoPaths.firmwareVersion, cancelToken: cancelToken);
+      return Version.parse(verStr);
+    }, cancelToken: cancelToken);
   }
 
   @override
   Future<bool> getOnOff(Device dev, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    return await dd.coap.getCbor<bool>(BorneoPaths.power, cancelToken: cancelToken);
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      return await dd.coap.getCbor<bool>(BorneoPaths.power, cancelToken: cancelToken);
+    }, cancelToken: cancelToken);
   }
 
   @override
   Future setOnOff(Device dev, bool on, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final response = await dd.coap.putBytes(
-      BorneoPaths.power,
-      payload: simple_cbor.cbor.encode(on),
-      accept: CoapMediaType.applicationCbor,
-    );
-    if (!response.isSuccess) {
-      throw DeviceError("Failed to post to `${response.location}`", dev);
-    }
+    await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final response = await dd.coap.putBytes(
+        BorneoPaths.power,
+        payload: simple_cbor.cbor.encode(on),
+        accept: CoapMediaType.applicationCbor,
+      );
+      if (!response.isSuccess) {
+        throw DeviceError("Failed to post to `${response.location}`", dev);
+      }
+    }, cancelToken: cancelToken);
   }
 
   @override
   Future<PowerBehavior> getPowerBehavior(Device dev, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final value = await dd.coap.getCbor<int>(BorneoPaths.powerBehavior, cancelToken: cancelToken);
-    return PowerBehavior.values[value];
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final value = await dd.coap.getCbor<int>(BorneoPaths.powerBehavior, cancelToken: cancelToken);
+      return PowerBehavior.values[value];
+    }, cancelToken: cancelToken);
   }
 
   @override
   Future<DateTime> getHeartbeat(Device dev, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final timestamp = await dd.coap.getCbor<int>(BorneoPaths.heartbeat, cancelToken: cancelToken);
-    return DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final timestamp = await dd.coap.getCbor<int>(BorneoPaths.heartbeat, cancelToken: cancelToken);
+      return DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    }, cancelToken: cancelToken);
   }
 
   @override
@@ -416,35 +441,41 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
     DateTime timestamp, {
     CancellationToken? cancelToken,
   }) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final timestampUS = timestamp.isUtc ? timestamp.microsecondsSinceEpoch : timestamp.toUtc().microsecondsSinceEpoch;
-    final request = CoapRequest.get(
-      BorneoPaths.rtcLocal,
-      confirmable: true,
-      accept: CoapMediaType.applicationCbor,
-      payload: simple_cbor.cbor.encode(timestampUS),
-    );
-    final response = await dd.coap.send(request);
-    final payload = simple_cbor.cbor.decode(response.payload) as Map;
-    return BorneoRtcLocalNtpResponse.fromMap(payload);
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final timestampUS = timestamp.isUtc ? timestamp.microsecondsSinceEpoch : timestamp.toUtc().microsecondsSinceEpoch;
+      final request = CoapRequest.get(
+        BorneoPaths.rtcLocal,
+        confirmable: true,
+        accept: CoapMediaType.applicationCbor,
+        payload: simple_cbor.cbor.encode(timestampUS),
+      );
+      final response = await dd.coap.send(request);
+      final payload = simple_cbor.cbor.decode(response.payload) as Map;
+      return BorneoRtcLocalNtpResponse.fromMap(payload);
+    }, cancelToken: cancelToken);
   }
 
   @override
   Future<void> setRtcLocalSkew(Device dev, Duration skew, {CancellationToken? cancelToken}) async {
-    if (skew.isNegative) {
-      throw ArgumentError('Skew must be a non-negative duration.');
-    }
-    if (skew < const Duration(microseconds: 1000)) {
-      throw ArgumentError('Skew must be greater than 1ms.');
-    }
-    final dd = dev.driverData as BorneoCoapDriverData;
-    await dd.coap.postCbor(BorneoPaths.rtcLocal, skew.inMicroseconds, cancelToken: cancelToken);
+    await this.withQueue(dev, () async {
+      if (skew.isNegative) {
+        throw ArgumentError('Skew must be a non-negative duration.');
+      }
+      if (skew < const Duration(microseconds: 1000)) {
+        throw ArgumentError('Skew must be greater than 1ms.');
+      }
+      final dd = dev.driverData as BorneoCoapDriverData;
+      await dd.coap.postCbor(BorneoPaths.rtcLocal, skew.inMicroseconds, cancelToken: cancelToken);
+    }, cancelToken: cancelToken);
   }
 
   @override
   Future setPowerBehavior(Device dev, PowerBehavior behavior, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    await dd.coap.putCbor(BorneoPaths.powerBehavior, behavior.index, cancelToken: cancelToken);
+    await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      await dd.coap.putCbor(BorneoPaths.powerBehavior, behavior.index, cancelToken: cancelToken);
+    }, cancelToken: cancelToken);
   }
 
   @override
@@ -455,28 +486,34 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
 
   @override
   Future<GeneralBorneoDeviceStatus> getGeneralDeviceStatus(Device dev, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final payload = await dd.coap.getCbor<Map>(BorneoPaths.status, cancelToken: cancelToken);
-    return GeneralBorneoDeviceStatus.fromMap(payload);
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final payload = await dd.coap.getCbor<Map>(BorneoPaths.status, cancelToken: cancelToken);
+      return GeneralBorneoDeviceStatus.fromMap(payload);
+    }, cancelToken: cancelToken);
   }
 
   @override
   Future<void> reboot(Device dev, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    await dd.coap.postCbor<void>(BorneoPaths.reboot, null, cancelToken: cancelToken);
+    await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      await dd.coap.postCbor<void>(BorneoPaths.reboot, null, cancelToken: cancelToken);
+    }, cancelToken: cancelToken);
   }
 
   @override
   Future<void> factoryReset(Device dev, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final response = await dd.coap.postBytes(
-      BorneoPaths.factoryReset,
-      payload: simple_cbor.cbor.encode(null),
-      accept: CoapMediaType.applicationCbor,
-    );
-    if (!response.isSuccess) {
-      throw DeviceError("Failed to put `${response.location}`", dev);
-    }
+    await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final response = await dd.coap.postBytes(
+        BorneoPaths.factoryReset,
+        payload: simple_cbor.cbor.encode(null),
+        accept: CoapMediaType.applicationCbor,
+      );
+      if (!response.isSuccess) {
+        throw DeviceError("Failed to put `${response.location}`", dev);
+      }
+    }, cancelToken: cancelToken);
   }
 
   @override
@@ -511,21 +548,25 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
 
   @override
   Future<String> getTimeZone(Device dev, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    return await dd.coap.getCbor<String>(BorneoPaths.timezone, cancelToken: cancelToken);
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      return await dd.coap.getCbor<String>(BorneoPaths.timezone, cancelToken: cancelToken);
+    }, cancelToken: cancelToken);
   }
 
   @override
   Future<void> setTimeZone(Device dev, String timezone, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final response = await dd.coap.putBytes(
-      BorneoPaths.timezone,
-      payload: simple_cbor.cbor.encode(timezone),
-      accept: CoapMediaType.applicationCbor,
-    );
-    if (!response.isSuccess) {
-      throw DeviceError("Failed to put to `${response.location}`", dev);
-    }
+    await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final response = await dd.coap.putBytes(
+        BorneoPaths.timezone,
+        payload: simple_cbor.cbor.encode(timezone),
+        accept: CoapMediaType.applicationCbor,
+      );
+      if (!response.isSuccess) {
+        throw DeviceError("Failed to put to `${response.location}`", dev);
+      }
+    }, cancelToken: cancelToken);
   }
 
   @override
@@ -595,9 +636,11 @@ mixin BorneoDeviceCoapApi implements IBorneoDeviceApi {
 
   @override
   Future<bool> factoryNvsExists(Device dev, String ns, String key, {CancellationToken? cancelToken}) async {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    final uri = BorneoPaths.nvsExists.replace(queryParameters: {'ns': ns, 'k': key});
-    return await dd.coap.getCbor<bool>(uri, cancelToken: cancelToken);
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final uri = BorneoPaths.nvsExists.replace(queryParameters: {'ns': ns, 'k': key});
+      return await dd.coap.getCbor<bool>(uri, cancelToken: cancelToken);
+    }, cancelToken: cancelToken);
   }
 
   @override
