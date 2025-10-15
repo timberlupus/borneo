@@ -12,7 +12,6 @@ export 'driver_registry.dart';
 export 'errors.dart';
 export 'events.dart';
 export 'device.dart';
-export 'command_queue.dart';
 export 'mdns.dart';
 
 export 'models/bound_device.dart';

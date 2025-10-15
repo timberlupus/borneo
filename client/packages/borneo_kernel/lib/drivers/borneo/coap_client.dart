@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:async';
 
-import 'package:borneo_kernel_abstractions/command_queue.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:coap/coap.dart';
@@ -14,7 +13,6 @@ class BorneoCoapClient extends CoapClient {
   Device device;
   EventBus? deviceEvents;
   bool offlineDetectionEnabled = true;
-  final DeviceCommandQueue _commandQueue;
 
   BorneoCoapClient(
     super.baseUri, {
@@ -26,13 +24,7 @@ class BorneoCoapClient extends CoapClient {
     this.deviceEvents,
     this.offlineDetectionEnabled = true,
     this.logger,
-  }) : _commandQueue = DeviceCommandQueue();
-
-  @override
-  void close() {
-    _commandQueue.dispose();
-    super.close();
-  }
+  });
 
   @override
   Future<CoapResponse> send(
@@ -40,19 +32,17 @@ class BorneoCoapClient extends CoapClient {
     final CoapMulticastResponseHandler? onMulticastResponse,
     final CancellationToken? cancellationToken,
   }) async {
-    return _commandQueue.enqueue(() async {
-      try {
-        return await super.send(request);
-      } on IOException {
-        if (offlineDetectionEnabled && deviceEvents != null) {
-          // Emit an event to notify that the device is offline
-          if (logger != null) {
-            logger!.w('Device ${device.id} is offline. Emitting DeviceOfflineEvent.');
-          }
-          deviceEvents!.fire(DeviceOfflineEvent(device));
+    try {
+      return await super.send(request);
+    } on IOException {
+      if (offlineDetectionEnabled && deviceEvents != null) {
+        // Emit an event to notify that the device is offline
+        if (logger != null) {
+          logger!.w('Device ${device.id} is offline. Emitting DeviceOfflineEvent.');
         }
-        rethrow;
+        deviceEvents!.fire(DeviceOfflineEvent(device));
       }
-    }, cancellationToken: cancellationToken);
+      rethrow;
+    }
   }
 }
