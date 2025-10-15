@@ -48,6 +48,6 @@ class TimezoneConverter {
   Future<String?> getLocalPosixTimezone() async {
     // Get device's local IANA timezone (e.g., "America/New_York")
     final ianaTimezone = await FlutterTimezone.getLocalTimezone();
-    return await convertToPosixTimezone(ianaTimezone);
+    return await convertToPosixTimezone(ianaTimezone.identifier);
   }
 }

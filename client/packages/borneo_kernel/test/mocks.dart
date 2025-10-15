@@ -78,7 +78,14 @@ class MockDriver implements Driver {
 
   @override
   Future<T> withBusyCheck<T>(Device dev, Future<T> Function() action, {CancellationToken? cancelToken}) {
-    return action();
+    // TODO: implement withBusyCheck
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<T> withQueue<T>(Device dev, Future<T> Function() action, {CancellationToken? cancelToken}) {
+    // TODO: implement withQueue
+    throw UnimplementedError();
   }
 }
 
