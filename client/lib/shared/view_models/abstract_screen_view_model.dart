@@ -11,10 +11,8 @@ abstract class AbstractScreenViewModel extends BaseViewModel with ViewModelEvent
 
   Future<void> initialize() async {
     assert(!_isInitialized);
-    enqueueUIJob(() async {
-      await onInitialize();
-      _isInitialized = true;
-    });
+    await onInitialize();
+    _isInitialized = true;
   }
 
   Future<void> onInitialize();

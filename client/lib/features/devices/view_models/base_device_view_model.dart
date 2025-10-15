@@ -69,9 +69,6 @@ abstract class BaseDeviceViewModel extends BaseViewModel
         if (isTimerRunning) {
           stopTimer();
         }
-        if (taskQueue.size > 0) {
-          taskQueueCancelToken.cancel();
-        }
         onDeviceRemoved();
         notifyListeners();
       }
@@ -174,7 +171,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     assert(!isDisposed);
 
     if (!isTimerRunning) {
-      _timer = Timer.periodic(timerDuration, (_) => enqueueJob(() => _periodicRefreshTask(taskQueueCancelToken)));
+      _timer = Timer.periodic(timerDuration, (_) => _periodicRefreshTask(null));
     }
   }
 

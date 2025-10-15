@@ -10,9 +10,9 @@ import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
 
 final class DefaultKernel implements IKernel {
-  static const Duration kStartupDiscoveryDuration = Duration(seconds: 10);
-  static const Duration kLocalProbeTimeOut = Duration(seconds: 10);
-  static const Duration kLocalBindTimeOut = Duration(seconds: 20);
+  static const Duration kStartupDiscoveryDuration = Duration(seconds: 15);
+  static const Duration kLocalProbeTimeOut = Duration(seconds: 3);
+  static const Duration kLocalBindTimeOut = Duration(seconds: 5);
   static const Duration kHeartbeatPollingInterval = Duration(seconds: 15);
 
   Timer? _timer;

@@ -227,8 +227,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
   }
 
-  void switchPowerOnOff(bool onOff) {
-    super.enqueueUIJob(() async => await _switchPowerOnOff(onOff));
+  void switchPowerOnOff(bool onOff) async {
+    await _switchPowerOnOff(onOff);
   }
 
   Future<void> _switchPowerOnOff(bool onOff) async {
@@ -242,9 +242,9 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       (super.mode == LyfiMode.scheduled || super.mode == LyfiMode.sun) &&
       (super.state == LyfiState.temporary || super.state == LyfiState.normal);
 
-  void switchTemporaryState() {
+  void switchTemporaryState() async {
     assert(super.state == LyfiState.normal || super.state == LyfiState.temporary);
-    super.enqueueUIJob(() async => await _switchTemporaryState());
+    await _switchTemporaryState();
   }
 
   Future<void> _switchTemporaryState() async {
@@ -258,8 +258,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     await refreshStatus();
   }
 
-  void toggleLock(bool isLocked) {
-    super.enqueueUIJob(() async => await _toggleLock(isLocked));
+  void toggleLock(bool isLocked) async {
+    await _toggleLock(isLocked);
   }
 
   Future<void> _toggleLock(bool newIsLocked) async {
@@ -294,8 +294,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
   }
 
-  void switchMode(LyfiMode mode) {
-    super.enqueueUIJob(() async => await _switchMode(mode));
+  void switchMode(LyfiMode mode) async {
+    await _switchMode(mode);
   }
 
   Future<void> _switchMode(LyfiMode newMode) async {

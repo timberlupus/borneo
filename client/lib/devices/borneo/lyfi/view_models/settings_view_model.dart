@@ -76,16 +76,14 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   }
 
   Future<void> updateGeoLocation(LatLng location) async {
-    super.enqueueUIJob(() async {
-      try {
-        final loc = GeoLocation(lat: location.latitude, lng: location.longitude);
-        await super.lyfiDeviceApi.setLocation(super.boundDevice!.device, loc);
-        _location = loc;
-        notification.showSuccess(_gt.translate("Location updated successfully"));
-      } catch (e) {
-        notification.showError(_gt.translate("Failed to update device location: $e"));
-      }
-    });
+    try {
+      final loc = GeoLocation(lat: location.latitude, lng: location.longitude);
+      await super.lyfiDeviceApi.setLocation(super.boundDevice!.device, loc);
+      _location = loc;
+      notification.showSuccess(_gt.translate("Location updated successfully"));
+    } catch (e) {
+      notification.showError(_gt.translate("Failed to update device location: $e"));
+    }
   }
 
   Future<Position> getLocation({CancellationToken? cancel}) async {
@@ -128,102 +126,88 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   }
 
   Future<void> updateTimezone() async {
-    super.enqueueUIJob(() async {
-      isBusy = true;
-      notifyListeners();
-      try {
-        final tzc = TimezoneConverter();
-        await tzc.init();
-        final posixTZ = await tzc.getLocalPosixTimezone();
-        await api.setTimeZone(boundDevice!.device, posixTZ!);
-        _timezone = posixTZ;
-        notification.showSuccess(_gt.translate("Time zone updated successfully"));
-      } catch (e) {
-        notification.showError(_gt.translate("Failed to update device time zone: $e"));
-      }
-    });
+    isBusy = true;
+    notifyListeners();
+    try {
+      final tzc = TimezoneConverter();
+      await tzc.init();
+      final posixTZ = await tzc.getLocalPosixTimezone();
+      await api.setTimeZone(boundDevice!.device, posixTZ!);
+      _timezone = posixTZ;
+      notification.showSuccess(_gt.translate("Time zone updated successfully"));
+    } catch (e) {
+      notification.showError(_gt.translate("Failed to update device time zone: $e"));
+    }
   }
 
   Future<void> updateLedCorrectionMethod(LedCorrectionMethod newMethod) async {
-    super.enqueueUIJob(() async {
-      isBusy = true;
-      notifyListeners();
-      try {
-        await api.setCorrectionMethod(boundDevice!.device, newMethod);
-        _correctionMethod = newMethod;
-        notification.showSuccess(_gt.translate("LED correction method updated successfully"));
-      } catch (e) {
-        notification.showError(_gt.translate("Failed to update LED correction method: $e"));
-      }
-    });
+    isBusy = true;
+    notifyListeners();
+    try {
+      await api.setCorrectionMethod(boundDevice!.device, newMethod);
+      _correctionMethod = newMethod;
+      notification.showSuccess(_gt.translate("LED correction method updated successfully"));
+    } catch (e) {
+      notification.showError(_gt.translate("Failed to update LED correction method: $e"));
+    }
   }
 
   Future<void> updateTemporaryDuration(Duration dur) async {
-    super.enqueueUIJob(() async {
-      isBusy = true;
-      notifyListeners();
-      try {
-        await api.setTemporaryDuration(boundDevice!.device, dur);
-        _temporaryDuration = dur;
-        notification.showSuccess(_gt.translate("Temporary duration updated successfully"));
-      } catch (e) {
-        notification.showError(_gt.translate("Failed to update temporary duration: $e"));
-      }
-    });
+    isBusy = true;
+    notifyListeners();
+    try {
+      await api.setTemporaryDuration(boundDevice!.device, dur);
+      _temporaryDuration = dur;
+      notification.showSuccess(_gt.translate("Temporary duration updated successfully"));
+    } catch (e) {
+      notification.showError(_gt.translate("Failed to update temporary duration: $e"));
+    }
   }
 
   Future<void> updateFanMode(FanMode mode) async {
-    super.enqueueUIJob(() async {
-      isBusy = true;
-      notifyListeners();
-      try {
-        await api.setFanMode(boundDevice!.device, mode);
-        _fanMode = mode;
-        notification.showSuccess(_gt.translate("Fan mode updated successfully"));
-      } catch (e) {
-        notification.showError(_gt.translate("Failed to update fan mode: $e"));
-      }
-    });
+    isBusy = true;
+    notifyListeners();
+    try {
+      await api.setFanMode(boundDevice!.device, mode);
+      _fanMode = mode;
+      notification.showSuccess(_gt.translate("Fan mode updated successfully"));
+    } catch (e) {
+      notification.showError(_gt.translate("Failed to update fan mode: $e"));
+    }
   }
 
   Future<void> updateManualFanPower(int power) async {
-    super.enqueueUIJob(() async {
-      isBusy = true;
-      notifyListeners();
-      try {
-        await api.setFanManualPower(boundDevice!.device, power);
-        _manualFanPower = power;
-        notification.showSuccess(_gt.translate("Manual fan power updated successfully"));
-      } catch (e) {
-        notification.showError(_gt.translate("Failed to update manual fan power: $e"));
-      }
-    });
+    isBusy = true;
+    notifyListeners();
+    try {
+      await api.setFanManualPower(boundDevice!.device, power);
+      _manualFanPower = power;
+      notification.showSuccess(_gt.translate("Manual fan power updated successfully"));
+    } catch (e) {
+      notification.showError(_gt.translate("Failed to update manual fan power: $e"));
+    }
   }
 
   Future<void> updatePowerBehavior(PowerBehavior behavior) async {
-    super.enqueueUIJob(() async {
-      isBusy = true;
-      notifyListeners();
-      try {
-        await api.setPowerBehavior(boundDevice!.device, behavior);
-        _powerBehavior = behavior;
-        notification.showSuccess(_gt.translate("Power behavior updated successfully"));
-      } catch (e) {
-        notification.showError(_gt.translate("Failed to update power behavior: $e"));
-      }
-    });
+    isBusy = true;
+    notifyListeners();
+    try {
+      await api.setPowerBehavior(boundDevice!.device, behavior);
+      _powerBehavior = behavior;
+      notification.showSuccess(_gt.translate("Power behavior updated successfully"));
+    } catch (e) {
+      notification.showError(_gt.translate("Failed to update power behavior: $e"));
+    }
   }
 
   Future<void> factoryReset() async {
-    super.enqueueUIJob(() async {
-      isBusy = true;
-      notifyListeners();
-      try {
-        await api.factoryReset(boundDevice!.device);
-        notification.showSuccess(_gt.translate("Device restored to factory settings"));
-      } catch (e) {
-        notification.showError(_gt.translate("Failed to restore device to factory settings: $e"));
-      }
-    });
+    isBusy = true;
+    notifyListeners();
+    try {
+      await api.factoryReset(boundDevice!.device);
+      notification.showSuccess(_gt.translate("Device restored to factory settings"));
+    } catch (e) {
+      notification.showError(_gt.translate("Failed to restore device to factory settings: $e"));
+    }
   }
 }

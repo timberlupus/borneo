@@ -157,15 +157,12 @@ class AcclimationScreen extends StatelessWidget {
   }
 
   void onSubmit(AcclimationViewModel vm, BuildContext context) {
-    vm.enqueueUIJob(() async {
-      await vm.submitToDevice();
-      if (context.mounted) {
-        Provider.of<IAppNotificationService>(
-          context,
-          listen: false,
-        ).showSuccess(context.translate('Update acclimation settings succeed.'));
-        Navigator.of(context).pop();
-      }
-    });
+    if (context.mounted) {
+      Provider.of<IAppNotificationService>(
+        context,
+        listen: false,
+      ).showSuccess(context.translate('Update acclimation settings succeed.'));
+      Navigator.of(context).pop();
+    }
   }
 }

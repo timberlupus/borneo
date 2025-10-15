@@ -74,14 +74,12 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   }
 
   Future<void> syncDeviceTimezone() async {
-    enqueueUIJob(() async {
-      final success = await _syncDeviceTimezone();
-      if (success) {
-        notification.showSuccess('Timezone synchronized successfully');
-      } else {
-        notification.showError('Failed to sync timezone');
-      }
-    });
+    final success = await _syncDeviceTimezone();
+    if (success) {
+      notification.showSuccess('Timezone synchronized successfully');
+    } else {
+      notification.showError('Failed to sync timezone');
+    }
   }
 
   Future<bool> _syncDeviceTimezone() async {

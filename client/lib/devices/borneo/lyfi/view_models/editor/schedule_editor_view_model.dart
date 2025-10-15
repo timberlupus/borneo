@@ -224,15 +224,13 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
     }
   }
 
-  void togglePreviewMode() {
-    parent.enqueueJob(() async {
-      if (isPreviewMode) {
-        _deviceApi.switchState(parent.boundDevice!.device, LyfiState.dimming);
-      } else {
-        _deviceApi.switchState(parent.boundDevice!.device, LyfiState.preview);
-      }
-      notifyListeners();
-    });
+  void togglePreviewMode() async {
+    if (isPreviewMode) {
+      await _deviceApi.switchState(parent.boundDevice!.device, LyfiState.dimming);
+    } else {
+      await _deviceApi.switchState(parent.boundDevice!.device, LyfiState.preview);
+    }
+    notifyListeners();
   }
 
   @override
