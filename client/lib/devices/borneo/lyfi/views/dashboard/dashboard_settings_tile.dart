@@ -12,9 +12,9 @@ class DashboardSettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Selector<LyfiViewModel, bool>(
-      selector: (_, vm) => vm.canUnlock,
-      builder: (context, canUnlock, _) {
-        final isDisabled = !canUnlock;
+      selector: (_, vm) => vm.canChangeSettings,
+      builder: (context, canChangeSettings, _) {
+        final isDisabled = !canChangeSettings;
         final iconColor = isDisabled ? theme.colorScheme.primary.withValues(alpha: 0.38) : theme.colorScheme.primary;
         final textColor = isDisabled ? theme.colorScheme.primary.withValues(alpha: 0.38) : theme.colorScheme.primary;
         return AspectRatio(

@@ -43,6 +43,9 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       isLocked &&
       (super.state == LyfiState.normal || super.state == LyfiState.temporary);
 
+  bool get canChangeSettings =>
+      !isBusy && super.isOnline && isLocked && (super.state == LyfiState.normal || super.state == LyfiState.temporary);
+
   bool get canTimedOn => !isBusy && (!isOn || super.mode == LyfiMode.scheduled);
 
   IEditor? currentEditor;
