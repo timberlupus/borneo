@@ -64,8 +64,6 @@ static int add_mdns_services()
 
     const esp_app_desc_t* app_desc = esp_app_get_description();
 
-    const struct system_info* sysinfo = bo_system_get_info();
-
     mdns_txt_item_t serviceTxtData[] = {
         { "name", sysinfo->name },
         { "id", sysinfo->hex_id },
