@@ -18,7 +18,7 @@ static int add_mdns_services();
 
 #define MDNS_SERVICE_TYPE "_borneo"
 #define MDNS_UDP_PORT 5683
-#define HOSTNAME_MAX_LEN 32
+#define HOSTNAME_MAX_LEN 70
 
 static char _hostname[HOSTNAME_MAX_LEN] = { 0 };
 
