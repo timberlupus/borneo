@@ -47,8 +47,8 @@ int populate_hostname()
 {
     uint8_t mac[6] = { 0 };
     BO_TRY(esp_read_mac(mac, ESP_MAC_WIFI_STA));
-    snprintf(_hostname, sizeof(_hostname), "borneo-%02x%02x%02x%02x%02x%02x", mac[0], mac[1], mac[2], mac[3], mac[4],
-             mac[5]);
+    const struct system_info* sysinfo = bo_system_get_info();
+    snprintf(_hostname, sizeof(_hostname), "%s-%02X%02X", sysinfo->name, mac[4], mac[5]);
     return 0;
 }
 
@@ -64,13 +64,13 @@ static int add_mdns_services()
 
     const esp_app_desc_t* app_desc = esp_app_get_description();
 
+    const struct system_info* sysinfo = bo_system_get_info();
+
     mdns_txt_item_t serviceTxtData[] = {
-        { "name", CONFIG_BORNEO_DEVICE_NAME_DEFAULT },
+        { "name", sysinfo->name },
         { "id", sysinfo->hex_id },
-        { "manuf_id", "1" },
-        { "manuf_name", sysinfo->manuf },
-        { "model_name", CONFIG_BORNEO_BOARD_NAME },
-        { "model_id", "1" },
+        { "manuf", sysinfo->manuf },
+        { "model", sysinfo->model },
         { "hwver", CONFIG_BORNEO_HW_VER },
         { "fwver", app_desc->version },
         { "serno", sysinfo->hex_id },
