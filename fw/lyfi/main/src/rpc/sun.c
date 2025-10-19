@@ -12,8 +12,6 @@
 #include <borneo/system.h>
 #include <borneo/rtc.h>
 
-#include <borneo/common.h>
-
 #include "../led/led.h"
 #include "../solar.h"
 #include "cbor-common.h"

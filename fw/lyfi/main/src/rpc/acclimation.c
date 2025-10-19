@@ -10,7 +10,6 @@
 #include <cbor.h>
 
 #include <borneo/system.h>
-#include <borneo/rtc.h>
 
 #include <borneo/common.h>
 

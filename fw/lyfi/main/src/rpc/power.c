@@ -6,7 +6,6 @@
 #include <cbor.h>
 
 #include <borneo/system.h>
-#include <borneo/common.h>
 #include <borneo/power.h>
 #include "../power-meas.h"
 #include "rpc.h"

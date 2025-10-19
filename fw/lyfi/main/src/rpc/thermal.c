@@ -1,7 +1,8 @@
+#include <errno.h>
+
 #include <esp_system.h>
 #include <esp_event.h>
 #include <esp_log.h>
-#include <sys/socket.h>
 
 #include <cbor.h>
 

@@ -1,18 +1,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
+#include <errno.h>
 
 #include <esp_system.h>
 #include <esp_event.h>
 #include <esp_log.h>
-#include <sys/socket.h>
 
-#include "coap3/coap.h"
 #include <cbor.h>
 
 #include <borneo/system.h>
-#include <borneo/coap.h>
-#include <borneo/rtc.h>
 
 #include "../led/led.h"
 #include "cbor-common.h"

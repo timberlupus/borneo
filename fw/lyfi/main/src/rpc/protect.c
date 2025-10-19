@@ -1,12 +1,10 @@
 #include <esp_system.h>
 #include <esp_event.h>
 #include <esp_log.h>
-#include <sys/socket.h>
 
-#include <coap3/coap.h>
 #include <cbor.h>
 
-#include <borneo/common.h>
+#include <borneo/system.h>
 #include "../protect.h"
 #include "rpc.h"
 

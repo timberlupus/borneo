@@ -1,21 +1,23 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
+#include <errno.h>
 
 #include <esp_system.h>
 #include <esp_event.h>
 #include <esp_log.h>
-#include <sys/socket.h>
 
 #include <cbor.h>
 
 #include <borneo/system.h>
-#include <borneo/rtc.h>
 
 #include <borneo/common.h>
 
 #include "../fan.h"
 #include "../led/led.h"
+#include "../thermal.h"
+#include "../power-meas.h"
+#include "../ntc.h"
 #include "../coap-paths.h"
 #include "../rpc/cbor-common.h"
 
