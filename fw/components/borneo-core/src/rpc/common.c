@@ -1,0 +1,244 @@
+#include <esp_system.h>
+#include <esp_event.h>
+#include <esp_log.h>
+#include <sys/socket.h>
+
+#include <esp_ota_ops.h>
+#include <esp_mac.h>
+#include <esp_timer.h>
+#include <nvs_flash.h>
+#include <cbor.h>
+
+#include <borneo/system.h>
+#include <borneo/sntp.h>
+#include <borneo/rpc/common.h>
+#include <borneo/rtc.h>
+#include <borneo/common.h>
+#include <borneo/wifi.h>
+#include <borneo/power.h>
+#include <borneo/nvs.h>
+#include <borneo/power-meas.h>
+#include <borneo/timer.h>
+#include <borneo/product.h>
+
+#define TAG "borneo-rpc-common"
+
+int bo_rpc_borneo_info_get(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args; // No input args for GET
+    const struct system_info* sysinfo = bo_system_get_info();
+
+    CborEncoder root_map;
+    BO_TRY(cbor_encoder_create_map(retvals, &root_map, CborIndefiniteLength));
+
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "id"));
+        BO_TRY(cbor_encode_text_stringz(&root_map, sysinfo->hex_id));
+    }
+
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "compatible"));
+        BO_TRY(cbor_encode_text_stringz(&root_map, CONFIG_BORNEO_DEVICE_COMPATIBLE));
+    }
+
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "name"));
+        BO_TRY(cbor_encode_text_stringz(&root_map, sysinfo->name));
+    }
+
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "serno"));
+        BO_TRY(cbor_encode_text_stringz(&root_map, sysinfo->hex_id));
+    }
+
+    // Product Mode
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "productMode"));
+#if CONFIG_BORNEO_PRODUCT_MODE_STANDALONE == 1
+        BO_TRY(cbor_encode_uint(&root_map, BORNEO_PRODUCT_MODE_STANDALONE));
+#elif CONFIG_BORNEO_PRODUCT_MODE_FULL == 1
+        BO_TRY(cbor_encode_uint(&root_map, BORNEO_PRODUCT_MODE_FULL));
+#else
+        BO_TRY(cbor_encode_uint(&root_map, BORNEO_PRODUCT_MODE_OEM));
+#endif
+    }
+
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "hasBT"));
+#if CONFIG_BT_BLE_ENABLED
+        BO_TRY(cbor_encode_boolean(&root_map, true));
+#else
+        BO_TRY(cbor_encode_boolean(&root_map, false));
+#endif
+
+#if CONFIG_BT_BLE_ENABLED
+        // bt-mac
+        uint8_t bt_mac[6];
+        BO_TRY(esp_read_mac(bt_mac, ESP_MAC_BT));
+        BO_TRY(cbor_encode_text_stringz(&root_map, "btMac"));
+        BO_TRY(cbor_encode_byte_string(&root_map, bt_mac, 6));
+#endif
+    }
+
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "hasWifi"));
+        BO_TRY(cbor_encode_boolean(&root_map, true));
+    }
+
+    {
+        uint8_t wifi_mac[6];
+        esp_read_mac(wifi_mac, ESP_MAC_WIFI_STA);
+        BO_TRY(cbor_encode_text_stringz(&root_map, "wifiMac"));
+        BO_TRY(cbor_encode_byte_string(&root_map, wifi_mac, 6));
+    }
+
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "manufID"));
+        BO_TRY(cbor_encode_uint(&root_map, 1));
+    }
+
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "manufName"));
+        BO_TRY(cbor_encode_text_stringz(&root_map, sysinfo->manuf));
+    }
+
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "modelID"));
+        BO_TRY(cbor_encode_uint(&root_map, 1));
+    }
+
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "modelName"));
+        BO_TRY(cbor_encode_text_stringz(&root_map, sysinfo->model));
+    }
+
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "hwVer"));
+        BO_TRY(cbor_encode_text_stringz(&root_map, CONFIG_BORNEO_HW_VER));
+    }
+
+    {
+        const esp_app_desc_t* app_desc = esp_app_get_description();
+        if (app_desc == NULL) {
+            return -1;
+        }
+        BO_TRY(cbor_encode_text_stringz(&root_map, "fwVer"));
+        BO_TRY(cbor_encode_text_stringz(&root_map, app_desc->version));
+    }
+
+    BO_TRY(cbor_encoder_close_container(retvals, &root_map));
+
+    return 0;
+}
+
+int bo_rpc_borneo_reboot_post(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args; // No input data for reboot
+    (void)retvals; // No output for reboot
+    bo_system_reboot_later(5000);
+    return 0;
+}
+
+int bo_rpc_borneo_status_get(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args; // No input args for GET
+    CborEncoder root_map;
+
+    BO_TRY(cbor_encoder_create_map(retvals, &root_map, CborIndefiniteLength));
+
+    BO_TRY(cbor_encode_text_stringz(&root_map, "power"));
+    BO_TRY(cbor_encode_boolean(&root_map, bo_power_is_on()));
+
+    BO_TRY(cbor_encode_text_stringz(&root_map, "timestamp"));
+    BO_TRY(cbor_encode_uint(&root_map, bo_rtc_get_timestamp()));
+
+    BO_TRY(cbor_encode_text_stringz(&root_map, "bootDuration"));
+    BO_TRY(cbor_encode_int(&root_map, bo_timer_uptime_ms()));
+
+    BO_TRY(cbor_encode_text_stringz(&root_map, "timezone"));
+    char* tz_name = getenv("TZ");
+    if (tz_name == NULL) {
+        BO_TRY(cbor_encode_null(&root_map));
+    }
+    else {
+        BO_TRY(cbor_encode_text_stringz(&root_map, tz_name));
+    }
+
+    // TODO FIXME
+    BO_TRY(cbor_encode_text_stringz(&root_map, "wifiStatus"));
+    BO_TRY(cbor_encode_uint(&root_map, 0));
+
+    // WiFi RSSI
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "wifiRssi"));
+        int wifi_rssi;
+        if (bo_wifi_get_rssi(&wifi_rssi) == 0) {
+            BO_TRY(cbor_encode_int(&root_map, wifi_rssi));
+        }
+        else {
+            BO_TRY(cbor_encode_null(&root_map));
+        }
+    }
+
+#if CONFIG_BT_BLE_ENABLED
+    // TODO FIXME
+    BO_TRY(cbor_encode_text_stringz(&root_map, "btStatus"));
+    BO_TRY(cbor_encode_uint(&root_map, 0));
+#endif
+
+    // TODO FIXME
+    BO_TRY(cbor_encode_text_stringz(&root_map, "serverStatus"));
+    BO_TRY(cbor_encode_uint(&root_map, 0));
+
+    BO_TRY(cbor_encode_text_stringz(&root_map, "error"));
+    BO_TRY(cbor_encode_int(&root_map, errno));
+
+    BO_TRY(cbor_encode_text_stringz(&root_map, "shutdownReason"));
+    BO_TRY(cbor_encode_uint(&root_map, bo_system_get_shutdown_reason()));
+
+    BO_TRY(cbor_encode_text_stringz(&root_map, "shutdownTimestamp"));
+    BO_TRY(cbor_encode_uint(&root_map, bo_system_get_shutdown_timestamp()));
+
+#if CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "powerVoltage"));
+        int mv;
+        int rc = bo_power_volt_read(&mv);
+        if (rc != 0) {
+            BO_TRY(cbor_encode_null(&root_map));
+        }
+        else {
+            BO_TRY(cbor_encode_int(&root_map, mv));
+        }
+    }
+#endif // CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT
+
+    BO_TRY(cbor_encoder_close_container(retvals, &root_map));
+
+    return 0;
+}
+
+int bo_rpc_borneo_fw_ver_get(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args; // No input args for GET
+    const esp_app_desc_t* app_desc = esp_app_get_description();
+    if (app_desc == NULL) {
+        return -1;
+    }
+    BO_TRY(cbor_encode_text_stringz(retvals, app_desc->version));
+    return 0;
+}
+
+int bo_rpc_borneo_compatible_get(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args; // No input args for GET
+    BO_TRY(cbor_encode_text_stringz(retvals, CONFIG_BORNEO_DEVICE_COMPATIBLE));
+    return 0;
+}
+
+int bo_rpc_heartbeat_get(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args; // No input args for GET
+    BO_TRY(cbor_encode_int(retvals, (int64_t)time(NULL)));
+    return 0;
+}
