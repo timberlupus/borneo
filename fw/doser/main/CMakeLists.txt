@@ -3,10 +3,10 @@ file(GLOB_RECURSE BORNEO_APP_SOURCES
     "src/*.cpp"
 )
 
-set(REQUIRES_RPO)
+set(REQUIRES_PRO)
 
 if(BORNEO_EDITION_PRO STREQUAL "1")
-    list(APPEND REQUIRES_RPO borneo-factory borneo-ota)
+    list(APPEND REQUIRES_PRO borneo-factory borneo-ota)
 endif()
 
 idf_component_register(
