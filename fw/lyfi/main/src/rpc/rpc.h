@@ -44,6 +44,29 @@ int bo_rpc_borneo_lyfi_acclimation_get(const CborValue* args, CborEncoder* retva
 int bo_rpc_borneo_lyfi_acclimation_post(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_lyfi_acclimation_delete(const CborValue* args, CborEncoder* retvals);
 
+// RPC function declarations for LyFi core CBOR operations
+int bo_rpc_borneo_lyfi_color_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_color_put(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_schedule_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_schedule_put(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_info_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_status_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_temp_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_state_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_state_put(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_correction_method_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_correction_method_put(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_mode_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_mode_put(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_temporary_duration_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_temporary_duration_put(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_geo_location_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_geo_location_put(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_tz_enabled_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_tz_enabled_put(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_tz_offset_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_tz_offset_put(const CborValue* args, CborEncoder* retvals);
+
 #ifdef __cplusplus
 }
 #endif
