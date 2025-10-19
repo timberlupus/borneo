@@ -22,6 +22,19 @@ int bo_rpc_borneo_lyfi_protection_overheated_temp_get(const CborValue* args, Cbo
 
 #endif // CONFIG_LYFI_PROTECTION_OVERHEATED_SUPPORT
 
+#if CONFIG_LYFI_THERMAL_ENABLED
+
+// RPC function declarations for LyFi thermal CBOR operations
+int bo_rpc_borneo_lyfi_thermal_current_temp_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_thermal_keep_temp_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_thermal_settings_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_thermal_fan_mode_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_thermal_fan_mode_put(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_thermal_manual_fan_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_thermal_manual_fan_put(const CborValue* args, CborEncoder* retvals);
+
+#endif // CONFIG_LYFI_THERMAL_ENABLED
+
 #ifdef __cplusplus
 }
 #endif
