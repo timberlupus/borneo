@@ -145,14 +145,7 @@ static void coap_hnd_borneo_settings_timezone_put(coap_resource_t* resource, coa
     CborParser parser;
     CborValue value;
     BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
-
-    int rc = bo_rpc_borneo_settings_timezone_put(&value, NULL);
-    if (rc == -1) {
-        coap_pdu_set_code(response, COAP_RESPONSE_CODE(500));
-        return;
-    }
-    BO_COAP_TRY(rc, response);
-
+    BO_COAP_TRY(bo_rpc_borneo_settings_timezone_put(&value, NULL), response);
     coap_pdu_set_code(response, COAP_RESPONSE_CODE(204));
     return;
 }
