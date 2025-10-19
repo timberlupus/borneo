@@ -16,6 +16,7 @@
 
 #include "../led/led.h"
 #include "../fan.h"
+#include "../rpc/rpc.h"
 
 #define TAG "lyfi-coap"
 
@@ -25,27 +26,10 @@ static void coap_hnd_acclimation_get(coap_resource_t* resource, coap_session_t* 
     size_t encoded_size = 0;
     uint8_t buf[128];
 
-    // TODO lock
-
     CborEncoder encoder;
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
 
-    CborEncoder root_map;
-    BO_COAP_TRY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength), response);
-
-    BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "enabled"), response);
-    BO_COAP_TRY(cbor_encode_boolean(&root_map, led_acclimation_is_enabled()), response);
-
-    BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "startTimestamp"), response);
-    BO_COAP_TRY(cbor_encode_int(&root_map, _led.settings.acclimation.start_utc), response);
-
-    BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "days"), response);
-    BO_COAP_TRY(cbor_encode_int(&root_map, _led.settings.acclimation.duration), response);
-
-    BO_COAP_TRY(cbor_encode_text_stringz(&root_map, "startPercent"), response);
-    BO_COAP_TRY(cbor_encode_int(&root_map, _led.settings.acclimation.start_percent), response);
-
-    BO_COAP_TRY(cbor_encoder_close_container(&encoder, &root_map), response);
+    BO_COAP_TRY(bo_rpc_borneo_lyfi_acclimation_get(NULL, &encoder), response);
 
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
     coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
@@ -64,50 +48,8 @@ static void coap_hnd_acclimation_post(coap_resource_t* resource, coap_session_t*
     CborParser parser;
     CborValue iter;
     BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &iter), response);
-    if (!cbor_value_is_map(&iter)) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return;
-    }
 
-    CborValue value;
-    bool enabled;
-    time_t start_time;
-    int duration, start_percent;
-
-    BO_COAP_TRY_DECODE(cbor_value_map_find_value(&iter, "enabled", &value), response);
-    BO_COAP_TRY_DECODE(cbor_value_get_boolean(&value, &enabled), response);
-
-    BO_COAP_TRY_DECODE(cbor_value_map_find_value(&iter, "startTimestamp", &value), response);
-    BO_COAP_TRY_DECODE(cbor_value_get_int64_checked(&value, &start_time), response);
-
-    BO_COAP_TRY_DECODE(cbor_value_map_find_value(&iter, "days", &value), response);
-    BO_COAP_TRY_DECODE(cbor_value_get_int_checked(&value, &duration), response);
-
-    BO_COAP_TRY_DECODE(cbor_value_map_find_value(&iter, "startPercent", &value), response);
-    BO_COAP_TRY_DECODE(cbor_value_get_int_checked(&value, &start_percent), response);
-
-    if (start_time <= 0) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return;
-    }
-
-    if (duration > LED_ACCLIMATION_DAYS_MAX || duration < LED_ACCLIMATION_DAYS_MIN) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return;
-    }
-
-    if (start_percent < 10 || start_percent > 90) {
-        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
-        return;
-    }
-
-    struct led_acclimation_settings acc = {
-        .start_utc = start_time,
-        .duration = (uint8_t)duration,
-        .start_percent = (uint8_t)start_percent,
-    };
-
-    BO_COAP_TRY(led_acclimation_set(&acc, enabled), response);
+    BO_COAP_TRY(bo_rpc_borneo_lyfi_acclimation_post(&iter, NULL), response);
 
     coap_pdu_set_code(response, BO_COAP_CODE_201_CREATED);
 }
@@ -115,8 +57,7 @@ static void coap_hnd_acclimation_post(coap_resource_t* resource, coap_session_t*
 static void coap_hnd_acclimation_delete(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
                                         const coap_string_t* query, coap_pdu_t* response)
 {
-    // TODO lock
-    BO_COAP_TRY(led_acclimation_terminate(), response);
+    BO_COAP_TRY(bo_rpc_borneo_lyfi_acclimation_delete(NULL, NULL), response);
 
     coap_pdu_set_code(response, COAP_RESPONSE_CODE_DELETED);
 }
