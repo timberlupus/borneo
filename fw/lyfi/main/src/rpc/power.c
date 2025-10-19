@@ -1,0 +1,26 @@
+#include <esp_system.h>
+#include <esp_event.h>
+#include <esp_log.h>
+#include <nvs_flash.h>
+
+#include <cbor.h>
+
+#include <borneo/system.h>
+#include <borneo/common.h>
+#include <borneo/power.h>
+#include "../power-meas.h"
+#include "power.h"
+
+#if CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT && CONFIG_LYFI_MEAS_CURRENT_SUPPORT
+
+#define TAG "lyfi-rpc-power"
+int bo_rpc_lyfi_power_mw_get(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args; // No input args for GET
+    int32_t power_mw;
+    BO_TRY(lyfi_power_read(&power_mw));
+    BO_TRY(cbor_encode_uint(retvals, power_mw));
+    return 0;
+}
+
+#endif // CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT && CONFIG_LYFI_MEAS_CURRENT_SUPPORT
