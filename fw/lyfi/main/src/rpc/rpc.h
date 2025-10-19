@@ -35,6 +35,10 @@ int bo_rpc_borneo_lyfi_thermal_manual_fan_put(const CborValue* args, CborEncoder
 
 #endif // CONFIG_LYFI_THERMAL_ENABLED
 
+// RPC function declarations for LyFi sun CBOR operations
+int bo_rpc_borneo_lyfi_sun_schedule_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_sun_curve_get(const CborValue* args, CborEncoder* retvals);
+
 #ifdef __cplusplus
 }
 #endif

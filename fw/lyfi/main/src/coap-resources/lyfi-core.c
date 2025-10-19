@@ -19,7 +19,7 @@
 #include "../ntc.h"
 #include "../power-meas.h"
 #include "../coap-paths.h"
-#include "cbor-common.h"
+#include "../rpc/cbor-common.h"
 
 #define TAG "lyfi-coap"
 
