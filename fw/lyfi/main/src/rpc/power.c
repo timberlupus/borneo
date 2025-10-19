@@ -9,7 +9,7 @@
 #include <borneo/common.h>
 #include <borneo/power.h>
 #include "../power-meas.h"
-#include "power.h"
+#include "rpc.h"
 
 #if CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT && CONFIG_LYFI_MEAS_CURRENT_SUPPORT
 

@@ -13,6 +13,7 @@
 #include <borneo/coap.h>
 
 #include "../fan.h"
+#include "../rpc/rpc.h"
 
 #define TAG "lyfi-coap"
 
@@ -24,13 +25,7 @@ static void _coap_hnd_fan_power_get(coap_resource_t* resource, coap_session_t* s
     uint8_t buf[128];
 
     cbor_encoder_init(&encoder, buf, sizeof(buf), 0);
-
-#if CONFIG_LYFI_FAN_CTRL_SUPPORT
-    const struct fan_status status = fan_get_status();
-    BO_COAP_TRY(cbor_encode_uint(&encoder, status.power), response);
-#else
-    BO_COAP_TRY(cbor_encode_null(&encoder), response);
-#endif
+    BO_COAP_TRY(bo_rpc_borneo_lyfi_fan_power_get(NULL, &encoder), response);
     encoded_size = cbor_encoder_get_buffer_size(&encoder, buf);
 
     coap_add_data_blocked_response(request, response, COAP_MEDIATYPE_APPLICATION_CBOR, 0, encoded_size, buf);
@@ -50,22 +45,14 @@ static void _coap_hnd_fan_power_put(coap_resource_t* resource, coap_session_t* s
     CborValue it;
     BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &it), response);
 
-#if CONFIG_LYFI_FAN_CTRL_SUPPORT
-    int power;
-    BO_COAP_TRY_DECODE(cbor_value_get_int(&it, &power), response);
-    if (power > 100 || power < 0) {
-        goto _BAD_REQUEST;
+    int rc = bo_rpc_borneo_lyfi_fan_power_put(&it, NULL);
+    if (rc == -1) {
+        coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
+        return;
     }
-    BO_COAP_TRY(fan_set_power((uint8_t)power), response);
-#else
-    goto _BAD_REQUEST;
-#endif // CONFIG_LYFI_FAN_CTRL_SUPPORT
+    BO_COAP_TRY(rc, response);
 
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
-    return;
-
-_BAD_REQUEST:
-    coap_pdu_set_code(response, BO_COAP_CODE_400_BAD_REQUEST);
     return;
 }
 

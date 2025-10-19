@@ -8,7 +8,7 @@
 
 #include <borneo/common.h>
 #include "../protect.h"
-#include "protect.h"
+#include "rpc.h"
 
 #if CONFIG_LYFI_PROTECTION_OVERHEATED_SUPPORT
 
