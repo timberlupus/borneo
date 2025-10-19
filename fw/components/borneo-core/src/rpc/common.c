@@ -242,3 +242,29 @@ int bo_rpc_heartbeat_get(const CborValue* args, CborEncoder* retvals)
     BO_TRY(cbor_encode_int(retvals, (int64_t)time(NULL)));
     return 0;
 }
+
+int bo_rpc_borneo_settings_timezone_get(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args; // No input args for GET
+    const char* tz = bo_rtc_get_tz();
+    if (tz != NULL) {
+        BO_TRY(cbor_encode_text_stringz(retvals, tz));
+    }
+    else {
+        BO_TRY(cbor_encode_null(retvals));
+    }
+    return 0;
+}
+
+int bo_rpc_borneo_settings_timezone_put(const CborValue* args, CborEncoder* retvals)
+{
+    (void)retvals; // No output for PUT
+    char tz[256] = { 0 };
+    size_t tz_len = sizeof(tz);
+    BO_TRY(cbor_value_copy_text_string(args, tz, &tz_len, NULL));
+    if (tz_len > 128 || tz_len == 0) {
+        return -EINVAL; // Bad request
+    }
+    bo_rtc_set_tz(tz);
+    return 0;
+}
