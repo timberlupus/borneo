@@ -93,22 +93,12 @@ int bo_rpc_borneo_info_get(const CborValue* args, CborEncoder* retvals)
     }
 
     {
-        BO_TRY(cbor_encode_text_stringz(&root_map, "manufID"));
-        BO_TRY(cbor_encode_uint(&root_map, 1));
-    }
-
-    {
-        BO_TRY(cbor_encode_text_stringz(&root_map, "manufName"));
+        BO_TRY(cbor_encode_text_stringz(&root_map, "manuf"));
         BO_TRY(cbor_encode_text_stringz(&root_map, sysinfo->manuf));
     }
 
     {
-        BO_TRY(cbor_encode_text_stringz(&root_map, "modelID"));
-        BO_TRY(cbor_encode_uint(&root_map, 1));
-    }
-
-    {
-        BO_TRY(cbor_encode_text_stringz(&root_map, "modelName"));
+        BO_TRY(cbor_encode_text_stringz(&root_map, "model"));
         BO_TRY(cbor_encode_text_stringz(&root_map, sysinfo->model));
     }
 

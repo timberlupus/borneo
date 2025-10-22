@@ -115,9 +115,7 @@ class GeneralBorneoDeviceInfo {
   final List<int> btMac;
   final bool hasWifi;
   final List<int> wifiMac;
-  final int manufID;
   final String manufName;
-  final int modelID;
   final String modelName;
   final Version hwVer;
   final Version fwVer;
@@ -132,9 +130,7 @@ class GeneralBorneoDeviceInfo {
     this.btMac = const [],
     this.hasWifi = false,
     this.wifiMac = const [],
-    required this.manufID,
     required this.manufName,
-    required this.modelID,
     required this.modelName,
     required this.hwVer,
     required this.fwVer,
@@ -150,10 +146,8 @@ class GeneralBorneoDeviceInfo {
       hasBT: map['hasBT'],
       hasWifi: map['hasWifi'],
       wifiMac: map['wifiMac'], // Convert bytes to String
-      manufID: map['manufID'],
-      manufName: map['manufName'],
-      modelID: map['modelID'],
-      modelName: map['modelName'],
+      manufName: map['manuf'],
+      modelName: map['model'],
       hwVer: Version.parse(map['hwVer']),
       fwVer: Version.parse(map['fwVer']),
     );
