@@ -510,6 +510,11 @@ menu "Borneo LyFi"
             int "Power supply current ADC factor in mV/A"
             depends on LYFI_MEAS_CURRENT_SUPPORT
             default 235
+
+        config LYFI_MEAS_CURRENT_OFFSET
+            int "Power supply current ADC offset in mV"
+            depends on LYFI_MEAS_CURRENT_SUPPORT
+            default 0
     endmenu
 
 
