@@ -58,10 +58,9 @@ jobs:
       with:
         github-token: ${{ secrets.BORNEO_OSS_WEB_FLASHER_TOKEN }}
         script: |
-          github.rest.actions.createWorkflowDispatch({
+          await github.rest.repos.createDispatchEvent({
             owner: 'borneo-iot',
             repo: 'web-flasher',
-            workflow_id: 'deploy.yml',
-            ref: 'master',
-            inputs: {}
+            event_type: 'deploy-firmware',
+            client_payload: {}
           });
