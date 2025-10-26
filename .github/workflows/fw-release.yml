@@ -1,16 +1,14 @@
 name: Borneo Firmware Release CI
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - 'fw/**'
-      - '.github/workflows/fw-release.yml'
   pull_request:
     branches: [master]
     paths:
       - 'fw/**'
       - '.github/workflows/fw-release.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '0 18 * * *'
 
 permissions:
   contents: write
@@ -50,7 +48,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         tag_name: release-fw-latest
-        name: Borneo-IoT Latest Firmware Release
+        name: Daily Firmware Release
         draft: false
         overwrite_files: true
         files: artifacts/*
@@ -63,7 +61,7 @@ jobs:
           github.rest.actions.createWorkflowDispatch({
             owner: 'borneo-iot',
             repo: 'web-flasher',
-            workflow_id: 'deploy.yml', xs
-            ref: 'firmware_ce',
+            workflow_id: 'deploy.yml',
+            ref: 'master',
             inputs: {}
           });
