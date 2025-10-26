@@ -40,26 +40,19 @@ jobs:
     - name: Generate Manifests file
       run: python fw/scripts/ci/merge_manifest.py ./artifacts -o ./artifacts/manifests.json
 
-    - name: Delete existing release and tag
-      run: |
-        if gh release view release-fw-latest >/dev/null 2>&1; then
-          gh release delete release-fw-latest --yes
-        fi
-        if git ls-remote --tags origin | grep -q "release-fw-latest"; then
-          git push origin --delete release-fw-latest
-        fi
-
     - name: Create and push new tag
       run: |
+        git tag -d release-fw-latest || true
         git tag release-fw-latest
-        git push origin release-fw-latest
+        git push origin release-fw-latest --force
 
     - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: release-fw-latest
         name: Borneo-IoT Latest Firmware Release
         draft: false
+        overwrite_files: true
         files: artifacts/*
 
     - name: Deploy to web-flasher repo (firmware_ce branch)

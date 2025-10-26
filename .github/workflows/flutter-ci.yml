@@ -278,11 +278,12 @@ jobs:
           fi
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: app-ce-v${{ needs.build-apk.outputs.version }}
           name: Borneo-IoT App Release app-ce-v${{ needs.build-apk.outputs.version }}
           draft: false
+          overwrite_files: true
           prerelease: ${{ steps.set_prerelease.outputs.prerelease }}
           files: |
             release-artifacts/borneo-app-ce-${{ needs.build-apk.outputs.version }}.apk
