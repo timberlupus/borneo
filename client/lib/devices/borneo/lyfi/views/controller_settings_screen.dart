@@ -76,7 +76,7 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
   }
 
   List<Widget> _buildSettingGroups(BuildContext context, bool isInitialized) {
-    const rightChevron = CupertinoListTileChevron();
+    // const rightChevron = CupertinoListTileChevron();
     final tileColor = Theme.of(context).colorScheme.surfaceContainerHighest;
     return <Widget>[
       GenericSettingsGroup(

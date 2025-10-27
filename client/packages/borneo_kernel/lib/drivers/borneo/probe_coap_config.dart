@@ -8,4 +8,7 @@ class BorneoProbeCoapConfig extends DefaultCoapConfig {
 
   @override
   double get ackTimeoutScale => 2;
+
+  @override
+  int get maxRetransmit => 1;
 }

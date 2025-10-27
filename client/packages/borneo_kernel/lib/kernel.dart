@@ -492,7 +492,7 @@ final class DefaultKernel implements IKernel {
                 futures.add(
                   _tryDoHeartBeat(
                     bd,
-                    kHeartbeatPollingInterval,
+                    kLocalProbeTimeOut,
                   ).catchError((_) => false).asCancellable(_heartbeatPollingTaskCancelToken),
                 );
                 devices.add(bd);
