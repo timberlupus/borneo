@@ -3,6 +3,8 @@ import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 
+import 'models/io.dart';
+
 abstract class Driver implements IDisposable {
   Driver();
 
@@ -19,12 +21,21 @@ abstract class Driver implements IDisposable {
     return await dev.driverData.lock.synchronized(action);
   }
 
-  Future<T> withQueue<T>(Device dev, Future<T> Function() action, {CancellationToken? cancelToken}) async {
-    return await dev.driverData.queue.submit(() async {
-      if (dev.driverData.isBusy) {
-        throw InvalidOperationException(message: "Device is busy");
-      }
-      return await action();
-    }, cancel: cancelToken);
+  Future<T> withQueue<T>(
+    Device dev,
+    Future<T> Function() action, {
+    CancellationToken? cancelToken,
+    IOCommandPriority priority = IOCommandPriority.normal,
+  }) async {
+    return await dev.driverData.queue.submit(
+      () async {
+        if (dev.driverData.isBusy) {
+          throw InvalidOperationException(message: "Device is busy");
+        }
+        return await action();
+      },
+      priority: priority,
+      cancel: cancelToken,
+    );
   }
 }

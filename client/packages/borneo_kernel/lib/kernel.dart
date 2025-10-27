@@ -473,15 +473,29 @@ final class DefaultKernel implements IKernel {
               final devices = <BoundDevice>[];
               for (final bd in _boundDevices.values) {
                 final driverDesc = _driverRegistry.metaDrivers[bd.driverID];
-                if (driverDesc?.heartbeatMethod == HeartbeatMethod.poll && !bd.device.driverData.isBusy) {
-                  futures.add(
-                    _tryDoHeartBeat(
-                      bd,
-                      kHeartbeatPollingInterval,
-                    ).catchError((_) => false).asCancellable(_heartbeatPollingTaskCancelToken),
-                  );
-                  devices.add(bd);
+                if (driverDesc?.heartbeatMethod != HeartbeatMethod.poll) {
+                  continue;
                 }
+
+                if (bd.device.driverData.isBusy) {
+                  _logger.t('Skip heartbeat for ${bd.device.id} because driver lock is busy.');
+                  continue;
+                }
+
+                final queue = bd.device.driverData.queue;
+                // Prefer user-initiated operations; skip polling when device IO queue is active.
+                if (!queue.isIdle) {
+                  _logger.t('Skip heartbeat for ${bd.device.id} because IO queue is busy.');
+                  continue;
+                }
+
+                futures.add(
+                  _tryDoHeartBeat(
+                    bd,
+                    kHeartbeatPollingInterval,
+                  ).catchError((_) => false).asCancellable(_heartbeatPollingTaskCancelToken),
+                );
+                devices.add(bd);
               }
 
               _logger.d('Polling heartbeat for (${devices.length}) bound devices...');

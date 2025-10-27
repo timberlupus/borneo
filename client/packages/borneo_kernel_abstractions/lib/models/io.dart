@@ -59,6 +59,22 @@ class IORequestQueue {
     return completer.future;
   }
 
+  Future<T>? trySubmit<T>(
+    Future<T> Function() task, {
+    IOCommandPriority priority = IOCommandPriority.normal,
+    CancellationToken? cancel,
+  }) {
+    if (_disposed) {
+      throw StateError('IORequestQueue has been disposed');
+    }
+
+    if (!isIdle) {
+      return null;
+    }
+
+    return submit(task, priority: priority, cancel: cancel);
+  }
+
   void _processQueue() async {
     if (_queue.isEmpty || _disposed) {
       _isProcessing = false;
@@ -88,4 +104,6 @@ class IORequestQueue {
   }
 
   int get length => _queue.length;
+
+  bool get isIdle => !_isProcessing && _queue.isEmpty && _currentItem == null;
 }

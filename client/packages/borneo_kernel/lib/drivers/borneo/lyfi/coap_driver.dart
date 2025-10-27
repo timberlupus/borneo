@@ -18,7 +18,7 @@ import 'package:borneo_common/io/net/coap_client.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/metadata.dart';
 import 'package:borneo_kernel_abstractions/errors.dart';
 import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
-
+import 'package:borneo_kernel_abstractions/models/io.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/driver.dart';
@@ -125,14 +125,19 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
     if (dev.driverData.isBusy) {
       return true;
     }
-    return withQueue(dev, () async {
-      try {
-        final dd = dev.driverData as LyfiCoapDriverData;
-        return await dd.probeCoap.ping().asCancellable(cancelToken);
-      } catch (e) {
-        return false;
-      }
-    });
+    return withQueue(
+      dev,
+      () async {
+        try {
+          final dd = dev.driverData as LyfiCoapDriverData;
+          return await dd.probeCoap.ping().asCancellable(cancelToken);
+        } catch (e) {
+          return false;
+        }
+      },
+      cancelToken: cancelToken,
+      priority: IOCommandPriority.low,
+    );
   }
 
   @override
