@@ -84,7 +84,12 @@ class MockDriver implements Driver {
   }
 
   @override
-  Future<T> withQueue<T>(Device dev, Future<T> Function() action, {CancellationToken? cancelToken, IOCommandPriority? priority}) {
+  Future<T> withQueue<T>(
+    Device dev,
+    Future<T> Function() action, {
+    CancellationToken? cancelToken,
+    IOCommandPriority? priority,
+  }) {
     // TODO: implement withQueue
     throw UnimplementedError();
   }
