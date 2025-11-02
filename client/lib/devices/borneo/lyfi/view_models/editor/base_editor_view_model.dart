@@ -20,7 +20,7 @@ abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
-  bool get isOnline => parent.isOnline;
+  bool get isOnline => parent.isOnline && !parent.isSuspectedOffline;
   bool get isBusy => parent.isBusy;
 
   bool _isChanged = false;
@@ -68,12 +68,22 @@ abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
     final color = _channels.map((x) => x.value).toList(growable: false);
     if (isLimited) {
       _colorChangeRateLimiter.add(() async {
+        if (parent.isSuspectedOffline || parent.boundDevice == null) {
+          return;
+        }
         if (!parent.boundDevice!.device.driverData.isBusy) {
-          deviceApi.setColor(parent.boundDevice!.device, color, cancelToken: cancelToken);
+          await parent.executeLyfiCommand(
+            () => deviceApi.setColor(parent.boundDevice!.device, color, cancelToken: cancelToken),
+          );
         }
       });
     } else {
-      await deviceApi.setColor(parent.boundDevice!.device, color, cancelToken: cancelToken);
+      if (parent.isSuspectedOffline || parent.boundDevice == null) {
+        return;
+      }
+      await parent.executeLyfiCommand(
+        () => deviceApi.setColor(parent.boundDevice!.device, color, cancelToken: cancelToken),
+      );
     }
   }
 }

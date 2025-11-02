@@ -1,4 +1,3 @@
-import 'package:borneo_app/shared/widgets/device_status_indicator.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
@@ -49,43 +48,25 @@ class LyfiBusyIndicatorSliver extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
-      child: Selector<LyfiViewModel, ({bool isBusy, bool isOnline})>(
-        selector: (_, vm) => (isBusy: vm.isBusy, isOnline: vm.isOnline),
-        builder: (context, vm, _) => SizedBox(
-          height: 1,
-          width: double.infinity,
-          child: vm.isBusy
-              ? LinearProgressIndicator(
-                  backgroundColor: Colors.transparent,
-                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
-                )
-              : Container(color: Colors.transparent),
-        ),
+      child: Selector<LyfiViewModel, bool>(
+        selector: (_, vm) => vm.isBusy,
+        builder: (context, isBusy, _) {
+          if (!isBusy) {
+            return const SizedBox.shrink();
+          }
+          return const LinearProgressIndicator(minHeight: 2);
+        },
       ),
     );
   }
 }
 
-/// Online and timezone status banners shown under AppBar
 class LyfiStatusBannersSliver extends StatelessWidget {
   const LyfiStatusBannersSliver({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return SliverToBoxAdapter(child: Column(children: const [_OnlineStatusBanner(), _TimezoneSyncBanner()]));
-  }
-}
 
-class _OnlineStatusBanner extends StatelessWidget {
-  const _OnlineStatusBanner();
   @override
   Widget build(BuildContext context) {
-    return Selector<LyfiViewModel, bool>(
-      selector: (_, vm) => vm.isOnline,
-      builder: (context, isOnline, _) {
-        final vm = context.read<LyfiViewModel>();
-        return DeviceStatusIndicator(isOnline: isOnline, onReconnect: isOnline ? null : vm.reconnect);
-      },
-    );
+    return const SliverToBoxAdapter(child: _TimezoneSyncBanner());
   }
 }
 

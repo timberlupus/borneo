@@ -134,7 +134,7 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
           return;
         }
         final vm = context.read<LyfiViewModel>();
-        if (!vm.isLocked) {
+        if (!vm.isLocked && !vm.isSuspectedOffline) {
           vm.toggleLock(true);
         } else {
           Navigator.of(context).pop();
@@ -159,7 +159,9 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
     if (vm.isLocked) {
       Navigator.of(context).pop();
     } else {
-      vm.toggleLock(true);
+      if (!vm.isSuspectedOffline) {
+        vm.toggleLock(true);
+      }
     }
   }
 }

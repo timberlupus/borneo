@@ -9,6 +9,7 @@ import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
 import 'package:borneo_kernel_abstractions/models/driver_data.dart';
 import 'package:borneo_kernel_abstractions/models/driver_descriptor.dart';
 import 'package:borneo_kernel_abstractions/models/heartbeat_method.dart';
+import 'package:borneo_kernel_abstractions/models/io.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
@@ -83,7 +84,7 @@ class MockDriver implements Driver {
   }
 
   @override
-  Future<T> withQueue<T>(Device dev, Future<T> Function() action, {CancellationToken? cancelToken}) {
+  Future<T> withQueue<T>(Device dev, Future<T> Function() action, {CancellationToken? cancelToken, IOCommandPriority? priority}) {
     // TODO: implement withQueue
     throw UnimplementedError();
   }

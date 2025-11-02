@@ -4,8 +4,16 @@ import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 class DeviceStatusIndicator extends StatelessWidget {
   final bool isOnline;
   final VoidCallback? onReconnect;
+  final bool isReconnecting;
+  final int? reconnectCountdownSeconds;
 
-  const DeviceStatusIndicator({super.key, required this.isOnline, this.onReconnect});
+  const DeviceStatusIndicator({
+    super.key,
+    required this.isOnline,
+    this.onReconnect,
+    this.isReconnecting = false,
+    this.reconnectCountdownSeconds,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +45,41 @@ class DeviceStatusIndicator extends StatelessWidget {
           ),
           if (onReconnect != null)
             TextButton.icon(
-              onPressed: onReconnect,
-              icon: Icon(Icons.refresh, size: 16, color: theme.colorScheme.error),
-              label: Text(
-                context.translate('Reconnect'),
-                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error, fontWeight: FontWeight.w500),
+              onPressed: isReconnecting ? null : onReconnect,
+              icon: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: isReconnecting
+                    ? SizedBox(
+                        key: const ValueKey('reconnect-progress'),
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.error),
+                        ),
+                      )
+                    : Icon(
+                        Icons.refresh,
+                        key: const ValueKey('reconnect-icon'),
+                        size: 16,
+                        color: theme.colorScheme.error,
+                      ),
+              ),
+              label: Builder(
+                builder: (context) {
+                  final rawCountdown = reconnectCountdownSeconds ?? 0;
+                  final int countdown = rawCountdown < 0 ? 0 : (rawCountdown > 99 ? 99 : rawCountdown);
+                  final labelText = isReconnecting
+                      ? '${context.translate("Connecting...")} (${countdown}s)'
+                      : context.translate('Reconnect');
+                  return Text(
+                    labelText,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

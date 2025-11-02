@@ -4,7 +4,7 @@ import 'package:cancellation_token/cancellation_token.dart';
 
 class ManualEditorViewModel extends BaseEditorViewModel {
   @override
-  bool get canEdit => parent.isOnline && parent.isOn && parent.mode == LyfiMode.manual;
+  bool get canEdit => parent.isOnline && !parent.isSuspectedOffline && parent.isOn && parent.mode == LyfiMode.manual;
 
   bool get canChangeColor => canEdit;
 
@@ -12,7 +12,13 @@ class ManualEditorViewModel extends BaseEditorViewModel {
 
   @override
   Future<void> onInitialize({CancellationToken? cancelToken}) async {
-    final lyfiStatus = await super.deviceApi.getLyfiStatus(parent.boundDevice!.device, cancelToken: cancelToken);
+    if (parent.boundDevice == null) {
+      throw StateError('Device is not bound.');
+    }
+
+    final lyfiStatus = await parent.executeLyfiCommand(
+      () => super.deviceApi.getLyfiStatus(parent.boundDevice!.device, cancelToken: cancelToken),
+    );
 
     // Ensure we are in the correct state and mode before proceeding
     if (parent.state != LyfiState.dimming) {

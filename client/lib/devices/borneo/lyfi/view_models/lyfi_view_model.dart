@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
@@ -18,6 +19,10 @@ import 'editor/ieditor.dart';
 
 class LyfiViewModel extends BaseLyfiDeviceViewModel {
   static const initializationTimeout = Duration(seconds: 5);
+  static const Duration _commandTimeout = Duration(seconds: 3);
+  static const Duration _rapidProbeTimeout = Duration(seconds: 1);
+  static const Duration _rapidProbeInterval = Duration(milliseconds: 600);
+  static const int _rapidProbeAttempts = 3;
   static const int tempMax = 105;
   static final int tempSetpoint = 45;
 
@@ -26,6 +31,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   bool _isDisposed = false;
 
   final ILocaleService localeService;
+  Future<void>? _rapidProbeTask;
 
   ILyfiDeviceApi get _deviceApi => super.borneoDeviceApi as ILyfiDeviceApi;
 
@@ -35,18 +41,26 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   final ValueNotifier<Duration> _temporaryRemaining = ValueNotifier<Duration>(Duration.zero);
   ValueNotifier<Duration> get temporaryRemaining => _temporaryRemaining;
 
-  bool get canLockOrUnlock => !isBusy && isOn;
+  bool get isSuspectedOffline => super.isSuspectedOffline;
+  Duration get commandTimeout => _commandTimeout;
+
+  bool get canLockOrUnlock => !isBusy && !isSuspectedOffline && isOn;
   bool get canUnlock =>
       !isBusy &&
       super.isOnline &&
+      !isSuspectedOffline &&
       isOn &&
       isLocked &&
       (super.state == LyfiState.normal || super.state == LyfiState.temporary);
 
   bool get canChangeSettings =>
-      !isBusy && super.isOnline && isLocked && (super.state == LyfiState.normal || super.state == LyfiState.temporary);
+      !isBusy &&
+      super.isOnline &&
+      !isSuspectedOffline &&
+      isLocked &&
+      (super.state == LyfiState.normal || super.state == LyfiState.temporary);
 
-  bool get canTimedOn => !isBusy && (!isOn || super.mode == LyfiMode.scheduled);
+  bool get canTimedOn => !isBusy && !isSuspectedOffline && (!isOn || super.mode == LyfiMode.scheduled);
 
   IEditor? currentEditor;
   final ScheduleTable scheduledInstants = [];
@@ -84,25 +98,75 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     super.logger,
   });
 
+  Future<T> executeLyfiCommand<T>(
+    Future<T> Function() action, {
+    Duration? timeout,
+    bool resetSuspectedOnSuccess = true,
+  }) {
+    return runDeviceCommand(
+      action,
+      timeout: timeout ?? _commandTimeout,
+      resetSuspectedOnSuccess: resetSuspectedOnSuccess,
+    );
+  }
+
+  @override
+  void onDeviceSuspectedOffline() {
+    super.onDeviceSuspectedOffline();
+    if (_rapidProbeTask != null || boundDevice == null || isDisposed) {
+      return;
+    }
+    _rapidProbeTask = _runRapidProbe().whenComplete(() {
+      _rapidProbeTask = null;
+    });
+  }
+
+  Future<void> _runRapidProbe() async {
+    for (var attempt = 0; attempt < _rapidProbeAttempts; attempt++) {
+      if (isDisposed || boundDevice == null || !super.isOnline) {
+        return;
+      }
+
+      try {
+        await _deviceApi.getLyfiStatus(boundDevice!.device).timeout(_rapidProbeTimeout);
+        super.clearSuspectedOffline();
+        await refreshStatus();
+        return;
+      } on TimeoutException {
+        // continue to next attempt
+      } on SocketException catch (e, stackTrace) {
+        logger?.w('Lyfi rapid probe socket error: $e', error: e, stackTrace: stackTrace);
+      } on IOException catch (e, stackTrace) {
+        logger?.w('Lyfi rapid probe IO error: $e', error: e, stackTrace: stackTrace);
+      } catch (e, stackTrace) {
+        logger?.w('Lyfi rapid probe unexpected error: $e', error: e, stackTrace: stackTrace);
+      }
+
+      if (attempt < _rapidProbeAttempts - 1) {
+        await Future.delayed(_rapidProbeInterval);
+      }
+    }
+  }
+
   @override
   Future<void> onInitialize() async {
     await super.onInitialize();
-    if (super.isOnline) {
-      _temporaryDuration = await _deviceApi.getTemporaryDuration(boundDevice!.device);
+    if (super.isOnline && !isSuspectedOffline && boundDevice != null) {
+      _temporaryDuration = await executeLyfiCommand(() => _deviceApi.getTemporaryDuration(boundDevice!.device));
     }
 
     //_channels.length * lyfiBrightnessMax.toDouble();
 
     await refreshStatus();
 
-    if (super.isOnline) {
+    if (super.isOnline && !isSuspectedOffline && boundDevice != null) {
       switch (mode) {
         case LyfiMode.scheduled:
-          scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
+          scheduledInstants.addAll(await executeLyfiCommand(() => _deviceApi.getSchedule(boundDevice!.device)));
           break;
 
         case LyfiMode.sun:
-          sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
+          sunInstants.addAll(await executeLyfiCommand(() => _deviceApi.getSunSchedule(boundDevice!.device)));
           break;
 
         default:
@@ -124,7 +188,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       for (final cvn in _channels) {
         cvn.dispose();
       }
-      if (!super.isLocked && super.isOnline) {
+      if (!super.isLocked && super.isOnline && !isSuspectedOffline) {
         try {
           Future.microtask(() async {
             if (super.state != LyfiState.normal) {
@@ -149,20 +213,24 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   Future<void> onDeviceBound() async {
     super.onDeviceBound();
 
-    _temporaryDuration = await _deviceApi.getTemporaryDuration(boundDevice!.device);
+    if (boundDevice == null) {
+      return;
+    }
+
+    _temporaryDuration = await executeLyfiCommand(() => _deviceApi.getTemporaryDuration(boundDevice!.device));
 
     await refreshStatus();
 
     switch (mode) {
       case LyfiMode.scheduled:
         if (scheduledInstants.isEmpty) {
-          scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
+          scheduledInstants.addAll(await executeLyfiCommand(() => _deviceApi.getSchedule(boundDevice!.device)));
         }
         break;
 
       case LyfiMode.sun:
         if (sunInstants.isEmpty) {
-          sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
+          sunInstants.addAll(await executeLyfiCommand(() => _deviceApi.getSunSchedule(boundDevice!.device)));
         }
         break;
 
@@ -197,10 +265,14 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   @override
   Future<void> refreshStatus({CancellationToken? cancelToken}) async {
     assert(!_isDisposed);
-    if (!super.isOnline) {
+    if (!super.isOnline || isSuspectedOffline || boundDevice == null) {
       return;
     }
     await super.refreshStatus(cancelToken: cancelToken);
+
+    if (super.isSuspectedOffline) {
+      return;
+    }
 
     _fanPowerRatio = super.lyfiDeviceStatus?.fanPower == null ? null : super.lyfiDeviceStatus!.fanPower!.toDouble();
 
@@ -221,7 +293,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
 
     if (super.mode == LyfiMode.sun) {
-      final sunSchedule = await _deviceApi.getSunSchedule(boundDevice!.device);
+      final sunSchedule = await executeLyfiCommand(() => _deviceApi.getSunSchedule(boundDevice!.device));
       if (sunSchedule.length == sunInstants.length) {
         for (int i = 0; i < sunSchedule.length; i++) {
           sunInstants[i] = sunSchedule[i];
@@ -231,16 +303,21 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   }
 
   void switchPowerOnOff(bool onOff) async {
+    if (isSuspectedOffline) {
+      notifyAppError('Device is offline. Please retry after reconnection.');
+      return;
+    }
     await _switchPowerOnOff(onOff);
   }
 
   Future<void> _switchPowerOnOff(bool onOff) async {
-    _deviceApi.setOnOff(super.boundDevice!.device, onOff);
+    await executeLyfiCommand(() => _deviceApi.setOnOff(super.boundDevice!.device, onOff));
     await refreshStatus();
   }
 
   bool get canSwitchTemporaryState =>
       !isBusy &&
+      !isSuspectedOffline &&
       super.isOn &&
       (super.mode == LyfiMode.scheduled || super.mode == LyfiMode.sun) &&
       (super.state == LyfiState.temporary || super.state == LyfiState.normal);
@@ -253,10 +330,10 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   Future<void> _switchTemporaryState() async {
     // Turn the temp mode on
     if (super.state == LyfiState.normal) {
-      _deviceApi.switchState(super.boundDevice!.device, LyfiState.temporary);
+      await executeLyfiCommand(() => _deviceApi.switchState(super.boundDevice!.device, LyfiState.temporary));
     } else {
       // Restore running mode
-      _deviceApi.switchState(super.boundDevice!.device, LyfiState.normal);
+      await executeLyfiCommand(() => _deviceApi.switchState(super.boundDevice!.device, LyfiState.normal));
     }
     await refreshStatus();
   }
@@ -266,6 +343,9 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   }
 
   Future<void> _toggleLock(bool newIsLocked) async {
+    if (isSuspectedOffline) {
+      return;
+    }
     if (!super.isLocked) {
       assert(currentEditor != null);
       // Exiting the edit mode
@@ -273,10 +353,10 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         await currentEditor!.save();
         if (currentEditor is ScheduleEditorViewModel) {
           scheduledInstants.clear();
-          scheduledInstants.addAll(await _deviceApi.getSchedule(boundDevice!.device));
+          scheduledInstants.addAll(await executeLyfiCommand(() => _deviceApi.getSchedule(boundDevice!.device)));
         } else if (currentEditor is SunEditorViewModel) {
           sunInstants.clear();
-          sunInstants.addAll(await _deviceApi.getSunSchedule(boundDevice!.device));
+          sunInstants.addAll(await executeLyfiCommand(() => _deviceApi.getSunSchedule(boundDevice!.device)));
         }
       }
     }
@@ -306,12 +386,17 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       return;
     }
 
+    if (isSuspectedOffline) {
+      notifyAppError('Device is offline. Please retry after reconnection.');
+      return;
+    }
+
     if (newMode == LyfiMode.sun) {
       if (borneoDeviceStatus?.timezone.isEmpty ?? true) {
         notifyAppError("Unable to switch to Sun Simulation mode, the device's timezone is not set.");
         return;
       }
-      final location = await _deviceApi.getLocation(super.boundDevice!.device);
+      final location = await executeLyfiCommand(() => _deviceApi.getLocation(super.boundDevice!.device));
       if (location == null) {
         notifyAppError("Unable to switch to Sun Simulation mode, the device's geographic location is not set.");
         return;
@@ -362,6 +447,9 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   }
 
   Future<SettingsViewModel> loadSettings(final GettextLocalizations gt) async {
+    if (!super.isOnline || isSuspectedOffline || boundDevice == null) {
+      throw StateError('Device is not reachable at the moment.');
+    }
     final vm = SettingsViewModel(
       gt,
       deviceID: deviceID,
@@ -373,8 +461,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       borneoInfo: super.borneoDeviceInfo!,
       ledInfo: lyfiDeviceInfo,
       ledStatus: lyfiDeviceStatus!,
-      powerBehavior: await _deviceApi.getPowerBehavior(boundDevice!.device),
-      location: await _deviceApi.getLocation(boundDevice!.device),
+      powerBehavior: await executeLyfiCommand(() => _deviceApi.getPowerBehavior(boundDevice!.device)),
+      location: await executeLyfiCommand(() => _deviceApi.getLocation(boundDevice!.device)),
     );
     await vm.initialize();
     return vm;

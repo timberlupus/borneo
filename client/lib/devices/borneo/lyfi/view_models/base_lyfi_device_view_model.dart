@@ -14,7 +14,8 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
 
   double? get nominalPower => lyfiDeviceInfo.nominalPower;
 
-  bool get canMeasureCurrent => super.isOnline && isOn && lyfiDeviceStatus?.powerCurrent != null;
+  bool get canMeasureCurrent =>
+      super.isOnline && !super.isSuspectedOffline && isOn && lyfiDeviceStatus?.powerCurrent != null;
   bool get canMeasurePower => canMeasureCurrent && canMeasureVoltage;
 
   LyfiMode _mode = LyfiMode.manual;
@@ -38,7 +39,7 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
       return;
     }
     try {
-      await lyfiDeviceApi.switchMode(super.boundDevice!.device, newMode);
+      await runDeviceCommand(() => lyfiDeviceApi.switchMode(super.boundDevice!.device, newMode));
       _mode = newMode;
     } catch (_) {
       await refreshStatus();
@@ -53,7 +54,7 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
       return;
     }
     try {
-      await lyfiDeviceApi.switchState(super.boundDevice!.device, newState);
+      await runDeviceCommand(() => lyfiDeviceApi.switchState(super.boundDevice!.device, newState));
       _state = newState;
     } catch (_) {
       await refreshStatus();
@@ -75,7 +76,13 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   Future<void> refreshStatus({CancellationToken? cancelToken}) async {
     await super.refreshStatus(cancelToken: cancelToken);
 
-    _lyfiStatus = await lyfiDeviceApi.getLyfiStatus(boundDevice!.device, cancelToken: cancelToken);
+    if (!super.isOnline || super.isSuspectedOffline) {
+      return;
+    }
+
+    _lyfiStatus = await runDeviceCommand(
+      () => lyfiDeviceApi.getLyfiStatus(boundDevice!.device, cancelToken: cancelToken),
+    );
     _mode = _lyfiStatus?.mode ?? LyfiMode.manual;
     _state = _lyfiStatus?.state ?? LyfiState.normal;
 

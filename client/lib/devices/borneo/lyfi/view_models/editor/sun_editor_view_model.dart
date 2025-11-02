@@ -7,7 +7,7 @@ class SunEditorViewModel extends BaseEditorViewModel {
   ILyfiDeviceApi get _deviceApi => parent.boundDevice!.driver as ILyfiDeviceApi;
 
   @override
-  bool get canEdit => parent.isOnline && parent.isOn && parent.mode == LyfiMode.sun;
+  bool get canEdit => parent.isOnline && !parent.isSuspectedOffline && parent.isOn && parent.mode == LyfiMode.sun;
 
   bool get canChangeColor => canEdit;
 
@@ -29,14 +29,20 @@ class SunEditorViewModel extends BaseEditorViewModel {
     }
     assert(parent.mode == LyfiMode.sun);
 
-    final lyfiStatus = await _deviceApi.getLyfiStatus(parent.boundDevice!.device, cancelToken: cancelToken);
+    if (parent.boundDevice == null) {
+      throw StateError('Device is not bound.');
+    }
+
+    final lyfiStatus = await parent.executeLyfiCommand(
+      () => _deviceApi.getLyfiStatus(parent.boundDevice!.device, cancelToken: cancelToken),
+    );
     for (int i = 0; i < parent.lyfiDeviceInfo.channels.length; i++) {
       channels[i].value = lyfiStatus.sunColor[i];
     }
 
-    _sunCurve = await _deviceApi.getSunCurve(parent.boundDevice!.device);
+    _sunCurve = await parent.executeLyfiCommand(() => _deviceApi.getSunCurve(parent.boundDevice!.device));
 
-    final instants = await _deviceApi.getSunSchedule(parent.boundDevice!.device);
+    final instants = await parent.executeLyfiCommand(() => _deviceApi.getSunSchedule(parent.boundDevice!.device));
     _sunInstants = instants;
   }
 

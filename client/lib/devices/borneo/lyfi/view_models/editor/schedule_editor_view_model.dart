@@ -60,7 +60,7 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
   bool get isPreviewMode => parent.state == LyfiState.preview;
 
   @override
-  bool get canEdit => parent.isOnline && parent.isOn && parent.mode == LyfiMode.scheduled;
+  bool get canEdit => parent.isOnline && !parent.isSuspectedOffline && parent.isOn && parent.mode == LyfiMode.scheduled;
 
   bool get canChangeColor => canEdit && currentEntry != null;
 
@@ -72,7 +72,13 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
 
   @override
   Future<void> onInitialize({CancellationToken? cancelToken}) async {
-    final deviceSideInstants = await super.deviceApi.getSchedule(parent.boundDevice!.device);
+    if (parent.boundDevice == null) {
+      throw StateError('Device is not bound.');
+    }
+
+    final deviceSideInstants = await parent.executeLyfiCommand(
+      () => super.deviceApi.getSchedule(parent.boundDevice!.device),
+    );
 
     _entries.addAll(deviceSideInstants.map((x) => ScheduleEntryViewModel(x)));
 
@@ -226,9 +232,15 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
 
   void togglePreviewMode() async {
     if (isPreviewMode) {
-      await _deviceApi.switchState(parent.boundDevice!.device, LyfiState.dimming);
+      if (parent.isSuspectedOffline || parent.boundDevice == null) {
+        return;
+      }
+      await parent.executeLyfiCommand(() => _deviceApi.switchState(parent.boundDevice!.device, LyfiState.dimming));
     } else {
-      await _deviceApi.switchState(parent.boundDevice!.device, LyfiState.preview);
+      if (parent.isSuspectedOffline || parent.boundDevice == null) {
+        return;
+      }
+      await parent.executeLyfiCommand(() => _deviceApi.switchState(parent.boundDevice!.device, LyfiState.preview));
     }
     notifyListeners();
   }
@@ -236,7 +248,10 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
   @override
   Future<void> save() async {
     final schedule = _entries.map((x) => x.toModel());
-    await _deviceApi.setSchedule(parent.boundDevice!.device, schedule);
+    if (parent.isSuspectedOffline || parent.boundDevice == null) {
+      return;
+    }
+    await parent.executeLyfiCommand(() => _deviceApi.setSchedule(parent.boundDevice!.device, schedule));
   }
 
   void resetChannelValues() {}
