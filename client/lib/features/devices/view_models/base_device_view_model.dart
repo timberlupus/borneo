@@ -4,7 +4,6 @@ import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_kernel_abstractions/device_api.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:borneo_common/io/net/rssi.dart';
