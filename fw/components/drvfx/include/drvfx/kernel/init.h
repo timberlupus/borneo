@@ -50,6 +50,10 @@ Available level:
 
 #define DRVFX_SYS_INIT_NAMED(name, init_fn, level, prio) DRVFX_INIT_ENTRY_DEFINE(name, init_fn, NULL, level, prio)
 
+#define DRVFX_SUBSYS_INIT(init_fn, prio) DRVFX_SYS_INIT_NAMED(init_fn, init_fn, POST_KERNEL, prio)
+
+#define DRVFX_SUBSYS_INIT_NAMED(name, init_fn, prio) DRVFX_INIT_ENTRY_DEFINE(name, init_fn, NULL, POST_KERNEL, prio)
+
 #ifdef __cplusplus
 }
 #endif

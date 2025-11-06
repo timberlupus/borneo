@@ -53,10 +53,9 @@ struct drvfx_device {
 
 // Functions:
 
-bool drvfx_device_is_ready(const struct drvfx_device* dev);
-const struct drvfx_device* drvfx_device_get_binding(const char* name);
-size_t drvfx_device_get_all_static(const struct drvfx_device **devices);
-
+bool k_device_is_ready(const struct drvfx_device* dev);
+const struct drvfx_device* k_device_get_binding(const char* name);
+size_t k_device_get_all_static(const struct drvfx_device** devices);
 
 #ifdef __cplusplus
 }
