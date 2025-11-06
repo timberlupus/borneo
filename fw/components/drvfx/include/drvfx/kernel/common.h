@@ -4,6 +4,8 @@
 extern "C" {
 #endif
 
+#define __WEAK __attribute__((weak))
+
 #define _DO_STRINGIFY(x) #x
 #define _STRINGIFY(s) _DO_STRINGIFY(s)
 
