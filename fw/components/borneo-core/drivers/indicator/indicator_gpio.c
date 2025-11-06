@@ -18,6 +18,7 @@
 static void indicator_task(void* args);
 static void got_ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 static void lost_ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
+static void _kernel_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 
 volatile static int _state = BO_INDICATOR_STATE_NO_CONN;
@@ -47,6 +48,7 @@ int bo_indicator_init()
     BO_TRY(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &got_ip_event_handler, NULL));
     BO_TRY(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_LOST_IP, &lost_ip_event_handler, NULL));
     BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &_system_event_handler, NULL));
+    BO_TRY(esp_event_handler_register(KERNEL_EVENTS, ESP_EVENT_ANY_ID, &_kernel_event_handler, NULL));
 
     xTaskCreateStatic(indicator_task, "indicator_task", TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY, _task_stack,
                       &_task_tcb);
@@ -100,11 +102,23 @@ static void lost_ip_event_handler(void* arg, esp_event_base_t event_base, int32_
     }
 }
 
+static void _kernel_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
+{
+    switch (event_id) {
+
+    case KERNEL_EVENT_ENTERING_SAFE_MODE: {
+        _state = BO_INDICATOR_STATE_FAULT;
+    } break;
+
+    default:
+        break;
+    }
+}
+
 static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
     switch (event_id) {
 
-    case BO_EVENT_ENTERING_SAFE_MODE:
     case BO_EVENT_FATAL_ERROR: {
         _state = BO_INDICATOR_STATE_FAULT;
     } break;
