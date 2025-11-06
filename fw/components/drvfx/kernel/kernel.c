@@ -36,3 +36,16 @@ void k_safe_mode(uint32_t reason)
         ESP_LOGE(TAG, "Failed to send safe mode message.");
     }
 }
+
+void k_ready()
+{
+    if (s_kernel.mode != KERNEL_MODE_INIT) {
+        ESP_LOGE(TAG, "Bad kernel mode: %u", s_kernel.mode);
+    }
+    s_kernel.mode = KERNEL_MODE_NORMAL;
+
+    int rc = esp_event_post(KERNEL_EVENTS, KERNEL_EVENT_READY, NULL, 0, portMAX_DELAY);
+    if (rc != 0) {
+        ESP_LOGE(TAG, "Failed to send normal mode message.");
+    }
+}

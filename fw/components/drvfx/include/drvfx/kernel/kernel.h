@@ -22,6 +22,7 @@ typedef enum {
 void k_init();
 void k_safe_mode(uint32_t reason);
 uint32_t k_get_shutdown_reason();
+void k_ready();
 
 kernel_mode_t k_get_mode();
 

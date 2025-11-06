@@ -87,7 +87,7 @@ static void drvfx_userland_init()
 
     drvfx_sys_init_run_level(DRVFX_INIT_LEVEL_APPLICATION);
 
-    K_MUST(esp_event_post(KERNEL_EVENTS, KERNEL_EVENT_READY, NULL, 0, portMAX_DELAY));
+    k_ready();
     ESP_LOGI(TAG, "Main thread initialized.");
 }
 
