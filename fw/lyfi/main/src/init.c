@@ -45,7 +45,6 @@ static int _lyfi_init(const struct drvfx_device* dev)
 static int _app_init()
 {
     // At this point, power-on is complete, send the power-on completion message.
-    bo_system_set_ready();
     return 0;
 }
 

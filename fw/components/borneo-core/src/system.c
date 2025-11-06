@@ -36,6 +36,7 @@ enum state_flags_enum {
 static inline char to_hex_digit_upper(uint8_t val) { return (val < 10) ? ('0' + val) : ('A' + val - 10); }
 static inline char to_hex_digit_lower(uint8_t val) { return (val < 10) ? ('0' + val) : ('a' + val - 10); }
 
+static void _kernel_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 static int load_factory_settings();
 
@@ -70,20 +71,10 @@ int bo_system_init()
     }
     _sysinfo.hex_id[16] = '\0';
 
+    BO_TRY_ESP(esp_event_handler_register(KERNEL_EVENTS, ESP_EVENT_ANY_ID, &_kernel_event_handler, NULL));
     BO_TRY_ESP(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &_system_event_handler, NULL));
 
     return 0;
-}
-
-void bo_system_set_ready()
-{
-    if (_status.mode == BO_SYSTEM_MODE_INIT) {
-        _status.mode = BO_SYSTEM_MODE_NORMAL;
-        BO_MUST_ESP(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_READY, NULL, 0, portMAX_DELAY));
-    }
-    else {
-        bo_panic();
-    }
 }
 
 void bo_panic()
@@ -101,29 +92,9 @@ void bo_panic()
     abort();
 }
 
-void bo_safe_mode(uint32_t reason)
-{
-    ESP_LOGW(TAG, "System malfunction (%u), entering protection mode.", reason);
-    if (bo_power_is_on()) {
-        int rc = bo_power_shutdown(reason);
-        if (rc != 0) {
-            ESP_LOGE(TAG, "Failed to do emergency shutdown.");
-        }
-    }
-
-    _status.mode = BO_SYSTEM_MODE_SAFE;
-
-    int rc = esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_ENTERING_SAFE_MODE, NULL, 0, pdMS_TO_TICKS(100));
-    if (rc != 0) {
-        ESP_LOGE(TAG, "Failed to send safe mode message.");
-    }
-}
-
 const struct system_info* bo_system_get_info() { return &_sysinfo; }
 
 const struct system_status* bo_system_get_status() { return &_status; }
-
-uint8_t bo_system_get_mode() { return _status.mode; }
 
 static void _reboot_callback();
 
@@ -226,13 +197,26 @@ void _reboot_callback()
     esp_restart();
 }
 
-void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
+static void _kernel_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
     switch (event_id) {
 
-    case BO_EVENT_READY: {
-        ESP_LOGI(TAG, "Everything seems fine, the device is ready now.");
+    case KERNEL_EVENT_READY: {
+        ESP_LOGI(TAG, "Everything is fine. We're so back.");
     } break;
+
+    case KERNEL_EVENT_ENTERING_SAFE_MODE: {
+        BO_MUST(bo_power_shutdown(BO_SHUTDOWN_REASON_FATAL_ERROR));
+    } break;
+
+    default:
+        break;
+    }
+}
+
+static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
+{
+    switch (event_id) {
 
     case BO_EVENT_POWER_ON: {
     } break;

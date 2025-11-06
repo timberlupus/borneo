@@ -14,6 +14,7 @@
 #include <esp_rom_md5.h>
 
 #include <smf/smf.h>
+#include <drvfx/drvfx.h>
 
 #include <borneo/common.h>
 #include <borneo/system.h>
@@ -259,7 +260,7 @@ void led_blank()
 
 int led_set_color(const led_color_t color)
 {
-    if (bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
+    if (k_get_mode() != KERNEL_MODE_NORMAL) {
         return -EINVAL;
     }
 
@@ -469,7 +470,6 @@ bool led_is_blank()
 static void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data)
 {
     switch (event_id) {
-    case BO_EVENT_ENTERING_SAFE_MODE:
     case BO_EVENT_SHUTDOWN_FAULT:
     case BO_EVENT_FATAL_ERROR: {
         if (led_is_fading()) {
@@ -492,7 +492,7 @@ static void system_events_handler(void* handler_args, esp_event_base_t base, int
     } break;
 
     case BO_EVENT_POWER_ON: {
-        if (bo_system_get_mode() == BO_SYSTEM_MODE_NORMAL) {
+        if (k_get_mode() == KERNEL_MODE_NORMAL) {
             int rc = led_fade_to_normal();
             if (rc) {
                 ESP_LOGE(TAG, "Failed to invoke `led_fade_to_normal()`, errcode=%d", rc);
@@ -523,7 +523,7 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
     switch (event_id) {
 
     case LYFI_EVENT_LED_NOTIFY_TEMPORARY_STATE: {
-        if (bo_power_is_on() && bo_system_get_mode() == BO_SYSTEM_MODE_NORMAL) {
+        if (bo_power_is_on() && k_get_mode() == KERNEL_MODE_NORMAL) {
             if (led_get_state() == LED_STATE_NORMAL
                 && (_led.settings.mode == LED_MODE_SCHEDULED || _led.settings.mode == LED_MODE_SUN)) {
                 led_switch_state(LED_STATE_TEMPORARY);
@@ -541,7 +541,7 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
 
 int led_mode_manual_entry()
 {
-    if (!bo_power_is_on() || bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
+    if (!bo_power_is_on() || k_get_mode() != KERNEL_MODE_NORMAL) {
         return -EINVAL;
     }
 
@@ -558,7 +558,7 @@ int led_mode_manual_entry()
 
 int led_mode_scheduled_entry()
 {
-    if (!bo_power_is_on() || bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
+    if (!bo_power_is_on() || k_get_mode() != KERNEL_MODE_NORMAL) {
         return -EINVAL;
     }
 
@@ -579,7 +579,7 @@ int led_mode_scheduled_entry()
 
 int led_mode_sun_entry()
 {
-    if (!bo_power_is_on() || bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
+    if (!bo_power_is_on() || k_get_mode() != KERNEL_MODE_NORMAL) {
         return -EINVAL;
     }
 
@@ -605,7 +605,7 @@ void led_render_task()
     led_color_t last_color;
     memcpy(last_color, LED_COLOR_BLANK, sizeof(led_color_t));
 
-    if (bo_power_is_on() && bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
+    if (bo_power_is_on() && k_get_mode() != KERNEL_MODE_NORMAL) {
         BO_MUST(led_fade_to_normal());
     }
 
@@ -661,7 +661,7 @@ int led_switch_state(uint8_t state)
         return -EINVAL;
     }
 
-    if (!bo_power_is_on() || bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
+    if (!bo_power_is_on() || k_get_mode() != KERNEL_MODE_NORMAL) {
         return -EINVAL;
     }
 
@@ -775,7 +775,7 @@ static void normal_state_entry()
 
 static void normal_state_run()
 {
-    if (!bo_power_is_on() || bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
+    if (!bo_power_is_on() || k_get_mode() != KERNEL_MODE_NORMAL) {
         led_blank();
         return;
     }
@@ -926,7 +926,7 @@ int32_t led_get_temporary_remaining()
 
 void led_temporary_state_entry()
 {
-    if (!bo_power_is_on() || bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
+    if (!bo_power_is_on() || k_get_mode() != KERNEL_MODE_NORMAL) {
         return;
     }
     if (_led.settings.mode != LED_MODE_SUN && _led.settings.mode != LED_MODE_SCHEDULED) {

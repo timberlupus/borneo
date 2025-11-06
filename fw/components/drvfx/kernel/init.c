@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -7,7 +6,7 @@
 #include "drvfx/kernel/common.h"
 #include "drvfx/drvfx.h"
 
-#define TAG "drvfx-init"
+#define TAG "kernel.init"
 
 extern const struct drvfx_init_entry _drvfx_init_EARLY_start[];
 extern const struct drvfx_init_entry _drvfx_init_EARLY_end[];
@@ -73,6 +72,8 @@ static void drvfx_sys_init_run_level(enum init_level level)
 static void __attribute__((constructor, used)) drvfx_kernel_init()
 {
     ESP_LOGI(TAG, "Kernel initializing...");
+    k_init();
+
     drvfx_sys_init_run_level(DRVFX_INIT_LEVEL_EARLY);
     drvfx_sys_init_run_level(DRVFX_INIT_LEVEL_PRE_KERNEL_1);
     drvfx_sys_init_run_level(DRVFX_INIT_LEVEL_PRE_KERNEL_2);
@@ -86,6 +87,7 @@ static void drvfx_userland_init()
 
     drvfx_sys_init_run_level(DRVFX_INIT_LEVEL_APPLICATION);
 
+    K_MUST(esp_event_post(KERNEL_EVENTS, KERNEL_EVENT_READY, NULL, 0, portMAX_DELAY));
     ESP_LOGI(TAG, "Main thread initialized.");
 }
 
