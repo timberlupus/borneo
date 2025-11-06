@@ -259,6 +259,10 @@ void led_blank()
 
 int led_set_color(const led_color_t color)
 {
+    if (bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
+        return -EINVAL;
+    }
+
     if (!(bo_power_is_on() && led_get_state() == LED_STATE_DIMMING)) {
         return -EINVAL;
     }
@@ -465,6 +469,7 @@ bool led_is_blank()
 static void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data)
 {
     switch (event_id) {
+    case BO_EVENT_ENTERING_SAFE_MODE:
     case BO_EVENT_SHUTDOWN_FAULT:
     case BO_EVENT_FATAL_ERROR: {
         if (led_is_fading()) {
@@ -472,10 +477,7 @@ static void system_events_handler(void* handler_args, esp_event_base_t base, int
         }
         led_blank();
         if (led_get_state() != LED_STATE_NORMAL) {
-            int rc = led_switch_state(LED_STATE_NORMAL);
-            if (rc) {
-                ESP_LOGE(TAG, "Unable to swtich to normal state, errcode=%d", rc);
-            }
+            smf_set_state(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_NORMAL]);
         }
     } break;
 
@@ -490,14 +492,16 @@ static void system_events_handler(void* handler_args, esp_event_base_t base, int
     } break;
 
     case BO_EVENT_POWER_ON: {
-        int rc = led_fade_to_normal();
-        if (rc) {
-            ESP_LOGE(TAG, "Failed to invoke `led_fade_to_normal()`, errcode=%d", rc);
-        }
-        if (led_get_state() != LED_STATE_NORMAL) {
-            rc = led_switch_state(LED_STATE_NORMAL);
+        if (bo_system_get_mode() == BO_SYSTEM_MODE_NORMAL) {
+            int rc = led_fade_to_normal();
             if (rc) {
-                ESP_LOGE(TAG, "Failed to swtich state to normal, errcode=%d", rc);
+                ESP_LOGE(TAG, "Failed to invoke `led_fade_to_normal()`, errcode=%d", rc);
+            }
+            if (led_get_state() != LED_STATE_NORMAL) {
+                rc = led_switch_state(LED_STATE_NORMAL);
+                if (rc) {
+                    ESP_LOGE(TAG, "Failed to swtich state to normal, errcode=%d", rc);
+                }
             }
         }
     } break;
@@ -519,13 +523,14 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
     switch (event_id) {
 
     case LYFI_EVENT_LED_NOTIFY_TEMPORARY_STATE: {
-        assert(bo_power_is_on());
-        if (led_get_state() == LED_STATE_NORMAL
-            && (_led.settings.mode == LED_MODE_SCHEDULED || _led.settings.mode == LED_MODE_SUN)) {
-            led_switch_state(LED_STATE_TEMPORARY);
-        }
-        else if (led_get_state() == LED_STATE_TEMPORARY) {
-            BO_MUST(led_switch_state(LED_STATE_NORMAL));
+        if (bo_power_is_on() && bo_system_get_mode() == BO_SYSTEM_MODE_NORMAL) {
+            if (led_get_state() == LED_STATE_NORMAL
+                && (_led.settings.mode == LED_MODE_SCHEDULED || _led.settings.mode == LED_MODE_SUN)) {
+                led_switch_state(LED_STATE_TEMPORARY);
+            }
+            else if (led_get_state() == LED_STATE_TEMPORARY) {
+                BO_MUST(led_switch_state(LED_STATE_NORMAL));
+            }
         }
     } break;
 
@@ -536,7 +541,7 @@ static void led_events_handler(void* handler_args, esp_event_base_t base, int32_
 
 int led_mode_manual_entry()
 {
-    if (!bo_power_is_on()) {
+    if (!bo_power_is_on() || bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
         return -EINVAL;
     }
 
@@ -553,7 +558,7 @@ int led_mode_manual_entry()
 
 int led_mode_scheduled_entry()
 {
-    if (!bo_power_is_on()) {
+    if (!bo_power_is_on() || bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
         return -EINVAL;
     }
 
@@ -574,7 +579,7 @@ int led_mode_scheduled_entry()
 
 int led_mode_sun_entry()
 {
-    if (!bo_power_is_on()) {
+    if (!bo_power_is_on() || bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
         return -EINVAL;
     }
 
@@ -600,7 +605,7 @@ void led_render_task()
     led_color_t last_color;
     memcpy(last_color, LED_COLOR_BLANK, sizeof(led_color_t));
 
-    if (bo_power_is_on()) {
+    if (bo_power_is_on() && bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
         BO_MUST(led_fade_to_normal());
     }
 
@@ -656,7 +661,7 @@ int led_switch_state(uint8_t state)
         return -EINVAL;
     }
 
-    if (!bo_power_is_on()) {
+    if (!bo_power_is_on() || bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
         return -EINVAL;
     }
 
@@ -770,13 +775,13 @@ static void normal_state_entry()
 
 static void normal_state_run()
 {
-    if (led_is_fading()) {
-        led_fade_drive();
+    if (!bo_power_is_on() || bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
+        led_blank();
         return;
     }
 
-    if (!bo_power_is_on()) {
-        led_blank();
+    if (led_is_fading()) {
+        led_fade_drive();
         return;
     }
 
@@ -921,7 +926,7 @@ int32_t led_get_temporary_remaining()
 
 void led_temporary_state_entry()
 {
-    if (!bo_power_is_on()) {
+    if (!bo_power_is_on() || bo_system_get_mode() != BO_SYSTEM_MODE_NORMAL) {
         return;
     }
     if (_led.settings.mode != LED_MODE_SUN && _led.settings.mode != LED_MODE_SCHEDULED) {

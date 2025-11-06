@@ -41,8 +41,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   final ValueNotifier<Duration> _temporaryRemaining = ValueNotifier<Duration>(Duration.zero);
   ValueNotifier<Duration> get temporaryRemaining => _temporaryRemaining;
 
-  @override
-  bool get isSuspectedOffline => super.isSuspectedOffline;
   Duration get commandTimeout => _commandTimeout;
 
   bool get canLockOrUnlock => !isBusy && !isSuspectedOffline && isOn;

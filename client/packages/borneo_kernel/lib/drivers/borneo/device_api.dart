@@ -20,6 +20,7 @@ class BorneoPaths {
   static final Uri reboot = Uri(path: '/borneo/reboot');
   static final Uri powerBehavior = Uri(path: '/borneo/power/behavior');
   static final Uri status = Uri(path: '/borneo/status');
+  static final Uri systemMode = Uri(path: '/borneo/mode');
   static final Uri timezone = Uri(path: '/borneo/settings/timezone');
   static final Uri factoryReset = Uri(path: '/borneo/factory/reset');
   static final Uri firmwareVersion = Uri(path: '/borneo/fwver');
@@ -35,6 +36,19 @@ class BorneoPaths {
   static final Uri nvsString = Uri(path: '/borneo/factory/nvs/str');
   static final Uri nvsBlob = Uri(path: '/borneo/factory/nvs/blob');
   static final Uri nvsExists = Uri(path: '/borneo/factory/nvs/exists');
+}
+
+enum SystemMode {
+  init,
+  normal,
+  safe;
+
+  static SystemMode fromInt(int value) => switch (value) {
+    0 => SystemMode.init,
+    1 => SystemMode.normal,
+    2 => SystemMode.safe,
+    _ => throw ArgumentError('Invalid value for SystemMode: $value'),
+  };
 }
 
 enum ProductMode {
@@ -155,6 +169,7 @@ class GeneralBorneoDeviceInfo {
 }
 
 class GeneralBorneoDeviceStatus {
+  final SystemMode mode;
   final bool power;
   final DateTime timestamp;
   final Duration bootDuration;
@@ -169,6 +184,7 @@ class GeneralBorneoDeviceStatus {
   final double? powerVoltage;
 
   const GeneralBorneoDeviceStatus({
+    this.mode = SystemMode.normal,
     this.power = false,
     required this.timestamp,
     required this.bootDuration,
@@ -185,6 +201,7 @@ class GeneralBorneoDeviceStatus {
 
   factory GeneralBorneoDeviceStatus.fromMap(Map map) {
     return GeneralBorneoDeviceStatus(
+      mode: SystemMode.fromInt(map['mode'] as int),
       power: map['power'],
       timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] * 1000, isUtc: true),
       bootDuration: Duration(milliseconds: map['bootDuration']),
@@ -239,6 +256,8 @@ abstract class IBorneoDeviceApi extends IDeviceApi {
 
   Future<BorneoRtcLocalNtpResponse> getRtcLocal(Device dev, DateTime timestamp, {CancellationToken? cancelToken});
   Future<void> setRtcLocalSkew(Device dev, Duration skew, {CancellationToken? cancelToken});
+
+  Future<SystemMode> getSystemMode(Device dev, {CancellationToken? cancelToken});
 
   Future<String> getTimeZone(Device dev, {CancellationToken? cancelToken});
   Future<void> setTimeZone(Device dev, String timezone, {CancellationToken? cancelToken});
@@ -538,6 +557,14 @@ mixin BorneoDeviceCoapApi on Driver implements IBorneoDeviceApi {
   Future<bool> isUpgrading({CancellationToken? cancelToken}) {
     // TODO: implement isUpgrading
     throw UnimplementedError();
+  }
+
+  @override
+  Future<SystemMode> getSystemMode(Device dev, {CancellationToken? cancelToken}) async {
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      return SystemMode.fromInt(await dd.coap.getCbor<int>(BorneoPaths.systemMode, cancelToken: cancelToken));
+    }, cancelToken: cancelToken);
   }
 
   @override

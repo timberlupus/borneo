@@ -77,8 +77,8 @@ int bo_system_init()
 
 void bo_system_set_ready()
 {
-    if (!_status.is_ready) {
-        _status.is_ready = true;
+    if (_status.mode == BO_SYSTEM_MODE_INIT) {
+        _status.mode = BO_SYSTEM_MODE_NORMAL;
         BO_MUST_ESP(esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_READY, NULL, 0, portMAX_DELAY));
     }
     else {
@@ -101,9 +101,29 @@ void bo_panic()
     abort();
 }
 
+void bo_safe_mode(uint32_t reason)
+{
+    ESP_LOGW(TAG, "System malfunction (%u), entering protection mode.", reason);
+    if (bo_power_is_on()) {
+        int rc = bo_power_shutdown(reason);
+        if (rc != 0) {
+            ESP_LOGE(TAG, "Failed to do emergency shutdown.");
+        }
+    }
+
+    _status.mode = BO_SYSTEM_MODE_SAFE;
+
+    int rc = esp_event_post(BO_SYSTEM_EVENTS, BO_EVENT_ENTERING_SAFE_MODE, NULL, 0, pdMS_TO_TICKS(100));
+    if (rc != 0) {
+        ESP_LOGE(TAG, "Failed to send safe mode message.");
+    }
+}
+
 const struct system_info* bo_system_get_info() { return &_sysinfo; }
 
 const struct system_status* bo_system_get_status() { return &_status; }
+
+uint8_t bo_system_get_mode() { return _status.mode; }
 
 static void _reboot_callback();
 
@@ -251,8 +271,8 @@ int load_factory_settings()
                                  &changed));
 
     len = BO_DEVICE_MANUF_MAX;
-    BO_TRY(
-        bo_nvs_get_or_set_str(nvs_handle, SYSTEM_NVS_KEY_MANUF, _sysinfo.manuf, &len, CONFIG_BORNEO_MANUF_DEFAULT, &changed));
+    BO_TRY(bo_nvs_get_or_set_str(nvs_handle, SYSTEM_NVS_KEY_MANUF, _sysinfo.manuf, &len, CONFIG_BORNEO_MANUF_DEFAULT,
+                                 &changed));
 
     if (changed) {
         BO_TRY(nvs_commit(nvs_handle));

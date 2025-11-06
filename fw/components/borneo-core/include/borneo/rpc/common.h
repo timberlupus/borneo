@@ -10,6 +10,7 @@ int bo_rpc_borneo_reboot_post(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_status_get(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_fw_ver_get(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_compatible_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_system_mode_get(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_heartbeat_get(const CborValue* args, CborEncoder* retvals);
 
 // RPC function declarations for power-related CBOR operations

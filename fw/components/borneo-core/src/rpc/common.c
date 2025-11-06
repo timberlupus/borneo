@@ -136,6 +136,9 @@ int bo_rpc_borneo_status_get(const CborValue* args, CborEncoder* retvals)
 
     BO_TRY(cbor_encoder_create_map(retvals, &root_map, CborIndefiniteLength));
 
+    BO_TRY(cbor_encode_text_stringz(&root_map, "mode"));
+    BO_TRY(cbor_encode_uint(&root_map, bo_system_get_mode()));
+
     BO_TRY(cbor_encode_text_stringz(&root_map, "power"));
     BO_TRY(cbor_encode_boolean(&root_map, bo_power_is_on()));
 
@@ -230,6 +233,14 @@ int bo_rpc_heartbeat_get(const CborValue* args, CborEncoder* retvals)
 {
     (void)args; // No input args for GET
     BO_TRY(cbor_encode_int(retvals, (int64_t)time(NULL)));
+    return 0;
+}
+
+int bo_rpc_system_mode_get(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args; // No input args for GET
+    uint8_t mode = bo_system_get_mode();
+    BO_TRY(cbor_encode_uint(retvals, mode));
     return 0;
 }
 

@@ -23,6 +23,7 @@ ESP_EVENT_DECLARE_BASE(BO_SYSTEM_EVENTS);
 
 enum {
     BO_EVENT_INITIALIZING = 0, ///< Power-on start initialization
+    BO_EVENT_ENTERING_SAFE_MODE, ///< Entering safe mode
     BO_EVENT_READY, ///< Power-on initialization completed
     BO_EVENT_POWER_ON, ///< Soft power on
     BO_EVENT_REBOOTING, ///< Rebooting
@@ -35,6 +36,12 @@ enum {
     BO_EVENT_FATAL_ERROR, ///< Fatal error occurred
 
     BO_EVENT_GEO_LOCATION_CHANGED, ///< Location changed
+};
+
+enum {
+    BO_SYSTEM_MODE_INIT = 0,
+    BO_SYSTEM_MODE_NORMAL = 1,
+    BO_SYSTEM_MODE_SAFE = 2,
 };
 
 enum {
@@ -58,7 +65,7 @@ struct system_status {
     uint32_t state_flags;
     uint32_t shutdown_reason;
     uint64_t shutdown_timestamp;
-    bool is_ready;
+    uint8_t mode;
 };
 
 int bo_system_init();
@@ -66,9 +73,12 @@ void bo_system_set_ready();
 
 const struct system_info* bo_system_get_info();
 
+uint8_t bo_system_get_mode();
+
 void bo_system_reboot_later(uint32_t delay_ms);
 
 void bo_panic();
+void bo_safe_mode(uint32_t reason);
 
 int bo_system_factory_reset();
 

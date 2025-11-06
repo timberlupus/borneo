@@ -104,6 +104,7 @@ static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_
 {
     switch (event_id) {
 
+    case BO_EVENT_ENTERING_SAFE_MODE:
     case BO_EVENT_FATAL_ERROR: {
         _state = BO_INDICATOR_STATE_FAULT;
     } break;
