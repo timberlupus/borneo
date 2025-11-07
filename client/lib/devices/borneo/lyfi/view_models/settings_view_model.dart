@@ -137,6 +137,9 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       notification.showSuccess(_gt.translate("Time zone updated successfully"));
     } catch (e) {
       notification.showError(_gt.translate("Failed to update device time zone: $e"));
+    } finally {
+      isBusy = false;
+      notifyListeners();
     }
   }
 
@@ -149,6 +152,9 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       notification.showSuccess(_gt.translate("LED correction method updated successfully"));
     } catch (e) {
       notification.showError(_gt.translate("Failed to update LED correction method: $e"));
+    } finally {
+      isBusy = false;
+      notifyListeners();
     }
   }
 
@@ -161,6 +167,9 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       notification.showSuccess(_gt.translate("Temporary duration updated successfully"));
     } catch (e) {
       notification.showError(_gt.translate("Failed to update temporary duration: $e"));
+    } finally {
+      isBusy = false;
+      notifyListeners();
     }
   }
 
@@ -173,6 +182,9 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       notification.showSuccess(_gt.translate("Fan mode updated successfully"));
     } catch (e) {
       notification.showError(_gt.translate("Failed to update fan mode: $e"));
+    } finally {
+      isBusy = false;
+      notifyListeners();
     }
   }
 
@@ -185,6 +197,9 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       notification.showSuccess(_gt.translate("Manual fan power updated successfully"));
     } catch (e) {
       notification.showError(_gt.translate("Failed to update manual fan power: $e"));
+    } finally {
+      isBusy = false;
+      notifyListeners();
     }
   }
 
@@ -197,6 +212,9 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       notification.showSuccess(_gt.translate("Power behavior updated successfully"));
     } catch (e) {
       notification.showError(_gt.translate("Failed to update power behavior: $e"));
+    } finally {
+      isBusy = false;
+      notifyListeners();
     }
   }
 
@@ -208,6 +226,9 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       notification.showSuccess(_gt.translate("Device restored to factory settings"));
     } catch (e) {
       notification.showError(_gt.translate("Failed to restore device to factory settings: $e"));
+    } finally {
+      isBusy = false;
+      notifyListeners();
     }
   }
 }
