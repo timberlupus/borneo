@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <errno.h>
 
 #include <esp_event.h>
 
