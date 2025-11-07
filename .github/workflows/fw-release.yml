@@ -44,6 +44,29 @@ jobs:
         git tag release-fw-latest
         git push origin release-fw-latest --force
 
+    - name: Remove previous release assets
+      uses: actions/github-script@v8
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const tag = 'release-fw-latest';
+          try {
+            const rel = await github.rest.repos.getReleaseByTag({ owner: context.repo.owner, repo: context.repo.repo, tag });
+            const release_id = rel.data.id;
+            const assets = await github.paginate(github.rest.repos.listReleaseAssets, { owner: context.repo.owner, repo: context.repo.repo, release_id });
+            for (const a of assets) {
+              console.log(`Deleting asset ${a.name} (${a.id})`);
+              await github.rest.repos.deleteReleaseAsset({ owner: context.repo.owner, repo: context.repo.repo, asset_id: a.id });
+            }
+            console.log('Previous release assets removed.');
+          } catch (err) {
+            if (err.status === 404) {
+              console.log('Release not found, nothing to delete.');
+            } else {
+              throw err;
+            }
+          }
+
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
