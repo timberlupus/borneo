@@ -2,6 +2,7 @@
 
 /* Include core drvfx definitions (struct drvfx_device, kernel helpers, etc.) */
 #include <drvfx/drvfx.h>
+#include <errno.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,7 +66,10 @@ struct rtc_driver_api {
  */
 static inline int rtc_now(const struct drvfx_device* dev, struct tm* now)
 {
-    const struct rtc_driver_api* api = dev->api;
+    const struct rtc_driver_api* api = dev ? dev->api : NULL;
+    if (api == NULL) {
+        return -ENOSYS;
+    }
     return api->now(dev, now);
 }
 
@@ -80,7 +84,10 @@ static inline int rtc_now(const struct drvfx_device* dev, struct tm* now)
  */
 static inline int rtc_set_datetime(const struct drvfx_device* dev, const struct tm* now)
 {
-    const struct rtc_driver_api* api = dev->api;
+    const struct rtc_driver_api* api = dev ? dev->api : NULL;
+    if (api == NULL) {
+        return -ENOSYS;
+    }
     return api->set_datetime(dev, now);
 }
 
@@ -95,7 +102,10 @@ static inline int rtc_set_datetime(const struct drvfx_device* dev, const struct 
  */
 static inline int rtc_is_halted(const struct drvfx_device* dev, bool* halted)
 {
-    const struct rtc_driver_api* api = dev->api;
+    const struct rtc_driver_api* api = dev ? dev->api : NULL;
+    if (api == NULL) {
+        return -ENOSYS;
+    }
     return api->is_halted(dev, halted);
 }
 
@@ -109,7 +119,10 @@ static inline int rtc_is_halted(const struct drvfx_device* dev, bool* halted)
  */
 static inline int rtc_halt(const struct drvfx_device* dev)
 {
-    const struct rtc_driver_api* api = dev->api;
+    const struct rtc_driver_api* api = dev ? dev->api : NULL;
+    if (api == NULL) {
+        return -ENOSYS;
+    }
     return api->halt(dev);
 }
 

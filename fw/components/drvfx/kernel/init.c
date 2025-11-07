@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include <esp_log.h>
+#include <esp_private/startup_internal.h>
 
 #include "drvfx/kernel/common.h"
 #include "drvfx/drvfx.h"
@@ -71,28 +72,32 @@ static void drvfx_sys_init_run_level(enum init_level level)
 
 static void __attribute__((constructor, used)) drvfx_kernel_init()
 {
-    ESP_LOGI(TAG, "Kernel initializing...");
+    ESP_LOGI(TAG, "Drvfx initializing...");
     k_init();
 
     drvfx_sys_init_run_level(DRVFX_INIT_LEVEL_EARLY);
     drvfx_sys_init_run_level(DRVFX_INIT_LEVEL_PRE_KERNEL_1);
     drvfx_sys_init_run_level(DRVFX_INIT_LEVEL_PRE_KERNEL_2);
-    drvfx_sys_init_run_level(DRVFX_INIT_LEVEL_POST_KERNEL);
-    ESP_LOGI(TAG, "Kernel initialized.");
 }
 
-static void drvfx_userland_init()
+ESP_SYSTEM_INIT_FN(drvfx_post_kernel_init, SECONDARY, BIT(0), 1000)
 {
-    ESP_LOGI(TAG, "User land initializing...");
+    drvfx_sys_init_run_level(DRVFX_INIT_LEVEL_POST_KERNEL);
+    return 0;
+}
 
-    drvfx_sys_init_run_level(DRVFX_INIT_LEVEL_APPLICATION);
-
-    k_ready();
-    ESP_LOGI(TAG, "Main thread initialized.");
+void __attribute__((weak)) drvfx_app_main()
+{
+    //
+    ESP_LOGI(TAG, "Entering the default `drvfx_app_main` ...");
 }
 
 void app_main()
 {
-    //
-    drvfx_userland_init();
+    ESP_LOGI(TAG, "User land initializing...");
+    drvfx_sys_init_run_level(DRVFX_INIT_LEVEL_APPLICATION);
+
+    k_ready();
+    ESP_LOGI(TAG, "Main thread initialized.");
+    drvfx_app_main();
 }

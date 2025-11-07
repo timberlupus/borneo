@@ -124,7 +124,7 @@ Runtime usage:
 #include <drvfx/drvfx.h>
 #include "your_drivers_dir/foo.h"
 
-void app_main(void)
+void drvfx_app_main(void)
 {
     const struct drvfx_device *dev = k_device_get_binding("foo0");
     if (dev && k_device_is_ready(dev)) {
@@ -132,7 +132,7 @@ void app_main(void)
         if (api && api->read) {
             char buf[32];
             int rc = api->read(dev, buf, sizeof(buf));
-            (void)rc;
+            // ...
         }
     }
 }

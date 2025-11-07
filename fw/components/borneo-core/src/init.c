@@ -42,8 +42,9 @@
 
 #define TAG "bo-init"
 
-static int _borneo_early_init(const struct drvfx_device* dev)
+static int _borneo_core_init(const struct drvfx_device* dev)
 {
+    ESP_LOGI(TAG, "Initializing Borneo Core...");
 #if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED && (!CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG)
     CLEAR_PERI_REG_MASK(USB_SERIAL_JTAG_CONF0_REG, USB_SERIAL_JTAG_DP_PULLUP);
 #endif
@@ -54,12 +55,6 @@ static int _borneo_early_init(const struct drvfx_device* dev)
     BO_TRY(bo_nvs_init());
     BO_TRY(esp_event_loop_create_default());
     ESP_LOGI(TAG, "Early stuff has been initialized successfully.");
-    return 0;
-}
-
-static int _borneo_core_init(const struct drvfx_device* dev)
-{
-    ESP_LOGI(TAG, "Initializing Borneo Core...");
 
 #if CONFIG_BORNEO_INDICATOR_ENABLED
     BO_TRY(bo_indicator_init());
@@ -82,15 +77,18 @@ static int _borneo_net_init(const struct drvfx_device* dev)
     ESP_LOGI(TAG, "Initializing ESP-NETIF...");
     BO_TRY(esp_netif_init());
 
+    ESP_LOGI(TAG, "Initializing Wi-Fi...");
     BO_TRY(bo_wifi_init());
 
+    ESP_LOGI(TAG, "Initializing mDNS...");
     BO_TRY(bo_mdns_init());
+
+    ESP_LOGI(TAG, "Initializing SNTP...");
     BO_TRY(bo_sntp_init());
 
     ESP_LOGI(TAG, "Borneo networking has been initialized successfully.");
     return 0;
 }
 
-DRVFX_SYS_INIT(_borneo_early_init, EARLY, DRVFX_INIT_KERNEL_DEFAULT_PRIORITY);
 DRVFX_SYS_INIT(_borneo_core_init, APPLICATION, DRVFX_INIT_APP_HIGHEST_PRIORITY);
 DRVFX_SYS_INIT(_borneo_net_init, APPLICATION, DRVFX_INIT_APP_HIGH_PRIORITY);
