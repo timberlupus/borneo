@@ -7,6 +7,8 @@
 extern const struct drvfx_device* _drvfx_device_start;
 extern const struct drvfx_device* _drvfx_device_end;
 
+#define TAG "drvfx.device"
+
 bool k_device_is_ready(const struct drvfx_device* dev)
 {
 	/*
@@ -14,10 +16,16 @@ bool k_device_is_ready(const struct drvfx_device* dev)
 	 * reports the `device` as not ready for usage.
 	 */
 	if (dev == NULL) {
-		return false;
-	}
+        ESP_LOGE(TAG, "k_device_is_ready called with NULL device");
+        return false;
+    }
 
-	return dev->state->initialized && (dev->state->init_res == 0);
+    if (dev->state == NULL) {
+        ESP_LOGE(TAG, "k_device_is_ready called with NULL device state");
+        return false;
+    }
+
+    return dev->state->initialized && (dev->state->init_res == 0);
 }
 
 const struct drvfx_device* k_device_get_binding(const char* name)
