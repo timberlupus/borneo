@@ -4,8 +4,8 @@
 
 #include "drvfx/drvfx.h"
 
-extern const struct drvfx_device* _drvfx_device_start;
-extern const struct drvfx_device* _drvfx_device_end;
+extern const struct drvfx_device _drvfx_device_start[];
+extern const struct drvfx_device _drvfx_device_end[];
 
 #define TAG "drvfx.device"
 
