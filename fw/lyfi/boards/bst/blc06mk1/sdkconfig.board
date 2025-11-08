@@ -20,11 +20,6 @@ CONFIG_ESPTOOLPY_FLASHFREQ="80m"
 #################### Core Stuff #########################
 CONFIG_BORNEO_ADC_ENABLED=y
 
-########################### Devices ############################
-CONFIG_LYFI_DEVICE_RMT_ENABLED=y
-CONFIG_LYFI_DEVICE_RMT_PWM0_ENABLED=y
-CONFIG_LYFI_DEVICE_RMT_PWM1_ENABLED=y
-
 ################################# Power Supply Measurement ###############################
 CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT=y
 CONFIG_BORNEO_MEAS_VOLTAGE_ADC_CHANNEL=0
