@@ -453,14 +453,6 @@ menu "Borneo LyFi"
             int "DAC Channel for DAC"
             depends on LYFI_FAN_CTRL_SUPPORT && (IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2) && LYFI_FAN_CTRL_VREG_SUPPORT
 
-        config LYFI_FAN_CTRL_DAC_DUTY_MIN
-            int "The Minimum Duty for the DAC"
-            depends on LYFI_FAN_CTRL_SUPPORT && (IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2) && LYFI_FAN_CTRL_VREG_SUPPORT
-
-        config LYFI_FAN_CTRL_DAC_DUTY_MAX
-            int "The Maximum Duty for the DAC"
-            depends on LYFI_FAN_CTRL_SUPPORT && (IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2) && LYFI_FAN_CTRL_VREG_SUPPORT
-
         config LYFI_FAN_CTRL_SHUTDOWN_ENABLED
             bool "Enable The Shutdown Pin for The Power of Fan"
             depends on LYFI_FAN_CTRL_SUPPORT

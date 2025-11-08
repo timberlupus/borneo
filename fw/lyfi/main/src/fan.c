@@ -77,14 +77,14 @@ int fan_set_power(uint8_t value)
 #if SOC_DAC_SUPPORTED
         // Built-in DAC
         {
-            const int DUTY_RANGE = CONFIG_LYFI_FAN_CTRL_DAC_DUTY_MAX - CONFIG_LYFI_FAN_CTRL_DAC_DUTY_MIN;
+            const int DUTY_RANGE = CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX - CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MIN;
             int duty = (DUTY_RANGE * value + FAN_POWER_MAX / 2) / FAN_POWER_MAX;
-            duty = CONFIG_LYFI_FAN_CTRL_DAC_DUTY_MAX - duty;
+            duty = CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX - duty;
 
-            if (duty <= CONFIG_LYFI_FAN_CTRL_DAC_DUTY_MIN) {
-                duty = CONFIG_LYFI_FAN_CTRL_DAC_DUTY_MIN;
+            if (duty <= CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MIN) {
+                duty = CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MIN;
             }
-            if (duty >= CONFIG_LYFI_FAN_CTRL_DAC_DUTY_MAX) {
+            if (duty >= CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX) {
                 duty = 0xFF; // DAC_MAX_DUTY
             }
             BO_TRY(dac_output_voltage(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL, duty));
