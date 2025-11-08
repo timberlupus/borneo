@@ -74,6 +74,7 @@ struct led_scheduler {
 };
 
 struct led_factory_settings {
+    uint8_t channel_count; ///< PWM channel count
     uint16_t pwm_freq; ///< The frequency of PWM signals
 };
 

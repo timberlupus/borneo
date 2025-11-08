@@ -31,6 +31,7 @@
 #define LED_NVS_KEY_TEMPORARY_DURATION "tmpdur"
 #define LED_NVS_KEY_CORRECTION_METHOD "corrmtd"
 #define LED_NVS_KEY_PWM_FREQ "pwmfreq"
+#define LED_NVS_KEY_CHANNEL_COUNT "chcount"
 #define LED_NVS_KEY_LOC "loc"
 #define LED_NVS_KEY_TZ_ENABLED "tz_en"
 #define LED_NVS_KEY_TZ_OFFSET "tz_off"
@@ -106,8 +107,12 @@ int led_load_factory_settings(struct led_factory_settings* factory_settings)
     BO_NVS_AUTO_CLOSE(handle);
 
     bool changed = false;
+
     BO_TRY(bo_nvs_get_or_set_u16(handle, LED_NVS_KEY_PWM_FREQ, &factory_settings->pwm_freq,
                                  CONFIG_LYFI_DEFAULT_PWM_FREQ, &changed));
+
+    BO_TRY(bo_nvs_get_or_set_u8(handle, LED_NVS_KEY_CHANNEL_COUNT, &factory_settings->channel_count,
+                                CONFIG_LYFI_LED_CHANNEL_COUNT, &changed));
 
     if (changed) {
         BO_TRY(nvs_commit(handle));
