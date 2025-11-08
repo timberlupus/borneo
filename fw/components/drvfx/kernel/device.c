@@ -36,10 +36,11 @@ const struct drvfx_device* k_device_get_binding(const char* name)
 	 * string.
 	 */
 	if ((name == NULL) || (name[0] == '\0')) {
-		return NULL;
-	}
+        ESP_LOGE(TAG, "k_device_get_binding called with NULL or empty name");
+        return NULL;
+    }
 
-	/* Split the search into two loops: in the common scenario, where
+    /* Split the search into two loops: in the common scenario, where
 	 * device names are stored in ROM (and are referenced by the user
 	 * with CONFIG_* macros), only cheap pointer comparisons will be
 	 * performed. Reserve string comparisons for a fallback.
