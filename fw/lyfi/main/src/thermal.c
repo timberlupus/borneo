@@ -109,10 +109,6 @@ int thermal_init()
     BO_TRY(load_factory_settings());
     BO_TRY(load_user_settings());
 
-#if CONFIG_LYFI_FAN_CTRL_SUPPORT
-    BO_TRY(fan_init());
-#endif
-
 #if CONFIG_LYFI_NTC_SUPPORT
     if (ntc_init() != 0) {
 #if CONFIG_LYFI_FAN_CTRL_SUPPORT

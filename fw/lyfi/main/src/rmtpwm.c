@@ -67,6 +67,17 @@ static int rmtpwm_init(const struct drvfx_device* dev)
         .resolution = RMT_PWM_RESOLUTION_HZ,
     };
     BO_TRY_ESP(rmt_new_pwm_encoder(&encoder_config, &s_pwm_encoder));
+
+#if !SOC_DAC_SUPPORTED && CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
+    ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan PWM-DAC...", CONFIG_LYFI_FAN_CTRL_VREG_GPIO);
+    BO_TRY(rmtpwm_channel_init(&s_dac_channel, CONFIG_LYFI_FAN_CTRL_VREG_GPIO));
+#endif
+
+#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
+    ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan PWM...", CONFIG_LYFI_FAN_CTRL_PWM_GPIO);
+    BO_TRY(rmtpwm_channel_init(&s_pwm_channel, CONFIG_LYFI_FAN_CTRL_PWM_GPIO));
+#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
+
     return 0;
 }
 

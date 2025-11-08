@@ -24,8 +24,6 @@ struct fan_factory_settings {
     uint32_t flags;
 };
 
-int fan_init();
-
 int fan_set_power(uint8_t value);
 uint8_t fan_get_power();
 

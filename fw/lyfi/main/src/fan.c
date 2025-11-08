@@ -17,6 +17,7 @@
 #include <driver/dac.h>
 #endif
 
+#include <drvfx/drvfx.h>
 #include <borneo/system.h>
 #include <borneo/nvs.h>
 
@@ -37,65 +38,6 @@ static portMUX_TYPE _status_lock = portMUX_INITIALIZER_UNLOCKED;
 
 static struct fan_status _status = { 0 };
 static struct fan_factory_settings _factory_settings = { 0 };
-
-int fan_init()
-{
-    ESP_LOGI(TAG, "Initializing fan driver...");
-
-    BO_TRY(fan_factory_settings_load());
-
-#if CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED
-    {
-        uint64_t selected_gpios = 0ULL;
-        selected_gpios |= 1ULL << CONFIG_LYFI_FAN_CTRL_SHUTDOWN_GPIO;
-
-        gpio_config_t io_conf = { 0 };
-        io_conf.intr_type = GPIO_INTR_DISABLE;
-        io_conf.mode = GPIO_MODE_OUTPUT;
-        io_conf.pin_bit_mask = selected_gpios;
-        io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
-        io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
-        BO_TRY(gpio_config(&io_conf));
-
-        BO_TRY(gpio_set_level(CONFIG_LYFI_FAN_CTRL_SHUTDOWN_GPIO, 0));
-        ESP_LOGI(TAG, "Fan shutdown GPIO%u initialized.", CONFIG_LYFI_FAN_CTRL_SHUTDOWN_GPIO);
-    }
-#endif // CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED
-
-#if CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
-    bool dac_enabled = _factory_settings.flags & FAN_FLAG_DAC_ENABLED;
-#endif // CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
-
-#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-    bool pwm_enabled = _factory_settings.flags & FAN_FLAG_PWM_ENABLED;
-#else
-    bool pwm_enabled = false;
-#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-
-#if CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
-    if (dac_enabled) {
-#if SOC_DAC_SUPPORTED
-        ESP_LOGI(TAG, "Fan driver using DAC, channel=%u", CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL);
-        BO_TRY(dac_output_enable(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL));
-        BO_TRY(dac_output_voltage(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL, 0xFF));
-#else
-        BO_TRY(rmtpwm_dac_init());
-        BO_TRY(rmtpwm_set_dac_duty(RMTPWM_DUTY_MAX));
-#endif // SOC_DAC_SUPPORTED
-    }
-#endif // CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
-
-#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-    if (pwm_enabled) {
-        ESP_LOGI(TAG, "Fan PWM output enabled, GPIO=%i", CONFIG_LYFI_FAN_CTRL_PWM_GPIO);
-        BO_TRY(rmtpwm_pwm_init());
-        BO_TRY(rmtpwm_set_pwm_duty(0));
-    }
-#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-
-    ESP_LOGI(TAG, "Fan driver initizlied.");
-    return 0;
-}
 
 int fan_set_power(uint8_t value)
 {
@@ -220,5 +162,65 @@ int fan_factory_settings_load()
 
     return 0;
 }
+
+static int fan_init()
+{
+    ESP_LOGI(TAG, "Initializing fan driver...");
+
+    BO_TRY(fan_factory_settings_load());
+
+#if CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED
+    {
+        uint64_t selected_gpios = 0ULL;
+        selected_gpios |= 1ULL << CONFIG_LYFI_FAN_CTRL_SHUTDOWN_GPIO;
+
+        gpio_config_t io_conf = { 0 };
+        io_conf.intr_type = GPIO_INTR_DISABLE;
+        io_conf.mode = GPIO_MODE_OUTPUT;
+        io_conf.pin_bit_mask = selected_gpios;
+        io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+        io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+        BO_TRY(gpio_config(&io_conf));
+
+        BO_TRY(gpio_set_level(CONFIG_LYFI_FAN_CTRL_SHUTDOWN_GPIO, 0));
+        ESP_LOGI(TAG, "Fan shutdown GPIO%u initialized.", CONFIG_LYFI_FAN_CTRL_SHUTDOWN_GPIO);
+    }
+#endif // CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED
+
+#if CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
+    bool dac_enabled = _factory_settings.flags & FAN_FLAG_DAC_ENABLED;
+#endif // CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
+
+#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
+    bool pwm_enabled = _factory_settings.flags & FAN_FLAG_PWM_ENABLED;
+#else
+    bool pwm_enabled = false;
+#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
+
+#if CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
+    if (dac_enabled) {
+#if SOC_DAC_SUPPORTED
+        ESP_LOGI(TAG, "Fan driver using DAC, channel=%u", CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL);
+        BO_TRY(dac_output_enable(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL));
+        BO_TRY(dac_output_voltage(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL, 0xFF));
+#else
+        BO_TRY(rmtpwm_dac_init());
+        BO_TRY(rmtpwm_set_dac_duty(RMTPWM_DUTY_MAX));
+#endif // SOC_DAC_SUPPORTED
+    }
+#endif // CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
+
+#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
+    if (pwm_enabled) {
+        ESP_LOGI(TAG, "Fan PWM output enabled, GPIO=%i", CONFIG_LYFI_FAN_CTRL_PWM_GPIO);
+        BO_TRY(rmtpwm_set_pwm_duty(0));
+    }
+#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
+
+    ESP_LOGI(TAG, "Fan driver initizlied.");
+    return 0;
+}
+
+DRVFX_SYS_INIT(fan_init, APPLICATION, DRVFX_INIT_APP_HIGH_PRIORITY);
 
 #endif // CONFIG_LYFI_FAN_CTRL_SUPPORT

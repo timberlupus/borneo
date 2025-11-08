@@ -1,19 +1,27 @@
 menu "Borneo LyFi"
     menu "Devices"
-        menu "RMT"
-            config LYFI_DEVICE_RMT_ENABLED
-                bool "RMT device enabled"
-                default y
+        menu "Aux PWM"
+            config LYFI_DEVICE_APWM_ENABLED
+                bool "Aux PWM device enabled"
+                default n
 
-            config LYFI_DEVICE_RMT_PWM0_ENABLED
-                bool "RMT device PWM 0 enabled"
+            config LYFI_DEVICE_APWM0_ENABLED
+                bool "Aux PWM 0 enabled"
                 default y
-                depends on LYFI_DEVICE_RMT_ENABLED
+                depends on LYFI_DEVICE_APWM_ENABLED
+
+            config LYFI_DEVICE_APWM0_GPIO
+                int "Aux PWM 0 GPIO number"
+                depends on LYFI_DEVICE_APWM0_ENABLED
 
             config LYFI_DEVICE_RMT_PWM1_ENABLED
                 bool "RMT device PWM 1 enabled"
                 default n
-                depends on LYFI_DEVICE_RMT_ENABLED
+                depends on LYFI_DEVICE_APWM_ENABLED
+
+            config LYFI_DEVICE_APWM1_GPIO
+                int "Aux PWM 1 GPIO number"
+                depends on LYFI_DEVICE_APWM1_ENABLED
         endmenu
     endmenu
 
