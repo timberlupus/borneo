@@ -97,10 +97,11 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
         .duration = 30,
         .start_percent = 30,
     },
-}
-;
+};
 
-int led_load_factory_settings(struct led_factory_settings* factory_settings)
+static struct led_factory_settings s_factory_settings;
+
+int led_load_factory_settings()
 {
     nvs_handle_t handle;
     BO_TRY(bo_nvs_factory_open(LED_NVS_NS, NVS_READWRITE, &handle));
@@ -108,10 +109,10 @@ int led_load_factory_settings(struct led_factory_settings* factory_settings)
 
     bool changed = false;
 
-    BO_TRY(bo_nvs_get_or_set_u16(handle, LED_NVS_KEY_PWM_FREQ, &factory_settings->pwm_freq,
+    BO_TRY(bo_nvs_get_or_set_u16(handle, LED_NVS_KEY_PWM_FREQ, &s_factory_settings.pwm_freq,
                                  CONFIG_LYFI_DEFAULT_PWM_FREQ, &changed));
 
-    BO_TRY(bo_nvs_get_or_set_u8(handle, LED_NVS_KEY_CHANNEL_COUNT, &factory_settings->channel_count,
+    BO_TRY(bo_nvs_get_or_set_u8(handle, LED_NVS_KEY_CHANNEL_COUNT, &s_factory_settings.channel_count,
                                 CONFIG_LYFI_LED_CHANNEL_COUNT, &changed));
 
     if (changed) {
@@ -409,4 +410,16 @@ int led_tz_set_offset(int32_t offset)
     portEXIT_CRITICAL(&g_led_spinlock);
     BO_TRY(led_save_user_settings());
     return 0;
+}
+
+inline const struct led_factory_settings* led_get_factory_settings()
+{
+    //
+    return &s_factory_settings;
+}
+
+inline size_t led_channel_count()
+{
+    const struct led_factory_settings* factory_settings = led_get_factory_settings();
+    return factory_settings->channel_count;
 }

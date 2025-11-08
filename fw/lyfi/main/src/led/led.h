@@ -15,12 +15,10 @@ extern "C" {
 
 #define LYFI_LEDC_SCHEDULER_ITEMS_CAPACITY 48
 
-#define LYFI_LED_CHANNEL_COUNT CONFIG_LYFI_LED_CHANNEL_COUNT
-
 typedef uint16_t led_brightness_t;
 typedef uint16_t led_duty_t;
-typedef led_brightness_t led_color_t[LYFI_LED_CHANNEL_COUNT];
-typedef led_duty_t led_duties_t[LYFI_LED_CHANNEL_COUNT];
+typedef led_brightness_t led_color_t[CONFIG_LYFI_LED_CHANNEL_COUNT];
+typedef led_duty_t led_duties_t[CONFIG_LYFI_LED_CHANNEL_COUNT];
 
 #define LED_BRIGHTNESS_MIN ((led_brightness_t)0)
 #define LED_BRIGHTNESS_MAX ((led_brightness_t)4095)
@@ -135,7 +133,7 @@ extern const led_duty_t LED_CORLUT_EXP[LED_BRIGHTNESS_MAX + 1];
 
 int led_init();
 
-inline size_t led_channel_count() { return LYFI_LED_CHANNEL_COUNT; }
+size_t led_channel_count();
 
 void led_blank();
 
@@ -155,6 +153,7 @@ int led_set_schedule(const struct led_scheduler_item* items, size_t count);
 const struct led_scheduler* led_get_schedule();
 
 const struct led_user_settings* led_get_settings();
+const struct led_factory_settings* led_get_factory_settings();
 
 const struct led_status* led_get_status();
 
@@ -187,7 +186,7 @@ int led_set_geo_location(const struct geo_location* location);
 int led_tz_enable(bool enabled);
 int led_tz_set_offset(int32_t offset);
 
-int led_load_factory_settings(struct led_factory_settings* factory_settings);
+int led_load_factory_settings();
 int led_load_user_settings();
 int led_save_user_settings();
 

@@ -147,7 +147,7 @@ struct led_status _led;
 
 portMUX_TYPE g_led_spinlock = portMUX_INITIALIZER_UNLOCKED;
 
-static ledc_channel_config_t _ledc_channels[LYFI_LED_CHANNEL_COUNT];
+static ledc_channel_config_t _ledc_channels[CONFIG_LYFI_LED_CHANNEL_COUNT];
 /**
  * Initialize the LED controller
  *
@@ -162,8 +162,8 @@ int led_init()
 
     _led.settings_lock = xSemaphoreCreateMutex();
 
-    struct led_factory_settings factory_settings;
-    BO_TRY(led_load_factory_settings(&factory_settings));
+    BO_TRY(led_load_factory_settings());
+    const struct led_factory_settings* factory_settings = led_get_factory_settings();
 
     BO_TRY(led_load_user_settings());
 
@@ -173,7 +173,7 @@ int led_init()
     // TODO allow set the freq in product definition
     ledc_timer_config_t ledc_timer = {
         .duty_resolution = LEDC_TIMER_12_BIT,
-        .freq_hz = factory_settings.pwm_freq,
+        .freq_hz = factory_settings->pwm_freq,
 
 #if SOC_LEDC_SUPPORT_HS_MODE
         .speed_mode = LEDC_HIGH_SPEED_MODE,
@@ -187,19 +187,19 @@ int led_init()
     BO_TRY_ESP(ledc_timer_config(&ledc_timer));
 
     // More than 8 channels need to initialize the second timer
-#if LYFI_LED_CHANNEL_COUNT > 8
-    ledc_timer.speed_mode = LEDC_LOW_SPEED_MODE;
-    ledc_timer.timer_num = LEDC_TIMER_1;
-    BO_TRY_ESP(ledc_timer_config(&ledc_timer));
-#endif
+    if (led_channel_count() > 8) {
+        ledc_timer.speed_mode = LEDC_LOW_SPEED_MODE;
+        ledc_timer.timer_num = LEDC_TIMER_1;
+        BO_TRY_ESP(ledc_timer_config(&ledc_timer));
+    }
 
     ESP_LOGI(TAG, "PWM timer initialized.");
 
     // Initialize all channels
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+    for (size_t ch = 0; ch < factory_settings->channel_count; ch++) {
         _ledc_channels[ch].gpio_num = LED_GPIOS[ch];
         _ledc_channels[ch].intr_type = LEDC_INTR_DISABLE;
-        _ledc_channels[ch].hpoint = (ch * LED_MAX_DUTY) / LYFI_LED_CHANNEL_COUNT;
+        _ledc_channels[ch].hpoint = (ch * LED_MAX_DUTY) / led_channel_count();
 #if SOC_LEDC_SUPPORT_HS_MODE
         if (ch <= 7) { // the next timer
             _ledc_channels[ch].speed_mode = LEDC_HIGH_SPEED_MODE;
@@ -268,7 +268,7 @@ int led_set_color(const led_color_t color)
         return -EINVAL;
     }
     // Verify the colors
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+    for (size_t ch = 0; ch < led_channel_count(); ch++) {
         if (color[ch] > LED_BRIGHTNESS_MAX) {
             return -EINVAL;
         }
@@ -302,7 +302,7 @@ int led_get_color(led_color_t color)
 
 led_brightness_t led_get_channel_power(uint8_t ch)
 {
-    assert(ch < LYFI_LED_CHANNEL_COUNT);
+    BO_MUST(ch < led_channel_count());
     portENTER_CRITICAL(&g_led_spinlock);
     led_brightness_t value = _led.color[ch];
     portEXIT_CRITICAL(&g_led_spinlock);
@@ -337,14 +337,14 @@ inline led_duty_t channel_brightness_to_duty(led_brightness_t brightness)
 
 inline void color_to_duties(const led_color_t color, led_duty_t* duties)
 {
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+    for (size_t ch = 0; ch < led_channel_count(); ch++) {
         duties[ch] = channel_brightness_to_duty(color[ch]);
     }
 }
 
 int led_set_channel_duty(uint8_t ch, led_duty_t duty)
 {
-    if (ch >= LYFI_LED_CHANNEL_COUNT || duty > LED_MAX_DUTY) {
+    if (ch >= led_channel_count() || duty > LED_MAX_DUTY) {
         return -1;
     }
 
@@ -353,7 +353,7 @@ int led_set_channel_duty(uint8_t ch, led_duty_t duty)
     }
 
     uint32_t total_duty = 0;
-    for (size_t ich = 0; ich < LYFI_LED_CHANNEL_COUNT; ich++) {
+    for (size_t ich = 0; ich < led_channel_count(); ich++) {
         if (ich == ch) {
             continue;
         }
@@ -367,7 +367,7 @@ int led_set_channel_duty(uint8_t ch, led_duty_t duty)
 
 int led_get_duties(led_duty_t* duties)
 {
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+    for (size_t ch = 0; ch < led_channel_count(); ch++) {
         uint32_t duty = ledc_get_duty(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel);
         if (duty == LEDC_ERR_DUTY) {
             return -EIO;
@@ -380,7 +380,7 @@ int led_get_duties(led_duty_t* duties)
 int led_set_duties(const led_duty_t* duties)
 {
     uint32_t hpoint = 0;
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+    for (size_t ch = 0; ch < led_channel_count(); ch++) {
         led_duty_t duty = duties[ch];
         BO_MUST(ledc_set_duty_and_update(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel, duty, hpoint));
         hpoint = (hpoint + duty) % (1 << LED_DUTY_RES);
@@ -390,7 +390,7 @@ int led_set_duties(const led_duty_t* duties)
 
 int led_set_channel_brightness(uint8_t ch, led_brightness_t brightness)
 {
-    if (ch >= LYFI_LED_CHANNEL_COUNT || brightness > LED_BRIGHTNESS_MAX) {
+    if (ch >= led_channel_count() || brightness > LED_BRIGHTNESS_MAX) {
         return -EINVAL;
     }
     led_duty_t duty = channel_brightness_to_duty(brightness);
@@ -457,7 +457,7 @@ bool led_is_blank()
 {
     bool blank = true;
     portENTER_CRITICAL(&g_led_spinlock);
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+    for (size_t ch = 0; ch < led_channel_count(); ch++) {
         if (_led.color[ch] > 0) {
             blank = false;
             break;
@@ -628,7 +628,7 @@ void led_render_task()
             portENTER_CRITICAL(&g_led_spinlock);
             bool color_changed = memcmp(last_color, _led.color, sizeof(led_color_t)) != 0;
             if (color_changed) {
-                for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+                for (size_t ch = 0; ch < led_channel_count(); ch++) {
                     led_brightness_t new_val = _led.color[ch];
                     if (last_color[ch] != new_val) {
                         last_color[ch] = new_val;

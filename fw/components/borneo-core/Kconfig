@@ -57,10 +57,10 @@ menu "Borneo Core"
 
         choice
             prompt "Select indicator type"
+            default BORNEO_INDICATOR_GPIO_ENABLED
 
             config BORNEO_INDICATOR_GPIO_ENABLED
                 bool "Simple GPIO LED"
-                default y
                 depends on BORNEO_INDICATOR_ENABLED
 
             config BORNEO_INDICATOR_ADDRESSABLE_ENABLED

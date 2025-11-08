@@ -43,7 +43,7 @@ void led_sch_compute_color_in_range(led_color_t color, const struct tm* tm_local
         now_instant += SECS_PER_DAY;
     }
 
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+    for (size_t ch = 0; ch < led_channel_count(); ch++) {
         led_brightness_t begin_brightness = range_begin->color[ch];
         led_brightness_t end_brightness = range_end->color[ch];
         int32_t value = linear_interpolate_i32(range_begin->instant, begin_brightness, range_end->instant,

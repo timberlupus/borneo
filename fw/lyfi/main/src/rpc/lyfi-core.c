@@ -46,7 +46,7 @@ static int _encode_channel_info_entry(CborEncoder* parent, const char* name, con
 static int _encode_channel_info_array(CborEncoder* parent)
 {
     CborEncoder channels_array;
-    BO_TRY(cbor_encoder_create_array(parent, &channels_array, CONFIG_LYFI_LED_CHANNEL_COUNT));
+    BO_TRY(cbor_encoder_create_array(parent, &channels_array, led_channel_count()));
 
     // Channel 0
 #if CONFIG_LYFI_LED_CH0_ENABLED
@@ -209,7 +209,7 @@ int bo_rpc_borneo_lyfi_info_get(const CborValue* args, CborEncoder* retvals)
 
     {
         BO_TRY(cbor_encode_text_stringz(&root_map, "channelCount"));
-        BO_TRY(cbor_encode_uint(&root_map, CONFIG_LYFI_LED_CHANNEL_COUNT));
+        BO_TRY(cbor_encode_uint(&root_map, led_channel_count()));
     }
 
     {

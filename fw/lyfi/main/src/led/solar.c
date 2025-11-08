@@ -68,7 +68,7 @@ int led_sun_update_scheduler()
     sch->item_count = SOLAR_INSTANTS_COUNT;
     for (size_t i = 0; i < SOLAR_INSTANTS_COUNT; i++) {
         sch->items[i].instant = (uint32_t)round(instants[i].time * 3600.0);
-        for (size_t j = 0; j < LYFI_LED_CHANNEL_COUNT; j++) {
+        for (size_t j = 0; j < led_channel_count(); j++) {
             uint16_t brightness = (uint16_t)roundf((float)_led.settings.sun_color[j] * instants[i].brightness);
             if (brightness > LED_BRIGHTNESS_MAX) {
                 brightness = LED_BRIGHTNESS_MAX;

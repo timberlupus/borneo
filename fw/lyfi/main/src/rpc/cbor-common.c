@@ -33,8 +33,8 @@ int cbor_encode_led_sch_item(CborEncoder* encoder, const struct led_scheduler_it
 int cbor_encode_color(CborEncoder* encoder, const led_color_t color)
 {
     CborEncoder ch_array;
-    BO_TRY(cbor_encoder_create_array(encoder, &ch_array, LYFI_LED_CHANNEL_COUNT));
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+    BO_TRY(cbor_encoder_create_array(encoder, &ch_array, led_channel_count()));
+    for (size_t ch = 0; ch < led_channel_count(); ch++) {
         BO_TRY(cbor_encode_uint(&ch_array, color[ch]));
     }
     BO_TRY(cbor_encoder_close_container(encoder, &ch_array));
@@ -47,11 +47,11 @@ int cbor_value_get_led_color(CborValue* value, led_color_t color)
     size_t array_length = 0;
     BO_TRY(cbor_value_enter_container(value, &array));
     BO_TRY(cbor_value_get_array_length(value, &array_length));
-    if (array_length != LYFI_LED_CHANNEL_COUNT) {
+    if (array_length != led_channel_count()) {
         return -EINVAL;
     }
 
-    for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+    for (size_t ch = 0; ch < led_channel_count(); ch++) {
         int ch_value = 0;
         BO_TRY(cbor_value_get_int_checked(&array, &ch_value));
         if (ch_value < 0) {

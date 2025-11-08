@@ -64,7 +64,7 @@ int led_acclimation_drive(time_t utc_now, led_color_t color)
             percent = 100;
         }
 
-        for (size_t ch = 0; ch < LYFI_LED_CHANNEL_COUNT; ch++) {
+        for (size_t ch = 0; ch < led_channel_count(); ch++) {
             color[ch] = (led_brightness_t)(((uint32_t)color[ch] * percent + 50) / 100);
         }
         return 0;
