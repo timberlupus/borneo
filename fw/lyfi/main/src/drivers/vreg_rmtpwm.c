@@ -35,7 +35,7 @@ static int _vreg_init(const struct drvfx_device* dev)
         .pwm_freq = RMTPWM_FREQ_HZ,
         .gpio_num = CONFIG_LYFI_FAN_CTRL_VREG_GPIO,
     };
-    const rmtpwm_generator_t* data = (const rmtpwm_generator_t* data)dev->data;
+    const rmtpwm_generator_t* data = (const rmtpwm_generator_t*)dev->data;
 
     BO_TRY(rmtpwm_generator_init(data, &dac_config));
 
