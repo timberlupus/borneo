@@ -14,7 +14,6 @@
 #include <borneo/common.h>
 
 #include "../led/led.h"
-#include "../fan.h"
 
 #define TAG "acclimation-rpc"
 

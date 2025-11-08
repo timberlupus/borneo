@@ -15,7 +15,6 @@
 #include <borneo/rtc.h>
 
 #include "../led/led.h"
-#include "../fan.h"
 #include "../rpc/rpc.h"
 
 #define TAG "lyfi-coap"

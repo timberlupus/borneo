@@ -22,7 +22,6 @@
 
 #include "thermal.h"
 #include "protect.h"
-#include "fan.h"
 #include "power-meas.h"
 
 #if CONFIG_LYFI_PROTECTION_ENABLED
