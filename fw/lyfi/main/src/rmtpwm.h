@@ -6,8 +6,6 @@ extern "C" {
 
 #define RMTPWM_DUTY_MAX 255
 
-int rmtpwm_init();
-
 #if !SOC_DAC_SUPPORTED
 int rmtpwm_dac_init();
 int rmtpwm_set_dac_duty(uint8_t duty);

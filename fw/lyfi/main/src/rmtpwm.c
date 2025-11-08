@@ -8,6 +8,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
+#include <drvfx/drvfx.h>
 #include <borneo/system.h>
 
 #include "rmtpwm.h"
@@ -53,11 +54,11 @@ static rmt_encoder_handle_t s_pwm_encoder = NULL;
 static struct rmtpwm_channel s_pwm_channel = { 0 };
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
-#if !SOC_DAC_SUPPORTED && CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
+#if !SOC_DAC_SUPPORTED && CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
 static struct rmtpwm_channel s_dac_channel = { 0 };
 #endif // !SOC_DAC_SUPPORTED
 
-int rmtpwm_init()
+static int rmtpwm_init(const struct drvfx_device* dev)
 {
     ESP_LOGI(TAG, "RMT PWM Sub-system initializing...");
 
@@ -96,11 +97,11 @@ static int rmtpwm_channel_init(struct rmtpwm_channel* channel, gpio_num_t gpio_n
     return 0;
 }
 
-#if !SOC_DAC_SUPPORTED && CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
+#if !SOC_DAC_SUPPORTED && CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
 int rmtpwm_dac_init()
 {
-    ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan PWM-DAC...", CONFIG_LYFI_FAN_CTRL_PWMDAC_GPIO);
-    return rmtpwm_channel_init(&s_dac_channel, CONFIG_LYFI_FAN_CTRL_PWMDAC_GPIO);
+    ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan PWM-DAC...", CONFIG_LYFI_FAN_CTRL_VREG_GPIO);
+    return rmtpwm_channel_init(&s_dac_channel, CONFIG_LYFI_FAN_CTRL_VREG_GPIO);
 }
 #endif
 
@@ -116,7 +117,7 @@ int rmtpwm_set_pwm_duty(uint8_t duty) { return rmtpwm_set_duty_internal(&s_pwm_c
 
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
-#if !SOC_DAC_SUPPORTED && CONFIG_LYFI_FAN_CTRL_INTERNAL_REGULATOR_SUPPORT
+#if !SOC_DAC_SUPPORTED && CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
 int rmtpwm_set_dac_duty(uint8_t duty) { return rmtpwm_set_duty_internal(&s_dac_channel, duty); }
 #endif // SOC_DAC_SUPPORTED
 
@@ -222,3 +223,9 @@ err:
     }
     return ret;
 }
+
+#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT || (CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT && !SOC_DAC_SUPPORTED)
+
+DRVFX_SUBSYS_INIT(rmtpwm_init, DRVFX_INIT_KERNEL_DEFAULT_PRIORITY);
+
+#endif

@@ -20,6 +20,7 @@
 #include <borneo/nvs.h>
 #include <borneo/power-meas.h>
 
+#include "fan.h"
 #include "thermal.h"
 #include "protect.h"
 #include "power-meas.h"
