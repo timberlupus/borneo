@@ -204,7 +204,6 @@ static int fan_init()
         BO_TRY(dac_output_enable(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL));
         BO_TRY(dac_output_voltage(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL, 0xFF));
 #else
-        BO_TRY(rmtpwm_dac_init());
         BO_TRY(rmtpwm_set_dac_duty(RMTPWM_DUTY_MAX));
 #endif // SOC_DAC_SUPPORTED
     }
