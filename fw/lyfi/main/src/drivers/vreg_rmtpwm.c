@@ -16,6 +16,7 @@
 #include <drvfx/drvfx.h>
 #include <borneo/system.h>
 
+#include "vreg.h"
 #include "../rmtpwm.h"
 
 #define TAG "vreg_rmtpwm"
