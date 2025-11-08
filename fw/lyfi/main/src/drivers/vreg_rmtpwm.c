@@ -18,6 +18,8 @@
 
 #include "../rmtpwm.h"
 
+#define TAG "vreg_rmtpwm"
+
 #define RMTPWM_FREQ_HZ 25000 // 25 kHz PWM
 #define RMT_PWM_RESOLUTION_HZ 10000000 // 10MHz resolution
 
