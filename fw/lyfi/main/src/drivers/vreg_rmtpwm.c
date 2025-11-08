@@ -62,12 +62,12 @@ static int _set_duty(const struct drvfx_device* dev, uint8_t duty)
     return 0;
 }
 
-const static struct vreg_driver_api = {
+const static struct vreg_driver_api s_api = {
     .set_duty = &_set_duty,
 };
 
 static rmtpwm_generator_t s_dac = { 0 };
 
-DRVFX_DEVICE_DEFINE("vreg", _vreg_init, &s_dac, NULL, DRVFX_INIT_POST_KERNEL_DEFAULT_PRIORITY, &vreg_driver_api);
+DRVFX_DEVICE_DEFINE("vreg", _vreg_init, &s_dac, NULL, DRVFX_INIT_POST_KERNEL_DEFAULT_PRIORITY, &s_api);
 
 #endif // CONFIG_LYFI_FAN_CTRL_VREG_DEVICE_RMTPWM
