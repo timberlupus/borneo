@@ -4,6 +4,8 @@
 extern "C" {
 #endif
 
+#define __SYSCALL static inline
+
 ESP_EVENT_DECLARE_BASE(KERNEL_EVENTS);
 
 /// @brief Kernel events

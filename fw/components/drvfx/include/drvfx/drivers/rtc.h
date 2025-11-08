@@ -64,7 +64,7 @@ struct rtc_driver_api {
  *              current date/time. tm_isdst should be set to -1 if unknown.
  * @return 0 on success, negative on failure.
  */
-static inline int rtc_now(const struct drvfx_device* dev, struct tm* now)
+__SYSCALL int rtc_now(const struct drvfx_device* dev, struct tm* now)
 {
     const struct rtc_driver_api* api = dev ? dev->api : NULL;
     if (api == NULL) {
@@ -82,7 +82,7 @@ static inline int rtc_now(const struct drvfx_device* dev, struct tm* now)
  * @param now   Pointer to a struct tm containing the desired date/time.
  * @return 0 on success, negative on error.
  */
-static inline int rtc_set_datetime(const struct drvfx_device* dev, const struct tm* now)
+__SYSCALL int rtc_set_datetime(const struct drvfx_device* dev, const struct tm* now)
 {
     const struct rtc_driver_api* api = dev ? dev->api : NULL;
     if (api == NULL) {
@@ -100,7 +100,7 @@ static inline int rtc_set_datetime(const struct drvfx_device* dev, const struct 
  * @param halted  Output boolean set to true if the RTC is halted.
  * @return 0 on success, negative on error.
  */
-static inline int rtc_is_halted(const struct drvfx_device* dev, bool* halted)
+__SYSCALL int rtc_is_halted(const struct drvfx_device* dev, bool* halted)
 {
     const struct rtc_driver_api* api = dev ? dev->api : NULL;
     if (api == NULL) {
@@ -117,7 +117,7 @@ static inline int rtc_is_halted(const struct drvfx_device* dev, bool* halted)
  * @param dev   Pointer to the drvfx device instance.
  * @return 0 on success, negative on error.
  */
-static inline int rtc_halt(const struct drvfx_device* dev)
+__SYSCALL int rtc_halt(const struct drvfx_device* dev)
 {
     const struct rtc_driver_api* api = dev ? dev->api : NULL;
     if (api == NULL) {
