@@ -35,16 +35,16 @@ static int _vreg_init(const struct drvfx_device* dev)
         return -ENODEV;
     }
 
-    rmtpwm_encoder_config_t dac_config = {
-        .resolution = RMT_PWM_RESOLUTION_HZ,
-        .pwm_freq = RMTPWM_FREQ_HZ,
-        .gpio_num = CONFIG_LYFI_FAN_CTRL_VREG_GPIO,
-    };
     rmtpwm_generator_t* data = (rmtpwm_generator_t*)dev->data;
     if (data == NULL) {
         return -ENODATA;
     }
 
+    rmtpwm_encoder_config_t dac_config = {
+        .resolution = RMT_PWM_RESOLUTION_HZ,
+        .pwm_freq = RMTPWM_FREQ_HZ,
+        .gpio_num = CONFIG_LYFI_FAN_CTRL_VREG_GPIO,
+    };
     BO_TRY(rmtpwm_generator_init(data, &dac_config));
 
     return 0;
@@ -69,6 +69,6 @@ const static struct vreg_driver_api s_api = {
 
 static rmtpwm_generator_t s_dac = { 0 };
 
-DRVFX_DEVICE_DEFINE("vreg", _vreg_init, &s_dac, NULL, DRVFX_INIT_POST_KERNEL_HIGH_PRIORITY, &s_api);
+DRVFX_DEVICE_DEFINE("vreg", _vreg_init, &s_dac, NULL, DRVFX_INIT_POST_KERNEL_DEFAULT_PRIORITY, &s_api);
 
 #endif // CONFIG_LYFI_FAN_CTRL_VREG_DEVICE_RMTPWM
