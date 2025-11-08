@@ -30,12 +30,19 @@ static int _vreg_init(const struct drvfx_device* dev)
     ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan internal voltage regulator...",
              CONFIG_LYFI_FAN_CTRL_VREG_GPIO);
 
+    if (dev == NULL) {
+        return -ENODEV;
+    }
+
     rmtpwm_encoder_config_t dac_config = {
         .resolution = RMT_PWM_RESOLUTION_HZ,
         .pwm_freq = RMTPWM_FREQ_HZ,
         .gpio_num = CONFIG_LYFI_FAN_CTRL_VREG_GPIO,
     };
-    const rmtpwm_generator_t* data = (const rmtpwm_generator_t*)dev->data;
+    rmtpwm_generator_t* data = (rmtpwm_generator_t*)dev->data;
+    if (data == NULL) {
+        return -ENODATA;
+    }
 
     BO_TRY(rmtpwm_generator_init(data, &dac_config));
 
@@ -44,7 +51,14 @@ static int _vreg_init(const struct drvfx_device* dev)
 
 static int _set_duty(const struct drvfx_device* dev, uint8_t duty)
 {
-    BO_TRY(rmtpwm_set_duty(&s_dac, duty));
+    if (dev == NULL) {
+        return -ENODEV;
+    }
+    rmtpwm_generator_t* data = (rmtpwm_generator_t*)dev->data;
+    if (data == NULL) {
+        return -ENODATA;
+    }
+    BO_TRY(rmtpwm_set_duty(data, duty));
     return 0;
 }
 
