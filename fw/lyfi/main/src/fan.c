@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -23,6 +24,7 @@
 
 #include "rmtpwm.h"
 #include "fan.h"
+#include "drivers/vreg.h"
 
 #define NVS_FAN_NAMESPACE "fan"
 #define FAN_NVS_KEY_DAC_ENABLED "dac_en"
@@ -103,7 +105,11 @@ int fan_set_power(uint8_t value)
             if (duty >= CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX) {
                 duty = RMTPWM_DUTY_MAX;
             }
-            BO_TRY(rmtpwm_set_dac_duty((uint8_t)duty));
+            const struct drvfx_device* vreg = k_device_get_binding("vreg");
+            if (vreg == NULL) {
+                return -ENODEV;
+            }
+            BO_TRY(vreg_set_duty(vreg, (uint8_t)duty));
             ESP_LOGI(TAG, "Set fan power, method: PWM DAC, power=%d, PWM-DAC_duty=%d", value, duty);
         }
 #endif // CONFIG_IDF_TARGET_ESP32C3
@@ -204,7 +210,11 @@ static int fan_init()
         BO_TRY(dac_output_enable(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL));
         BO_TRY(dac_output_voltage(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL, 0xFF));
 #else
-        BO_TRY(rmtpwm_set_dac_duty(RMTPWM_DUTY_MAX));
+        const struct drvfx_device* vreg = k_device_get_binding("vreg");
+        if (vreg == NULL) {
+            return -ENODEV;
+        }
+        BO_TRY(vreg_set_duty(vreg, 0xFF));
 #endif // SOC_DAC_SUPPORTED
     }
 #endif // CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT

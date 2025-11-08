@@ -38,16 +38,6 @@ static int _rmtpwm_init(const struct drvfx_device* dev)
 {
     ESP_LOGI(TAG, "RMT PWM Sub-system initializing...");
 
-#if !SOC_DAC_SUPPORTED && CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
-    ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan PWM-DAC...", CONFIG_LYFI_FAN_CTRL_VREG_GPIO);
-    rmtpwm_encoder_config_t dac_config = {
-        .resolution = RMT_PWM_RESOLUTION_HZ,
-        .pwm_freq = RMTPWM_FREQ_HZ,
-        .gpio_num = CONFIG_LYFI_FAN_CTRL_VREG_GPIO,
-    };
-    BO_TRY(rmtpwm_generator_init(&s_dac, &dac_config));
-#endif
-
 #if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
     ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan PWM...", CONFIG_LYFI_FAN_CTRL_PWM_GPIO);
     rmtpwm_encoder_config_t pwm_config = {
@@ -111,15 +101,13 @@ err:
     return ret;
 }
 
+int rmtpwm_set_duty(rmtpwm_generator_t* pwm, uint8_t duty) { return rmtpwm_set_duty_internal(pwm, duty); }
+
 #if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
 int rmtpwm_set_pwm_duty(uint8_t duty) { return rmtpwm_set_duty_internal(&s_pwm, duty); }
 
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-
-#if !SOC_DAC_SUPPORTED && CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
-int rmtpwm_set_dac_duty(uint8_t duty) { return rmtpwm_set_duty_internal(&s_dac, duty); }
-#endif // SOC_DAC_SUPPORTED
 
 int rmtpwm_set_duty_internal(rmtpwm_generator_t* pwm, uint8_t duty)
 {

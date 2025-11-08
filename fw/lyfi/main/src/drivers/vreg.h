@@ -12,7 +12,7 @@ struct vreg_driver_api {
 
 __SYSCALL int vreg_set_duty(const struct drvfx_device* dev, uint8_t duty)
 {
-    const struct apwm_driver_api* api = dev ? dev->api : NULL;
+    const struct vreg_driver_api* api = dev ? dev->api : NULL;
     if (api == NULL) {
         return -ENOSYS;
     }

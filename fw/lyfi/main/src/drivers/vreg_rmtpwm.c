@@ -1,0 +1,57 @@
+#include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
+#include <esp_system.h>
+#include <esp_err.h>
+#include <esp_log.h>
+#include <driver/ledc.h>
+#include <nvs_flash.h>
+#include <driver/gpio.h>
+
+#include <drvfx/drvfx.h>
+#include <borneo/system.h>
+
+#include "../rmtpwm.h"
+
+#define RMTPWM_FREQ_HZ 25000 // 25 kHz PWM
+#define RMT_PWM_RESOLUTION_HZ 10000000 // 10MHz resolution
+
+#if CONFIG_LYFI_FAN_CTRL_VREG_DEVICE_RMTPWM
+
+static int _vreg_init(const struct drvfx_device* dev)
+{
+    ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan internal voltage regulator...",
+             CONFIG_LYFI_FAN_CTRL_VREG_GPIO);
+
+    rmtpwm_encoder_config_t dac_config = {
+        .resolution = RMT_PWM_RESOLUTION_HZ,
+        .pwm_freq = RMTPWM_FREQ_HZ,
+        .gpio_num = CONFIG_LYFI_FAN_CTRL_VREG_GPIO,
+    };
+    const rmtpwm_generator_t* data = (const rmtpwm_generator_t* data)dev->data;
+
+    BO_TRY(rmtpwm_generator_init(data, &dac_config));
+
+    return 0;
+}
+
+static int _set_duty(const struct drvfx_device* dev, uint8_t duty)
+{
+    BO_TRY(rmtpwm_set_duty(&s_dac, duty));
+    return 0;
+}
+
+const static struct vreg_driver_api = {
+    .set_duty = &_set_duty,
+};
+
+static rmtpwm_generator_t s_dac = { 0 };
+
+DRVFX_DEVICE_DEFINE("vreg", _vreg_init, &s_dac, NULL, DRVFX_INIT_POST_KERNEL_DEFAULT_PRIORITY, &vreg_driver_api);
+
+#endif // CONFIG_LYFI_FAN_CTRL_VREG_DEVICE_RMTPWM

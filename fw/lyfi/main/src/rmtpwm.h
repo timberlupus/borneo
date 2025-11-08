@@ -41,9 +41,7 @@ typedef struct {
 
 int rmtpwm_generator_init(rmtpwm_generator_t* pwm, const rmtpwm_encoder_config_t* config);
 
-#if !SOC_DAC_SUPPORTED
-int rmtpwm_set_dac_duty(uint8_t duty);
-#endif
+int rmtpwm_set_duty(rmtpwm_generator_t* pwm, uint8_t duty);
 
 #if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 int rmtpwm_set_pwm_duty(uint8_t duty);

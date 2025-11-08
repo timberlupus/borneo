@@ -406,10 +406,6 @@ menu "Borneo LyFi"
                 depends on LYFI_FAN_CTRL_PWM_SUPPORT && IDF_TARGET_ESP32
         endchoice
 
-        config LYFI_FAN_CTRL_PWM_DEVICE
-            default "rmtpwm0"
-            depends on LYFI_FAN_CTRL_PWM_DEVICE_RMT || LYFI_FAN_CTRL_PWM_DEVICE_MCPWM
-
         config LYFI_FAN_CTRL_PWM_GPIO
             int "The GPIO number for PWM fan"
             depends on LYFI_FAN_CTRL_PWM_SUPPORT
@@ -431,11 +427,11 @@ menu "Borneo LyFi"
             config LYFI_FAN_CTRL_VREG_DEVICE_DAC
                 bool "Using DAC as the internal regulator DAC device"
                 depends on LYFI_FAN_CTRL_VREG_SUPPORT && IDF_TARGET_ESP32
-        endchoice
 
-        config LYFI_FAN_CTRL_VREG_DEVICE_DEVICE
-            default "rmtpwm1"
-            depends on LYFI_FAN_CTRL_VREG_DEVICE_RMTPWM || LYFI_FAN_CTRL_VREG_DEVICE_DAC
+            config LYFI_FAN_CTRL_VREG_DEVICE_MCPWM
+                bool "Using DAC as the internal regulator MCPWM device"
+                depends on LYFI_FAN_CTRL_VREG_SUPPORT && IDF_TARGET_ESP32
+        endchoice
 
         config LYFI_FAN_CTRL_VREG_GPIO
             int "The Output GPIO for the internal voltage regulator"
