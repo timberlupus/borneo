@@ -399,7 +399,7 @@ menu "Borneo LyFi"
 
             config LYFI_FAN_CTRL_PWM_DEVICE_RMT
                 bool "Using RMT as the PWM device"
-                depends on LYFI_FAN_CTRL_PWM_SUPPORT && LYFI_DEVICE_RMT_ENABLED
+                depends on LYFI_FAN_CTRL_PWM_SUPPORT
 
             config LYFI_FAN_CTRL_PWM_DEVICE_MCPWM
                 bool "Using MCPWM as the PWM device"
@@ -422,14 +422,17 @@ menu "Borneo LyFi"
 
             config LYFI_FAN_CTRL_VREG_DEVICE_RMTPWM
                 bool "Using RMT-PWM as the internal regulator DAC device"
-                depends on LYFI_FAN_CTRL_VREG_SUPPORT && LYFI_DEVICE_RMT_ENABLED
+                default n
+                depends on LYFI_FAN_CTRL_VREG_SUPPORT
 
             config LYFI_FAN_CTRL_VREG_DEVICE_DAC
                 bool "Using DAC as the internal regulator DAC device"
+                default n
                 depends on LYFI_FAN_CTRL_VREG_SUPPORT && IDF_TARGET_ESP32
 
             config LYFI_FAN_CTRL_VREG_DEVICE_MCPWM
                 bool "Using DAC as the internal regulator MCPWM device"
+                default n
                 depends on LYFI_FAN_CTRL_VREG_SUPPORT && IDF_TARGET_ESP32
         endchoice
 
