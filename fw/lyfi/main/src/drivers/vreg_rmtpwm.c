@@ -69,6 +69,6 @@ const static struct vreg_driver_api s_api = {
 
 static rmtpwm_generator_t s_dac = { 0 };
 
-DRVFX_DEVICE_DEFINE("vreg", _vreg_init, &s_dac, NULL, DRVFX_INIT_POST_KERNEL_DEFAULT_PRIORITY, &s_api);
+DRVFX_DEVICE_DEFINE("vreg", _vreg_init, &s_dac, NULL, DRVFX_INIT_POST_KERNEL_HIGH_PRIORITY, &s_api);
 
 #endif // CONFIG_LYFI_FAN_CTRL_VREG_DEVICE_RMTPWM
