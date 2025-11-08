@@ -30,10 +30,6 @@ static int rmtpwm_set_duty_internal(rmtpwm_generator_t* pwm, uint8_t duty);
 static rmtpwm_generator_t s_pwm = { 0 };
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
-#if !SOC_DAC_SUPPORTED && CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
-static rmtpwm_generator_t s_dac = { 0 };
-#endif // !SOC_DAC_SUPPORTED
-
 static int _rmtpwm_init(const struct drvfx_device* dev)
 {
     ESP_LOGI(TAG, "RMT PWM Sub-system initializing...");
