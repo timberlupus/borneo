@@ -177,7 +177,7 @@ static int fan_init()
         if (vreg == NULL) {
             return -ENODEV;
         }
-        BO_TRY(vreg_set_output(vreg, 0xFF));
+        BO_TRY(vreg_set_output(vreg, FAN_POWER_MAX));
     }
 #endif // CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
 
