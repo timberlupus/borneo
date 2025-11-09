@@ -21,13 +21,15 @@
 
 #if CONFIG_LYFI_FAN_CTRL_VREG_DEVICE_DAC
 
+#define TAG "vreg_dac"
+
 struct dac_data {
     dac_oneshot_handle_t handle;
 };
 
 static int _vreg_init(const struct drvfx_device* dev)
 {
-    ESP_LOGI(TAG, "Create DAC channel %u for fan internal voltage regulator...", LYFI_FAN_CTRL_VREG_DAC_CHANNEL);
+    ESP_LOGI(TAG, "Create DAC channel %u for fan internal voltage regulator...", CONFIG_LYFI_FAN_CTRL_VREG_DAC_CHANNEL);
 
     if (dev == NULL) {
         return -ENODEV;
@@ -39,7 +41,7 @@ static int _vreg_init(const struct drvfx_device* dev)
     }
 
     dac_oneshot_config_t oneshot_cfg = {
-        .chan_id = LYFI_FAN_CTRL_VREG_DAC_CHANNEL,
+        .chan_id = CONFIG_LYFI_FAN_CTRL_VREG_DAC_CHANNEL,
     };
 
     BO_TRY(dac_oneshot_new_channel(&oneshot_cfg, &data->handle));
