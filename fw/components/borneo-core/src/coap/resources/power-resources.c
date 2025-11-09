@@ -16,7 +16,6 @@
 #include <borneo/system.h>
 #include <borneo/power.h>
 #include <borneo/nvs.h>
-#include <borneo/power-meas.h>
 #include <borneo/rpc/common.h>
 
 #define TAG "borneo-power-coap"

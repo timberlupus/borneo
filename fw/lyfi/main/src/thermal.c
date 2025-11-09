@@ -12,11 +12,12 @@
 #include <esp_log.h>
 #include <nvs_flash.h>
 
+#include <drvfx/drvfx.h>
 #include <borneo/system.h>
+#include <borneo/devices/sensor.h>
 #include <borneo/power.h>
 #include <borneo/nvs.h>
 
-#include "ntc.h"
 #include "fan.h"
 #include "protect.h"
 #include "thermal.h"
@@ -32,10 +33,11 @@ struct pid {
 };
 
 struct thermal_state {
+    const struct drvfx_device* temp_dev;
     esp_timer_handle_t timer;
     struct pid pid;
     int current_temp;
-    int temp_window[TEMP_WINDOW_SIZE];
+    int8_t temp_window[TEMP_WINDOW_SIZE];
     uint8_t temp_window_index;
 };
 
@@ -110,19 +112,18 @@ int thermal_init()
     BO_TRY(load_user_settings());
 
 #if CONFIG_LYFI_NTC_SUPPORT
-    if (ntc_init() != 0) {
-#if CONFIG_LYFI_FAN_CTRL_SUPPORT
-        fan_set_power(OUTPUT_MAX);
-#endif
-        return -1;
+    _thermal.temp_dev = k_device_get_binding("sensor.temp");
+    if (_thermal.temp_dev == NULL) {
+        return -ENODEV;
     }
-
     {
         // Fill the window
         for (size_t ti = 0; ti < TEMP_WINDOW_SIZE; ti++) {
-            int rc = ntc_read_temp(_thermal.temp_window + ti);
+            int32_t temp;
+            int rc = sensor_get_value(_thermal.temp_dev, &temp);
             if (rc == 0) {
-                _thermal.current_temp = _thermal.temp_window[ti];
+                _thermal.temp_window[ti] = temp;
+                _thermal.current_temp = temp;
             }
             else {
                 _thermal.temp_window[ti] = -1;
@@ -130,6 +131,8 @@ int thermal_init()
             vTaskDelay(pdMS_TO_TICKS(10));
         }
     }
+#else
+    _thermal.temp_dev = NULL;
 #endif // CONFIG_LYFI_NTC_SUPPORT
 
 #if CONFIG_LYFI_FAN_CTRL_SUPPORT
@@ -242,8 +245,8 @@ int thermal_get_current_temp() { return _thermal.current_temp; }
 
 static void _timer_callback_pid(void* args)
 {
-    int new_temp = -1;
-    int rc = ntc_read_temp(&new_temp);
+    int32_t new_temp = -1;
+    int rc = sensor_get_value(_thermal.temp_dev, &new_temp);
     if (rc != 0) {
         ESP_LOGE(TAG, "Temperature sensor fault or not connected.");
         if (bo_power_is_on()) {

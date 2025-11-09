@@ -1,0 +1,16 @@
+CompileFlags:
+  Add: [
+    "-Icomponents",
+    "-Imain",
+    "-Ibuild/config",
+    "-Ibuild/generated",
+    "-I$IDF_PATH/components/freertos/include",
+    "-I$IDF_PATH/components/esp_common/include",
+    "-I$IDF_PATH/components/esp_system/include",
+    "-I$IDF_PATH/components/esp_hw_support/include",
+    "-I$IDF_PATH/components/driver/include",
+    "-I$IDF_PATH/components/log/include",
+    "-I$IDF_PATH/components/esp_rom/include",
+    "-include",
+    "build/config/sdkconfig.h"
+  ]

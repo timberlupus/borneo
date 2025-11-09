@@ -5,9 +5,10 @@
 
 #include <cbor.h>
 
+#include <drvfx/drvfx.h>
 #include <borneo/system.h>
+#include <borneo/devices/sensor.h>
 #include <borneo/power.h>
-#include "../power-meas.h"
 #include "rpc.h"
 
 #if CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT && CONFIG_LYFI_MEAS_CURRENT_SUPPORT
@@ -17,7 +18,8 @@ int bo_rpc_lyfi_power_mw_get(const CborValue* args, CborEncoder* retvals)
 {
     (void)args; // No input args for GET
     int32_t power_mw;
-    BO_TRY(lyfi_power_read(&power_mw));
+    const struct drvfx_device* sensor_dev = k_device_get_binding("sensor.led_power");
+    BO_TRY(sensor_get_value(sensor_dev, &power_mw));
     BO_TRY(cbor_encode_uint(retvals, power_mw));
     return 0;
 }

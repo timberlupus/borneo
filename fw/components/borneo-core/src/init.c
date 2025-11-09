@@ -33,7 +33,6 @@
 #include "borneo/coap.h"
 #include "borneo/mdns.h"
 #include "borneo/system.h"
-#include "borneo/power-meas.h"
 #include "borneo/rtc.h"
 
 #if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED
@@ -63,8 +62,6 @@ static int _borneo_core_init(const struct drvfx_device* dev)
     BO_TRY(bo_system_init());
     BO_TRY(bo_power_init());
     BO_TRY(bo_rtc_init());
-
-    BO_TRY(bo_power_meas_init());
 
     ESP_LOGI(TAG, "Borneo Core has been initialized successfully.");
     return 0;

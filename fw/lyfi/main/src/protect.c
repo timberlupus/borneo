@@ -16,14 +16,13 @@
 
 #include <borneo/system.h>
 #include <borneo/common.h>
+#include <borneo/devices/sensor.h>
 #include <borneo/power.h>
 #include <borneo/nvs.h>
-#include <borneo/power-meas.h>
 
 #include "fan.h"
 #include "thermal.h"
 #include "protect.h"
-#include "power-meas.h"
 
 #if CONFIG_LYFI_PROTECTION_ENABLED
 
@@ -63,6 +62,10 @@ struct bo_protect_status {
     volatile int overheated_count; // Count of overheated events
     volatile int temp_read_fail_count; // Count of temperature read failures
 #endif // CONFIG_LYFI_PROTECTION_OVERHEATED_SUPPORT
+
+#if CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
+    const struct drvfx_device* power_sensor_dev;
+#endif // CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
 };
 
 static struct bo_protect_status _protect = { 0 };
@@ -74,6 +77,15 @@ int bo_protect_init()
 
     ESP_LOGI(TAG, "Loading factory settings...");
     BO_TRY(load_factory_settings());
+
+#if CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
+    {
+        _protect.power_sensor_dev = k_device_get_binding("sensor.led_power");
+        if (_protect.power_sensor_dev == NULL) {
+            return -ENODEV;
+        }
+    }
+#endif // CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
 
     xTaskCreate(&protect_task, "protect_task", 2048, NULL, TASK_PRIORITY, NULL);
 
@@ -193,7 +205,7 @@ static void check_overpower_protection()
 
     static int power_read_fail_count = 0;
     int32_t power_mw;
-    int ret = lyfi_power_read(&power_mw);
+    int ret = sensor_get_value(_protect.power_sensor_dev, &power_mw);
     if (ret != 0) {
         power_read_fail_count++;
         if (power_read_fail_count >= 5) {

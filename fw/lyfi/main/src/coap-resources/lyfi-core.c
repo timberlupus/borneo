@@ -16,8 +16,6 @@
 
 #include "../led/led.h"
 #include "../fan.h"
-#include "../ntc.h"
-#include "../power-meas.h"
 #include "../coap-paths.h"
 #include "../rpc/cbor-common.h"
 #include "../rpc/rpc.h"

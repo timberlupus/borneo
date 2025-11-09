@@ -17,16 +17,20 @@
 #include <driver/gpio.h>
 #include <esp_adc/adc_oneshot.h>
 
-#include "borneo/algo/filters.h"
-#include "borneo/common.h"
-#include "borneo/system.h"
-#include "borneo/devices/adc.h"
-#include "borneo/power-meas.h"
-#include "borneo/nvs.h"
+#include <drvfx/drvfx.h>
 
-#define TAG "power_meas"
+#include <borneo/algo/filters.h>
+#include <borneo/common.h>
+#include <borneo/system.h>
+#include <borneo/devices/adc.h>
+#include <borneo/devices/sensor.h>
+
+#define TAG "sensor.led_current"
+
+#define BO_ADC_WINDOW_SIZE 5
 
 #if CONFIG_LYFI_MEAS_CURRENT_SUPPORT
+
 #define LED_NVS_NS "led"
 #define LED_NVS_KEY_MEAS_CURRENT_ENABLED "curr.en"
 
@@ -34,14 +38,22 @@
 #define CONFIG_LYFI_MEAS_CURRENT_OFFSET 0
 #endif
 
+struct sensor_current_data {
+    const struct drvfx_device* adc_dev;
+    int32_t current_ma;
+};
+
 struct power_meas_factory_settings {
     bool measurement_enabled;
 };
 
+/*
 static struct power_meas_factory_settings s_factory_settings = {
     .measurement_enabled = true,
 };
+*/
 
+/*
 static int factory_settings_load(void)
 {
     nvs_handle_t nvs_handle;
@@ -61,25 +73,7 @@ static int factory_settings_load(void)
 
     return 0;
 }
-#endif
 
-int lyfi_power_meas_init()
-{
-    ESP_LOGI(TAG, "Initializing LyFi power measurement...");
-
-#if CONFIG_LYFI_MEAS_CURRENT_SUPPORT
-    BO_TRY(factory_settings_load());
-    if (!s_factory_settings.measurement_enabled) {
-        ESP_LOGW(TAG, "Power measurement disabled by factory settings.");
-        return 0;
-    }
-    BO_TRY(bo_adc_channel_config(CONFIG_LYFI_MEAS_CURRENT_ADC_CHANNEL));
-#endif
-
-    return 0;
-}
-
-#if CONFIG_LYFI_MEAS_CURRENT_SUPPORT
 int lyfi_power_current_read(int* ma)
 {
     if (ma == NULL) {
@@ -96,9 +90,7 @@ int lyfi_power_current_read(int* ma)
     *ma = (adc_mv * 1000 + (CONFIG_LYFI_MEAS_CURRENT_FACTOR / 2)) / CONFIG_LYFI_MEAS_CURRENT_FACTOR;
     return 0;
 }
-#endif
 
-#if CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT && CONFIG_LYFI_MEAS_CURRENT_SUPPORT
 int lyfi_power_read(int32_t* mw)
 {
     if (mw == NULL) {
@@ -148,4 +140,71 @@ int lyfi_power_read(int32_t* mw)
     *mw = (value_mv * value_ma + 500) / 1000; // Convert to mW
     return 0;
 }
-#endif
+*/
+
+static int _fetch_sample(const struct drvfx_device* dev)
+{
+    if (dev == NULL) {
+        return -ENODEV;
+    }
+    if (dev->data == NULL) {
+        return -ENOSYS;
+    }
+    struct sensor_current_data* data = (struct sensor_current_data*)dev->data;
+
+    int32_t adc_mv;
+    BO_TRY(adc_read_mv(data->adc_dev, CONFIG_LYFI_MEAS_CURRENT_ADC_CHANNEL, &adc_mv));
+    adc_mv -= CONFIG_LYFI_MEAS_CURRENT_OFFSET;
+    if (adc_mv < 0) {
+        adc_mv = 0;
+    }
+    data->current_ma = (adc_mv * 1000 + (CONFIG_LYFI_MEAS_CURRENT_FACTOR / 2)) / CONFIG_LYFI_MEAS_CURRENT_FACTOR;
+    return 0;
+}
+
+static int _get_value(const struct drvfx_device* dev, int32_t* value)
+{
+    if (dev == NULL) {
+        return -ENODEV;
+    }
+    if (dev->data == NULL) {
+        return -ENOSYS;
+    }
+    struct sensor_current_data* data = (struct sensor_current_data*)dev->data;
+    *value = data->current_ma;
+    return 0;
+}
+
+static int sensor_current_init(const struct drvfx_device* dev)
+{
+    if (dev == NULL) {
+        return -ENODEV;
+    }
+    ESP_LOGI(TAG, "Initializing current sensor '%s'...", dev->name);
+
+    if (dev->data == NULL) {
+        return -ENOSYS;
+    }
+    struct sensor_current_data* data = (struct sensor_current_data*)dev->data;
+
+    data->adc_dev = k_device_get_binding("adc");
+    if (data->adc_dev == NULL) {
+        ESP_LOGE(TAG, "Failed to get device 'adc'");
+    }
+
+    BO_TRY(_fetch_sample(dev));
+
+    return 0;
+}
+
+const static struct sensor_api s_api = {
+    .fetch_sample = &_fetch_sample,
+    .get_value = &_get_value,
+};
+
+static struct sensor_current_data s_data = { 0 };
+
+DRVFX_DEVICE_DEFINE("sensor.led_current", sensor_current_init, &s_data, NULL, DRVFX_INIT_POST_KERNEL_DEFAULT_PRIORITY,
+                    &s_api);
+
+#endif // CONFIG_LYFI_MEAS_CURRENT_SUPPORT

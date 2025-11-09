@@ -18,7 +18,6 @@
 #include <borneo/wifi.h>
 #include <borneo/power.h>
 #include <borneo/nvs.h>
-#include <borneo/power-meas.h>
 #include <borneo/timer.h>
 #include <borneo/product.h>
 #include <borneo/rpc/common.h>

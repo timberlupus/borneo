@@ -4,3 +4,4 @@ managed_components
 __pycache__
 *.pyc
 dependencies.lock
+.cache

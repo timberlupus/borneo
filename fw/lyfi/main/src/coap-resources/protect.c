@@ -8,8 +8,6 @@
 
 #include <borneo/common.h>
 #include <borneo/coap.h>
-// #include <borneo/rtc.h>
-// #include <borneo/ntc.h>
 #include "../thermal.h"
 #include "../protect.h"
 #include "../rpc/rpc.h"

@@ -9,15 +9,14 @@
 
 #include <cbor.h>
 
+#include <drvfx/drvfx.h>
 #include <borneo/system.h>
-
 #include <borneo/common.h>
+#include <borneo/devices/sensor.h>
 
 #include "../fan.h"
 #include "../led/led.h"
 #include "../thermal.h"
-#include "../power-meas.h"
-#include "../ntc.h"
 #include "../coap-paths.h"
 #include "../rpc/cbor-common.h"
 
@@ -263,8 +262,9 @@ int bo_rpc_borneo_lyfi_status_get(const CborValue* args, CborEncoder* retvals)
 #if CONFIG_LYFI_NTC_SUPPORT
     {
         BO_TRY(cbor_encode_text_stringz(&root_map, "temperature"));
-        int temp;
-        int rc = ntc_read_temp(&temp);
+        int32_t temp;
+        const struct drvfx_device* temp_dev = k_device_get_binding("sensor.temp");
+        int rc = sensor_get_value(temp_dev, &temp);
         if (rc != 0) {
             BO_TRY(cbor_encode_null(&root_map));
         }
@@ -277,8 +277,9 @@ int bo_rpc_borneo_lyfi_status_get(const CborValue* args, CborEncoder* retvals)
 #if CONFIG_LYFI_MEAS_CURRENT_SUPPORT
     {
         BO_TRY(cbor_encode_text_stringz(&root_map, "powerCurrent"));
-        int ma;
-        int rc = lyfi_power_current_read(&ma);
+        int32_t ma;
+        const struct drvfx_device* sensor_dev = k_device_get_binding("sensor.led_current");
+        int rc = sensor_get_value(sensor_dev, &ma);
         if (rc != 0) {
             BO_TRY(cbor_encode_null(&root_map));
         }
@@ -341,8 +342,9 @@ int bo_rpc_borneo_lyfi_temp_get(const CborValue* args, CborEncoder* retvals)
 {
     (void)args;
 #if CONFIG_LYFI_NTC_SUPPORT
-    int temp;
-    int rc = ntc_read_temp(&temp);
+    int32_t temp;
+    const struct drvfx_device* temp_dev = k_device_get_binding("sensor.temp");
+    int rc = sensor_get_value(temp_dev, &temp);
     if (rc != 0) {
         BO_TRY(cbor_encode_int(retvals, temp));
     }

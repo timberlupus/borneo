@@ -12,17 +12,22 @@
 #include <esp_sntp.h>
 #include <esp_system.h>
 #include <driver/gpio.h>
-#include <esp_adc/adc_oneshot.h>
+
+#include <drvfx/drvfx.h>
 
 #include <borneo/system.h>
 #include <borneo/algo/filters.h>
 #include <borneo/devices/adc.h>
-
-#include "ntc.h"
+#include <borneo/devices/sensor.h>
 
 #if CONFIG_LYFI_NTC_SUPPORT
 
 #define TAG "NTC"
+
+struct ntc_data {
+    const struct drvfx_device* adc_dev;
+    int8_t temp_value;
+};
 
 static int8_t ntc_table_lookup(int r);
 
@@ -30,6 +35,11 @@ static int8_t ntc_table_lookup(int r);
 #define NTC_TEMP_BUF_SIZE 16
 #define NTC_ADC_MAX_VALUE 1023
 #define ADC_WINDOW_SIZE 5
+
+enum {
+    NTC_SAMPLING_INTERVAL = 100,
+    NTC_BAD_TEMPERATURE = -127,
+};
 
 // clang-format off
 
@@ -75,35 +85,6 @@ enum {
     NTC_MAPPING_TABLE_SIZE = sizeof(NTC_MAPPING_TABLE) / sizeof(NTC_MAPPING_TABLE[0]),
 };
 
-int ntc_init()
-{
-    ESP_LOGI(TAG, "Initializing NTC...");
-
-    BO_TRY(bo_adc_channel_config(CONFIG_LYFI_NTC_ADC_CHANNEL));
-    return 0;
-}
-
-/** @brief Read the temperature
- *  @retval Temperature in celsius
- */
-int ntc_read_temp(int* temp)
-{
-    int adc_mv;
-    BO_TRY(bo_adc_read_mv(CONFIG_LYFI_NTC_ADC_CHANNEL, &adc_mv));
-    if (adc_mv == 0 || adc_mv == 4095) {
-        ESP_LOGE(TAG, "No NTC connected! sample_avg=%d", adc_mv);
-        return -EIO;
-    }
-
-    int value = ntc_table_lookup(adc_mv);
-    if (value == NTC_BAD_TEMPERATURE) {
-        ESP_LOGE(TAG, "Bad temperature!");
-        return -EIO;
-    }
-    *temp = value;
-    return 0;
-}
-
 static int8_t ntc_table_lookup(int value)
 {
 
@@ -134,5 +115,75 @@ static int8_t ntc_table_lookup(int value)
 
     return closest_index;
 }
+
+static int _fetch_sample(const struct drvfx_device* dev)
+{
+    if (dev == NULL) {
+        return -ENODEV;
+    }
+    if (dev->data == NULL) {
+        return -ENOSYS;
+    }
+    struct ntc_data* data = (struct ntc_data*)dev->data;
+
+    int32_t adc_mv;
+    BO_TRY(adc_read_mv(data->adc_dev, CONFIG_LYFI_NTC_ADC_CHANNEL, &adc_mv));
+    if (adc_mv == 0 || adc_mv == 4095) {
+        ESP_LOGE(TAG, "No NTC connected! sample_avg=%d", adc_mv);
+        return -EIO;
+    }
+
+    int value = ntc_table_lookup(adc_mv);
+    if (value == NTC_BAD_TEMPERATURE) {
+        ESP_LOGE(TAG, "Bad temperature!");
+        return -EIO;
+    }
+    data->temp_value = (int8_t)value;
+    return 0;
+}
+
+static int _get_value(const struct drvfx_device* dev, int32_t* value)
+{
+    if (dev == NULL) {
+        return -ENODEV;
+    }
+    if (dev->data == NULL) {
+        return -ENOSYS;
+    }
+    struct ntc_data* data = (struct ntc_data*)dev->data;
+    *value = data->temp_value;
+    return 0;
+}
+
+static int ntc_init(const struct drvfx_device* dev)
+{
+    if (dev == NULL) {
+        return -ENODEV;
+    }
+    ESP_LOGI(TAG, "Initializing NTC '%s'...", dev->name);
+
+    if (dev->data == NULL) {
+        return -ENOSYS;
+    }
+    struct ntc_data* data = (struct ntc_data*)dev->data;
+
+    data->adc_dev = k_device_get_binding("adc");
+    if (data->adc_dev == NULL) {
+        ESP_LOGE(TAG, "Failed to get device 'adc'");
+    }
+
+    BO_TRY(_fetch_sample(dev));
+
+    return 0;
+}
+
+const static struct sensor_api s_api = {
+    .fetch_sample = &_fetch_sample,
+    .get_value = &_get_value,
+};
+
+static struct ntc_data s_data = { 0 };
+
+DRVFX_DEVICE_DEFINE("sensor.temp", ntc_init, &s_data, NULL, DRVFX_INIT_POST_KERNEL_DEFAULT_PRIORITY, &s_api);
 
 #endif // CONFIG_LYFI_NTC_SUPPORT

@@ -11,6 +11,7 @@
 
 #include <drvfx/drvfx.h>
 #include <borneo/system.h>
+#include <borneo/devices/sensor.h>
 #include <borneo/sntp.h>
 #include <borneo/rpc/common.h>
 #include <borneo/rtc.h>
@@ -18,7 +19,6 @@
 #include <borneo/wifi.h>
 #include <borneo/power.h>
 #include <borneo/nvs.h>
-#include <borneo/power-meas.h>
 #include <borneo/timer.h>
 #include <borneo/product.h>
 
@@ -196,8 +196,9 @@ int bo_rpc_borneo_status_get(const CborValue* args, CborEncoder* retvals)
 #if CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT
     {
         BO_TRY(cbor_encode_text_stringz(&root_map, "powerVoltage"));
-        int mv;
-        int rc = bo_power_volt_read(&mv);
+        int32_t mv;
+        const struct drvfx_device* vdev = k_device_get_binding("sensor.voltage");
+        int rc = sensor_get_value(vdev, &mv);
         if (rc != 0) {
             BO_TRY(cbor_encode_null(&root_map));
         }

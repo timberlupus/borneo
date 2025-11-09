@@ -19,6 +19,9 @@ CONFIG_ESPTOOLPY_FLASHFREQ="80m"
 
 #################### Core Stuff #########################
 CONFIG_BORNEO_ADC_ENABLED=y
+CONFIG_BORNEO_ADC_CH0_ENABLED=y
+CONFIG_BORNEO_ADC_CH1_ENABLED=y
+CONFIG_BORNEO_ADC_CH2_ENABLED=y
 
 ################################# Power Supply Measurement ###############################
 CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT=y

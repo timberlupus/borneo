@@ -47,6 +47,46 @@ menu "Borneo Core"
         config BORNEO_ADC_ENABLED
             bool "ADC enabled"
             default y
+
+        config BORNEO_ADC_CH0_ENABLED
+            bool "ADC1 Channel 0 enabled"
+            default n
+            depends on BORNEO_ADC_ENABLED
+
+        config BORNEO_ADC_CH1_ENABLED
+            bool "ADC1 Channel 1 enabled"
+            default n
+            depends on BORNEO_ADC_ENABLED
+
+        config BORNEO_ADC_CH2_ENABLED
+            bool "ADC1 Channel 2 enabled"
+            default n
+            depends on BORNEO_ADC_ENABLED
+
+        config BORNEO_ADC_CH3_ENABLED
+            bool "ADC1 Channel 3 enabled"
+            default n
+            depends on BORNEO_ADC_ENABLED
+
+        config BORNEO_ADC_CH4_ENABLED
+            bool "ADC1 Channel 4 enabled"
+            default n
+            depends on BORNEO_ADC_ENABLED
+
+        config BORNEO_ADC_CH5_ENABLED
+            bool "ADC1 Channel 5 enabled"
+            default n
+            depends on BORNEO_ADC_ENABLED
+
+        config BORNEO_ADC_CH6_ENABLED
+            bool "ADC1 Channel 6 enabled"
+            default n
+            depends on BORNEO_ADC_ENABLED
+
+        config BORNEO_ADC_CH7_ENABLED
+            bool "ADC1 Channel 7 enabled"
+            default n
+            depends on BORNEO_ADC_ENABLED
     endmenu
 
 

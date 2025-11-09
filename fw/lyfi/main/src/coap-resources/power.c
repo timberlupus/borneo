@@ -11,7 +11,6 @@
 #include <borneo/system.h>
 #include <borneo/coap.h>
 #include <borneo/power.h>
-#include "../power-meas.h"
 #include "../rpc/rpc.h"
 
 #define TAG "lyfi-power-coap"
