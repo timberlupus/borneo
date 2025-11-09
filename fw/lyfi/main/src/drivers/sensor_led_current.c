@@ -41,6 +41,7 @@
 struct sensor_current_data {
     const struct drvfx_device* adc_dev;
     int32_t current_ma;
+    int32_t filtered_current;
 };
 
 struct power_meas_factory_settings {
@@ -73,73 +74,6 @@ static int factory_settings_load(void)
 
     return 0;
 }
-
-int lyfi_power_current_read(int* ma)
-{
-    if (ma == NULL) {
-        return -EINVAL;
-    }
-    if (!s_factory_settings.measurement_enabled) {
-        return -ENODEV;
-    }
-    int adc_mv;
-    BO_TRY(bo_adc_read_mv_filtered(CONFIG_LYFI_MEAS_CURRENT_ADC_CHANNEL, &adc_mv));
-    if (adc_mv >= CONFIG_LYFI_MEAS_CURRENT_OFFSET) {
-        adc_mv -= CONFIG_LYFI_MEAS_CURRENT_OFFSET;
-    }
-    *ma = (adc_mv * 1000 + (CONFIG_LYFI_MEAS_CURRENT_FACTOR / 2)) / CONFIG_LYFI_MEAS_CURRENT_FACTOR;
-    return 0;
-}
-
-int lyfi_power_read(int32_t* mw)
-{
-    if (mw == NULL) {
-        return -EINVAL;
-    }
-    if (!s_factory_settings.measurement_enabled) {
-        return -ENODEV;
-    }
-
-    // TODO Add lock
-    uint16_t last_v_adc = 0;
-    uint16_t last_c_adc = 0;
-    uint16_t v_adc_window[BO_ADC_WINDOW_SIZE];
-    uint16_t c_adc_window[BO_ADC_WINDOW_SIZE];
-    for (size_t i = 0; i < BO_ADC_WINDOW_SIZE; i++) {
-        int adc_v, adc_c;
-        BO_TRY(bo_adc_read_mv(CONFIG_BORNEO_MEAS_VOLTAGE_ADC_CHANNEL, &adc_v));
-        BO_TRY(bo_adc_read_mv(CONFIG_LYFI_MEAS_CURRENT_ADC_CHANNEL, &adc_c));
-        if (adc_v == 0 || adc_v == 4095) {
-            adc_v = last_v_adc; // Ignore outliers
-        }
-        else {
-            last_v_adc = adc_v;
-        }
-        if (adc_c == 0 || adc_c == 4095) {
-            adc_c = last_c_adc; // Ignore outliers
-        }
-        else {
-            last_c_adc = adc_c;
-        }
-        v_adc_window[i] = (uint16_t)adc_v;
-        c_adc_window[i] = (uint16_t)adc_c;
-    }
-
-    int value_mv;
-    int value_ma;
-
-    value_mv = median_filter_u16(v_adc_window, BO_ADC_WINDOW_SIZE);
-    value_mv = (value_mv * CONFIG_BORNEO_MEAS_VOLTAGE_FACTOR + 500) / 1000;
-
-    value_ma = median_filter_u16(c_adc_window, BO_ADC_WINDOW_SIZE);
-    if (value_ma >= CONFIG_LYFI_MEAS_CURRENT_OFFSET) {
-        value_ma -= CONFIG_LYFI_MEAS_CURRENT_OFFSET;
-    }
-    value_ma = (value_ma * 1000 + (CONFIG_LYFI_MEAS_CURRENT_FACTOR / 2)) / CONFIG_LYFI_MEAS_CURRENT_FACTOR;
-
-    *mw = (value_mv * value_ma + 500) / 1000; // Convert to mW
-    return 0;
-}
 */
 
 static int _fetch_sample(const struct drvfx_device* dev)
@@ -158,7 +92,8 @@ static int _fetch_sample(const struct drvfx_device* dev)
     if (adc_mv < 0) {
         adc_mv = 0;
     }
-    data->current_ma = (adc_mv * 1000 + (CONFIG_LYFI_MEAS_CURRENT_FACTOR / 2)) / CONFIG_LYFI_MEAS_CURRENT_FACTOR;
+    int32_t raw_ma = (adc_mv * 1000 + (CONFIG_LYFI_MEAS_CURRENT_FACTOR / 2)) / CONFIG_LYFI_MEAS_CURRENT_FACTOR;
+    data->current_ma = ema_filter(raw_ma, &data->filtered_current, 1, 10);
     return 0;
 }
 

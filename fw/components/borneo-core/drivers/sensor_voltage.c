@@ -43,7 +43,7 @@ static int _fetch_sample(const struct drvfx_device* dev)
     int32_t adc_mv;
     BO_TRY(adc_read_mv(data->adc_dev, CONFIG_BORNEO_MEAS_VOLTAGE_ADC_CHANNEL, &adc_mv));
     int32_t raw_mv = (adc_mv * CONFIG_BORNEO_MEAS_VOLTAGE_FACTOR + 500) / 1000;
-    data->voltage_mv = ema_filter(raw_mv, &data->filtered_voltage, 0.1f);
+    data->voltage_mv = ema_filter(raw_mv, &data->filtered_voltage, 1, 10);
     return 0;
 }
 
