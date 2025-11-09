@@ -175,26 +175,7 @@ static int fan_init()
     bool pwm_enabled = false;
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
-#if CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
-    if (vreg_enabled) {
-        const struct drvfx_device* vreg = k_device_get_binding("vreg");
-        if (vreg == NULL) {
-            return -ENODEV;
-        }
-        BO_TRY(vreg_set_output(vreg, FAN_POWER_MAX));
-    }
-#endif // CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
-
-#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-    if (pwm_enabled) {
-        ESP_LOGI(TAG, "Fan PWM output enabled, GPIO=%i", CONFIG_LYFI_FAN_CTRL_PWM_GPIO);
-        const struct drvfx_device* fpwm = k_device_get_binding("fpwm");
-        if (fpwm == NULL) {
-            return -ENODEV;
-        }
-        BO_TRY(fpwm_set_duty(fpwm, 0));
-    }
-#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
+    BO_TRY(fan_set_power(FAN_POWER_MIN));
 
     ESP_LOGI(TAG, "Fan driver initizlied.");
     return 0;
