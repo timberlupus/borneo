@@ -3,6 +3,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/event_groups.h>
+#include <freertos/semphr.h> // 添加互斥锁头文件
 #include <esp_system.h>
 #include <esp_log.h>
 #include <esp_event.h>
@@ -26,6 +27,7 @@
 struct adc_data {
     adc_oneshot_unit_handle_t handle;
     adc_cali_handle_t cali;
+    SemaphoreHandle_t mutex; // 添加互斥锁
 };
 
 /*
@@ -111,14 +113,22 @@ static int _adc_cali(adc_cali_handle_t* out_handle)
 static int _read_mv(const struct drvfx_device* dev, adc_channel_t channel, int32_t* mv)
 {
     struct adc_data* data = (struct adc_data*)dev->data;
-    BO_TRY(adc_oneshot_get_calibrated_result(data->handle, data->cali, channel, (int*)mv));
-    return 0;
+    xSemaphoreTake(data->mutex, portMAX_DELAY);
+    int rc = adc_oneshot_get_calibrated_result(data->handle, data->cali, channel, (int*)mv);
+    xSemaphoreGive(data->mutex);
+    return rc;
 }
 
 static int adc_init(const struct drvfx_device* dev)
 {
     ESP_LOGI(TAG, "Initializing ADC...");
     struct adc_data* data = (struct adc_data*)dev->data;
+
+    data->mutex = xSemaphoreCreateMutex();
+    if (data->mutex == NULL) {
+        ESP_LOGE(TAG, "Failed to create ADC mutex");
+        return -1;
+    }
 
     adc_oneshot_unit_init_cfg_t unit_config = { 0 };
     unit_config.unit_id = AVAILABLE_ADC_UNIT;
