@@ -27,6 +27,7 @@
 struct sensor_voltage_data {
     const struct drvfx_device* adc_dev;
     int32_t voltage_mv;
+    int32_t filtered_voltage;
 };
 
 static int _fetch_sample(const struct drvfx_device* dev)
@@ -41,7 +42,8 @@ static int _fetch_sample(const struct drvfx_device* dev)
 
     int32_t adc_mv;
     BO_TRY(adc_read_mv(data->adc_dev, CONFIG_BORNEO_MEAS_VOLTAGE_ADC_CHANNEL, &adc_mv));
-    data->voltage_mv = (adc_mv * CONFIG_BORNEO_MEAS_VOLTAGE_FACTOR + 500) / 1000;
+    int32_t raw_mv = (adc_mv * CONFIG_BORNEO_MEAS_VOLTAGE_FACTOR + 500) / 1000;
+    data->voltage_mv = ema_filter(raw_mv, &data->filtered_voltage, 0.1f);
     return 0;
 }
 
