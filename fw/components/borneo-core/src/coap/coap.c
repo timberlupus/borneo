@@ -151,7 +151,7 @@ static int register_resource(coap_context_t* ctx, const struct coap_resource_des
     if (ctx == NULL || res == NULL) {
         return -EINVAL;
     }
-    ESP_LOGI(TAG, "Registering CoAP resource `%s`", res->path.s);
+    ESP_LOGD(TAG, "Registering CoAP resource `%s`", res->path.s);
     coap_resource_t* resource = coap_resource_init((coap_str_const_t*)&res->path, COAP_RESOURCE_FLAGS_RELEASE_URI);
     if (resource == NULL) {
         ESP_LOGE(TAG, "coap_resource_init() failed");
