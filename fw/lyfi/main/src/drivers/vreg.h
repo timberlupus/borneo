@@ -7,16 +7,16 @@ extern "C" {
 #endif
 
 struct vreg_driver_api {
-    int (*set_duty)(const struct drvfx_device* dev, uint8_t duty);
+    int (*set_output)(const struct drvfx_device* dev, uint8_t percent);
 };
 
-__SYSCALL int vreg_set_duty(const struct drvfx_device* dev, uint8_t duty)
+__SYSCALL int vreg_set_output(const struct drvfx_device* dev, uint8_t percent)
 {
     const struct vreg_driver_api* api = dev ? dev->api : NULL;
     if (api == NULL) {
         return -ENOSYS;
     }
-    return api->set_duty(dev, duty);
+    return api->set_output(dev, percent);
 }
 
 #ifdef __cplusplus

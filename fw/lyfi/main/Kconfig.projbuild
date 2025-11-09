@@ -445,7 +445,7 @@ menu "Borneo LyFi"
             int "The Maximum Duty for the internal voltage regulator"
             depends on LYFI_FAN_CTRL_VREG_SUPPORT
 
-        config LYFI_FAN_CTRL_DAC_CHANNEL
+        config LYFI_FAN_CTRL_VREG_DAC_CHANNEL
             int "DAC Channel for DAC"
             depends on LYFI_FAN_CTRL_VREG_SUPPORT && LYFI_FAN_CTRL_VREG_DEVICE_DAC
 

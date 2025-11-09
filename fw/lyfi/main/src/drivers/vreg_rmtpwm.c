@@ -50,8 +50,12 @@ static int _vreg_init(const struct drvfx_device* dev)
     return 0;
 }
 
-static int _set_duty(const struct drvfx_device* dev, uint8_t duty)
+static int _set_output(const struct drvfx_device* dev, uint8_t percent)
 {
+    if (percent > 100) {
+        return -EINVAL;
+    }
+
     if (dev == NULL) {
         return -ENODEV;
     }
@@ -59,12 +63,29 @@ static int _set_duty(const struct drvfx_device* dev, uint8_t duty)
     if (data == NULL) {
         return -ENODATA;
     }
+
+    const struct drvfx_device* vreg = k_device_get_binding("vreg");
+    if (vreg == NULL) {
+        return -ENODEV;
+    }
+
+    const int DUTY_RANGE = CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX - CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MIN;
+    int duty = (DUTY_RANGE * percent + 100 / 2) / 100;
+    duty = CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX - duty;
+
+    if (duty <= CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MIN) {
+        duty = CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MIN;
+    }
+    if (duty >= CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX) {
+        duty = 0xFF;
+    }
+
     BO_TRY(rmtpwm_set_duty(data, duty));
     return 0;
 }
 
 const static struct vreg_driver_api s_api = {
-    .set_duty = &_set_duty,
+    .set_output = &_set_output,
 };
 
 static rmtpwm_generator_t s_dac = { 0 };

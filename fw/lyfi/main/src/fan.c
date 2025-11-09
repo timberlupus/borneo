@@ -22,9 +22,9 @@
 #include <borneo/system.h>
 #include <borneo/nvs.h>
 
-#include "rmtpwm.h"
 #include "fan.h"
 #include "drivers/vreg.h"
+#include "rmtpwm.h"
 
 #define NVS_FAN_NAMESPACE "fan"
 #define FAN_NVS_KEY_DAC_ENABLED "dac_en"
@@ -68,7 +68,7 @@ int fan_set_power(uint8_t value)
 
 #if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
     if (_factory_settings.flags & FAN_FLAG_PWM_ENABLED) {
-        uint8_t duty = (value * RMTPWM_DUTY_MAX + FAN_POWER_MAX / 2) / FAN_POWER_MAX;
+        uint8_t duty = (value * 0xFF + FAN_POWER_MAX / 2) / FAN_POWER_MAX;
         BO_TRY(rmtpwm_set_pwm_duty(duty));
         ESP_LOGI(TAG, "Set fan power, method: PWM, power=%u%%", value);
     }
@@ -76,43 +76,12 @@ int fan_set_power(uint8_t value)
 
 #if CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
     if (_factory_settings.flags & FAN_FLAG_DAC_ENABLED) {
-#if SOC_DAC_SUPPORTED
-        // Built-in DAC
-        {
-            const int DUTY_RANGE = CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX - CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MIN;
-            int duty = (DUTY_RANGE * value + FAN_POWER_MAX / 2) / FAN_POWER_MAX;
-            duty = CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX - duty;
 
-            if (duty <= CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MIN) {
-                duty = CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MIN;
-            }
-            if (duty >= CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX) {
-                duty = 0xFF; // DAC_MAX_DUTY
-            }
-            BO_TRY(dac_output_voltage(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL, duty));
-            ESP_LOGI(TAG, "Set fan power, method: DAC, power=%u/100, DAC-value=%hhu", value, duty);
+        const struct drvfx_device* vreg = k_device_get_binding("vreg");
+        if (vreg == NULL) {
+            return -ENODEV;
         }
-#else
-        // VREG
-        {
-            const int DUTY_RANGE = CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX - CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MIN;
-            int duty = (DUTY_RANGE * value + FAN_POWER_MAX / 2) / FAN_POWER_MAX;
-            duty = CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX - duty;
-
-            if (duty <= CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MIN) {
-                duty = CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MIN;
-            }
-            if (duty >= CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX) {
-                duty = RMTPWM_DUTY_MAX;
-            }
-            const struct drvfx_device* vreg = k_device_get_binding("vreg");
-            if (vreg == NULL) {
-                return -ENODEV;
-            }
-            BO_TRY(vreg_set_duty(vreg, (uint8_t)duty));
-            ESP_LOGI(TAG, "Set fan power, method: PWM DAC, power=%d, PWM-DAC_duty=%d", value, duty);
-        }
-#endif // CONFIG_IDF_TARGET_ESP32C3
+        BO_TRY(vreg_set_output(vreg, value));
     }
 #endif // CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
 
@@ -214,7 +183,7 @@ static int fan_init()
         if (vreg == NULL) {
             return -ENODEV;
         }
-        BO_TRY(vreg_set_duty(vreg, 0xFF));
+        BO_TRY(vreg_set_output(vreg, 0xFF));
 #endif // SOC_DAC_SUPPORTED
     }
 #endif // CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
