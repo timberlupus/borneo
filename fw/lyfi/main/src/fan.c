@@ -165,16 +165,6 @@ static int fan_init()
     }
 #endif // CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED
 
-#if CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
-    bool vreg_enabled = _factory_settings.flags & FAN_FLAG_VREG_ENABLED;
-#endif // CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
-
-#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-    bool pwm_enabled = _factory_settings.flags & FAN_FLAG_PWM_ENABLED;
-#else
-    bool pwm_enabled = false;
-#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-
     BO_TRY(fan_set_power(FAN_POWER_MIN));
 
     ESP_LOGI(TAG, "Fan driver initizlied.");
