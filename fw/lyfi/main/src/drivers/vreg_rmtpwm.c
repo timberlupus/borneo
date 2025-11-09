@@ -64,11 +64,6 @@ static int _set_output(const struct drvfx_device* dev, uint8_t percent)
         return -ENODATA;
     }
 
-    const struct drvfx_device* vreg = k_device_get_binding("vreg");
-    if (vreg == NULL) {
-        return -ENODEV;
-    }
-
     const int DUTY_RANGE = CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX - CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MIN;
     int duty = (DUTY_RANGE * percent + 100 / 2) / 100;
     duty = CONFIG_LYFI_FAN_CTRL_VREG_DUTY_MAX - duty;

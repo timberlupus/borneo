@@ -6,13 +6,16 @@
 extern "C" {
 #endif
 
-struct apwm_driver_api {
+#define FPWM_DUTY_MIN 0x00
+#define FPWM_DUTY_MAX 0xFF
+
+struct fpwm_driver_api {
     int (*set_duty)(const struct drvfx_device* dev, uint8_t duty);
 };
 
-__SYSCALL int apwm_set_duty(const struct drvfx_device* dev, uint8_t duty)
+__SYSCALL int fpwm_set_duty(const struct drvfx_device* dev, uint8_t duty)
 {
-    const struct apwm_driver_api* api = dev ? dev->api : NULL;
+    const struct fpwm_driver_api* api = dev ? dev->api : NULL;
     if (api == NULL) {
         return -ENOSYS;
     }

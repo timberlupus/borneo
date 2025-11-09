@@ -24,7 +24,7 @@
 
 #include "fan.h"
 #include "drivers/vreg.h"
-#include "rmtpwm.h"
+#include "drivers/fpwm.h"
 
 #define NVS_FAN_NAMESPACE "fan"
 #define FAN_NVS_KEY_VREG_ENABLED "vreg_en"
@@ -68,8 +68,12 @@ int fan_set_power(uint8_t value)
 
 #if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
     if (_factory_settings.flags & FAN_FLAG_PWM_ENABLED) {
+        const struct drvfx_device* fpwm = k_device_get_binding("fpwm");
+        if (fpwm == NULL) {
+            return -ENODEV;
+        }
         uint8_t duty = (value * 0xFF + FAN_POWER_MAX / 2) / FAN_POWER_MAX;
-        BO_TRY(rmtpwm_set_pwm_duty(duty));
+        BO_TRY(fpwm_set_duty(fpwm, duty));
         ESP_LOGI(TAG, "Set fan power, method: PWM, power=%u%%", value);
     }
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
@@ -184,7 +188,11 @@ static int fan_init()
 #if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
     if (pwm_enabled) {
         ESP_LOGI(TAG, "Fan PWM output enabled, GPIO=%i", CONFIG_LYFI_FAN_CTRL_PWM_GPIO);
-        BO_TRY(rmtpwm_set_pwm_duty(0));
+        const struct drvfx_device* fpwm = k_device_get_binding("fpwm");
+        if (fpwm == NULL) {
+            return -ENODEV;
+        }
+        BO_TRY(fpwm_set_duty(fpwm, 0));
     }
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 

@@ -394,10 +394,10 @@ menu "Borneo LyFi"
 
         choice
             prompt "PWM fan device"
-            default LYFI_FAN_CTRL_PWM_DEVICE_RMT
+            default LYFI_FAN_CTRL_PWM_DEVICE_RMTPWM
             depends on LYFI_FAN_CTRL_SUPPORT
 
-            config LYFI_FAN_CTRL_PWM_DEVICE_RMT
+            config LYFI_FAN_CTRL_PWM_DEVICE_RMTPWM
                 bool "Using RMT as the PWM device"
                 depends on LYFI_FAN_CTRL_PWM_SUPPORT
 
