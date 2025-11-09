@@ -64,7 +64,7 @@ static void indicator_timer_callback(void* arg)
 
     switch (_state) {
     case BO_INDICATOR_STATE_NORMAL: {
-        _led_state = 0;
+        _led_state = 1;
         next_delay_us = 5000000; // 5 seconds
     } break;
 
