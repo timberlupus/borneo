@@ -45,73 +45,96 @@ static int _encode_channel_info_entry(CborEncoder* parent, const char* name, con
 
 static int _encode_channel_info_array(CborEncoder* parent)
 {
+    size_t chcount = led_channel_count();
     CborEncoder channels_array;
-    BO_TRY(cbor_encoder_create_array(parent, &channels_array, led_channel_count()));
+    BO_TRY(cbor_encoder_create_array(parent, &channels_array, chcount));
 
     // Channel 0
 #if CONFIG_LYFI_LED_CH0_ENABLED
-    BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH0_NAME, CONFIG_LYFI_LED_CH0_COLOR,
-                                      CONFIG_LYFI_LED_CH0_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH0_POWER));
+    if (chcount >= 0) {
+        BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH0_NAME, CONFIG_LYFI_LED_CH0_COLOR,
+                                          CONFIG_LYFI_LED_CH0_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH0_POWER));
+    }
 #endif
 
     // Channel 1
 #if CONFIG_LYFI_LED_CH1_ENABLED
-    BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH1_NAME, CONFIG_LYFI_LED_CH1_COLOR,
-                                      CONFIG_LYFI_LED_CH1_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH1_POWER));
+    if (chcount >= 1) {
+        BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH1_NAME, CONFIG_LYFI_LED_CH1_COLOR,
+                                          CONFIG_LYFI_LED_CH1_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH1_POWER));
+    }
 #endif
 
     // Channel 2
 #if CONFIG_LYFI_LED_CH2_ENABLED
-    BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH2_NAME, CONFIG_LYFI_LED_CH2_COLOR,
-                                      CONFIG_LYFI_LED_CH2_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH2_POWER));
+    if (chcount >= 2) {
+        BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH2_NAME, CONFIG_LYFI_LED_CH2_COLOR,
+                                          CONFIG_LYFI_LED_CH2_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH2_POWER));
+    }
 #endif
 
     // Channel 3
 #if CONFIG_LYFI_LED_CH3_ENABLED
-    BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH3_NAME, CONFIG_LYFI_LED_CH3_COLOR,
-                                      CONFIG_LYFI_LED_CH3_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH3_POWER));
+    if (chcount >= 3) {
+        BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH3_NAME, CONFIG_LYFI_LED_CH3_COLOR,
+                                          CONFIG_LYFI_LED_CH3_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH3_POWER));
+    }
 #endif
 
     // Channel 4
 #if CONFIG_LYFI_LED_CH4_ENABLED
-    BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH4_NAME, CONFIG_LYFI_LED_CH4_COLOR,
-                                      CONFIG_LYFI_LED_CH4_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH4_POWER));
+    if (chcount >= 4) {
+        BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH4_NAME, CONFIG_LYFI_LED_CH4_COLOR,
+                                          CONFIG_LYFI_LED_CH4_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH4_POWER));
+    }
 #endif
 
     // Channel 5
 #if CONFIG_LYFI_LED_CH5_ENABLED
-    BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH5_NAME, CONFIG_LYFI_LED_CH5_COLOR,
-                                      CONFIG_LYFI_LED_CH5_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH5_POWER));
+    if (chcount >= 5) {
+        BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH5_NAME, CONFIG_LYFI_LED_CH5_COLOR,
+                                          CONFIG_LYFI_LED_CH5_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH5_POWER));
+    }
 #endif
 
     // Channel 6
 #if CONFIG_LYFI_LED_CH6_ENABLED
-    BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH6_NAME, CONFIG_LYFI_LED_CH6_COLOR,
-                                      CONFIG_LYFI_LED_CH6_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH6_POWER));
+    if (chcount >= 6) {
+        BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH6_NAME, CONFIG_LYFI_LED_CH6_COLOR,
+                                          CONFIG_LYFI_LED_CH6_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH6_POWER));
+    }
 #endif
 
     // Channel 7
 #if CONFIG_LYFI_LED_CH7_ENABLED
-    BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH7_NAME, CONFIG_LYFI_LED_CH7_COLOR,
-                                      CONFIG_LYFI_LED_CH7_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH7_POWER));
+    if (chcount >= 7) {
+        BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH7_NAME, CONFIG_LYFI_LED_CH7_COLOR,
+                                          CONFIG_LYFI_LED_CH7_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH7_POWER));
+    }
 #endif
 
     // Channel 8
 #if CONFIG_LYFI_LED_CH8_ENABLED
-    BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH8_NAME, CONFIG_LYFI_LED_CH8_COLOR,
-                                      CONFIG_LYFI_LED_CH0_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH0_POWER));
+    if (chcount >= 8) {
+        BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH8_NAME, CONFIG_LYFI_LED_CH8_COLOR,
+                                          CONFIG_LYFI_LED_CH0_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH0_POWER));
+    }
 #endif
 
     // Channel 9
 #if CONFIG_LYFI_LED_CH9_ENABLED
-    BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH9_NAME, CONFIG_LYFI_LED_CH9_COLOR,
-                                      CONFIG_LYFI_LED_CH8_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH8_POWER));
+    if (chcount >= 9) {
+        BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH9_NAME, CONFIG_LYFI_LED_CH9_COLOR,
+                                          CONFIG_LYFI_LED_CH8_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH8_POWER));
+    }
 #endif
 
     // Channel 10
 #if CONFIG_LYFI_LED_CH10_ENABLED
-    BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH10_NAME, CONFIG_LYFI_LED_CH10_COLOR,
-                                      CONFIG_LYFI_LED_CH9_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH9_POWER));
+    if (chcount >= 10) {
+        BO_TRY(_encode_channel_info_entry(&channels_array, CONFIG_LYFI_LED_CH10_NAME, CONFIG_LYFI_LED_CH10_COLOR,
+                                          CONFIG_LYFI_LED_CH9_BRIGHTNESS_PERCENT, CONFIG_LYFI_LED_CH9_POWER));
+    }
 #endif
 
     BO_TRY(cbor_encoder_close_container(parent, &channels_array));
