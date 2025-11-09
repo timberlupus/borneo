@@ -99,12 +99,6 @@ err:
 
 int rmtpwm_set_duty(rmtpwm_generator_t* pwm, uint8_t duty) { return rmtpwm_set_duty_internal(pwm, duty); }
 
-#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-
-int rmtpwm_set_pwm_duty(uint8_t duty) { return rmtpwm_set_duty_internal(&s_pwm, duty); }
-
-#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-
 int rmtpwm_set_duty_internal(rmtpwm_generator_t* pwm, uint8_t duty)
 {
     if (duty == pwm->duty) {
@@ -179,7 +173,7 @@ static esp_err_t rmt_pwm_encoder_reset(rmt_encoder_t* encoder)
 }
 /* Note: encoder instances are now embedded in rmtpwm_generator_t instances and created via rmtpwm_instance_init() */
 
-#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT || (CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT && !SOC_DAC_SUPPORTED)
+#if CONFIG_LYFI_FAN_CTRL_PWM_DEVICE_RMTPWM || CONFIG_LYFI_FAN_CTRL_VREG_DEVICE_RMTPWM
 
 DRVFX_SUBSYS_INIT(_rmtpwm_init, DRVFX_INIT_KERNEL_DEFAULT_PRIORITY);
 
