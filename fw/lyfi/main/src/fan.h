@@ -7,7 +7,7 @@ extern "C" {
 #if CONFIG_LYFI_FAN_CTRL_SUPPORT
 
 enum fan_flags_enum {
-    FAN_FLAG_DAC_ENABLED = 1,
+    FAN_FLAG_VREG_ENABLED = 1,
     FAN_FLAG_PWM_ENABLED = 2,
 };
 

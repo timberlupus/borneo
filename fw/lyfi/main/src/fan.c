@@ -27,7 +27,7 @@
 #include "rmtpwm.h"
 
 #define NVS_FAN_NAMESPACE "fan"
-#define FAN_NVS_KEY_DAC_ENABLED "dac_en"
+#define FAN_NVS_KEY_VREG_ENABLED "vreg_en"
 #define FAN_NVS_KEY_PWM_ENABLED "pwm_en"
 
 #define TAG "fan"
@@ -75,8 +75,7 @@ int fan_set_power(uint8_t value)
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
 #if CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
-    if (_factory_settings.flags & FAN_FLAG_DAC_ENABLED) {
-
+    if (_factory_settings.flags & FAN_FLAG_VREG_ENABLED) {
         const struct drvfx_device* vreg = k_device_get_binding("vreg");
         if (vreg == NULL) {
             return -ENODEV;
@@ -115,12 +114,12 @@ int fan_factory_settings_load()
 
     uint8_t en = 0;
 
-    BO_TRY(bo_nvs_get_or_set_u8(nvs_handle, FAN_NVS_KEY_DAC_ENABLED, &en, 1, &changed));
+    BO_TRY(bo_nvs_get_or_set_u8(nvs_handle, FAN_NVS_KEY_VREG_ENABLED, &en, 1, &changed));
     if (en) {
-        _factory_settings.flags |= FAN_FLAG_DAC_ENABLED;
+        _factory_settings.flags |= FAN_FLAG_VREG_ENABLED;
     }
     else {
-        _factory_settings.flags &= ~FAN_FLAG_DAC_ENABLED;
+        _factory_settings.flags &= ~FAN_FLAG_VREG_ENABLED;
     }
 
     BO_TRY(bo_nvs_get_or_set_u8(nvs_handle, FAN_NVS_KEY_PWM_ENABLED, &en, 1, &changed));
@@ -163,7 +162,7 @@ static int fan_init()
 #endif // CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED
 
 #if CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
-    bool dac_enabled = _factory_settings.flags & FAN_FLAG_DAC_ENABLED;
+    bool vreg_enabled = _factory_settings.flags & FAN_FLAG_VREG_ENABLED;
 #endif // CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
 
 #if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
@@ -173,18 +172,12 @@ static int fan_init()
 #endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
 
 #if CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
-    if (dac_enabled) {
-#if SOC_DAC_SUPPORTED
-        ESP_LOGI(TAG, "Fan driver using DAC, channel=%u", CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL);
-        BO_TRY(dac_output_enable(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL));
-        BO_TRY(dac_output_voltage(CONFIG_LYFI_FAN_CTRL_DAC_CHANNEL, 0xFF));
-#else
+    if (vreg_enabled) {
         const struct drvfx_device* vreg = k_device_get_binding("vreg");
         if (vreg == NULL) {
             return -ENODEV;
         }
         BO_TRY(vreg_set_output(vreg, 0xFF));
-#endif // SOC_DAC_SUPPORTED
     }
 #endif // CONFIG_LYFI_FAN_CTRL_VREG_SUPPORT
 
