@@ -59,7 +59,7 @@ static int _set_output(const struct drvfx_device* dev, uint8_t percent)
     if (dev == NULL) {
         return -ENODEV;
     }
-    struct dac_data* data = (struct data_data*)dev->data;
+    struct dac_data* data = (struct dac_data*)dev->data;
     if (data == NULL) {
         return -ENODATA;
     }
@@ -80,7 +80,7 @@ static int _set_output(const struct drvfx_device* dev, uint8_t percent)
 }
 
 const static struct vreg_driver_api s_api = {
-    ..set_output = &_set_output,
+    .set_output = &_set_output,
 };
 
 static struct dac_data s_data = { 0 };
