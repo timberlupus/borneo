@@ -5,6 +5,7 @@
 #include <esp_log.h>
 #include <esp_event.h>
 #include <esp_wifi.h>
+#include <esp_timer.h>
 #include <driver/gpio.h>
 
 #include <borneo/devices/indicator.h>
@@ -13,18 +14,16 @@
 #if CONFIG_BORNEO_INDICATOR_ENABLED && CONFIG_BORNEO_INDICATOR_GPIO_ENABLED
 
 #define TAG "indicator"
-#define TASK_STACK_SIZE 1024
 
-static void indicator_task(void* args);
+static void indicator_timer_callback(void* arg);
 static void got_ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 static void lost_ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 static void _kernel_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 
 volatile static int _state = BO_INDICATOR_STATE_NO_CONN;
-
-static StackType_t _task_stack[TASK_STACK_SIZE];
-static StaticTask_t _task_tcb;
+static esp_timer_handle_t _indicator_timer;
+static int _led_state = 0;
 
 int bo_indicator_init()
 {
@@ -50,42 +49,43 @@ int bo_indicator_init()
     BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &_system_event_handler, NULL));
     BO_TRY(esp_event_handler_register(KERNEL_EVENTS, ESP_EVENT_ANY_ID, &_kernel_event_handler, NULL));
 
-    xTaskCreateStatic(indicator_task, "indicator_task", TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY, _task_stack,
-                      &_task_tcb);
+    const esp_timer_create_args_t timer_args = {
+        .callback = &indicator_timer_callback, .arg = NULL, .dispatch_method = ESP_TIMER_TASK, .name = "indicator_timer"
+    };
+    BO_TRY(esp_timer_create(&timer_args, &_indicator_timer));
+    BO_TRY(esp_timer_start_once(_indicator_timer, 1000000)); // Start with 1 second
+
     return res;
 }
 
-static void indicator_task(void* args)
+static void indicator_timer_callback(void* arg)
 {
-    uint32_t x = 0;
-    int delay = pdMS_TO_TICKS(1000);
-    while (1) {
+    uint64_t next_delay_us = 1000000; // Default 1 second
 
-        switch (_state) {
-        case BO_INDICATOR_STATE_NORMAL: {
-            delay = pdMS_TO_TICKS(5000);
-            x = 0;
-        } break;
+    switch (_state) {
+    case BO_INDICATOR_STATE_NORMAL: {
+        _led_state = 0;
+        next_delay_us = 5000000; // 5 seconds
+    } break;
 
-        case BO_INDICATOR_STATE_FAULT: {
-            x = !x;
-            delay = pdMS_TO_TICKS(200);
-        } break;
+    case BO_INDICATOR_STATE_FAULT: {
+        _led_state = !_led_state;
+        next_delay_us = 200000; // 200 ms
+    } break;
 
-        case BO_INDICATOR_STATE_NO_CONN: {
-            x = !x;
-            delay = pdMS_TO_TICKS(1000);
-        } break;
+    case BO_INDICATOR_STATE_NO_CONN: {
+        _led_state = !_led_state;
+        next_delay_us = 1000000; // 1 second
+    } break;
 
-        default: {
-            delay = pdMS_TO_TICKS(1000);
-        }
-        }
-
-        BO_MUST(gpio_set_level(CONFIG_BORNEO_INDICATOR_GPIO, x));
-
-        vTaskDelay(delay);
+    default: {
+        next_delay_us = 1000000; // 1 second
     }
+    }
+
+    BO_MUST(gpio_set_level(CONFIG_BORNEO_INDICATOR_GPIO, _led_state));
+
+    esp_timer_start_once(_indicator_timer, next_delay_us);
 }
 
 static void got_ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
