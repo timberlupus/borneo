@@ -5,5 +5,5 @@ description: ESP-IDF modular device driver framework
 documentation:
 issues: https://github.com/borneo-iot/esp-idf-drvfx/issues
 repository: git://github.com/borneo-iot/esp-idf-drvfx.git
-url: https://github.com/borneo-iot/esp-idf-drvfx/tree/master/components/button
+url: https://github.com/borneo-iot/esp-idf-drvfx/tree/master/components/drvfx
 version: 0.1.0
