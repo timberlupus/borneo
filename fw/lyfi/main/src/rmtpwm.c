@@ -13,10 +13,9 @@
 
 #include "rmtpwm.h"
 
-static const char* TAG = "rmtpwm";
+#if CONFIG_LYFI_FAN_CTRL_PWM_DEVICE_RMTPWM || CONFIG_LYFI_FAN_CTRL_VREG_DEVICE_RMTPWM
 
-#define RMTPWM_FREQ_HZ 25000 // 25 kHz PWM
-#define RMT_PWM_RESOLUTION_HZ 10000000 // 10MHz resolution
+static const char* TAG = "rmtpwm";
 
 static size_t rmt_encode_pwm(rmt_encoder_t* encoder, rmt_channel_handle_t channel, const void* primary_data,
                              size_t data_size, rmt_encode_state_t* ret_state);
@@ -24,28 +23,6 @@ static esp_err_t rmt_del_pwm_encoder(rmt_encoder_t* encoder);
 static esp_err_t rmt_pwm_encoder_reset(rmt_encoder_t* encoder);
 
 static int rmtpwm_set_duty_internal(rmtpwm_generator_t* pwm, uint8_t duty);
-
-/* Each PWM instance now contains its own encoder state */
-#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-static rmtpwm_generator_t s_pwm = { 0 };
-#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-
-static int _rmtpwm_init(const struct drvfx_device* dev)
-{
-    ESP_LOGI(TAG, "RMT PWM Sub-system initializing...");
-
-#if CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-    ESP_LOGI(TAG, "Create RMT TX channel (GPIO%u) for fan PWM...", CONFIG_LYFI_FAN_CTRL_PWM_GPIO);
-    rmtpwm_encoder_config_t pwm_config = {
-        .resolution = RMT_PWM_RESOLUTION_HZ,
-        .pwm_freq = RMTPWM_FREQ_HZ,
-        .gpio_num = CONFIG_LYFI_FAN_CTRL_PWM_GPIO,
-    };
-    BO_TRY(rmtpwm_generator_init(&s_pwm, &pwm_config));
-#endif // CONFIG_LYFI_FAN_CTRL_PWM_SUPPORT
-
-    return 0;
-}
 
 int rmtpwm_generator_init(rmtpwm_generator_t* pwm, const rmtpwm_encoder_config_t* config)
 {
@@ -171,10 +148,5 @@ static esp_err_t rmt_pwm_encoder_reset(rmt_encoder_t* encoder)
     rmt_encoder_reset(pwm->copy_encoder);
     return ESP_OK;
 }
-/* Note: encoder instances are now embedded in rmtpwm_generator_t instances and created via rmtpwm_instance_init() */
-
-#if CONFIG_LYFI_FAN_CTRL_PWM_DEVICE_RMTPWM || CONFIG_LYFI_FAN_CTRL_VREG_DEVICE_RMTPWM
-
-DRVFX_SUBSYS_INIT(_rmtpwm_init, DRVFX_INIT_KERNEL_DEFAULT_PRIORITY);
 
 #endif
