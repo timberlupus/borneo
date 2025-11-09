@@ -110,13 +110,19 @@ static int _coap_init()
     }
 
     // Register all handlers
-    extern const struct coap_resource_desc _coap_resources_start;
-    extern const struct coap_resource_desc _coap_resources_end;
-    for (const struct coap_resource_desc* it = &_coap_resources_start; it != &_coap_resources_end; ++it) {
+    extern const struct coap_resource_desc _coap_resources_start[];
+    extern const struct coap_resource_desc _coap_resources_end[];
+    for (const struct coap_resource_desc* it = _coap_resources_start; it != _coap_resources_end; ++it) {
         rc = register_resource(_ctx, it);
         if (rc != 0) {
             goto _DEINIT_AND_EXIT;
         }
+    }
+
+    /* Log the number of registered CoAP resources */
+    {
+        ptrdiff_t res_count = _coap_resources_end - _coap_resources_start;
+        ESP_LOGI(TAG, "Registered %u CoAP resources", (size_t)res_count);
     }
 
     ESP_LOGI(TAG, "Starting CoAP server...");
