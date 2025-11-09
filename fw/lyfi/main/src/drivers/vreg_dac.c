@@ -19,9 +19,11 @@
 #include <drvfx/drvfx.h>
 #include <borneo/system.h>
 
+#include "vreg.h"
+
 #if CONFIG_LYFI_FAN_CTRL_VREG_DEVICE_DAC
 
-#define TAG "vreg_dac"
+#define TAG "vreg.h"
 
 struct dac_data {
     dac_oneshot_handle_t handle;
