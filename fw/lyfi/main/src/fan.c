@@ -165,6 +165,7 @@ static int fan_init()
     }
 #endif // CONFIG_LYFI_FAN_CTRL_SHUTDOWN_ENABLED
 
+    _status.power = FAN_POWER_MAX;
     BO_TRY(fan_set_power(FAN_POWER_MIN));
 
     ESP_LOGI(TAG, "Fan driver initizlied.");
