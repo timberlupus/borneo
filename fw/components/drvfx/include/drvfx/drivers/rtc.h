@@ -1,12 +1,13 @@
 #pragma once
 
 /* Include core drvfx definitions (struct drvfx_device, kernel helpers, etc.) */
-#include <drvfx/drvfx.h>
 #include <errno.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct drvfx_device;
 
 /**
  * rtc_driver_api - Real Time Clock driver API

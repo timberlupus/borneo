@@ -29,6 +29,8 @@ struct sensors {
 
 #define TAG "sensors"
 
+static struct sensors* s_sensors = NULL;
+
 static void sensor_task(void* arg)
 {
     struct sensors* sensors = (struct sensors*)arg;
@@ -76,7 +78,13 @@ static int _sensors_init(const struct drvfx_device* dev)
     // Create task
     xTaskCreate(sensor_task, "sensor_task", 2048, sensors, 12, NULL);
 
+    s_sensors = sensors;
+
     return 0;
 }
+
+size_t sensors_get_device_count(void) { return s_sensors ? s_sensors->count : 0; }
+
+const struct drvfx_device** sensors_get_devices(void) { return s_sensors ? s_sensors->devices : NULL; }
 
 DRVFX_SYS_INIT(_sensors_init, APPLICATION, DRVFX_INIT_APP_HIGH_PRIORITY);

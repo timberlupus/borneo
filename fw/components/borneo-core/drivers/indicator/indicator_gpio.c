@@ -8,6 +8,7 @@
 #include <esp_timer.h>
 #include <driver/gpio.h>
 
+#include <drvfx/drvfx.h>
 #include <borneo/devices/indicator.h>
 #include <borneo/system.h>
 

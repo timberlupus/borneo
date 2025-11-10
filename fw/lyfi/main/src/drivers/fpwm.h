@@ -1,13 +1,13 @@
 #pragma once
 
-#include <drvfx/drvfx.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define FPWM_DUTY_MIN 0x00
 #define FPWM_DUTY_MAX 0xFF
+
+struct drvfx_device;
 
 struct fpwm_driver_api {
     int (*set_duty)(const struct drvfx_device* dev, uint8_t duty);

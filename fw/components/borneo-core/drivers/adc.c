@@ -14,6 +14,7 @@
 #include <esp_adc/adc_cali.h>
 #include <esp_adc/adc_cali_scheme.h>
 
+#include <drvfx/drvfx.h>
 #include <borneo/system.h>
 #include <borneo/algo/filters.h>
 #include <borneo/devices/adc.h>

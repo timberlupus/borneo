@@ -14,6 +14,7 @@
 #include <nvs_flash.h>
 #include <driver/gpio.h>
 
+#include <drvfx/drvfx.h>
 #include <borneo/system.h>
 #include <borneo/common.h>
 #include <borneo/devices/sensor.h>

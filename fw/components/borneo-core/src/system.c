@@ -17,6 +17,7 @@
 
 #include <mbedtls/sha256.h>
 
+#include <drvfx/drvfx.h>
 #include <borneo/common.h>
 #include <borneo/nvs.h>
 #include <borneo/system.h>

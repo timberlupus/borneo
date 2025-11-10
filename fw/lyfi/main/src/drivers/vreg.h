@@ -1,10 +1,10 @@
 #pragma once
 
-#include <drvfx/drvfx.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct drvfx_device;
 
 struct vreg_driver_api {
     int (*set_output)(const struct drvfx_device* dev, uint8_t percent);

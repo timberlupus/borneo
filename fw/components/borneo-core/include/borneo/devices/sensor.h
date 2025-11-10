@@ -4,6 +4,8 @@
 extern "C" {
 #endif
 
+struct drvfx_device;
+
 struct sensor_api {
     int (*fetch_sample)(const struct drvfx_device* dev);
     int (*get_value)(const struct drvfx_device* dev, int32_t* value);
