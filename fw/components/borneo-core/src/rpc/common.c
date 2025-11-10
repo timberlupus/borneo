@@ -12,6 +12,7 @@
 #include <drvfx/drvfx.h>
 #include <borneo/system.h>
 #include <borneo/devices/sensor.h>
+#include <borneo/sensors.h>
 #include <borneo/sntp.h>
 #include <borneo/rpc/common.h>
 #include <borneo/rtc.h>
@@ -269,5 +270,25 @@ int bo_rpc_borneo_settings_timezone_put(const CborValue* args, CborEncoder* retv
         return -EINVAL; // Bad request
     }
     bo_rtc_set_tz(tz);
+    return 0;
+}
+
+int bo_rpc_borneo_sensors_get(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args; // No input args for GET
+    CborEncoder root_map;
+    BO_TRY(cbor_encoder_create_map(retvals, &root_map, CborIndefiniteLength));
+    size_t n = sensors_get_device_count();
+    const struct drvfx_device** devs = sensors_get_devices();
+    for (size_t i = 0; i < n; i++) {
+        const struct drvfx_device* sensor_dev = devs[i];
+        BO_TRY(cbor_encode_text_stringz(&root_map, sensor_dev->name));
+        int32_t value;
+        BO_TRY(sensor_get_value(sensor_dev, &value));
+        BO_TRY(cbor_encode_int(&root_map, value));
+    }
+
+    BO_TRY(cbor_encoder_close_container(retvals, &root_map));
+
     return 0;
 }

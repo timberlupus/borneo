@@ -27,6 +27,9 @@ int bo_rpc_rtc_local_post(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_settings_timezone_get(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_settings_timezone_put(const CborValue* args, CborEncoder* retvals);
 
+// RPC function declarations for sensors
+int bo_rpc_borneo_sensors_get(const CborValue* args, CborEncoder* retvals);
+
 #ifdef __cplusplus
 }
 #endif
