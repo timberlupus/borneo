@@ -27,6 +27,7 @@
 struct ntc_data {
     const struct drvfx_device* adc_dev;
     int8_t temp_value;
+    int32_t filtered_temp;
 };
 
 static int8_t ntc_table_lookup(int r);
@@ -138,7 +139,7 @@ static int _fetch_sample(const struct drvfx_device* dev)
         ESP_LOGE(TAG, "Bad temperature!");
         return -EIO;
     }
-    data->temp_value = (int8_t)value;
+    data->temp_value = (int8_t)ema_filter((int32_t)value, &data->filtered_temp, 1, 10);
     return 0;
 }
 
