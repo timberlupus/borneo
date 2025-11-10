@@ -16,8 +16,7 @@
 #include "drvfx/drvfx.h"
 #include "drvfx/drivers/rtc.h"
 
-#ifdef CONFIG_DRIVER_RTC_DS1302_ENABLED
-
+#ifdef CONFIG_DRIVER_RTC_DS1302
 
 #define DEC2BCD(dec) ((dec / 10 * 16) + (dec % 10))
 
@@ -33,10 +32,9 @@ struct ds1302_data {
     StaticSemaphore_t lock_buf;
 };
 
-// TODO FXIME configurable
-#define PIN_CE 13
-#define PIN_CLK 14
-#define PIN_IO 12
+#define PIN_CE CONFIG_DRIVER_RTC_DS1302_CE_GPIO
+#define PIN_CLK CONFIG_DRIVER_RTC_DS1302_SCLK_GPIO
+#define PIN_IO CONFIG_DRIVER_RTC_DS1302_IO_GPIO
 
 enum {
     DS1302_REG_SECONDS = 0x80,
@@ -73,33 +71,33 @@ static int ds1302_init(const struct drvfx_device* dev)
     }
 
     uint64_t pins_mask = (1ULL << PIN_CE) | (1ULL << PIN_CLK);
-    // 初始化 GPIO
+    // Initialize GPIO
     gpio_config_t io_conf;
 
-    // 初始化输出端口
-    io_conf.intr_type = GPIO_INTR_DISABLE; // 禁止中断
-    io_conf.mode = GPIO_MODE_OUTPUT; // 输出模式
-    io_conf.pin_bit_mask = pins_mask; // 选定端口
-    io_conf.pull_down_en = 1; // 打开下拉
-    io_conf.pull_up_en = 0; // 禁止上拉
+    // Initialize output ports
+    io_conf.intr_type = GPIO_INTR_DISABLE; // Disable interrupt
+    io_conf.mode = GPIO_MODE_OUTPUT; // Output mode
+    io_conf.pin_bit_mask = pins_mask; // Selected ports
+    io_conf.pull_down_en = 1; // Enable pull-down
+    io_conf.pull_up_en = 0; // Disable pull-up
     K_TRY_OR_UNLOCK(gpio_config(&io_conf), rt->lock);
 
     pins_mask = (1ULL << PIN_IO);
     io_conf.intr_type = GPIO_INTR_DISABLE; // disable interrupt
-    io_conf.mode = GPIO_MODE_INPUT_OUTPUT; // 模式
-    io_conf.pin_bit_mask = pins_mask; // 选定端口
-    io_conf.pull_down_en = 0; // 下拉
-    io_conf.pull_up_en = 0; // 上拉
+    io_conf.mode = GPIO_MODE_INPUT_OUTPUT; // Mode
+    io_conf.pin_bit_mask = pins_mask; // Selected ports
+    io_conf.pull_down_en = 0; // Pull-down
+    io_conf.pull_up_en = 0; // Pull-up
     K_TRY_OR_UNLOCK(gpio_config(&io_conf), rt->lock);
 
     K_TRY_OR_UNLOCK(gpio_set_level(PIN_CE, 0), rt->lock);
     K_TRY_OR_UNLOCK(gpio_set_level(PIN_CLK, 0), rt->lock);
 
-    // 为超级电容打开涓流充电器，如果是锂电池，需要不同的参数
+    // Enable trickle charger for super capacitor, different parameters needed for lithium battery
     // Maximum 1 Diode, 2kOhm
     ds1302_set_trickle_charger(0xA5);
 
-    // 充电电池参考下面的参数
+    // For rechargeable battery, refer to the parameters below
     // Minimum 2 Diodes, 8kOhm
     // DS1302_set_trickle_charger(0xAB);
 
@@ -171,11 +169,18 @@ static int ds1302_set_datetime(const struct drvfx_device* dev, const struct tm* 
     return 0;
 }
 
-static int ds1302_halt()
+static int ds1302_halt(const struct drvfx_device* dev)
 {
-    K_TRY(begin_write(DS1302_REG_SECONDS));
-    K_TRY(write_byte(0b10000000));
-    K_TRY(end_io());
+    struct ds1302_data* rt = (struct ds1302_data*)dev->data;
+    if (xSemaphoreTake(rt->lock, portMAX_DELAY) != pdTRUE) {
+        return -1;
+    }
+
+    K_TRY_OR_UNLOCK(begin_write(DS1302_REG_SECONDS), rt->lock);
+    K_TRY_OR_UNLOCK(write_byte(0b10000000), rt->lock);
+    K_TRY_OR_UNLOCK(end_io(), rt->lock);
+
+    xSemaphoreGive(rt->lock);
     return 0;
 }
 
@@ -208,7 +213,7 @@ static int begin_write(uint8_t address)
 
 static int end_io()
 {
-    // CE 脚设置低电平
+    // Set CE pin to low level
     K_TRY(gpio_set_level(PIN_CE, 0));
     return 0;
 }
@@ -265,4 +270,4 @@ static const struct rtc_driver_api _ds1302_api = {
 DRVFX_DEVICE_DEFINE("ds1302", ds1302_init, &_ds1302_data, &_ds1302_config, DRVFX_INIT_POST_KERNEL_DEFAULT_PRIORITY,
                     &_ds1302_api);
 
-#endif
+#endif // CONFIG_DRIVER_RTC_DS1302
