@@ -1,7 +1,0 @@
-menu "Protothreads Configuration"
-
-    config PT_USE_SEMAPHORE
-        bool "Enable Protothreads semaphore"
-        default y
-
-endmenu
