@@ -18,7 +18,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
-import 'features/settings/view_models/settings_view_model.dart';
 import 'dart:async';
 
 import 'package:sembast/sembast.dart';
@@ -174,16 +173,6 @@ Future<void> main() async {
 
             // SharedPreferences
             provider.Provider<SharedPreferences>(create: (_) => sharedPreferences, lazy: false),
-
-            // SettingsViewModel
-            provider.ChangeNotifierProvider<SettingsViewModel>(
-              create: (ctx) => SettingsViewModel(
-                localeService: ctx.read<ILocaleService>(),
-                sharedPreferences: ctx.read<SharedPreferences>(),
-                eventBus: ctx.read<EventBus>(),
-              ),
-              lazy: false,
-            ),
           ],
           child: BorneoApp(),
         ),
