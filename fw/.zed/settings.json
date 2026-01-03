@@ -1,0 +1,12 @@
+{
+  "lsp": {
+    "clangd": {
+      "binary": {
+        "arguments": [
+          "--fallback-style=none",
+          "--compile-commands-dir=lyfi/build"
+        ]
+      }
+    }
+  }
+}
