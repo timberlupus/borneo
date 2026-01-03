@@ -305,7 +305,7 @@ class SettingsScreen extends StatelessWidget {
                 items: [
                   DropdownMenuItem<FanMode>(
                     value: FanMode.pid,
-                    child: Text("PID Adaptive", style: Theme.of(context).textTheme.bodySmall),
+                    child: Text(context.translate("PID Adaptive"), style: Theme.of(context).textTheme.bodySmall),
                   ),
                   DropdownMenuItem<FanMode>(
                     value: FanMode.manual,

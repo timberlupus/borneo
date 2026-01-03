@@ -84,6 +84,7 @@ class _BorneoAppState extends State<BorneoApp> {
     return switch (localeStr) {
       'zh_CN' => const Locale('zh', 'CN'),
       'en_US' => const Locale('en', 'US'),
+      'es' => const Locale('es'),
       _ => const Locale('en', 'US'),
     };
   }

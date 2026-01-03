@@ -72,6 +72,8 @@ class SettingsViewModel extends ChangeNotifier {
         _locale = const Locale('en', 'US');
       } else if (localeStr == 'zh_CN') {
         _locale = const Locale('zh', 'CN');
+      } else if (localeStr == 'es') {
+        _locale = const Locale('es');
       }
       return;
     }

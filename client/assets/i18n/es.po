@@ -1,17 +1,17 @@
-# English translations for PACKAGE package.
-# Copyright (C) 2025 THE PACKAGE'S COPYRIGHT HOLDER
+# Spanish translations for PACKAGE package.
+# Copyright (C) 2026 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# Automatically generated, 2025.
+# Automatically generated, 2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-03 14:33+0800\n"
-"PO-Revision-Date: 2025-06-01 20:57+0800\n"
+"POT-Creation-Date: 2026-01-03 14:43+0800\n"
+"PO-Revision-Date: 2026-01-03 14:43+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
-"Language: en\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,228 +19,228 @@ msgstr ""
 
 #: core\services\scene_manager_impl.dart:73
 msgid "My Home"
-msgstr ""
+msgstr "Mi Casa"
 
 #: core\services\scene_manager_impl.dart:82
 msgid "My Office"
-msgstr ""
+msgstr "Mi Oficina"
 
 #: devices\borneo\lyfi\manifest.dart:71
 #: devices\borneo\lyfi\views\settings_screen.dart:312
 msgid "Manual"
-msgstr ""
+msgstr "Manual"
 
 #: devices\borneo\lyfi\manifest.dart:73
 msgid "Scheduled"
-msgstr ""
+msgstr "Programado"
 
 #: devices\borneo\lyfi\manifest.dart:75
 msgid "Sun Simulation"
-msgstr ""
+msgstr "Simulación Solar"
 
 #: devices\borneo\lyfi\manifest.dart:84
 msgid "Running"
-msgstr ""
+msgstr "Ejecutándose"
 
 #: devices\borneo\lyfi\manifest.dart:86
 #: devices\borneo\lyfi\views\dashboard\dashboard_dimming_tile.dart:62
 msgid "Dimming"
-msgstr ""
+msgstr "Atenuación"
 
 #: devices\borneo\lyfi\manifest.dart:88
 #: devices\borneo\lyfi\views\dashboard\dashboard_temporary_tile.dart:86
 msgid "Temporary"
-msgstr ""
+msgstr "Temporal"
 
 #: devices\borneo\lyfi\manifest.dart:90
 msgid "Preview"
-msgstr ""
+msgstr "Vista Previa"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:83
 msgid "Location updated successfully"
-msgstr ""
+msgstr "Ubicación actualizada exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:85
 msgid "Failed to update device location: $e"
-msgstr ""
+msgstr "Error al actualizar la ubicación del dispositivo: $e"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:96
 msgid "Please enable location services"
-msgstr ""
+msgstr "Por favor, habilite los servicios de ubicación"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:104
 msgid "Location permissions are denied"
-msgstr ""
+msgstr "Los permisos de ubicación están denegados"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:109
 msgid "Location permissions are permanently denied"
-msgstr ""
+msgstr "Los permisos de ubicación están permanentemente denegados"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:123
 msgid "Failed to get location: $e"
-msgstr ""
+msgstr "Error al obtener la ubicación: $e"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:137
 msgid "Time zone updated successfully"
-msgstr ""
+msgstr "Zona horaria actualizada exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:139
 msgid "Failed to update device time zone: $e"
-msgstr ""
+msgstr "Error al actualizar la zona horaria del dispositivo: $e"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:152
 msgid "LED correction method updated successfully"
-msgstr ""
+msgstr "Método de corrección LED actualizado exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:154
 msgid "Failed to update LED correction method: $e"
-msgstr ""
+msgstr "Error al actualizar el método de corrección LED: $e"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:167
 msgid "Temporary duration updated successfully"
-msgstr ""
+msgstr "Duración temporal actualizada exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:169
 msgid "Failed to update temporary duration: $e"
-msgstr ""
+msgstr "Error al actualizar la duración temporal: $e"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:182
 msgid "Fan mode updated successfully"
-msgstr ""
+msgstr "Modo de ventilador actualizado exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:184
 msgid "Failed to update fan mode: $e"
-msgstr ""
+msgstr "Error al actualizar el modo de ventilador: $e"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:197
 msgid "Manual fan power updated successfully"
-msgstr ""
+msgstr "Potencia manual del ventilador actualizada exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:199
 msgid "Failed to update manual fan power: $e"
-msgstr ""
+msgstr "Error al actualizar la potencia manual del ventilador: $e"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:212
 msgid "Power behavior updated successfully"
-msgstr ""
+msgstr "Comportamiento de energía actualizado exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:214
 msgid "Failed to update power behavior: $e"
-msgstr ""
+msgstr "Error al actualizar el comportamiento de energía: $e"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:226
 msgid "Device restored to factory settings"
-msgstr ""
+msgstr "Dispositivo restaurado a configuración de fábrica"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:228
 msgid "Failed to restore device to factory settings: $e"
-msgstr ""
+msgstr "Error al restaurar el dispositivo a configuración de fábrica: $e"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:30
 msgid "Acclimation Mode"
-msgstr ""
+msgstr "Modo de Aclimatación"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:64
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:70
 #: features\devices\views\group_edit_screen.dart:91
 #: features\scenes\views\scene_edit_screen.dart:172
 msgid "Submit"
-msgstr ""
+msgstr "Enviar"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:82
 msgid "SETTINGS"
-msgstr ""
+msgstr "CONFIGURACIONES"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:85
 msgid "Enabled"
-msgstr ""
+msgstr "Habilitado"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:95
 msgid "Start date"
-msgstr ""
+msgstr "Fecha de inicio"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:132
 msgid "Duration"
-msgstr "Documentation"
+msgstr "Duración"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:143
 msgid "Start percent"
-msgstr ""
+msgstr "Porcentaje de inicio"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:164
 msgid "Update acclimation settings succeed."
-msgstr ""
+msgstr "Configuración de aclimatación actualizada exitosamente."
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:44
 #: devices\borneo\lyfi\views\settings_screen.dart:115
 msgid "Controller Settings"
-msgstr ""
+msgstr "Configuración del Controlador"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:82
 msgid "LED CONFIGURATION"
-msgstr ""
+msgstr "CONFIGURACIÓN LED"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:88
 msgid "PWM frequency"
-msgstr ""
+msgstr "Frecuencia PWM"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:111
 msgid "LED CHANNELS"
-msgstr ""
+msgstr "CANALES LED"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:141
 #: devices\borneo\lyfi\views\settings_screen.dart:295
 msgid "THERMAL MANAGEMENT"
-msgstr ""
+msgstr "GESTIÓN TÉRMICA"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:146
 msgid "Thermistor enabled"
-msgstr ""
+msgstr "Termistor habilitado"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:153
 #: devices\borneo\lyfi\views\settings_screen.dart:302
 msgid "Fan mode"
-msgstr ""
+msgstr "Modo de ventilador"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:157
 msgid "Disabled"
-msgstr ""
+msgstr "Deshabilitado"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:158
 msgid "Internal regulator"
-msgstr ""
+msgstr "Regulador interno"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:159
 msgid "PWM Output"
-msgstr ""
+msgstr "Salida PWM"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:160
 msgid "Internal regulator & PWM"
-msgstr ""
+msgstr "Regulador interno y PWM"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:171
 msgid "POWER & PROTECTION"
-msgstr ""
+msgstr "ENERGÍA Y PROTECCIÓN"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:179
 msgid "Overpower enabled"
-msgstr ""
+msgstr "Sobrepotencia habilitada"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:188
 msgid "Overpower cut-off"
-msgstr ""
+msgstr "Corte por sobrepotencia"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:220
 msgid "Overtemperature enabled"
-msgstr ""
+msgstr "Sobretemperatura habilitada"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:229
 msgid "Overtemperature cut-off"
-msgstr ""
+msgstr "Corte por sobretemperatura"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:281
 msgid "Confirm Submit"
-msgstr ""
+msgstr "Confirmar Envío"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:284
 msgid ""
@@ -248,7 +248,7 @@ msgid ""
 "hardware damage or other dangerous situations. Submitting will reboot the "
 "device.\n"
 "Do you want to proceed?"
-msgstr ""
+msgstr "Por favor, verifique cuidadosamente la configuración. Una configuración incorrecta puede causar daños al hardware u otras situaciones peligrosas. El envío reiniciará el dispositivo.\n¿Desea continuar?"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:288
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:264
@@ -258,20 +258,20 @@ msgstr ""
 #: main\views\main_screen.dart:255
 #: shared\widgets\generic_settings_screen.dart:74
 msgid "Cancel"
-msgstr ""
+msgstr "Cancelar"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:298
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:270
 msgid "Confirm"
-msgstr ""
+msgstr "Confirmar"
 
 #: devices\borneo\lyfi\views\dashboard\dashboard_acclimation_tile.dart:73
 msgid "Acclimation"
-msgstr ""
+msgstr "Aclimatación"
 
 #: devices\borneo\lyfi\views\dashboard\dashboard_fan_tile.dart:17
 msgid "Fan"
-msgstr ""
+msgstr "Ventilador"
 
 #: devices\borneo\lyfi\views\dashboard\dashboard_fan_tile.dart:52
 #: devices\borneo\lyfi\views\dashboard\dashboard_power_tile.dart:99
@@ -279,421 +279,424 @@ msgstr ""
 #: devices\borneo\lyfi\views\editor\sun_editor_view.dart:37
 #: devices\borneo\lyfi\views\settings_screen.dart:177
 msgid "N/A"
-msgstr ""
+msgstr "N/D"
 
 #: devices\borneo\lyfi\views\dashboard\dashboard_power_tile.dart:38
 msgid "LED Power"
-msgstr ""
+msgstr "Potencia LED"
 
 #: devices\borneo\lyfi\views\dashboard\dashboard_settings_tile.dart:54
 #: features\my\views\my_screen.dart:23
 msgid "Settings"
-msgstr ""
+msgstr "Configuración"
 
 #: devices\borneo\lyfi\views\dashboard\dashboard_temperature_tile.dart:37
 msgid "Temperature"
-msgstr ""
+msgstr "Temperatura"
 
 #: devices\borneo\lyfi\views\dimming_screen.dart:78
 msgid "MANU"
-msgstr ""
+msgstr "MAN"
 
 #: devices\borneo\lyfi\views\dimming_screen.dart:83
 msgid "SCHED"
-msgstr ""
+msgstr "PROG"
 
 #: devices\borneo\lyfi\views\dimming_screen.dart:88
 msgid "SUN"
-msgstr ""
+msgstr "SOL"
 
 #: devices\borneo\lyfi\views\dimming_screen.dart:162
 msgid "Device connection lost. Controls are locked."
-msgstr ""
+msgstr "Conexión del dispositivo perdida. Los controles están bloqueados."
 
 #: devices\borneo\lyfi\views\dimming_screen.dart:163
 msgid "Connection unstable. Trying to reconnect…"
-msgstr ""
+msgstr "Conexión inestable. Intentando reconectar…"
 
 #: devices\borneo\lyfi\views\dimming_screen.dart:206
 msgid "RETRY"
-msgstr ""
+msgstr "REINTENTAR"
 
 #: devices\borneo\lyfi\views\dimming_screen.dart:224
 msgid "Back to device"
-msgstr ""
+msgstr "Volver al dispositivo"
 
 #: devices\borneo\lyfi\views\easy_setup_screen.dart:34
 msgid "Easy Setup"
-msgstr ""
+msgstr "Configuración Fácil"
 
 #: devices\borneo\lyfi\views\easy_setup_screen.dart:136
 msgid "Hrs"
-msgstr ""
+msgstr "Hrs"
 
 #: devices\borneo\lyfi\views\easy_setup_screen.dart:153
 msgid "Mins"
-msgstr ""
+msgstr "Mins"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:27
 msgid "Add time point"
-msgstr ""
+msgstr "Agregar punto de tiempo"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:157
 msgid "Easy"
-msgstr ""
+msgstr "Fácil"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:166
 msgid ""
 "Using Easy Setup will clear your current dimming settings. Are you sure you "
 "want to proceed?"
 msgstr ""
+"Usar Configuración Fácil borrará sus ajustes de atenuación actuales. ¿Está seguro de que desea "
+"continuar?"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:184
 msgid "Add"
-msgstr ""
+msgstr "Agregar"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:201
 msgid "Remove"
-msgstr ""
+msgstr "Eliminar"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:210
 msgid "Clear"
-msgstr ""
+msgstr "Limpiar"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:219
 msgid "Prev"
-msgstr ""
+msgstr "Ant"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:228
 msgid "Next"
-msgstr ""
+msgstr "Sig"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:253
 msgid "Confirmation"
-msgstr ""
+msgstr "Confirmación"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:255
 msgid "Are you sure you want to remove all schedule entries?"
-msgstr ""
+msgstr "¿Está seguro de que desea eliminar todas las entradas del horario?"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:75
 msgid "DEVICE INFORMATION"
-msgstr ""
+msgstr "INFORMACIÓN DEL DISPOSITIVO"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:81
 #: features\devices\views\group_edit_screen.dart:23
 #: features\scenes\views\scene_edit_screen.dart:121
 msgid "Name"
-msgstr ""
+msgstr "Nombre"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:90
 msgid "Manufacturer & Model"
-msgstr ""
+msgstr "Fabricante y Modelo"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:100
 msgid "Serial number"
-msgstr ""
+msgstr "Número de serie"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:107
 msgid "Device address"
-msgstr ""
+msgstr "Dirección del dispositivo"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:122
 msgid "DEVICE STATUS"
-msgstr ""
+msgstr "ESTADO DEL DISPOSITIVO"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:131
 msgid "Device time & time zone"
-msgstr ""
+msgstr "Hora y zona horaria del dispositivo"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:136
 msgid "Unknown time zone"
-msgstr ""
+msgstr "Zona horaria desconocida"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:149
 msgid "Power status at startup"
-msgstr ""
+msgstr "Estado de alimentación al inicio"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:155
 msgid "Keep on"
-msgstr ""
+msgstr "Mantener encendido"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:159
 msgid "Keep off"
-msgstr ""
+msgstr "Mantener apagado"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:163
 msgid "Maintain last"
-msgstr ""
+msgstr "Mantener último"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:176
 msgid "Last shutdown"
-msgstr ""
+msgstr "Último apagado"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:179
 #, python-brace-format
 msgid "Reason code: {reasonCode}"
-msgstr ""
+msgstr "Código de razón: {reasonCode}"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:185
 msgid "LIGHTING"
-msgstr ""
+msgstr "ILUMINACIÓN"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:193
 msgid "Location for sun & moon simulation"
-msgstr ""
+msgstr "Ubicación para simulación de sol y luna"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:196
 msgid "Unknown"
-msgstr ""
+msgstr "Desconocido"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:212
 msgid "Correction curve"
-msgstr ""
+msgstr "Curva de corrección"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:218
 msgid "Logarithmic"
-msgstr ""
+msgstr "Logarítmica"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:222
 msgid "Linear"
-msgstr ""
+msgstr "Lineal"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:226
 msgid "Exponential"
-msgstr ""
+msgstr "Exponencial"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:230
 msgid "Gamma"
-msgstr ""
+msgstr "Gamma"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:234
 msgid "CIE1931"
-msgstr ""
+msgstr "CIE1931"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:248
 msgid "Temporary light on duration"
-msgstr ""
+msgstr "Duración de encendido temporal de la luz"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:254
 msgid "5 minutes"
-msgstr ""
+msgstr "5 minutos"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:258
 msgid "10 minutes"
-msgstr ""
+msgstr "10 minutos"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:262
 msgid "20 minutes"
-msgstr ""
+msgstr "20 minutos"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:266
 msgid "1 hour"
-msgstr ""
+msgstr "1 hora"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:270
 msgid "2 hours"
-msgstr ""
+msgstr "2 horas"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:274
 msgid "4 hours"
-msgstr ""
+msgstr "4 horas"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:278
 msgid "8 hours"
-msgstr ""
+msgstr "8 horas"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:282
 msgid "12 hours"
-msgstr ""
+msgstr "12 horas"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:308
 msgid "PID Adaptive"
-msgstr ""
+msgstr "PID Adaptativo"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:328
 msgid "Manual fan power"
-msgstr ""
+msgstr "Potencia manual del ventilador"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:355
 msgid "VERSION & UPGRADE"
-msgstr ""
+msgstr "VERSIÓN Y ACTUALIZACIÓN"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:361
 msgid "Hardware version"
-msgstr ""
+msgstr "Versión del hardware"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:368
 msgid "Firmware version"
-msgstr ""
+msgstr "Versión del firmware"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:374
 msgid "DANGER ZONE"
-msgstr ""
+msgstr "ZONA DE PELIGRO"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:381
 msgid "Restore to factory settings"
-msgstr ""
+msgstr "Restaurar a configuración de fábrica"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:384
 msgid "Your device will lose all custom settings."
-msgstr ""
+msgstr "Su dispositivo perderá todas las configuraciones personalizadas."
 
 #: devices\borneo\lyfi\views\settings_screen.dart:408
 msgid "Restore Factory Settings"
-msgstr ""
+msgstr "Restaurar Configuración de Fábrica"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:413
 msgid "Are you sure you want to restore this device to factory settings?"
-msgstr ""
+msgstr "¿Está seguro de que desea restaurar este dispositivo a la configuración de fábrica?"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:415
 msgid "This action will:"
-msgstr ""
+msgstr "Esta acción hará:"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:417
 msgid "• Delete all custom settings and configurations"
-msgstr ""
+msgstr "• Eliminar todas las configuraciones y ajustes personalizados"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:418
 msgid "• Disconnect the device from your network"
-msgstr ""
+msgstr "• Desconectar el dispositivo de su red"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:419
 msgid "• Reset all schedules and modes to defaults"
-msgstr ""
+msgstr "• Restablecer todos los horarios y modos a los valores predeterminados"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:422
 msgid "The device will need to be reconfigured after this operation."
-msgstr ""
+msgstr "El dispositivo necesitará ser reconfigurado después de esta operación."
 
 #: devices\borneo\lyfi\views\settings_screen.dart:444
 msgid "Restore"
-msgstr ""
+msgstr "Restaurar"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:457
 msgid "Set Manual Fan Power"
-msgstr ""
+msgstr "Establecer Potencia Manual del Ventilador"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:482
 msgid "Set"
-msgstr ""
+msgstr "Establecer"
 
 #: devices\borneo\lyfi\views\widgets\lyfi_header.dart:107
 msgid "Sync Timezone"
-msgstr ""
+msgstr "Sincronizar Zona Horaria"
 
 #: devices\views\device_offline_view.dart:21
 msgid "Device is offline"
-msgstr ""
+msgstr "El dispositivo está desconectado"
 
 #: devices\views\device_offline_view.dart:26
 msgid ""
 "The device is currently offline. Please check the network or power "
 "connection."
 msgstr ""
+"El dispositivo está actualmente desconectado. Por favor, verifique la conexión de red o alimentación."
 
 #: devices\views\device_offline_view.dart:36
 msgid "Close"
-msgstr ""
+msgstr "Cerrar"
 
 #: features\chores\views\chore_card.dart:129
 msgid "ACTIVE"
-msgstr ""
+msgstr "ACTIVO"
 
 #: features\chores\views\chore_card.dart:129
 msgid "INACTIVE"
-msgstr ""
+msgstr "INACTIVO"
 
 #: features\chores\views\chore_list.dart:52
 msgid "Chores"
-msgstr ""
+msgstr "Tareas"
 
 #: features\chores\views\chore_list.dart:86
 msgid "Error loading chores"
-msgstr ""
+msgstr "Error al cargar tareas"
 
 #: features\chores\views\chore_list.dart:90
 #: features\chores\views\chore_list.dart:170
 #: features\scenes\views\scenes_screen.dart:46
 #: features\scenes\views\scenes_screen.dart:87
 msgid "Retry"
-msgstr ""
+msgstr "Reintentar"
 
 #: features\chores\views\chore_list.dart:108
 msgid "No chores"
-msgstr ""
+msgstr "Sin tareas"
 
 #: features\chores\views\chore_list.dart:116
 msgid "No chores available for devices in the current scene."
-msgstr ""
+msgstr "No hay tareas disponibles para los dispositivos en la escena actual."
 
 #: features\chores\views\chore_list.dart:209
 msgid "Loading chores"
-msgstr ""
+msgstr "Cargando tareas"
 
 #: features\chores\views\chore_list.dart:230 main\views\main_screen.dart:248
 msgid "Loading..."
-msgstr ""
+msgstr "Cargando..."
 
 #: features\devices\views\device_discovery_screen.dart:41
 msgid "Stop"
-msgstr ""
+msgstr "Detener"
 
 #: features\devices\views\device_discovery_screen.dart:44
 msgid "Start"
-msgstr ""
+msgstr "Iniciar"
 
 #: features\devices\views\device_discovery_screen.dart:187
 msgid "A new device has been added."
-msgstr "A new device has been added."
+msgstr "Se ha agregado un nuevo dispositivo."
 
 #: features\devices\views\device_discovery_screen.dart:294
 msgid "Discovered Devices:"
-msgstr "Discovered Devices:"
+msgstr "Dispositivos Descubiertos:"
 
 #: features\devices\views\device_discovery_screen.dart:406
 msgid "Select the group to which the new device belongs:"
-msgstr ""
+msgstr "Seleccione el grupo al que pertenece el nuevo dispositivo:"
 
 #: features\devices\views\device_group_selection_sheet.dart:29
 msgid "No group"
-msgstr ""
+msgstr "Sin grupo"
 
 #: features\devices\views\device_list_tile.dart:60
 msgid "OFF-LINE"
-msgstr ""
+msgstr "FUERA DE LÍNEA"
 
 #: features\devices\views\device_list_tile.dart:68
 msgid "OFF"
-msgstr ""
+msgstr "APAGADO"
 
 #: features\devices\views\device_list_tile.dart:120
 #: shared\widgets\device_status_indicator.dart:74
 msgid "Reconnect"
-msgstr ""
+msgstr "Reconectar"
 
 #: features\devices\views\device_list_tile.dart:122
 msgid "Change group..."
-msgstr ""
+msgstr "Cambiar grupo..."
 
 #: features\devices\views\device_list_tile.dart:123
 msgid "Delete..."
-msgstr ""
+msgstr "Eliminar..."
 
 #: features\devices\views\device_list_tile.dart:138
 #, python-brace-format
 msgid "Are you sure to delete the device \"{deviceName}\"?"
-msgstr ""
+msgstr "¿Está seguro de eliminar el dispositivo \"{deviceName}\"?"
 
 #: features\devices\views\device_list_tile.dart:156
 msgid "Change Device Group"
-msgstr ""
+msgstr "Cambiar Grupo de Dispositivo"
 
 #: features\devices\views\device_list_tile.dart:158
 #, python-brace-format
 msgid "Select the group to which device \"{deviceName}\" belongs:"
-msgstr ""
+msgstr "Seleccione el grupo al que pertenece el dispositivo \"{deviceName}\":"
 
 #: features\devices\views\devices_screen.dart:134
 #: features\scenes\views\scenes_screen.dart:42
@@ -704,91 +707,91 @@ msgstr "Error: {errMsg}"
 #: features\devices\views\devices_screen.dart:202
 #: main\views\main_screen.dart:94
 msgid "Add New Devices"
-msgstr "Add New Devices"
+msgstr "Agregar Nuevos Dispositivos"
 
 #: features\devices\views\devices_screen.dart:206
 #: main\views\main_screen.dart:100
 msgid "Add Devices Group"
-msgstr "Add Devices Group"
+msgstr "Agregar Grupo de Dispositivos"
 
 #: features\devices\views\devices_screen.dart:219
 #, python-brace-format
 msgid "Devices in {currentScene}"
-msgstr "Devices in {currentScene}"
+msgstr "Dispositivos en {currentScene}"
 
 #: features\devices\views\group_edit_screen.dart:25
 #: features\scenes\views\scene_edit_screen.dart:123
 msgid "Enter the required scene name"
-msgstr "Enter the required scene name"
+msgstr "Ingrese el nombre de escena requerido"
 
 #: features\devices\views\group_edit_screen.dart:29
 #: features\scenes\views\scene_edit_screen.dart:127
 msgid "Please enter the scene name"
-msgstr "Please enter the scene name"
+msgstr "Por favor ingrese el nombre de escena"
 
 #: features\devices\views\group_edit_screen.dart:44
 #: features\scenes\views\scene_edit_screen.dart:144
 msgid "Enter the optional notes for this scene"
-msgstr "Enter the optional notes for this scene"
+msgstr "Ingrese las notas opcionales para esta escena"
 
 #: features\devices\views\group_edit_screen.dart:45
 #: features\scenes\views\scene_edit_screen.dart:145
 msgid "Notes"
-msgstr "Notes"
+msgstr "Notas"
 
 #: features\devices\views\group_edit_screen.dart:82
 msgid "Operation failed"
-msgstr ""
+msgstr "Operación fallida"
 
 #: features\devices\views\group_edit_screen.dart:155
 msgid "Group deleted"
-msgstr ""
+msgstr "Grupo eliminado"
 
 #: features\devices\views\group_edit_screen.dart:161
 msgid "Delete failed"
-msgstr ""
+msgstr "Eliminación fallida"
 
 #: features\devices\views\group_edit_screen.dart:194
 msgid "New Device Group"
-msgstr "New Device Group"
+msgstr "Nuevo Grupo de Dispositivo"
 
 #: features\devices\views\group_edit_screen.dart:195
 msgid "Edit Device Group"
-msgstr "Edit Device Group"
+msgstr "Editar Grupo de Dispositivo"
 
 #: features\devices\widgets\delete_group_dialog.dart:23
 msgid "Delete"
-msgstr ""
+msgstr "Eliminar"
 
 #: features\devices\widgets\empty_groups_widget.dart:20
 msgid "No Device Groups"
-msgstr ""
+msgstr "Sin Grupos de Dispositivo"
 
 #: features\devices\widgets\empty_groups_widget.dart:23
 msgid "Create groups to better organize your devices"
-msgstr ""
+msgstr "Crear grupos para organizar mejor sus dispositivos"
 
 #: features\devices\widgets\empty_groups_widget.dart:31
 msgid "Create First Group"
-msgstr ""
+msgstr "Crear Primer Grupo"
 
 #: features\my\views\about_screen.dart:64
 #, python-brace-format
 msgid "Version: {verText} Build: {buildNumberText}"
-msgstr "Version: {verText} Build: {buildNumberText}"
+msgstr "Versión: {verText} Compilación: {buildNumberText}"
 
 #: features\my\views\about_screen.dart:87
 msgid ""
 "Copyright © Yunnan BinaryStars Technologies, Co., Ltd. All rights reserved."
-msgstr ""
+msgstr "Copyright © Yunnan BinaryStars Technologies, Co., Ltd. Todos los derechos reservados."
 
 #: features\my\views\about_screen.dart:103
 msgid "Website"
-msgstr "Website"
+msgstr "Sitio web"
 
 #: features\my\views\about_screen.dart:134
 msgid "Documentation"
-msgstr ""
+msgstr "Documentación"
 
 #: features\my\views\about_screen.dart:163
 msgid ""
@@ -796,151 +799,151 @@ msgid ""
 "License version 3 or later, with no warranty.\n"
 "The author assumes no responsibility or liability for any direct or indirect "
 "consequences resulting from the use of this software."
-msgstr ""
+msgstr "Esta aplicación móvil es software libre licenciado bajo GNU General Public License versión 3 o posterior, sin garantía.\nEl autor no asume responsabilidad o liability por cualquier consecuencia directa o indirecta resultante del uso de este software."
 
 #: features\my\views\my_screen.dart:32
 msgid "About"
-msgstr ""
+msgstr "Acerca de"
 
 #: features\scenes\views\scene_card.dart:202
 #, python-brace-format
 msgid "{0} devices"
-msgstr ""
+msgstr "{0} dispositivos"
 
 #: features\scenes\views\scene_card.dart:211
 #, python-brace-format
 msgid "{0} active"
-msgstr ""
+msgstr "{0} activo"
 
 #: features\scenes\views\scene_edit_screen.dart:35
 msgid "New Scene"
-msgstr ""
+msgstr "Nueva Escena"
 
 #: features\scenes\views\scene_edit_screen.dart:35
 msgid "Edit Scene"
-msgstr ""
+msgstr "Editar Escena"
 
 #: features\scenes\views\scene_edit_screen.dart:71
 msgid "Scene Image"
-msgstr ""
+msgstr "Imagen de Escena"
 
 #: features\scenes\views\scene_edit_screen.dart:190
 msgid ""
 "Are you sure you want to delete this scene? This action cannot be undone."
-msgstr ""
+msgstr "¿Está seguro de que desea eliminar esta escena? Esta acción no se puede deshacer."
 
 #: features\scenes\views\scene_edit_screen.dart:203
 #: features\scenes\views\scene_edit_screen.dart:209
 msgid "Cannot Delete Scene"
-msgstr ""
+msgstr "No se puede eliminar escena"
 
 #: features\scenes\views\scene_edit_screen.dart:204
 msgid "Cannot delete the last remaining scene."
-msgstr ""
+msgstr "No se puede eliminar la última escena restante."
 
 #: features\scenes\views\scene_edit_screen.dart:211
 msgid ""
 "This scene contains devices or device groups. Please remove all devices and "
 "groups from this scene before deleting it."
-msgstr ""
+msgstr "Esta escena contiene dispositivos o grupos de dispositivos. Por favor, elimine todos los dispositivos y grupos de esta escena antes de eliminarla."
 
 #: features\scenes\views\scenes_screen.dart:57 main\views\main_screen.dart:40
 #: main\views\main_screen.dart:217
 msgid "Scenes"
-msgstr "Scenes"
+msgstr "Escenas"
 
 #: features\settings\views\app_settings_screen.dart:46
 msgid "App Settings"
-msgstr "App Settings"
+msgstr "Configuraciones de la App"
 
 #: features\settings\views\app_settings_screen.dart:56
 msgid "APPEARANCE"
-msgstr "APPEARANCE"
+msgstr "APARIENCIA"
 
 #: features\settings\views\app_settings_screen.dart:60
 msgid "Theme"
-msgstr "Theme"
+msgstr "Tema"
 
 #: features\settings\views\app_settings_screen.dart:69
 msgid "System"
-msgstr "System"
+msgstr "Sistema"
 
 #: features\settings\views\app_settings_screen.dart:70
 msgid "Light"
-msgstr "Light"
+msgstr "Claro"
 
 #: features\settings\views\app_settings_screen.dart:71
 msgid "Dark"
-msgstr "Dark"
+msgstr "Oscuro"
 
 #: features\settings\views\app_settings_screen.dart:78
 msgid "Language"
-msgstr ""
+msgstr "Idioma"
 
 #: features\settings\views\app_settings_screen.dart:94
 msgid "Temperature Unit"
-msgstr ""
+msgstr "Unidad de Temperatura"
 
 #: features\settings\views\app_settings_screen.dart:103
 msgid "℃ (Celsius)"
-msgstr ""
+msgstr "℃ (Celsius)"
 
 #: features\settings\views\app_settings_screen.dart:104
 msgid "℉ (Fahrenheit)"
-msgstr ""
+msgstr "℉ (Fahrenheit)"
 
 #: features\settings\views\app_settings_screen.dart:113
 msgid "FEEDBACK"
-msgstr "FEEDBACK"
+msgstr "COMENTARIOS"
 
 #: features\settings\views\app_settings_screen.dart:117
 msgid "Rate in application store"
-msgstr "Rate in application store"
+msgstr "Calificar en la tienda de aplicaciones"
 
 #: features\settings\views\app_settings_screen.dart:122
 msgid "Report an issue on GitHub"
-msgstr "Report an issue on GitHub"
+msgstr "Reportar un problema en GitHub"
 
 #: main\view_models\main_view_model.dart:127
 msgid "ERROR"
-msgstr ""
+msgstr "ERROR"
 
 #: main\views\main_screen.dart:42 main\views\main_screen.dart:227
 msgid "My"
-msgstr "My"
+msgstr "Mi"
 
 #: main\views\main_screen.dart:97
 msgid "Add Scene"
-msgstr "Add Scene"
+msgstr "Agregar Escena"
 
 #: main\views\main_screen.dart:222
 msgid "Devices"
-msgstr "Devices"
+msgstr "Dispositivos"
 
 #: main\views\main_screen.dart:312
 msgid "Press back again to exit"
-msgstr ""
+msgstr "Presione atrás nuevamente para salir"
 
 #: shared\widgets\device_status_indicator.dart:39
 msgid "Device offline"
-msgstr ""
+msgstr "Dispositivo fuera de línea"
 
 #: shared\widgets\generic_settings_screen.dart:59
 msgid "Save"
-msgstr ""
+msgstr "Guardar"
 
 #: shared\widgets\map_location_picker.dart:126
 msgid "Select Location"
-msgstr ""
+msgstr "Seleccionar Ubicación"
 
 #: shared\widgets\map_location_picker.dart:132
 msgid "Apply"
-msgstr ""
+msgstr "Aplicar"
 
 #: shared\widgets\map_location_picker.dart:196
 msgid "Current location"
-msgstr ""
+msgstr "Ubicación actual"
 
 #: shared\widgets\map_location_picker.dart:225
 msgid "Please select a location"
-msgstr ""
+msgstr "Por favor seleccione una ubicación"
