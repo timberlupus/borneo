@@ -28,8 +28,9 @@ import '../core/services/chore_manager.dart';
 import '../core/services/scene_manager.dart';
 import 'app_theme.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
+import 'package:borneo_app/core/config/language_config.dart';
 
-const kSupportedLocales = [Locale('en', 'US'), Locale('zh', 'CN')];
+final kSupportedLocales = LanguageConfig.supportedLocales;
 
 class BorneoApp extends StatefulWidget {
   final EventBus _globalEventBus = EventBus();
@@ -81,12 +82,7 @@ class _BorneoAppState extends State<BorneoApp> {
   Future<Locale?> _loadLocale() async {
     final prefs = await SharedPreferences.getInstance();
     final localeStr = prefs.getString('app.locale');
-    return switch (localeStr) {
-      'zh_CN' => const Locale('zh', 'CN'),
-      'en_US' => const Locale('en', 'US'),
-      'es' => const Locale('es'),
-      _ => const Locale('en', 'US'),
-    };
+    return LanguageConfig.languageCodeToLocale(localeStr);
   }
 
   @override

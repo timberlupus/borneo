@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/events/app_events.dart';
 import 'package:borneo_app/core/services/local_service.dart';
+import 'package:borneo_app/core/config/language_config.dart';
 
 const kBrightnessKey = "app.brightness";
 const kLocaleKey = "app.locale";
@@ -28,12 +29,12 @@ class AppSettingsViewModel extends AbstractScreenViewModel {
   @override
   Future<void> onInitialize() async {
     final prefs = await SharedPreferences.getInstance();
-    // 主题
+    // Theme
     final idx = prefs.getInt(_kBrightnessKey);
     if (idx != null && idx >= 0 && idx < ThemeMode.values.length) {
       _themeMode = ThemeMode.values[idx];
     } else {
-      // 获取系统主题
+      // Get system theme
       final platformBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
       if (platformBrightness == Brightness.dark) {
         _themeMode = ThemeMode.dark;
@@ -43,25 +44,17 @@ class AppSettingsViewModel extends AbstractScreenViewModel {
         await prefs.setInt(_kBrightnessKey, ThemeMode.light.index);
       }
     }
-    // 语言
+    // Language
     final localeStr = prefs.getString(_kLocaleKey);
-    if (localeStr != null) {
-      if (localeStr == 'en_US') {
-        _locale = const Locale('en', 'US');
-      } else if (localeStr == 'zh_CN') {
-        _locale = const Locale('zh', 'CN');
-      }
-    } else {
+    _locale = LanguageConfig.languageCodeToLocale(localeStr);
+
+    // If first time use, automatically save default language
+    if (localeStr == null) {
       final sysLocale = WidgetsBinding.instance.platformDispatcher.locale;
-      if (sysLocale.languageCode == 'zh') {
-        _locale = const Locale('zh', 'CN');
-        await prefs.setString(_kLocaleKey, 'zh_CN');
-      } else {
-        _locale = const Locale('en', 'US');
-        await prefs.setString(_kLocaleKey, 'en_US');
-      }
+      final defaultCode = LanguageConfig.getDefaultLanguageCode(sysLocale);
+      await prefs.setString(_kLocaleKey, defaultCode);
     }
-    // 温度单位无需再在此初始化，由 LocaleService 负责
+    // Temperature unit doesn't need to be initialized here, managed by LocaleService
     notifyListeners();
   }
 
@@ -77,7 +70,7 @@ class AppSettingsViewModel extends AbstractScreenViewModel {
   Future<void> changeLocale(Locale locale) async {
     _locale = locale;
     final prefs = await SharedPreferences.getInstance();
-    final localeStr = locale.languageCode == 'zh' ? 'zh_CN' : 'en_US';
+    final localeStr = LanguageConfig.localeToLanguageCode(locale);
     await prefs.setString(_kLocaleKey, localeStr);
     notifyListeners();
     globalEventBus.fire(AppLocaleChangedEvent(locale));

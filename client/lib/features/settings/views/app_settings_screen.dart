@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:borneo_app/features/settings/view_models/app_settings_view_model.dart';
 import 'package:borneo_app/shared/widgets/generic_settings_screen.dart';
 import 'package:borneo_app/app/app.dart';
+import 'package:borneo_app/core/config/language_config.dart';
 
 class AppSettingsScreen extends StatelessWidget {
   const AppSettingsScreen({super.key});
@@ -84,7 +85,7 @@ class AppSettingsScreen extends StatelessWidget {
                 if (val != null) context.read<AppSettingsViewModel>().changeLocale(val);
               },
               items: kSupportedLocales.map((loc) {
-                return DropdownMenuItem(value: loc, child: Text(loc.languageCode == 'zh' ? '中文 (简体)' : 'English (US)'));
+                return DropdownMenuItem(value: loc, child: Text(LanguageConfig.getLocaleDisplayName(loc)));
               }).toList(),
             ),
           ),
