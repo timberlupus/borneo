@@ -16,5 +16,8 @@
         "editor.detectIndentation": false
     },
     "dart.previewFlutterUiGuides": true,
-    "extensions.autoUpdate": true
+    "extensions.autoUpdate": true,
+    "[xml]": {
+        "editor.defaultFormatter": "DotJoshJohnson.xml"
+    }
 }
