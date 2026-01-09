@@ -43,6 +43,22 @@ menu "Borneo Core"
 
     endmenu
 
+    menu "Network Provisioning"
+        choice
+            prompt "Provisioning Method"
+            default BORNEO_PROV_METHOD_SC
+
+            config BORNEO_PROV_METHOD_SC
+                bool "SmartConfig (ESPTouch)"
+
+            config BORNEO_PROV_METHOD_NP
+                bool "Espressif Network Provisioning"
+                depends on SOC_BT_SUPPORTED
+                select BT_ENABLED
+                select BT_NIMBLE_ENABLED
+        endchoice
+    endmenu
+
     menu "ADC settings"
         config BORNEO_ADC_ENABLED
             bool "ADC enabled"

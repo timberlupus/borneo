@@ -1,22 +1,23 @@
+#include <stdlib.h>
+#include <string.h>
 
-#if !CONFIG_BT_BLE_BLUFI_ENABLE
+#include <freertos/FreeRTOS.h>
+#include <freertos/event_groups.h>
+#include <freertos/task.h>
 
 #include <esp_event.h>
 #include <esp_log.h>
 #include <esp_smartconfig.h>
 #include <esp_system.h>
 #include <esp_wifi.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/event_groups.h>
-#include <freertos/task.h>
 #include <nvs_flash.h>
 #include <esp_netif.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include <borneo/common.h>
 #include <borneo/system.h>
 #include <borneo/wifi.h>
+
+#if CONFIG_BORNEO_PROV_METHOD_SC
 
 #define TAG "smartconfig"
 
@@ -189,4 +190,4 @@ int bo_wifi_sc_start()
     return 0;
 }
 
-#endif // CONFIG_BT_BLE_BLUFI_ENABLE
+#endif // CONFIG_BORNEO_PROV_METHOD_SC

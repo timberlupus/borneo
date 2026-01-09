@@ -1,6 +1,6 @@
 dependencies:
   cmake_utilities: '*'
-  idf: '>=5.0'
+  idf: '>=5.1'
 description: ESP-IDF modular device driver framework
 issues: https://github.com/borneo-iot/esp-idf-drvfx/issues
 repository: git://github.com/borneo-iot/esp-idf-drvfx.git

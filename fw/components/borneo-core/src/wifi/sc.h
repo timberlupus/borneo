@@ -4,12 +4,12 @@
 extern "C" {
 #endif
 
-#if !CONFIG_BT_BLE_BLUFI_ENABLE
+#if CONFIG_BORNEO_PROV_METHOD_SC
 
 int bo_wifi_sc_init();
 int bo_wifi_sc_start();
 
-#endif // CONFIG_BT_BLE_BLUFI_ENABLE
+#endif // CONFIG_BORNEO_PROV_METHOD_SC
 
 #ifdef __cplusplus
 }

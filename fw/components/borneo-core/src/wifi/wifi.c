@@ -18,10 +18,10 @@
 #include <borneo/system.h>
 #include <borneo/wifi.h>
 
-#if CONFIG_BT_BLE_ENABLED
-#include "./blufi.h"
-#else
-#include "./sc.h"
+#if CONFIG_BORNEO_PROV_METHOD_NP
+#include "np.h"
+#elif CONFIG_BORNEO_PROV_METHOD_SC
+#include "sc.h"
 #endif
 
 #define SSID_MAX_LEN 32
@@ -73,10 +73,10 @@ int bo_wifi_start()
     if (!_has_ssid()) {
         ESP_LOGI(TAG, "There is no saved WiFi configuration.");
 
-#if CONFIG_BT_BLE_BLUFI_ENABLE
-        BO_TRY(bo_wifi_blufi_init());
-        BO_TRY(bo_wifi_blufi_start());
-#else
+#if CONFIG_BORNEO_PROV_METHOD_NP
+        BO_TRY(bo_wifi_np_init());
+        BO_TRY(bo_wifi_np_start());
+#elif CONFIG_BORNEO_PROV_METHOD_SC
         BO_TRY(bo_wifi_sc_init());
         BO_TRY(bo_wifi_sc_start());
 #endif
