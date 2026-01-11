@@ -50,8 +50,10 @@ class WifiSelectionScreen extends StatelessWidget {
             }
             return RefreshIndicator(
               onRefresh: () async => await vm.scanNetworks(),
-              child: ListView.builder(
+              child: ListView.separated(
                 itemCount: vm.networks!.length,
+                separatorBuilder: (context, index) =>
+                    Divider(height: 1, color: Theme.of(context).dividerColor.withValues(alpha: 0.38)),
                 itemBuilder: (context, index) {
                   final network = vm.networks![index];
                   return ListTile(

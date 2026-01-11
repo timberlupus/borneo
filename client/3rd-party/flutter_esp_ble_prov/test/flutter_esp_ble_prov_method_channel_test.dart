@@ -11,8 +11,8 @@ void main() {
   setUp(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      return '42';
-    });
+          return '42';
+        });
   });
 
   tearDown(() {
@@ -28,14 +28,14 @@ void main() {
     // Mock the method call handler for scanWifiNetworksWithDetails
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      if (methodCall.method == 'scanWifiNetworksWithDetails') {
-        return [
-          {'ssid': 'TestNetwork1', 'rssi': -45, 'security': 1},
-          {'ssid': 'TestNetwork2', 'rssi': -67, 'security': 0},
-        ];
-      }
-      return '42';
-    });
+          if (methodCall.method == 'scanWifiNetworksWithDetails') {
+            return [
+              {'ssid': 'TestNetwork1', 'rssi': -45, 'security': 1},
+              {'ssid': 'TestNetwork2', 'rssi': -67, 'security': 0},
+            ];
+          }
+          return '42';
+        });
 
     final networks = await platform.scanWifiNetworksWithDetails(
       'TestDevice',
