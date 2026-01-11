@@ -5,6 +5,8 @@ abstract class AppRoutes {
   static const kDevices = '/devices';
   static const kAccount = '/account';
   static const kDeviceDiscovery = '/devices/discovery';
+  static const kDeviceDiscoveryWifiSelection = '/devices/discovery/wifi-selection';
+  static const kDeviceDiscoveryProvisioning = '/devices/discovery/provisioning';
 
   static String makeDeviceScreenRoute(String driverID) {
     if (driverID.isEmpty) {

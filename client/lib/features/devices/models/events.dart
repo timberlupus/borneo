@@ -7,6 +7,18 @@ class NewDeviceFoundEvent {
   const NewDeviceFoundEvent(this.device);
 }
 
+class UnprovisionedDeviceFoundEvent {
+  final String deviceName;
+  const UnprovisionedDeviceFoundEvent(this.deviceName);
+}
+
+class ProvisioningProgressEvent {
+  final dynamic state; // To avoid circular dependency, or use dynamic/int
+  // Better to import if possible, but let's keep it simple for event bus.
+  // Actually, I can import BleProvisioningState.
+  const ProvisioningProgressEvent(this.state);
+}
+
 class NewDeviceEntityAddedEvent {
   final DeviceEntity device;
   const NewDeviceEntityAddedEvent(this.device);

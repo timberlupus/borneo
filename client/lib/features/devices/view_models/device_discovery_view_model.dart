@@ -1,46 +1,41 @@
 import 'dart:async';
-
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
+import 'package:borneo_app/features/devices/models/discoverable_device.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/shared/view_models/abstract_screen_view_model.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:esp_smartconfig/esp_smartconfig.dart';
 
 import '../models/events.dart';
-import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 
 class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
-  // TODO move this to device manager
   bool _disposed = false;
   final Logger _logger;
-  final _provisioner = Provisioner.espTouch();
   final IGroupManager _groupManager;
   final IDeviceManager _deviceManager;
   final IDeviceModuleRegistry deviceMdoules;
+
   bool get _isDiscovering => _deviceManager.isDiscoverying;
+  bool _isBleScanning = false;
 
   late final StreamSubscription<NewDeviceEntityAddedEvent> _deviceAddedEventSub;
   late final StreamSubscription<NewDeviceFoundEvent> _newDeviceFoundEventSub;
 
-  String _ssid = '';
-  String? _bssid;
-  String _password = '';
-  bool _isSmartConfigEnabled = false;
-  bool _isFormValid = false;
-  int _newDeviceCount = 0;
-  int _discoveredCount = 0;
+  // Internal lists
+  List<String> _unprovisioned = [];
+  List<SupportedDeviceDescriptor> _provisioned = [];
 
-  // Getter for loading state
-  bool get isDiscovering => _isDiscovering;
+  // To handle duplicates within BLE scanning session
+  Set<String> _ignoredFingerprints = {};
 
-  final ValueNotifier<List<SupportedDeviceDescriptor>> _discoveredDevices = ValueNotifier([]);
-  ValueNotifier<List<SupportedDeviceDescriptor>> get discoveredDevices => _discoveredDevices;
+  // Exposed list
+  final ValueNotifier<List<DiscoverableDevice>> _discoverableDevices = ValueNotifier([]);
+  ValueNotifier<List<DiscoverableDevice>> get discoverableDevices => _discoverableDevices;
 
   DeviceEntity? _lastestAddedDevice;
   DeviceEntity? get lastestAddedDevice => _lastestAddedDevice;
@@ -48,30 +43,10 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   late final List<DeviceGroupEntity> _availableGroups = [];
   List<DeviceGroupEntity> get availableGroups => _availableGroups;
 
-  String get ssid => _ssid;
+  bool get isDiscovering => _isBleScanning;
 
-  set ssid(String value) {
-    if (_ssid != value) {
-      _ssid = value;
-      _validateForm();
-    }
-  }
-
-  String? get bssid => _bssid;
-
-  String get password => _password;
-
-  set password(String value) {
-    if (_password != value) {
-      _password = value;
-      _validateForm();
-    }
-  }
-
-  bool get isSmartConfigEnabled => _isSmartConfigEnabled;
-  bool get isFormValid => _isFormValid;
-  int get newDeviceCount => _newDeviceCount;
-  int get discoveredCount => _discoveredCount;
+  // Platform check
+  bool get isMobile => defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS;
 
   DeviceDiscoveryViewModel(
     this._logger,
@@ -94,6 +69,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   Future<void> onInitialize() async {
     try {
       _availableGroups.addAll(await _groupManager.fetchAllGroupsInCurrentScene());
+      await startDiscovery();
     } finally {}
   }
 
@@ -102,8 +78,8 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     if (!_disposed) {
       _deviceAddedEventSub.cancel();
       _newDeviceFoundEventSub.cancel();
-      _discoveredDevices.dispose();
-      if (_isDiscovering) {
+      _discoverableDevices.dispose();
+      if (_isDiscovering || _isBleScanning) {
         stopDiscovery();
       }
       super.dispose();
@@ -111,111 +87,85 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     }
   }
 
-  void toggleSmartConfigSwitch(bool? value) async {
-    super.isBusy = true;
-    notifyListeners();
-    try {
-      _isSmartConfigEnabled = value ?? false;
-      /*
-      if (_isSmartConfigEnabled && _ssid.isEmpty) {
-        await aquireWifiInfo();
-      }
-      */
-      _validateForm();
-    } catch (e, stackTrace) {
-      notifyAppError("$e", error: e, stackTrace: stackTrace);
-    } finally {
-      super.isBusy = false;
-      notifyListeners();
-    }
-  }
-
-  void _validateForm() {
-    _isFormValid = !_isSmartConfigEnabled || (_ssid.trim().isNotEmpty && _password.trim().isNotEmpty);
-    notifyListeners();
-  }
-
-  Future<void> startStopDiscovery() async {
-    if (_isDiscovering) {
-      await stopDiscovery();
-    } else {
-      await startDiscovery();
-    }
-  }
-
-  Future<void> startDiscovery() async {
-    assert(!isDiscovering);
-    assert(!super.isBusy);
-    assert(isSmartConfigEnabled ? isFormValid : true);
-
-    _newDeviceCount = 0;
-    _discoveredCount = 0;
-    _discoveredDevices.value = [];
-
-    try {
-      super.isBusy = true;
-      await _deviceManager.startDiscovery();
-
-      if (isSmartConfigEnabled) {
-        await _provisioner.start(
-          ProvisioningRequest.fromStrings(
-            ssid: ssid,
-            password: password.isEmpty ? null : password,
-            reservedData: "borneo-hello",
-          ),
-        );
-      }
-      notifyListeners();
-    } catch (e, stackTrace) {
-      super.notifyAppError('Error occurred while discovering devices: $e', error: e, stackTrace: stackTrace);
-      _logger.e('Failed to discovering devices', error: e, stackTrace: stackTrace);
-    } finally {
-      super.isBusy = false;
-      notifyListeners();
-    }
-  }
-
   Future<void> stopDiscovery() async {
-    if (!isDiscovering || super.isBusy) {
-      return;
-    }
-
-    super.isBusy = true;
+    _isBleScanning = false;
     notifyListeners();
+
     try {
-      if (isSmartConfigEnabled) {
-        _provisioner.stop();
+      if (_isDiscovering) {
+        await _deviceManager.stopDiscovery();
       }
-      await _deviceManager.stopDiscovery();
     } catch (e, stackTrace) {
       super.notifyAppError('Error occurred while stopping discovery: $e', error: e, stackTrace: stackTrace);
     } finally {
-      super.isBusy = false;
       notifyListeners();
     }
   }
 
-  Future<void> aquireWifiInfo() async {
-    var status = await Permission.locationWhenInUse.status;
-    if (status.isDenied) {
-      status = await Permission.locationWhenInUse.request();
-    }
+  // Clean resources when leaving screen or stopping
+  Future<bool> onWillPop() async {
+    await stopDiscovery();
+    return true;
+  }
 
-    if (status.isGranted) {
+  Future<void> startDiscovery() async {
+    if (isDiscovering) return; // Already running
+
+    // Clear previous results
+    _unprovisioned.clear();
+    _provisioned.clear();
+    _updateDiscoverableList();
+
+    try {
+      _isBleScanning = true;
+      notifyListeners(); // Update UI to show loading
+
+      // Stop any existing discovery first
+      await stopDiscovery();
+
+      // Start mDNS discovery (platform independent)
       try {
-        _ssid = '';
-        _bssid = '';
-        if (_ssid.startsWith('"') && _ssid.endsWith('"')) {
-          _ssid = _ssid.substring(1, _ssid.length - 1);
-        }
+        await _deviceManager.startDiscovery();
       } catch (e) {
-        rethrow;
+        _logger.e('Failed to start mDNS discovery', error: e);
       }
-    } else {
-      throw PermissionDeniedException(
-        message:
-            'The program requires permission to access WiFi network information; otherwise, the WiFi name needs to be manually entered.',
-      );
+
+      // Start BLE discovery (Mobile only)
+      if (isMobile) {
+        await _startBleScan();
+      } else {
+        _isBleScanning = false;
+        notifyListeners();
+      }
+    } catch (e, stackTrace) {
+      super.notifyAppError('Error occurred while discovering devices: $e', error: e, stackTrace: stackTrace);
+      _logger.e('Failed to discovering devices', error: e, stackTrace: stackTrace);
+      _isBleScanning = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _startBleScan() async {
+    try {
+      // Check permissions
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.locationWhenInUse,
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+      ].request();
+
+      bool permissionsGranted = true;
+      // You can add stricter checks here if needed.
+
+      // Perform scan
+      final devices = await _deviceManager.bleProvisioner.scanBleDevices('BOPROV_');
+      _unprovisioned = devices;
+      _updateDiscoverableList();
+    } catch (e) {
+      _logger.e('BLE Scan failed', error: e);
+    } finally {
+      _isBleScanning = false;
+      notifyListeners();
     }
   }
 
@@ -225,9 +175,9 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
 
   Future<void> _onNewDeviceEntityAdded(NewDeviceEntityAddedEvent event) async {
     try {
-      _discoveredDevices.value.removeWhere((x) => x.fingerprint == event.device.fingerprint);
-      _discoveredDevices.value = List.from(_discoveredDevices.value);
+      _provisioned.removeWhere((x) => x.fingerprint == event.device.fingerprint);
       _lastestAddedDevice = event.device;
+      _updateDiscoverableList();
     } finally {
       notifyListeners();
     }
@@ -235,12 +185,26 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
 
   Future<void> _onNewDeviceFound(NewDeviceFoundEvent event) async {
     try {
-      _newDeviceCount += 1;
-      _discoveredDevices.value.add(event.device);
-      _discoveredDevices.value = List.from(_discoveredDevices.value);
+      // Avoid duplicates
+      if (!_provisioned.any((d) => d.fingerprint == event.device.fingerprint)) {
+        _provisioned.add(event.device);
+        _updateDiscoverableList();
+      }
     } finally {
       notifyListeners();
     }
+  }
+
+  void _updateDiscoverableList() {
+    List<DiscoverableDevice> list = [];
+
+    // Provisioned first
+    list.addAll(_provisioned.map((d) => DiscoverableDevice.provisioned(d)));
+
+    // Unprovisioned second
+    list.addAll(_unprovisioned.map((name) => DiscoverableDevice.unprovisioned(name)));
+
+    _discoverableDevices.value = list;
   }
 
   void clearAddedDevice() {
