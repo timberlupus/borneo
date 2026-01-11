@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-03 14:43+0800\n"
+"POT-Creation-Date: 2026-01-11 17:39+0800\n"
 "PO-Revision-Date: 2026-01-03 14:43+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -248,12 +248,17 @@ msgid ""
 "hardware damage or other dangerous situations. Submitting will reboot the "
 "device.\n"
 "Do you want to proceed?"
-msgstr "Por favor, verifique cuidadosamente la configuración. Una configuración incorrecta puede causar daños al hardware u otras situaciones peligrosas. El envío reiniciará el dispositivo.\n¿Desea continuar?"
+msgstr ""
+"Por favor, verifique cuidadosamente la configuración. Una configuración "
+"incorrecta puede causar daños al hardware u otras situaciones peligrosas. El "
+"envío reiniciará el dispositivo.\n"
+"¿Desea continuar?"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:288
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:264
 #: devices\borneo\lyfi\views\settings_screen.dart:428
 #: devices\borneo\lyfi\views\settings_screen.dart:476
+#: features\devices\views\wifi_selection_screen.dart:95
 #: features\devices\widgets\delete_group_dialog.dart:19
 #: main\views\main_screen.dart:255
 #: shared\widgets\generic_settings_screen.dart:74
@@ -347,8 +352,8 @@ msgid ""
 "Using Easy Setup will clear your current dimming settings. Are you sure you "
 "want to proceed?"
 msgstr ""
-"Usar Configuración Fácil borrará sus ajustes de atenuación actuales. ¿Está seguro de que desea "
-"continuar?"
+"Usar Configuración Fácil borrará sus ajustes de atenuación actuales. ¿Está "
+"seguro de que desea continuar?"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:184
 msgid "Add"
@@ -547,7 +552,9 @@ msgstr "Restaurar Configuración de Fábrica"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:413
 msgid "Are you sure you want to restore this device to factory settings?"
-msgstr "¿Está seguro de que desea restaurar este dispositivo a la configuración de fábrica?"
+msgstr ""
+"¿Está seguro de que desea restaurar este dispositivo a la configuración de "
+"fábrica?"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:415
 msgid "This action will:"
@@ -594,9 +601,11 @@ msgid ""
 "The device is currently offline. Please check the network or power "
 "connection."
 msgstr ""
-"El dispositivo está actualmente desconectado. Por favor, verifique la conexión de red o alimentación."
+"El dispositivo está actualmente desconectado. Por favor, verifique la "
+"conexión de red o alimentación."
 
 #: devices\views\device_offline_view.dart:36
+#: features\devices\views\provisioning_progress_screen.dart:99
 msgid "Close"
 msgstr "Cerrar"
 
@@ -639,23 +648,41 @@ msgstr "Cargando tareas"
 msgid "Loading..."
 msgstr "Cargando..."
 
-#: features\devices\views\device_discovery_screen.dart:41
+#: features\devices\views\device_discovery_screen.dart:45
+msgid "Add Device"
+msgstr ""
+
+#: features\devices\views\device_discovery_screen.dart:54
+#: features\devices\views\provisioning_progress_screen.dart:39
 msgid "Stop"
 msgstr "Detener"
 
-#: features\devices\views\device_discovery_screen.dart:44
-msgid "Start"
-msgstr "Iniciar"
+#: features\devices\views\device_discovery_screen.dart:62
+msgid "Refresh"
+msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:187
-msgid "A new device has been added."
-msgstr "Se ha agregado un nuevo dispositivo."
+#: features\devices\views\device_discovery_screen.dart:79
+#: features\devices\views\device_discovery_screen.dart:177
+msgid "Searching for devices..."
+msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:294
-msgid "Discovered Devices:"
-msgstr "Dispositivos Descubiertos:"
+#: features\devices\views\device_discovery_screen.dart:92
+msgid "Device provisioning is only available on iOS and Android."
+msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:406
+#: features\devices\views\device_discovery_screen.dart:147
+msgid "No devices found"
+msgstr ""
+
+#: features\devices\views\device_discovery_screen.dart:214
+msgid "Detected on network"
+msgstr ""
+
+#: features\devices\views\device_discovery_screen.dart:235
+msgid "Ready to provision"
+msgstr ""
+
+#: features\devices\views\device_discovery_screen.dart:283
 msgid "Select the group to which the new device belongs:"
 msgstr "Seleccione el grupo al que pertenece el nuevo dispositivo:"
 
@@ -759,6 +786,43 @@ msgstr "Nuevo Grupo de Dispositivo"
 msgid "Edit Device Group"
 msgstr "Editar Grupo de Dispositivo"
 
+#: features\devices\views\provisioning_progress_screen.dart:33
+msgid "Provisioning"
+msgstr ""
+
+#: features\devices\views\provisioning_progress_screen.dart:71
+msgid "Provisioning Successful!"
+msgstr ""
+
+#: features\devices\views\provisioning_progress_screen.dart:79
+msgid "OK"
+msgstr ""
+
+#: features\devices\views\provisioning_progress_screen.dart:93
+msgid "Unknown Error"
+msgstr ""
+
+#: features\devices\views\wifi_selection_screen.dart:34
+msgid "Select WiFi"
+msgstr ""
+
+#: features\devices\views\wifi_selection_screen.dart:46
+msgid "No WiFi networks found"
+msgstr ""
+
+#: features\devices\views\wifi_selection_screen.dart:82
+#, python-format
+msgid "Enter Password for %s"
+msgstr ""
+
+#: features\devices\views\wifi_selection_screen.dart:87
+msgid "Password"
+msgstr ""
+
+#: features\devices\views\wifi_selection_screen.dart:110
+msgid "Provision"
+msgstr ""
+
 #: features\devices\widgets\delete_group_dialog.dart:23
 msgid "Delete"
 msgstr "Eliminar"
@@ -783,7 +847,9 @@ msgstr "Versión: {verText} Compilación: {buildNumberText}"
 #: features\my\views\about_screen.dart:87
 msgid ""
 "Copyright © Yunnan BinaryStars Technologies, Co., Ltd. All rights reserved."
-msgstr "Copyright © Yunnan BinaryStars Technologies, Co., Ltd. Todos los derechos reservados."
+msgstr ""
+"Copyright © Yunnan BinaryStars Technologies, Co., Ltd. Todos los derechos "
+"reservados."
 
 #: features\my\views\about_screen.dart:103
 msgid "Website"
@@ -799,7 +865,11 @@ msgid ""
 "License version 3 or later, with no warranty.\n"
 "The author assumes no responsibility or liability for any direct or indirect "
 "consequences resulting from the use of this software."
-msgstr "Esta aplicación móvil es software libre licenciado bajo GNU General Public License versión 3 o posterior, sin garantía.\nEl autor no asume responsabilidad o liability por cualquier consecuencia directa o indirecta resultante del uso de este software."
+msgstr ""
+"Esta aplicación móvil es software libre licenciado bajo GNU General Public "
+"License versión 3 o posterior, sin garantía.\n"
+"El autor no asume responsabilidad o liability por cualquier consecuencia "
+"directa o indirecta resultante del uso de este software."
 
 #: features\my\views\my_screen.dart:32
 msgid "About"
@@ -830,7 +900,9 @@ msgstr "Imagen de Escena"
 #: features\scenes\views\scene_edit_screen.dart:190
 msgid ""
 "Are you sure you want to delete this scene? This action cannot be undone."
-msgstr "¿Está seguro de que desea eliminar esta escena? Esta acción no se puede deshacer."
+msgstr ""
+"¿Está seguro de que desea eliminar esta escena? Esta acción no se puede "
+"deshacer."
 
 #: features\scenes\views\scene_edit_screen.dart:203
 #: features\scenes\views\scene_edit_screen.dart:209
@@ -845,62 +917,64 @@ msgstr "No se puede eliminar la última escena restante."
 msgid ""
 "This scene contains devices or device groups. Please remove all devices and "
 "groups from this scene before deleting it."
-msgstr "Esta escena contiene dispositivos o grupos de dispositivos. Por favor, elimine todos los dispositivos y grupos de esta escena antes de eliminarla."
+msgstr ""
+"Esta escena contiene dispositivos o grupos de dispositivos. Por favor, "
+"elimine todos los dispositivos y grupos de esta escena antes de eliminarla."
 
 #: features\scenes\views\scenes_screen.dart:57 main\views\main_screen.dart:40
 #: main\views\main_screen.dart:217
 msgid "Scenes"
 msgstr "Escenas"
 
-#: features\settings\views\app_settings_screen.dart:46
+#: features\settings\views\app_settings_screen.dart:47
 msgid "App Settings"
 msgstr "Configuraciones de la App"
 
-#: features\settings\views\app_settings_screen.dart:56
+#: features\settings\views\app_settings_screen.dart:57
 msgid "APPEARANCE"
 msgstr "APARIENCIA"
 
-#: features\settings\views\app_settings_screen.dart:60
+#: features\settings\views\app_settings_screen.dart:61
 msgid "Theme"
 msgstr "Tema"
 
-#: features\settings\views\app_settings_screen.dart:69
+#: features\settings\views\app_settings_screen.dart:70
 msgid "System"
 msgstr "Sistema"
 
-#: features\settings\views\app_settings_screen.dart:70
+#: features\settings\views\app_settings_screen.dart:71
 msgid "Light"
 msgstr "Claro"
 
-#: features\settings\views\app_settings_screen.dart:71
+#: features\settings\views\app_settings_screen.dart:72
 msgid "Dark"
 msgstr "Oscuro"
 
-#: features\settings\views\app_settings_screen.dart:78
+#: features\settings\views\app_settings_screen.dart:79
 msgid "Language"
 msgstr "Idioma"
 
-#: features\settings\views\app_settings_screen.dart:94
+#: features\settings\views\app_settings_screen.dart:95
 msgid "Temperature Unit"
 msgstr "Unidad de Temperatura"
 
-#: features\settings\views\app_settings_screen.dart:103
+#: features\settings\views\app_settings_screen.dart:104
 msgid "℃ (Celsius)"
 msgstr "℃ (Celsius)"
 
-#: features\settings\views\app_settings_screen.dart:104
+#: features\settings\views\app_settings_screen.dart:105
 msgid "℉ (Fahrenheit)"
 msgstr "℉ (Fahrenheit)"
 
-#: features\settings\views\app_settings_screen.dart:113
+#: features\settings\views\app_settings_screen.dart:114
 msgid "FEEDBACK"
 msgstr "COMENTARIOS"
 
-#: features\settings\views\app_settings_screen.dart:117
+#: features\settings\views\app_settings_screen.dart:118
 msgid "Rate in application store"
 msgstr "Calificar en la tienda de aplicaciones"
 
-#: features\settings\views\app_settings_screen.dart:122
+#: features\settings\views\app_settings_screen.dart:123
 msgid "Report an issue on GitHub"
 msgstr "Reportar un problema en GitHub"
 
@@ -947,3 +1021,12 @@ msgstr "Ubicación actual"
 #: shared\widgets\map_location_picker.dart:225
 msgid "Please select a location"
 msgstr "Por favor seleccione una ubicación"
+
+#~ msgid "Start"
+#~ msgstr "Iniciar"
+
+#~ msgid "A new device has been added."
+#~ msgstr "Se ha agregado un nuevo dispositivo."
+
+#~ msgid "Discovered Devices:"
+#~ msgstr "Dispositivos Descubiertos:"

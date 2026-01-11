@@ -114,6 +114,8 @@ class _BorneoAppState extends State<BorneoApp> {
               final theme = Theme.of(context);
               return MultiProvider(
                 providers: [
+                  Provider<GettextLocalizations>(create: (context) => gt),
+
                   Provider<IAppNotificationService>(create: (context) => AppNotificationServiceImpl(theme)),
 
                   Provider<UrlLauncherService>(

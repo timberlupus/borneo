@@ -4,6 +4,7 @@ import 'package:borneo_app/features/devices/views/wifi_selection_screen.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/services/devices/device_manager.dart';
@@ -24,6 +25,7 @@ class DeviceDiscoveryScreen extends StatelessWidget {
         context.read<IGroupManager>(),
         context.read<IDeviceManager>(),
         context.read<IDeviceModuleRegistry>(),
+        context.read<GettextLocalizations>(),
         globalEventBus: context.read<EventBus>(),
       )..onInitialize(),
       child: const _DeviceDiscoveryContent(),
@@ -38,17 +40,14 @@ class _DeviceDiscoveryContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.read<DeviceDiscoveryViewModel>();
 
-    // Handle back button to stop discovery
-    return WillPopScope(
-      onWillPop: vm.onWillPop,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(context.translate('Add Device')),
-          actions: [
-            Selector<DeviceDiscoveryViewModel, bool>(
-              selector: (_, vm) => vm.isDiscovering,
-              builder: (ctx, isDiscovering, child) {
-                if (!isDiscovering) return SizedBox();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(context.translate('Add Device')),
+        actions: [
+          Selector<DeviceDiscoveryViewModel, bool>(
+            selector: (_, vm) => vm.isDiscovering,
+            builder: (ctx, isDiscovering, child) {
+              if (isDiscovering) {
                 return TextButton(
                   onPressed: () => ctx.read<DeviceDiscoveryViewModel>().stopDiscovery(),
                   child: Text(
@@ -56,51 +55,142 @@ class _DeviceDiscoveryContent extends StatelessWidget {
                     style: TextStyle(color: Theme.of(context).colorScheme.primary),
                   ),
                 );
-              },
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            if (!vm.isMobile)
-              Container(
-                color: Colors.amber.shade100,
-                padding: EdgeInsets.all(8),
-                width: double.infinity,
-                child: Text(
-                  context.translate('Device provisioning is only available on iOS and Android.'),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.black87),
-                ),
+              } else {
+                return IconButton(
+                  icon: Icon(Icons.refresh),
+                  onPressed: () => ctx.read<DeviceDiscoveryViewModel>().startDiscovery(),
+                  tooltip: context.translate('Refresh'),
+                );
+              }
+            },
+          ),
+        ],
+      ),
+      body: FutureBuilder<void>(
+        future: vm.initFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text(context.translate('Searching for devices...'), style: TextStyle(fontSize: 16)),
+                ],
               ),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: () async => await vm.startDiscovery(),
-                child: ValueListenableBuilder<List<DiscoverableDevice>>(
-                  valueListenable: vm.discoverableDevices,
-                  builder: (context, devices, child) {
-                    if (devices.isEmpty) {
-                      return ListView(
-                        children: [
-                          SizedBox(height: 100),
-                          Center(child: Text(context.translate('Pull to scan for devices'))),
-                        ],
-                      );
-                    }
+            );
+          }
+          return Column(
+            children: [
+              if (!vm.isMobile)
+                Container(
+                  color: Colors.amber.shade100,
+                  padding: EdgeInsets.all(8),
+                  width: double.infinity,
+                  child: Text(
+                    context.translate('Device provisioning is only available on iOS and Android.'),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.black87),
+                  ),
+                ),
+              ValueListenableBuilder<String?>(
+                valueListenable: vm.scanError,
+                builder: (context, error, child) {
+                  if (error == null) return SizedBox();
+                  return Container(
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    padding: EdgeInsets.all(12),
+                    width: double.infinity,
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error, size: 20),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            error,
+                            style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 14),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => vm.scanError.value = null,
+                          child: Icon(Icons.close, color: Theme.of(context).colorScheme.error, size: 20),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              Expanded(
+                child: Selector<DeviceDiscoveryViewModel, (bool, List<DiscoverableDevice>)>(
+                  selector: (_, vm) => (vm.isDiscovering, vm.discoverableDevices.value),
+                  builder: (context, state, child) {
+                    final (isDiscovering, devices) = state;
 
-                    return ListView.separated(
-                      itemCount: devices.length,
-                      separatorBuilder: (context, index) => Divider(height: 1),
-                      itemBuilder: (context, index) {
-                        return _buildDeviceTile(context, vm, devices[index]);
-                      },
+                    return Stack(
+                      children: [
+                        if (devices.isEmpty)
+                          ListView(
+                            children: [
+                              SizedBox(height: 60),
+                              Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.media_bluetooth_off,
+                                      size: 64,
+                                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.38),
+                                    ),
+                                    SizedBox(height: 16),
+                                    Text(
+                                      context.translate('No devices found'),
+                                      style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.outline),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )
+                        else
+                          ListView.separated(
+                            itemCount: devices.length,
+                            separatorBuilder: (context, index) => Divider(height: 1),
+                            itemBuilder: (context, index) {
+                              final vm = context.read<DeviceDiscoveryViewModel>();
+                              return _buildDeviceTile(context, vm, devices[index]);
+                            },
+                          ),
+                        if (isDiscovering)
+                          Container(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            child: Center(
+                              child: Card(
+                                child: Padding(
+                                  padding: EdgeInsets.all(24),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      CircularProgressIndicator(),
+                                      SizedBox(height: 16),
+                                      Text(
+                                        context.translate('Searching for devices...'),
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     );
                   },
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }

@@ -22,10 +22,10 @@ class BleProvisioner implements IBleProvisioner {
       return devices;
     } on PlatformException catch (e) {
       _logger.e('PlatformException during BLE scan: ${e.code}', error: e);
-      return [];
+      rethrow;
     } catch (e) {
       _logger.e('Error scanning BLE devices', error: e);
-      return [];
+      rethrow;
     }
   }
 
@@ -35,9 +35,14 @@ class BleProvisioner implements IBleProvisioner {
     String pop = '',
     CancellationToken? cancelToken,
   }) async {
-    // According to documentation, this returns List<String> of SSIDs.
-    // We pass empty string as proofOfPossession for devices without PoP.
-    return await _plugin.scanWifiNetworksWithDetails(deviceName, pop).asCancellable(cancelToken);
+    try {
+      // According to documentation, this returns List<String> of SSIDs.
+      // We pass empty string as proofOfPossession for devices without PoP.
+      return await _plugin.scanWifiNetworksWithDetails(deviceName, pop).asCancellable(cancelToken);
+    } catch (e) {
+      _logger.e('Error scanning WiFi networks', error: e);
+      rethrow;
+    }
   }
 
   @override

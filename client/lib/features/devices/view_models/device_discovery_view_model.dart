@@ -6,22 +6,26 @@ import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/shared/view_models/abstract_screen_view_model.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 
 import '../models/events.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 
 class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   bool _disposed = false;
+  late CancellationToken _scanCancelToken = CancellationToken();
   final Logger _logger;
   final IGroupManager _groupManager;
   final IDeviceManager _deviceManager;
   final IDeviceModuleRegistry deviceMdoules;
+  final GettextLocalizations _gt;
 
   bool get _isDiscovering => _deviceManager.isDiscoverying;
-  bool _isBleScanning = false;
+  bool _isRefreshing = false; // 主动刷新标志（BLE 扫描）
 
   late final StreamSubscription<NewDeviceEntityAddedEvent> _deviceAddedEventSub;
   late final StreamSubscription<NewDeviceFoundEvent> _newDeviceFoundEventSub;
@@ -34,13 +38,18 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   final ValueNotifier<List<DiscoverableDevice>> _discoverableDevices = ValueNotifier([]);
   ValueNotifier<List<DiscoverableDevice>> get discoverableDevices => _discoverableDevices;
 
+  final ValueNotifier<String?> _scanError = ValueNotifier(null);
+  ValueNotifier<String?> get scanError => _scanError;
+
   DeviceEntity? _lastestAddedDevice;
   DeviceEntity? get lastestAddedDevice => _lastestAddedDevice;
 
   late final List<DeviceGroupEntity> _availableGroups = [];
   List<DeviceGroupEntity> get availableGroups => _availableGroups;
 
-  bool get isDiscovering => _isBleScanning;
+  late final Future<void> initFuture;
+
+  bool get isDiscovering => _isRefreshing;
 
   // Platform check
   bool get isMobile => defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS;
@@ -49,7 +58,8 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     this._logger,
     this._groupManager,
     this._deviceManager,
-    this.deviceMdoules, {
+    this.deviceMdoules,
+    this._gt, {
     required super.globalEventBus,
     super.logger,
   }) {
@@ -64,8 +74,14 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
 
   @override
   Future<void> onInitialize() async {
+    initFuture = _initialize();
+  }
+
+  Future<void> _initialize() async {
     try {
       _availableGroups.addAll(await _groupManager.fetchAllGroupsInCurrentScene());
+      // 延迟到下一帧，确保 UI 完全初始化
+      await Future.delayed(Duration.zero);
       await startDiscovery();
     } finally {}
   }
@@ -76,94 +92,105 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
       _deviceAddedEventSub.cancel();
       _newDeviceFoundEventSub.cancel();
       _discoverableDevices.dispose();
-      if (_isDiscovering || _isBleScanning) {
-        stopDiscovery();
+      _scanError.dispose();
+      if (_isRefreshing || _isDiscovering) {
+        _scanCancelToken.cancel();
       }
       super.dispose();
       _disposed = true;
     }
   }
 
-  Future<void> stopDiscovery() async {
-    _isBleScanning = false;
-    notifyListeners();
-
+  Future<void> _stopRefresh() async {
+    _isRefreshing = false;
+    _scanCancelToken.cancel();
     try {
       if (_isDiscovering) {
         await _deviceManager.stopDiscovery();
       }
     } catch (e, stackTrace) {
-      super.notifyAppError('Error occurred while stopping discovery: $e', error: e, stackTrace: stackTrace);
+      _logger.e('Error stopping discovery', error: e, stackTrace: stackTrace);
     } finally {
-      notifyListeners();
+      if (!_disposed) {
+        notifyListeners();
+      }
     }
+  }
+
+  Future<void> stopDiscovery() async {
+    await _stopRefresh();
   }
 
   // Clean resources when leaving screen or stopping
   Future<bool> onWillPop() async {
-    await stopDiscovery();
+    await _stopRefresh();
     return true;
   }
 
   Future<void> startDiscovery() async {
-    if (isDiscovering) return; // Already running
+    if (_isRefreshing) return; // Already refreshing
 
-    // Clear previous results
+    // Create new cancellation token for this operation
+    _scanCancelToken = CancellationToken();
+
+    // Clear all results
     _unprovisioned.clear();
     _provisioned.clear();
+    _scanError.value = null; // Clear previous error
     _updateDiscoverableList();
 
-    try {
-      _isBleScanning = true;
+    _isRefreshing = true;
+    if (!_disposed) {
       notifyListeners(); // Update UI to show loading
+    }
 
+    try {
       // Stop any existing discovery first
-      await stopDiscovery();
-
-      // Start mDNS discovery (platform independent)
-      try {
-        await _deviceManager.startDiscovery();
-      } catch (e) {
-        _logger.e('Failed to start mDNS discovery', error: e);
+      if (_isDiscovering) {
+        await _deviceManager.stopDiscovery();
       }
+
+      // Run mDNS and BLE discovery in parallel
+      final futures = <Future>[];
+
+      // Start mDNS discovery
+      futures.add(_deviceManager.startDiscovery());
 
       // Start BLE discovery (Mobile only)
       if (isMobile) {
-        await _startBleScan();
-      } else {
-        _isBleScanning = false;
+        futures.add(_startBleScan());
+      }
+
+      // Wait for both to complete
+      await Future.wait(futures);
+
+      if (_scanCancelToken.isCancelled) {
+        return;
+      }
+    } on CancelledException {
+      _logger.i('Device discovery has been cancelled.');
+    } catch (e, stackTrace) {
+      if (_scanCancelToken.isCancelled) return;
+      _logger.e('Discovery error', error: e, stackTrace: stackTrace);
+      if (!_disposed) {
+        _scanError.value = 'Bluetooth scan error, please check if Bluetooth device is enabled.';
+      }
+    } finally {
+      if (!_scanCancelToken.isCancelled && !_disposed) {
+        _isRefreshing = false;
         notifyListeners();
       }
-    } catch (e, stackTrace) {
-      super.notifyAppError('Error occurred while discovering devices: $e', error: e, stackTrace: stackTrace);
-      _logger.e('Failed to discovering devices', error: e, stackTrace: stackTrace);
-      _isBleScanning = false;
-      notifyListeners();
     }
   }
 
   Future<void> _startBleScan() async {
-    try {
-      // Check permissions
-      Map<Permission, PermissionStatus> statuses = await [
-        Permission.locationWhenInUse,
-        Permission.bluetoothScan,
-        Permission.bluetoothConnect,
-      ].request();
+    // Check permissions
+    await [Permission.locationWhenInUse, Permission.bluetoothScan, Permission.bluetoothConnect].request();
 
-      bool permissionsGranted = true;
-      // You can add stricter checks here if needed.
-
-      // Perform scan
-      final devices = await _deviceManager.bleProvisioner.scanBleDevices('BOPROV_');
-      _unprovisioned = devices;
-      _updateDiscoverableList();
-    } catch (e) {
-      _logger.e('BLE Scan failed', error: e);
-    } finally {
-      _isBleScanning = false;
-      notifyListeners();
-    }
+    // Perform scan
+    final devices = await _deviceManager.bleProvisioner.scanBleDevices('BOPROV_', cancelToken: _scanCancelToken);
+    _unprovisioned = devices;
+    _updateDiscoverableList();
   }
 
   Future<void> addNewDevice(SupportedDeviceDescriptor deviceInfo, DeviceGroupEntity? group) async {

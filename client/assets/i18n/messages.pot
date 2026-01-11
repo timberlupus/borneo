@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-03 14:43+0800\n"
+"POT-Creation-Date: 2026-01-11 17:39+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -254,6 +254,7 @@ msgstr ""
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:264
 #: devices\borneo\lyfi\views\settings_screen.dart:428
 #: devices\borneo\lyfi\views\settings_screen.dart:476
+#: features\devices\views\wifi_selection_screen.dart:95
 #: features\devices\widgets\delete_group_dialog.dart:19
 #: main\views\main_screen.dart:255
 #: shared\widgets\generic_settings_screen.dart:74
@@ -594,6 +595,7 @@ msgid ""
 msgstr ""
 
 #: devices\views\device_offline_view.dart:36
+#: features\devices\views\provisioning_progress_screen.dart:99
 msgid "Close"
 msgstr ""
 
@@ -636,23 +638,41 @@ msgstr ""
 msgid "Loading..."
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:41
+#: features\devices\views\device_discovery_screen.dart:45
+msgid "Add Device"
+msgstr ""
+
+#: features\devices\views\device_discovery_screen.dart:54
+#: features\devices\views\provisioning_progress_screen.dart:39
 msgid "Stop"
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:44
-msgid "Start"
+#: features\devices\views\device_discovery_screen.dart:62
+msgid "Refresh"
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:187
-msgid "A new device has been added."
+#: features\devices\views\device_discovery_screen.dart:79
+#: features\devices\views\device_discovery_screen.dart:177
+msgid "Searching for devices..."
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:294
-msgid "Discovered Devices:"
+#: features\devices\views\device_discovery_screen.dart:92
+msgid "Device provisioning is only available on iOS and Android."
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:406
+#: features\devices\views\device_discovery_screen.dart:147
+msgid "No devices found"
+msgstr ""
+
+#: features\devices\views\device_discovery_screen.dart:214
+msgid "Detected on network"
+msgstr ""
+
+#: features\devices\views\device_discovery_screen.dart:235
+msgid "Ready to provision"
+msgstr ""
+
+#: features\devices\views\device_discovery_screen.dart:283
 msgid "Select the group to which the new device belongs:"
 msgstr ""
 
@@ -756,6 +776,43 @@ msgstr ""
 msgid "Edit Device Group"
 msgstr ""
 
+#: features\devices\views\provisioning_progress_screen.dart:33
+msgid "Provisioning"
+msgstr ""
+
+#: features\devices\views\provisioning_progress_screen.dart:71
+msgid "Provisioning Successful!"
+msgstr ""
+
+#: features\devices\views\provisioning_progress_screen.dart:79
+msgid "OK"
+msgstr ""
+
+#: features\devices\views\provisioning_progress_screen.dart:93
+msgid "Unknown Error"
+msgstr ""
+
+#: features\devices\views\wifi_selection_screen.dart:34
+msgid "Select WiFi"
+msgstr ""
+
+#: features\devices\views\wifi_selection_screen.dart:46
+msgid "No WiFi networks found"
+msgstr ""
+
+#: features\devices\views\wifi_selection_screen.dart:82
+#, python-format
+msgid "Enter Password for %s"
+msgstr ""
+
+#: features\devices\views\wifi_selection_screen.dart:87
+msgid "Password"
+msgstr ""
+
+#: features\devices\views\wifi_selection_screen.dart:110
+msgid "Provision"
+msgstr ""
+
 #: features\devices\widgets\delete_group_dialog.dart:23
 msgid "Delete"
 msgstr ""
@@ -849,55 +906,55 @@ msgstr ""
 msgid "Scenes"
 msgstr ""
 
-#: features\settings\views\app_settings_screen.dart:46
+#: features\settings\views\app_settings_screen.dart:47
 msgid "App Settings"
 msgstr ""
 
-#: features\settings\views\app_settings_screen.dart:56
+#: features\settings\views\app_settings_screen.dart:57
 msgid "APPEARANCE"
 msgstr ""
 
-#: features\settings\views\app_settings_screen.dart:60
+#: features\settings\views\app_settings_screen.dart:61
 msgid "Theme"
 msgstr ""
 
-#: features\settings\views\app_settings_screen.dart:69
+#: features\settings\views\app_settings_screen.dart:70
 msgid "System"
 msgstr ""
 
-#: features\settings\views\app_settings_screen.dart:70
+#: features\settings\views\app_settings_screen.dart:71
 msgid "Light"
 msgstr ""
 
-#: features\settings\views\app_settings_screen.dart:71
+#: features\settings\views\app_settings_screen.dart:72
 msgid "Dark"
 msgstr ""
 
-#: features\settings\views\app_settings_screen.dart:78
+#: features\settings\views\app_settings_screen.dart:79
 msgid "Language"
 msgstr ""
 
-#: features\settings\views\app_settings_screen.dart:94
+#: features\settings\views\app_settings_screen.dart:95
 msgid "Temperature Unit"
 msgstr ""
 
-#: features\settings\views\app_settings_screen.dart:103
+#: features\settings\views\app_settings_screen.dart:104
 msgid "℃ (Celsius)"
 msgstr ""
 
-#: features\settings\views\app_settings_screen.dart:104
+#: features\settings\views\app_settings_screen.dart:105
 msgid "℉ (Fahrenheit)"
 msgstr ""
 
-#: features\settings\views\app_settings_screen.dart:113
+#: features\settings\views\app_settings_screen.dart:114
 msgid "FEEDBACK"
 msgstr ""
 
-#: features\settings\views\app_settings_screen.dart:117
+#: features\settings\views\app_settings_screen.dart:118
 msgid "Rate in application store"
 msgstr ""
 
-#: features\settings\views\app_settings_screen.dart:122
+#: features\settings\views\app_settings_screen.dart:123
 msgid "Report an issue on GitHub"
 msgstr ""
 
