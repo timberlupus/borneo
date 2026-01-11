@@ -1,4 +1,3 @@
-import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 
 enum DiscoverableDeviceType {

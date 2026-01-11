@@ -28,10 +28,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
 
   // Internal lists
   List<String> _unprovisioned = [];
-  List<SupportedDeviceDescriptor> _provisioned = [];
-
-  // To handle duplicates within BLE scanning session
-  Set<String> _ignoredFingerprints = {};
+  final List<SupportedDeviceDescriptor> _provisioned = [];
 
   // Exposed list
   final ValueNotifier<List<DiscoverableDevice>> _discoverableDevices = ValueNotifier([]);
