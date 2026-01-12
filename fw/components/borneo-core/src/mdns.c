@@ -21,26 +21,77 @@ static int add_mdns_services();
 #define HOSTNAME_MAX_LEN 70
 
 static char _hostname[HOSTNAME_MAX_LEN] = { 0 };
+static bool _mdns_initialized = false;
+
+static void mdns_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
+static int mdns_start();
+static void mdns_stop();
 
 int bo_mdns_init()
 {
     ESP_LOGI(TAG, "Initializing Borneo MDNS sub-system...");
 
-    BO_TRY_ESP(mdns_init());
+    // Register event handler for IP_EVENT_STA_GOT_IP and IP_EVENT_STA_LOST_IP
+    BO_TRY_ESP(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &mdns_event_handler, NULL));
+    BO_TRY_ESP(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_LOST_IP, &mdns_event_handler, NULL));
 
+    ESP_LOGI(TAG, "mDNS sub-system module has been initialized successfully.");
+
+    return 0;
+}
+
+static int mdns_start()
+{
+    if (_mdns_initialized) {
+        ESP_LOGW(TAG, "mDNS already started, skipping...");
+        return 0;
+    }
+
+    ESP_LOGI(TAG, "Starting mDNS...");
+
+    BO_TRY_ESP(mdns_init());
     BO_TRY(populate_hostname());
 
     const struct system_info* sysinfo = bo_system_get_info();
 
     BO_TRY_ESP(mdns_hostname_set(_hostname));
-
     BO_TRY_ESP(mdns_instance_name_set(sysinfo->name));
 
     BO_TRY(add_mdns_services());
 
-    ESP_LOGI(TAG, "mDNS sub-system module has been initialized successfully.");
+    _mdns_initialized = true;
+    ESP_LOGI(TAG, "mDNS started successfully.");
 
     return 0;
+}
+
+static void mdns_stop()
+{
+    if (!_mdns_initialized) {
+        ESP_LOGW(TAG, "mDNS not started, skipping stop...");
+        return;
+    }
+
+    ESP_LOGI(TAG, "Stopping mDNS...");
+
+    mdns_free();
+
+    _mdns_initialized = false;
+    ESP_LOGI(TAG, "mDNS stopped successfully.");
+}
+
+static void mdns_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
+{
+    if (event_base == IP_EVENT) {
+        if (event_id == IP_EVENT_STA_GOT_IP) {
+            ESP_LOGI(TAG, "WiFi connected, starting mDNS...");
+            BO_MUST_ESP(mdns_start());
+        }
+        else if (event_id == IP_EVENT_STA_LOST_IP) {
+            ESP_LOGI(TAG, "WiFi disconnected, stopping mDNS...");
+            mdns_stop();
+        }
+    }
 }
 
 int populate_hostname()

@@ -54,7 +54,7 @@ static void network_prov_event_handler(void* arg, esp_event_base_t event_base, i
     } break;
 
     case NETWORK_PROV_WIFI_CRED_FAIL: {
-        network_prov_mgr_reset_wifi_sm_state_on_failure();
+        BO_MUST_ESP(network_prov_mgr_reset_wifi_sm_state_on_failure());
         ESP_LOGE(TAG, "Provisioning failed!");
     } break;
 
