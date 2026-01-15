@@ -116,11 +116,13 @@ private class BLEProvisionService: ProvisionService {
                 case .success:
                     NSLog("Success provisioning device. ssid: \(ssid), deviceName: \(deviceName) ")
                     self.result(true)
+                    device?.disconnect()
                 case .configApplied:
                     NSLog("Wifi config applied device. ssid: \(ssid), deviceName: \(deviceName) ")
                 case .failure:
                     NSLog("Failed to provision device. ssid: \(ssid), deviceName: \(deviceName) ")
                     self.result(false)
+                    device?.disconnect()
                 }
             }
         }

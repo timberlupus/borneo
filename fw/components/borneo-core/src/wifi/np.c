@@ -43,6 +43,7 @@ static void network_prov_event_handler(void* arg, esp_event_base_t event_base, i
     switch (event_id) {
     case NETWORK_PROV_START: {
         ESP_LOGI(TAG, "Provisioning started");
+        esp_event_post(BO_WIFI_EVENTS, BO_EVENT_WIFI_PROVISIONING_START, NULL, 0, portMAX_DELAY);
     } break;
 
     case NETWORK_PROV_WIFI_CRED_RECV: {
@@ -55,11 +56,13 @@ static void network_prov_event_handler(void* arg, esp_event_base_t event_base, i
 
     case NETWORK_PROV_WIFI_CRED_FAIL: {
         BO_MUST_ESP(network_prov_mgr_reset_wifi_sm_state_on_failure());
-        ESP_LOGE(TAG, "Provisioning failed!");
+        ESP_LOGE(TAG, "Provisioning failed! Reseting the wifi provisioning...");
+        esp_event_post(BO_WIFI_EVENTS, BO_EVENT_WIFI_PROVISIONING_FAIL, NULL, 0, portMAX_DELAY);
     } break;
 
     case NETWORK_PROV_WIFI_CRED_SUCCESS: {
         ESP_LOGI(TAG, "Provisioning successful");
+        esp_event_post(BO_WIFI_EVENTS, BO_EVENT_WIFI_PROVISIONING_SUCCESS, NULL, 0, portMAX_DELAY);
     } break;
 
     case NETWORK_PROV_END: {

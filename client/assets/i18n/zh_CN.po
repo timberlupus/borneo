@@ -310,7 +310,7 @@ msgstr "日出日落"
 
 #: devices\borneo\lyfi\views\dimming_screen.dart:162
 msgid "Device connection lost. Controls are locked."
-msgstr ""
+msgstr "设备连接丢失。控制被锁定。"
 
 #: devices\borneo\lyfi\views\dimming_screen.dart:163
 msgid "Connection unstable. Trying to reconnect…"
@@ -364,11 +364,11 @@ msgstr "全清"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:219
 msgid "Prev"
-msgstr "上个时间"
+msgstr "上个时间点"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:228
 msgid "Next"
-msgstr "下个时间"
+msgstr "下个时间点"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:253
 msgid "Confirmation"
@@ -641,7 +641,7 @@ msgstr "载入中..."
 
 #: features\devices\views\device_discovery_screen.dart:45
 msgid "Add Device"
-msgstr ""
+msgstr "添加设备"
 
 #: features\devices\views\device_discovery_screen.dart:54
 #: features\devices\views\provisioning_progress_screen.dart:39
@@ -650,28 +650,28 @@ msgstr "停止"
 
 #: features\devices\views\device_discovery_screen.dart:62
 msgid "Refresh"
-msgstr ""
+msgstr "刷新"
 
 #: features\devices\views\device_discovery_screen.dart:79
 #: features\devices\views\device_discovery_screen.dart:177
 msgid "Searching for devices..."
-msgstr ""
+msgstr "正在搜索设备..."
 
 #: features\devices\views\device_discovery_screen.dart:92
 msgid "Device provisioning is only available on iOS and Android."
-msgstr ""
+msgstr "设备配置仅在 iOS 和 Android 上可用。"
 
 #: features\devices\views\device_discovery_screen.dart:147
 msgid "No devices found"
-msgstr ""
+msgstr "未找到设备"
 
 #: features\devices\views\device_discovery_screen.dart:214
 msgid "Detected on network"
-msgstr ""
+msgstr "在网络上检测到"
 
 #: features\devices\views\device_discovery_screen.dart:235
 msgid "Ready to provision"
-msgstr ""
+msgstr "准备配置"
 
 #: features\devices\views\device_discovery_screen.dart:283
 msgid "Select the group to which the new device belongs:"
@@ -779,40 +779,40 @@ msgstr "新建设备组"
 
 #: features\devices\views\provisioning_progress_screen.dart:33
 msgid "Provisioning"
-msgstr ""
+msgstr "配置"
 
 #: features\devices\views\provisioning_progress_screen.dart:71
 msgid "Provisioning Successful!"
-msgstr ""
+msgstr "配置成功！"
 
 #: features\devices\views\provisioning_progress_screen.dart:79
 msgid "OK"
-msgstr ""
+msgstr "确定"
 
 #: features\devices\views\provisioning_progress_screen.dart:93
 msgid "Unknown Error"
-msgstr ""
+msgstr "未知错误"
 
 #: features\devices\views\wifi_selection_screen.dart:34
 msgid "Select WiFi"
-msgstr ""
+msgstr "选择 WiFi"
 
 #: features\devices\views\wifi_selection_screen.dart:46
 msgid "No WiFi networks found"
-msgstr ""
+msgstr "未找到 WiFi 网络"
 
 #: features\devices\views\wifi_selection_screen.dart:82
 #, python-format
 msgid "Enter Password for %s"
-msgstr ""
+msgstr "输入 %s 的密码"
 
 #: features\devices\views\wifi_selection_screen.dart:87
 msgid "Password"
-msgstr ""
+msgstr "密码"
 
 #: features\devices\views\wifi_selection_screen.dart:110
 msgid "Provision"
-msgstr ""
+msgstr "配置"
 
 #: features\devices\widgets\delete_group_dialog.dart:23
 msgid "Delete"

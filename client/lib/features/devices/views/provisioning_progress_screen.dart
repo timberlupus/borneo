@@ -1,4 +1,5 @@
 import 'package:borneo_app/core/services/devices/device_manager.dart';
+import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_app/features/devices/models/ble_provision_state.dart';
 import 'package:borneo_app/features/devices/view_models/provisioning_progress_view_model.dart';
 import 'package:event_bus/event_bus.dart';
@@ -23,6 +24,7 @@ class ProvisioningProgressScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => ProvisioningProgressViewModel(
         context.read<IDeviceManager>(),
+        context.read<IBleProvisioner>(),
         deviceName,
         ssid,
         password,
@@ -36,7 +38,7 @@ class ProvisioningProgressScreen extends StatelessWidget {
               builder: (ctx) {
                 return TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: Text(context.translate("Stop"), style: TextStyle(color: Colors.white)),
+                  child: Text(context.translate("Stop"), style: TextStyle(color: Theme.of(ctx).colorScheme.onPrimary)),
                 );
               },
             ),
@@ -48,8 +50,8 @@ class ProvisioningProgressScreen extends StatelessWidget {
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 children: [
-                  Icon(Icons.wifi_tethering, size: 64, color: Theme.of(context).colorScheme.primary),
-                  SizedBox(height: 32),
+                  Icon(Icons.wifi_tethering_outlined, size: 128, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(height: 32),
                   Center(
                     child: Column(
                       children: [
@@ -66,10 +68,10 @@ class ProvisioningProgressScreen extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 32.0),
                       child: Column(
                         children: [
-                          Icon(Icons.check_circle, size: 48, color: Colors.green),
-                          SizedBox(height: 16),
+                          Icon(Icons.check_circle, size: 48, color: Theme.of(context).colorScheme.primary),
+                          const SizedBox(height: 16),
                           Text(context.translate('Provisioning Successful!')),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           ElevatedButton(
                             onPressed: () {
                               // Pop back to discovery screen (2 levels back: progress -> wifi -> discovery)
@@ -87,13 +89,13 @@ class ProvisioningProgressScreen extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 32.0),
                       child: Column(
                         children: [
-                          Icon(Icons.error, size: 48, color: Colors.red),
-                          SizedBox(height: 16),
+                          Icon(Icons.error, size: 48, color: Theme.of(context).colorScheme.error),
+                          const SizedBox(height: 16),
                           Text(
                             vm.errorMessage ?? context.translate('Unknown Error'),
-                            style: TextStyle(color: Colors.red),
+                            style: TextStyle(color: Theme.of(context).colorScheme.error),
                           ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           ElevatedButton(
                             onPressed: () => Navigator.pop(context),
                             child: Text(context.translate('Close')),
@@ -118,13 +120,13 @@ class ProvisioningProgressScreen extends StatelessWidget {
 
     Widget icon;
     if (isCompleted || vm.state == BleProvisioningState.success) {
-      icon = Icon(Icons.check, color: Colors.green);
+      icon = Icon(Icons.check, color: Theme.of(context).colorScheme.primary);
     } else if (isCurrent && vm.state != BleProvisioningState.failed) {
       icon = SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2));
     } else if (vm.state == BleProvisioningState.failed && isCurrent) {
-      icon = Icon(Icons.close, color: Colors.red);
+      icon = Icon(Icons.close, color: Theme.of(context).colorScheme.error);
     } else {
-      icon = Icon(Icons.circle_outlined, color: Colors.grey);
+      icon = Icon(Icons.circle_outlined, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38));
     }
 
     return Padding(
@@ -132,12 +134,14 @@ class ProvisioningProgressScreen extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(width: 24, height: 24, child: Center(child: icon)),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           Text(
             context.translate(label),
             style: TextStyle(
               fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-              color: isPending ? Colors.grey : Theme.of(context).textTheme.bodyMedium?.color,
+              color: isPending
+                  ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)
+                  : Theme.of(context).textTheme.bodyMedium?.color,
             ),
           ),
         ],

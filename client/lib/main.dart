@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:borneo_app/core/infrastructure/logging.dart';
 import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/core/services/device_exception_handler.dart';
+import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_app/core/services/devices/device_module_harvesters.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/core/services/devices/mdns.dart';
@@ -173,6 +174,12 @@ Future<void> main() async {
 
             // SharedPreferences
             provider.Provider<SharedPreferences>(create: (_) => sharedPreferences, lazy: false),
+
+            // IBleProvisioner
+            provider.ProxyProvider<Logger, IBleProvisioner>(
+              update: (_, logger, prev) => prev ?? BleProvisioner(),
+              lazy: true,
+            ),
           ],
           child: BorneoApp(),
         ),

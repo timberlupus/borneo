@@ -20,8 +20,13 @@ static int add_mdns_services();
 #define MDNS_UDP_PORT 5683
 #define HOSTNAME_MAX_LEN 70
 
-static char _hostname[HOSTNAME_MAX_LEN] = { 0 };
-static bool _mdns_initialized = false;
+struct mdns_context {
+    char hostname[HOSTNAME_MAX_LEN];
+    bool initialized;
+};
+
+static struct mdns_context s_mdns_ctx = { 0 };
+static portMUX_TYPE s_mdns_lock = portMUX_INITIALIZER_UNLOCKED;
 
 static void mdns_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 static int mdns_start();
@@ -42,7 +47,11 @@ int bo_mdns_init()
 
 static int mdns_start()
 {
-    if (_mdns_initialized) {
+    portENTER_CRITICAL(&s_mdns_lock);
+    bool initialized = s_mdns_ctx.initialized;
+    portEXIT_CRITICAL(&s_mdns_lock);
+
+    if (initialized) {
         ESP_LOGW(TAG, "mDNS already started, skipping...");
         return 0;
     }
@@ -54,12 +63,16 @@ static int mdns_start()
 
     const struct system_info* sysinfo = bo_system_get_info();
 
-    BO_TRY_ESP(mdns_hostname_set(_hostname));
+    portENTER_CRITICAL(&s_mdns_lock);
+    BO_TRY_ESP(mdns_hostname_set(s_mdns_ctx.hostname));
+    portEXIT_CRITICAL(&s_mdns_lock);
     BO_TRY_ESP(mdns_instance_name_set(sysinfo->name));
 
     BO_TRY(add_mdns_services());
 
-    _mdns_initialized = true;
+    portENTER_CRITICAL(&s_mdns_lock);
+    s_mdns_ctx.initialized = true;
+    portEXIT_CRITICAL(&s_mdns_lock);
     ESP_LOGI(TAG, "mDNS started successfully.");
 
     return 0;
@@ -67,8 +80,12 @@ static int mdns_start()
 
 static void mdns_stop()
 {
-    if (!_mdns_initialized) {
-        ESP_LOGW(TAG, "mDNS not started, skipping stop...");
+    portENTER_CRITICAL(&s_mdns_lock);
+    bool initialized = s_mdns_ctx.initialized;
+    portEXIT_CRITICAL(&s_mdns_lock);
+
+    if (!initialized) {
+        ESP_LOGI(TAG, "mDNS not started, skipping stop...");
         return;
     }
 
@@ -76,7 +93,9 @@ static void mdns_stop()
 
     mdns_free();
 
-    _mdns_initialized = false;
+    portENTER_CRITICAL(&s_mdns_lock);
+    s_mdns_ctx.initialized = false;
+    portEXIT_CRITICAL(&s_mdns_lock);
     ESP_LOGI(TAG, "mDNS stopped successfully.");
 }
 
@@ -99,7 +118,9 @@ int populate_hostname()
     uint8_t mac[6] = { 0 };
     BO_TRY(esp_read_mac(mac, ESP_MAC_WIFI_STA));
     const struct system_info* sysinfo = bo_system_get_info();
-    snprintf(_hostname, sizeof(_hostname), "%s-%02X%02X", sysinfo->name, mac[4], mac[5]);
+    portENTER_CRITICAL(&s_mdns_lock);
+    snprintf(s_mdns_ctx.hostname, sizeof(s_mdns_ctx.hostname), "%s-%02X%02X", sysinfo->name, mac[4], mac[5]);
+    portEXIT_CRITICAL(&s_mdns_lock);
     return 0;
 }
 

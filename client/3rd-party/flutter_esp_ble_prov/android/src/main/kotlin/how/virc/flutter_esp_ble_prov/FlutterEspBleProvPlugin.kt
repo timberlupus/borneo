@@ -359,6 +359,7 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
         override fun wifiConfigFailed(e: java.lang.Exception?) {
           boss.e("wifiConfiFailed $e")
           ctx.result.success(false)
+          esp.disconnectDevice()
         }
 
         override fun wifiConfigApplied() {
@@ -368,21 +369,25 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
         override fun wifiConfigApplyFailed(e: java.lang.Exception?) {
           boss.e("wifiConfigApplyFailed $e")
           ctx.result.success(false)
+          esp.disconnectDevice()
         }
 
         override fun provisioningFailedFromDevice(failureReason: ESPConstants.ProvisionFailureReason?) {
           boss.e("provisioningFailedFromDevice $failureReason")
           ctx.result.success(false)
+          esp.disconnectDevice()
         }
 
         override fun deviceProvisioningSuccess() {
           boss.d("deviceProvisioningSuccess")
           ctx.result.success(true)
+          esp.disconnectDevice()
         }
 
         override fun onProvisioningFailed(e: java.lang.Exception?) {
           boss.e("onProvisioningFailed")
           ctx.result.success(false)
+          esp.disconnectDevice()
         }
 
       })

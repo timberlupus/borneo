@@ -1,11 +1,11 @@
-import 'package:borneo_app/core/services/devices/device_manager.dart';
+import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_app/shared/view_models/abstract_screen_view_model.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter_esp_ble_prov/flutter_esp_ble_prov.dart';
 import 'package:logger/logger.dart';
 
 class WifiSelectionViewModel extends AbstractScreenViewModel {
-  final IDeviceManager _deviceManager;
+  final IBleProvisioner _bleProvisioner;
   final String deviceName;
   final Logger _logger = Logger(); // Or inject
 
@@ -13,7 +13,7 @@ class WifiSelectionViewModel extends AbstractScreenViewModel {
   List<WifiNetwork>? get networks => _networks;
   final CancellationToken _scanCancelToken = CancellationToken();
 
-  WifiSelectionViewModel(this._deviceManager, this.deviceName, {required super.globalEventBus});
+  WifiSelectionViewModel(this._bleProvisioner, this.deviceName, {required super.globalEventBus});
 
   @override
   Future<void> onInitialize() async {
@@ -25,7 +25,7 @@ class WifiSelectionViewModel extends AbstractScreenViewModel {
     notifyListeners();
     try {
       // Assuming PoP is empty string as decided
-      _networks = await _deviceManager.bleProvisioner.scanWifiNetworks(deviceName, cancelToken: _scanCancelToken);
+      _networks = await _bleProvisioner.scanWifiNetworks(deviceName, cancelToken: _scanCancelToken);
     } on CancelledException {
       logger?.i('The scanning task has been cancelled.');
     } catch (e, stackTrace) {

@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
+import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_app/features/devices/models/ble_provision_state.dart';
 import 'package:borneo_app/features/devices/models/events.dart';
 import 'package:borneo_app/shared/view_models/abstract_screen_view_model.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:logger/logger.dart';
 
 class ProvisioningProgressViewModel extends AbstractScreenViewModel {
   final IDeviceManager _deviceManager;
+  final IBleProvisioner _bleProvisioner;
   final String deviceName;
   final String ssid;
   final String password;
@@ -20,9 +23,11 @@ class ProvisioningProgressViewModel extends AbstractScreenViewModel {
   String? get errorMessage => _errorMessage;
 
   StreamSubscription? _deviceFoundSub;
+  final CancellationToken _provisionCancelToken = CancellationToken();
 
   ProvisioningProgressViewModel(
     this._deviceManager,
+    this._bleProvisioner,
     this.deviceName,
     this.ssid,
     this.password, {
@@ -31,6 +36,9 @@ class ProvisioningProgressViewModel extends AbstractScreenViewModel {
 
   @override
   void dispose() {
+    if (isBusy) {
+      _provisionCancelToken.cancel();
+    }
     _deviceFoundSub?.cancel();
     super.dispose();
   }
@@ -43,12 +51,14 @@ class ProvisioningProgressViewModel extends AbstractScreenViewModel {
   Future<void> startProvisioning() async {
     if (_state != BleProvisioningState.idle) return;
 
+    isBusy = true;
+    notifyListeners();
     try {
       // 1. Sending Credentials
       _updateState(BleProvisioningState.sendingCredentials);
 
       // This sends credentials and waits for ESP confirmation
-      await _deviceManager.bleProvisioner.provisionWifi(deviceName, ssid, password);
+      await _bleProvisioner.provisionWifi(deviceName, ssid, password, cancelToken: _provisionCancelToken);
 
       // 2. Connecting to Wifi (Assumed by plugin usually, or happens now)
       _updateState(BleProvisioningState.connectingToWifi);
@@ -97,10 +107,17 @@ class ProvisioningProgressViewModel extends AbstractScreenViewModel {
       await _deviceManager.addNewDevice(deviceTimestamp);
 
       _updateState(BleProvisioningState.success);
+    } on CancelledException {
+      _logger.i('The provisioning task has been cancelled.');
     } catch (e, stackTrace) {
       _logger.e('Provisioning failed', error: e, stackTrace: stackTrace);
       _errorMessage = e.toString();
       _updateState(BleProvisioningState.failed);
+    } finally {
+      isBusy = false;
+      if (!_provisionCancelToken.isCancelled && !super.isDisposed) {
+        notifyListeners();
+      }
     }
   }
 

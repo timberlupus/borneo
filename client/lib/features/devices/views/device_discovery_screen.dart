@@ -8,6 +8,7 @@ import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/services/devices/device_manager.dart';
+import '../../../core/services/devices/ble_provisioner.dart';
 import '../view_models/device_discovery_view_model.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
@@ -24,6 +25,7 @@ class DeviceDiscoveryScreen extends StatelessWidget {
         context.read<Logger>(),
         context.read<IGroupManager>(),
         context.read<IDeviceManager>(),
+        context.read<IBleProvisioner>(),
         context.read<IDeviceModuleRegistry>(),
         context.read<GettextLocalizations>(),
         globalEventBus: context.read<EventBus>(),

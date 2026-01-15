@@ -14,6 +14,7 @@ import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 
 import '../models/events.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
+import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 
 class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   bool _disposed = false;
@@ -21,6 +22,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   final Logger _logger;
   final IGroupManager _groupManager;
   final IDeviceManager _deviceManager;
+  final IBleProvisioner _bleProvisioner;
   final IDeviceModuleRegistry deviceMdoules;
   final GettextLocalizations _gt;
 
@@ -58,6 +60,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     this._logger,
     this._groupManager,
     this._deviceManager,
+    this._bleProvisioner,
     this.deviceMdoules,
     this._gt, {
     required super.globalEventBus,
@@ -188,7 +191,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     await [Permission.locationWhenInUse, Permission.bluetoothScan, Permission.bluetoothConnect].request();
 
     // Perform scan
-    final devices = await _deviceManager.bleProvisioner.scanBleDevices('BOPROV_', cancelToken: _scanCancelToken);
+    final devices = await _bleProvisioner.scanBleDevices('BOPROV_', cancelToken: _scanCancelToken);
     _unprovisioned = devices;
     _updateDiscoverableList();
   }

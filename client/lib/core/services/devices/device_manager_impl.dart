@@ -9,7 +9,6 @@ import 'package:sembast/sembast.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:lw_wot/wot.dart';
 
-import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/features/devices/models/events.dart';
 import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
@@ -19,8 +18,8 @@ import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/core/services/store_names.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
+import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
-import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_common/io/net/network_interface_helper.dart';
 
 final class DeviceManagerImpl extends IDeviceManager {
@@ -29,7 +28,6 @@ final class DeviceManagerImpl extends IDeviceManager {
   final Database _db;
   bool _isInitialized = false;
   final ISceneManager _sceneManager;
-  final IBleProvisioner _bleProvisioner = BleProvisioner();
 
   final Lock _deviceOperLock = Lock();
 
@@ -74,9 +72,6 @@ final class DeviceManagerImpl extends IDeviceManager {
 
   @override
   bool get isInitialized => _isInitialized;
-
-  @override
-  IBleProvisioner get bleProvisioner => _bleProvisioner;
 
   @override
   GlobalDevicesEventBus get allDeviceEvents => _kernel.events;

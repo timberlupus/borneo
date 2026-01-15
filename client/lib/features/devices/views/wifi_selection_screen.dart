@@ -1,4 +1,4 @@
-import 'package:borneo_app/core/services/devices/device_manager.dart';
+import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_app/features/devices/view_models/wifi_selection_view_model.dart';
 import 'package:borneo_app/features/devices/views/provisioning_progress_screen.dart';
 import 'package:event_bus/event_bus.dart';
@@ -14,13 +14,13 @@ class WifiSelectionScreen extends StatelessWidget {
   Icon _getWifiIcon(int rssi) {
     // RSSI typically ranges from -100 (weak) to 0 (strong)
     if (rssi >= -50) {
-      return Icon(Icons.wifi, color: Colors.green); // Strong signal
+      return const Icon(Icons.wifi, color: Colors.green); // Strong signal
     } else if (rssi >= -70) {
-      return Icon(Icons.wifi_2_bar, color: Colors.yellow); // Good signal
+      return const Icon(Icons.wifi_2_bar, color: Colors.yellow); // Good signal
     } else if (rssi >= -80) {
-      return Icon(Icons.wifi_1_bar, color: Colors.orange); // Weak signal
+      return const Icon(Icons.wifi_1_bar, color: Colors.orange); // Weak signal
     } else {
-      return Icon(Icons.wifi_1_bar, color: Colors.red); // Very weak signal
+      return const Icon(Icons.wifi_1_bar, color: Colors.red); // Very weak signal
     }
   }
 
@@ -28,7 +28,7 @@ class WifiSelectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) =>
-          WifiSelectionViewModel(context.read<IDeviceManager>(), deviceName, globalEventBus: context.read<EventBus>())
+          WifiSelectionViewModel(context.read<IBleProvisioner>(), deviceName, globalEventBus: context.read<EventBus>())
             ..onInitialize(),
       child: Scaffold(
         appBar: AppBar(title: Text(context.translate('Select WiFi'))),
@@ -42,7 +42,7 @@ class WifiSelectionScreen extends StatelessWidget {
                 onRefresh: () async => await vm.scanNetworks(),
                 child: ListView(
                   children: [
-                    SizedBox(height: 100),
+                    const SizedBox(height: 100),
                     Center(child: Text(context.translate('No WiFi networks found'))),
                   ],
                 ),
@@ -59,7 +59,7 @@ class WifiSelectionScreen extends StatelessWidget {
                   return ListTile(
                     title: Text(network.ssid),
                     leading: _getWifiIcon(network.rssi),
-                    trailing: Icon(Icons.lock, size: 16), // TODO FIXME
+                    trailing: const Icon(Icons.lock, size: 16), // TODO FIXME
                     onTap: () => _showPasswordDialog(context, network.ssid),
                   );
                 },
@@ -96,7 +96,7 @@ class WifiSelectionScreen extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.pop(ctx);
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                     builder: (_) => ProvisioningProgressScreen(

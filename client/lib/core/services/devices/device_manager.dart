@@ -4,8 +4,6 @@ import 'package:borneo_common/borneo_common.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:sembast/sembast.dart';
 import 'package:lw_wot/wot.dart';
-
-import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 
@@ -16,7 +14,6 @@ abstract class IDeviceManager implements IDisposable {
 
   // Abstract properties and methods
   bool get isInitialized;
-  IBleProvisioner get bleProvisioner;
   GlobalDevicesEventBus get allDeviceEvents;
   IKernel get kernel;
   Iterable<BoundDevice> get boundDevices;

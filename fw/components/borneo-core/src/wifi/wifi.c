@@ -43,9 +43,14 @@ static bool _has_ssid();
 
 static void wifi_events_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 static void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data);
+static void bo_wifi_events_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 
-static bool s_configurated = false;
+typedef enum { WIFI_STATE_DISCONNECTED = 0, WIFI_STATE_PROVISIONING, WIFI_STATE_CONNECTED } bo_wifi_state_t;
+
+static bo_wifi_state_t s_wifi_state = WIFI_STATE_DISCONNECTED;
 static portMUX_TYPE s_status_lock = portMUX_INITIALIZER_UNLOCKED;
+
+ESP_EVENT_DEFINE_BASE(BO_WIFI_EVENTS);
 
 int bo_wifi_init()
 {
@@ -59,7 +64,9 @@ int bo_wifi_init()
     BO_TRY(esp_wifi_init(&cfg));
     BO_TRY(esp_wifi_set_mode(WIFI_MODE_STA));
     BO_TRY(esp_wifi_set_ps(WIFI_PS_NONE));
-    BO_TRY(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_events_handler, NULL));
+    // 移除WiFi事件注册：BO_TRY(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_events_handler, NULL));
+    BO_TRY(esp_event_handler_register(BO_WIFI_EVENTS, ESP_EVENT_ANY_ID, &bo_wifi_events_handler,
+                                      NULL)); // 添加BO_WIFI_EVENTS注册
     BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &system_events_handler, NULL));
 
     return bo_wifi_start();
@@ -72,6 +79,9 @@ int bo_wifi_start()
     // Try to connect the AP
     if (!_has_ssid()) {
         ESP_LOGI(TAG, "There is no saved WiFi configuration.");
+        portENTER_CRITICAL(&s_status_lock);
+        s_wifi_state = WIFI_STATE_PROVISIONING;
+        portEXIT_CRITICAL(&s_status_lock);
 
 #if CONFIG_BORNEO_PROV_METHOD_NP
         BO_TRY(bo_wifi_np_init());
@@ -82,6 +92,9 @@ int bo_wifi_start()
 #endif
     }
     else {
+        portENTER_CRITICAL(&s_status_lock);
+        s_wifi_state = WIFI_STATE_DISCONNECTED;
+        portEXIT_CRITICAL(&s_status_lock);
         BO_TRY(esp_wifi_connect());
 
         int32_t shutdown_count = 0;
@@ -119,19 +132,30 @@ int bo_wifi_forget()
         if (error != 0) {
             return error;
         }
-
         BO_TRY(esp_wifi_restore());
     }
     else if (error != 0) {
         return error;
     }
-    ESP_LOGI(TAG, "WiFi info has been restored.");
+
+    // 设置状态为Provisioning，并重新启动配网
+    portENTER_CRITICAL(&s_status_lock);
+    s_wifi_state = WIFI_STATE_PROVISIONING;
+    portEXIT_CRITICAL(&s_status_lock);
+
+    // 重新启动WiFi子系统以进入配网
+    BO_TRY(bo_wifi_start()); // 或调用新函数 bo_wifi_enter_provisioning()
+
+    ESP_LOGI(TAG, "WiFi info has been restored and provisioning started.");
     return 0;
 }
 
 static void wifi_events_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
     switch (event_id) {
+    case WIFI_EVENT_SCAN_DONE: {
+        ESP_LOGI(TAG, "WiFi scan done.");
+    } break;
 
     case WIFI_EVENT_STA_START: {
         ESP_LOGI(TAG, "WiFi station mode started.");
@@ -142,6 +166,10 @@ static void wifi_events_handler(void* arg, esp_event_base_t event_base, int32_t 
     } break;
 
     case WIFI_EVENT_STA_DISCONNECTED: {
+        portENTER_CRITICAL(&s_status_lock);
+        s_wifi_state = WIFI_STATE_DISCONNECTED;
+        portEXIT_CRITICAL(&s_status_lock);
+        wifi_event_sta_disconnected_t* event = (wifi_event_sta_disconnected_t*)event_data;
         wifi_config_t wifi_config = { 0 };
         int rc = esp_wifi_get_config(ESP_IF_WIFI_STA, &wifi_config);
         if (rc == ESP_OK) {
@@ -170,6 +198,9 @@ static void wifi_events_handler(void* arg, esp_event_base_t event_base, int32_t 
     } break;
 
     case WIFI_EVENT_STA_CONNECTED: {
+        portENTER_CRITICAL(&s_status_lock);
+        s_wifi_state = WIFI_STATE_CONNECTED;
+        portEXIT_CRITICAL(&s_status_lock);
         if (_wifi_reconnect_timer != NULL) {
             BO_MUST(esp_timer_stop(_wifi_reconnect_timer));
             BO_MUST(esp_timer_delete(_wifi_reconnect_timer));
@@ -186,6 +217,41 @@ static void wifi_events_handler(void* arg, esp_event_base_t event_base, int32_t 
     } break;
 
     } // switch
+}
+
+static void bo_wifi_events_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
+{
+    switch (event_id) {
+    case BO_EVENT_WIFI_PROVISIONING_START: {
+        ESP_LOGI(TAG, "Provisioning started.");
+        // 取消WiFi事件注册（如果已注册）
+        esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_events_handler);
+        portENTER_CRITICAL(&s_status_lock);
+        s_wifi_state = WIFI_STATE_PROVISIONING;
+        portEXIT_CRITICAL(&s_status_lock);
+        break;
+    }
+    case BO_EVENT_WIFI_PROVISIONING_SUCCESS: {
+        ESP_LOGI(TAG, "Provisioning successful.");
+        // 注册WiFi事件
+        BO_MUST(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_events_handler, NULL));
+        portENTER_CRITICAL(&s_status_lock);
+        s_wifi_state = WIFI_STATE_DISCONNECTED;
+        portEXIT_CRITICAL(&s_status_lock);
+        // 尝试连接
+        if (_has_ssid()) {
+            BO_MUST(esp_wifi_connect());
+        }
+        break;
+    }
+    case BO_EVENT_WIFI_PROVISIONING_FAIL: {
+        ESP_LOGE(TAG, "Provisioning failed.");
+        // 可选：保持Provisioning或重置
+        break;
+    }
+    default:
+        break;
+    }
 }
 
 int bo_wifi_get_rssi(int* rssi)
@@ -292,9 +358,9 @@ void system_events_handler(void* handler_args, esp_event_base_t base, int32_t ev
 
 bool bo_wifi_configurated()
 {
-    bool configurated;
+    bo_wifi_state_t state;
     portENTER_CRITICAL(&s_status_lock);
-    configurated = s_configurated;
+    state = s_wifi_state;
     portEXIT_CRITICAL(&s_status_lock);
-    return configurated;
+    return (state == WIFI_STATE_CONNECTED);
 }
