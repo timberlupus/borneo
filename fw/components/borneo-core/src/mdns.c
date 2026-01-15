@@ -37,8 +37,7 @@ int bo_mdns_init()
     ESP_LOGI(TAG, "Initializing Borneo MDNS sub-system...");
 
     // Register event handler for IP_EVENT_STA_GOT_IP and IP_EVENT_STA_LOST_IP
-    BO_TRY_ESP(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &mdns_event_handler, NULL));
-    BO_TRY_ESP(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_LOST_IP, &mdns_event_handler, NULL));
+    BO_TRY_ESP(esp_event_handler_register(IP_EVENT, ESP_EVENT_ANY_ID, &mdns_event_handler, NULL));
 
     ESP_LOGI(TAG, "mDNS sub-system module has been initialized successfully.");
 
@@ -63,9 +62,7 @@ static int mdns_start()
 
     const struct system_info* sysinfo = bo_system_get_info();
 
-    portENTER_CRITICAL(&s_mdns_lock);
     BO_TRY_ESP(mdns_hostname_set(s_mdns_ctx.hostname));
-    portEXIT_CRITICAL(&s_mdns_lock);
     BO_TRY_ESP(mdns_instance_name_set(sysinfo->name));
 
     BO_TRY(add_mdns_services());
@@ -101,15 +98,19 @@ static void mdns_stop()
 
 static void mdns_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
-    if (event_base == IP_EVENT) {
-        if (event_id == IP_EVENT_STA_GOT_IP) {
-            ESP_LOGI(TAG, "WiFi connected, starting mDNS...");
-            BO_MUST_ESP(mdns_start());
-        }
-        else if (event_id == IP_EVENT_STA_LOST_IP) {
-            ESP_LOGI(TAG, "WiFi disconnected, stopping mDNS...");
-            mdns_stop();
-        }
+    switch (event_id) {
+    case IP_EVENT_STA_GOT_IP: {
+        ESP_LOGI(TAG, "WiFi connected, starting mDNS...");
+        BO_MUST_ESP(mdns_start());
+    } break;
+
+    case IP_EVENT_STA_LOST_IP: {
+        ESP_LOGI(TAG, "WiFi disconnected, stopping mDNS...");
+        mdns_stop();
+    } break;
+
+    default:
+        break;
     }
 }
 
