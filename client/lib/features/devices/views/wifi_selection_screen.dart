@@ -81,6 +81,7 @@ class WifiSelectionScreen extends StatelessWidget {
         builder: (context, setState) => AlertDialog(
           title: Text(context.translate('Enter Password for %s').replaceAll('%s', ssid)),
           content: TextField(
+            autofocus: true,
             controller: passwordController,
             obscureText: obscurePassword,
             decoration: InputDecoration(
