@@ -1,4 +1,3 @@
-import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_app/features/devices/models/ble_provision_state.dart';
 import 'package:borneo_app/features/devices/view_models/provisioning_progress_view_model.dart';
@@ -23,7 +22,6 @@ class ProvisioningProgressScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => ProvisioningProgressViewModel(
-        context.read<IDeviceManager>(),
         context.read<IBleProvisioner>(),
         deviceName,
         ssid,
@@ -72,13 +70,19 @@ class ProvisioningProgressScreen extends StatelessWidget {
                           const SizedBox(height: 16),
                           Text(context.translate('Provisioning Successful!')),
                           const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Pop back to discovery screen (2 levels back: progress -> wifi -> discovery)
-                              Navigator.pop(context); // Pop Progress
-                              Navigator.pop(context); // Pop Wifi Selection
+                          // Auto-pop after showing success for 2 seconds
+                          Builder(
+                            builder: (ctx) {
+                              Future.delayed(const Duration(seconds: 2), () {
+                                if (ctx.mounted) {
+                                  // Pop back to discovery screen with refresh flag
+                                  Navigator.pop(context, {
+                                    'refresh': true,
+                                  }); // Pop Progress (back to discovery due to pushReplacement)
+                                }
+                              });
+                              return const SizedBox.shrink();
                             },
-                            child: Text(context.translate('OK')),
                           ),
                         ],
                       ),

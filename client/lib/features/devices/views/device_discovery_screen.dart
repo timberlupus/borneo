@@ -236,9 +236,16 @@ class _DeviceDiscoveryContent extends StatelessWidget {
       title: Text(name),
       subtitle: Text(context.translate('Ready to provision')),
       trailing: Icon(Icons.chevron_right),
-      onTap: () {
+      onTap: () async {
         if (vm.isMobile) {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => WifiSelectionScreen(deviceName: name)));
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => WifiSelectionScreen(deviceName: name)),
+          );
+          // Check if we need to refresh after provisioning
+          if (result != null && result is Map && result['refresh'] == true) {
+            vm.startDiscovery();
+          }
         }
       },
     );
