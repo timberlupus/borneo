@@ -127,6 +127,11 @@ int populate_hostname()
 
 static int add_mdns_services()
 {
+    uint8_t mac[6] = { 0 };
+    char mac_str[18];
+    BO_TRY(esp_read_mac(mac, ESP_MAC_WIFI_STA));
+    snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
     const struct system_info* sysinfo = bo_system_get_info();
     // Add the mDNS service
     BO_TRY_ESP(mdns_service_add(sysinfo->name, MDNS_SERVICE_TYPE, "_udp", MDNS_UDP_PORT, NULL, 0));
@@ -148,6 +153,7 @@ static int add_mdns_services()
         { "category", CONFIG_BORNEO_DEVICE_CATEGORY },
         { "compatible", CONFIG_BORNEO_DEVICE_COMPATIBLE },
         { "path", "/borneo" },
+        { "mac", mac_str },
     };
 
     BO_TRY_ESP(mdns_service_txt_set(MDNS_SERVICE_TYPE, "_udp", serviceTxtData,

@@ -27,7 +27,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   final GettextLocalizations _gt;
 
   bool get _isDiscovering => _deviceManager.isDiscoverying;
-  bool _isRefreshing = false; // 主动刷新标志（BLE 扫描）
+  bool _isRefreshing = false;
 
   late final StreamSubscription<NewDeviceEntityAddedEvent> _deviceAddedEventSub;
   late final StreamSubscription<NewDeviceFoundEvent> _newDeviceFoundEventSub;

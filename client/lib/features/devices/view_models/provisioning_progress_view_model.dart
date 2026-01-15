@@ -49,7 +49,9 @@ class ProvisioningProgressViewModel extends AbstractScreenViewModel {
   }
 
   Future<void> startProvisioning() async {
-    if (_state != BleProvisioningState.idle) return;
+    if (_state != BleProvisioningState.idle) {
+      return;
+    }
 
     isBusy = true;
     notifyListeners();
