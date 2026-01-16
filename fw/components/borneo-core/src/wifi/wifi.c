@@ -30,22 +30,33 @@
 #define NVS_COUNT_KEY "shutdown-count"
 #define TAG "wifi"
 #define WIFI_RECONNECT_INTERVAL_MS 5000
+#define RECONNECT_ATTEMPTS_MAX 5
 
 static int bo_wifi_start();
+static int bo_wifi_enter_provisioning();
 static int _update_nvs_early(int32_t* shutdown_count);
 static int _update_nvs_reset();
 static void _timer_callback(void* args);
 static void _wifi_reconnect_callback(void* arg);
+static int _attempt_wifi_reconnect();
+static void _shutdown_timer_cleanup(); // Forward declaration for shutdown timer cleanup helper
 
 static esp_timer_handle_t _wifi_reconnect_timer = NULL;
 static esp_timer_handle_t _shutdown_checking_timer = NULL;
 static bool _has_ssid();
+static int s_reconnect_attempts = 0;
 
 static void wifi_events_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 static void system_events_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data);
 static void bo_wifi_events_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
+static void wifi_on_disconnected(void* event_data);
 
-typedef enum { WIFI_STATE_DISCONNECTED = 0, WIFI_STATE_PROVISIONING, WIFI_STATE_CONNECTED } bo_wifi_state_t;
+typedef enum {
+    WIFI_STATE_DISCONNECTED = 0,
+    WIFI_STATE_CONNECTING,
+    WIFI_STATE_PROVISIONING,
+    WIFI_STATE_CONNECTED,
+} bo_wifi_state_t;
 
 static bo_wifi_state_t s_wifi_state = WIFI_STATE_DISCONNECTED;
 static portMUX_TYPE s_status_lock = portMUX_INITIALIZER_UNLOCKED;
@@ -64,7 +75,6 @@ int bo_wifi_init()
     BO_TRY(esp_wifi_init(&cfg));
     BO_TRY(esp_wifi_set_mode(WIFI_MODE_STA));
     BO_TRY(esp_wifi_set_ps(WIFI_PS_NONE));
-    // 移除WiFi事件注册：BO_TRY(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_events_handler, NULL));
     BO_TRY(esp_event_handler_register(BO_WIFI_EVENTS, ESP_EVENT_ANY_ID, &bo_wifi_events_handler,
                                       NULL)); // 添加BO_WIFI_EVENTS注册
     BO_TRY(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, &system_events_handler, NULL));
@@ -93,7 +103,7 @@ int bo_wifi_start()
     }
     else {
         portENTER_CRITICAL(&s_status_lock);
-        s_wifi_state = WIFI_STATE_DISCONNECTED;
+        s_wifi_state = WIFI_STATE_CONNECTING;
         portEXIT_CRITICAL(&s_status_lock);
         BO_TRY(esp_wifi_connect());
 
@@ -113,6 +123,7 @@ int bo_wifi_start()
             .name = "settings_sync_timer",
         };
 
+        _shutdown_timer_cleanup();
         BO_TRY(esp_timer_create(&timer_args, &_shutdown_checking_timer));
         BO_TRY(esp_timer_start_once(_shutdown_checking_timer, SHORT_SHUTDOWN_PERIOD * 1000000));
     }
@@ -138,16 +149,160 @@ int bo_wifi_forget()
         return error;
     }
 
-    // 设置状态为Provisioning，并重新启动配网
-    portENTER_CRITICAL(&s_status_lock);
-    s_wifi_state = WIFI_STATE_PROVISIONING;
-    portEXIT_CRITICAL(&s_status_lock);
-
-    // 重新启动WiFi子系统以进入配网
-    BO_TRY(bo_wifi_start()); // 或调用新函数 bo_wifi_enter_provisioning()
+    // Enter provisioning mode
+    BO_TRY(bo_wifi_enter_provisioning());
 
     ESP_LOGI(TAG, "WiFi info has been restored and provisioning started.");
     return 0;
+}
+
+/**
+ * @brief Enter WiFi provisioning mode without restarting WiFi
+ * Assumes WiFi is already running from bo_wifi_start()
+ * @return 0 on success, error code on failure
+ */
+static int bo_wifi_enter_provisioning()
+{
+    // Set state to provisioning
+    portENTER_CRITICAL(&s_status_lock);
+    s_wifi_state = WIFI_STATE_PROVISIONING;
+    s_reconnect_attempts = 0; // Reset reconnect attempts
+    portEXIT_CRITICAL(&s_status_lock);
+
+    // Clean up any pending reconnect timer
+    if (_wifi_reconnect_timer != NULL) {
+        esp_timer_stop(_wifi_reconnect_timer);
+        esp_timer_delete(_wifi_reconnect_timer);
+        _wifi_reconnect_timer = NULL;
+    }
+
+    // Clean up shutdown timer to avoid stale callbacks during provisioning
+    _shutdown_timer_cleanup();
+
+#if CONFIG_BORNEO_PROV_METHOD_NP
+    BO_TRY(bo_wifi_np_init());
+    BO_TRY(bo_wifi_np_start());
+#elif CONFIG_BORNEO_PROV_METHOD_SC
+    BO_TRY(bo_wifi_sc_init());
+    BO_TRY(bo_wifi_sc_start());
+#endif
+
+    return 0;
+}
+
+/**
+ * @brief Attempt to reconnect to WiFi with retry logic
+ * @return 0 on success, -1 if max attempts reached or no SSID configured
+ */
+static int _attempt_wifi_reconnect()
+{
+    if (!_has_ssid()) {
+        ESP_LOGI(TAG, "No SSID configured, cannot reconnect.");
+        return -1;
+    }
+
+    portENTER_CRITICAL(&s_status_lock);
+    bool should_reconnect = s_reconnect_attempts < RECONNECT_ATTEMPTS_MAX;
+    if (should_reconnect) {
+        s_reconnect_attempts++;
+    }
+    int attempts = s_reconnect_attempts;
+    portEXIT_CRITICAL(&s_status_lock);
+
+    if (!should_reconnect) {
+        ESP_LOGW(TAG, "Maximum reconnect attempts (%d) reached. Stopping reconnection.", RECONNECT_ATTEMPTS_MAX);
+        return -1;
+    }
+
+    ESP_LOGI(TAG, "Attempting to reconnect (attempt %d/%d)...", attempts, RECONNECT_ATTEMPTS_MAX);
+    int rc = esp_wifi_connect();
+    if (rc != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initiate WiFi connection. errno=%d. Will retry later...", rc);
+        return -1;
+    }
+
+    portENTER_CRITICAL(&s_status_lock);
+    s_wifi_state = WIFI_STATE_CONNECTING;
+    portEXIT_CRITICAL(&s_status_lock);
+    return 0;
+}
+
+/**
+ * @brief Determine whether WiFi configuration should be cleared
+ *
+ * @param reason WiFi disconnection reason
+ * @return true Configuration should be cleared and re-provisioning is needed
+ * @return false Configuration can be kept and reconnection should be attempted
+ */
+static bool should_clear_wifi_config(wifi_err_reason_t reason)
+{
+    switch (reason) {
+    // Password/authentication errors - need to clear
+    case WIFI_REASON_AUTH_FAIL:
+    case WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT:
+    case WIFI_REASON_HANDSHAKE_TIMEOUT:
+    case WIFI_REASON_802_1X_AUTH_FAILED:
+    case WIFI_REASON_MIC_FAILURE:
+    case WIFI_REASON_INVALID_PMKID:
+
+    // Cipher suite incompatibility - need to clear
+    case WIFI_REASON_GROUP_CIPHER_INVALID:
+    case WIFI_REASON_PAIRWISE_CIPHER_INVALID:
+    case WIFI_REASON_CIPHER_SUITE_REJECTED:
+    case WIFI_REASON_BAD_CIPHER_OR_AKM:
+    case WIFI_REASON_UNSUPP_RSN_IE_VERSION:
+    case WIFI_REASON_INVALID_RSN_IE_CAP:
+    case WIFI_REASON_NO_AP_FOUND_W_COMPATIBLE_SECURITY:
+    case WIFI_REASON_NO_AP_FOUND_IN_AUTHMODE_THRESHOLD:
+        return true;
+
+    default:
+        return false;
+    }
+}
+
+static void wifi_on_disconnected(void* event_data)
+{
+    portENTER_CRITICAL(&s_status_lock);
+    s_wifi_state = WIFI_STATE_DISCONNECTED;
+    portEXIT_CRITICAL(&s_status_lock);
+    wifi_event_sta_disconnected_t* event = (wifi_event_sta_disconnected_t*)event_data;
+    uint8_t reason = event->reason;
+
+    ESP_LOGW(TAG, "WiFi disconnected. Reason: %d", reason);
+
+    // Check if configuration should be cleared
+    if (should_clear_wifi_config(reason)) {
+        ESP_LOGW(TAG,
+                 "WiFi disconnected due to auth/security issue (reason=%d). Clearing saved configuration and entering "
+                 "provisioning mode.",
+                 reason);
+        if (_wifi_reconnect_timer != NULL) {
+            esp_timer_stop(_wifi_reconnect_timer);
+            esp_timer_delete(_wifi_reconnect_timer);
+            _wifi_reconnect_timer = NULL;
+        }
+        bo_wifi_forget();
+        return;
+    }
+
+    // Stop shutdown timer once we are disconnected to avoid unnecessary reset callback
+    _shutdown_timer_cleanup();
+
+    // Attempt to reconnect
+    int rc = _attempt_wifi_reconnect();
+    if (rc != 0) {
+        // Max attempts reached or no SSID, start timer for later retry
+        if (_wifi_reconnect_timer == NULL) {
+            esp_timer_create_args_t timer_args = {
+                .callback = &_wifi_reconnect_callback,
+                .arg = NULL,
+                .name = "wifi_reconnect",
+            };
+            BO_MUST(esp_timer_create(&timer_args, &_wifi_reconnect_timer));
+            BO_MUST(esp_timer_start_once(_wifi_reconnect_timer, WIFI_RECONNECT_INTERVAL_MS * 1000));
+        }
+    }
 }
 
 static void wifi_events_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
@@ -166,40 +321,13 @@ static void wifi_events_handler(void* arg, esp_event_base_t event_base, int32_t 
     } break;
 
     case WIFI_EVENT_STA_DISCONNECTED: {
-        portENTER_CRITICAL(&s_status_lock);
-        s_wifi_state = WIFI_STATE_DISCONNECTED;
-        portEXIT_CRITICAL(&s_status_lock);
-        wifi_event_sta_disconnected_t* event = (wifi_event_sta_disconnected_t*)event_data;
-        wifi_config_t wifi_config = { 0 };
-        int rc = esp_wifi_get_config(ESP_IF_WIFI_STA, &wifi_config);
-        if (rc == ESP_OK) {
-            const char* saved_ssid = (const char*)wifi_config.sta.ssid;
-            if (strnlen(saved_ssid, MAX_SSID_LEN) > 0) {
-                int rc = esp_wifi_connect();
-                if (rc != ESP_OK) {
-                    ESP_LOGE(TAG, "Failed to connect WiFi AP(SSID=%s). errno=%d. Attempting to reconnect...",
-                             saved_ssid, rc);
-                    // Start the reconnect timer
-                    if (_wifi_reconnect_timer == NULL) {
-                        esp_timer_create_args_t timer_args = {
-                            .callback = &_wifi_reconnect_callback,
-                            .arg = NULL,
-                            .name = "wifi_reconnect",
-                        };
-                        BO_MUST(esp_timer_create(&timer_args, &_wifi_reconnect_timer));
-                        BO_MUST(esp_timer_start_once(_wifi_reconnect_timer, WIFI_RECONNECT_INTERVAL_MS * 1000));
-                    }
-                }
-            }
-            else {
-                ESP_LOGE(TAG, "Something wrong here. We're disconnected but there is no saved WiFi configuration.");
-            }
-        }
+        wifi_on_disconnected(event_data);
     } break;
 
     case WIFI_EVENT_STA_CONNECTED: {
         portENTER_CRITICAL(&s_status_lock);
         s_wifi_state = WIFI_STATE_CONNECTED;
+        s_reconnect_attempts = 0; // Reset reconnect attempts on successful connection
         portEXIT_CRITICAL(&s_status_lock);
         if (_wifi_reconnect_timer != NULL) {
             BO_MUST(esp_timer_stop(_wifi_reconnect_timer));
@@ -224,7 +352,6 @@ static void bo_wifi_events_handler(void* arg, esp_event_base_t event_base, int32
     switch (event_id) {
     case BO_EVENT_WIFI_PROVISIONING_START: {
         ESP_LOGI(TAG, "Provisioning started.");
-        // 取消WiFi事件注册（如果已注册）
         esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_events_handler);
         portENTER_CRITICAL(&s_status_lock);
         s_wifi_state = WIFI_STATE_PROVISIONING;
@@ -233,12 +360,10 @@ static void bo_wifi_events_handler(void* arg, esp_event_base_t event_base, int32
     }
     case BO_EVENT_WIFI_PROVISIONING_SUCCESS: {
         ESP_LOGI(TAG, "Provisioning successful.");
-        // 注册WiFi事件
         BO_MUST(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_events_handler, NULL));
         portENTER_CRITICAL(&s_status_lock);
-        s_wifi_state = WIFI_STATE_DISCONNECTED;
+        s_wifi_state = WIFI_STATE_CONNECTING;
         portEXIT_CRITICAL(&s_status_lock);
-        // 尝试连接
         if (_has_ssid()) {
             BO_MUST(esp_wifi_connect());
         }
@@ -246,7 +371,6 @@ static void bo_wifi_events_handler(void* arg, esp_event_base_t event_base, int32
     }
     case BO_EVENT_WIFI_PROVISIONING_FAIL: {
         ESP_LOGE(TAG, "Provisioning failed.");
-        // 可选：保持Provisioning或重置
         break;
     }
     default:
@@ -261,6 +385,15 @@ int bo_wifi_get_rssi(int* rssi)
     }
     BO_TRY(esp_wifi_sta_get_rssi(rssi));
     return 0;
+}
+
+static void _shutdown_timer_cleanup()
+{
+    if (_shutdown_checking_timer != NULL) {
+        esp_timer_stop(_shutdown_checking_timer);
+        esp_timer_delete(_shutdown_checking_timer);
+        _shutdown_checking_timer = NULL;
+    }
 }
 
 void _timer_callback(void* args) { _update_nvs_reset(); }
@@ -319,15 +452,18 @@ EXIT_AND_CLOSE:
 void _wifi_reconnect_callback(void* arg)
 {
     ESP_LOGI(TAG, "Checking Wi-Fi connection...");
-    if (_has_ssid()) {
-        ESP_LOGI(TAG, "Not connected to AP. Reconnecting...");
-        int rc = esp_wifi_connect();
-        if (rc) {
-            ESP_LOGE(TAG, "Failed to connect to AP.");
+    int rc = _attempt_wifi_reconnect();
+    if (rc != 0) {
+        // Max attempts reached, clean up timer
+        if (_wifi_reconnect_timer != NULL) {
+            BO_MUST(esp_timer_stop(_wifi_reconnect_timer));
+            BO_MUST(esp_timer_delete(_wifi_reconnect_timer));
+            _wifi_reconnect_timer = NULL;
         }
     }
     else {
-        ESP_LOGI(TAG, "SSID is invalid or already connected to AP.");
+        // Reconnect initiated, restart timer for next check if needed
+        BO_MUST(esp_timer_start_once(_wifi_reconnect_timer, WIFI_RECONNECT_INTERVAL_MS * 1000));
     }
 }
 

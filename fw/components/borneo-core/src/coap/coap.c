@@ -146,6 +146,10 @@ _EXIT:
 
 void bo_coap_deinit()
 {
+    // Unregister event handlers
+    esp_event_handler_unregister(BO_SNTP_EVENTS, ESP_EVENT_ANY_ID, _bo_event_handler);
+    esp_event_handler_unregister(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, _system_event_handler);
+
     if (_ctx != NULL) {
         coap_free_context(_ctx);
         _ctx = NULL;
