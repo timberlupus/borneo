@@ -39,7 +39,11 @@ void led_sch_compute_color_in_range(led_color_t color, const struct tm* tm_local
                                     const struct led_scheduler_item* range_end)
 {
     int32_t now_instant = (tm_local->tm_hour * 3600) + (tm_local->tm_min * 60) + tm_local->tm_sec;
-    if (range_begin->instant >= SECS_PER_DAY) {
+    // Align current time into the same day-space when the range spans over midnight.
+    if (range_end->instant >= SECS_PER_DAY && range_begin->instant < SECS_PER_DAY) {
+        now_instant += SECS_PER_DAY;
+    }
+    else if (range_begin->instant >= SECS_PER_DAY) {
         now_instant += SECS_PER_DAY;
     }
 

@@ -105,8 +105,8 @@ bool led_sun_is_in_progress(const struct tm* local_tm)
     }
 
     uint32_t local_instant = (local_tm->tm_hour * 3600) + (local_tm->tm_min * 60) + local_tm->tm_sec;
-    bool result = _led.sun_scheduler.items[0].instant >= local_instant
-        && _led.sun_scheduler.items[_led.sun_scheduler.item_count - 1].instant <= local_instant;
+    bool result = _led.sun_scheduler.items[0].instant <= local_instant
+        && _led.sun_scheduler.items[_led.sun_scheduler.item_count - 1].instant >= local_instant;
     portEXIT_CRITICAL(&g_led_spinlock);
 
     return result;
