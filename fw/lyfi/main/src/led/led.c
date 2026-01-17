@@ -12,6 +12,7 @@
 #include <esp_log.h>
 #include <nvs_flash.h>
 #include <esp_rom_md5.h>
+#include <esp_task_wdt.h>
 
 #include <smf/smf.h>
 #include <drvfx/drvfx.h>
@@ -56,7 +57,7 @@ static void dimming_state_exit();
 #define TAG "lyfi-ledc"
 
 #define TASK_PRIORITY 15
-#define SECS_PER_DAY 172800
+#define SECS_PER_DAY 86400
 #define LED_MAX_DUTY ((1 << LEDC_TIMER_12_BIT) - 1)
 #define LED_DUTY_RES LEDC_TIMER_10_BIT
 
@@ -609,10 +610,14 @@ void led_render_task()
         BO_MUST(led_fade_to_normal());
     }
 
+    BO_MUST_ESP(esp_task_wdt_add(NULL));
+
     // Maintain a strict 10ms refresh cadence; if work exceeds 10ms, skip this frame's HW update.
     TickType_t last_wake = xTaskGetTickCount();
 
     while (true) {
+        esp_task_wdt_reset();
+
         int64_t frame_start_us = esp_timer_get_time();
 
         int smf_ret = smf_run_state(SMF_CTX(&_led));
@@ -741,7 +746,10 @@ int led_switch_mode(uint8_t mode)
         return -EINVAL;
     }
 
+    portENTER_CRITICAL(&g_led_spinlock);
     _led.settings.mode = mode;
+    portEXIT_CRITICAL(&g_led_spinlock);
+
     BO_TRY_ESP(esp_event_post(LYFI_EVENTS, LYFI_EVENT_LED_MODE_CHANGED, NULL, 0, portMAX_DELAY));
 
     return 0;
@@ -753,7 +761,10 @@ int led_set_correction_method(uint8_t correction_method)
         return -EINVAL;
     }
 
+    portENTER_CRITICAL(&g_led_spinlock);
     _led.settings.correction_method = correction_method;
+    portEXIT_CRITICAL(&g_led_spinlock);
+
     BO_TRY(led_save_user_settings());
     return 0;
 }

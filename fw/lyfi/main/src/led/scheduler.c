@@ -23,7 +23,7 @@
 #include "../algo.h"
 #include "led.h"
 
-#define SECS_PER_DAY 172800
+#define SECS_PER_DAY 86400
 
 #define TAG "led.scheduler"
 

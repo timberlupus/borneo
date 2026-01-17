@@ -82,6 +82,8 @@ int led_acclimation_set(const struct led_acclimation_settings* settings, bool en
     if (settings == NULL) {
         return -EINVAL;
     }
+
+    portENTER_CRITICAL(&g_led_spinlock);
     memcpy(&_led.settings.acclimation, settings, sizeof(struct led_acclimation_settings));
     if (enabled) {
         _led.settings.flags |= LED_OPTION_ACCLIMATION_ENABLED;
@@ -89,6 +91,8 @@ int led_acclimation_set(const struct led_acclimation_settings* settings, bool en
     else {
         _led.settings.flags &= ~LED_OPTION_ACCLIMATION_ENABLED;
     }
+    portEXIT_CRITICAL(&g_led_spinlock);
+
     BO_TRY(led_save_user_settings());
     ESP_LOGI(TAG, "Acclimation settings has been updated.");
     return 0;
@@ -96,12 +100,16 @@ int led_acclimation_set(const struct led_acclimation_settings* settings, bool en
 
 int led_acclimation_terminate()
 {
+    portENTER_CRITICAL(&g_led_spinlock);
     if (!led_acclimation_is_enabled()) {
+        portEXIT_CRITICAL(&g_led_spinlock);
         return -EINVAL;
     }
 
     _led.acclimation_activated = false;
     _led.settings.flags &= ~LED_OPTION_ACCLIMATION_ENABLED;
+    portEXIT_CRITICAL(&g_led_spinlock);
+
     BO_TRY(led_save_user_settings());
     ESP_LOGI(TAG, "Acclimation settings has been terminated.");
     return 0;
