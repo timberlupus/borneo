@@ -288,6 +288,23 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
           ),
+          Selector<SettingsViewModel, ({bool canUpdate, bool cloudEnabled})>(
+            selector: (_, vm) => (canUpdate: vm.canUpdateCloudEnabled, cloudEnabled: vm.cloudEnabled),
+            builder: (context, map, _) => ListTile(
+              dense: true,
+              tileColor: tileColor,
+              title: Text(context.translate('Cloud simulation')),
+              subtitle: Text(context.translate('Simulate cloud shadow effect')),
+              trailing: Switch(
+                value: map.cloudEnabled,
+                onChanged: map.canUpdate
+                    ? (bool value) async {
+                        await vm.updateCloudEnabled(value);
+                      }
+                    : null,
+              ),
+            ),
+          ),
         ],
       ),
 

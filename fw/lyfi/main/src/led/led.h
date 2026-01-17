@@ -58,6 +58,7 @@ enum led_option_flags {
     LED_OPTION_HAS_GEO_LOCATION = 2,
     LED_OPTION_ACCLIMATION_ENABLED = 4, ///< Whether acclimation is enabled
     LED_OPTION_TZ_ENABLED = 8, ///< Whether timezone is enabled
+    LED_OPTION_CLOUD_ENABLED = 16, ///< Whether cloud overlay is enabled
 };
 
 struct led_scheduler_item {
@@ -121,6 +122,13 @@ struct led_status {
     SemaphoreHandle_t settings_lock;
 
     bool acclimation_activated;
+
+    // Cloud overlay (micro cloud shadow) runtime state
+    bool cloud_activated; ///< Whether cloud event is currently active
+    uint32_t cloud_start_ms;
+    uint32_t cloud_duration_ms;
+    uint32_t cloud_next_fire_ms;
+    uint16_t cloud_drop_bp; ///< Drop in basis points (1% = 100 bp)
 };
 
 extern struct led_status _led;
@@ -206,6 +214,12 @@ bool led_acclimation_is_activated();
 int led_acclimation_drive(time_t utc_now, led_color_t color);
 int led_acclimation_set(const struct led_acclimation_settings* settings, bool enabled);
 int led_acclimation_terminate();
+
+int led_cloud_init();
+int led_cloud_enable(bool enabled);
+bool led_cloud_is_enabled();
+bool led_cloud_is_activated();
+void led_cloud_drive(led_color_t color);
 
 #ifdef __cplusplus
 }

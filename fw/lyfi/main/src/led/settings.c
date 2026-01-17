@@ -39,6 +39,7 @@
 #define LED_NVS_KEY_ACCLIMATION_START "acc.start"
 #define LED_NVS_KEY_ACCLIMATION_DURATION "acc.days"
 #define LED_NVS_KEY_ACCLIMATION_START_PERCENT "acc.pc"
+#define LED_NVS_KEY_CLOUD_ENABLED "cloud.en"
 
 #define TAG "led.settings"
 
@@ -297,6 +298,26 @@ int led_load_user_settings()
         }
     }
 
+    {
+        uint8_t cloud_en = 0;
+        rc = nvs_get_u8(handle, LED_NVS_KEY_CLOUD_ENABLED, &cloud_en);
+        if (rc == 0) {
+            if (cloud_en) {
+                settings->flags |= LED_OPTION_CLOUD_ENABLED;
+            }
+            else {
+                settings->flags &= ~LED_OPTION_CLOUD_ENABLED;
+            }
+        }
+        else if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->flags &= ~LED_OPTION_CLOUD_ENABLED;
+            rc = 0;
+        }
+        if (rc) {
+            return rc;
+        }
+    }
+
     // TODO
     // Loading the brightness and power settings...
     // #ifdef CONFIG_LYFI_STANDALONE_CONTROLLER
@@ -334,6 +355,7 @@ int led_save_user_settings()
     BO_TRY(nvs_set_i64(handle, LED_NVS_KEY_ACCLIMATION_START, settings->acclimation.start_utc));
     BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_DURATION, settings->acclimation.duration));
     BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_START_PERCENT, settings->acclimation.start_percent));
+    BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_CLOUD_ENABLED, (uint8_t)(settings->flags & LED_OPTION_CLOUD_ENABLED)));
 
     BO_TRY(nvs_commit(handle));
     ESP_LOGI(TAG, "Dimming settings updated.");

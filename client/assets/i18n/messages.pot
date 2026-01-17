@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-11 17:39+0800\n"
+"POT-Creation-Date: 2026-01-17 19:51+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,7 +26,7 @@ msgid "My Office"
 msgstr ""
 
 #: devices\borneo\lyfi\manifest.dart:71
-#: devices\borneo\lyfi\views\settings_screen.dart:312
+#: devices\borneo\lyfi\views\settings_screen.dart:329
 msgid "Manual"
 msgstr ""
 
@@ -56,83 +56,91 @@ msgstr ""
 msgid "Preview"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:83
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:88
 msgid "Location updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:85
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:90
 msgid "Failed to update device location: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:96
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:101
 msgid "Please enable location services"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:104
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:109
 msgid "Location permissions are denied"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:109
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:114
 msgid "Location permissions are permanently denied"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:123
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:128
 msgid "Failed to get location: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:137
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:142
 msgid "Time zone updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:139
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:144
 msgid "Failed to update device time zone: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:152
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:157
 msgid "LED correction method updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:154
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:159
 msgid "Failed to update LED correction method: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:167
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:172
 msgid "Temporary duration updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:169
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:174
 msgid "Failed to update temporary duration: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:182
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:187
+msgid "Cloud simulation mode updated successfully"
+msgstr ""
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:189
+msgid "Failed to update cloud simulation mode: $e"
+msgstr ""
+
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:202
 msgid "Fan mode updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:184
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:204
 msgid "Failed to update fan mode: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:197
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:217
 msgid "Manual fan power updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:199
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:219
 msgid "Failed to update manual fan power: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:212
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:232
 msgid "Power behavior updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:214
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:234
 msgid "Failed to update power behavior: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:226
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:246
 msgid "Device restored to factory settings"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:228
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:248
 msgid "Failed to restore device to factory settings: $e"
 msgstr ""
 
@@ -189,7 +197,7 @@ msgid "LED CHANNELS"
 msgstr ""
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:141
-#: devices\borneo\lyfi\views\settings_screen.dart:295
+#: devices\borneo\lyfi\views\settings_screen.dart:312
 msgid "THERMAL MANAGEMENT"
 msgstr ""
 
@@ -198,7 +206,7 @@ msgid "Thermistor enabled"
 msgstr ""
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:153
-#: devices\borneo\lyfi\views\settings_screen.dart:302
+#: devices\borneo\lyfi\views\settings_screen.dart:319
 msgid "Fan mode"
 msgstr ""
 
@@ -252,9 +260,9 @@ msgstr ""
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:288
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:264
-#: devices\borneo\lyfi\views\settings_screen.dart:428
-#: devices\borneo\lyfi\views\settings_screen.dart:476
-#: features\devices\views\wifi_selection_screen.dart:95
+#: devices\borneo\lyfi\views\settings_screen.dart:445
+#: devices\borneo\lyfi\views\settings_screen.dart:493
+#: features\devices\views\wifi_selection_screen.dart:96
 #: features\devices\widgets\delete_group_dialog.dart:19
 #: main\views\main_screen.dart:255
 #: shared\widgets\generic_settings_screen.dart:74
@@ -508,75 +516,83 @@ msgstr ""
 msgid "12 hours"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:308
+#: devices\borneo\lyfi\views\settings_screen.dart:296
+msgid "Cloud simulation"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:297
+msgid "Simulate cloud shadow effect"
+msgstr ""
+
+#: devices\borneo\lyfi\views\settings_screen.dart:325
 msgid "PID Adaptive"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:328
+#: devices\borneo\lyfi\views\settings_screen.dart:345
 msgid "Manual fan power"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:355
+#: devices\borneo\lyfi\views\settings_screen.dart:372
 msgid "VERSION & UPGRADE"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:361
+#: devices\borneo\lyfi\views\settings_screen.dart:378
 msgid "Hardware version"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:368
+#: devices\borneo\lyfi\views\settings_screen.dart:385
 msgid "Firmware version"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:374
+#: devices\borneo\lyfi\views\settings_screen.dart:391
 msgid "DANGER ZONE"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:381
+#: devices\borneo\lyfi\views\settings_screen.dart:398
 msgid "Restore to factory settings"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:384
+#: devices\borneo\lyfi\views\settings_screen.dart:401
 msgid "Your device will lose all custom settings."
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:408
+#: devices\borneo\lyfi\views\settings_screen.dart:425
 msgid "Restore Factory Settings"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:413
+#: devices\borneo\lyfi\views\settings_screen.dart:430
 msgid "Are you sure you want to restore this device to factory settings?"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:415
+#: devices\borneo\lyfi\views\settings_screen.dart:432
 msgid "This action will:"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:417
+#: devices\borneo\lyfi\views\settings_screen.dart:434
 msgid "• Delete all custom settings and configurations"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:418
+#: devices\borneo\lyfi\views\settings_screen.dart:435
 msgid "• Disconnect the device from your network"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:419
+#: devices\borneo\lyfi\views\settings_screen.dart:436
 msgid "• Reset all schedules and modes to defaults"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:422
+#: devices\borneo\lyfi\views\settings_screen.dart:439
 msgid "The device will need to be reconfigured after this operation."
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:444
+#: devices\borneo\lyfi\views\settings_screen.dart:461
 msgid "Restore"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:457
+#: devices\borneo\lyfi\views\settings_screen.dart:474
 msgid "Set Manual Fan Power"
 msgstr ""
 
-#: devices\borneo\lyfi\views\settings_screen.dart:482
+#: devices\borneo\lyfi\views\settings_screen.dart:499
 msgid "Set"
 msgstr ""
 
@@ -595,7 +611,7 @@ msgid ""
 msgstr ""
 
 #: devices\views\device_offline_view.dart:36
-#: features\devices\views\provisioning_progress_screen.dart:99
+#: features\devices\views\provisioning_progress_screen.dart:105
 msgid "Close"
 msgstr ""
 
@@ -638,41 +654,41 @@ msgstr ""
 msgid "Loading..."
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:45
+#: features\devices\views\device_discovery_screen.dart:47
 msgid "Add Device"
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:54
+#: features\devices\views\device_discovery_screen.dart:56
 #: features\devices\views\provisioning_progress_screen.dart:39
 msgid "Stop"
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:62
+#: features\devices\views\device_discovery_screen.dart:64
 msgid "Refresh"
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:79
-#: features\devices\views\device_discovery_screen.dart:177
+#: features\devices\views\device_discovery_screen.dart:81
+#: features\devices\views\device_discovery_screen.dart:179
 msgid "Searching for devices..."
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:92
+#: features\devices\views\device_discovery_screen.dart:94
 msgid "Device provisioning is only available on iOS and Android."
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:147
+#: features\devices\views\device_discovery_screen.dart:149
 msgid "No devices found"
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:214
+#: features\devices\views\device_discovery_screen.dart:216
 msgid "Detected on network"
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:235
+#: features\devices\views\device_discovery_screen.dart:237
 msgid "Ready to provision"
 msgstr ""
 
-#: features\devices\views\device_discovery_screen.dart:283
+#: features\devices\views\device_discovery_screen.dart:292
 msgid "Select the group to which the new device belongs:"
 msgstr ""
 
@@ -784,11 +800,7 @@ msgstr ""
 msgid "Provisioning Successful!"
 msgstr ""
 
-#: features\devices\views\provisioning_progress_screen.dart:79
-msgid "OK"
-msgstr ""
-
-#: features\devices\views\provisioning_progress_screen.dart:93
+#: features\devices\views\provisioning_progress_screen.dart:99
 msgid "Unknown Error"
 msgstr ""
 
@@ -805,11 +817,11 @@ msgstr ""
 msgid "Enter Password for %s"
 msgstr ""
 
-#: features\devices\views\wifi_selection_screen.dart:87
+#: features\devices\views\wifi_selection_screen.dart:88
 msgid "Password"
 msgstr ""
 
-#: features\devices\views\wifi_selection_screen.dart:110
+#: features\devices\views\wifi_selection_screen.dart:111
 msgid "Provision"
 msgstr ""
 

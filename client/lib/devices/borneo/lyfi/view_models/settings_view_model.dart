@@ -36,6 +36,10 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   Duration get temporaryDuration => _temporaryDuration;
   bool get canUpdateTemporaryDuration => !isBusy && isOnline;
 
+  bool _cloudEnabled = false;
+  bool get cloudEnabled => _cloudEnabled;
+  bool get canUpdateCloudEnabled => !isBusy && isOnline;
+
   FanMode _fanMode = FanMode.manual;
   FanMode get fanMode => _fanMode;
   bool get canUpdateFanMode => !isBusy && isOnline;
@@ -71,14 +75,15 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     await super.onInitialize();
     _correctionMethod = await api.getCorrectionMethod(boundDevice!.device);
     _temporaryDuration = await api.getTemporaryDuration(boundDevice!.device);
+    _cloudEnabled = await api.getCloudEnabled(boundDevice!.device);
     _fanMode = await api.getFanMode(boundDevice!.device);
     _manualFanPower = await api.getFanManualPower(boundDevice!.device);
   }
 
-  Future<void> updateGeoLocation(LatLng location) async {
+  Future<void> updateGeoLocation(LatLng location, {CancellationToken? cancel}) async {
     try {
       final loc = GeoLocation(lat: location.latitude, lng: location.longitude);
-      await super.lyfiDeviceApi.setLocation(super.boundDevice!.device, loc);
+      await super.lyfiDeviceApi.setLocation(super.boundDevice!.device, loc, cancelToken: cancel);
       _location = loc;
       notification.showSuccess(_gt.translate("Location updated successfully"));
     } catch (e) {
@@ -125,14 +130,14 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     }
   }
 
-  Future<void> updateTimezone() async {
+  Future<void> updateTimezone({CancellationToken? cancel}) async {
     isBusy = true;
     notifyListeners();
     try {
       final tzc = TimezoneConverter();
       await tzc.init();
       final posixTZ = await tzc.getLocalPosixTimezone();
-      await api.setTimeZone(boundDevice!.device, posixTZ!);
+      await api.setTimeZone(boundDevice!.device, posixTZ!, cancelToken: cancel);
       _timezone = posixTZ;
       notification.showSuccess(_gt.translate("Time zone updated successfully"));
     } catch (e) {
@@ -143,11 +148,11 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     }
   }
 
-  Future<void> updateLedCorrectionMethod(LedCorrectionMethod newMethod) async {
+  Future<void> updateLedCorrectionMethod(LedCorrectionMethod newMethod, {CancellationToken? cancel}) async {
     isBusy = true;
     notifyListeners();
     try {
-      await api.setCorrectionMethod(boundDevice!.device, newMethod);
+      await api.setCorrectionMethod(boundDevice!.device, newMethod, cancelToken: cancel);
       _correctionMethod = newMethod;
       notification.showSuccess(_gt.translate("LED correction method updated successfully"));
     } catch (e) {
@@ -158,11 +163,11 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     }
   }
 
-  Future<void> updateTemporaryDuration(Duration dur) async {
+  Future<void> updateTemporaryDuration(Duration dur, {CancellationToken? cancel}) async {
     isBusy = true;
     notifyListeners();
     try {
-      await api.setTemporaryDuration(boundDevice!.device, dur);
+      await api.setTemporaryDuration(boundDevice!.device, dur, cancelToken: cancel);
       _temporaryDuration = dur;
       notification.showSuccess(_gt.translate("Temporary duration updated successfully"));
     } catch (e) {
@@ -173,11 +178,26 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     }
   }
 
-  Future<void> updateFanMode(FanMode mode) async {
+  Future<void> updateCloudEnabled(bool enabled, {CancellationToken? cancel}) async {
     isBusy = true;
     notifyListeners();
     try {
-      await api.setFanMode(boundDevice!.device, mode);
+      await api.setCloudEnabled(boundDevice!.device, enabled, cancelToken: cancel);
+      _cloudEnabled = enabled;
+      notification.showSuccess(_gt.translate("Cloud simulation mode updated successfully"));
+    } catch (e) {
+      notification.showError(_gt.translate("Failed to update cloud simulation mode: $e"));
+    } finally {
+      isBusy = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateFanMode(FanMode mode, {CancellationToken? cancel}) async {
+    isBusy = true;
+    notifyListeners();
+    try {
+      await api.setFanMode(boundDevice!.device, mode, cancelToken: cancel);
       _fanMode = mode;
       notification.showSuccess(_gt.translate("Fan mode updated successfully"));
     } catch (e) {
@@ -188,11 +208,11 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     }
   }
 
-  Future<void> updateManualFanPower(int power) async {
+  Future<void> updateManualFanPower(int power, {CancellationToken? cancel}) async {
     isBusy = true;
     notifyListeners();
     try {
-      await api.setFanManualPower(boundDevice!.device, power);
+      await api.setFanManualPower(boundDevice!.device, power, cancelToken: cancel);
       _manualFanPower = power;
       notification.showSuccess(_gt.translate("Manual fan power updated successfully"));
     } catch (e) {
@@ -203,11 +223,11 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     }
   }
 
-  Future<void> updatePowerBehavior(PowerBehavior behavior) async {
+  Future<void> updatePowerBehavior(PowerBehavior behavior, {CancellationToken? cancel}) async {
     isBusy = true;
     notifyListeners();
     try {
-      await api.setPowerBehavior(boundDevice!.device, behavior);
+      await api.setPowerBehavior(boundDevice!.device, behavior, cancelToken: cancel);
       _powerBehavior = behavior;
       notification.showSuccess(_gt.translate("Power behavior updated successfully"));
     } catch (e) {

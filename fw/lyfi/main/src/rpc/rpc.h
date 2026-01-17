@@ -66,6 +66,8 @@ int bo_rpc_borneo_lyfi_tz_enabled_get(const CborValue* args, CborEncoder* retval
 int bo_rpc_borneo_lyfi_tz_enabled_put(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_lyfi_tz_offset_get(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_lyfi_tz_offset_put(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_cloud_enabled_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_cloud_enabled_put(const CborValue* args, CborEncoder* retvals);
 
 #ifdef __cplusplus
 }

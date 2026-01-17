@@ -174,6 +174,8 @@ class LyfiDeviceStatus {
   final List<int> sunColor;
   final bool acclimationEnabled;
   final bool acclimationActivated;
+  final bool cloudEnabled;
+  final bool cloudActivated;
   final int? temperature;
   final double? powerCurrent;
 
@@ -192,6 +194,8 @@ class LyfiDeviceStatus {
     required this.powerCurrent,
     this.acclimationEnabled = false,
     this.acclimationActivated = false,
+    this.cloudEnabled = false,
+    this.cloudActivated = false,
   });
 
   factory LyfiDeviceStatus.fromMap(Map map) {
@@ -208,6 +212,8 @@ class LyfiDeviceStatus {
       powerCurrent: map['powerCurrent'] != null ? map['powerCurrent'] / 1000.0 : null,
       acclimationEnabled: map['acclimationEnabled'] ?? false,
       acclimationActivated: map['acclimationActivated'] ?? false,
+      cloudEnabled: map['cloudEnabled'] ?? false,
+      cloudActivated: map['cloudActivated'] ?? false,
     );
   }
 }

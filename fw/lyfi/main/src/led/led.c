@@ -238,6 +238,8 @@ int led_init()
     BO_TRY_ESP(esp_event_handler_register(LYFI_EVENTS, ESP_EVENT_ANY_ID, led_events_handler, NULL));
     BO_TRY_ESP(esp_event_handler_register(BO_SYSTEM_EVENTS, ESP_EVENT_ANY_ID, system_events_handler, NULL));
 
+    BO_TRY(led_cloud_init());
+
     ESP_LOGI(TAG, "Starting LED controller...");
 
     if (_led.settings.mode == LED_MODE_SUN) {
@@ -352,7 +354,6 @@ int led_set_color(const led_color_t color)
         break;
     }
     portEXIT_CRITICAL(&g_led_spinlock);
-
     BO_TRY(led_update_color(color));
 
     return 0;
@@ -886,6 +887,9 @@ static void normal_state_run()
     if (led_acclimation_is_enabled()) {
         BO_MUST(led_acclimation_drive(utc_now, color));
     }
+
+    // Optional cloud overlay (micro shadow) as a multiplicative filter
+    led_cloud_drive(color);
 
     BO_MUST(led_update_color(color));
 }

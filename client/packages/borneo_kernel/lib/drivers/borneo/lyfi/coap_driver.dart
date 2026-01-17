@@ -37,6 +37,7 @@ class LyfiPaths {
   static final Uri tzEnabled = Uri(path: '/borneo/lyfi/tz/enabled');
   static final Uri tzOffset = Uri(path: '/borneo/lyfi/tz/offset');
   static final Uri acclimation = Uri(path: '/borneo/lyfi/acclimation');
+  static final Uri cloudEnabled = Uri(path: '/borneo/lyfi/cloud/enabled');
   static final Uri temporaryDuration = Uri(path: '/borneo/lyfi/temporary-duration');
 
   static final Uri sunSchedule = Uri(path: '/borneo/lyfi/sun/schedule');
@@ -327,8 +328,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   @override
   Future<bool> getTimeZoneEnabled(Device dev, {CancellationToken? cancelToken}) => withQueue(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
-    final result = await dd.coap.getCbor<bool>(LyfiPaths.tzEnabled, cancelToken: cancelToken);
-    return result;
+    return await dd.coap.getCbor<bool>(LyfiPaths.tzEnabled, cancelToken: cancelToken);
   }, cancelToken: cancelToken);
 
   @override
@@ -341,14 +341,25 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   @override
   Future<int> getTimeZoneOffset(Device dev, {CancellationToken? cancelToken}) => withQueue(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
-    final result = await dd.coap.getCbor<int>(LyfiPaths.tzOffset, cancelToken: cancelToken);
-    return result;
+    return await dd.coap.getCbor<int>(LyfiPaths.tzOffset, cancelToken: cancelToken);
   }, cancelToken: cancelToken);
 
   @override
   Future<void> setTimeZoneOffset(Device dev, int offset, {CancellationToken? cancelToken}) => withQueue(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     await dd.coap.putCbor(LyfiPaths.tzOffset, offset, cancelToken: cancelToken);
+  }, cancelToken: cancelToken);
+
+  @override
+  Future<bool> getCloudEnabled(Device dev, {CancellationToken? cancelToken}) => withQueue(dev, () async {
+    final dd = dev.driverData as LyfiCoapDriverData;
+    return await dd.coap.getCbor<bool>(LyfiPaths.cloudEnabled, cancelToken: cancelToken);
+  }, cancelToken: cancelToken);
+
+  @override
+  Future<void> setCloudEnabled(Device dev, bool enabled, {CancellationToken? cancelToken}) => withQueue(dev, () async {
+    final dd = dev.driverData as LyfiCoapDriverData;
+    await dd.coap.putCbor(LyfiPaths.cloudEnabled, enabled, cancelToken: cancelToken);
   }, cancelToken: cancelToken);
 
   @override

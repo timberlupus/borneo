@@ -333,6 +333,16 @@ int bo_rpc_borneo_lyfi_status_get(const CborValue* args, CborEncoder* retvals)
         BO_TRY(cbor_encode_boolean(&root_map, led_acclimation_is_activated()));
     }
 
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "cloudEnabled"));
+        BO_TRY(cbor_encode_boolean(&root_map, led_cloud_is_enabled()));
+    }
+
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "cloudActivated"));
+        BO_TRY(cbor_encode_boolean(&root_map, led_cloud_is_activated()));
+    }
+
     BO_TRY(cbor_encoder_close_container(retvals, &root_map));
 
     return 0;
@@ -507,6 +517,23 @@ int bo_rpc_borneo_lyfi_tz_offset_put(const CborValue* args, CborEncoder* retvals
     int offset = 0;
     BO_TRY(cbor_value_get_int_checked(args, &offset));
     BO_TRY(led_tz_set_offset(offset));
+
+    return 0;
+}
+
+int bo_rpc_borneo_lyfi_cloud_enabled_get(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args;
+    BO_TRY(cbor_encode_boolean(retvals, led_cloud_is_enabled()));
+    return 0;
+}
+
+int bo_rpc_borneo_lyfi_cloud_enabled_put(const CborValue* args, CborEncoder* retvals)
+{
+    bool enabled = false;
+    BO_TRY(cbor_value_get_boolean(args, &enabled));
+    BO_TRY(led_cloud_enable(enabled));
+    BO_TRY(led_save_user_settings());
 
     return 0;
 }

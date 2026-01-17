@@ -38,6 +38,9 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
   Future<int> getTimeZoneOffset(Device dev, {CancellationToken? cancelToken});
   Future<void> setTimeZoneOffset(Device dev, int offset, {CancellationToken? cancelToken});
 
+  Future<bool> getCloudEnabled(Device dev, {CancellationToken? cancelToken});
+  Future<void> setCloudEnabled(Device dev, bool enabled, {CancellationToken? cancelToken});
+
   Future<AcclimationSettings> getAcclimation(Device dev, {CancellationToken? cancelToken});
   Future<void> setAcclimation(Device dev, AcclimationSettings acc, {CancellationToken? cancelToken});
   Future<void> terminateAcclimation(Device dev, {CancellationToken? cancelToken});
