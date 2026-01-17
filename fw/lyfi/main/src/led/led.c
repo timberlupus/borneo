@@ -25,6 +25,10 @@
 #include <borneo/wifi.h>
 #include <borneo/timer.h>
 
+#if CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
+#include <borneo/devices/sensor.h>
+#endif // CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
+
 #include "../lyfi-events.h"
 #include "../algo.h"
 #include "led.h"
@@ -64,6 +68,7 @@ static void dimming_state_exit();
 #define LED_UPDATE_PERIOD_US 10000 // 10ms
 #define LED_UPDATE_PERIOD_TICKS (pdMS_TO_TICKS(10)) // Ticks in 10ms
 #define TEMPORARY_FADE_PERIOD_MS 7000
+#define LED_CHANNEL_SELF_TEST_WAIT_MS 500
 
 static inline led_duty_t channel_brightness_to_duty(led_brightness_t power);
 static inline void color_to_duties(const led_color_t color, led_duty_t* duties);
@@ -73,6 +78,10 @@ static int __attribute__((unused)) led_set_duties(const led_duty_t* duties);
 static int led_mode_manual_entry();
 static int led_mode_scheduled_entry();
 static int led_mode_sun_entry();
+
+#if CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
+static int led_channel_self_test();
+#endif // CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
 
 ESP_EVENT_DEFINE_BASE(LYFI_EVENTS);
 /*
@@ -235,6 +244,11 @@ int led_init()
         BO_TRY(led_sun_init());
     }
 
+#if CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
+    // Perform LED channel self-test
+    BO_TRY(led_channel_self_test());
+#endif
+
     xTaskCreate(&led_render_task, "led_render_task", 4 * 1024, NULL, TASK_PRIORITY, NULL);
     ESP_LOGI(TAG, "LED Controller module has been initialized successfully.");
     return 0;
@@ -251,6 +265,57 @@ inline uint8_t led_get_previous_state()
 }
 
 inline portMUX_TYPE* led_get_lock() { return &g_led_spinlock; }
+
+#if CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
+static int led_channel_self_test()
+{
+    ESP_LOGI(TAG, "Starting LED channel self-test...");
+
+    const struct drvfx_device* power_sensor_dev = k_device_get_binding("sensor.led_power");
+    if (power_sensor_dev == NULL) {
+        ESP_LOGW(TAG, "Power sensor not available, skipping self-test");
+        return 0;
+    }
+
+    // Self-test each channel
+    for (size_t ch = 0; ch < led_channel_count(); ch++) {
+        ESP_LOGI(TAG, "Testing channel %u...", ch);
+
+        // Set channel to 100% (max duty)
+        led_duty_t max_duty = LED_MAX_DUTY;
+        int rc = led_set_channel_duty(ch, max_duty);
+        if (rc != 0) {
+            ESP_LOGW(TAG, "Channel %u: Failed to set duty", ch);
+            continue;
+        }
+
+        // Wait for stable reading
+        vTaskDelay(pdMS_TO_TICKS(LED_CHANNEL_SELF_TEST_WAIT_MS));
+
+        // Read power, voltage, and current
+        int32_t power_mw;
+        rc = sensor_get_value(power_sensor_dev, &power_mw);
+        if (rc == 0) {
+            ESP_LOGI(TAG, "Channel %u: Power = %ld mW", ch, power_mw);
+        }
+        else {
+            ESP_LOGW(TAG, "Channel %u: Failed to read power (error %d)", ch, rc);
+        }
+
+        // Turn off channel
+        rc = led_set_channel_duty(ch, 0);
+        if (rc != 0) {
+            ESP_LOGW(TAG, "Channel %u: Failed to turn off", ch);
+        }
+
+        // Small delay before next channel
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+
+    ESP_LOGI(TAG, "LED channel self-test completed");
+    return 0;
+}
+#endif // CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
 
 void led_blank()
 {
