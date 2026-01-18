@@ -853,6 +853,10 @@ static void normal_state_entry()
 static void normal_state_run()
 {
     if (!bo_power_is_on() || k_get_mode() != KERNEL_MODE_NORMAL) {
+        if (led_is_fading()) {
+            led_fade_drive();
+            return;
+        }
         led_blank();
         return;
     }
