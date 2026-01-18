@@ -425,15 +425,7 @@ int led_set_channel_duty(uint8_t ch, led_duty_t duty)
         return 0;
     }
 
-    uint32_t total_duty = 0;
-    for (size_t ich = 0; ich < led_channel_count(); ich++) {
-        if (ich == ch) {
-            continue;
-        }
-        total_duty += ledc_get_duty(_ledc_channels[ich].speed_mode, _ledc_channels[ich].channel);
-    }
-
-    uint32_t hpoint = total_duty % (1 << LED_DUTY_RES);
+    uint32_t hpoint = _ledc_channels[ch].hpoint;
     BO_TRY_ESP(ledc_set_duty_and_update(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel, duty, hpoint));
     return 0;
 }
@@ -452,11 +444,11 @@ int led_get_duties(led_duty_t* duties)
 
 int led_set_duties(const led_duty_t* duties)
 {
-    uint32_t hpoint = 0;
     for (size_t ch = 0; ch < led_channel_count(); ch++) {
         led_duty_t duty = duties[ch];
+        // Use pre-allocated hpoint from initialization, no dynamic recalculation
+        uint32_t hpoint = _ledc_channels[ch].hpoint;
         BO_MUST(ledc_set_duty_and_update(_ledc_channels[ch].speed_mode, _ledc_channels[ch].channel, duty, hpoint));
-        hpoint = (hpoint + duty) % (1 << LED_DUTY_RES);
     }
     return 0;
 }
