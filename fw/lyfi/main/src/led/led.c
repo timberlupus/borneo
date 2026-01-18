@@ -58,12 +58,14 @@ static void dimming_state_entry();
 static void dimming_state_run();
 static void dimming_state_exit();
 
+static inline void led_dimming_reset_timeout();
+
 #define TAG "lyfi-ledc"
 
 #define TASK_PRIORITY 15
 #define SECS_PER_DAY 86400
 #define LED_MAX_DUTY ((1 << LEDC_TIMER_12_BIT) - 1)
-#define LED_DUTY_RES LEDC_TIMER_10_BIT
+#define LED_DUTY_RES LEDC_TIMER_12_BIT
 
 #define LED_UPDATE_PERIOD_US 10000 // 10ms
 #define LED_UPDATE_PERIOD_TICKS (pdMS_TO_TICKS(10)) // Ticks in 10ms
@@ -355,6 +357,10 @@ int led_set_color(const led_color_t color)
     }
     portEXIT_CRITICAL(&g_led_spinlock);
     BO_TRY(led_update_color(color));
+
+    if (led_get_state() == LED_STATE_DIMMING) {
+        led_dimming_reset_timeout();
+    }
 
     return 0;
 }
@@ -816,6 +822,10 @@ int led_switch_mode(uint8_t mode)
     _led.settings.mode = mode;
     portEXIT_CRITICAL(&g_led_spinlock);
 
+    if (led_get_state() == LED_STATE_DIMMING) {
+        led_dimming_reset_timeout();
+    }
+
     BO_TRY_ESP(esp_event_post(LYFI_EVENTS, LYFI_EVENT_LED_MODE_CHANGED, NULL, 0, portMAX_DELAY));
 
     return 0;
@@ -914,9 +924,13 @@ void dimming_state_entry()
     if (led_is_fading()) {
         BO_MUST(led_fade_stop());
     }
-    // TODO Start the timer
 
     ESP_LOGI(TAG, "Entering dimming mode.");
+
+    led_dimming_reset_timeout();
+    if (_led.settings.dimming_timeout_sec > 0) {
+        ESP_LOGI(TAG, "Dimming timeout set to %u seconds", _led.settings.dimming_timeout_sec);
+    }
 
     switch (_led.settings.mode) {
 
@@ -939,12 +953,27 @@ void dimming_state_entry()
 
 void dimming_state_run()
 {
-    //
+    if (_led.settings.dimming_timeout_sec > 0) {
+        int64_t now_ms = bo_timer_uptime_ms();
+        int64_t deadline_ms;
+        portENTER_CRITICAL(&g_led_spinlock);
+        deadline_ms = _led.dimming_timeout_deadline_ms;
+        portEXIT_CRITICAL(&g_led_spinlock);
+
+        if (now_ms >= deadline_ms && deadline_ms > 0) {
+            ESP_LOGW(TAG, "Dimming timeout reached (%lld >= %lld), switching back to NORMAL", now_ms, deadline_ms);
+            BO_MUST(led_fade_to_normal());
+            smf_set_state(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_NORMAL]);
+        }
+    }
 }
 
 void dimming_state_exit()
 {
-    //
+    portENTER_CRITICAL(&g_led_spinlock);
+    _led.dimming_timeout_deadline_ms = 0;
+    portEXIT_CRITICAL(&g_led_spinlock);
+    ESP_LOGI(TAG, "Exiting dimming mode.");
 }
 
 static void preview_state_entry()
@@ -1009,6 +1038,39 @@ int32_t led_get_temporary_remaining()
     else {
         return -1;
     }
+}
+
+static inline void led_dimming_reset_timeout()
+{
+    int64_t now_ms = bo_timer_uptime_ms();
+    uint16_t timeout_sec;
+    portENTER_CRITICAL(&g_led_spinlock);
+    timeout_sec = _led.settings.dimming_timeout_sec;
+    portEXIT_CRITICAL(&g_led_spinlock);
+
+    if (timeout_sec > 0) {
+        portENTER_CRITICAL(&g_led_spinlock);
+        _led.dimming_timeout_deadline_ms = now_ms + (timeout_sec * 1000LL);
+        portEXIT_CRITICAL(&g_led_spinlock);
+    }
+}
+
+int led_set_dimming_timeout(uint32_t timeout_sec)
+{
+    portENTER_CRITICAL(&g_led_spinlock);
+    _led.settings.dimming_timeout_sec = timeout_sec;
+    portEXIT_CRITICAL(&g_led_spinlock);
+    BO_TRY(led_save_user_settings());
+    return 0;
+}
+
+uint32_t led_get_dimming_timeout()
+{
+    uint32_t timeout;
+    portENTER_CRITICAL(&g_led_spinlock);
+    timeout = _led.settings.dimming_timeout_sec;
+    portEXIT_CRITICAL(&g_led_spinlock);
+    return timeout;
 }
 
 void led_temporary_state_entry()

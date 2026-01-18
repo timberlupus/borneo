@@ -97,6 +97,8 @@ struct led_user_settings {
 
     struct led_acclimation_settings acclimation;
 
+    uint16_t dimming_timeout_sec; ///< DIMMING mode timeout in seconds, 0 = disabled
+
     uint32_t flags; ///< The option flags
 };
 
@@ -129,6 +131,8 @@ struct led_status {
     uint32_t cloud_duration_ms;
     uint32_t cloud_next_fire_ms;
     uint16_t cloud_drop_bp; ///< Drop in basis points (1% = 100 bp)
+
+    int64_t dimming_timeout_deadline_ms; ///< Deadline timestamp for DIMMING mode timeout
 };
 
 extern struct led_status _led;
@@ -178,6 +182,9 @@ bool led_is_blank();
 
 int led_set_temporary_duration(uint32_t duration);
 int32_t led_get_temporary_remaining();
+
+int led_set_dimming_timeout(uint32_t timeout_sec);
+uint32_t led_get_dimming_timeout();
 
 int led_set_correction_method(uint8_t correction_method);
 

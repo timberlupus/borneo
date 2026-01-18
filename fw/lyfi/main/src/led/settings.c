@@ -40,6 +40,7 @@
 #define LED_NVS_KEY_ACCLIMATION_DURATION "acc.days"
 #define LED_NVS_KEY_ACCLIMATION_START_PERCENT "acc.pc"
 #define LED_NVS_KEY_CLOUD_ENABLED "cloud.en"
+#define LED_NVS_KEY_DIMMING_TIMEOUT "dg_to"
 
 #define TAG "led.settings"
 
@@ -90,6 +91,8 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
         .lng = 102.7062f,
     },
     .tz_offset = 8 * 3600, // UTC+8
+
+    .dimming_timeout_sec = CONFIG_LYFI_DIMMING_TIMEOUT_DEFAULT,
 
     .flags = 0ULL,
 
@@ -318,6 +321,17 @@ int led_load_user_settings()
         }
     }
 
+    {
+        rc = nvs_get_u16(handle, LED_NVS_KEY_DIMMING_TIMEOUT, &settings->dimming_timeout_sec);
+        if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->dimming_timeout_sec = CONFIG_LYFI_DIMMING_TIMEOUT_DEFAULT;
+            rc = 0;
+        }
+        if (rc) {
+            return rc;
+        }
+    }
+
     // TODO
     // Loading the brightness and power settings...
     // #ifdef CONFIG_LYFI_STANDALONE_CONTROLLER
@@ -356,6 +370,7 @@ int led_save_user_settings()
     BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_DURATION, settings->acclimation.duration));
     BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_START_PERCENT, settings->acclimation.start_percent));
     BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_CLOUD_ENABLED, (uint8_t)(settings->flags & LED_OPTION_CLOUD_ENABLED)));
+    BO_TRY(nvs_set_u16(handle, LED_NVS_KEY_DIMMING_TIMEOUT, settings->dimming_timeout_sec));
 
     BO_TRY(nvs_commit(handle));
     ESP_LOGI(TAG, "Dimming settings updated.");
