@@ -40,7 +40,8 @@ enum LyfiState {
   normal,
   dimming,
   temporary,
-  preview;
+  preview,
+  disco;
 
   bool get isLocked => !(this == preview || this == dimming);
 
@@ -49,6 +50,7 @@ enum LyfiState {
     "dimming" => LyfiState.dimming,
     "temporary" => LyfiState.temporary,
     "preview" => LyfiState.preview,
+    "disco" => LyfiState.disco,
     _ => throw InvalidDataException(),
   };
 }

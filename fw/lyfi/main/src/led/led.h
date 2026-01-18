@@ -41,6 +41,7 @@ enum led_status_enum {
     LED_STATE_DIMMING = 1,
     LED_STATE_TEMPORARY = 2,
     LED_STATE_PREVIEW = 3,
+    LED_STATE_DISCO = 4,
 
     LED_STATE_COUNT,
 };
@@ -227,6 +228,10 @@ int led_cloud_enable(bool enabled);
 bool led_cloud_is_enabled();
 bool led_cloud_is_activated();
 void led_cloud_drive(led_color_t color);
+
+// Disco mode functions
+int led_disco_init();
+void led_disco_drive(time_t utc_now, led_color_t color);
 
 #ifdef __cplusplus
 }

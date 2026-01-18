@@ -46,6 +46,10 @@ static void led_temporary_state_entry();
 static void led_temporary_state_run();
 static void led_temporary_state_exit();
 
+static void disco_state_entry();
+static void disco_state_run();
+static void disco_state_exit();
+
 static void normal_state_entry();
 static void normal_state_run();
 static void normal_state_exit();
@@ -108,6 +112,8 @@ static const struct smf_state LED_STATE_TABLE[] = {
     = SMF_CREATE_STATE(&led_temporary_state_entry, &led_temporary_state_run, &led_temporary_state_exit, NULL, NULL),
 
     [LED_STATE_PREVIEW] = SMF_CREATE_STATE(&preview_state_entry, &preview_state_run, &preview_state_exit, NULL, NULL),
+
+    [LED_STATE_DISCO] = SMF_CREATE_STATE(&disco_state_entry, &disco_state_run, &disco_state_exit, NULL, NULL),
 };
 
 static const uint8_t LED_GPIOS[CONFIG_LYFI_LED_CHANNEL_COUNT] = {
@@ -769,6 +775,16 @@ int led_switch_state(uint8_t state)
         }
     } break;
 
+    case LED_STATE_DISCO: {
+        // Can switch to DISCO from NORMAL state
+        if (led_get_state() == LED_STATE_NORMAL) {
+            smf_set_state(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_DISCO]);
+        }
+        else {
+            return -EINVAL;
+        }
+    } break;
+
     default:
         return -1;
     }
@@ -1011,6 +1027,36 @@ static void preview_state_exit()
     led_update_color(_led.color_to_resume);
     ESP_LOGI(TAG, "Preview state ended.");
 }
+
+// ========== DISCO State ==========
+
+static void disco_state_entry()
+{
+    ESP_LOGI(TAG, "Entering disco state.");
+
+    // Initialize disco mode
+    BO_MUST(led_disco_init());
+}
+
+static void disco_state_run()
+{
+    if (!bo_power_is_on() || k_get_mode() != KERNEL_MODE_NORMAL) {
+        // If power off or not in normal kernel mode, return to normal state
+        smf_set_state(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_NORMAL]);
+        return;
+    }
+
+    led_color_t color;
+    time_t utc_now = time(NULL);
+
+    // Let disco drive function generate the color
+    led_disco_drive(utc_now, color);
+
+    // Update hardware
+    BO_MUST(led_update_color(color));
+}
+
+static void disco_state_exit() { ESP_LOGI(TAG, "Exiting disco state."); }
 
 int led_set_temporary_duration(uint32_t duration)
 {

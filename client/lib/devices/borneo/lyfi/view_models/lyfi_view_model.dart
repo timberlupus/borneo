@@ -337,6 +337,27 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     await refreshStatus();
   }
 
+  bool get canSwitchDiscoState =>
+      !isBusy &&
+      !isSuspectedOffline &&
+      super.isOn &&
+      (super.state == LyfiState.temporary || super.state == LyfiState.normal);
+
+  void switchDiscoState() async {
+    await _switchDiscoState();
+  }
+
+  Future<void> _switchDiscoState() async {
+    // Turn the disco mode on
+    if (super.state == LyfiState.normal || super.state == LyfiState.temporary) {
+      await executeLyfiCommand(() => _deviceApi.switchState(super.boundDevice!.device, LyfiState.disco));
+    } else {
+      // Restore running mode
+      await executeLyfiCommand(() => _deviceApi.switchState(super.boundDevice!.device, LyfiState.normal));
+    }
+    await refreshStatus();
+  }
+
   void toggleLock(bool isLocked) async {
     await _toggleLock(isLocked);
   }

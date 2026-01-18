@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import '../disco_page.dart';
 
 class DashboardTemporaryTile extends StatelessWidget {
   const DashboardTemporaryTile({super.key});
@@ -42,6 +44,23 @@ class DashboardTemporaryTile extends StatelessWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: props.canSwitch ? () => context.read<LyfiViewModel>().switchTemporaryState() : null,
+                onLongPress: props.canSwitch
+                    ? () async {
+                        HapticFeedback.mediumImpact();
+                        final vm = context.read<LyfiViewModel>();
+                        if (!vm.canSwitchDiscoState) return;
+
+                        vm.switchDiscoState();
+                        if (context.mounted) {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ChangeNotifierProvider.value(value: vm, child: const DiscoPage()),
+                            ),
+                          );
+                        }
+                      }
+                    : null,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Stack(
