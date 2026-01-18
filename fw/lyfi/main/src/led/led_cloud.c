@@ -8,6 +8,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
+#include <drvfx/drvfx.h>
+
 #include <borneo/timer.h>
 
 #include "led.h"
@@ -15,12 +17,12 @@
 #define TAG "lyfi-cloud"
 
 // Cloud overlay (micro cloud shadow) configuration
-#define CLOUD_DROP_MIN_BP 200 // 2.00%
-#define CLOUD_DROP_MAX_BP 500 // 5.00%
-#define CLOUD_DURATION_MIN_MS 400
-#define CLOUD_DURATION_MAX_MS 1500
-#define CLOUD_INTERVAL_BASE_MS 15000
-#define CLOUD_INTERVAL_JITTER_MS 10000
+#define CLOUD_DROP_MIN_BP 3000 // 30%
+#define CLOUD_DROP_MAX_BP 6000 // 60%
+#define CLOUD_DURATION_MIN_MS 30000 // 30 seconds
+#define CLOUD_DURATION_MAX_MS 300000 // 5 minutes
+#define CLOUD_INTERVAL_MIN_MS 300000 // 5 minutes
+#define CLOUD_INTERVAL_MAX_MS 1800000 // 30 minutes
 
 /**
  * @brief Generate random value in range [min, max] inclusive.
@@ -72,6 +74,10 @@ void led_cloud_drive(led_color_t color)
     uint32_t start_ms;
     uint32_t duration_ms;
     uint16_t drop_bp;
+    bool just_activated = false;
+    uint32_t log_duration_ms = 0;
+    uint16_t log_drop_bp = 0;
+    uint32_t log_next_in_ms = 0;
 
     // Update/arm cloud state once per frame under lock
     portENTER_CRITICAL(led_get_lock());
@@ -80,8 +86,13 @@ void led_cloud_drive(led_color_t color)
         _led.cloud_duration_ms = _rand_range(CLOUD_DURATION_MIN_MS, CLOUD_DURATION_MAX_MS);
         _led.cloud_start_ms = now_ms;
         _led.cloud_activated = true;
-        _led.cloud_next_fire_ms
-            = now_ms + _rand_range(CLOUD_INTERVAL_BASE_MS, CLOUD_INTERVAL_BASE_MS + CLOUD_INTERVAL_JITTER_MS);
+        _led.cloud_next_fire_ms = now_ms + _rand_range(CLOUD_INTERVAL_MIN_MS, CLOUD_INTERVAL_MAX_MS);
+
+        // Prepare log details to print outside the critical section
+        just_activated = true;
+        log_duration_ms = _led.cloud_duration_ms;
+        log_drop_bp = _led.cloud_drop_bp;
+        log_next_in_ms = (_led.cloud_next_fire_ms > now_ms) ? (_led.cloud_next_fire_ms - now_ms) : 0;
     }
 
     active = _led.cloud_activated;
@@ -95,6 +106,11 @@ void led_cloud_drive(led_color_t color)
         active = false;
     }
     portEXIT_CRITICAL(led_get_lock());
+
+    if (just_activated) {
+        ESP_LOGI(TAG, "Cloud activated: duration=%u ms, drop=%u bp, next_fire_in=%u ms", (unsigned)log_duration_ms,
+                 (unsigned)log_drop_bp, (unsigned)log_next_in_ms);
+    }
 
     if (!active || duration_ms == 0) {
         return;

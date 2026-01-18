@@ -883,13 +883,16 @@ static void normal_state_run()
         break;
     }
 
-    // Apply filters
+    // Apply filters only when not fading and in proper state
     if (led_acclimation_is_enabled()) {
         BO_MUST(led_acclimation_drive(utc_now, color));
     }
 
     // Optional cloud overlay (micro shadow) as a multiplicative filter
-    led_cloud_drive(color);
+
+    if (_led.settings.flags & LED_OPTION_CLOUD_ENABLED) {
+        led_cloud_drive(color);
+    }
 
     BO_MUST(led_update_color(color));
 }

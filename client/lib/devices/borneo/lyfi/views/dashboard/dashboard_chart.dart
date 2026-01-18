@@ -11,8 +11,14 @@ class DashboardChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<LyfiViewModel, ({bool isOnline, LyfiMode mode, LyfiState? state, bool isOn})>(
-      selector: (_, vm) => (isOnline: vm.isOnline, mode: vm.mode, state: vm.state, isOn: vm.isOn),
+    return Selector<LyfiViewModel, ({bool isOnline, LyfiMode mode, LyfiState? state, bool isOn, bool cloudActivated})>(
+      selector: (_, vm) => (
+        isOnline: vm.isOnline,
+        mode: vm.mode,
+        state: vm.state,
+        isOn: vm.isOn,
+        cloudActivated: vm.lyfiDeviceStatus?.cloudActivated ?? false,
+      ),
       builder: (context, props, _) {
         if (!props.isOnline) {
           return const SizedBox.shrink();
@@ -44,27 +50,48 @@ class DashboardChart extends StatelessWidget {
               child: child,
             );
           },
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final iconSize =
-                  (constraints.maxWidth < constraints.maxHeight ? constraints.maxWidth : constraints.maxHeight) * 0.50;
-              return Stack(
-                children: [
-                  Positioned(
-                    right: -iconSize * 0.1,
-                    bottom: -iconSize * 0.1,
-                    child: IgnorePointer(
-                      child: Icon(
-                        modeIcon,
-                        size: iconSize,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .03),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 200),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final iconSize =
+                    ((constraints.maxWidth < constraints.maxHeight ? constraints.maxWidth : constraints.maxHeight) *
+                            0.50)
+                        .clamp(0, double.infinity)
+                        .toDouble();
+                return Stack(
+                  children: [
+                    Positioned(
+                      right: -iconSize * 0.1,
+                      bottom: -iconSize * 0.1,
+                      child: IgnorePointer(
+                        child: Icon(
+                          modeIcon,
+                          size: iconSize,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .03),
+                        ),
                       ),
                     ),
-                  ),
-                  Positioned.fill(child: chartWidget),
-                ],
-              );
-            },
+                    Positioned.fill(child: chartWidget),
+                    Positioned(
+                      right: 12,
+                      top: 12,
+                      child: AnimatedOpacity(
+                        opacity: props.cloudActivated ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: Icon(
+                          Icons.cloud,
+                          size: 24,
+                          color: Theme.of(context).colorScheme.secondary,
+                          shadows: const [Shadow(color: Colors.black26, blurRadius: 2, offset: Offset(1, 1))],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         );
       },
