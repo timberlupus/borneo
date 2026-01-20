@@ -856,7 +856,13 @@ int led_set_correction_method(uint8_t correction_method)
 static void normal_state_entry()
 {
     if (_led.settings.mode == LED_MODE_SUN) {
-        BO_MUST(led_sun_update_scheduler());
+        if (led_sun_can_active()) {
+            BO_MUST(led_sun_update_scheduler());
+        }
+        else {
+            ESP_LOGW(TAG, "Sun mode unavailable, fallback to MANUAL");
+            _led.settings.mode = LED_MODE_MANUAL;
+        }
     }
 
     if (led_get_previous_state() == LED_STATE_DIMMING || led_get_previous_state() == LED_STATE_PREVIEW) {

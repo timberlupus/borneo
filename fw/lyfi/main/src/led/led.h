@@ -73,9 +73,15 @@ struct led_scheduler {
     // struct led_scheduler_item items[]; FIXME TODO
 };
 
+struct led_channel_settings {
+    char name[16]; ///< Channel name (15 chars + \0)
+    char color[8]; ///< Channel color in hex format (e.g., "#F44336")
+};
+
 struct led_factory_settings {
     uint8_t channel_count; ///< PWM channel count
     uint16_t pwm_freq; ///< The frequency of PWM signals
+    struct led_channel_settings channels[CONFIG_LYFI_LED_CHANNEL_COUNT]; ///< Channel settings (name, color)
 };
 
 struct led_acclimation_settings {
@@ -167,6 +173,8 @@ const struct led_scheduler* led_get_schedule();
 
 const struct led_user_settings* led_get_settings();
 const struct led_factory_settings* led_get_factory_settings();
+const char* led_get_channel_name(uint8_t ch);
+const char* led_get_channel_color(uint8_t ch);
 
 const struct led_status* led_get_status();
 

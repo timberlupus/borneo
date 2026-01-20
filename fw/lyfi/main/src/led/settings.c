@@ -2,6 +2,7 @@
 #include <time.h>
 #include <errno.h>
 #include <math.h>
+#include <stdio.h>
 
 #include <esp_system.h>
 #include <esp_event.h>
@@ -103,10 +104,50 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
     },
 };
 
+struct led_channel_defaults {
+    const char* name;
+    const char* color;
+};
+
+static const struct led_channel_defaults LED_DEFAULT_CHANNELS[CONFIG_LYFI_LED_CHANNEL_COUNT] = {
+#if CONFIG_LYFI_LED_CH0_ENABLED
+    [0] = { CONFIG_LYFI_LED_CH0_NAME, CONFIG_LYFI_LED_CH0_COLOR },
+#endif
+#if CONFIG_LYFI_LED_CH1_ENABLED
+    [1] = { CONFIG_LYFI_LED_CH1_NAME, CONFIG_LYFI_LED_CH1_COLOR },
+#endif
+#if CONFIG_LYFI_LED_CH2_ENABLED
+    [2] = { CONFIG_LYFI_LED_CH2_NAME, CONFIG_LYFI_LED_CH2_COLOR },
+#endif
+#if CONFIG_LYFI_LED_CH3_ENABLED
+    [3] = { CONFIG_LYFI_LED_CH3_NAME, CONFIG_LYFI_LED_CH3_COLOR },
+#endif
+#if CONFIG_LYFI_LED_CH4_ENABLED
+    [4] = { CONFIG_LYFI_LED_CH4_NAME, CONFIG_LYFI_LED_CH4_COLOR },
+#endif
+#if CONFIG_LYFI_LED_CH5_ENABLED
+    [5] = { CONFIG_LYFI_LED_CH5_NAME, CONFIG_LYFI_LED_CH5_COLOR },
+#endif
+#if CONFIG_LYFI_LED_CH6_ENABLED
+    [6] = { CONFIG_LYFI_LED_CH6_NAME, CONFIG_LYFI_LED_CH6_COLOR },
+#endif
+#if CONFIG_LYFI_LED_CH7_ENABLED
+    [7] = { CONFIG_LYFI_LED_CH7_NAME, CONFIG_LYFI_LED_CH7_COLOR },
+#endif
+#if CONFIG_LYFI_LED_CH8_ENABLED
+    [8] = { CONFIG_LYFI_LED_CH8_NAME, CONFIG_LYFI_LED_CH8_COLOR },
+#endif
+#if CONFIG_LYFI_LED_CH9_ENABLED
+    [9] = { CONFIG_LYFI_LED_CH9_NAME, CONFIG_LYFI_LED_CH9_COLOR },
+#endif
+};
+
 static struct led_factory_settings s_factory_settings;
 
 int led_load_factory_settings()
 {
+    memset(&s_factory_settings, 0, sizeof(s_factory_settings));
+
     nvs_handle_t handle;
     BO_TRY(bo_nvs_factory_open(LED_NVS_NS, NVS_READWRITE, &handle));
     BO_NVS_AUTO_CLOSE(handle);
@@ -118,6 +159,25 @@ int led_load_factory_settings()
 
     BO_TRY(bo_nvs_get_or_set_u8(handle, LED_NVS_KEY_CHANNEL_COUNT, &s_factory_settings.channel_count,
                                 CONFIG_LYFI_LED_CHANNEL_COUNT, &changed));
+    // Load channel names and colors from NVS with Kconfig defaults
+    for (uint8_t ch = 0; ch < CONFIG_LYFI_LED_CHANNEL_COUNT && ch < s_factory_settings.channel_count; ch++) {
+        const struct led_channel_defaults* defaults = &LED_DEFAULT_CHANNELS[ch];
+        if (defaults->name == NULL || defaults->color == NULL) {
+            continue;
+        }
+
+        char key[16];
+
+        size_t len = sizeof(s_factory_settings.channels[ch].name);
+        snprintf(key, sizeof(key), "ch%u.name", ch);
+        BO_TRY(
+            bo_nvs_get_or_set_str(handle, key, s_factory_settings.channels[ch].name, &len, defaults->name, &changed));
+
+        len = sizeof(s_factory_settings.channels[ch].color);
+        snprintf(key, sizeof(key), "ch%u.color", ch);
+        BO_TRY(
+            bo_nvs_get_or_set_str(handle, key, s_factory_settings.channels[ch].color, &len, defaults->color, &changed));
+    }
 
     if (changed) {
         BO_TRY(nvs_commit(handle));
@@ -459,4 +519,20 @@ inline size_t led_channel_count()
 {
     const struct led_factory_settings* factory_settings = led_get_factory_settings();
     return factory_settings->channel_count;
+}
+
+const char* led_get_channel_name(uint8_t ch)
+{
+    if (ch >= CONFIG_LYFI_LED_CHANNEL_COUNT) {
+        return NULL;
+    }
+    return s_factory_settings.channels[ch].name;
+}
+
+const char* led_get_channel_color(uint8_t ch)
+{
+    if (ch >= CONFIG_LYFI_LED_CHANNEL_COUNT) {
+        return NULL;
+    }
+    return s_factory_settings.channels[ch].color;
 }
