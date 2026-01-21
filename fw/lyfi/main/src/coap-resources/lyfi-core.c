@@ -56,6 +56,26 @@ static void coap_hnd_color_put(coap_resource_t* resource, coap_session_t* sessio
     coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
 }
 
+#if CONFIG_BORNEO_PRODUCT_MODE_STANDALONE
+static void coap_hnd_channel_meta_put(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
+                                      const coap_string_t* query, coap_pdu_t* response)
+{
+    coap_resource_notify_observers(resource, NULL);
+
+    size_t data_size;
+    const uint8_t* data;
+
+    coap_get_data(request, &data_size, &data);
+
+    CborParser parser;
+    CborValue value;
+    BO_COAP_TRY(cbor_parser_init(data, data_size, 0, &parser, &value), response);
+    BO_COAP_TRY(bo_rpc_borneo_lyfi_channel_meta_put(&value, NULL), response);
+
+    coap_pdu_set_code(response, BO_COAP_CODE_204_CHANGED);
+}
+#endif // CONFIG_BORNEO_PRODUCT_MODE_STANDALONE
+
 static void coap_hnd_schedule_get(coap_resource_t* resource, coap_session_t* session, const coap_pdu_t* request,
                                   const coap_string_t* query, coap_pdu_t* response)
 {
@@ -404,6 +424,10 @@ static void coap_hnd_cloud_enabled_put(coap_resource_t* resource, coap_session_t
 }
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/color", false, coap_hnd_color_get, NULL, coap_hnd_color_put, NULL);
+
+#if CONFIG_BORNEO_PRODUCT_MODE_STANDALONE
+COAP_RESOURCE_DEFINE("borneo/lyfi/channel", false, NULL, NULL, coap_hnd_channel_meta_put, NULL);
+#endif // CONFIG_BORNEO_PRODUCT_MODE_STANDALONE
 
 COAP_RESOURCE_DEFINE("borneo/lyfi/schedule", false, coap_hnd_schedule_get, NULL, coap_hnd_schedule_put, NULL);
 

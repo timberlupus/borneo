@@ -56,9 +56,9 @@ int bo_rpc_borneo_info_get(const CborValue* args, CborEncoder* retvals)
     // Product Mode
     {
         BO_TRY(cbor_encode_text_stringz(&root_map, "productMode"));
-#if CONFIG_BORNEO_PRODUCT_MODE_STANDALONE == 1
+#if CONFIG_BORNEO_PRODUCT_MODE_STANDALONE
         BO_TRY(cbor_encode_uint(&root_map, BORNEO_PRODUCT_MODE_STANDALONE));
-#elif CONFIG_BORNEO_PRODUCT_MODE_FULL == 1
+#elif CONFIG_BORNEO_PRODUCT_MODE_FULL
         BO_TRY(cbor_encode_uint(&root_map, BORNEO_PRODUCT_MODE_FULL));
 #else
         BO_TRY(cbor_encode_uint(&root_map, BORNEO_PRODUCT_MODE_OEM));

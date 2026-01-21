@@ -50,6 +50,9 @@ int bo_rpc_borneo_lyfi_color_put(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_lyfi_schedule_get(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_lyfi_schedule_put(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_lyfi_info_get(const CborValue* args, CborEncoder* retvals);
+#if CONFIG_BORNEO_PRODUCT_MODE_STANDALONE
+int bo_rpc_borneo_lyfi_channel_meta_put(const CborValue* args, CborEncoder* retvals);
+#endif // CONFIG_BORNEO_PRODUCT_MODE_STANDALONE
 int bo_rpc_borneo_lyfi_status_get(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_lyfi_temp_get(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_lyfi_state_get(const CborValue* args, CborEncoder* retvals);
