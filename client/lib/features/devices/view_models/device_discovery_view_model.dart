@@ -176,7 +176,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
       if (_scanCancelToken.isCancelled) return;
       _logger.e('Discovery error', error: e, stackTrace: stackTrace);
       if (!_disposed) {
-        _scanError.value = 'Bluetooth scan error, please check if Bluetooth device is enabled.';
+        _scanError.value = _gt.translate('Bluetooth scan error, please check if Bluetooth device is enabled.');
       }
     } finally {
       if (!_scanCancelToken.isCancelled && !_disposed) {

@@ -224,6 +224,11 @@ int bo_rpc_borneo_lyfi_info_get(const CborValue* args, CborEncoder* retvals)
 #endif // CONFIG_LYFI_LED_NOMINAL_POWER
 
     {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "channelCountMax"));
+        BO_TRY(cbor_encode_uint(&root_map, CONFIG_LYFI_LED_CHANNEL_COUNT));
+    }
+
+    {
         BO_TRY(cbor_encode_text_stringz(&root_map, "channelCount"));
         BO_TRY(cbor_encode_uint(&root_map, led_channel_count()));
     }
@@ -237,66 +242,6 @@ int bo_rpc_borneo_lyfi_info_get(const CborValue* args, CborEncoder* retvals)
 
     return 0;
 }
-
-#if CONFIG_BORNEO_PRODUCT_MODE_STANDALONE
-int bo_rpc_borneo_lyfi_channel_meta_put(const CborValue* args, CborEncoder* retvals)
-{
-    (void)retvals;
-
-    if (!cbor_value_is_map(args)) {
-        return -EINVAL;
-    }
-
-    CborValue value;
-
-    BO_TRY(cbor_value_map_find_value(args, "channel", &value));
-
-    uint64_t ch = 0;
-    BO_TRY(cbor_value_get_uint64(&value, &ch));
-    if (ch > UINT8_MAX) {
-        return -EINVAL;
-    }
-
-    char name_buf[sizeof(((struct led_channel_settings*)0)->name)];
-    char color_buf[sizeof(((struct led_channel_settings*)0)->color)];
-    bool has_name = false;
-    bool has_color = false;
-
-    CborError err = cbor_value_map_find_value(args, "name", &value);
-    BO_TRY(err);
-    if (cbor_value_is_valid(&value) && !cbor_value_is_undefined(&value)) {
-        size_t len = 0;
-        BO_TRY(cbor_value_calculate_string_length(&value, &len));
-        if (len >= sizeof(name_buf)) {
-            return -EINVAL;
-        }
-
-        size_t buf_size = sizeof(name_buf);
-        BO_TRY(cbor_value_copy_text_string(&value, name_buf, &buf_size, NULL));
-        has_name = true;
-    }
-
-    err = cbor_value_map_find_value(args, "color", &value);
-    BO_TRY(err);
-    if (cbor_value_is_valid(&value) && !cbor_value_is_undefined(&value)) {
-        size_t len = 0;
-        BO_TRY(cbor_value_calculate_string_length(&value, &len));
-        if (len >= sizeof(color_buf)) {
-            return -EINVAL;
-        }
-
-        size_t buf_size = sizeof(color_buf);
-        BO_TRY(cbor_value_copy_text_string(&value, color_buf, &buf_size, NULL));
-        has_color = true;
-    }
-
-    if (!has_name && !has_color) {
-        return -EINVAL;
-    }
-
-    return led_set_factory_channel((uint8_t)ch, has_name ? name_buf : NULL, has_color ? color_buf : NULL);
-}
-#endif // CONFIG_BORNEO_PRODUCT_MODE_STANDALONE
 
 int bo_rpc_borneo_lyfi_status_get(const CborValue* args, CborEncoder* retvals)
 {

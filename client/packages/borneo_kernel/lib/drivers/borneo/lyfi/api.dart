@@ -59,14 +59,4 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
 
   /// Sets the manual fan power level (0-100).
   Future<void> setFanManualPower(Device dev, int power, {CancellationToken? cancelToken});
-
-  /// Updates channel metadata (name and/or color) for standalone controllers.
-  /// Only one or both of [name] and [color] need to be provided.
-  Future<void> setChannelMetadata(
-    Device dev,
-    int channel, {
-    String? name,
-    String? color,
-    CancellationToken? cancelToken,
-  });
 }

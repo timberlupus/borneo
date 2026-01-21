@@ -22,14 +22,21 @@ class LyfiChannelInfo {
 
 class LyfiDeviceInfo {
   final double? nominalPower;
+  final int channelCountMax;
   final int channelCount;
   final List<LyfiChannelInfo> channels;
 
-  const LyfiDeviceInfo({required this.nominalPower, required this.channelCount, required this.channels});
+  const LyfiDeviceInfo({
+    required this.channelCountMax,
+    this.nominalPower,
+    required this.channelCount,
+    required this.channels,
+  });
 
   factory LyfiDeviceInfo.fromMap(Map map) {
     return LyfiDeviceInfo(
       nominalPower: map['nominalPower']?.toDouble(),
+      channelCountMax: map['channelCountMax'],
       channelCount: map['channelCount'],
       channels: List<LyfiChannelInfo>.from(map['channels'].map((x) => LyfiChannelInfo.fromMap(x))),
     );

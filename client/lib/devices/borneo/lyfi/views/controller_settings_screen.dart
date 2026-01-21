@@ -6,6 +6,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 
 class ControllerSettingsScreen extends StatefulWidget {
   final ControllerSettingsViewModel vm;
@@ -70,7 +71,9 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
                 selector: (context, vm) => vm.hasChanges,
                 builder: (context, hasChanges, child) => TextButton.icon(
                   key: const ValueKey('submit'),
-                  onPressed: isInitialized && hasChanges ? () => _showSubmitConfirmationDialog(context) : null,
+                  onPressed: isInitialized && context.read<ControllerSettingsViewModel>().canSubmit
+                      ? () => _showSubmitConfirmationDialog(context)
+                      : null,
                   icon: const Icon(Icons.upload),
                   label: Text(context.translate('Submit')),
                 ),
@@ -140,13 +143,13 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
                           hintText: context.translate('1-15 characters'),
                         ),
                         inputFormatters: [LengthLimitingTextInputFormatter(15)],
-                        onChanged: (val) => widget.vm.setChannelName(index, val),
+                        onChanged: (val) => setState(() => widget.vm.setChannelName(index, val)),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    OutlinedButton.icon(
+                    IconButton.outlined(
                       icon: const Icon(Icons.palette_outlined),
-                      label: Text(colorStr),
+                      tooltip: context.translate('Pick color'),
                       onPressed: () => _openColorPicker(index),
                     ),
                   ],
@@ -363,9 +366,9 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
   }
 
   String _colorToHex(Color color) {
-    final r = color.red.toRadixString(16).padLeft(2, '0');
-    final g = color.green.toRadixString(16).padLeft(2, '0');
-    final b = color.blue.toRadixString(16).padLeft(2, '0');
-    return '#${r}${g}${b}'.toUpperCase();
+    final r = color.intRed.toRadixString(16).padLeft(2, '0');
+    final g = color.intGreen.toRadixString(16).padLeft(2, '0');
+    final b = color.intBlue.toRadixString(16).padLeft(2, '0');
+    return '#$r$g$b'.toUpperCase();
   }
 }

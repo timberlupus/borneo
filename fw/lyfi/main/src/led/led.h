@@ -175,8 +175,6 @@ const struct led_user_settings* led_get_settings();
 const struct led_factory_settings* led_get_factory_settings();
 const char* led_get_channel_name(uint8_t ch);
 const char* led_get_channel_color(uint8_t ch);
-int led_set_factory_channel(uint8_t ch, const char* name, const char* color);
-
 const struct led_status* led_get_status();
 
 portMUX_TYPE* led_get_lock();

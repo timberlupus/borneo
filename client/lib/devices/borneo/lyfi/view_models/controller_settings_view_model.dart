@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 
@@ -45,6 +47,7 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
   late final List<String> _initialChannelNames;
   late final List<String> _channelColors;
   late final List<String> _initialChannelColors;
+  late final List<bool> _channelNameValid;
 
   bool get hasChanges {
     final basicChanged =
@@ -60,11 +63,15 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
     return basicChanged || channelChanged;
   }
 
+  bool get canSubmit => hasChanges && _channelNameValid.every((v) => v);
+
   String getChannelName(int index) => _channelNames[index];
   String getChannelColor(int index) => _channelColors[index];
+  bool isChannelNameValid(int index) => _channelNameValid[index];
   void setChannelName(int index, String value) {
     if (_channelNames[index] != value) {
       _channelNames[index] = value;
+      _channelNameValid[index] = _validateChannelName(value);
       notifyListeners();
     }
   }
@@ -100,6 +107,11 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
     _initialChannelNames = List<String>.from(_channelNames, growable: false);
     _channelColors = List<String>.generate(channelCount, (i) => info.channels[i].color, growable: false);
     _initialChannelColors = List<String>.from(_channelColors, growable: false);
+    _channelNameValid = List<bool>.generate(
+      channelCount,
+      (i) => _validateChannelName(_channelNames[i]),
+      growable: false,
+    );
 
     await _initSetting(
       pwmFreq,
@@ -138,6 +150,18 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
       () async =>
           await this.borneoDeviceApi.getFactoryNvsU8(boundDevice!.device, overtempCutoff.namespace, overtempCutoff.key),
     );
+  }
+
+  bool _validateChannelName(String value) {
+    // Must be 1-15 bytes in UTF-8 and not all whitespace
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return false;
+    try {
+      final bytes = utf8.encode(value);
+      return bytes.isNotEmpty && bytes.length <= 15;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> _initSetting<T>(NvsSettingEntry<T> setting, Future<T> Function() getter) async {
@@ -210,16 +234,14 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
     for (int ch = 0; ch < channelCount; ch++) {
       final bool nameChanged = _channelNames[ch] != _initialChannelNames[ch];
       final bool colorChanged = _channelColors[ch] != _initialChannelColors[ch];
-      if (nameChanged || colorChanged) {
-        await lyfiDeviceApi.setChannelMetadata(
-          boundDevice!.device,
-          ch,
-          name: nameChanged ? _channelNames[ch] : null,
-          color: colorChanged ? _channelColors[ch] : null,
-        );
-        _initialChannelNames[ch] = _channelNames[ch];
-        _initialChannelColors[ch] = _channelColors[ch];
+      if (nameChanged) {
+        await this.borneoDeviceApi.setFactoryNvsString(boundDevice!.device, "led", "ch$ch.name", _channelNames[ch]);
       }
+      if (colorChanged) {
+        await this.borneoDeviceApi.setFactoryNvsString(boundDevice!.device, "led", "ch$ch.color", _channelColors[ch]);
+      }
+      _initialChannelNames[ch] = _channelNames[ch];
+      _initialChannelColors[ch] = _channelColors[ch];
     }
 
     this.borneoDeviceApi.reboot(boundDevice!.device);

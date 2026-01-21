@@ -422,23 +422,4 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
     final dd = dev.driverData as LyfiCoapDriverData;
     await dd.coap.putCbor(LyfiPaths.fanManual, power, cancelToken: cancelToken);
   }, cancelToken: cancelToken);
-
-  @override
-  Future<void> setChannelMetadata(
-    Device dev,
-    int channel, {
-    String? name,
-    String? color,
-    CancellationToken? cancelToken,
-  }) => withQueue(dev, () async {
-    final dd = dev.driverData as LyfiCoapDriverData;
-    final Map<String, Object> payload = {
-      'channel': channel,
-      if (name != null) 'name': name,
-      if (color != null) 'color': color,
-    };
-    await dd.coap.putCbor(LyfiPaths.channel, payload, cancelToken: cancelToken);
-    // Refresh cached LyfiDeviceInfo snapshot after update
-    dd.lyfiDeviceInfo = await _getLyfiInfo(dd.coap, cancelToken: cancelToken);
-  }, cancelToken: cancelToken);
 }
