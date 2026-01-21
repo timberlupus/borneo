@@ -40,12 +40,41 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
   late final NvsSettingEntry<bool> overtempEnabled;
   late final NvsSettingEntry<int> overtempCutoff;
 
-  bool get hasChanges =>
-      pwmFreq.changed ||
-      overpowerEnabled.changed ||
-      overpowerCutoff.changed ||
-      overtempEnabled.changed ||
-      overtempCutoff.changed;
+  late final int channelCount;
+  late final List<String> _channelNames;
+  late final List<String> _initialChannelNames;
+  late final List<String> _channelColors;
+  late final List<String> _initialChannelColors;
+
+  bool get hasChanges {
+    final basicChanged =
+        pwmFreq.changed ||
+        overpowerEnabled.changed ||
+        overpowerCutoff.changed ||
+        overtempEnabled.changed ||
+        overtempCutoff.changed;
+    final channelChanged = List.generate(
+      channelCount,
+      (i) => _channelNames[i] != _initialChannelNames[i] || _channelColors[i] != _initialChannelColors[i],
+    ).any((x) => x);
+    return basicChanged || channelChanged;
+  }
+
+  String getChannelName(int index) => _channelNames[index];
+  String getChannelColor(int index) => _channelColors[index];
+  void setChannelName(int index, String value) {
+    if (_channelNames[index] != value) {
+      _channelNames[index] = value;
+      notifyListeners();
+    }
+  }
+
+  void setChannelColor(int index, String value) {
+    if (_channelColors[index] != value) {
+      _channelColors[index] = value;
+      notifyListeners();
+    }
+  }
 
   ControllerSettingsViewModel({
     required super.deviceID,
@@ -63,6 +92,14 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
     overpowerCutoff = NvsSettingEntry<int>(999999, notifyListeners, namespace: "protect", key: "opp.v");
     overtempEnabled = NvsSettingEntry<bool>(true, notifyListeners, namespace: "protect", key: "ot.en");
     overtempCutoff = NvsSettingEntry<int>(65, notifyListeners, namespace: "protect", key: "ot.v");
+
+    // Initialize channel metadata from device info
+    final info = super.lyfiDeviceInfo;
+    channelCount = info.channelCount;
+    _channelNames = List<String>.generate(channelCount, (i) => info.channels[i].name, growable: false);
+    _initialChannelNames = List<String>.from(_channelNames, growable: false);
+    _channelColors = List<String>.generate(channelCount, (i) => info.channels[i].color, growable: false);
+    _initialChannelColors = List<String>.from(_channelColors, growable: false);
 
     await _initSetting(
       pwmFreq,
@@ -167,6 +204,22 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
         overtempCutoff.value,
       );
       overtempCutoff.reset();
+    }
+
+    // Channel metadata updates (name/color)
+    for (int ch = 0; ch < channelCount; ch++) {
+      final bool nameChanged = _channelNames[ch] != _initialChannelNames[ch];
+      final bool colorChanged = _channelColors[ch] != _initialChannelColors[ch];
+      if (nameChanged || colorChanged) {
+        await lyfiDeviceApi.setChannelMetadata(
+          boundDevice!.device,
+          ch,
+          name: nameChanged ? _channelNames[ch] : null,
+          color: colorChanged ? _channelColors[ch] : null,
+        );
+        _initialChannelNames[ch] = _channelNames[ch];
+        _initialChannelColors[ch] = _channelColors[ch];
+      }
     }
 
     this.borneoDeviceApi.reboot(boundDevice!.device);

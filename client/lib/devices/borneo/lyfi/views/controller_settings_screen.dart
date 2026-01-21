@@ -2,6 +2,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/controller_settings_v
 import 'package:borneo_app/shared/widgets/generic_settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import 'package:provider/provider.dart';
@@ -17,6 +18,7 @@ class ControllerSettingsScreen extends StatefulWidget {
 class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
   late Future<void> _initFuture;
   late final TextEditingController _overpowerCutoffController;
+  final List<TextEditingController> _channelNameControllers = [];
 
   @override
   void initState() {
@@ -28,6 +30,9 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
   @override
   void dispose() {
     _overpowerCutoffController.dispose();
+    for (final c in _channelNameControllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -106,65 +111,50 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
         ],
       ),
 
-      /*
       GenericSettingsGroup(
         title: context.translate('LED CHANNELS'),
         children: [
-          ListTile(
-            dense: true,
-            tileColor: tileColor,
-            title: Text('CH0'),
-            leading: Icon(Icons.circle, color: Color.fromARGB(255, 196, 44, 44)),
-            trailing: rightChevron,
-          ),
-          ListTile(
-            dense: true,
-            tileColor: tileColor,
-            title: Text('CH1'),
-            leading: Icon(Icons.circle, color: Color.fromARGB(255, 196, 44, 44)),
-            trailing: rightChevron,
-          ),
-          ListTile(
-            dense: true,
-            tileColor: tileColor,
-            title: Text('CH2'),
-            leading: Icon(Icons.circle, color: Color.fromARGB(255, 196, 44, 44)),
-            trailing: rightChevron,
-          ),
-        ],
-      ),
-      */
+          if (isInitialized)
+            ...List<Widget>.generate(widget.vm.channelCount, (index) {
+              final name = widget.vm.getChannelName(index);
+              final colorStr = widget.vm.getChannelColor(index);
+              if (_channelNameControllers.length <= index) {
+                _channelNameControllers.add(TextEditingController(text: name));
+              } else {
+                final c = _channelNameControllers[index];
+                if (c.text != name) c.text = name;
+              }
 
-      // Thermal
-      /*
-      GenericSettingsGroup(
-        title: context.translate('THERMAL MANAGEMENT'),
-        children: [
-          SwitchListTile.adaptive(
-            dense: true,
-            tileColor: tileColor,
-            title: Text(context.translate("Thermistor enabled")),
-            value: true,
-            onChanged: isInitialized ? (bool value) {} : null,
-          ),
-          ListTile(
-            dense: true,
-            tileColor: tileColor,
-            title: Text(context.translate('Fan mode')),
-            trailing: DropdownButton<int>(
-              value: 0,
-              items: [
-                DropdownMenuItem<int>(value: 0, child: Text(context.translate("Disabled"))),
-                DropdownMenuItem<int>(value: 1, child: Text(context.translate("Internal regulator"))),
-                DropdownMenuItem<int>(value: 2, child: Text(context.translate("PWM Output"))),
-                DropdownMenuItem<int>(value: 3, child: Text(context.translate("Internal regulator & PWM"))),
-              ],
-              onChanged: isInitialized ? (int? value) {} : null,
-            ),
-          ),
+              return ListTile(
+                dense: true,
+                tileColor: tileColor,
+                leading: Icon(Icons.circle, color: _parseHexColor(colorStr)),
+                title: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _channelNameControllers[index],
+                        decoration: InputDecoration(
+                          isDense: true,
+                          labelText: context.translate('Name'),
+                          hintText: context.translate('1-15 characters'),
+                        ),
+                        inputFormatters: [LengthLimitingTextInputFormatter(15)],
+                        onChanged: (val) => widget.vm.setChannelName(index, val),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.palette_outlined),
+                      label: Text(colorStr),
+                      onPressed: () => _openColorPicker(index),
+                    ),
+                  ],
+                ),
+              );
+            }),
         ],
       ),
-      */
 
       // Power & Protection
       GenericSettingsGroup(
@@ -301,5 +291,81 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
         );
       },
     );
+  }
+
+  Color _parseHexColor(String colorStr) {
+    try {
+      final normalized = colorStr.startsWith('#') ? colorStr.substring(1) : colorStr;
+      if (normalized.length == 6) {
+        final value = int.parse(normalized, radix: 16) | 0xFF000000;
+        return Color(value);
+      }
+    } catch (_) {}
+    return Theme.of(context).colorScheme.primary;
+  }
+
+  void _openColorPicker(int index) {
+    final initialColor = _parseHexColor(widget.vm.getChannelColor(index));
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        Color selected = initialColor;
+        return AlertDialog(
+          title: Text(context.translate('Pick color')),
+          content: SingleChildScrollView(
+            child: BlockPicker(
+              pickerColor: initialColor,
+              onColorChanged: (c) => selected = c,
+              availableColors: const [
+                Colors.red,
+                Colors.pink,
+                Colors.deepPurple,
+                Colors.indigo,
+                Colors.blue,
+                Colors.lightBlue,
+                Colors.cyan,
+                Colors.teal,
+                Colors.green,
+                Colors.lightGreen,
+                Colors.lime,
+                Colors.yellow,
+                Colors.amber,
+                Colors.orange,
+                Colors.deepOrange,
+                Colors.brown,
+                Colors.blueGrey,
+                Colors.black,
+                Colors.white,
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(context.translate('Cancel'))),
+            TextButton(
+              onPressed: () {
+                _setChannelColorFromPicker(index, selected);
+                Navigator.of(ctx).pop();
+              },
+              child: Text(context.translate('Apply')),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _setChannelColorFromPicker(int index, Color color) {
+    final hex = _colorToHex(color);
+    setState(() {
+      widget.vm.setChannelColor(index, hex);
+    });
+  }
+
+  String _colorToHex(Color color) {
+    final r = color.red.toRadixString(16).padLeft(2, '0');
+    final g = color.green.toRadixString(16).padLeft(2, '0');
+    final b = color.blue.toRadixString(16).padLeft(2, '0');
+    return '#${r}${g}${b}'.toUpperCase();
   }
 }
