@@ -1,4 +1,5 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/controller_settings_view_model.dart';
+import 'package:borneo_app/shared/widgets/bottom_sheet_picker.dart';
 import 'package:borneo_app/shared/widgets/generic_settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -90,25 +91,17 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
         title: context.translate('LED CONFIGURATION'),
         children: [
           if (isInitialized && widget.vm.pwmFreq.available)
-            ListTile(
-              dense: true,
-              tileColor: tileColor,
-              title: Text(context.translate('PWM frequency')),
-              trailing: Selector<ControllerSettingsViewModel, int?>(
-                selector: (context, vm) => vm.pwmFreq.value,
-                builder: (context, pwmFreq, child) => DropdownButton<int>(
-                  value: pwmFreq,
-                  items: [
-                    DropdownMenuItem<int>(value: 500, child: Text("500 Hz")),
-                    DropdownMenuItem<int>(value: 1000, child: Text("1 kHz")),
-                    DropdownMenuItem<int>(value: 2000, child: Text("2 kHz")),
-                    DropdownMenuItem<int>(value: 3000, child: Text("3 kHz")),
-                    DropdownMenuItem<int>(value: 4000, child: Text("4 kHz")),
-                    DropdownMenuItem<int>(value: 8000, child: Text("8 kHz")),
-                    DropdownMenuItem<int>(value: 19000, child: Text("19 kHz")),
-                  ],
-                  onChanged: (v) => widget.vm.pwmFreq.setValue(v!),
+            Selector<ControllerSettingsViewModel, int?>(
+              selector: (context, vm) => vm.pwmFreq.value,
+              builder: (context, pwmFreq, child) => ListTile(
+                dense: true,
+                tileColor: tileColor,
+                title: Text(context.translate('PWM frequency')),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [Text(_formatPwmFreq(pwmFreq)), const SizedBox(width: 8), const Icon(Icons.chevron_right)],
                 ),
+                onTap: () => _showPwmFreqPicker(context),
               ),
             ),
         ],
@@ -117,8 +110,22 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
       GenericSettingsGroup(
         title: context.translate('LED CHANNELS'),
         children: [
+          if (isInitialized && widget.vm.channelCountSetting.available)
+            Selector<ControllerSettingsViewModel, int?>(
+              selector: (context, vm) => vm.channelCountSetting.value,
+              builder: (context, channelCount, child) => ListTile(
+                dense: true,
+                tileColor: tileColor,
+                title: Text(context.translate('Channel count')),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [Text('$channelCount'), const SizedBox(width: 8), const Icon(Icons.chevron_right)],
+                ),
+                onTap: () => _showChannelCountPicker(context),
+              ),
+            ),
           if (isInitialized)
-            ...List<Widget>.generate(widget.vm.channelCount, (index) {
+            ...List<Widget>.generate(widget.vm.channelCountSetting.value, (index) {
               final name = widget.vm.getChannelName(index);
               final colorStr = widget.vm.getChannelColor(index);
               if (_channelNameControllers.length <= index) {
@@ -216,23 +223,17 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
               ),
             ),
           if (isInitialized && widget.vm.overtempCutoff.available)
-            ListTile(
-              dense: true,
-              tileColor: tileColor,
-              title: Text(context.translate('Overtemperature cut-off')),
-              trailing: Selector<ControllerSettingsViewModel, int?>(
-                selector: (context, vm) => vm.overtempCutoff.value,
-                builder: (context, cutoff, child) => DropdownButton<int>(
-                  value: cutoff,
-                  items: [
-                    DropdownMenuItem<int>(value: 55, child: Text("55 ℃")),
-                    DropdownMenuItem<int>(value: 60, child: Text("60 ℃")),
-                    DropdownMenuItem<int>(value: 65, child: Text("65 ℃")),
-                    DropdownMenuItem<int>(value: 70, child: Text("70 ℃")),
-                    DropdownMenuItem<int>(value: 75, child: Text("75 ℃")),
-                  ],
-                  onChanged: (v) => widget.vm.overtempCutoff.setValue(v!),
+            Selector<ControllerSettingsViewModel, int?>(
+              selector: (context, vm) => vm.overtempCutoff.value,
+              builder: (context, cutoff, child) => ListTile(
+                dense: true,
+                tileColor: tileColor,
+                title: Text(context.translate('Overtemperature cut-off')),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [Text('$cutoff ℃'), const SizedBox(width: 8), const Icon(Icons.chevron_right)],
                 ),
+                onTap: () => _showOvertempCutoffPicker(context),
               ),
             ),
         ],
@@ -363,6 +364,80 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
     setState(() {
       widget.vm.setChannelColor(index, hex);
     });
+  }
+
+  void _showChannelCountPicker(BuildContext context) {
+    final maxChannels = widget.vm.lyfiDeviceInfo.channelCountMax;
+    final currentValue = widget.vm.channelCountSetting.value;
+
+    BottomSheetPicker.show(
+      context: context,
+      title: context.translate('Select channel count'),
+      items: List.generate(maxChannels, (index) => '${index + 1}'),
+      selectedIndex: currentValue - 1,
+      onItemSelected: (index) {
+        widget.vm.channelCountSetting.setValue(index + 1);
+      },
+    );
+  }
+
+  String _formatPwmFreq(int? freq) {
+    if (freq == null) return '';
+    if (freq >= 1000) {
+      return '${(freq / 1000).round()} kHz';
+    } else {
+      return '$freq Hz';
+    }
+  }
+
+  void _showPwmFreqPicker(BuildContext context) {
+    final currentValue = widget.vm.pwmFreq.value;
+    final options = [
+      {'value': 500, 'label': '500 Hz'},
+      {'value': 1000, 'label': '1 kHz'},
+      {'value': 2000, 'label': '2 kHz'},
+      {'value': 3000, 'label': '3 kHz'},
+      {'value': 4000, 'label': '4 kHz'},
+      {'value': 8000, 'label': '8 kHz'},
+      {'value': 19000, 'label': '19 kHz'},
+    ];
+
+    final currentIndex = options.indexWhere((option) => option['value'] == currentValue);
+
+    BottomSheetPicker.show(
+      context: context,
+      title: context.translate('Select PWM frequency'),
+      items: options.map((option) => option['label'] as String).toList(),
+      selectedIndex: currentIndex >= 0 ? currentIndex : 0,
+      onItemSelected: (index) {
+        final selectedOption = options[index];
+        widget.vm.pwmFreq.setValue(selectedOption['value'] as int);
+      },
+    );
+  }
+
+  void _showOvertempCutoffPicker(BuildContext context) {
+    final currentValue = widget.vm.overtempCutoff.value;
+    final options = [
+      {'value': 55, 'label': '55 ℃'},
+      {'value': 60, 'label': '60 ℃'},
+      {'value': 65, 'label': '65 ℃'},
+      {'value': 70, 'label': '70 ℃'},
+      {'value': 75, 'label': '75 ℃'},
+    ];
+
+    final currentIndex = options.indexWhere((option) => option['value'] == currentValue);
+
+    BottomSheetPicker.show(
+      context: context,
+      title: context.translate('Select overtemperature cut-off'),
+      items: options.map((option) => option['label'] as String).toList(),
+      selectedIndex: currentIndex >= 0 ? currentIndex : 0,
+      onItemSelected: (index) {
+        final selectedOption = options[index];
+        widget.vm.overtempCutoff.setValue(selectedOption['value'] as int);
+      },
+    );
   }
 
   String _colorToHex(Color color) {

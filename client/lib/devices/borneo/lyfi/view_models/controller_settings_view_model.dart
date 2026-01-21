@@ -41,6 +41,7 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
   late final NvsSettingEntry<int> overpowerCutoff;
   late final NvsSettingEntry<bool> overtempEnabled;
   late final NvsSettingEntry<int> overtempCutoff;
+  late final NvsSettingEntry<int> channelCountSetting;
 
   late final int channelCount;
   late final List<String> _channelNames;
@@ -55,7 +56,8 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
         overpowerEnabled.changed ||
         overpowerCutoff.changed ||
         overtempEnabled.changed ||
-        overtempCutoff.changed;
+        overtempCutoff.changed ||
+        channelCountSetting.changed;
     final channelChanged = List.generate(
       channelCount,
       (i) => _channelNames[i] != _initialChannelNames[i] || _channelColors[i] != _initialChannelColors[i],
@@ -102,10 +104,20 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
 
     // Initialize channel metadata from device info
     final info = super.lyfiDeviceInfo;
-    channelCount = info.channelCount;
-    _channelNames = List<String>.generate(channelCount, (i) => info.channels[i].name, growable: false);
+    channelCountSetting = NvsSettingEntry<int>(info.channelCount, notifyListeners, namespace: "led", key: "chcount");
+
+    channelCount = info.channelCountMax;
+    _channelNames = List<String>.generate(
+      channelCount,
+      (i) => i < info.channelCount ? info.channels[i].name : '',
+      growable: false,
+    );
     _initialChannelNames = List<String>.from(_channelNames, growable: false);
-    _channelColors = List<String>.generate(channelCount, (i) => info.channels[i].color, growable: false);
+    _channelColors = List<String>.generate(
+      channelCount,
+      (i) => i < info.channelCount ? info.channels[i].color : '#FFFFFF',
+      growable: false,
+    );
     _initialChannelColors = List<String>.from(_channelColors, growable: false);
     _channelNameValid = List<bool>.generate(
       channelCount,
@@ -149,6 +161,14 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
       overtempCutoff,
       () async =>
           await this.borneoDeviceApi.getFactoryNvsU8(boundDevice!.device, overtempCutoff.namespace, overtempCutoff.key),
+    );
+    await _initSetting(
+      channelCountSetting,
+      () async => await this.borneoDeviceApi.getFactoryNvsU8(
+        boundDevice!.device,
+        channelCountSetting.namespace,
+        channelCountSetting.key,
+      ),
     );
   }
 
@@ -228,6 +248,16 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
         overtempCutoff.value,
       );
       overtempCutoff.reset();
+    }
+
+    if (channelCountSetting.changed) {
+      await this.borneoDeviceApi.setFactoryNvsU8(
+        boundDevice!.device,
+        channelCountSetting.namespace,
+        channelCountSetting.key,
+        channelCountSetting.value,
+      );
+      channelCountSetting.reset();
     }
 
     // Channel metadata updates (name/color)

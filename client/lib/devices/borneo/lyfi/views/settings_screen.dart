@@ -1,6 +1,7 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/controller_settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/controller_settings_screen.dart';
+import 'package:borneo_app/shared/widgets/bottom_sheet_picker.dart';
 import 'package:borneo_app/shared/widgets/generic_settings_screen.dart';
 import 'package:borneo_app/shared/widgets/map_location_picker.dart';
 import 'package:borneo_common/io/net/rssi.dart';
@@ -147,26 +148,15 @@ class SettingsScreen extends StatelessWidget {
               leading: const Icon(Icons.settings_power_outlined),
               tileColor: tileColor,
               title: Text(context.translate('Power status at startup')),
-              trailing: DropdownButton<PowerBehavior>(
-                value: map.behavior,
-                items: [
-                  DropdownMenuItem<PowerBehavior>(
-                    value: PowerBehavior.autoPowerOn,
-                    child: Text(context.translate("Keep on"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<PowerBehavior>(
-                    value: PowerBehavior.maintainPowerOff,
-                    child: Text(context.translate("Keep off"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<PowerBehavior>(
-                    value: PowerBehavior.lastPowerState,
-                    child: Text(context.translate("Maintain last"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_formatPowerBehavior(context, map.behavior)),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right),
                 ],
-                onChanged: (PowerBehavior? newValue) async {
-                  await vm.updatePowerBehavior(newValue!);
-                },
               ),
+              onTap: map.canUpdate ? () => _showPowerBehaviorPicker(context, vm) : null,
             ),
           ),
           ListTile(
@@ -210,34 +200,15 @@ class SettingsScreen extends StatelessWidget {
               dense: true,
               tileColor: tileColor,
               title: Text(context.translate('Correction curve')),
-              trailing: DropdownButton<LedCorrectionMethod>(
-                value: map.correctionMethod,
-                items: [
-                  DropdownMenuItem<LedCorrectionMethod>(
-                    value: LedCorrectionMethod.log,
-                    child: Text(context.translate("Logarithmic"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<LedCorrectionMethod>(
-                    value: LedCorrectionMethod.linear,
-                    child: Text(context.translate("Linear"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<LedCorrectionMethod>(
-                    value: LedCorrectionMethod.exp,
-                    child: Text(context.translate("Exponential"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<LedCorrectionMethod>(
-                    value: LedCorrectionMethod.gamma,
-                    child: Text(context.translate("Gamma"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<LedCorrectionMethod>(
-                    value: LedCorrectionMethod.cie1931,
-                    child: Text(context.translate("CIE1931"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_formatCorrectionMethod(context, map.correctionMethod)),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right),
                 ],
-                onChanged: (LedCorrectionMethod? newValue) async {
-                  await vm.updateLedCorrectionMethod(newValue!);
-                },
               ),
+              onTap: map.canUpdate ? () => _showCorrectionMethodPicker(context, vm) : null,
             ),
           ),
           Selector<SettingsViewModel, ({bool canUpdate, Duration duration})>(
@@ -246,46 +217,15 @@ class SettingsScreen extends StatelessWidget {
               dense: true,
               tileColor: tileColor,
               title: Text(context.translate('Temporary light on duration')),
-              trailing: DropdownButton<Duration>(
-                value: map.duration,
-                items: [
-                  DropdownMenuItem<Duration>(
-                    value: Duration(minutes: 5),
-                    child: Text(context.translate("5 minutes"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<Duration>(
-                    value: Duration(minutes: 10),
-                    child: Text(context.translate("10 minutes"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<Duration>(
-                    value: Duration(minutes: 20),
-                    child: Text(context.translate("20 minutes"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<Duration>(
-                    value: Duration(hours: 1),
-                    child: Text(context.translate("1 hour"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<Duration>(
-                    value: Duration(hours: 2),
-                    child: Text(context.translate("2 hours"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<Duration>(
-                    value: Duration(hours: 4),
-                    child: Text(context.translate("4 hours"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<Duration>(
-                    value: Duration(hours: 8),
-                    child: Text(context.translate("8 hours"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<Duration>(
-                    value: Duration(hours: 12),
-                    child: Text(context.translate("12 hours"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_formatDuration(context, map.duration)),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right),
                 ],
-                onChanged: (Duration? newValue) async {
-                  await vm.updateTemporaryDuration(newValue!);
-                },
               ),
+              onTap: map.canUpdate ? () => _showTemporaryDurationPicker(context, vm) : null,
             ),
           ),
           Selector<SettingsViewModel, ({bool canUpdate, bool cloudEnabled})>(
@@ -317,22 +257,15 @@ class SettingsScreen extends StatelessWidget {
               dense: true,
               tileColor: tileColor,
               title: Text(context.translate('Fan mode')),
-              trailing: DropdownButton<FanMode>(
-                value: map.fanMode,
-                items: [
-                  DropdownMenuItem<FanMode>(
-                    value: FanMode.pid,
-                    child: Text(context.translate("PID Adaptive"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
-                  DropdownMenuItem<FanMode>(
-                    value: FanMode.manual,
-                    child: Text(context.translate("Manual"), style: Theme.of(context).textTheme.bodySmall),
-                  ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_formatFanMode(context, map.fanMode)),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right),
                 ],
-                onChanged: (FanMode? newValue) async {
-                  await vm.updateFanMode(newValue!);
-                },
               ),
+              onTap: map.canUpdate ? () => _showFanModePicker(context, vm) : null,
             ),
           ),
           Selector<SettingsViewModel, ({bool canUpdate, int manualFanPower, FanMode fanMode})>(
@@ -501,6 +434,129 @@ class SettingsScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  String _formatPowerBehavior(BuildContext context, PowerBehavior behavior) {
+    return switch (behavior) {
+      PowerBehavior.autoPowerOn => context.translate("Keep on"),
+      PowerBehavior.maintainPowerOff => context.translate("Keep off"),
+      PowerBehavior.lastPowerState => context.translate("Maintain last"),
+    };
+  }
+
+  void _showPowerBehaviorPicker(BuildContext context, SettingsViewModel vm) {
+    final options = [
+      {'value': PowerBehavior.autoPowerOn, 'label': context.translate("Keep on")},
+      {'value': PowerBehavior.maintainPowerOff, 'label': context.translate("Keep off")},
+      {'value': PowerBehavior.lastPowerState, 'label': context.translate("Maintain last")},
+    ];
+    final currentIndex = options.indexWhere((option) => option['value'] == vm.powerBehavior);
+
+    BottomSheetPicker.show(
+      context: context,
+      title: context.translate('Select power status'),
+      items: options.map((option) => option['label'] as String).toList(),
+      selectedIndex: currentIndex >= 0 ? currentIndex : 0,
+      onItemSelected: (index) async {
+        final selectedOption = options[index];
+        await vm.updatePowerBehavior(selectedOption['value'] as PowerBehavior);
+      },
+    );
+  }
+
+  String _formatCorrectionMethod(BuildContext context, LedCorrectionMethod method) {
+    return switch (method) {
+      LedCorrectionMethod.log => context.translate("Logarithmic"),
+      LedCorrectionMethod.linear => context.translate("Linear"),
+      LedCorrectionMethod.exp => context.translate("Exponential"),
+      LedCorrectionMethod.gamma => context.translate("Gamma"),
+      LedCorrectionMethod.cie1931 => context.translate("CIE1931"),
+    };
+  }
+
+  void _showCorrectionMethodPicker(BuildContext context, SettingsViewModel vm) {
+    final options = [
+      {'value': LedCorrectionMethod.log, 'label': context.translate("Logarithmic")},
+      {'value': LedCorrectionMethod.linear, 'label': context.translate("Linear")},
+      {'value': LedCorrectionMethod.exp, 'label': context.translate("Exponential")},
+      {'value': LedCorrectionMethod.gamma, 'label': context.translate("Gamma")},
+      {'value': LedCorrectionMethod.cie1931, 'label': context.translate("CIE1931")},
+    ];
+    final currentIndex = options.indexWhere((option) => option['value'] == vm.correctionMethod);
+
+    BottomSheetPicker.show(
+      context: context,
+      title: context.translate('Select correction curve'),
+      items: options.map((option) => option['label'] as String).toList(),
+      selectedIndex: currentIndex >= 0 ? currentIndex : 0,
+      onItemSelected: (index) async {
+        final selectedOption = options[index];
+        await vm.updateLedCorrectionMethod(selectedOption['value'] as LedCorrectionMethod);
+      },
+    );
+  }
+
+  String _formatDuration(BuildContext context, Duration duration) {
+    if (duration.inMinutes == 5) return context.translate("5 minutes");
+    if (duration.inMinutes == 10) return context.translate("10 minutes");
+    if (duration.inMinutes == 20) return context.translate("20 minutes");
+    if (duration.inHours == 1) return context.translate("1 hour");
+    if (duration.inHours == 2) return context.translate("2 hours");
+    if (duration.inHours == 4) return context.translate("4 hours");
+    if (duration.inHours == 8) return context.translate("8 hours");
+    if (duration.inHours == 12) return context.translate("12 hours");
+    return duration.toString();
+  }
+
+  void _showTemporaryDurationPicker(BuildContext context, SettingsViewModel vm) {
+    final options = [
+      {'value': Duration(minutes: 5), 'label': context.translate("5 minutes")},
+      {'value': Duration(minutes: 10), 'label': context.translate("10 minutes")},
+      {'value': Duration(minutes: 20), 'label': context.translate("20 minutes")},
+      {'value': Duration(hours: 1), 'label': context.translate("1 hour")},
+      {'value': Duration(hours: 2), 'label': context.translate("2 hours")},
+      {'value': Duration(hours: 4), 'label': context.translate("4 hours")},
+      {'value': Duration(hours: 8), 'label': context.translate("8 hours")},
+      {'value': Duration(hours: 12), 'label': context.translate("12 hours")},
+    ];
+    final currentIndex = options.indexWhere((option) => option['value'] == vm.temporaryDuration);
+
+    BottomSheetPicker.show(
+      context: context,
+      title: context.translate('Select duration'),
+      items: options.map((option) => option['label'] as String).toList(),
+      selectedIndex: currentIndex >= 0 ? currentIndex : 0,
+      onItemSelected: (index) async {
+        final selectedOption = options[index];
+        await vm.updateTemporaryDuration(selectedOption['value'] as Duration);
+      },
+    );
+  }
+
+  String _formatFanMode(BuildContext context, FanMode mode) {
+    return switch (mode) {
+      FanMode.pid => context.translate("PID Adaptive"),
+      FanMode.manual => context.translate("Manual"),
+    };
+  }
+
+  void _showFanModePicker(BuildContext context, SettingsViewModel vm) {
+    final options = [
+      {'value': FanMode.pid, 'label': context.translate("PID Adaptive")},
+      {'value': FanMode.manual, 'label': context.translate("Manual")},
+    ];
+    final currentIndex = options.indexWhere((option) => option['value'] == vm.fanMode);
+
+    BottomSheetPicker.show(
+      context: context,
+      title: context.translate('Select fan mode'),
+      items: options.map((option) => option['label'] as String).toList(),
+      selectedIndex: currentIndex >= 0 ? currentIndex : 0,
+      onItemSelected: (index) async {
+        final selectedOption = options[index];
+        await vm.updateFanMode(selectedOption['value'] as FanMode);
+      },
     );
   }
 }
