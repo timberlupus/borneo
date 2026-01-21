@@ -245,5 +245,6 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
     }
 
     this.borneoDeviceApi.reboot(boundDevice!.device);
+    await deviceManager.unbind(deviceID);
   }
 }
