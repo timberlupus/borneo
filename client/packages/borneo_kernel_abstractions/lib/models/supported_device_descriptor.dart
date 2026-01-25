@@ -1,3 +1,5 @@
+import 'package:pub_semver/pub_semver.dart';
+
 import 'package:borneo_kernel_abstractions/models/driver_descriptor.dart';
 
 class SupportedDeviceDescriptor {
@@ -9,6 +11,8 @@ class SupportedDeviceDescriptor {
   final String model;
   final String? manuf;
   final String? serno;
+  final Version fwVer;
+  final bool? isCE;
 
   const SupportedDeviceDescriptor({
     required this.driverDescriptor,
@@ -17,6 +21,8 @@ class SupportedDeviceDescriptor {
     required this.fingerprint,
     required this.compatible,
     required this.model,
+    required this.fwVer,
+    required this.isCE,
     this.manuf,
     this.serno,
   });

@@ -118,6 +118,16 @@ int bo_rpc_borneo_info_get(const CborValue* args, CborEncoder* retvals)
         BO_TRY(cbor_encode_text_stringz(&root_map, app_desc->version));
     }
 
+    {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "isCE"));
+
+#if CONFIG_BORNEO_EDITION_CE
+        BO_TRY(cbor_encode_boolean(&root_map, true));
+#else
+        BO_TRY(cbor_encode_boolean(&root_map, false));
+#endif
+    }
+
     BO_TRY(cbor_encoder_close_container(retvals, &root_map));
 
     return 0;

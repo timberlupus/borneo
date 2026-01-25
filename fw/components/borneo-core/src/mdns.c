@@ -149,6 +149,11 @@ static int add_mdns_services()
         { "model", sysinfo->model },
         { "hwver", CONFIG_BORNEO_HW_VER },
         { "fwver", app_desc->version },
+#if CONFIG_BORNEO_EDITION_CE
+        { "ce", "true" },
+#else
+        { "ce", "false" },
+#endif
         { "serno", sysinfo->hex_id },
         { "category", CONFIG_BORNEO_DEVICE_CATEGORY },
         { "compatible", CONFIG_BORNEO_DEVICE_COMPATIBLE },

@@ -186,6 +186,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   static SupportedDeviceDescriptor? matches(DiscoveredDevice discovered) {
     if (discovered is MdnsDiscoveredDevice) {
       final compatible = utf8.decode(discovered.txt?['compatible'] ?? [], allowMalformed: true);
+      final fwVer = Version.parse(utf8.decode(discovered.txt?['fwver'] ?? [], allowMalformed: true));
       if (compatible == lyfiCompatibleString) {
         final matched = SupportedDeviceDescriptor(
           driverDescriptor: borneoLyfiDriverDescriptor,
@@ -195,6 +196,8 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
           model: utf8.decode(discovered.txt?['model_name'] ?? [], allowMalformed: true),
           fingerprint: utf8.decode(discovered.txt?['serno'] ?? [], allowMalformed: true),
           manuf: utf8.decode(discovered.txt?['manuf_name'] ?? [], allowMalformed: true),
+          fwVer: fwVer,
+          isCE: utf8.decode(discovered.txt?['ce'] ?? [], allowMalformed: true) == 'true' ? true : false,
         );
         return matched;
       }

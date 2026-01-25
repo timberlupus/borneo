@@ -133,6 +133,7 @@ class GeneralBorneoDeviceInfo {
   final String modelName;
   final Version hwVer;
   final Version fwVer;
+  final bool isCE;
 
   const GeneralBorneoDeviceInfo({
     required this.id,
@@ -148,6 +149,7 @@ class GeneralBorneoDeviceInfo {
     required this.modelName,
     required this.hwVer,
     required this.fwVer,
+    required this.isCE,
   });
 
   factory GeneralBorneoDeviceInfo.fromMap(Map map) {
@@ -164,6 +166,7 @@ class GeneralBorneoDeviceInfo {
       modelName: map['model'],
       hwVer: Version.parse(map['hwVer']),
       fwVer: Version.parse(map['fwVer']),
+      isCE: map['isCE'] ?? true,
     );
   }
 }

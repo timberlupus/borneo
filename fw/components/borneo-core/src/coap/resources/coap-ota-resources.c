@@ -26,7 +26,7 @@
 #include <borneo/power.h>
 #include <borneo/nvs.h>
 
-#ifndef CONFIG_BORNEO_PRO
+#if CONFIG_BORNEO_EDITION_CE
 
 #define TAG "borneo-coap-ota"
 
@@ -355,4 +355,4 @@ static void coap_hnd_download(coap_resource_t* resource, coap_session_t* session
 COAP_RESOURCE_DEFINE("borneo/ota/coap/status", false, coap_hnd_status_get, NULL, NULL, NULL);
 COAP_RESOURCE_DEFINE("borneo/ota/coap/download", false, NULL, coap_hnd_download, coap_hnd_download, NULL);
 
-#endif // CONFIG_BORNEO_PRO
+#endif // CONFIG_BORNEO_EDITION_CE

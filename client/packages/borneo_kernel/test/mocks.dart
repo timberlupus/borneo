@@ -14,6 +14,7 @@ import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.da
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 class MockLogger extends Logger {
   final List<String> logs = [];
@@ -177,6 +178,8 @@ SupportedDeviceDescriptor createTestDeviceDescriptor(String id, String address, 
     fingerprint: 'test-$id',
     compatible: 'test',
     model: 'TestModel',
+    fwVer: Version.parse('0.4.9'),
+    isCE: true,
   );
 }
 

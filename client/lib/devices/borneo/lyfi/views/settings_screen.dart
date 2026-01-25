@@ -316,7 +316,7 @@ class SettingsScreen extends StatelessWidget {
             leading: const Icon(Icons.info_outline),
             tileColor: tileColor,
             title: Text(context.translate('Firmware version')),
-            trailing: Text(vm.borneoInfo.fwVer.toString()),
+            trailing: Text(vm.borneoInfo.fwVer.toString() + (vm.borneoInfo.isCE ? " (CE)" : " (PRO)")),
           ),
         ],
       ),

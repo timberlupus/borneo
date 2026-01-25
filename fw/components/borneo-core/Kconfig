@@ -28,6 +28,10 @@ menu "Borneo Core"
             string "Borneo manufacturer default value"
             default "BST"
 
+        config BORNEO_EDITION_CE
+            bool "Is open-source edition"
+            default y
+
         choice
             prompt "Select product mode"
 
