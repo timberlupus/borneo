@@ -53,6 +53,10 @@
         <string>We need access to your location to display maps.</string>
         <key>NSLocalNetworkUsageDescription</key>
         <string>We need access to the local network to discover and connect to Borneo devices.</string>
+        <key>NSBonjourServices</key>
+        <array>
+            <string>_borneo._udp.</string>
+        </array>
         <key>NSBluetoothAlwaysUsageDescription</key>
         <string>We need access to Bluetooth to provision WiFi networks for Borneo devices.</string>
         <key>NSBluetoothPeripheralUsageDescription</key>

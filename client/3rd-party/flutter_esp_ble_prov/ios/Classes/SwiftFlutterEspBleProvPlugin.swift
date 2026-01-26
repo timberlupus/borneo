@@ -64,13 +64,20 @@ private class BLEProvisionService: ProvisionService {
     }
     
     func searchDevices(prefix: String) {
-        ESPProvisionManager.shared.searchESPDevices(devicePrefix: prefix, transport:.ble, security:.secure) { deviceList, error in
+        // Use .unsecure to match firmware's NETWORK_PROV_SECURITY_0 setting
+        ESPProvisionManager.shared.searchESPDevices(devicePrefix: prefix, transport:.ble, security:.unsecure) { deviceList, error in
             if(error != nil) {
+                // Error code 27 = "No bluetooth device found" - return empty list instead of error
+                if error!.code == 27 {
+                    self.result([String]())
+                    return
+                }
                 ESPErrorHandler.handle(error: error!, result: self.result)
+                return
             }
             self.result(deviceList?.map({ (device: ESPDevice) -> String in
                 return device.name
-            }))
+            }) ?? [])
         }
     }
     
@@ -129,10 +136,12 @@ private class BLEProvisionService: ProvisionService {
     }
     
     private func connect(deviceName: String, proofOfPossession: String, completionHandler: @escaping (ESPDevice?) -> Void) {
-        ESPProvisionManager.shared.createESPDevice(deviceName: deviceName, transport: .ble, security: .secure, proofOfPossession: proofOfPossession) { espDevice, error in
+        // Use .unsecure to match firmware's NETWORK_PROV_SECURITY_0 setting
+        ESPProvisionManager.shared.createESPDevice(deviceName: deviceName, transport: .ble, security: .unsecure, proofOfPossession: proofOfPossession) { espDevice, error in
             
             if(error != nil) {
                 ESPErrorHandler.handle(error: error!, result: self.result)
+                return
             }
             espDevice?.connect { status in
                 switch status {
