@@ -49,6 +49,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   late final List<DeviceGroupEntity> _availableGroups = [];
   List<DeviceGroupEntity> get availableGroups => _availableGroups;
 
+  @override
   late final Future<void> initFuture;
 
   bool get isDiscovering => _isRefreshing;

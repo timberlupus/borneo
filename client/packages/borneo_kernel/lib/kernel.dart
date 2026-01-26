@@ -659,8 +659,7 @@ final class DefaultKernel implements IKernel {
       // TODO error handling
       final Set<String> allSupportedMdnsServiceTypes = {};
       for (final metaDriver in _driverRegistry.metaDrivers.values) {
-        if (metaDriver.discoveryMethod is MdnsDeviceDiscoveryMethod) {
-          final mdnsMethod = metaDriver.discoveryMethod as MdnsDeviceDiscoveryMethod;
+        if (metaDriver.discoveryMethod case MdnsDeviceDiscoveryMethod mdnsMethod) {
           if (!allSupportedMdnsServiceTypes.contains(mdnsMethod.serviceType)) {
             _logger.i('Starting mDNS discovery for service type `${mdnsMethod.serviceType}`...');
             final discovery = await mdnsProvider!.startDiscovery(

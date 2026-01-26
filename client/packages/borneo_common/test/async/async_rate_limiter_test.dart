@@ -65,5 +65,19 @@ void main() {
       await Future.delayed(Duration(milliseconds: 200));
       expect(executed, isTrue);
     });
+
+    test('dispose should work correctly', () async {
+      final rateLimiter = AsyncRateLimiter<Future Function()>(interval: Duration(milliseconds: 100));
+      var executionCount = 0;
+
+      rateLimiter.add(() async {
+        executionCount++;
+      });
+
+      await Future.delayed(Duration(milliseconds: 150));
+      rateLimiter.dispose();
+
+      expect(executionCount, equals(1));
+    });
   });
 }
