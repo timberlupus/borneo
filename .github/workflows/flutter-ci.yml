@@ -19,46 +19,7 @@ env:
   FLUTTER_WORKING_DIR: client
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.FLUTTER_WORKING_DIR }}
-    outputs:
-      cache-key-pub: ${{ steps.cache-keys.outputs.pub }}
-      cache-key-gradle: ${{ steps.cache-keys.outputs.gradle }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Generate cache keys
-        id: cache-keys
-        run: |
-          echo "pub=${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock', 'client/packages/*/pubspec.yaml') }}" >> $GITHUB_OUTPUT
-          echo "gradle=${{ runner.os }}-gradle-${{ hashFiles('client/**/*.gradle*', 'client/**/gradle-wrapper.properties') }}" >> $GITHUB_OUTPUT
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version-file: client/pubspec.yaml
-          cache: true
-
-      - name: Cache pub dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.pub-cache
-          key: ${{ steps.cache-keys.outputs.pub }}
-          restore-keys: ${{ runner.os }}-pub-cache-
-
-      - name: Activate melos and bootstrap
-        run: |
-          dart pub global activate melos
-          melos bootstrap --no-intellij
-
   test:
-    needs: setup
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -79,7 +40,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.pub-cache
-          key: ${{ needs.setup.outputs.cache-key-pub }}
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock', 'client/packages/*/pubspec.yaml') }}
           restore-keys: ${{ runner.os }}-pub-cache-
 
       - name: Activate melos and bootstrap
@@ -99,7 +60,7 @@ jobs:
           melos run test:dart --no-select
 
   build-apk:
-    needs: [setup, test]
+    needs: test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -143,7 +104,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.pub-cache
-          key: ${{ needs.setup.outputs.cache-key-pub }}
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock', 'client/packages/*/pubspec.yaml') }}
           restore-keys: ${{ runner.os }}-pub-cache-
 
       - name: Cache Gradle dependencies
@@ -152,7 +113,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ needs.setup.outputs.cache-key-gradle }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('client/**/*.gradle*', 'client/**/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-gradle-
 
       - name: Activate melos and bootstrap
@@ -184,7 +145,7 @@ jobs:
           path: ${{ github.workspace }}/${{ env.FLUTTER_WORKING_DIR }}/build/app/outputs/flutter-apk/borneo-app-ce-${{ steps.get_version.outputs.version }}.apk
 
   build-windows:
-    needs: [setup, test]
+    needs: test
     runs-on: windows-latest
     defaults:
       run:
@@ -207,14 +168,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.pub-cache
-          key: ${{ needs.setup.outputs.cache-key-pub }}
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock', 'client/packages/*/pubspec.yaml') }}
           restore-keys: ${{ runner.os }}-pub-cache-
 
       # Cache NuGet packages to speed MSBuild / CMake native deps
       - name: Cache NuGet packages
         uses: actions/cache@v4
         with:
-          path: ${{ env.USERPROFILE }}\\.nuget\\packages
+          path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('client/windows/**') }}
           restore-keys: ${{ runner.os }}-nuget-
 
@@ -254,10 +215,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: borneo-app-ce-${{ steps.get_version.outputs.version }}-windows-x64
-          path: client\build\windows\dist\borneo-app-ce-${{ steps.get_version.outputs.version }}-windows-x64.zip
+          path: client/build/windows/dist/borneo-app-ce-${{ steps.get_version.outputs.version }}-windows-x64.zip
 
   build-ios:
-    needs: [setup, test]
+    needs: test
     runs-on: macos-14
     defaults:
       run:
@@ -280,7 +241,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.pub-cache
-          key: ${{ needs.setup.outputs.cache-key-pub }}
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('client/pubspec.yaml', 'client/pubspec.lock', 'client/packages/*/pubspec.yaml') }}
           restore-keys: ${{ runner.os }}-pub-cache-
 
       - name: Cache CocoaPods
@@ -289,7 +250,7 @@ jobs:
           path: |
             ~/.cocoapods
             ~/Library/Caches/CocoaPods
-            client/ios/Pods
+            ${{ github.workspace }}/client/ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('client/ios/Podfile.lock') }}
           restore-keys: ${{ runner.os }}-pods-
 
