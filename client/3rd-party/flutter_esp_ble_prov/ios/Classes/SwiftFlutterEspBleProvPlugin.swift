@@ -199,10 +199,7 @@ private extension Optional where Wrapped == String {
         case "secure1":
             return .secure
         case "secure2":
-            if let sec2 = ESPSecurity(rawValue: 2) { // defensive in case SDK exposes security 2
-                return sec2
-            }
-            return .secure
+            return ESPSecurity(rawValue: 2) // defensive in case SDK exposes security 2
         default:
             return .unsecure
         }
