@@ -55,7 +55,7 @@ jobs:
       - name: Activate melos and bootstrap
         run: |
           dart pub global activate melos
-          melos bootstrap
+          melos bootstrap --no-intellij
 
   test:
     needs: setup
