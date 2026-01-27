@@ -265,9 +265,6 @@ jobs:
       - name: Get Flutter dependencies
         run: flutter pub get
 
-      - name: Install CocoaPods dependencies
-        run: pod install --project-directory=ios
-
       - name: Get version from pubspec.yaml
         id: get_version
         run: |
@@ -275,7 +272,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Build iOS app (no codesign)
-        run: flutter build ios --release --no-codesign --no-pub --build-number ${{ github.run_number }}
+        run: flutter build ios --release --no-codesign --build-number ${{ github.run_number }}
 
   release:
     needs: [build-apk, build-windows, build-ios]
