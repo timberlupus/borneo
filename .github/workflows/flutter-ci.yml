@@ -256,8 +256,68 @@ jobs:
           name: borneo-app-ce-${{ steps.get_version.outputs.version }}-windows-x64
           path: client\build\windows\dist\borneo-app-ce-${{ steps.get_version.outputs.version }}-windows-x64.zip
 
+  build-ios:
+    needs: [setup, test]
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: ${{ env.FLUTTER_WORKING_DIR }}
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: client/pubspec.yaml
+          cache: true
+
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ needs.setup.outputs.cache-key-pub }}
+          restore-keys: ${{ runner.os }}-pub-cache-
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cocoapods
+            ~/Library/Caches/CocoaPods
+            client/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('client/ios/Podfile.lock') }}
+          restore-keys: ${{ runner.os }}-pods-
+
+      - name: Flutter precache (iOS)
+        run: flutter precache --ios
+
+      - name: Activate melos and bootstrap
+        run: |
+          dart pub global activate melos
+          melos bootstrap
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Install CocoaPods dependencies
+        run: pod install --project-directory=ios
+
+      - name: Get version from pubspec.yaml
+        id: get_version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | head -n1 | awk '{print $2}' | cut -d'+' -f1)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build iOS app (no codesign)
+        run: flutter build ios --release --no-codesign --no-pub --build-number ${{ github.run_number }}
+
   release:
-    needs: [build-apk, build-windows]
+    needs: [build-apk, build-windows, build-ios]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
 
