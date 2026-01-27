@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'flutter_esp_ble_prov_platform_interface.dart';
+import 'security_level.dart';
 import 'wifi_network.dart';
 
 /// An implementation of [FlutterEspBleProvPlatform] that uses method channels.
@@ -36,10 +37,12 @@ class MethodChannelFlutterEspBleProv extends FlutterEspBleProvPlatform {
   Future<List<String>> scanWifiNetworks(
     String deviceName,
     String proofOfPossession,
+    SecurityLevel security,
   ) async {
     final args = {
       'deviceName': deviceName,
       'proofOfPossession': proofOfPossession,
+      'security': security._wireValue,
     };
     final raw = await methodChannel.invokeMethod<List<Object?>>(
       'scanWifiNetworks',
@@ -56,10 +59,12 @@ class MethodChannelFlutterEspBleProv extends FlutterEspBleProvPlatform {
   Future<List<WifiNetwork>> scanWifiNetworksWithDetails(
     String deviceName,
     String proofOfPossession,
+    SecurityLevel security,
   ) async {
     final args = {
       'deviceName': deviceName,
       'proofOfPossession': proofOfPossession,
+      'security': security._wireValue,
     };
     final raw = await methodChannel.invokeMethod<List<Object?>>(
       'scanWifiNetworksWithDetails',
@@ -92,13 +97,50 @@ class MethodChannelFlutterEspBleProv extends FlutterEspBleProvPlatform {
     String proofOfPossession,
     String ssid,
     String passphrase,
+    SecurityLevel security,
   ) async {
     final args = {
       'deviceName': deviceName,
       'proofOfPossession': proofOfPossession,
       'ssid': ssid,
       'passphrase': passphrase,
+      'security': security._wireValue,
     };
     return await methodChannel.invokeMethod<bool?>('provisionWifi', args);
+  }
+
+  @override
+  Future<Uint8List?> sendDataToCustomEndPoint(
+    String deviceName,
+    String proofOfPossession,
+    String path,
+    Uint8List data,
+    SecurityLevel security,
+  ) async {
+    final args = {
+      'deviceName': deviceName,
+      'proofOfPossession': proofOfPossession,
+      'path': path,
+      'data': data,
+      'security': security._wireValue,
+    };
+    final result = await methodChannel.invokeMethod<Uint8List?>(
+      'sendDataToCustomEndPoint',
+      args,
+    );
+    return result;
+  }
+}
+
+extension on SecurityLevel {
+  String get _wireValue {
+    switch (this) {
+      case SecurityLevel.unsecure:
+        return 'unsecure';
+      case SecurityLevel.secure1:
+        return 'secure1';
+      case SecurityLevel.secure2:
+        return 'secure2';
+    }
   }
 }

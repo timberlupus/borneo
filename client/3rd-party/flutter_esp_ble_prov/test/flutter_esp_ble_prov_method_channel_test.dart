@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_esp_ble_prov/src/flutter_esp_ble_prov_method_channel.dart';
+import 'package:flutter_esp_ble_prov/src/security_level.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -40,6 +41,7 @@ void main() {
     final networks = await platform.scanWifiNetworksWithDetails(
       'TestDevice',
       'test123',
+      SecurityLevel.unsecure,
     );
 
     expect(networks.length, 2);

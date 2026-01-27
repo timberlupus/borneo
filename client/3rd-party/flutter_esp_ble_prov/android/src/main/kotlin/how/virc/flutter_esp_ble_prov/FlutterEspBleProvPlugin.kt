@@ -16,6 +16,7 @@ import androidx.core.app.ActivityCompat
 import com.espressif.provisioning.*
 import com.espressif.provisioning.listeners.BleScanListener
 import com.espressif.provisioning.listeners.ProvisionListener
+import com.espressif.provisioning.listeners.ResponseListener
 import com.espressif.provisioning.listeners.WiFiScanListener
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -60,6 +61,17 @@ class CallContext(val call: MethodCall, val result: Result) {
    */
   fun arg(name: String): String? {
     val v = call.argument<String>(name)
+    if (v == null) {
+      result.error("E0", "Missing argument: $name", "The argument $name was not provided")
+    }
+    return v
+  }
+
+  /**
+   * Extracts a byte array argument's value from the method call.
+   */
+  fun argBytes(name: String): ByteArray? {
+    val v = call.argument<ByteArray>(name)
     if (v == null) {
       result.error("E0", "Missing argument: $name", "The argument $name was not provided")
     }
@@ -145,6 +157,7 @@ class Boss {
   private val scanWifiMethod = "scanWifiNetworks"
   private val scanWifiWithDetailsMethod = "scanWifiNetworksWithDetails"
   private val provisionWifiMethod = "provisionWifi"
+  private val sendDataMethod = "sendDataToCustomEndPoint"
   private val platformVersionMethod = "getPlatformVersion"
 
   /**
@@ -163,6 +176,7 @@ class Boss {
   private val wifiScanner: WifiScanManager = WifiScanManager(this)
   private val wifiScannerWithDetails: WifiScanWithDetailsManager = WifiScanWithDetailsManager(this)
   private val wifiProvisioner: WifiProvisionManager = WifiProvisionManager(this)
+  private val sendDataManager: SendDataManager = SendDataManager(this)
 
   private lateinit var platformContext: Context
   lateinit var platformActivity: Activity
@@ -178,12 +192,21 @@ class Boss {
     return devices[deviceName]
   }
 
+  private fun parseSecurity(security: String?): ESPConstants.SecurityType {
+    return when (security?.lowercase()) {
+      "secure1" -> ESPConstants.SecurityType.SECURITY_1
+      "secure2" -> ESPConstants.SecurityType.SECURITY_2
+      else -> ESPConstants.SecurityType.SECURITY_0
+    }
+  }
+
   /**
    * Connect to a named device with proofOfPossession string, and once connected, execute the
    * callback.
    */
-  fun connect(conn: BleConnector, proofOfPossession: String, onConnectCallback: (ESPDevice) -> Unit) {
-    val esp = espManager.createESPDevice(ESPConstants.TransportType.TRANSPORT_BLE, ESPConstants.SecurityType.SECURITY_1)
+  fun connect(conn: BleConnector, proofOfPossession: String, security: String?, onConnectCallback: (ESPDevice) -> Unit) {
+    val securityType = parseSecurity(security)
+    val esp = espManager.createESPDevice(ESPConstants.TransportType.TRANSPORT_BLE, securityType)
     EventBus.getDefault().register(object {
       @Subscribe(threadMode = ThreadMode.MAIN)
       fun onEvent(event: DeviceConnectionEvent) {
@@ -209,6 +232,7 @@ class Boss {
         scanWifiMethod -> wifiScanner.call(ctx)
         scanWifiWithDetailsMethod -> wifiScannerWithDetails.call(ctx)
         provisionWifiMethod -> wifiProvisioner.call(ctx)
+        sendDataMethod -> sendDataManager.call(ctx)
         else -> result.notImplemented()
       }
     })
@@ -274,9 +298,10 @@ class WifiScanManager(boss: Boss) : ActionManager(boss) {
   override fun call(ctx: CallContext) {
     val name = ctx.arg("deviceName") ?: return
     val proofOfPossession = ctx.arg("proofOfPossession") ?: return
+    val security = ctx.call.argument<String>("security")
     val conn = boss.connector(name) ?: return
     boss.d("esp connect: start")
-    boss.connect(conn, proofOfPossession) { esp ->
+    boss.connect(conn, proofOfPossession, security) { esp ->
       boss.d("scanNetworks: start")
       esp.scanNetworks(object : WiFiScanListener {
         override fun onWifiListReceived(wifiList: ArrayList<WiFiAccessPoint>?) {
@@ -304,9 +329,10 @@ class WifiScanWithDetailsManager(boss: Boss) : ActionManager(boss) {
   override fun call(ctx: CallContext) {
     val name = ctx.arg("deviceName") ?: return
     val proofOfPossession = ctx.arg("proofOfPossession") ?: return
+    val security = ctx.call.argument<String>("security")
     val conn = boss.connector(name) ?: return
     boss.d("esp connect: start")
-    boss.connect(conn, proofOfPossession) { esp ->
+    boss.connect(conn, proofOfPossession, security) { esp ->
       boss.d("scanNetworksWithDetails: start")
       esp.scanNetworks(object : WiFiScanListener {
         override fun onWifiListReceived(wifiList: ArrayList<WiFiAccessPoint>?) {
@@ -343,9 +369,10 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
     val passphrase = ctx.arg("passphrase") ?: return
     val deviceName = ctx.arg("deviceName") ?: return
     val proofOfPossession = ctx.arg("proofOfPossession") ?: return
+    val security = ctx.call.argument<String>("security")
     val conn = boss.connector(deviceName) ?: return
 
-    boss.connect(conn, proofOfPossession) { esp ->
+    boss.connect(conn, proofOfPossession, security) { esp ->
       boss.d("provision: start")
       esp.provision(ssid, passphrase, object : ProvisionListener {
         override fun createSessionFailed(e: java.lang.Exception?) {
@@ -394,6 +421,36 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
     }
   }
 
+}
+
+
+class SendDataManager(boss: Boss) : ActionManager(boss) {
+  override fun call(ctx: CallContext) {
+    boss.d("sendDataToCustomEndPoint: start")
+    val deviceName = ctx.arg("deviceName") ?: return
+    val proofOfPossession = ctx.arg("proofOfPossession") ?: return
+    val path = ctx.arg("path") ?: return
+    val data = ctx.argBytes("data") ?: return
+    val security = ctx.call.argument<String>("security")
+    val conn = boss.connector(deviceName) ?: return
+
+    boss.connect(conn, proofOfPossession, security) { esp ->
+      boss.d("sendData: start")
+      esp.sendDataToCustomEndPoint(path, data, object : ResponseListener {
+        override fun onSuccess(returnData: ByteArray?) {
+          boss.d("sendData: success")
+          ctx.result.success(returnData)
+          esp.disconnectDevice()
+        }
+
+        override fun onFailure(e: java.lang.Exception?) {
+          boss.e("sendData: failure $e")
+          ctx.result.error("E_SEND_DATA_FAILED", "Send data failed", "Exception details: $e")
+          esp.disconnectDevice()
+        }
+      })
+    }
+  }
 }
 
 

@@ -1,6 +1,8 @@
+import 'dart:typed_data';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'flutter_esp_ble_prov_method_channel.dart';
+import 'security_level.dart';
 import 'wifi_network.dart';
 
 abstract class FlutterEspBleProvPlatform extends PlatformInterface {
@@ -35,6 +37,7 @@ abstract class FlutterEspBleProvPlatform extends PlatformInterface {
   Future<List<String>> scanWifiNetworks(
     String deviceName,
     String proofOfPossession,
+    SecurityLevel security,
   ) {
     throw UnimplementedError('scanWifiNetworks has not been implemented.');
   }
@@ -42,6 +45,7 @@ abstract class FlutterEspBleProvPlatform extends PlatformInterface {
   Future<List<WifiNetwork>> scanWifiNetworksWithDetails(
     String deviceName,
     String proofOfPossession,
+    SecurityLevel security,
   ) {
     throw UnimplementedError(
       'scanWifiNetworksWithDetails has not been implemented.',
@@ -53,7 +57,20 @@ abstract class FlutterEspBleProvPlatform extends PlatformInterface {
     String proofOfPossession,
     String ssid,
     String passphrase,
+    SecurityLevel security,
   ) {
     throw UnimplementedError('provisionWifi has not been implemented');
+  }
+
+  Future<Uint8List?> sendDataToCustomEndPoint(
+    String deviceName,
+    String proofOfPossession,
+    String path,
+    Uint8List data,
+    SecurityLevel security,
+  ) {
+    throw UnimplementedError(
+      'sendDataToCustomEndPoint has not been implemented',
+    );
   }
 }

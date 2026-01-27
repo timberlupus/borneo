@@ -6,6 +6,13 @@ Plugin for provisioning ESP32 Devices over BLE (Bluetooth Low Energy).
 This library uses Espressif-provided provisioning libraries for their custom
 protocol over BLE.
 
+## Security levels
+
+The plugin defaults to SECURITY_0 (unsecure). You can opt into SECURITY_1 or
+SECURITY_2 from Flutter via the `security` parameter (enum `SecurityLevel`);
+your device firmware must be built with the matching security level and proof
+of possession.
+
 See the example.
 
 ## Requirements
