@@ -154,19 +154,13 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
         await _deviceManager.stopDiscovery();
       }
 
-      // Run mDNS and BLE discovery in parallel
-      final futures = <Future>[];
+      // Start mDNS discovery (runs continuously in background, don't await)
+      _deviceManager.startDiscovery();
 
-      // Start mDNS discovery
-      futures.add(_deviceManager.startDiscovery());
-
-      // Start BLE discovery (Mobile only)
+      // Start BLE discovery (Mobile only) - await this one
       if (isMobile) {
-        futures.add(_startBleScan());
+        await _startBleScan();
       }
-
-      // Wait for both to complete
-      await Future.wait(futures);
 
       if (_scanCancelToken.isCancelled) {
         return;
