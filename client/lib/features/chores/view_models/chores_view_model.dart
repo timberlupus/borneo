@@ -49,6 +49,7 @@ class ChoresViewModel extends ChangeNotifier {
       await _reloadChores();
     } catch (e) {
       _error = e.toString();
+    } finally {
       _isLoading = false;
     }
   }
