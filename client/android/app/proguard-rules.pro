@@ -4,14 +4,28 @@
 -keep class com.yalantis.ucrop.** { *; }
 -dontwarn com.yalantis.ucrop.**
 
-# Keep Espressif provisioning classes for BLE provisioning
+# Espressif Provisioning Library
 -keep class com.espressif.provisioning.** { *; }
--dontwarn com.espressif.provisioning.**
+-keep interface com.espressif.provisioning.** { *; }
 
-# Keep EventBus classes
--keep class org.greenrobot.eventbus.** { *; }
--dontwarn org.greenrobot.eventbus.**
+# Protocol Buffers
+-keep class * extends com.google.protobuf.GeneratedMessageLite { *; }
+-keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite {
+  <fields>;
+  <methods>;
+}
 
-# Keep Flutter plugin classes
--keep class how.virc.flutter_esp_ble_prov.** { *; }
--dontwarn how.virc.flutter_esp_ble_prov.**
+# Security classes
+-keep class com.espressif.provisioning.security.** { *; }
+-keep class com.espressif.provisioning.transport.** { *; }
+-keep class com.espressif.provisioning.Session { *; }
+-keep class com.espressif.provisioning.Session$** { *; }
+
+# EventBus
+-keepclassmembers class ** {
+    @org.greenrobot.eventbus.Subscribe <methods>;
+}
+-keep enum org.greenrobot.eventbus.ThreadMode { *; }
+
+# BLE
+-keep class android.bluetooth.** { *; }
