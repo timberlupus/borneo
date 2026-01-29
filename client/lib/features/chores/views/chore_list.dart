@@ -236,7 +236,9 @@ class _FlowingLoadingTextState extends State<_FlowingLoadingText> with SingleTic
                 blendMode: BlendMode.srcIn,
                 child: Text(
                   context.translate('Loading...'),
-                  style: (theme.textTheme.titleSmall ?? theme.textTheme.bodyLarge)?.copyWith(fontWeight: FontWeight.w600),
+                  style: (theme.textTheme.titleSmall ?? theme.textTheme.bodyLarge)?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
