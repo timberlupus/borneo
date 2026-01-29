@@ -77,7 +77,10 @@ final class DefaultKernel implements IKernel {
   @override
   bool get isScanning => _isScanning;
 
-  DefaultKernel(this._logger, this._driverRegistry, {this.mdnsProvider,
+  DefaultKernel(
+    this._logger,
+    this._driverRegistry, {
+    this.mdnsProvider,
     // allow overriding heartbeat/probe parameters for faster detection
     Duration? localProbeTimeout,
     Duration? localBindTimeout,
@@ -86,14 +89,13 @@ final class DefaultKernel implements IKernel {
     int? consecutiveFailureThreshold,
     int? heartbeatRetryMaxAttempts,
     int? observationTimeoutMultiplier,
-  }) :
-    localProbeTimeout = localProbeTimeout ?? const Duration(seconds: 1),
-    localBindTimeout = localBindTimeout ?? const Duration(seconds: 5),
-    heartbeatPollingInterval = heartbeatPollingInterval ?? const Duration(seconds: 5),
-    maxMissedObservations = maxMissedObservations ?? _defaultMaxMissedObservations,
-    consecutiveFailureThreshold = consecutiveFailureThreshold ?? _defaultConsecutiveFailureThreshold,
-    heartbeatRetryMaxAttempts = heartbeatRetryMaxAttempts ?? _defaultHeartbeatRetryMaxAttempts,
-    observationTimeoutMultiplier = observationTimeoutMultiplier ?? _defaultObservationTimeoutMultiplier {
+  }) : localProbeTimeout = localProbeTimeout ?? const Duration(seconds: 1),
+       localBindTimeout = localBindTimeout ?? const Duration(seconds: 5),
+       heartbeatPollingInterval = heartbeatPollingInterval ?? const Duration(seconds: 5),
+       maxMissedObservations = maxMissedObservations ?? _defaultMaxMissedObservations,
+       consecutiveFailureThreshold = consecutiveFailureThreshold ?? _defaultConsecutiveFailureThreshold,
+       heartbeatRetryMaxAttempts = heartbeatRetryMaxAttempts ?? _defaultHeartbeatRetryMaxAttempts,
+       observationTimeoutMultiplier = observationTimeoutMultiplier ?? _defaultObservationTimeoutMultiplier {
     _logger.i('Loading the kernel...');
 
     _deviceOfflineSub = _events.on<DeviceOfflineEvent>().listen((event) async {
@@ -482,7 +484,10 @@ final class DefaultKernel implements IKernel {
     _observationTimeoutTimers[deviceId]?.cancel();
 
     // Set timeout for a multiple of the normal heartbeat interval
-    _observationTimeoutTimers[deviceId] = Timer(heartbeatPollingInterval * observationTimeoutMultiplier, () => _onHeartbeatMissed(deviceId));
+    _observationTimeoutTimers[deviceId] = Timer(
+      heartbeatPollingInterval * observationTimeoutMultiplier,
+      () => _onHeartbeatMissed(deviceId),
+    );
   }
 
   Future<void> _stopHeartbeatObservation(String deviceId) async {
