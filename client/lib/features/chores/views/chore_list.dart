@@ -210,26 +210,36 @@ class _FlowingLoadingTextState extends State<_FlowingLoadingText> with SingleTic
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
-          return ShaderMask(
-            shaderCallback: (bounds) {
-              final width = bounds.width;
-              final animationValue = _controller.value;
-              final gradientWidth = width * 0.35;
-              final dx = (width + gradientWidth) * animationValue - gradientWidth;
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(
+                strokeWidth: 2.0,
+                valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+              ),
+              const SizedBox(width: 12),
+              ShaderMask(
+                shaderCallback: (bounds) {
+                  final width = bounds.width;
+                  final animationValue = _controller.value;
+                  final gradientWidth = width * 0.35;
+                  final dx = (width + gradientWidth) * animationValue - gradientWidth;
 
-              return LinearGradient(
-                colors: [baseColor, highlight, baseColor],
-                stops: const [0.0, 0.5, 1.0],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                transform: GradientTranslation(dx),
-              ).createShader(bounds);
-            },
-            blendMode: BlendMode.srcIn,
-            child: Text(
-              context.translate('Loading...'),
-              style: (theme.textTheme.titleSmall ?? theme.textTheme.bodyLarge)?.copyWith(fontWeight: FontWeight.w600),
-            ),
+                  return LinearGradient(
+                    colors: [baseColor, highlight, baseColor],
+                    stops: const [0.0, 0.5, 1.0],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    transform: GradientTranslation(dx),
+                  ).createShader(bounds);
+                },
+                blendMode: BlendMode.srcIn,
+                child: Text(
+                  context.translate('Loading...'),
+                  style: (theme.textTheme.titleSmall ?? theme.textTheme.bodyLarge)?.copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
           );
         },
       ),
