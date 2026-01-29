@@ -32,9 +32,9 @@ extension CoapClientExtensions on CoapClient {
 
   /// Observes the given [uri] using a confirmable CoAP GET request and yields each CBOR-decoded payload as type [T].
   /// Errors during decoding are emitted as stream errors.
-  Stream<T> observeCbor<T>(Uri uri, {CancellationToken? cancelToken}) async* {
+  Stream<T> observeCbor<T>(Uri uri, {CancellationToken? cancelToken, int maxRetransmit = 1}) async* {
     final request = CoapRequest.get(uri, accept: CoapMediaType.applicationCbor);
-    final obs = await observe(request, maxRetransmit: 3).asCancellable(cancelToken);
+    final obs = await observe(request, maxRetransmit: maxRetransmit).asCancellable(cancelToken);
     try {
       await for (final rep in obs) {
         try {
@@ -50,7 +50,7 @@ extension CoapClientExtensions on CoapClient {
 
   /// Observes the given [uri] using a non-confirmable CoAP GET request and yields each CBOR-decoded payload as type [T].
   /// Errors during decoding are emitted as stream errors.
-  Stream<T> observeCborNon<T>(Uri uri, {CancellationToken? cancelToken}) async* {
+  Stream<T> observeCborNon<T>(Uri uri, {CancellationToken? cancelToken, int maxRetransmit = 1}) async* {
     final request = CoapRequest(
       uri,
       RequestMethod.get,
@@ -58,7 +58,7 @@ extension CoapClientExtensions on CoapClient {
       confirmable: false,
       contentFormat: CoapMediaType.applicationCbor,
     );
-    final obs = await observe(request, maxRetransmit: 3).asCancellable(cancelToken);
+    final obs = await observe(request, maxRetransmit: maxRetransmit).asCancellable(cancelToken);
 
     try {
       await for (final rep in obs) {

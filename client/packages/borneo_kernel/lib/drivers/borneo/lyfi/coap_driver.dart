@@ -149,7 +149,8 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
     final dd = dev.driverData as LyfiCoapDriverData;
     final client = dd.coap;
     final request = CoapRequest.get(BorneoPaths.heartbeat);
-    final obs = await client.observe(request);
+    // Use a low retransmit count for heartbeat observation so failures surface faster
+    final obs = await client.observe(request, maxRetransmit: 1);
 
     return obs
         .map((msg) {

@@ -11,9 +11,16 @@ import 'package:borneo_kernel_abstractions/kernel.dart';
 
 final class DefaultKernel implements IKernel {
   static const Duration kStartupDiscoveryDuration = Duration(seconds: 15);
-  static const Duration kLocalProbeTimeOut = Duration(seconds: 3);
-  static const Duration kLocalBindTimeOut = Duration(seconds: 5);
-  static const Duration kHeartbeatPollingInterval = Duration(seconds: 15);
+
+  // Configurable heartbeat / probe parameters. Defaults chosen to detect
+  // disconnects faster while remaining conservative for flaky networks.
+  final Duration localProbeTimeout;
+  final Duration localBindTimeout;
+  final Duration heartbeatPollingInterval;
+  final int maxMissedObservations;
+  final int consecutiveFailureThreshold;
+  final int heartbeatRetryMaxAttempts;
+  final int observationTimeoutMultiplier;
 
   Timer? _timer;
 
@@ -46,7 +53,11 @@ final class DefaultKernel implements IKernel {
   final Map<String, StreamSubscription> _observationSubscriptions = {};
   final Map<String, int> _missedObservations = {};
   final Map<String, Timer> _observationTimeoutTimers = {};
-  static const int kMaxMissedObservations = 3;
+  // Default values
+  static const int _defaultMaxMissedObservations = 2;
+  static const int _defaultConsecutiveFailureThreshold = 2;
+  static const int _defaultHeartbeatRetryMaxAttempts = 1;
+  static const int _defaultObservationTimeoutMultiplier = 2;
 
   @override
   bool get isInitialized => _isInitialized;
@@ -66,7 +77,23 @@ final class DefaultKernel implements IKernel {
   @override
   bool get isScanning => _isScanning;
 
-  DefaultKernel(this._logger, this._driverRegistry, {this.mdnsProvider}) {
+  DefaultKernel(this._logger, this._driverRegistry, {this.mdnsProvider,
+    // allow overriding heartbeat/probe parameters for faster detection
+    Duration? localProbeTimeout,
+    Duration? localBindTimeout,
+    Duration? heartbeatPollingInterval,
+    int? maxMissedObservations,
+    int? consecutiveFailureThreshold,
+    int? heartbeatRetryMaxAttempts,
+    int? observationTimeoutMultiplier,
+  }) :
+    localProbeTimeout = localProbeTimeout ?? const Duration(seconds: 1),
+    localBindTimeout = localBindTimeout ?? const Duration(seconds: 5),
+    heartbeatPollingInterval = heartbeatPollingInterval ?? const Duration(seconds: 5),
+    maxMissedObservations = maxMissedObservations ?? _defaultMaxMissedObservations,
+    consecutiveFailureThreshold = consecutiveFailureThreshold ?? _defaultConsecutiveFailureThreshold,
+    heartbeatRetryMaxAttempts = heartbeatRetryMaxAttempts ?? _defaultHeartbeatRetryMaxAttempts,
+    observationTimeoutMultiplier = observationTimeoutMultiplier ?? _defaultObservationTimeoutMultiplier {
     _logger.i('Loading the kernel...');
 
     _deviceOfflineSub = _events.on<DeviceOfflineEvent>().listen((event) async {
@@ -252,7 +279,7 @@ final class DefaultKernel implements IKernel {
         } else {
           throw DeviceProbeError("Failed to probe $device", device);
         }
-      }, timeout: kLocalBindTimeOut),
+      }, timeout: localBindTimeout),
     );
 
     for (final e in eventsToFire) {
@@ -329,7 +356,7 @@ final class DefaultKernel implements IKernel {
   void _startTimer() {
     assert(!_isDisposed);
 
-    _timer ??= Timer.periodic(kHeartbeatPollingInterval, (_) {
+    _timer ??= Timer.periodic(heartbeatPollingInterval, (_) {
       try {
         _heartbeatPollingPeriodicTask(cancelToken: _masterCancelToken);
       } catch (e, stackTrace) {
@@ -351,7 +378,7 @@ final class DefaultKernel implements IKernel {
           }
           return success;
         },
-        maxAttempts: 3,
+        maxAttempts: heartbeatRetryMaxAttempts,
         delayFactor: const Duration(milliseconds: 500),
         maxDelay: const Duration(seconds: 1),
         randomizationFactor: 0.1,
@@ -432,8 +459,8 @@ final class DefaultKernel implements IKernel {
       _missedObservations[deviceId] = (_missedObservations[deviceId] ?? 0) + 1;
       _logger.w('Heartbeat missed for device $deviceId. Total missed: ${_missedObservations[deviceId]}');
 
-      if (_missedObservations[deviceId]! >= kMaxMissedObservations) {
-        _logger.w('Device $deviceId marked offline after $kMaxMissedObservations missed observations');
+      if (_missedObservations[deviceId]! >= maxMissedObservations) {
+        _logger.w('Device $deviceId marked offline after $maxMissedObservations missed observations');
 
         // Find the device and mark it offline
         final boundDevice = _boundDevices[deviceId];
@@ -454,8 +481,8 @@ final class DefaultKernel implements IKernel {
     // Note: This method is called within _observationLock.synchronized()
     _observationTimeoutTimers[deviceId]?.cancel();
 
-    // Set timeout for 3x the normal heartbeat interval
-    _observationTimeoutTimers[deviceId] = Timer(kHeartbeatPollingInterval * 3, () => _onHeartbeatMissed(deviceId));
+    // Set timeout for a multiple of the normal heartbeat interval
+    _observationTimeoutTimers[deviceId] = Timer(heartbeatPollingInterval * observationTimeoutMultiplier, () => _onHeartbeatMissed(deviceId));
   }
 
   Future<void> _stopHeartbeatObservation(String deviceId) async {
@@ -516,7 +543,7 @@ final class DefaultKernel implements IKernel {
                 futures.add(
                   _tryDoHeartBeat(
                     bd,
-                    kLocalProbeTimeOut,
+                    localProbeTimeout,
                   ).catchError((_) => false).asCancellable(_heartbeatPollingTaskCancelToken),
                 );
                 devices.add(bd);
@@ -532,8 +559,8 @@ final class DefaultKernel implements IKernel {
                     'The device(${devices[i].device}) is not responding. Consecutive failures: ${_consecutiveFailures[deviceId]}',
                   );
 
-                  // Only mark as offline after 3 consecutive failures
-                  if (_consecutiveFailures[deviceId]! >= 3) {
+                  // Only mark as offline after configured consecutive failures
+                  if (_consecutiveFailures[deviceId]! >= consecutiveFailureThreshold) {
                     offlineDevices.add(devices[i].device);
                     _consecutiveFailures.remove(deviceId);
                   }
