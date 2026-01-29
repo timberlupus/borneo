@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:borneo_app/core/events/app_events.dart';
+import 'package:borneo_app/core/services/chore_manager_impl.dart';
 import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/core/services/app_notification_service_impl.dart';
 import 'package:borneo_app/core/services/devices/device_manager_impl.dart';
@@ -165,7 +166,7 @@ class _BorneoAppState extends State<BorneoApp> {
 
                   // ChoreManager
                   Provider<IChoreManager>(
-                    create: (context) => IChoreManager(
+                    create: (context) => ChoreManagerImpl(
                       context.read<EventBus>(),
                       context.read<Database>(),
                       context.read<ISceneManager>(),
