@@ -34,13 +34,14 @@ bool led_acclimation_is_activated() { return led_acclimation_is_enabled() && _le
 
 int led_acclimation_drive(time_t utc_now, led_color_t color)
 {
+    portENTER_CRITICAL(&g_led_spinlock);
     if (led_acclimation_is_activated() && !led_acclimation_is_enabled()) {
         _led.acclimation_activated = false;
-        return 0;
+        goto exit;
     }
 
     if (!led_acclimation_is_enabled()) {
-        return 0;
+        goto exit;
     }
 
     struct led_acclimation_settings* acc = &_led.settings.acclimation;
@@ -67,13 +68,17 @@ int led_acclimation_drive(time_t utc_now, led_color_t color)
         for (size_t ch = 0; ch < led_channel_count(); ch++) {
             color[ch] = (led_brightness_t)(((uint32_t)color[ch] * percent + 50) / 100);
         }
-        return 0;
+        goto exit;
     }
     else {
         if (led_acclimation_is_enabled()) {
             BO_TRY(led_acclimation_terminate());
         }
+        goto exit;
     }
+
+exit:
+    portEXIT_CRITICAL(&g_led_spinlock);
     return 0;
 }
 

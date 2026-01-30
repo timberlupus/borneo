@@ -28,7 +28,7 @@
 struct adc_data {
     adc_oneshot_unit_handle_t handle;
     adc_cali_handle_t cali;
-    SemaphoreHandle_t mutex; // 添加互斥锁
+    SemaphoreHandle_t mutex;
 };
 
 /*
@@ -72,6 +72,7 @@ static int _adc_cali(adc_cali_handle_t* out_handle)
     if (!calibrated) {
         ESP_LOGI(TAG, "calibration scheme version is %s", "Curve Fitting");
         adc_cali_curve_fitting_config_t cali_config = {
+            .chan = 0,
             .unit_id = AVAILABLE_ADC_UNIT,
             .atten = ADC_ATTEN_DB_12,
             .bitwidth = ADC_BITWIDTH_12,
@@ -104,6 +105,7 @@ static int _adc_cali(adc_cali_handle_t* out_handle)
     }
     else if (ret == ESP_ERR_NOT_SUPPORTED || !calibrated) {
         ESP_LOGW(TAG, "eFuse not burnt, skip software calibration");
+        return 0;
     }
     else {
         ESP_LOGE(TAG, "Invalid arg or no memory");

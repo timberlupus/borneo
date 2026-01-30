@@ -25,6 +25,7 @@ static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_
 volatile static int _state = BO_INDICATOR_STATE_NO_CONN;
 static esp_timer_handle_t _indicator_timer;
 static int _led_state = 0;
+static portMUX_TYPE _indicator_lock = portMUX_INITIALIZER_UNLOCKED;
 
 int bo_indicator_init()
 {
@@ -63,9 +64,10 @@ static void indicator_timer_callback(void* arg)
 {
     uint64_t next_delay_us = 1000000; // Default 1 second
 
+    portENTER_CRITICAL(&_indicator_lock);
     switch (_state) {
     case BO_INDICATOR_STATE_NORMAL: {
-        _led_state = 1;
+        _led_state = 0;
         next_delay_us = 5000000; // 5 seconds
     } break;
 
@@ -83,6 +85,7 @@ static void indicator_timer_callback(void* arg)
         next_delay_us = 1000000; // 1 second
     }
     }
+    portEXIT_CRITICAL(&_indicator_lock);
 
     BO_MUST(gpio_set_level(CONFIG_BORNEO_INDICATOR_GPIO, _led_state));
 
@@ -91,20 +94,25 @@ static void indicator_timer_callback(void* arg)
 
 static void got_ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
+    portENTER_CRITICAL(&_indicator_lock);
     if (_state == BO_INDICATOR_STATE_NO_CONN) {
         _state = BO_INDICATOR_STATE_NORMAL;
     }
+    portEXIT_CRITICAL(&_indicator_lock);
 }
 
 static void lost_ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
+    portENTER_CRITICAL(&_indicator_lock);
     if (_state == BO_INDICATOR_STATE_NORMAL) {
         _state = BO_INDICATOR_STATE_NO_CONN;
     }
+    portEXIT_CRITICAL(&_indicator_lock);
 }
 
 static void _kernel_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
+    portENTER_CRITICAL(&_indicator_lock);
     switch (event_id) {
 
     case KERNEL_EVENT_ENTERING_SAFE_MODE: {
@@ -114,10 +122,12 @@ static void _kernel_event_handler(void* arg, esp_event_base_t event_base, int32_
     default:
         break;
     }
+    portEXIT_CRITICAL(&_indicator_lock);
 }
 
 static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
+    portENTER_CRITICAL(&_indicator_lock);
     switch (event_id) {
 
     case BO_EVENT_FATAL_ERROR: {
@@ -131,6 +141,7 @@ static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_
     default:
         break;
     }
+    portEXIT_CRITICAL(&_indicator_lock);
 }
 
 #endif // CONFIG_BORNEO_INDICATOR_ENABLED && CONFIG_BORNEO_INDICATOR_GPIO_ENABLED
