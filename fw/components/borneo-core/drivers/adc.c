@@ -136,8 +136,6 @@ static int adc_init(const struct drvfx_device* dev)
     adc_oneshot_unit_init_cfg_t unit_config = { 0 };
     unit_config.unit_id = AVAILABLE_ADC_UNIT;
     BO_TRY(adc_oneshot_new_unit(&unit_config, &data->handle));
-    ESP_LOGI(TAG, "Calibrating ADC...");
-    BO_TRY(_adc_cali(&data->cali));
 
     adc_oneshot_chan_cfg_t adc_config = {
         .bitwidth = ADC_BITWIDTH_12,
@@ -176,6 +174,10 @@ static int adc_init(const struct drvfx_device* dev)
     BO_TRY(adc_oneshot_config_channel(data->handle, ADC_CHANNEL_7, &adc_config));
 #endif
 
+    ESP_LOGI(TAG, "Calibrating ADC...");
+    BO_TRY(_adc_cali(&data->cali));
+
+    ESP_LOGI(TAG, "ADC initialized successfully.");
     return 0;
 }
 
