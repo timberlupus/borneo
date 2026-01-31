@@ -26,6 +26,7 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
   late final StreamSubscription<DeviceRemovedEvent> _removedEventSub;
   late final StreamSubscription<DevicePowerOnOffChangedEvent> _powerEventSub;
   late final StreamSubscription<DeviceEntityUpdatedEvent> _deviceUpdatedSub;
+  late final StreamSubscription<LoadingDriverFailedEvent> _loadingFailedEventSub;
 
   late bool _isPowerOn = false;
   bool get isPowerOn => _isPowerOn;
@@ -37,6 +38,7 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
     _removedEventSub = deviceManager.allDeviceEvents.on<DeviceRemovedEvent>().listen(_onRemoved);
     _powerEventSub = deviceManager.allDeviceEvents.on<DevicePowerOnOffChangedEvent>().listen(_onPowerChanged);
     _deviceUpdatedSub = deviceManager.allDeviceEvents.on<DeviceEntityUpdatedEvent>().listen(_onDeviceUpdated);
+    _loadingFailedEventSub = deviceManager.allDeviceEvents.on<LoadingDriverFailedEvent>().listen(_onLoadingFailed);
 
     if (deviceManager.isBound(deviceEntity.id)) {
       final wotThing = deviceManager.getWotThing(deviceEntity.id);
@@ -55,6 +57,7 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
     _removedEventSub.cancel();
     _powerEventSub.cancel();
     _deviceUpdatedSub.cancel();
+    _loadingFailedEventSub.cancel();
     super.dispose();
   }
 
@@ -86,6 +89,13 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
   void _onDeviceUpdated(DeviceEntityUpdatedEvent event) {
     if (event.updated.id == deviceEntity.id) {
       deviceEntity = event.updated;
+      notifyListeners();
+    }
+  }
+
+  void _onLoadingFailed(LoadingDriverFailedEvent event) {
+    if (event.device.id == deviceEntity.id) {
+      deviceEntity.lastErrorMessage = event.message ?? event.error?.toString() ?? 'Unknown error';
       notifyListeners();
     }
   }

@@ -15,7 +15,7 @@ class DeviceOfflineView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.link_off, size: 80, color: theme.colorScheme.primary),
+            Icon(Icons.wifi_off, size: 80, color: theme.colorScheme.primary),
             const SizedBox(height: 12),
             Text(
               context.translate('Device is offline'),

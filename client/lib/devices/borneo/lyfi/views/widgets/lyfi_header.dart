@@ -29,7 +29,7 @@ class LyfiAppBar extends StatelessWidget {
           selector: (_, vm) => vm.rssiLevel,
           builder: (content, rssi, _) => Center(
             child: switch (rssi) {
-              null => Icon(Icons.link_off, size: 24, color: Theme.of(context).colorScheme.error),
+              null => Icon(Icons.wifi_off, size: 24, color: Theme.of(context).colorScheme.error),
               RssiLevel.strong => const Icon(Icons.wifi_rounded, size: 24),
               RssiLevel.medium => const Icon(Icons.wifi_2_bar_rounded, size: 24),
               RssiLevel.weak => const Icon(Icons.wifi_1_bar_rounded, size: 24),

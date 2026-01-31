@@ -389,6 +389,7 @@ class LyfiThing extends WotThing {
   late final WotProperty<bool> timeZoneEnabledProperty;
   late final WotProperty<int> timeZoneOffsetProperty;
   late final WotProperty<int> keepTempProperty;
+  late final WotProperty<int?> temperatureProperty;
 
   LyfiThing({
     required this.device,
@@ -626,6 +627,26 @@ class LyfiThing extends WotThing {
       ),
     );
     addProperty(keepTempProperty);
+
+    // Current temperature property
+    temperatureProperty = WotProperty<int?>(
+      thing: this,
+      name: 'temperature',
+      value: WotValue<int?>(
+        initialValue: null, // Default null
+        valueForwarder: (update) async {
+          // Read-only property
+          throw UnsupportedError('Temperature is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'integer',
+        title: 'Current Temperature',
+        description: 'Current device temperature in Celsius',
+        readOnly: true,
+      ),
+    );
+    addProperty(temperatureProperty);
   }
 
   /// Bind properties to actual hardware state (like Mozilla WebThing ready callback)
@@ -655,6 +676,7 @@ class LyfiThing extends WotThing {
       timeZoneEnabledProperty.value.notifyOfExternalUpdate(timeZoneEnabled);
       timeZoneOffsetProperty.value.notifyOfExternalUpdate(timeZoneOffset);
       keepTempProperty.value.notifyOfExternalUpdate(keepTemp);
+      temperatureProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature);
 
       logger?.d('LyfiThing: Successfully bound to hardware state');
     } catch (e, stackTrace) {
@@ -690,12 +712,15 @@ class LyfiThing extends WotThing {
     try {
       final generalStatus = await borneoApi.getGeneralDeviceStatus(device);
 
-      // Only update if different (like Mozilla WebThing value comparison)
-      if (onOffProperty.getValue() != generalStatus.power) {
-        onOffProperty.value.notifyOfExternalUpdate(generalStatus.power);
-      }
-    } catch (e) {
-      // Silent fail for background sync
+      onOffProperty.value.notifyOfExternalUpdate(generalStatus.power);
+
+      // Sync mode and state
+      final lyfiStatus = await lyfiApi.getLyfiStatus(device);
+      modeProperty.value.notifyOfExternalUpdate(lyfiStatus.mode.name);
+      stateProperty.value.notifyOfExternalUpdate(lyfiStatus.state.name);
+      temperatureProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature);
+    } catch (e, stackTrace) {
+      logger?.e('Lightweight sync failed: $e', error: e, stackTrace: stackTrace);
     }
   }
 

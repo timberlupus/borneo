@@ -32,7 +32,7 @@ class DeviceStatusIndicator extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.link_off, size: 16, color: theme.colorScheme.error),
+          Icon(Icons.wifi_off, size: 16, color: theme.colorScheme.error),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

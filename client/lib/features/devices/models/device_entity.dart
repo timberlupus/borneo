@@ -18,6 +18,9 @@ class DeviceEntity extends Device with BaseEntity {
   final String name;
   final String model;
 
+  // Non-persistent field for error messages
+  String? lastErrorMessage;
+
   DeviceEntity({
     required super.id,
     required super.address,

@@ -1,7 +1,6 @@
 import 'package:borneo_app/devices/view_models/abstract_device_summary_view_model.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/features/devices/view_models/grouped_devices_view_model.dart';
-import 'package:borneo_app/features/devices/views/state_icons.dart';
 import 'package:borneo_app/shared/widgets/confirmation_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +9,7 @@ import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import '../models/device_entity.dart';
 import '../../../routes/app_routes.dart';
 import 'device_group_selection_sheet.dart';
+import 'device_error_dialog.dart';
 
 class DeviceTile extends StatelessWidget {
   final bool isLast;
@@ -32,9 +32,9 @@ class DeviceTile extends StatelessWidget {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
       transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-      child: Selector<AbstractDeviceSummaryViewModel, (bool, bool)>(
-        selector: (_, vm) => (vm.isOnline, vm.isPowerOn),
-        builder: (context, status, child) {
+      child: Selector<AbstractDeviceSummaryViewModel, ({bool isOnline, bool isPowerOn})>(
+        selector: (_, vm) => (isOnline: vm.isOnline, isPowerOn: vm.isPowerOn),
+        builder: (context, ({bool isOnline, bool isPowerOn}) status, child) {
           final vm = context.watch<AbstractDeviceSummaryViewModel>();
           return ListTile(
             dense: false,
@@ -55,7 +55,7 @@ class DeviceTile extends StatelessWidget {
             ),
             title: Text(vm.deviceEntity.name),
             subtitle: () {
-              if (!status.$1) {
+              if (!status.isOnline) {
                 return Text(
                   context.translate('OFF-LINE'),
                   style: Theme.of(
@@ -63,7 +63,7 @@ class DeviceTile extends StatelessWidget {
                   ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
                 );
               }
-              if (!status.$2) {
+              if (!status.isPowerOn) {
                 return Text(
                   context.translate('OFF'),
                   style: Theme.of(
@@ -88,13 +88,40 @@ class DeviceTile extends StatelessWidget {
               return Row(mainAxisSize: MainAxisSize.min, children: separated);
             }(),
             trailing: () {
-              if (!status.$1) {
-                return FlashingIcon(icon: Icon(Icons.link_off, size: 24, color: Theme.of(context).colorScheme.error));
+              if (!status.isOnline) {
+                final errorMessage = vm.deviceEntity.lastErrorMessage;
+                if (errorMessage != null && errorMessage.isNotEmpty) {
+                  return IconButton.filledTonal(
+                    icon: Icon(Icons.error_outline, size: 24, color: Theme.of(context).colorScheme.error),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => DeviceErrorDialog(errorMessage: errorMessage),
+                      );
+                    },
+                  );
+                } else {
+                  return SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Center(child: Icon(Icons.wifi_off, size: 24, color: Theme.of(context).colorScheme.error)),
+                  );
+                }
               }
-              if (!status.$2) {
-                return Icon(Icons.power_settings_new, size: 24, color: Theme.of(context).colorScheme.error);
+              if (!status.isPowerOn) {
+                return SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Center(
+                    child: Icon(Icons.power_settings_new, size: 24, color: Theme.of(context).colorScheme.error),
+                  ),
+                );
               }
-              return moduleMeta.primaryStateIconBuilder(context, 24);
+              return SizedBox(
+                width: 48,
+                height: 48,
+                child: Center(child: moduleMeta.primaryStateIconBuilder(context, 24)),
+              );
             }(),
           );
         },
