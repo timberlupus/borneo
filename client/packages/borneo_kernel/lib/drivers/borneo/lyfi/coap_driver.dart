@@ -194,9 +194,9 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
           address: Uri(scheme: 'coap', host: discovered.host, port: discovered.port),
           name: utf8.decode(discovered.txt?['name'] ?? [], allowMalformed: true),
           compatible: compatible,
-          model: utf8.decode(discovered.txt?['model_name'] ?? [], allowMalformed: true),
+          model: utf8.decode(discovered.txt?['model'] ?? [], allowMalformed: true),
           fingerprint: utf8.decode(discovered.txt?['serno'] ?? [], allowMalformed: true),
-          manuf: utf8.decode(discovered.txt?['manuf_name'] ?? [], allowMalformed: true),
+          manuf: utf8.decode(discovered.txt?['manuf'] ?? [], allowMalformed: true),
           fwVer: fwVer,
           isCE: utf8.decode(discovered.txt?['ce'] ?? [], allowMalformed: true) == 'true' ? true : false,
         );

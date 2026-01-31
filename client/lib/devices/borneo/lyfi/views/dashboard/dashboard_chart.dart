@@ -48,12 +48,6 @@ class DashboardChart extends StatelessWidget {
             ),
           );
         }
-        final modeIcon = switch (props.mode) {
-          LyfiMode.manual => Icons.bar_chart_outlined,
-          LyfiMode.scheduled => Icons.alarm_outlined,
-          LyfiMode.sun => Icons.wb_sunny_outlined,
-        };
-
         final chartWidget = switch (props.mode) {
           LyfiMode.manual => ManualRunningChart(),
           LyfiMode.scheduled => ScheduleRunningChart(),
@@ -79,24 +73,8 @@ class DashboardChart extends StatelessWidget {
             constraints: const BoxConstraints(minHeight: 200),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final iconSize =
-                    ((constraints.maxWidth < constraints.maxHeight ? constraints.maxWidth : constraints.maxHeight) *
-                            0.50)
-                        .clamp(0, double.infinity)
-                        .toDouble();
                 return Stack(
                   children: [
-                    Positioned(
-                      right: -iconSize * 0.1,
-                      bottom: -iconSize * 0.1,
-                      child: IgnorePointer(
-                        child: Icon(
-                          modeIcon,
-                          size: iconSize,
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .03),
-                        ),
-                      ),
-                    ),
                     Positioned.fill(child: chartWidget),
                     Positioned(
                       right: 12,
