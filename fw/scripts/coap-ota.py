@@ -102,16 +102,14 @@ class CoAPFirmwareUpdater:
                     if response.code.is_successful():
                         result = cbor2.loads(response.payload)
                         print("Firmware update successfully triggered!")
-                        print(f"Next boot partition: {result.get('next_boot', 'unknown')}")
-                        await context.shutdown()
+                        print(
+                            f"Next boot partition: {result.get('next_boot', 'unknown')}")
                         return True
                     else:
                         print(f"Update trigger failed: {response.code}")
-                        await context.shutdown()
                         return False
                 except Exception as e:
                     print(f"Error triggering update: {str(e)}")
-                    await context.shutdown()
                     return False
 
                 return True
@@ -122,7 +120,12 @@ class CoAPFirmwareUpdater:
             print(f"Request failed: {e}")
             return False
         finally:
-            await context.shutdown()
+            try:
+                await context.shutdown()
+            except Exception as e:
+                print(f"Warning: Failed to shutdown CoAP context cleanly: {e}")
+                print(
+                    "This is likely a known aiocoap library issue and does not affect the OTA success.")
 
 async def main(args):
     # Configuration parameters
@@ -143,4 +146,4 @@ if __name__ == "__main__":
     parser.add_argument("url", help="The URL to Device address, e.g.: `coap://192.168.1.10`")
     parser.add_argument("fw_path", help="The `.bin` file path of the firmware to process")
     args = parser.parse_args()
-    asyncio.get_event_loop().run_until_complete(main(args))
+    asyncio.run(main(args))
