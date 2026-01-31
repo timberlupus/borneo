@@ -12,6 +12,7 @@ import 'package:borneo_app/main/views/main_screen.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
@@ -113,6 +114,23 @@ class _BorneoAppState extends State<BorneoApp> {
             builder: (context, child) {
               final gt = GettextLocalizations.of(context);
               final theme = Theme.of(context);
+              final effectiveBrightness = _themeMode == ThemeMode.dark
+                  ? Brightness.dark
+                  : (_themeMode == ThemeMode.light ? Brightness.light : theme.brightness);
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                SystemChrome.setSystemUIOverlayStyle(
+                  SystemUiOverlayStyle(
+                    statusBarColor: Colors.transparent,
+                    statusBarIconBrightness: Brightness.dark,
+                    systemNavigationBarColor: effectiveBrightness == Brightness.light
+                        ? Colors.white
+                        : theme.colorScheme.surfaceContainerHighest,
+                    systemNavigationBarIconBrightness: effectiveBrightness == Brightness.light
+                        ? Brightness.dark
+                        : Brightness.light,
+                  ),
+                );
+              });
               return MultiProvider(
                 providers: [
                   Provider<GettextLocalizations>(create: (context) => gt),
