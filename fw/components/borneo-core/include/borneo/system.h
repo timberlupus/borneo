@@ -70,7 +70,8 @@ void bo_safe_mode(uint32_t reason);
 
 int bo_system_factory_reset();
 
-int bo_system_set_name(const char* name);
+int bo_system_set_factory_name(const char* name);
+int bo_system_set_user_name(const char* name);
 int bo_system_set_model(const char* model);
 int bo_system_set_manuf(const char* manuf);
 

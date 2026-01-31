@@ -28,6 +28,8 @@
 #define SYSTEM_NVS_KEY_NAME "name"
 #define SYSTEM_NVS_KEY_MODEL "model"
 #define SYSTEM_NVS_KEY_MANUF "manuf"
+#define SYSTEM_USER_NVS_NS "user_settings"
+#define SYSTEM_USER_NVS_KEY_NAME "name"
 
 enum state_flags_enum {
     STATE_FLAG_OPERABLE = 1,
@@ -40,6 +42,7 @@ static inline char to_hex_digit_lower(uint8_t val) { return (val < 10) ? ('0' + 
 static void _kernel_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 static void _system_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 static int load_factory_settings();
+static int load_user_settings();
 
 ESP_EVENT_DEFINE_BASE(BO_SYSTEM_EVENTS);
 
@@ -51,6 +54,7 @@ static struct system_status _status = { 0 };
 int bo_system_init()
 {
     BO_TRY(load_factory_settings());
+    BO_TRY(load_user_settings());
 
     // Make the device ID (EUI-64 from MAC)
     uint8_t mac[6];
@@ -124,7 +128,7 @@ int bo_system_factory_reset()
     return 0;
 }
 
-int bo_system_set_name(const char* name)
+int bo_system_set_factory_name(const char* name)
 {
     if (name == NULL || strlen(name) >= BO_DEVICE_NAME_MAX) {
         return -EINVAL;
@@ -135,6 +139,23 @@ int bo_system_set_name(const char* name)
     BO_NVS_AUTO_CLOSE(nvs_handle);
     BO_TRY(nvs_set_str(nvs_handle, SYSTEM_NVS_KEY_NAME, name));
     BO_TRY(nvs_commit(nvs_handle));
+    return 0;
+}
+
+int bo_system_set_user_name(const char* name)
+{
+    if (name == NULL || strlen(name) >= BO_DEVICE_NAME_MAX) {
+        return -EINVAL;
+    }
+
+    nvs_handle_t nvs_handle;
+    BO_TRY(bo_nvs_user_open(SYSTEM_USER_NVS_NS, NVS_READWRITE, &nvs_handle));
+    BO_NVS_AUTO_CLOSE(nvs_handle);
+    BO_TRY(nvs_set_str(nvs_handle, SYSTEM_USER_NVS_KEY_NAME, name));
+    BO_TRY(nvs_commit(nvs_handle));
+    // Update in-memory sysinfo
+    strncpy(_sysinfo.name, name, BO_DEVICE_NAME_MAX - 1);
+    _sysinfo.name[BO_DEVICE_NAME_MAX - 1] = '\0';
     return 0;
 }
 
@@ -261,6 +282,29 @@ int load_factory_settings()
 
     if (changed) {
         BO_TRY(nvs_commit(nvs_handle));
+    }
+
+    return 0;
+}
+
+static int load_user_settings()
+{
+    // Load user settings, override factory if present
+    nvs_handle_t user_nvs_handle;
+    esp_err_t err = bo_nvs_user_open(SYSTEM_USER_NVS_NS, NVS_READONLY, &user_nvs_handle);
+    if (err == ESP_OK) {
+        BO_NVS_AUTO_CLOSE(user_nvs_handle);
+        size_t len = BO_DEVICE_NAME_MAX;
+        err = nvs_get_str(user_nvs_handle, SYSTEM_USER_NVS_KEY_NAME, _sysinfo.name, &len);
+        if (err == ESP_OK) {
+            ESP_LOGI(TAG, "Loaded user device name: %s", _sysinfo.name);
+        }
+        else if (err != ESP_ERR_NVS_NOT_FOUND) {
+            ESP_LOGW(TAG, "Failed to load user device name: %s", esp_err_to_name(err));
+        }
+    }
+    else if (err != ESP_ERR_NVS_NOT_FOUND) {
+        ESP_LOGW(TAG, "Failed to open user NVS: %s", esp_err_to_name(err));
     }
 
     return 0;

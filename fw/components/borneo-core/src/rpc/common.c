@@ -283,6 +283,27 @@ int bo_rpc_borneo_settings_timezone_put(const CborValue* args, CborEncoder* retv
     return 0;
 }
 
+int bo_rpc_borneo_settings_name_get(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args; // No input args for GET
+    const struct system_info* sysinfo = bo_system_get_info();
+    BO_TRY(cbor_encode_text_stringz(retvals, sysinfo->name));
+    return 0;
+}
+
+int bo_rpc_borneo_settings_name_put(const CborValue* args, CborEncoder* retvals)
+{
+    (void)retvals; // No output for PUT
+    char name[BO_DEVICE_NAME_MAX] = { 0 };
+    size_t name_len = sizeof(name);
+    BO_TRY(cbor_value_copy_text_string(args, name, &name_len, NULL));
+    if (name_len >= BO_DEVICE_NAME_MAX || name_len == 0) {
+        return -EINVAL; // Bad request
+    }
+    BO_TRY(bo_system_set_user_name(name));
+    return 0;
+}
+
 int bo_rpc_borneo_sensors_get(const CborValue* args, CborEncoder* retvals)
 {
     (void)args; // No input args for GET
