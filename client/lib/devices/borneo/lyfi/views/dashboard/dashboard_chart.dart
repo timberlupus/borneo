@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 import '../widgets/manual_running_chart.dart';
@@ -21,7 +22,31 @@ class DashboardChart extends StatelessWidget {
       ),
       builder: (context, props, _) {
         if (!props.isOnline) {
-          return const SizedBox.shrink();
+          return Container(
+            constraints: const BoxConstraints(minHeight: 200),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.wifi_off, size: 64, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+                  const SizedBox(height: 16),
+                  Text(
+                    context.translate('Device Offline'),
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    context.translate('Please check device connection'),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
         }
         final modeIcon = switch (props.mode) {
           LyfiMode.manual => Icons.bar_chart_outlined,
