@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/controller_settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/controller_settings_screen.dart';
@@ -75,14 +76,17 @@ class SettingsScreen extends StatelessWidget {
       GenericSettingsGroup(
         title: context.translate('DEVICE INFORMATION'),
         children: [
-          ListTile(
-            dense: true,
-            tileColor: tileColor,
-            leading: Icon(Icons.info_outline),
-            title: Text(context.translate('Name')),
-            subtitle: Text(vm.borneoInfo.name),
-            trailing: rightChevron,
-            onTap: () {},
+          Selector<SettingsViewModel, String>(
+            selector: (_, vm) => vm.name,
+            builder: (context, name, _) => ListTile(
+              dense: true,
+              tileColor: tileColor,
+              leading: Icon(Icons.info_outline),
+              title: Text(context.translate('Name')),
+              subtitle: Text(name),
+              trailing: rightChevron,
+              onTap: () => _showNameDialog(context, vm),
+            ),
           ),
           ListTile(
             dense: true,
@@ -429,6 +433,72 @@ class SettingsScreen extends StatelessWidget {
                 Navigator.of(context).pop();
                 await vm.updateManualFanPower(tempValue.toInt());
               },
+              child: Text(context.translate('Set')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showNameDialog(BuildContext context, SettingsViewModel vm) {
+    final controller = TextEditingController(text: vm.name);
+    String? errorText;
+
+    String? validateName(String name) {
+      if (name.isEmpty) {
+        return context.translate('Device name cannot be empty.');
+      }
+      if (name.trim().isEmpty) {
+        return context.translate('Device name cannot be pure whitespace.');
+      }
+      if (name.trim() != name) {
+        return context.translate('Device name cannot have leading or trailing whitespace.');
+      }
+      if (utf8.encode(name).length > 63) {
+        return context.translate('Device name is too long. Maximum length is 63 bytes when encoded as UTF-8.');
+      }
+      return null;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(context.translate('Set Device Name')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(labelText: context.translate('Device Name'), errorText: errorText),
+                onChanged: (value) {
+                  setState(() {
+                    errorText = validateName(value);
+                  });
+                },
+              ),
+              if (vm.isBusy) ...[SizedBox(height: 16), CircularProgressIndicator()],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: vm.isBusy ? null : () => Navigator.of(context).pop(),
+              child: Text(context.translate('Cancel')),
+            ),
+            FilledButton(
+              onPressed: vm.isBusy || errorText != null
+                  ? null
+                  : () async {
+                      final newName = controller.text.trim();
+                      if (validateName(newName) == null) {
+                        setState(() {});
+                        await vm.updateName(newName);
+                        if (context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      }
+                    },
               child: Text(context.translate('Set')),
             ),
           ],

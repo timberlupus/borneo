@@ -238,6 +238,21 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     }
   }
 
+  Future<void> updateName(String newName, {CancellationToken? cancel}) async {
+    isBusy = true;
+    notifyListeners();
+    try {
+      await borneoDeviceApi.setName(boundDevice!.device, newName, cancelToken: cancel);
+      await deviceManager.update(deviceID, name: newName);
+      notification.showSuccess(_gt.translate("Device name updated successfully"));
+    } catch (e) {
+      notification.showError(_gt.translate("Failed to update device name: $e"));
+    } finally {
+      isBusy = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> factoryReset() async {
     isBusy = true;
     notifyListeners();

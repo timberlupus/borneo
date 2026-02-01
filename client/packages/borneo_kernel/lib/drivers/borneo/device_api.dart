@@ -3,6 +3,7 @@ import 'package:borneo_kernel_abstractions/device_api.dart';
 import 'package:borneo_kernel_abstractions/driver.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:cancellation_token/cancellation_token.dart';
+import 'dart:convert';
 
 import 'package:borneo_common/io/net/coap_client.dart';
 import 'package:borneo_kernel_abstractions/errors.dart';
@@ -12,6 +13,7 @@ import 'package:cbor/simple.dart' as simple_cbor;
 import 'package:borneo_kernel_abstractions/device.dart';
 
 const String kBorneoDeviceMdnsServiceType = '_borneo._udp';
+const int kDeviceNameMaxInBytes = 63;
 
 class BorneoPaths {
   static final Uri heartbeat = Uri(path: '/borneo/heartbeat');
@@ -22,6 +24,7 @@ class BorneoPaths {
   static final Uri status = Uri(path: '/borneo/status');
   static final Uri systemMode = Uri(path: '/borneo/mode');
   static final Uri timezone = Uri(path: '/borneo/settings/timezone');
+  static final Uri name = Uri(path: '/borneo/settings/name');
   static final Uri factoryReset = Uri(path: '/borneo/factory/reset');
   static final Uri firmwareVersion = Uri(path: '/borneo/fwver');
   static final Uri compatible = Uri(path: '/borneo/compatible');
@@ -264,6 +267,9 @@ abstract class IBorneoDeviceApi extends IDeviceApi {
 
   Future<String> getTimeZone(Device dev, {CancellationToken? cancelToken});
   Future<void> setTimeZone(Device dev, String timezone, {CancellationToken? cancelToken});
+
+  Future<String> getName(Device dev, {CancellationToken? cancelToken});
+  Future<void> setName(Device dev, String newName, {CancellationToken? cancelToken});
 
   Future<void> reboot(Device dev, {CancellationToken? cancelToken});
   Future<void> factoryReset(Device dev, {CancellationToken? cancelToken});
@@ -589,6 +595,43 @@ mixin BorneoDeviceCoapApi on Driver implements IBorneoDeviceApi {
       );
       if (!response.isSuccess) {
         throw DeviceError("Failed to put to `${response.location}`", dev);
+      }
+    }, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<String> getName(Device dev, {CancellationToken? cancelToken}) async {
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      return await dd.coap.getCbor<String>(BorneoPaths.name, cancelToken: cancelToken);
+    }, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<void> setName(Device dev, String newName, {CancellationToken? cancelToken}) async {
+    if (newName.isEmpty) {
+      throw ArgumentError('Device name cannot be empty.');
+    }
+    if (newName.trim().isEmpty) {
+      throw ArgumentError('Device name cannot be pure whitespace.');
+    }
+    if (newName.trim() != newName) {
+      throw ArgumentError('Device name cannot have leading or trailing whitespace.');
+    }
+    if (utf8.encode(newName).length > kDeviceNameMaxInBytes) {
+      throw ArgumentError(
+        'Device name is too long. Maximum length is $kDeviceNameMaxInBytes bytes when encoded as UTF-8.',
+      );
+    }
+    await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final response = await dd.coap.putBytes(
+        BorneoPaths.name,
+        payload: simple_cbor.cbor.encode(newName),
+        accept: CoapMediaType.applicationCbor,
+      );
+      if (!response.isSuccess) {
+        throw DeviceError("Failed to set to `$newName`", dev);
       }
     }, cancelToken: cancelToken);
   }
