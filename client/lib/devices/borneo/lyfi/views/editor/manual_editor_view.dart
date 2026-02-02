@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 
-import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_app/core/utils/hex_color.dart';
 import 'package:borneo_app/shared/widgets/value_listenable_builders.dart';
 import '../../view_models/editor/manual_editor_view_model.dart';
 
 class ManualEditorView extends StatelessWidget {
-  const ManualEditorView({super.key});
+  final ManualEditorViewModel viewModel;
+  const ManualEditorView({super.key, required this.viewModel});
 
   Widget buildSliders(BuildContext context) {
     return Selector<ManualEditorViewModel, ({bool isInitialized, bool canChangeColor})>(
@@ -120,12 +120,8 @@ class ManualEditorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final editor = context.read<LyfiViewModel>().currentEditor;
-    if (editor == null) {
-      return const SizedBox.shrink();
-    }
     return ChangeNotifierProvider.value(
-      value: editor as ManualEditorViewModel,
+      value: viewModel,
       builder: (context, child) => Column(
         spacing: 16,
         children: [

@@ -5,6 +5,9 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 
 import '../view_models/lyfi_view_model.dart';
+import '../view_models/editor/manual_editor_view_model.dart';
+import '../view_models/editor/schedule_editor_view_model.dart';
+import '../view_models/editor/sun_editor_view_model.dart';
 import 'widgets/lyfi_header.dart';
 import 'editor/manual_editor_view.dart';
 import 'editor/schedule_editor_view.dart';
@@ -115,26 +118,68 @@ class DimmingView extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         const DimmingHeroPanel(),
-        Expanded(
-          child: Selector<LyfiViewModel, ({bool isLocked, LyfiMode mode})>(
-            selector: (context, vm) => (isLocked: vm.isLocked, mode: vm.mode),
-            builder: (context, vm, child) {
-              return AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-                child: switch (vm.mode) {
-                  LyfiMode.manual => const ManualEditorView(),
-                  LyfiMode.scheduled => const ScheduleEditorView(),
-                  LyfiMode.sun => const SunEditorView(),
-                },
-              );
-            },
-          ),
-        ),
+        Expanded(child: const EditorHost()),
       ],
     );
+  }
+}
+
+class EditorHost extends StatelessWidget {
+  const EditorHost({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = context.watch<LyfiViewModel>();
+    final state = vm.editorState;
+
+    Widget child;
+    switch (state.status) {
+      case EditorStatus.loading:
+        child = const Center(key: ValueKey('editor-loading'), child: CircularProgressIndicator());
+        break;
+      case EditorStatus.error:
+        child = Center(
+          key: const ValueKey('editor-error'),
+          child: Text(context.translate('Editor initialization failed. Please retry.')),
+        );
+        break;
+      case EditorStatus.ready:
+        child = _buildEditor(state);
+        break;
+      case EditorStatus.idle:
+        child = const SizedBox.shrink(key: ValueKey('editor-idle'));
+        break;
+    }
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+      child: child,
+    );
+  }
+
+  Widget _buildEditor(EditorState state) {
+    final editor = state.editor;
+    if (editor == null) {
+      return const SizedBox.shrink(key: ValueKey('editor-null'));
+    }
+
+    switch (state.mode) {
+      case LyfiMode.manual:
+        return editor is ManualEditorViewModel
+            ? ManualEditorView(key: const ValueKey('editor-manual'), viewModel: editor)
+            : const SizedBox.shrink(key: ValueKey('editor-manual-mismatch'));
+      case LyfiMode.scheduled:
+        return editor is ScheduleEditorViewModel
+            ? ScheduleEditorView(key: const ValueKey('editor-scheduled'), viewModel: editor)
+            : const SizedBox.shrink(key: ValueKey('editor-scheduled-mismatch'));
+      case LyfiMode.sun:
+        return editor is SunEditorViewModel
+            ? SunEditorView(key: const ValueKey('editor-sun'), viewModel: editor)
+            : const SizedBox.shrink(key: ValueKey('editor-sun-mismatch'));
+    }
   }
 }
 

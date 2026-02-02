@@ -9,6 +9,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:intl/intl.dart';
 
@@ -16,6 +17,33 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/manual_editor_
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/schedule_editor_view_model.dart';
 
 import 'editor/ieditor.dart';
+
+enum EditorStatus { idle, loading, ready, error }
+
+@immutable
+class EditorState {
+  final LyfiMode mode;
+  final EditorStatus status;
+  final IEditor? editor;
+  final Object? error;
+
+  const EditorState({required this.mode, required this.status, required this.editor, this.error});
+
+  EditorState copyWith({
+    LyfiMode? mode,
+    EditorStatus? status,
+    IEditor? editor,
+    Object? error,
+    bool clearError = false,
+  }) {
+    return EditorState(
+      mode: mode ?? this.mode,
+      status: status ?? this.status,
+      editor: editor ?? this.editor,
+      error: clearError ? null : (error ?? this.error),
+    );
+  }
+}
 
 class LyfiViewModel extends BaseLyfiDeviceViewModel {
   static const initializationTimeout = Duration(seconds: 5);
@@ -61,7 +89,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
   bool get canTimedOn => !isBusy && !isSuspectedOffline && (!isOn || super.mode == LyfiMode.scheduled);
 
-  IEditor? currentEditor;
+  EditorState _editorState = const EditorState(mode: LyfiMode.manual, status: EditorStatus.idle, editor: null);
+  EditorState get editorState => _editorState;
   final ScheduleTable scheduledInstants = [];
   final ScheduleTable sunInstants = [];
 
@@ -158,6 +187,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
     await refreshStatus();
 
+    _editorState = _editorState.copyWith(mode: super.mode);
+
     if (super.isOnline && !isSuspectedOffline && boundDevice != null) {
       switch (mode) {
         case LyfiMode.scheduled:
@@ -203,6 +234,10 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       ch.dispose();
     }
     */
+      if (_editorState.editor != null) {
+        _editorState.editor!.dispose();
+        _editorState = _editorState.copyWith(editor: null, status: EditorStatus.idle, clearError: true);
+      }
       super.dispose();
       _isDisposed = true;
     }
@@ -219,6 +254,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     _temporaryDuration = await executeLyfiCommand(() => _deviceApi.getTemporaryDuration(boundDevice!.device));
 
     await refreshStatus();
+
+    _editorState = _editorState.copyWith(mode: super.mode);
 
     switch (mode) {
       case LyfiMode.scheduled:
@@ -255,9 +292,9 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     _overallBrightness = 0.0;
     _fanPowerRatio = 0.0;
 
-    if (currentEditor != null) {
-      currentEditor!.dispose();
-      currentEditor = null;
+    if (_editorState.editor != null) {
+      _editorState.editor!.dispose();
+      _editorState = _editorState.copyWith(editor: null, status: EditorStatus.idle, clearError: true);
     }
   }
 
@@ -362,19 +399,36 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     await _toggleLock(isLocked);
   }
 
+  void _scheduleEditorDispose(IEditor editor) {
+    Future.delayed(const Duration(milliseconds: 350), () {
+      if (_isDisposed) {
+        return;
+      }
+      if (_editorState.editor == editor) {
+        return;
+      }
+      try {
+        editor.dispose();
+      } catch (e, stackTrace) {
+        logger?.w('Editor dispose delayed failed: $e', error: e, stackTrace: stackTrace);
+      }
+    });
+  }
+
   Future<void> _toggleLock(bool newIsLocked) async {
     if (isSuspectedOffline) {
       return;
     }
     if (!super.isLocked) {
-      assert(currentEditor != null);
+      final editor = _editorState.editor;
+      assert(editor != null);
       // Exiting the edit mode
-      if (currentEditor!.isChanged) {
-        await currentEditor!.save();
-        if (currentEditor is ScheduleEditorViewModel) {
+      if (editor != null && editor.isChanged) {
+        await editor.save();
+        if (editor is ScheduleEditorViewModel) {
           scheduledInstants.clear();
           scheduledInstants.addAll(await executeLyfiCommand(() => _deviceApi.getSchedule(boundDevice!.device)));
-        } else if (currentEditor is SunEditorViewModel) {
+        } else if (editor is SunEditorViewModel) {
           sunInstants.clear();
           sunInstants.addAll(await executeLyfiCommand(() => _deviceApi.getSunSchedule(boundDevice!.device)));
         }
@@ -385,6 +439,11 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       // Exiting edit mode - switch to normal state
       await super.setState(LyfiState.normal);
       await refreshStatus();
+      final previousEditor = _editorState.editor;
+      _editorState = _editorState.copyWith(status: EditorStatus.idle, editor: null, clearError: true);
+      if (previousEditor != null) {
+        _scheduleEditorDispose(previousEditor);
+      }
       notifyListeners();
     } else {
       // Entering edit mode - wait for state to change to dimming before creating editor
@@ -430,24 +489,43 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   }
 
   Future<void> _toggleEditor(LyfiMode newMode) async {
+    final previousEditor = _editorState.editor;
+    _editorState = _editorState.copyWith(mode: newMode, status: EditorStatus.loading, editor: null, clearError: true);
+    notifyListeners();
+
+    IEditor newEditor;
     switch (newMode) {
       case LyfiMode.manual:
-        currentEditor = ManualEditorViewModel(this);
+        newEditor = ManualEditorViewModel(this);
         break;
 
       case LyfiMode.scheduled:
-        currentEditor = ScheduleEditorViewModel(this);
+        newEditor = ScheduleEditorViewModel(this);
         break;
 
       case LyfiMode.sun:
-        currentEditor = SunEditorViewModel(this);
+        newEditor = SunEditorViewModel(this);
         break;
     }
-    await currentEditor!.initialize();
+
+    try {
+      await newEditor.initialize();
+      _editorState = _editorState.copyWith(status: EditorStatus.ready, editor: newEditor, clearError: true);
+      notifyListeners();
+    } catch (e, stackTrace) {
+      logger?.e('Failed to initialize editor for mode $newMode', error: e, stackTrace: stackTrace);
+      newEditor.dispose();
+      _editorState = _editorState.copyWith(status: EditorStatus.error, editor: null, error: e);
+      notifyListeners();
+    }
+
+    if (previousEditor != null) {
+      _scheduleEditorDispose(previousEditor);
+    }
     // Do not notify here; callers decide after refresh/creation to notify.
   }
 
-  bool get isDimmingReady => !isLocked && super.state == LyfiState.dimming && currentEditor != null;
+  bool get isDimmingReady => !isLocked && super.state == LyfiState.dimming && _editorState.status == EditorStatus.ready;
 
   /// Returns a Future that completes when the view model is ready for Dimming editing
   /// (unlocked, state==dimming, editor initialized). No timers/polling are used; it resolves

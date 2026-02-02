@@ -12,12 +12,12 @@ import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/schedule_editor_view_model.dart';
 import 'package:borneo_app/core/utils/hex_color.dart';
-import '../../view_models/lyfi_view_model.dart';
 import '../brightness_slider_list.dart';
 import '../widgets/lyfi_time_line_chart.dart';
 
 class ScheduleEditorView extends StatelessWidget {
-  const ScheduleEditorView({super.key});
+  final ScheduleEditorViewModel viewModel;
+  const ScheduleEditorView({super.key, required this.viewModel});
 
   Future<Duration?> showNewInstantDialog(BuildContext context, TimeOfDay initialTime) async {
     // bool isNextDay = false;
@@ -83,10 +83,8 @@ class ScheduleEditorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final editor = context.read<LyfiViewModel>().currentEditor;
-    final editorVM = editor as ScheduleEditorViewModel;
     return ChangeNotifierProvider.value(
-      value: editorVM,
+      value: viewModel,
       builder: (context, child) {
         return Column(
           spacing: 16,

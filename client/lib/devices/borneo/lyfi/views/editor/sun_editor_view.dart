@@ -6,11 +6,11 @@ import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import 'package:provider/provider.dart';
 
-import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import '../../view_models/editor/sun_editor_view_model.dart';
 
 class SunEditorView extends StatelessWidget {
-  const SunEditorView({super.key});
+  final SunEditorViewModel viewModel;
+  const SunEditorView({super.key, required this.viewModel});
 
   Widget buildSliders(BuildContext context) {
     return Consumer<SunEditorViewModel>(
@@ -48,10 +48,8 @@ class SunEditorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentEditor = context.read<LyfiViewModel>().currentEditor!;
-
     return ChangeNotifierProvider.value(
-      value: currentEditor as SunEditorViewModel,
+      value: viewModel,
       builder: (context, child) => Column(
         spacing: 16,
         children: [
