@@ -5,6 +5,9 @@ setup(
     version='0.4.12',
     packages=find_packages(),
     install_requires=[
+        'aiocoap>=0.4.12',
+        'cbor2>=5.8.0',
+        'aiofiles',
     ],
     author='Yunnan BinaryStars Technologies Co., Ltd.',
     author_email='oldrev@gmail.com',
