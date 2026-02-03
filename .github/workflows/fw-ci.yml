@@ -23,6 +23,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Install clang-format
+      run: |
+        apt update
+        apt install -y clang-format
+
     - name: Build LyFi Firmware in Docker
       run: |
         rm -rf fw/lyfi/build
