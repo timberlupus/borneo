@@ -25,8 +25,8 @@ jobs:
 
     - name: Install clang-format
       run: |
-        apt update
-        apt install -y clang-format
+        sudo apt update
+        sudo apt install -y clang-format
 
     - name: Build LyFi Firmware in Docker
       run: |
