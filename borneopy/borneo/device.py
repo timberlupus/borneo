@@ -3,9 +3,13 @@ import asyncio
 import struct
 import os
 import hashlib
+from aiocoap.protocol import Context
+from aiofiles.threadpool.binary import AsyncBufferedReader
 from cbor2 import dumps, loads
 from urllib.parse import urljoin
 import aiofiles
+from typing import Any
+from typing_extensions import Self
 
 from aiocoap import *
 
@@ -17,20 +21,20 @@ class BorneoError(RuntimeError):
 
 
 class AbstractBorneoDeviceCoapClient:
-    def __init__(self, address):
-        self.address = address
+    def __init__(self, address: str) -> None:
+        self.address: str = address
 
-    async def open(self):
-        self._context = await Context.create_client_context()
+    async def open(self) -> None:
+        self._context: Context = await Context.create_client_context()
 
-    async def close(self):
+    async def close(self) -> None:
         await self._context.shutdown()
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Self:
         await self.open()
         return self
 
-    async def __aexit__(self, exc_type, exc, tb):
+    async def __aexit__(self, exc_type, exc, tb) -> None:
         await self.close()
 
     async def get_wellknown_core(self):
@@ -45,24 +49,24 @@ class AbstractBorneoDeviceCoapClient:
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_on_off(self, on_off: bool):
+    async def set_on_off(self, on_off: bool) -> None:
         uri = self.address + '/borneo/power'
-        payload = dumps(on_off)
+        payload: bytes = dumps(on_off)
         msg = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(msg).response
 
-    async def factory_reset(self):
+    async def factory_reset(self) -> None:
         uri = self.address + '/borneo/factory/reset'
         msg = Message(code=POST, uri=uri, mtype=NON, no_response=26)
         await self._context.request(msg).response
 
-    async def factory_set_name(self, name: str):
+    async def factory_set_name(self, name: str) -> None:
         uri = self.address + '/borneo/factory/name'
-        payload = dumps(name)
+        payload: bytes = dumps(name)
         msg = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(msg).response
 
-    async def reboot(self):
+    async def reboot(self) -> None:
         uri = self.address + '/borneo/reboot'
         msg = Message(code=POST, uri=uri, mtype=NON, no_response=26)
         await self._context.request(msg).response
@@ -85,9 +89,9 @@ class AbstractBorneoDeviceCoapClient:
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_timezone(self, tz: str):
+    async def set_timezone(self, tz: str) -> None:
         uri = self.address + '/borneo/settings/timezone'
-        payload = dumps(tz)
+        payload: bytes = dumps(tz)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -103,9 +107,9 @@ class AbstractBorneoDeviceCoapClient:
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_upgrade_checking(self):
+    async def set_upgrade_checking(self) -> None:
         uri = self.address + '/borneo/upgrade/checking'
-        payload = dumps(True)
+        payload: bytes = dumps(True)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -115,9 +119,9 @@ class AbstractBorneoDeviceCoapClient:
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def begin_upgrade(self):
+    async def begin_upgrade(self) -> None:
         uri = self.address + '/borneo/upgrade/upgrading'
-        payload = dumps(True)
+        payload: bytes = dumps(True)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -139,9 +143,9 @@ class AbstractBorneoDeviceCoapClient:
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_nvs_u8(self, key: str, value: int):
+    async def set_nvs_u8(self, key: str, value: int) -> None:
         uri = self.address + f'/borneo/factory/nvs/u8?key={key}'
-        payload = dumps(value)
+        payload: bytes = dumps(value)
         request = Message(code=POST, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -151,9 +155,9 @@ class AbstractBorneoDeviceCoapClient:
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_nvs_u16(self, key: str, value: int):
+    async def set_nvs_u16(self, key: str, value: int) -> None:
         uri = self.address + f'/borneo/factory/nvs/u16?key={key}'
-        payload = dumps(value)
+        payload: bytes = dumps(value)
         request = Message(code=POST, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -163,9 +167,9 @@ class AbstractBorneoDeviceCoapClient:
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_nvs_u32(self, key: str, value: int):
+    async def set_nvs_u32(self, key: str, value: int) -> None:
         uri = self.address + f'/borneo/factory/nvs/u32?key={key}'
-        payload = dumps(value)
+        payload: bytes = dumps(value)
         request = Message(code=POST, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -175,9 +179,9 @@ class AbstractBorneoDeviceCoapClient:
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_nvs_u64(self, key: str, value: int):
+    async def set_nvs_u64(self, key: str, value: int) -> None:
         uri = self.address + f'/borneo/factory/nvs/u64?key={key}'
-        payload = dumps(value)
+        payload: bytes = dumps(value)
         request = Message(code=POST, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -187,9 +191,9 @@ class AbstractBorneoDeviceCoapClient:
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_nvs_i8(self, key: str, value: int):
+    async def set_nvs_i8(self, key: str, value: int) -> None:
         uri = self.address + f'/borneo/factory/nvs/i8?key={key}'
-        payload = dumps(value)
+        payload: bytes = dumps(value)
         request = Message(code=POST, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -199,9 +203,9 @@ class AbstractBorneoDeviceCoapClient:
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_nvs_i32(self, key: str, value: int):
+    async def set_nvs_i32(self, key: str, value: int) -> None:
         uri = self.address + f'/borneo/factory/nvs/i32?key={key}'
-        payload = dumps(value)
+        payload: bytes = dumps(value)
         request = Message(code=POST, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -211,9 +215,9 @@ class AbstractBorneoDeviceCoapClient:
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_nvs_i64(self, key: str, value: int):
+    async def set_nvs_i64(self, key: str, value: int) -> None:
         uri = self.address + f'/borneo/factory/nvs/i64?key={key}'
-        payload = dumps(value)
+        payload: bytes = dumps(value)
         request = Message(code=POST, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -223,9 +227,9 @@ class AbstractBorneoDeviceCoapClient:
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_nvs_blob(self, key: str, value: bytes):
+    async def set_nvs_blob(self, key: str, value: bytes) -> None:
         uri = self.address + f'/borneo/factory/nvs/blob?key={key}'
-        payload = dumps(value)
+        payload: bytes = dumps(value)
         request = Message(code=POST, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -235,9 +239,9 @@ class AbstractBorneoDeviceCoapClient:
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_nvs_str(self, key: str, value: str):
+    async def set_nvs_str(self, key: str, value: str) -> None:
         uri = self.address + f'/borneo/factory/nvs/str?key={key}'
-        payload = dumps(value)
+        payload: bytes = dumps(value)
         request = Message(code=POST, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -272,7 +276,7 @@ class AbstractBorneoDeviceCoapClient:
         return loads(response.payload)
 
     # CoAP OTA functionality methods
-    async def _calculate_file_checksum(self, firmware_path):
+    async def _calculate_file_checksum(self, firmware_path: str) -> bytes:
         """Calculate SHA256 checksum of the firmware file"""
         sha256 = hashlib.sha256()
         async with aiofiles.open(firmware_path, 'rb') as f:
@@ -281,11 +285,11 @@ class AbstractBorneoDeviceCoapClient:
                 if not data:
                     break
                 sha256.update(data)
-        return sha256
+        return sha256.digest()
 
     async def check_ota_status(self):
         """Check OTA server status"""
-        uri = urljoin(self.address, "/borneo/ota/coap/status")
+        uri: str = urljoin(self.address, "/borneo/ota/coap/status")
         request = Message(code=GET, uri=uri)
         try:
             response = await self._context.request(request).response
@@ -316,9 +320,9 @@ class AbstractBorneoDeviceCoapClient:
         if not os.path.exists(firmware_path):
             return {'success': False, 'error': f'Firmware file {firmware_path} does not exist'}
 
-        file_size = os.path.getsize(firmware_path)
-        sha256 = await self._calculate_file_checksum(firmware_path)
-        file_checksum = sha256.digest()
+        file_size: int = os.path.getsize(firmware_path)
+        sha256: hashlib.HASH = await self._calculate_file_checksum(firmware_path)
+        file_checksum: bytes = sha256.digest()
 
         if progress_callback:
             progress_callback(0, file_size)
@@ -332,7 +336,7 @@ class AbstractBorneoDeviceCoapClient:
                 progress_callback(len(firmware_data), file_size)
 
             # Create CoAP PUT request
-            uri = urljoin(self.address, "/borneo/ota/coap/download")
+            uri: str = urljoin(self.address, "/borneo/ota/coap/download")
             request = Message(code=PUT, uri=uri, payload=firmware_data)
             request.remote.maximum_block_size_exp = 5  # 1024 bytes
 
@@ -342,7 +346,7 @@ class AbstractBorneoDeviceCoapClient:
             # Process server response
             if response.code.is_successful():
                 # Send POST request to complete update
-                post_payload = dumps({
+                post_payload: bytes = dumps({
                     "checksum": file_checksum,
                 })
                 post_request = Message(code=POST, payload=post_payload, uri=uri)

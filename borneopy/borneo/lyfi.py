@@ -2,6 +2,8 @@ import logging
 import asyncio
 import struct
 from cbor2 import dumps, loads
+from typing import List, Dict, Any, Optional
+from typing_extensions import Self
 from borneo.device import AbstractBorneoDeviceCoapClient, BorneoError
 
 from aiocoap import *
@@ -54,10 +56,10 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         except Exception as e:
             raise BorneoError(f"Error getting color: {str(e)}")
 
-    async def set_color(self, color):
+    async def set_color(self, color) -> None:
         """Set the LED color. Color should be a list of integers (one per channel)."""
         uri = self.address + '/borneo/lyfi/color'
-        payload = dumps(color)
+        payload: bytes = dumps(color)
         request = Message(code=PUT, payload=payload, uri=uri)
         try:
             response = await self._context.request(request).response
@@ -72,9 +74,9 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_schedule(self, schedule):
+    async def set_schedule(self, schedule) -> None:
         uri = self.address + '/borneo/lyfi/schedule'
-        payload = dumps(schedule)
+        payload: bytes = dumps(schedule)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -88,21 +90,21 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         response = await self._context.request(request).response
         return LedState(loads(response.payload))
 
-    async def switch_state(self, state: LedState):
+    async def switch_state(self, state: LedState) -> None:
         uri = self.address + '/borneo/lyfi/state'
-        payload = dumps(state.value)
+        payload: bytes = dumps(state.value)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
-    async def set_fan_power(self, power: int):
+    async def set_fan_power(self, power: int) -> None:
         uri = self.address + '/borneo/lyfi/fan/power'
-        payload = dumps(power)
+        payload: bytes = dumps(power)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
-    async def set_keep_temp(self, kp: int):
+    async def set_keep_temp(self, kp: int) -> None:
         uri = self.address + '/borneo/lyfi/thermal/temp/keep'
-        payload = dumps(kp)
+        payload: bytes = dumps(kp)
         request = Message(code=PUT, payload=payload, uri=uri)
         response = await self._context.request(request).response
 
@@ -130,9 +132,9 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_fan_mode(self, mode: str):
+    async def set_fan_mode(self, mode: str) -> None:
         uri = self.address + '/borneo/lyfi/thermal/fan/mode'
-        payload = dumps(mode)
+        payload: bytes = dumps(mode)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -142,9 +144,9 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_manual_fan(self, power: int):
+    async def set_manual_fan(self, power: int) -> None:
         uri = self.address + '/borneo/lyfi/thermal/fan/manual'
-        payload = dumps(power)
+        payload: bytes = dumps(power)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -184,9 +186,9 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_mode(self, mode: int):
+    async def set_mode(self, mode: int) -> None:
         uri = self.address + '/borneo/lyfi/mode'
-        payload = dumps(mode)
+        payload: bytes = dumps(mode)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -196,9 +198,9 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_correction_method(self, method):
+    async def set_correction_method(self, method) -> None:
         uri = self.address + '/borneo/lyfi/correction-method'
-        payload = dumps(method)
+        payload: bytes = dumps(method)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -208,9 +210,9 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_temporary_duration(self, duration: int):
+    async def set_temporary_duration(self, duration: int) -> None:
         uri = self.address + '/borneo/lyfi/temporary-duration'
-        payload = dumps(duration)
+        payload: bytes = dumps(duration)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -220,9 +222,9 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_geo_location(self, location):
+    async def set_geo_location(self, location) -> None:
         uri = self.address + '/borneo/lyfi/geo-location'
-        payload = dumps(location)
+        payload: bytes = dumps(location)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -232,9 +234,9 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_tz_enabled(self, enabled: bool):
+    async def set_tz_enabled(self, enabled: bool) -> None:
         uri = self.address + '/borneo/lyfi/tz/enabled'
-        payload = dumps(enabled)
+        payload: bytes = dumps(enabled)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -244,9 +246,9 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_tz_offset(self, offset: int):
+    async def set_tz_offset(self, offset: int) -> None:
         uri = self.address + '/borneo/lyfi/tz/offset'
-        payload = dumps(offset)
+        payload: bytes = dumps(offset)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -256,9 +258,9 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def set_cloud_enabled(self, enabled: bool):
+    async def set_cloud_enabled(self, enabled: bool) -> None:
         uri = self.address + '/borneo/lyfi/cloud/enabled'
-        payload = dumps(enabled)
+        payload: bytes = dumps(enabled)
         request = Message(code=PUT, payload=payload, uri=uri)
         await self._context.request(request).response
 
@@ -268,8 +270,8 @@ class LyfiCoapClient(AbstractBorneoDeviceCoapClient):
         response = await self._context.request(request).response
         return loads(response.payload)
 
-    async def publish_acclimation(self, data):
+    async def publish_acclimation(self, data) -> None:
         uri = self.address + '/borneo/lyfi/acclimation'
-        payload = dumps(data)
+        payload: bytes = dumps(data)
         request = Message(code=POST, payload=payload, uri=uri)
         await self._context.request(request).response
