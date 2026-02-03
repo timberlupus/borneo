@@ -155,7 +155,7 @@ static const struct led_channel_defaults LED_DEFAULT_CHANNELS[CONFIG_LYFI_LED_CH
         },
 #endif
 #if CONFIG_LYFI_LED_CH6_ENABLED
-    [6] = { 
+    [6] = {
             .name = CONFIG_LYFI_LED_CH6_NAME,
             .color = CONFIG_LYFI_LED_CH6_COLOR,
             .wavelength = CONFIG_LYFI_LED_CH6_WAVELENGTH,
