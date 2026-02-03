@@ -1,6 +1,7 @@
 # A Based Open Source WiFi Aquarium LED DIY Kit
 
 ![Firmware Build Status](https://github.com/borneo-iot/borneo/actions/workflows/fw-ci.yml/badge.svg)
+![Firmware Release Status](https://github.com/borneo-iot/borneo/actions/workflows/fw-release.yml/badge.svg)
 ![App Build Status](https://github.com/borneo-iot/borneo/actions/workflows/flutter-ci.yml/badge.svg)
 
 ![BorneoIoT Banner](assets/borneo-repo-banner.jpg)
