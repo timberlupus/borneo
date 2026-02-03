@@ -108,38 +108,79 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
 struct led_channel_defaults {
     const char* name;
     const char* color;
+    int16_t wavelength;
 };
 
 static const struct led_channel_defaults LED_DEFAULT_CHANNELS[CONFIG_LYFI_LED_CHANNEL_COUNT] = {
 #if CONFIG_LYFI_LED_CH0_ENABLED
-    [0] = { CONFIG_LYFI_LED_CH0_NAME, CONFIG_LYFI_LED_CH0_COLOR },
+    [0] = {
+            .name = CONFIG_LYFI_LED_CH0_NAME,
+            .color = CONFIG_LYFI_LED_CH0_COLOR,
+            .wavelength = CONFIG_LYFI_LED_CH0_WAVELENGTH,
+        },
 #endif
 #if CONFIG_LYFI_LED_CH1_ENABLED
-    [1] = { CONFIG_LYFI_LED_CH1_NAME, CONFIG_LYFI_LED_CH1_COLOR },
+    [1] = {
+            .name = CONFIG_LYFI_LED_CH1_NAME,
+            .color = CONFIG_LYFI_LED_CH1_COLOR,
+            .wavelength = CONFIG_LYFI_LED_CH1_WAVELENGTH,
+        },
 #endif
 #if CONFIG_LYFI_LED_CH2_ENABLED
-    [2] = { CONFIG_LYFI_LED_CH2_NAME, CONFIG_LYFI_LED_CH2_COLOR },
+    [2] = { 
+            .name = CONFIG_LYFI_LED_CH2_NAME,
+            .color = CONFIG_LYFI_LED_CH2_COLOR,
+            .wavelength = CONFIG_LYFI_LED_CH2_WAVELENGTH,
+         },
 #endif
 #if CONFIG_LYFI_LED_CH3_ENABLED
-    [3] = { CONFIG_LYFI_LED_CH3_NAME, CONFIG_LYFI_LED_CH3_COLOR },
+    [3] = {
+            .name = CONFIG_LYFI_LED_CH3_NAME,
+            .color = CONFIG_LYFI_LED_CH3_COLOR,
+            .wavelength = CONFIG_LYFI_LED_CH3_WAVELENGTH,
+        },
 #endif
 #if CONFIG_LYFI_LED_CH4_ENABLED
-    [4] = { CONFIG_LYFI_LED_CH4_NAME, CONFIG_LYFI_LED_CH4_COLOR },
+    [4] = {
+            .name = CONFIG_LYFI_LED_CH4_NAME,
+            .color = CONFIG_LYFI_LED_CH4_COLOR,
+            .wavelength = CONFIG_LYFI_LED_CH4_WAVELENGTH,
+        },
 #endif
 #if CONFIG_LYFI_LED_CH5_ENABLED
-    [5] = { CONFIG_LYFI_LED_CH5_NAME, CONFIG_LYFI_LED_CH5_COLOR },
+    [5] = {
+            .name = CONFIG_LYFI_LED_CH5_NAME,
+            .color = CONFIG_LYFI_LED_CH5_COLOR,
+            .wavelength = CONFIG_LYFI_LED_CH5_WAVELENGTH,
+        },
 #endif
 #if CONFIG_LYFI_LED_CH6_ENABLED
-    [6] = { CONFIG_LYFI_LED_CH6_NAME, CONFIG_LYFI_LED_CH6_COLOR },
+    [6] = { 
+            .name = CONFIG_LYFI_LED_CH6_NAME,
+            .color = CONFIG_LYFI_LED_CH6_COLOR,
+            .wavelength = CONFIG_LYFI_LED_CH6_WAVELENGTH,
+        },
 #endif
 #if CONFIG_LYFI_LED_CH7_ENABLED
-    [7] = { CONFIG_LYFI_LED_CH7_NAME, CONFIG_LYFI_LED_CH7_COLOR },
+    [7] = {
+            .name = CONFIG_LYFI_LED_CH7_NAME,
+            .color = CONFIG_LYFI_LED_CH7_COLOR,
+            .wavelength = CONFIG_LYFI_LED_CH7_WAVELENGTH,
+        },
 #endif
 #if CONFIG_LYFI_LED_CH8_ENABLED
-    [8] = { CONFIG_LYFI_LED_CH8_NAME, CONFIG_LYFI_LED_CH8_COLOR },
+    [8] = {
+            .name = CONFIG_LYFI_LED_CH8_NAME,
+            .color = CONFIG_LYFI_LED_CH8_COLOR,
+            .wavelength = CONFIG_LYFI_LED_CH8_WAVELENGTH,
+        },
 #endif
 #if CONFIG_LYFI_LED_CH9_ENABLED
-    [9] = { CONFIG_LYFI_LED_CH9_NAME, CONFIG_LYFI_LED_CH9_COLOR },
+    [9] = {
+        .name = CONFIG_LYFI_LED_CH9_NAME,
+        .color = CONFIG_LYFI_LED_CH9_COLOR,
+        .wavelength = CONFIG_LYFI_LED_CH9_WAVELENGTH,
+    },
 #endif
 };
 
@@ -178,6 +219,10 @@ int led_load_factory_settings()
         snprintf(key, sizeof(key), "ch%u.color", ch);
         BO_TRY(
             bo_nvs_get_or_set_str(handle, key, s_factory_settings.channels[ch].color, &len, defaults->color, &changed));
+
+        snprintf(key, sizeof(key), "ch%u.wl", ch);
+        BO_TRY(bo_nvs_get_or_set_u16(handle, key, (uint16_t*)&s_factory_settings.channels[ch].wavelength,
+                                     defaults->wavelength, &changed));
     }
 
     if (changed) {
@@ -536,4 +581,12 @@ const char* led_get_channel_color(uint8_t ch)
         return NULL;
     }
     return s_factory_settings.channels[ch].color;
+}
+
+int16_t led_get_channel_wavelength(uint8_t ch)
+{
+    if (ch >= CONFIG_LYFI_LED_CHANNEL_COUNT) {
+        return 0;
+    }
+    return s_factory_settings.channels[ch].wavelength;
 }

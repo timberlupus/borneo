@@ -34,6 +34,9 @@ static int _encode_channel_info_entry(CborEncoder* parent, const struct led_chan
     BO_TRY(cbor_encode_text_stringz(&ch_map, "color"));
     BO_TRY(cbor_encode_text_stringz(&ch_map, channel->color));
 
+    BO_TRY(cbor_encode_text_stringz(&ch_map, "wavelength"));
+    BO_TRY(cbor_encode_int(&ch_map, channel->wavelength));
+
     BO_TRY(cbor_encode_text_stringz(&ch_map, "brightnessPercent"));
     BO_TRY(cbor_encode_uint(&ch_map, brightness_percent));
 

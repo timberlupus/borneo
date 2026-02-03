@@ -12,10 +12,8 @@ endif()
 
 include(BorneoProduct REQUIRED)
 
-#include(./cmake/ClangFormat.cmake REQUIRED)
+include("${CMAKE_SOURCE_DIR}/../cmake/ClangFormat.cmake" REQUIRED)
 
-
-#clangformat_setup(${ALL_C_SOURCES} ${ALL_CPP_SOURCES} ${ALL_HEADERS})
 
 FILE(GLOB_RECURSE ALL_C_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/main/src/*.c"
@@ -30,7 +28,7 @@ FILE(GLOB_RECURSE ALL_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/main/include/*.hpp"
 )
 
-
+clangformat_setup(${ALL_C_SOURCES} ${ALL_CPP_SOURCES} ${ALL_HEADERS})
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 

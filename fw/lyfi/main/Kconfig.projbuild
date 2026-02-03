@@ -108,6 +108,11 @@ menu "Borneo LyFi"
                 string "Color for LED channel 0"
                 depends on LYFI_LED_CH0_ENABLED
 
+            config LYFI_LED_CH0_WAVELENGTH
+                int "Wavelength for LED channel 0"
+                default 0
+                depends on LYFI_LED_CH0_ENABLED
+
             config LYFI_LED_CH0_BRIGHTNESS_PERCENT
                 int "Brightness percent for LED channel 0"
                 default 0
@@ -132,6 +137,11 @@ menu "Borneo LyFi"
                 depends on LYFI_LED_CH1_ENABLED
             config LYFI_LED_CH1_COLOR
                 string "Color for LED channel 1"
+                depends on LYFI_LED_CH1_ENABLED
+
+            config LYFI_LED_CH1_WAVELENGTH
+                int "Wavelength for LED channel 1"
+                default 0
                 depends on LYFI_LED_CH1_ENABLED
 
             config LYFI_LED_CH1_BRIGHTNESS_PERCENT
@@ -162,6 +172,11 @@ menu "Borneo LyFi"
                 string "Color for LED channel 2"
                 depends on LYFI_LED_CH2_ENABLED
 
+            config LYFI_LED_CH2_WAVELENGTH
+                int "Wavelength for LED channel 2"
+                default 0
+                depends on LYFI_LED_CH2_ENABLED
+
             config LYFI_LED_CH2_BRIGHTNESS_PERCENT
                 int "Brightness percent for LED channel 2"
                 default 0
@@ -187,6 +202,11 @@ menu "Borneo LyFi"
 
             config LYFI_LED_CH3_COLOR
                 string "Color for LED channel 3"
+                depends on LYFI_LED_CH3_ENABLED
+
+            config LYFI_LED_CH3_WAVELENGTH
+                int "Wavelength for LED channel 3"
+                default 0
                 depends on LYFI_LED_CH3_ENABLED
 
             config LYFI_LED_CH3_BRIGHTNESS_PERCENT
@@ -216,6 +236,11 @@ menu "Borneo LyFi"
                 string "Color for LED channel 4"
                 depends on LYFI_LED_CH4_ENABLED
 
+            config LYFI_LED_CH4_WAVELENGTH
+                int "Wavelength for LED channel 4"
+                default 0
+                depends on LYFI_LED_CH4_ENABLED
+
             config LYFI_LED_CH4_BRIGHTNESS_PERCENT
                 int "Brightness percent for LED channel 4"
                 default 0
@@ -241,6 +266,11 @@ menu "Borneo LyFi"
 
             config LYFI_LED_CH5_COLOR
                 string "Color for LED channel 5"
+                depends on LYFI_LED_CH5_ENABLED
+
+            config LYFI_LED_CH5_WAVELENGTH
+                int "Wavelength for LED channel 5"
+                default 0
                 depends on LYFI_LED_CH5_ENABLED
 
             config LYFI_LED_CH5_BRIGHTNESS_PERCENT
@@ -270,6 +300,11 @@ menu "Borneo LyFi"
                 string "Color for LED channel 6"
                 depends on LYFI_LED_CH6_ENABLED
 
+            config LYFI_LED_CH6_WAVELENGTH
+                int "Wavelength for LED channel 6"
+                default 0
+                depends on LYFI_LED_CH6_ENABLED
+
             config LYFI_LED_CH6_BRIGHTNESS_PERCENT
                 int "Brightness percent for LED channel 6"
                 default 0
@@ -295,6 +330,11 @@ menu "Borneo LyFi"
 
             config LYFI_LED_CH7_COLOR
                 string "Color for LED channel 7"
+                depends on LYFI_LED_CH7_ENABLED
+
+            config LYFI_LED_CH7_WAVELENGTH
+                int "Wavelength for LED channel 7"
+                default 0
                 depends on LYFI_LED_CH7_ENABLED
 
             config LYFI_LED_CH7_BRIGHTNESS_PERCENT
@@ -324,6 +364,11 @@ menu "Borneo LyFi"
                 string "Color for LED channel 8"
                 depends on LYFI_LED_CH8_ENABLED
 
+            config LYFI_LED_CH8_WAVELENGTH
+                int "Wavelength for LED channel 8"
+                default 0
+                depends on LYFI_LED_CH8_ENABLED
+
             config LYFI_LED_CH8_BRIGHTNESS_PERCENT
                 int "Brightness percent for LED channel 8"
                 default 0
@@ -349,6 +394,11 @@ menu "Borneo LyFi"
 
             config LYFI_LED_CH9_COLOR
                 string "Color for LED channel 9"
+                depends on LYFI_LED_CH9_ENABLED
+
+            config LYFI_LED_CH9_WAVELENGTH
+                int "Wavelength for LED channel 9"
+                default 0
                 depends on LYFI_LED_CH9_ENABLED
 
             config LYFI_LED_CH9_BRIGHTNESS_PERCENT

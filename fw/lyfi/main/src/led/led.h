@@ -76,6 +76,7 @@ struct led_scheduler {
 struct led_channel_settings {
     char name[16]; ///< Channel name (15 chars + \0)
     char color[8]; ///< Channel color in hex format (e.g., "#F44336")
+    int16_t wavelength; ///< Channel wavelength in nm (0 = unknown)
 };
 
 struct led_factory_settings {
@@ -175,6 +176,7 @@ const struct led_user_settings* led_get_settings();
 const struct led_factory_settings* led_get_factory_settings();
 const char* led_get_channel_name(uint8_t ch);
 const char* led_get_channel_color(uint8_t ch);
+int16_t led_get_channel_wavelength(uint8_t ch);
 const struct led_status* led_get_status();
 
 portMUX_TYPE* led_get_lock();
