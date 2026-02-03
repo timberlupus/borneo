@@ -68,10 +68,16 @@ class AbstractBorneoDeviceCoapClient:
         await self._context.request(msg).response
 
     async def get_info(self):
+        """Get device information including MAC, version, etc."""
         uri = self.address + '/borneo/info'
         request = Message(code=GET, uri=uri)
-        response = await self._context.request(request).response
-        return loads(response.payload)
+        try:
+            response = await self._context.request(request).response
+            if not response.code.is_successful():
+                raise BorneoError(f"Request failed with code {response.code}")
+            return loads(response.payload)
+        except Exception as e:
+            raise BorneoError(f"Error getting info: {str(e)}")
 
     async def get_timezone(self):
         uri = self.address + '/borneo/settings/timezone'
@@ -119,7 +125,153 @@ class AbstractBorneoDeviceCoapClient:
         uri = self.address + '/borneo/status'
         request = Message(code=GET, uri=uri)
         response = await self._context.request(request).response
-        return loads(response.payload)    # CoAP OTA functionality methods
+        return loads(response.payload)
+
+    async def get_power_behavior(self):
+        uri = self.address + '/borneo/power/behavior'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def get_nvs_u8(self, key: str):
+        uri = self.address + f'/borneo/factory/nvs/u8?key={key}'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def set_nvs_u8(self, key: str, value: int):
+        uri = self.address + f'/borneo/factory/nvs/u8?key={key}'
+        payload = dumps(value)
+        request = Message(code=POST, payload=payload, uri=uri)
+        await self._context.request(request).response
+
+    async def get_nvs_u16(self, key: str):
+        uri = self.address + f'/borneo/factory/nvs/u16?key={key}'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def set_nvs_u16(self, key: str, value: int):
+        uri = self.address + f'/borneo/factory/nvs/u16?key={key}'
+        payload = dumps(value)
+        request = Message(code=POST, payload=payload, uri=uri)
+        await self._context.request(request).response
+
+    async def get_nvs_u32(self, key: str):
+        uri = self.address + f'/borneo/factory/nvs/u32?key={key}'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def set_nvs_u32(self, key: str, value: int):
+        uri = self.address + f'/borneo/factory/nvs/u32?key={key}'
+        payload = dumps(value)
+        request = Message(code=POST, payload=payload, uri=uri)
+        await self._context.request(request).response
+
+    async def get_nvs_u64(self, key: str):
+        uri = self.address + f'/borneo/factory/nvs/u64?key={key}'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def set_nvs_u64(self, key: str, value: int):
+        uri = self.address + f'/borneo/factory/nvs/u64?key={key}'
+        payload = dumps(value)
+        request = Message(code=POST, payload=payload, uri=uri)
+        await self._context.request(request).response
+
+    async def get_nvs_i8(self, key: str):
+        uri = self.address + f'/borneo/factory/nvs/i8?key={key}'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def set_nvs_i8(self, key: str, value: int):
+        uri = self.address + f'/borneo/factory/nvs/i8?key={key}'
+        payload = dumps(value)
+        request = Message(code=POST, payload=payload, uri=uri)
+        await self._context.request(request).response
+
+    async def get_nvs_i32(self, key: str):
+        uri = self.address + f'/borneo/factory/nvs/i32?key={key}'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def set_nvs_i32(self, key: str, value: int):
+        uri = self.address + f'/borneo/factory/nvs/i32?key={key}'
+        payload = dumps(value)
+        request = Message(code=POST, payload=payload, uri=uri)
+        await self._context.request(request).response
+
+    async def get_nvs_i64(self, key: str):
+        uri = self.address + f'/borneo/factory/nvs/i64?key={key}'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def set_nvs_i64(self, key: str, value: int):
+        uri = self.address + f'/borneo/factory/nvs/i64?key={key}'
+        payload = dumps(value)
+        request = Message(code=POST, payload=payload, uri=uri)
+        await self._context.request(request).response
+
+    async def get_nvs_blob(self, key: str):
+        uri = self.address + f'/borneo/factory/nvs/blob?key={key}'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def set_nvs_blob(self, key: str, value: bytes):
+        uri = self.address + f'/borneo/factory/nvs/blob?key={key}'
+        payload = dumps(value)
+        request = Message(code=POST, payload=payload, uri=uri)
+        await self._context.request(request).response
+
+    async def get_nvs_str(self, key: str):
+        uri = self.address + f'/borneo/factory/nvs/str?key={key}'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def set_nvs_str(self, key: str, value: str):
+        uri = self.address + f'/borneo/factory/nvs/str?key={key}'
+        payload = dumps(value)
+        request = Message(code=POST, payload=payload, uri=uri)
+        await self._context.request(request).response
+
+    async def check_nvs_exists(self, key: str):
+        uri = self.address + f'/borneo/factory/nvs/exists?key={key}'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def get_fwver(self):
+        uri = self.address + '/borneo/fwver'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def get_compatible(self):
+        uri = self.address + '/borneo/compatible'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def get_heartbeat(self):
+        uri = self.address + '/borneo/heartbeat'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    async def get_system_mode(self):
+        uri = self.address + '/borneo/mode'
+        request = Message(code=GET, uri=uri)
+        response = await self._context.request(request).response
+        return loads(response.payload)
+
+    # CoAP OTA functionality methods
     async def _calculate_file_checksum(self, firmware_path):
         """Calculate SHA256 checksum of the firmware file"""
         sha256 = hashlib.sha256()

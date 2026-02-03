@@ -3,7 +3,7 @@ import argparse
 import json
 from pprint import pprint
 
-from borneo import LyfiCoapClient, LedMode
+from borneo import LyfiCoapClient, LedState
 
 def pretty_print(response: dict):
     def bytes_serializer(obj: object):
@@ -60,12 +60,12 @@ async def main(address):
 
         print(">>>>>>>>>>>>>>>>>>>>>>>>>> Dimming demo:")
         led_state = await client.get_state()
-        print(f"Current state: { state }")
+        print(f"Current state: { led_state }")
 
         print(f"Switching the device to the dimming state...")
         state = await client.switch_state(LedState.DIMMING)
 
-        if device_info['channelCount'] == 6: # BLC06MK1
+        if lyfi_info['channelCount'] == 6: # BLC06MK1
             await client.set_color([10, 15, 10, 20, 15, 10])
 
         await asyncio.sleep(3)
@@ -79,4 +79,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Hello Buce Example")
     parser.add_argument('address', help='Address of the Borneo-IoT LyFi compatible device')
     args = parser.parse_args()
-    asyncio.get_event_loop().run_until_complete(main(args.address))
+    asyncio.run(main(args.address))
