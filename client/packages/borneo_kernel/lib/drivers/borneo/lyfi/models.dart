@@ -7,14 +7,16 @@ typedef ScheduleTable = List<ScheduledInstant>;
 class LyfiChannelInfo {
   final String name;
   final String color;
+  final int wavelength;
   final double brightnessRatio;
 
-  const LyfiChannelInfo({required this.name, required this.color, required this.brightnessRatio});
+  const LyfiChannelInfo({required this.name, required this.color, required this.wavelength, required this.brightnessRatio});
 
   factory LyfiChannelInfo.fromMap(dynamic map) {
     return LyfiChannelInfo(
       name: map['name'],
       color: map['color'],
+      wavelength: map['wavelength'],
       brightnessRatio: map['brightnessPercent'].toDouble() / 100.0,
     );
   }
