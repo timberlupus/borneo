@@ -56,11 +56,10 @@ class ScheduleEditorView extends StatelessWidget {
 
   List<LineChartBarData> buildLineDatas(ScheduleEditorViewModel vm) {
     final series = <LineChartBarData>[];
+    final sortedEntries = _sortedEntries(vm);
     for (int channelIndex = 0; channelIndex < vm.channels.length; channelIndex++) {
       final spots = <FlSpot>[];
-      //final sortedEntries = vm.entries.toList();
-      //sortedEntries.sort((a, b) => a.instant.compareTo(b.instant));
-      for (final entry in vm.entries) {
+      for (final entry in sortedEntries) {
         double x = entry.instant.inSeconds.toDouble();
         double y = entry.channels[channelIndex].toDouble();
         final spot = FlSpot(x, y);
@@ -92,25 +91,32 @@ class ScheduleEditorView extends StatelessWidget {
             // The chart
             Container(
               color: Theme.of(context).scaffoldBackgroundColor,
-              padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
+              padding: EdgeInsets.fromLTRB(8, 24, 8, 0),
               child: AspectRatio(
                 aspectRatio: 2.75,
                 child: Consumer<ScheduleEditorViewModel>(
                   builder: (context, vm, child) {
-                    final minX = vm.entries.isNotEmpty ? vm.entries.first.instant.inHours.toDouble() * 3600.0 : 0.0;
-                    final maxX = vm.entries.isNotEmpty
-                        ? ((vm.entries.last.instant.inSeconds.toDouble() / 3600.0).ceilToDouble() * 3600.0)
-                        : 24 * 3600.0;
+                    const minSpanSeconds = 3 * 3600.0;
+                    final sortedEntries = _sortedEntries(vm);
+                    double minX = 0.0;
+                    double maxX = 24 * 3600.0;
+                    if (sortedEntries.isNotEmpty) {
+                      minX = sortedEntries.first.instant.inSeconds.toDouble();
+                      maxX = sortedEntries.last.instant.inSeconds.toDouble();
+                      if (maxX - minX < minSpanSeconds) {
+                        maxX = minX + minSpanSeconds;
+                      }
+                    }
+                    final maxScale = ((maxX - minX) / minSpanSeconds).clamp(1.0, double.infinity);
                     return LyfiTimeLineChart(
                       lineBarsData: buildLineDatas(vm),
                       minX: minX,
                       maxX: maxX,
                       minY: 0,
                       maxY: lyfiBrightnessMax.toDouble(),
-                      currentTime: vm.currentEntry?.instant != null
-                          ? DateTime(0, 1, 1, vm.currentEntry!.instant.inHours, vm.currentEntry!.instant.inMinutes % 60)
-                          : DateTime(0, 1, 1, 0, 0),
+                      currentTime: vm.currentEntry?.instant ?? Duration.zero,
                       allowZoom: true,
+                      maxScale: maxScale,
                       lineTouchData: LineTouchData(
                         handleBuiltInTouches: true,
                         touchTooltipData: LineTouchTooltipData(getTooltipItems: (_) => []),
@@ -186,7 +192,11 @@ class ScheduleEditorView extends StatelessWidget {
                               final initialTime =
                                   (vm.currentEntry?.instant ?? Duration(hours: 6, minutes: 30)) +
                                   ScheduleEditorViewModel.defaultInstantSpan;
-                              final selectedTime = await showNewInstantDialog(context, initialTime.toTimeOfDay());
+                              final safeInitialTime = Duration(
+                                hours: initialTime.inHours % 24,
+                                minutes: initialTime.inMinutes % 60,
+                              );
+                              final selectedTime = await showNewInstantDialog(context, safeInitialTime.toTimeOfDay());
                               if (selectedTime != null) {
                                 vm.addInstant(selectedTime);
                               }
@@ -237,6 +247,12 @@ class ScheduleEditorView extends StatelessWidget {
         );
       },
     );
+  }
+
+  List<ScheduleEntryViewModel> _sortedEntries(ScheduleEditorViewModel vm) {
+    final sorted = vm.entries.toList();
+    sorted.sort((a, b) => a.instant.compareTo(b.instant));
+    return sorted;
   }
 
   void _confirmClearEntries(BuildContext context, ScheduleEditorViewModel vm) {

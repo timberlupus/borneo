@@ -22,11 +22,13 @@ class EasySetupViewModel extends ChangeNotifier {
 
   ScheduleTable build(ScheduleEditorViewModel editor) {
     final blackColor = List<int>.filled(editor.availableChannelCount, 0);
+    final start = _startTime.value;
+    final end = _endTime.value <= _startTime.value ? _endTime.value + const Duration(hours: 24) : _endTime.value;
     return <ScheduledInstant>[
-      ScheduledInstant(instant: _startTime.value, color: blackColor.toList()),
-      ScheduledInstant(instant: _startTime.value + fadingDuration, color: editor.channels.map((x) => x.value).toList()),
-      ScheduledInstant(instant: _endTime.value - fadingDuration, color: editor.channels.map((x) => x.value).toList()),
-      ScheduledInstant(instant: _endTime.value, color: blackColor.toList()),
+      ScheduledInstant(instant: start, color: blackColor.toList()),
+      ScheduledInstant(instant: start + fadingDuration, color: editor.channels.map((x) => x.value).toList()),
+      ScheduledInstant(instant: end - fadingDuration, color: editor.channels.map((x) => x.value).toList()),
+      ScheduledInstant(instant: end, color: blackColor.toList()),
     ];
   }
 }

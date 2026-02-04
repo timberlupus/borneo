@@ -2,6 +2,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_app/core/utils/hex_color.dart';
 import 'package:borneo_common/datetime_ext.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 // import 'package:borneo_common/duration_ext.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -25,27 +26,37 @@ class ScheduleRunningChart extends StatelessWidget {
         selector: (context, vm) => vm.deviceClock,
         shouldRebuild: (previous, next) => !previous.isEqualToMinute(next),
         builder: (context, clock, _) {
+          const minSpanSeconds = 3 * 3600.0;
+          final sortedInstants = _sortedInstants(vm);
+          double minX = 0.0;
+          double maxX = 24 * 3600.0;
+          if (sortedInstants.isNotEmpty) {
+            minX = sortedInstants.first.instant.inSeconds.toDouble();
+            maxX = sortedInstants.last.instant.inSeconds.toDouble();
+            if (maxX - minX < minSpanSeconds) {
+              maxX = minX + minSpanSeconds;
+            }
+          }
+          final maxScale = ((maxX - minX) / minSpanSeconds).clamp(1.0, double.infinity);
           return LyfiTimeLineChart(
-            lineBarsData: buildLineData(vm),
-            minX: 0,
-            maxX: 24 * 3600.0,
+            lineBarsData: buildLineData(vm, sortedInstants),
+            minX: minX,
+            maxX: maxX,
             minY: 0,
             maxY: lyfiBrightnessMax.toDouble(),
-            currentTime: clock,
+            currentTime: Duration(hours: clock.hour, minutes: clock.minute, seconds: clock.second),
             allowZoom: true,
+            maxScale: maxScale,
           );
         },
       ),
     );
   }
 
-  List<LineChartBarData> buildLineData(LyfiViewModel vm) {
+  List<LineChartBarData> buildLineData(LyfiViewModel vm, List<ScheduledInstant> instants) {
     final series = <LineChartBarData>[];
     for (int channelIndex = 0; channelIndex < vm.channels.length; channelIndex++) {
       final spots = <FlSpot>[];
-      //final sortedEntries = vm.entries.toList();
-      //sortedEntries.sort((a, b) => a.instant.compareTo(b.instant));
-      final instants = vm.scheduledInstants;
       for (final entry in instants) {
         double x = entry.instant.inSeconds.toDouble();
         double y = entry.color[channelIndex].toDouble();
@@ -64,5 +75,11 @@ class ScheduleRunningChart extends StatelessWidget {
       );
     }
     return series;
+  }
+
+  List<ScheduledInstant> _sortedInstants(LyfiViewModel vm) {
+    final sorted = vm.scheduledInstants.toList();
+    sorted.sort((a, b) => a.instant.compareTo(b.instant));
+    return sorted;
   }
 }

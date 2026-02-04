@@ -37,7 +37,7 @@ class SunRunningChart extends StatelessWidget {
             maxX: sunsetInstant,
             minY: 0,
             maxY: lyfiBrightnessMax.toDouble(),
-            currentTime: clock,
+            currentTime: Duration(hours: clock.hour, minutes: clock.minute, seconds: clock.second),
           );
         },
       ),

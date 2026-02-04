@@ -185,13 +185,38 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
 
   Future<void> addInstant(Duration instant) async {
     if (_entries.length >= maxEntries) return;
-    int insertPos = _findInstantInsertPosition(instant);
+    final normalized = _normalizeAddInstant(instant);
+    if (normalized == null) {
+      return;
+    }
+    int insertPos = _findInstantInsertPosition(normalized);
     if (_currentEntryIndex != null) {
-      _insertInstant(insertPos, instant, _entries[_currentEntryIndex!].channels);
+      _insertInstant(insertPos, normalized, _entries[_currentEntryIndex!].channels);
     } else {
-      _insertInstant(insertPos, instant, List<int>.filled(deviceInfo.channelCount, 0, growable: false));
+      _insertInstant(insertPos, normalized, List<int>.filled(deviceInfo.channelCount, 0, growable: false));
     }
     await setCurrentEntryAndSyncDimmingColor(insertPos);
+  }
+
+  Duration? _normalizeAddInstant(Duration instant) {
+    final normalizedHours = instant.inHours % 24;
+    final normalizedMinutes = instant.inMinutes % 60;
+    final normalized = Duration(hours: normalizedHours, minutes: normalizedMinutes);
+    if (_currentEntryIndex == null) {
+      return normalized;
+    }
+    final current = _entries[_currentEntryIndex!].instant;
+    final currentDay = current.inHours ~/ 24;
+    final currentHour = current.inHours % 24;
+    var targetHours = currentDay * 24 + normalizedHours;
+    if (currentDay == 0 && normalizedHours <= currentHour) {
+      targetHours += 24;
+    }
+    final result = Duration(hours: targetHours, minutes: normalizedMinutes);
+    if (result.inHours >= 48) {
+      return null;
+    }
+    return result;
   }
 
   int _findInstantInsertPosition(Duration instant) {
