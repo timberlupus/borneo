@@ -54,7 +54,7 @@ final class DefaultKernel implements IKernel {
   final Map<String, int> _missedObservations = {};
   final Map<String, Timer> _observationTimeoutTimers = {};
   // Default values
-  static const int _defaultMaxMissedObservations = 2;
+  static const int _defaultMaxMissedObservations = 3;
   static const int _defaultConsecutiveFailureThreshold = 2;
   static const int _defaultHeartbeatRetryMaxAttempts = 1;
   static const int _defaultObservationTimeoutMultiplier = 2;
