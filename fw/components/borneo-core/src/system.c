@@ -28,9 +28,6 @@
 #define SYSTEM_NVS_KEY_NAME "name"
 #define SYSTEM_NVS_KEY_MODEL "model"
 #define SYSTEM_NVS_KEY_MANUF "manuf"
-#define SYSTEM_USER_NVS_NS "user_settings"
-#define SYSTEM_USER_NVS_KEY_NAME "name"
-
 enum state_flags_enum {
     STATE_FLAG_OPERABLE = 1,
     STATE_FLAG_CONNECTION_CONFIGURATED = 2,
@@ -149,9 +146,9 @@ int bo_system_set_user_name(const char* name)
     }
 
     nvs_handle_t nvs_handle;
-    BO_TRY(bo_nvs_user_open(SYSTEM_USER_NVS_NS, NVS_READWRITE, &nvs_handle));
+    BO_TRY(bo_nvs_user_open(SYSTEM_NVS_NS, NVS_READWRITE, &nvs_handle));
     BO_NVS_AUTO_CLOSE(nvs_handle);
-    BO_TRY(nvs_set_str(nvs_handle, SYSTEM_USER_NVS_KEY_NAME, name));
+    BO_TRY(nvs_set_str(nvs_handle, SYSTEM_NVS_KEY_NAME, name));
     BO_TRY(nvs_commit(nvs_handle));
     // Update in-memory sysinfo
     strncpy(_sysinfo.name, name, BO_DEVICE_NAME_MAX - 1);
@@ -291,11 +288,11 @@ static int load_user_settings()
 {
     // Load user settings, override factory if present
     nvs_handle_t user_nvs_handle;
-    esp_err_t err = bo_nvs_user_open(SYSTEM_USER_NVS_NS, NVS_READONLY, &user_nvs_handle);
+    esp_err_t err = bo_nvs_user_open(SYSTEM_NVS_NS, NVS_READWRITE, &user_nvs_handle);
     if (err == ESP_OK) {
         BO_NVS_AUTO_CLOSE(user_nvs_handle);
         size_t len = BO_DEVICE_NAME_MAX;
-        err = nvs_get_str(user_nvs_handle, SYSTEM_USER_NVS_KEY_NAME, _sysinfo.name, &len);
+        err = nvs_get_str(user_nvs_handle, SYSTEM_NVS_KEY_NAME, _sysinfo.name, &len);
         if (err == ESP_OK) {
             ESP_LOGI(TAG, "Loaded user device name: %s", _sysinfo.name);
         }

@@ -139,7 +139,6 @@ We welcome your feedback! If you encounter any issues or have suggestions, pleas
 
 ## License
 
-
 ### Software & Firmware
 
 The software and firmware in this project is dual-licensed under the GNU General Public License version 3 or later (GPL-3.0+) and a proprietary license. You can find the full text of the GPL-3.0 license in the [LICENSE](LICENSE) file.
@@ -154,3 +153,4 @@ In addition to the GPL-3.0 license, I also offer proprietary licensing options f
 
 If you are interested in obtaining a proprietary license, please contact me at [info@binarystarstech.com](mailto:info@binarystarstech.com).
 
+The hardware, firmware, and App for this project were all created by: Wei Li（李维）.
