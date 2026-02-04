@@ -178,6 +178,9 @@ class LyfiTimeLineChart extends StatelessWidget {
 
   String _formatAxisLabel(double seconds) {
     final d = Duration(seconds: seconds.round());
+    if (d.inHours == 24 && d.inMinutes % 60 == 0) {
+      return '24:00';
+    }
     final hours = d.inHours % 24;
     final minutes = d.inMinutes % 60;
     final h = hours.toString().padLeft(2, '0');

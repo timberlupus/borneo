@@ -31,10 +31,13 @@ class ScheduleRunningChart extends StatelessWidget {
           double minX = 0.0;
           double maxX = 24 * 3600.0;
           if (sortedInstants.isNotEmpty) {
-            minX = sortedInstants.first.instant.inSeconds.toDouble();
-            maxX = sortedInstants.last.instant.inSeconds.toDouble();
-            if (maxX - minX < minSpanSeconds) {
-              maxX = minX + minSpanSeconds;
+            final hasCrossDay = sortedInstants.any((e) => e.instant.inHours >= 24);
+            if (hasCrossDay) {
+              minX = sortedInstants.first.instant.inSeconds.toDouble();
+              maxX = sortedInstants.last.instant.inSeconds.toDouble();
+              if (maxX - minX < minSpanSeconds) {
+                maxX = minX + minSpanSeconds;
+              }
             }
           }
           final maxScale = ((maxX - minX) / minSpanSeconds).clamp(1.0, double.infinity);

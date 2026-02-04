@@ -101,10 +101,13 @@ class ScheduleEditorView extends StatelessWidget {
                     double minX = 0.0;
                     double maxX = 24 * 3600.0;
                     if (sortedEntries.isNotEmpty) {
-                      minX = sortedEntries.first.instant.inSeconds.toDouble();
-                      maxX = sortedEntries.last.instant.inSeconds.toDouble();
-                      if (maxX - minX < minSpanSeconds) {
-                        maxX = minX + minSpanSeconds;
+                      final hasCrossDay = sortedEntries.any((e) => e.instant.inHours >= 24);
+                      if (hasCrossDay) {
+                        minX = sortedEntries.first.instant.inSeconds.toDouble();
+                        maxX = sortedEntries.last.instant.inSeconds.toDouble();
+                        if (maxX - minX < minSpanSeconds) {
+                          maxX = minX + minSpanSeconds;
+                        }
                       }
                     }
                     final maxScale = ((maxX - minX) / minSpanSeconds).clamp(1.0, double.infinity);
