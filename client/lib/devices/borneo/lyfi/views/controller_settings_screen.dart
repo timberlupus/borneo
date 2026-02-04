@@ -287,6 +287,7 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
                 if (context.mounted) {
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                 }
               },
               child: Text(context.translate('Confirm')),

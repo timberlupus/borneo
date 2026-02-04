@@ -185,12 +185,21 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
   }
 
   Future<void> _initSetting<T>(NvsSettingEntry<T> setting, Future<T> Function() getter) async {
-    if (await this.borneoDeviceApi.factoryNvsExists(boundDevice!.device, setting.namespace, setting.key)) {
-      setting._value = await getter();
-      setting._initialValue = setting._value;
-      setting.available = true;
-    } else {
+    try {
+      if (await this.borneoDeviceApi.factoryNvsExists(boundDevice!.device, setting.namespace, setting.key)) {
+        setting._value = await getter();
+        setting._initialValue = setting._value;
+        setting.available = true;
+      } else {
+        setting.available = false;
+      }
+    } catch (error, stackTrace) {
       setting.available = false;
+      super.logger?.w(
+        'factoryNvsExists failed for ${setting.namespace}/${setting.key}: $error',
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -274,7 +283,6 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
       _initialChannelColors[ch] = _channelColors[ch];
     }
 
-    this.borneoDeviceApi.reboot(boundDevice!.device);
-    await deviceManager.unbind(deviceID);
+    await this.borneoDeviceApi.reboot(boundDevice!.device);
   }
 }
