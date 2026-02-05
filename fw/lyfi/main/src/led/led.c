@@ -988,7 +988,6 @@ void dimming_state_run()
 
         if (now_ms >= deadline_ms && deadline_ms > 0) {
             ESP_LOGW(TAG, "Dimming timeout reached (%lld >= %lld), switching back to NORMAL", now_ms, deadline_ms);
-            BO_MUST(led_fade_to_normal());
             smf_set_state(SMF_CTX(&_led), &LED_STATE_TABLE[LED_STATE_NORMAL]);
         }
     }
