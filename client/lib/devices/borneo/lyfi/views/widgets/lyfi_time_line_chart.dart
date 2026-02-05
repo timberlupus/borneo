@@ -10,7 +10,7 @@ class LyfiTimeLineChart extends StatelessWidget {
   final List<VerticalLine>? extraVerticalLines;
   final String? Function(double value)? leftTitleBuilder;
   final Duration animationDuration;
-  final Duration currentTime;
+  final Duration? currentTime;
   final bool allowZoom;
   final LineTouchData? lineTouchData;
   final double labelAngleRadians;
@@ -23,7 +23,7 @@ class LyfiTimeLineChart extends StatelessWidget {
     required this.maxX,
     required this.minY,
     required this.maxY,
-    required this.currentTime,
+    this.currentTime,
     this.extraVerticalLines,
     this.leftTitleBuilder,
     this.animationDuration = const Duration(milliseconds: 200),
@@ -42,15 +42,17 @@ class LyfiTimeLineChart extends StatelessWidget {
     final labelStyle = Theme.of(
       context,
     ).textTheme.labelMedium?.copyWith(color: cs.onPrimary, fontFeatures: [FontFeature.tabularFigures()]);
-    final labelText = _formatNowLabel(currentTime.inSeconds.toDouble());
-    final textPainter = TextPainter(
-      text: TextSpan(text: labelText, style: labelStyle),
-      textDirection: TextDirection.ltr,
-      maxLines: 1,
-    )..layout();
-    final labelHeight = textPainter.height;
+    if (currentTime != null) {
+      final labelText = _formatNowLabel(currentTime!.inSeconds.toDouble());
+      final textPainter = TextPainter(
+        text: TextSpan(text: labelText, style: labelStyle),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+      )..layout();
+      final labelHeight = textPainter.height;
 
-    verticalLines.add(_buildNowLine(context, currentTime, labelHeight));
+      verticalLines.add(_buildNowLine(context, currentTime!, labelHeight));
+    }
     final xInterval = _resolveTimeInterval(minX, maxX);
     if (extraVerticalLines != null) {
       verticalLines.addAll(extraVerticalLines!);

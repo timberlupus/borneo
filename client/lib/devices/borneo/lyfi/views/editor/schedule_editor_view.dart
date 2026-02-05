@@ -117,7 +117,7 @@ class ScheduleEditorView extends StatelessWidget {
                       maxX: maxX,
                       minY: 0,
                       maxY: lyfiBrightnessMax.toDouble(),
-                      currentTime: vm.currentEntry?.instant ?? Duration.zero,
+                      currentTime: vm.currentEntry?.instant,
                       allowZoom: true,
                       maxScale: maxScale,
                       lineTouchData: LineTouchData(
