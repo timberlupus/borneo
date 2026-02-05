@@ -319,30 +319,11 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
         return AlertDialog(
           title: Text(context.translate('Pick color')),
           content: SingleChildScrollView(
-            child: BlockPicker(
+            child: ColorPicker(
+              hexInputBar: true,
+              enableAlpha: false,
               pickerColor: initialColor,
               onColorChanged: (c) => selected = c,
-              availableColors: const [
-                Colors.red,
-                Colors.pink,
-                Colors.deepPurple,
-                Colors.indigo,
-                Colors.blue,
-                Colors.lightBlue,
-                Colors.cyan,
-                Colors.teal,
-                Colors.green,
-                Colors.lightGreen,
-                Colors.lime,
-                Colors.yellow,
-                Colors.amber,
-                Colors.orange,
-                Colors.deepOrange,
-                Colors.brown,
-                Colors.blueGrey,
-                Colors.black,
-                Colors.white,
-              ],
             ),
           ),
           actions: [
