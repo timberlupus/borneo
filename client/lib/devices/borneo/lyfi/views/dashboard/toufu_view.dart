@@ -79,7 +79,7 @@ class DashboardToufu extends StatelessWidget {
                               max: maxValue.roundToDouble(),
                               degrees: 270,
                               style: GaugeAxisStyle(
-                                thickness: 13,
+                                thickness: 10.5,
                                 segmentSpacing: 0,
                                 background: segments.isEmpty ? arcColor : null,
                                 cornerRadius: Radius.zero,

@@ -24,7 +24,7 @@ class DashboardTemperatureTile extends StatelessWidget {
 
     Color progressColor;
     if (currentTempRaw != null && currentTempRaw <= 45) {
-      progressColor = theme.colorScheme.primary;
+      progressColor = Colors.lightGreen;
     } else if (currentTempRaw != null && currentTempRaw > 45 && currentTempRaw < 65) {
       progressColor = theme.colorScheme.secondary;
     } else if (currentTempRaw != null && currentTempRaw >= 65) {

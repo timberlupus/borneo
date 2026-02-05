@@ -57,37 +57,20 @@ class DashboardPowerTile extends StatelessWidget {
                     if (props.canMeasurePower && isOnline)
                       ...() {
                         final double watts = vm.currentWatts.value!;
-                        final int intPart = watts.floor();
-                        final String decimalStr = watts.toStringAsFixed(1).split('.')[1];
+                        final int intPart = watts.round();
                         final bool isZero = watts == 0;
                         return [
                           RollingInteger(
                             value: isZero ? 0 : intPart,
-                            textStyle: theme.textTheme.titleLarge?.copyWith(
+                            textStyle: theme.textTheme.headlineLarge?.copyWith(
                               color: textPrimary,
                               fontFeatures: [FontFeature.tabularFigures()],
                             ),
                             duration: const Duration(milliseconds: 300),
                           ),
-                          if (!isZero) ...[
-                            Text(
-                              '.',
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                color: textPrimary,
-                                fontFeatures: [FontFeature.tabularFigures()],
-                              ),
-                            ),
-                            Text(
-                              decimalStr,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontFeatures: [FontFeature.tabularFigures()],
-                                color: textPrimary,
-                              ),
-                            ),
-                          ],
                           Text(
                             'W',
-                            style: theme.textTheme.titleSmall?.copyWith(
+                            style: theme.textTheme.labelMedium?.copyWith(
                               fontFeatures: [FontFeature.tabularFigures()],
                               color: textPrimary,
                             ),
