@@ -11,12 +11,16 @@ class DashboardTemporaryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<LyfiViewModel, ({LyfiState? state, bool canSwitch, Duration total, Duration remain})>(
+    return Selector<
+      LyfiViewModel,
+      ({LyfiState? state, bool canSwitch, Duration total, Duration remain, bool isOnline})
+    >(
       selector: (context, vm) => (
         state: vm.state,
         canSwitch: vm.canSwitchTemporaryState,
         total: vm.temporaryDuration,
         remain: vm.temporaryRemaining.value,
+        isOnline: vm.isOnline,
       ),
       builder: (context, props, _) {
         final theme = Theme.of(context);
@@ -28,7 +32,7 @@ class DashboardTemporaryTile extends StatelessWidget {
           final sec = (remainSeconds % 60).toString().padLeft(2, '0');
           remainText = '$min:$sec';
         }
-        final isDisabled = !props.canSwitch;
+        final isDisabled = !props.canSwitch || !props.isOnline;
         final Color bgColor = isActive ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainerHighest;
         final Color fgColor = isActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurface;
         final double disabledAlpha = 0.38;

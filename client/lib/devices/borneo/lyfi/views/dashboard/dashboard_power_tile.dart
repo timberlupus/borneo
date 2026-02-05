@@ -105,7 +105,7 @@ class DashboardPowerTile extends StatelessWidget {
                     ],
                   ],
                 ),
-                const Divider(height: 8),
+                if (props.canMeasurePower && isOnline) const Divider(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
