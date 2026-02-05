@@ -121,7 +121,7 @@ class LyfiSwitchModeAction extends WotAction<Map<String, dynamic>?> {
     required this.lyfiApi,
     required this.device,
     this.color,
-  }) : super(name: 'switchMode', input: {'mode': targetMode.name, if (color != null) 'color': color});
+  }) : super(name: 'switchMode', input: {'mode': targetMode.name, 'color': ?color});
 
   @override
   Future<void> performAction() async {

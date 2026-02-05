@@ -657,9 +657,7 @@ final class DefaultKernel implements IKernel {
   Future<void> startDevicesScanning({Duration? timeout, CancellationToken? cancelToken}) async {
     assert(!_isScanning);
     _isScanning = true;
-    await _startMdnsDiscovery(
-      cancelToken: MergedCancellationToken([if (cancelToken != null) cancelToken, _masterCancelToken]),
-    );
+    await _startMdnsDiscovery(cancelToken: MergedCancellationToken([?cancelToken, _masterCancelToken]));
     _events.fire(DeviceDiscoveringStartedEvent());
 
     if (timeout != null) {
@@ -671,9 +669,7 @@ final class DefaultKernel implements IKernel {
   Future<void> stopDevicesScanning({CancellationToken? cancelToken}) async {
     assert(_isScanning);
     try {
-      await _stopMdnsDiscovery().asCancellable(
-        MergedCancellationToken([if (cancelToken != null) cancelToken, _masterCancelToken]),
-      );
+      await _stopMdnsDiscovery().asCancellable(MergedCancellationToken([?cancelToken, _masterCancelToken]));
       _isScanning = false;
       if (!_isDisposed) {
         _events.fire(DeviceDiscoveringStoppedEvent());
@@ -697,7 +693,7 @@ final class DefaultKernel implements IKernel {
             final discovery = await mdnsProvider!.startDiscovery(
               mdnsMethod.serviceType,
               _events,
-              cancelToken: MergedCancellationToken([if (cancelToken != null) cancelToken, _masterCancelToken]),
+              cancelToken: MergedCancellationToken([?cancelToken, _masterCancelToken]),
             );
             allSupportedMdnsServiceTypes.add(mdnsMethod.serviceType);
             _mdnsDiscoveryList.add(discovery);

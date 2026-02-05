@@ -230,7 +230,9 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
   }
 
   Future<void> _onDeviceDeleted(DeviceEntityDeletedEvent event) async {
-    if (isDisposed) return;
+    if (isDisposed) {
+      return;
+    }
 
     final int changedGroupIndex = _groups.indexWhere((g) => g.devices.any((d) => d.deviceEntity.id == event.id));
     // Remove the deleted device from UI
@@ -241,6 +243,9 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
       changedGroup.removeDeviceById(event.id);
       // Notify only when necessary
       if (!isDisposed) {
+        if(this.isBusy) {
+          this.setBusy(false, notify: false);
+        }
         notifyListeners();
       }
     }
