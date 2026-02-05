@@ -35,6 +35,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
   // Getter for error message
 
   bool get isEmpty => _groups.isEmpty;
+  bool get hasNoDevices => _groups.every((g) => g.devices.isEmpty);
   bool get isLoading => isBusy;
 
   // Getter for users list

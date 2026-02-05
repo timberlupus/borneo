@@ -80,14 +80,8 @@ class NoDataHintView extends StatelessWidget {
       hasScrollBody: false,
       child: EmptyGroupsWidget(
         onCreateGroup: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => GroupEditScreen(),
-              settings: RouteSettings(arguments: GroupEditArguments(isCreation: true)),
-            ),
-          );
-          // Refresh after creating group
+          await Navigator.of(context).pushNamed(AppRoutes.kDeviceDiscovery);
+          // Refresh after adding devices
           if (context.mounted) {
             context.read<GroupedDevicesViewModel>().refresh();
           }
@@ -159,7 +153,13 @@ class DevicesScreen extends StatelessWidget {
                 },
                 builder: (context, groupSnapshots, child) {
                   final groupedDevicesVM = context.read<GroupedDevicesViewModel>();
-                  return groupedDevicesVM.isEmpty
+                  if (groupedDevicesVM.isLoading) {
+                    return const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  return groupedDevicesVM.hasNoDevices
                       ? const NoDataHintView()
                       : SliverList.builder(
                           itemCount: groupSnapshots.length,

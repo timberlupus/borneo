@@ -15,12 +15,12 @@ class EmptyGroupsWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.group_outlined, size: 64, color: Colors.grey),
+            const Icon(Icons.devices_other_outlined, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            Text(context.translate('No Device Groups'), style: Theme.of(context).textTheme.headlineSmall),
+            Text(context.translate('No Devices'), style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
-              context.translate('Create groups to better organize your devices'),
+              context.translate('Add devices to get started'),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
@@ -28,7 +28,7 @@ class EmptyGroupsWidget extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onCreateGroup,
               icon: const Icon(Icons.add),
-              label: Text(context.translate('Create First Group')),
+              label: Text(context.translate('Add Devices')),
             ),
           ],
         ),

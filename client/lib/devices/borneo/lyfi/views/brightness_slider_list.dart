@@ -52,7 +52,7 @@ class BrightnessSliderList<TEditor extends IEditor> extends StatelessWidget {
       sliders.add(slider);
     }
     return ScreenTopRoundedContainer(
-      color: Theme.of(context).colorScheme.surfaceContainer,
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       padding: padding,
       child: ListView.separated(
         shrinkWrap: true,

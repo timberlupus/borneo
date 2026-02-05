@@ -58,8 +58,7 @@ class WifiSelectionScreen extends StatelessWidget {
                   final network = vm.networks![index];
                   return ListTile(
                     title: Text(network.ssid),
-                    leading: _getWifiIcon(network.rssi),
-                    trailing: const Icon(Icons.lock, size: 16), // TODO FIXME
+                    trailing: _getWifiIcon(network.rssi),
                     onTap: () => _showPasswordDialog(context, network.ssid),
                   );
                 },

@@ -499,6 +499,18 @@ int led_set_schedule(const struct led_scheduler_item* items, size_t count)
                 return -EINVAL;
             }
         }
+        // Additional check for duplicate time points
+        for (size_t i = 0; i < count; i++) {
+            for (size_t j = i + 1; j < count; j++) {
+                if (items[i].instant == items[j].instant) {
+                    return -EINVAL;
+                }
+            }
+        }
+        // Check that the time range from first to last point does not exceed 24 hours
+        if ((items[count - 1].instant - items[0].instant) >= SECS_PER_DAY) {
+            return -EINVAL;
+        }
     }
 
     if (count > 0 && items[count - 1].instant >= SECS_PER_DAY * 2) {
