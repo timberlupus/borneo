@@ -156,7 +156,8 @@ class AcclimationScreen extends StatelessWidget {
     ];
   }
 
-  void onSubmit(AcclimationViewModel vm, BuildContext context) {
+  Future<void> onSubmit(AcclimationViewModel vm, BuildContext context) async {
+    await vm.submitToDevice();
     if (context.mounted) {
       Provider.of<IAppNotificationService>(
         context,

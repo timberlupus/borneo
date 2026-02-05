@@ -34,7 +34,7 @@ class DashboardAcclimationTile extends StatelessWidget {
           aspectRatio: 1,
           child: Container(
             decoration: BoxDecoration(
-              color: isActive ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
+              color: isActive ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Material(
