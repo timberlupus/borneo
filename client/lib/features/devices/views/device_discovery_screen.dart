@@ -1,3 +1,4 @@
+import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/features/devices/models/discoverable_device.dart';
 import 'package:borneo_app/features/devices/views/device_group_selection_sheet.dart';
 import 'package:borneo_app/features/devices/views/wifi_selection_screen.dart';
@@ -286,7 +287,7 @@ class _DeviceDiscoveryContent extends StatelessWidget {
           Navigator.pop(context); // Close sheet
           // Optionally close screen or show snackbar.
           // Existing logic had a snackbar listener.
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Device Added')));
+          context.read<IAppNotificationService>().showSuccess(context.translate('Device Added'));
         },
         title: 'Registry "${deviceInfo.name}"',
         subtitle: context.translate('Select the group to which the new device belongs:'),

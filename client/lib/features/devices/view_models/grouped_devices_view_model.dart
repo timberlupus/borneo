@@ -243,7 +243,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
       changedGroup.removeDeviceById(event.id);
       // Notify only when necessary
       if (!isDisposed) {
-        if(this.isBusy) {
+        if (this.isBusy) {
           this.setBusy(false, notify: false);
         }
         notifyListeners();
