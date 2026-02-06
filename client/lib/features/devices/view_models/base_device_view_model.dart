@@ -360,10 +360,6 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     } catch (e, stackTrace) {
       logger?.i("Failed to refresh device status: $e", error: e, stackTrace: stackTrace);
       notifyAppError(e.toString(), error: e, stackTrace: stackTrace);
-    } finally {
-      if (!isDisposed && hasListeners) {
-        notifyListeners();
-      }
     }
   }
 

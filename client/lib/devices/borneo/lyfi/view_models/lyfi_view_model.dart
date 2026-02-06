@@ -329,7 +329,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
 
     if (super.mode == LyfiMode.sun) {
-      final sunSchedule = await executeLyfiCommand(() => _deviceApi.getSunSchedule(boundDevice!.device));
+      final sunSchedule = await _deviceApi.getSunSchedule(boundDevice!.device, cancelToken: cancelToken);
       if (sunSchedule.length == sunInstants.length) {
         for (int i = 0; i < sunSchedule.length; i++) {
           sunInstants[i] = sunSchedule[i];
@@ -511,11 +511,11 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     try {
       await newEditor.initialize();
       _editorState = _editorState.copyWith(status: EditorStatus.ready, editor: newEditor, clearError: true);
-      notifyListeners();
     } catch (e, stackTrace) {
       logger?.e('Failed to initialize editor for mode $newMode', error: e, stackTrace: stackTrace);
       newEditor.dispose();
       _editorState = _editorState.copyWith(status: EditorStatus.error, editor: null, error: e);
+    } finally {
       notifyListeners();
     }
 

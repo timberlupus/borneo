@@ -80,9 +80,11 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
       return;
     }
 
-    _lyfiStatus = await runDeviceCommand(
-      () => lyfiDeviceApi.getLyfiStatus(boundDevice!.device, cancelToken: cancelToken),
-    );
+    final oldMode = _mode;
+    final oldState = _state;
+    final oldCurrent = currentCurrent.value;
+
+    _lyfiStatus = await lyfiDeviceApi.getLyfiStatus(boundDevice!.device, cancelToken: cancelToken);
     _mode = _lyfiStatus?.mode ?? LyfiMode.manual;
     _state = _lyfiStatus?.state ?? LyfiState.normal;
 
@@ -90,5 +92,10 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
     currentWatts.value = currentVoltage.value != null && currentCurrent.value != null
         ? currentVoltage.value! * currentCurrent.value!
         : null;
+
+    // Only notify if something actually changed
+    if (_mode != oldMode || _state != oldState || currentCurrent.value != oldCurrent) {
+      notifyListeners();
+    }
   }
 }

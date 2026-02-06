@@ -102,6 +102,10 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
       return;
     }
 
+    final oldIsOn = _isOn;
+    final oldTimezone = _deviceTimezone;
+    final oldVoltage = currentVoltage.value;
+
     _borneoDeviceStatus = await borneoDeviceApi.getGeneralDeviceStatus(
       super.boundDevice!.device,
       cancelToken: cancelToken,
@@ -110,5 +114,10 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
     _deviceTimezone = _borneoDeviceStatus?.timezone;
 
     currentVoltage.value = _borneoDeviceStatus?.powerVoltage;
+
+    // Only notify if something actually changed
+    if (_isOn != oldIsOn || _deviceTimezone != oldTimezone || currentVoltage.value != oldVoltage) {
+      notifyListeners();
+    }
   }
 }
