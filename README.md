@@ -1,4 +1,4 @@
-# A Based Open Source WiFi Aquarium LED DIY Kit
+# BorneoIoT: A Based Full-Stack Open-Source Aquarium LED WiFi Controller
 
 ![Firmware Build Status](https://github.com/borneo-iot/borneo/actions/workflows/fw-ci.yml/badge.svg)
 ![Firmware Release Status](https://github.com/borneo-iot/borneo/actions/workflows/fw-release.yml/badge.svg)
@@ -22,135 +22,91 @@
 
 ---
 
-The Borneo-IoT Project offers cutting-edge, open-source, modular, and affordable hardware and software solutions for hobbyists and professionals to create aquarium LEDs and other smart aquarium devices.
+**Borneo** is a professional-grade, open-source ecosystem designed for aquarium enthusiasts and DIYers. It provides a complete end-to-end solution—from hardware schematics to embedded firmware and a modern mobile app—to build and control high-performance aquarium LED lighting systems.
 
+## One System, Three Pillars
 
-For more information, please visit the project's website: **[www.borneoiot.com](https://www.borneoiot.com)**.
+This project delivers a full-stack solution for aquarium automation:
 
-PDF versions of the hardware schematics and datasheets [`hw/datasheets`](hw/datasheets).
+1.  **Hardware**: Certified open-source PCB designs targeting the ESP32 family, featuring 6-channel PWM dimming and modular architecture.
+2.  **Firmware**: A robust ESP-IDF based firmware implementing CoAP/CBOR protocols, sunrise/sunset simulation, and cooling control.
+3.  **Mobile App**: A cross-platform Flutter application for intuitive real-time control, scheduling, and device management.
 
-**The project's PCB design uses [Horizon EDA](https://horizon-eda.org). After installation, you can open the `.hprj` file and export the BoM and Gerber files yourself.**
+---
 
-If you like this project, please don't forget to give it a ⭐. Thank you!
+## ️Key Features
 
-The Buce (Model BLC06MK1) LED controller in this project is an [OSHWA (Open Source Hardware Association)](https://www.oshwa.org) certificated open-hardware:
+### Powerful Hardware
+- **OSHWA Certified**: Pro-grade designs (Model BLC06MK1) using [Horizon EDA](https://horizon-eda.org).
+  [![OSHWA Badge](assets/buce-oshwa.png)](https://certification.oshwa.org/cn000017.html)
+- **High Performance**: Optimized for ESP32/ESP32-C3/C5 with unified board definitions.
+- **Precision Dimming**: 6-channel PWM with smooth 10-bit resolution and soft-start technology.
+- **Expandable**: Reference designs for LED lamps, drivers, and even dosing pumps.
 
-[![BLC06MK1](assets/buce-oshwa.png)](https://certification.oshwa.org/cn000017.html)
+### Intelligent Firmware
+- **Dynamic Control**: Graphical sunrise/sunset curves with millisecond-smooth transitions.
+- **Reliable**: SNTP time synchronization and PID-controlled active cooling system.
+- **Production Ready**: Full support for over-the-air (OTA) updates and automated QA testing.[^1]
+- **Extensible Architecture**: Zephyr-inspired driver abstraction for easy porting and expansion.
 
-## Features
+### Modern Control
+- **Cross-Platform**: Modern UI built with Flutter for iOS, Android, and beyond.
+- **Unified Protocol**: Uses CoAP + CBOR for efficient, low-latency device communication.
+- **Developer Friendly**: Includes a Python API client for custom automation scripts.
 
-- **Full Stack Open Source**
-    - PCB design (schematic and board layout) using [Horizon EDA](https://horizon-eda.org)
-    - Firmware based on [ESP-IDF](https://idf.espressif.com/) framework
-    - Flutter mobile app
+---
 
-- **Modular Hardware Design**
-    - Compact core board (22×30mm) for easy integration
-    - Reference schematics for custom PCB implementations
+## Repository Structure
 
-- **Component-based Firmware**
-    - Multi-ESP32 family support (ESP32/ESP32-C3/C5) via unified board definitions
-    - Zephyr RTOS-like driver architecture with hardware abstraction
-    - CoAP + CBOR protocol stack for multi-device support (lamps, pumps, sensors)
+| Directory | Content | Description |
+| :--- | :--- | :--- |
+| [**`hw/`**](hw/) | **Hardware** | PCB designs (Horizon EDA), 3D models, and PDF schematics.[^2] |
+| [**`fw/`**](fw/) | **Firmware** | ESP-IDF source code for LED controllers and upcoming devices. |
+| [**`client/`**](client/) | **Mobile App** | Flutter source code for the cross-platform mobile application. |
+| [**`borneopy/`**](borneopy/) | **Python SDK** | Python client library for desktop control and scripting. |
 
-- **Rich Functionality**
-    - 6-channel PWM dimmer with zero peripheral components
-    - Graphical sunrise/sunset dimming with soft-start
-    - SNTP time sync & PID-controlled cooling sub-system
-    - Python API client & demo scripts
-    - Optional INA139 current monitoring
+---
 
-- **Cost-effective Solution**
-    - ESP32-C3/ESP32 MCUs with standard components
-    - Integrated driver for basic/PWM cooling fans
-    - Pin-header friendly for DIY integration
-
-- **Production-ready System**[^1]
-    - Wireless OTA firmware updates
-    - Automated production tools:
-        - Batch programming & QA testing
-        - Product parameter configuration
-
-- **Field-proven**
-    - The prototype of this dimmer and LED driver has been running stably on my own planted tank for years
-    - Extensible architecture (ongoing pump/pH monitor development)
-
-[^1]: The open-source project does not provide mass production-related fixtures and software.
-
-## Project Status
-
-### Hardware & Firmware
-
-**Beta**：The firmware is full functionality and stability, but some minor features are still not quite perfect.
-
-### Mobile App
-
-**Pre-Beta**：All major functions have been completed and are operational, but minor functions such as setting the time zone still need to be implemented, and the stability also requires further polishing.
-
-## Roadmap
-
-Checkout the [milestones](https://github.com/borneo-iot/borneo/milestones) to get a glimpse of the upcoming features and milestones.
-
-## Directory Structure
-
-- `client/`: Mobile app source code
-- `borneopy/`: A open-source Python client library for the devices under the Borneo-IoT Project
-- `fw/`: Firmware source code
-    - `scripts`: Related Python scripts
-    - `cmake`: CMake scripts
-    - `components`: Common ESP-IDF component source code
-    - `lyfi`: LED dimmer firmware-related source code
-    - `doser`: Dosing pump firmware-related source code (under development)
-- `hw/`: Circuit design source files
-    - `blc06`: The board design of Buce, the 6-channel WiFi LED PWM dimmer
-    - `blb0657f`: 6-channel 57W LED lamp aluminum PCB design
-    - `bld6f`: 6-channel LED driver PCB design
-    - `blc05mk3`: 5-channel LED driver PCB design (*Obsoleted*)
-    - `blb08103`: 5-channel 63W LED lamp aluminum PCB design (*Obsoleted*)
-    - `3d-models`: STEP format 3D models
-    - `datasheets`: The hardware specifications in PDF format[^3]
-- `tools/`: Related scripts and tools
-
-[^3]: Since the datasheets are based on templates from my other products, the source file will not be provided in this repository.
+[^1]: The open-source project does not provide mass production-related fixtures or specialized factory software.
+[^2]: PDF datasheets are provided; however, raw template source files for some documents are excluded.
 
 ## Getting Started
 
-Please check out the [online documentation](https://docs.borneoiot.com/getting-started).
+- **New Users**: Check out our [**Getting Started Guide**](https://docs.borneoiot.com/getting-started).
+- **Hardware**: Find schematics and BoM files in the [`hw/`](hw/) directory.
+- **Firmware**: Compilation instructions are available in the [`fw/`](fw/) folder.
 
-## Contribution
+---
 
-Please read [CONTRIBUTING.md](.github/CONTRIBUTING.md) for more details.
+## Project Status
 
-If you want to support the development of this project, you could consider buying me a beer.
+| Component | Status | Details |
+| :--- | :--- | :--- |
+| **Hardware** | Stable | Production-ready, OSHWA certified. |
+| **Firmware** | Beta | Full-featured and stable on my personal tanks for years. |
+| **Mobile App** | Beta | Core functionality working. |
 
-<a href='https://ko-fi.com/O5O2U4W4E' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi3.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+---
 
-[![Support via PayPal.me](assets/paypal_button.svg)](https://www.paypal.me/oldrev)
+## Roadmap
 
-## Issues, Feedback & Support
+Check our [milestones](https://github.com/borneo-iot/borneo/milestones) for the latest development updates and upcoming features.
 
-We welcome your feedback! If you encounter any issues or have suggestions, please open an [issue](https://github.com/borneo-iot/borneo/issues).
+## Community & Support
 
-- Website：[www.borneoiot.com](https://www.borneoiot.com)
-- Online documentation：[docs.borneoiot.com](https://docs.borneoiot.com)
-- GutHub Discussions: [github.com/borneo-iot/borneo/discussions](https://github.com/borneo-iot/borneo/discussions)
-- E-mail: [info@binarystarstech.com](mailto:info@binarystarstech.com)
-- Borneo-IoT Discord Server: [discord.gg/EFJTm7PpEs](https://discord.gg/EFJTm7PpEs)
+- **Website**: [www.borneoiot.com](https://www.borneoiot.com)
+- **Documentation**: [docs.borneoiot.com](https://docs.borneoiot.com)
+- **Discussions**: [Join the Conversation](https://github.com/borneo-iot/borneo/discussions)
+- **Discord**: [Connect with Developers](https://discord.gg/EFJTm7PpEs)
+- **Email**: [info@binarystarstech.com](mailto:info@binarystarstech.com)
 
-## License
+---
 
-### Software & Firmware
+## Licenses
 
-The software and firmware in this project is dual-licensed under the GNU General Public License version 3 or later (GPL-3.0+) and a proprietary license. You can find the full text of the GPL-3.0 license in the [LICENSE](LICENSE) file.
+- **Software/Firmware**: Dual-licensed under [**GPL-3.0+**](LICENSE) and Enterprise licenses.
+- **Hardware**: Licensed under [**CERN-OHL-S-2.0**](LICENSE-HARDWARE).
 
-### Hardware
-
-The hardware design in this project is licensed under the CERN Open Hardware Licence Version 2 - Strongly Reciprocal (CERN-OHL-S-2.0). You can find the full text of the license in the [LICENSE-HARDWARE](LICENSE-HARDWARE) file.
-
-#### Proprietary Licensing
-
-In addition to the GPL-3.0 license, I also offer proprietary licensing options for those who wish to use this software in proprietary products.
-
-If you are interested in obtaining a proprietary license, please contact me at [info@binarystarstech.com](mailto:info@binarystarstech.com).
+---
 
 The hardware, firmware, and App for this project were all created by: Wei Li（李维）.
