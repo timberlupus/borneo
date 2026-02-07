@@ -52,14 +52,16 @@ class _RollingIntegerState extends State<RollingInteger> with SingleTickerProvid
   Widget build(BuildContext context) {
     final int newValue = widget.value;
     final textStyle = widget.textStyle ?? DefaultTextStyle.of(context).style;
+    final double fontSize = textStyle.fontSize ?? 24;
     return SizedBox(
-      height: (textStyle.fontSize ?? 24) * 1.25,
+      width: fontSize * 0.6,
+      height: fontSize * 1.25,
       child: AnimatedBuilder(
         animation: _anim,
         builder: (context, child) {
           final t = Curves.easeOut.transform(_anim.value);
-          // -1 => up (increase), 1 => down (decrease)
-          final direction = newValue >= _oldValue ? -1.0 : 1.0;
+          // 1 => down (increase), -1 => up (decrease)
+          final direction = newValue >= _oldValue ? 1.0 : -1.0;
           final offset = direction * t;
 
           return Stack(

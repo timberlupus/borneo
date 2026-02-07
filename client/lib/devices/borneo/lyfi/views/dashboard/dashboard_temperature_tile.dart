@@ -49,22 +49,34 @@ class DashboardTemperatureTile extends StatelessWidget {
         textBaseline: TextBaseline.alphabetic,
         children: [
           if (isOnline && currentTemp != null)
-            RollingInteger(
-              value: currentTemp,
-              textStyle: theme.textTheme.headlineLarge?.copyWith(
-                fontFeatures: [FontFeature.tabularFigures()],
-                color: progressColor,
-                fontSize: 24,
-              ),
-              duration: const Duration(milliseconds: 360),
-            )
+            ...() {
+              final String tempStr = currentTemp.toString().padLeft(3, '0');
+              final List<String> digits = tempStr.split('');
+              final List<Widget> digitWidgets = [];
+              for (int i = 0; i < digits.length; i++) {
+                final String digit = digits[i];
+                final bool isLeadingZero =
+                    i < digits.length - 1 && digit == '0' && digits.sublist(0, i).every((c) => c == '0');
+                final Color color = isLeadingZero ? theme.colorScheme.outlineVariant : progressColor;
+                digitWidgets.add(
+                  RollingInteger(
+                    value: int.parse(digit),
+                    textStyle: theme.textTheme.headlineLarge?.copyWith(
+                      color: color,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                    ),
+                    duration: const Duration(milliseconds: 300),
+                  ),
+                );
+              }
+              return digitWidgets;
+            }()
           else
             Text(
               context.translate("N/A"),
               style: theme.textTheme.headlineLarge?.copyWith(
                 fontFeatures: [FontFeature.tabularFigures()],
                 color: theme.colorScheme.outlineVariant,
-                fontSize: 24,
               ),
             ),
           if (isOnline && currentTemp != null)
@@ -73,7 +85,6 @@ class DashboardTemperatureTile extends StatelessWidget {
               style: theme.textTheme.labelMedium?.copyWith(
                 fontFeatures: [FontFeature.tabularFigures()],
                 color: progressColor,
-                fontSize: 12,
               ),
             ),
         ],

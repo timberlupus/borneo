@@ -28,25 +28,38 @@ class DashboardFanTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           textBaseline: TextBaseline.alphabetic,
           children: vm.isOnline && vm.fanPowerRatio != null
-              ? [
-                  RollingInteger(
-                    value: vm.fanPowerRatio!.toInt(),
-                    textStyle: theme.textTheme.headlineLarge?.copyWith(
-                      fontFeatures: [FontFeature.tabularFigures()],
-                      fontSize: 24,
-                      color: theme.colorScheme.primary,
+              ? () {
+                  final int fanValue = vm.fanPowerRatio!.toInt();
+                  final String fanStr = fanValue.toString().padLeft(3, '0');
+                  final List<String> digits = fanStr.split('');
+                  final List<Widget> digitWidgets = [];
+                  for (int i = 0; i < digits.length; i++) {
+                    final String digit = digits[i];
+                    final bool isLeadingZero =
+                        i < digits.length - 1 && digit == '0' && digits.sublist(0, i).every((c) => c == '0');
+                    final Color color = isLeadingZero ? theme.colorScheme.outlineVariant : theme.colorScheme.primary;
+                    digitWidgets.add(
+                      RollingInteger(
+                        value: int.parse(digit),
+                        textStyle: theme.textTheme.headlineLarge?.copyWith(
+                          color: color,
+                          fontFeatures: [FontFeature.tabularFigures()],
+                        ),
+                        duration: const Duration(milliseconds: 300),
+                      ),
+                    );
+                  }
+                  return [
+                    ...digitWidgets,
+                    Text(
+                      '%',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontFeatures: [FontFeature.tabularFigures()],
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
-                    duration: const Duration(milliseconds: 300),
-                  ),
-                  Text(
-                    '%',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontFeatures: [FontFeature.tabularFigures()],
-                      fontSize: 12,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ]
+                  ];
+                }()
               : [
                   Text(
                     context.translate("N/A"),

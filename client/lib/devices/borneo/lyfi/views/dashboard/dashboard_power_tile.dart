@@ -58,16 +58,27 @@ class DashboardPowerTile extends StatelessWidget {
                       ...() {
                         final double watts = vm.currentWatts.value!;
                         final int intPart = watts.round();
-                        final bool isZero = watts == 0;
-                        return [
-                          RollingInteger(
-                            value: isZero ? 0 : intPart,
-                            textStyle: theme.textTheme.headlineLarge?.copyWith(
-                              color: textPrimary,
-                              fontFeatures: [FontFeature.tabularFigures()],
+                        final String powerStr = intPart.toString().padLeft(3, '0');
+                        final List<String> digits = powerStr.split('');
+                        final List<Widget> digitWidgets = [];
+                        for (int i = 0; i < digits.length; i++) {
+                          final String digit = digits[i];
+                          final bool isLeadingZero =
+                              i < digits.length - 1 && digit == '0' && digits.sublist(0, i).every((c) => c == '0');
+                          final Color color = isLeadingZero ? arcColor : textPrimary;
+                          digitWidgets.add(
+                            RollingInteger(
+                              value: int.parse(digit),
+                              textStyle: theme.textTheme.headlineLarge?.copyWith(
+                                color: color,
+                                fontFeatures: [FontFeature.tabularFigures()],
+                              ),
+                              duration: const Duration(milliseconds: 200),
                             ),
-                            duration: const Duration(milliseconds: 300),
-                          ),
+                          );
+                        }
+                        return [
+                          ...digitWidgets,
                           Text(
                             'W',
                             style: theme.textTheme.labelMedium?.copyWith(
@@ -88,7 +99,7 @@ class DashboardPowerTile extends StatelessWidget {
                     ],
                   ],
                 ),
-                if (props.canMeasurePower && isOnline) const Divider(height: 8),
+                if (props.canMeasurePower && isOnline) const Divider(height: 8, thickness: 2.5),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
