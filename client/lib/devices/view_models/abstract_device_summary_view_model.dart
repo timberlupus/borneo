@@ -7,6 +7,7 @@ import 'package:borneo_kernel/drivers/borneo/events.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:lw_wot/thing.dart';
 
 import '../../shared/view_models/base_view_model.dart';
 
@@ -14,6 +15,8 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
   final IDeviceManager deviceManager;
   DeviceEntity deviceEntity;
   var isInitialized = false;
+
+  WotThing? wotThing;
 
   bool _isOnline;
   bool get isOnline => _isOnline;
@@ -41,7 +44,7 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
     _loadingFailedEventSub = deviceManager.allDeviceEvents.on<LoadingDriverFailedEvent>().listen(_onLoadingFailed);
 
     if (deviceManager.isBound(deviceEntity.id)) {
-      final wotThing = deviceManager.getWotThing(deviceEntity.id);
+      wotThing = deviceManager.getWotThing(deviceEntity.id);
       if (wotThing != null && wotThing.hasProperty(LyfiKnownProperties.kOn)) {
         final onProp = wotThing.getProperty(LyfiKnownProperties.kOn);
         if (onProp != null) {

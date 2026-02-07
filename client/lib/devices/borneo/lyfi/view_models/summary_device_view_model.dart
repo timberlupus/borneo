@@ -21,15 +21,15 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
       final mode = LyfiMode.fromString(modeValue as String);
       ledMode.value = mode;
     }
-    super.wotThing?.addSubscriber(_onStateChanged);
-    super.wotThing?.addSubscriber(_onModeChanged);
+    wotThing?.addSubscriber(_onStateChanged);
+    wotThing?.addSubscriber(_onModeChanged);
   }
 
   @override
   void dispose() {
     if (!_disposed) {
-      super.wotThing?.removeSubscriber(_onStateChanged);
-      super.wotThing?.removeSubscriber(_onModeChanged);
+      wotThing?.removeSubscriber(_onStateChanged);
+      wotThing?.removeSubscriber(_onModeChanged);
       ledState.dispose();
       ledMode.dispose();
       super.dispose();
