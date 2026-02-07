@@ -46,6 +46,7 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   });
 
   @override
+  @protected
   Future<void> onInitialize() async {
     // await super.onInitialize();
     await _initializeTimezone();

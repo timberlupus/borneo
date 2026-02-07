@@ -94,6 +94,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     });
   }
 
+  @protected
   Future<void> initialize() async {
     assert(!isInitialized);
     try {

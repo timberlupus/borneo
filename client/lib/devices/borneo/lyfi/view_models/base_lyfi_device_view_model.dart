@@ -25,6 +25,7 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   final ValueNotifier<double?> currentWatts = ValueNotifier<double?>(null);
 
   @override
+  @protected
   Future<void> onInitialize() async {
     super.onInitialize();
     if (super.isOnline) {
