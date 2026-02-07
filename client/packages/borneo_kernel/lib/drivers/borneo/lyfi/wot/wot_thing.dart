@@ -38,6 +38,21 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   late final ObservableWotProperty<String, LyfiFanModeChangedEvent> fanModeProperty;
   late final ObservableWotProperty<int, Object> fanManualPowerProperty;
 
+  late final WotProperty<bool> cloudEnabledProperty;
+  late final WotProperty<int> temporaryDurationProperty;
+  late final WotProperty<List<ScheduledInstant>> sunScheduleProperty;
+  late final WotProperty<List<SunCurveItem>> sunCurveProperty;
+  late final WotProperty<int> currentTempProperty;
+  late final WotProperty<LyfiDeviceInfo> deviceInfoProperty;
+  late final WotProperty<bool> unscheduledProperty;
+  late final WotProperty<int> temporaryRemainingProperty;
+  late final WotProperty<int> fanPowerProperty;
+  late final WotProperty<List<int>> manualColorProperty;
+  late final WotProperty<List<int>> sunColorProperty;
+  late final WotProperty<bool> acclimationActivatedProperty;
+  late final WotProperty<bool> cloudActivatedProperty;
+  late final WotProperty<double> powerCurrentProperty;
+
   LyfiThing({
     required this.device,
     required this.deviceEvents,
@@ -364,6 +379,275 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       mapper: (event) => 0, // Not used
     );
     addProperty(fanManualPowerProperty);
+
+    // Cloud enabled property
+    cloudEnabledProperty = WotProperty<bool>(
+      thing: this,
+      name: 'cloudEnabled',
+      value: WotValue<bool>(
+        initialValue: false, // Default false
+        valueForwarder: (update) => lyfiApi.setCloudEnabled(device, update),
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'boolean',
+        title: 'Cloud Enabled',
+        description: 'Controls cloud connectivity for remote management',
+        readOnly: false,
+      ),
+    );
+    addProperty(cloudEnabledProperty);
+
+    // Temporary duration property
+    temporaryDurationProperty = WotProperty<int>(
+      thing: this,
+      name: 'temporaryDuration',
+      value: WotValue<int>(
+        initialValue: 0, // Default 0 minutes
+        valueForwarder: (update) => lyfiApi.setTemporaryDuration(device, Duration(minutes: update)),
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'integer',
+        title: 'Temporary Duration',
+        description: 'Duration for temporary lighting mode in minutes',
+        readOnly: false,
+      ),
+    );
+    addProperty(temporaryDurationProperty);
+
+    // Sun schedule property (read-only)
+    sunScheduleProperty = WotProperty<List<ScheduledInstant>>(
+      thing: this,
+      name: 'sunSchedule',
+      value: WotValue<List<ScheduledInstant>>(
+        initialValue: [], // Default empty
+        valueForwarder: (update) async {
+          throw UnsupportedError('Sun schedule is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'array',
+        title: 'Sun Schedule',
+        description: 'Computed sun-based lighting schedule',
+        readOnly: true,
+      ),
+    );
+    addProperty(sunScheduleProperty);
+
+    // Sun curve property (read-only)
+    sunCurveProperty = WotProperty<List<SunCurveItem>>(
+      thing: this,
+      name: 'sunCurve',
+      value: WotValue<List<SunCurveItem>>(
+        initialValue: [], // Default empty
+        valueForwarder: (update) async {
+          throw UnsupportedError('Sun curve is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'array',
+        title: 'Sun Curve',
+        description: 'Sun brightness curve data points',
+        readOnly: true,
+      ),
+    );
+    addProperty(sunCurveProperty);
+
+    // Current temperature property (read-only)
+    currentTempProperty = WotProperty<int>(
+      thing: this,
+      name: 'currentTemp',
+      value: WotValue<int>(
+        initialValue: 25, // Default 25°C
+        valueForwarder: (update) async {
+          throw UnsupportedError('Current temperature is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'integer',
+        title: 'Current Temperature',
+        description: 'Current device temperature sensor reading in Celsius',
+        readOnly: true,
+      ),
+    );
+    addProperty(currentTempProperty);
+
+    // Device info property (read-only)
+    deviceInfoProperty = WotProperty<LyfiDeviceInfo>(
+      thing: this,
+      name: 'deviceInfo',
+      value: WotValue<LyfiDeviceInfo>(
+        initialValue: LyfiDeviceInfo(
+          nominalPower: 0,
+          channelCountMax: 0,
+          channelCount: 0,
+          channels: [],
+        ), // Default empty
+        valueForwarder: (update) async {
+          throw UnsupportedError('Device info is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'object',
+        title: 'Device Info',
+        description: 'Device capabilities and channel metadata',
+        readOnly: true,
+      ),
+    );
+    addProperty(deviceInfoProperty);
+
+    // Unscheduled property (read-only)
+    unscheduledProperty = WotProperty<bool>(
+      thing: this,
+      name: 'unscheduled',
+      value: WotValue<bool>(
+        initialValue: false, // Default false
+        valueForwarder: (update) async {
+          throw UnsupportedError('Unscheduled status is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'boolean',
+        title: 'Unscheduled',
+        description: 'Whether device is operating outside schedule',
+        readOnly: true,
+      ),
+    );
+    addProperty(unscheduledProperty);
+
+    // Temporary remaining property (read-only)
+    temporaryRemainingProperty = WotProperty<int>(
+      thing: this,
+      name: 'temporaryRemaining',
+      value: WotValue<int>(
+        initialValue: 0, // Default 0 seconds
+        valueForwarder: (update) async {
+          throw UnsupportedError('Temporary remaining is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'integer',
+        title: 'Temporary Remaining',
+        description: 'Seconds remaining in temporary mode',
+        readOnly: true,
+      ),
+    );
+    addProperty(temporaryRemainingProperty);
+
+    // Fan power property (read-only)
+    fanPowerProperty = WotProperty<int>(
+      thing: this,
+      name: 'fanPower',
+      value: WotValue<int>(
+        initialValue: 0, // Default 0%
+        valueForwarder: (update) async {
+          throw UnsupportedError('Fan power is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'integer',
+        title: 'Fan Power',
+        description: 'Current fan power level (0-100%)',
+        minimum: 0,
+        maximum: 100,
+        readOnly: true,
+      ),
+    );
+    addProperty(fanPowerProperty);
+
+    // Manual color property (read-only)
+    manualColorProperty = WotProperty<List<int>>(
+      thing: this,
+      name: 'manualColor',
+      value: WotValue<List<int>>(
+        initialValue: [0, 0, 0, 0], // Default all off
+        valueForwarder: (update) async {
+          throw UnsupportedError('Manual color is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'array',
+        title: 'Manual Color',
+        description: 'Stored manual color values',
+        readOnly: true,
+      ),
+    );
+    addProperty(manualColorProperty);
+
+    // Sun color property (read-only)
+    sunColorProperty = WotProperty<List<int>>(
+      thing: this,
+      name: 'sunColor',
+      value: WotValue<List<int>>(
+        initialValue: [0, 0, 0, 0], // Default all off
+        valueForwarder: (update) async {
+          throw UnsupportedError('Sun color is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'array',
+        title: 'Sun Color',
+        description: 'Current sun-simulated color values',
+        readOnly: true,
+      ),
+    );
+    addProperty(sunColorProperty);
+
+    // Acclimation activated property (read-only)
+    acclimationActivatedProperty = WotProperty<bool>(
+      thing: this,
+      name: 'acclimationActivated',
+      value: WotValue<bool>(
+        initialValue: false, // Default false
+        valueForwarder: (update) async {
+          throw UnsupportedError('Acclimation activated is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'boolean',
+        title: 'Acclimation Activated',
+        description: 'Whether acclimation is currently running',
+        readOnly: true,
+      ),
+    );
+    addProperty(acclimationActivatedProperty);
+
+    // Cloud activated property (read-only)
+    cloudActivatedProperty = WotProperty<bool>(
+      thing: this,
+      name: 'cloudActivated',
+      value: WotValue<bool>(
+        initialValue: false, // Default false
+        valueForwarder: (update) async {
+          throw UnsupportedError('Cloud activated is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'boolean',
+        title: 'Cloud Activated',
+        description: 'Whether cloud connection is active',
+        readOnly: true,
+      ),
+    );
+    addProperty(cloudActivatedProperty);
+
+    // Power current property (read-only)
+    powerCurrentProperty = WotProperty<double>(
+      thing: this,
+      name: 'powerCurrent',
+      value: WotValue<double>(
+        initialValue: 0.0, // Default 0W
+        valueForwarder: (update) async {
+          throw UnsupportedError('Power current is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'number',
+        title: 'Power Current',
+        description: 'Current power consumption in watts',
+        readOnly: true,
+      ),
+    );
+    addProperty(powerCurrentProperty);
   }
 
   /// Bind properties to actual hardware state (like Mozilla WebThing ready callback)
@@ -383,6 +667,14 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       final fanMode = await lyfiApi.getFanMode(device);
       final fanPower = await lyfiApi.getFanManualPower(device);
 
+      // Additional API calls for new properties
+      final cloudEnabled = await lyfiApi.getCloudEnabled(device);
+      final temporaryDuration = await lyfiApi.getTemporaryDuration(device);
+      final sunSchedule = await lyfiApi.getSunSchedule(device);
+      final sunCurve = await lyfiApi.getSunCurve(device);
+      // final currentTemp = await lyfiApi.getCurrentTemp(device); // Use lyfiStatus.temperature
+      // final deviceInfo = await lyfiApi.getDeviceInfo(device); // Skip for now
+
       // Update properties with actual values (like notifyOfExternalUpdate in Mozilla WebThing)
       onOffProperty.value.notifyOfExternalUpdate(generalStatus.power);
       stateProperty.value.notifyOfExternalUpdate(lyfiStatus.state.name);
@@ -398,6 +690,22 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       temperatureProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature);
       fanModeProperty.value.notifyOfExternalUpdate(fanMode.name);
       fanManualPowerProperty.value.notifyOfExternalUpdate(fanPower);
+
+      // Update new properties
+      cloudEnabledProperty.value.notifyOfExternalUpdate(cloudEnabled);
+      temporaryDurationProperty.value.notifyOfExternalUpdate(temporaryDuration.inMinutes);
+      sunScheduleProperty.value.notifyOfExternalUpdate(sunSchedule);
+      sunCurveProperty.value.notifyOfExternalUpdate(sunCurve);
+      currentTempProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature ?? 25);
+      // deviceInfoProperty.value.notifyOfExternalUpdate(deviceInfo);
+      unscheduledProperty.value.notifyOfExternalUpdate(lyfiStatus.unscheduled);
+      temporaryRemainingProperty.value.notifyOfExternalUpdate(lyfiStatus.temporaryRemaining.inSeconds);
+      fanPowerProperty.value.notifyOfExternalUpdate(lyfiStatus.fanPower ?? 0);
+      manualColorProperty.value.notifyOfExternalUpdate(lyfiStatus.manualColor);
+      sunColorProperty.value.notifyOfExternalUpdate(lyfiStatus.sunColor);
+      acclimationActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.acclimationActivated);
+      cloudActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.cloudActivated);
+      powerCurrentProperty.value.notifyOfExternalUpdate(lyfiStatus.powerCurrent ?? 0.0);
 
       logger?.d('LyfiThing: Successfully bound to hardware state');
     } catch (e, stackTrace) {
@@ -429,6 +737,15 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       modeProperty.value.notifyOfExternalUpdate(lyfiStatus.mode.name);
       stateProperty.value.notifyOfExternalUpdate(lyfiStatus.state.name);
       temperatureProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature);
+
+      // Sync additional critical properties
+      currentTempProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature ?? 25);
+      fanPowerProperty.value.notifyOfExternalUpdate(lyfiStatus.fanPower ?? 0);
+      unscheduledProperty.value.notifyOfExternalUpdate(lyfiStatus.unscheduled);
+      temporaryRemainingProperty.value.notifyOfExternalUpdate(lyfiStatus.temporaryRemaining.inSeconds);
+      acclimationActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.acclimationActivated);
+      cloudActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.cloudActivated);
+      powerCurrentProperty.value.notifyOfExternalUpdate(lyfiStatus.powerCurrent ?? 0.0);
     } catch (e, stackTrace) {
       logger?.e('Lightweight sync failed: $e', error: e, stackTrace: stackTrace);
     }
