@@ -60,8 +60,15 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
 
   static List<Widget> _secondaryStatesBuilder(BuildContext context, AbstractDeviceSummaryViewModel vm) {
     final lvm = vm as LyfiSummaryDeviceViewModel;
-    final modeWidget = Text(_modeText(context, lvm.ledMode), style: Theme.of(context).textTheme.labelSmall);
-    final stateWidget = Text(_stateText(context, lvm.ledState), style: Theme.of(context).textTheme.labelSmall);
+    final modeWidget = ValueListenableBuilder<LyfiMode?>(
+      valueListenable: lvm.ledMode,
+      builder: (context, mode, child) => Text(_modeText(context, mode), style: Theme.of(context).textTheme.labelSmall),
+    );
+    final stateWidget = ValueListenableBuilder<LyfiState?>(
+      valueListenable: lvm.ledState,
+      builder: (context, state, child) =>
+          Text(_stateText(context, state), style: Theme.of(context).textTheme.labelSmall),
+    );
     return [modeWidget, stateWidget];
   }
 

@@ -197,9 +197,10 @@ class WotThing {
   /// Get a property's value.
   ///
   /// Returns current property value if found, else null
-  dynamic getProperty(String propertyName) {
+  T? getProperty<T>(String propertyName) {
     final prop = findProperty(propertyName);
-    return prop?.getValue();
+    final value = prop?.getValue();
+    return value is T ? value : null;
   }
 
   /// Get a mapping of all properties and their values.
@@ -335,11 +336,14 @@ class WotThing {
 
   /// Notify all subscribers of a property change.
   void propertyNotify(WotProperty property) {
-    final message = '{"messageType":"propertyStatus","data":{"${property.getName()}":${property.getValue()}}}';
+    final message = WotMessage(
+      messageType: WotMessageType.propertyStatus,
+      data: {property.getName(): property.getValue()},
+    );
 
     for (final subscriber in _subscribers) {
       try {
-        subscriber.send(message);
+        subscriber(message);
       } catch (e) {
         // do nothing
       }
@@ -348,11 +352,11 @@ class WotThing {
 
   /// Notify all subscribers of an action status change.
   void actionNotify(WotAction action) {
-    final message = '{"messageType":"actionStatus","data":${action.asActionDescription()}}';
+    final message = WotMessage(messageType: WotMessageType.actionStatus, data: action.asActionDescription());
 
     for (final subscriber in _subscribers) {
       try {
-        subscriber.send(message);
+        subscriber(message);
       } catch (e) {
         // do nothing
       }
@@ -365,11 +369,11 @@ class WotThing {
       return;
     }
 
-    final message = '{"messageType":"event","data":${event.asEventDescription()}}';
+    final message = WotMessage(messageType: WotMessageType.event, data: event.asEventDescription());
 
     for (final subscriber in _availableEvents[event.getName()]!.subscribers) {
       try {
-        subscriber.send(message);
+        subscriber(message);
       } catch (e) {
         // do nothing
       }

@@ -1,58 +1,55 @@
-import 'dart:async';
-
+import 'package:flutter/foundation.dart';
 import 'package:borneo_app/devices/borneo/lyfi/core/wot.dart';
 import 'package:borneo_app/devices/borneo/view_models/base_borneo_summary_device_view_model.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:lw_wot/wot.dart';
 
 class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
   bool _disposed = false;
-  LyfiState? ledState;
-  LyfiMode? ledMode;
-
-  late final StreamSubscription<LyfiModeChangedEvent> _modeChangedSub;
-  late final StreamSubscription<LyfiStateChangedEvent> _stateChangedSub;
+  final ValueNotifier<LyfiState?> ledState = ValueNotifier(null);
+  final ValueNotifier<LyfiMode?> ledMode = ValueNotifier(null);
 
   LyfiSummaryDeviceViewModel(super.deviceEntity, super.deviceManager, super.globalEventBus) {
-    _modeChangedSub = deviceManager.allDeviceEvents.on<LyfiModeChangedEvent>().listen((event) {
-      if (super.deviceEntity.id == event.device.id) {
-        ledMode = event.mode;
-        notifyListeners();
-      }
-    });
-
-    _stateChangedSub = deviceManager.allDeviceEvents.on<LyfiStateChangedEvent>().listen((event) {
-      if (super.deviceEntity.id == event.device.id) {
-        ledState = event.state;
-        notifyListeners();
-      }
-    });
-
-    if (super.deviceManager.isBound(deviceEntity.id)) {
-      final wotThing = super.deviceManager.getWotThing(deviceEntity.id);
-      if (wotThing != null) {
-        final stateValue = wotThing.getProperty(LyfiKnownProperties.kState);
-        if (stateValue != null) {
-          final state = LyfiState.fromString(stateValue as String);
-          ledState = state;
-        }
-
-        final modeValue = wotThing.getProperty(LyfiKnownProperties.kMode);
-        if (modeValue != null) {
-          final mode = LyfiMode.fromString(modeValue as String);
-          ledMode = mode;
-        }
-      }
+    final stateValue = wotThing?.getProperty(LyfiKnownProperties.kState);
+    if (stateValue != null) {
+      final state = LyfiState.fromString(stateValue as String);
+      ledState.value = state;
     }
+
+    final modeValue = wotThing?.getProperty(LyfiKnownProperties.kMode);
+    if (modeValue != null) {
+      final mode = LyfiMode.fromString(modeValue as String);
+      ledMode.value = mode;
+    }
+    super.wotThing?.addSubscriber(_onStateChanged);
+    super.wotThing?.addSubscriber(_onModeChanged);
   }
 
   @override
   void dispose() {
     if (!_disposed) {
-      _stateChangedSub.cancel();
-      _modeChangedSub.cancel();
+      super.wotThing?.removeSubscriber(_onStateChanged);
+      super.wotThing?.removeSubscriber(_onModeChanged);
+      ledState.dispose();
+      ledMode.dispose();
       super.dispose();
       _disposed = true;
+    }
+  }
+
+  void _onStateChanged(WotMessage msg) {
+    final stateValue = wotThing?.getProperty(LyfiKnownProperties.kState);
+    if (stateValue != null) {
+      final state = LyfiState.fromString(stateValue as String);
+      ledState.value = state;
+    }
+  }
+
+  void _onModeChanged(WotMessage msg) {
+    final modeValue = wotThing?.getProperty(LyfiKnownProperties.kMode);
+    if (modeValue != null) {
+      final mode = LyfiMode.fromString(modeValue as String);
+      ledMode.value = mode;
     }
   }
 }

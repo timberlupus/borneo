@@ -1,5 +1,5 @@
 // dart format width=120
 
-export 'wot/wot-actions.dart';
-export 'wot/wot-properties.dart';
-export 'wot/wot-thing.dart';
+export 'wot/wot_actions.dart';
+export 'wot/wot_properties.dart';
+export 'wot/wot_thing.dart';

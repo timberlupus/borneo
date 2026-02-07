@@ -1,10 +1,10 @@
+import 'package:lw_wot/types.dart';
 import 'package:test/test.dart';
 import 'package:lw_wot/thing.dart';
 import 'package:lw_wot/property.dart';
 import 'package:lw_wot/action.dart';
 import 'package:lw_wot/event.dart';
 import 'package:lw_wot/value.dart';
-import 'package:lw_wot/types.dart';
 
 // Test action for action testing
 class TestThingAction extends WotAction<dynamic> {
@@ -22,11 +22,10 @@ class TestThingAction extends WotAction<dynamic> {
 }
 
 // Mock subscriber for testing notifications
-class MockSubscriber extends WotSubscriber {
-  final List<String> receivedMessages = [];
+class MockSubscriber {
+  final List<WotMessage> receivedMessages = [];
 
-  @override
-  void send(String message) {
+  void call(WotMessage message) {
     receivedMessages.add(message);
   }
 }
@@ -446,10 +445,8 @@ void main() {
 
         expect(subscriber.receivedMessages, hasLength(1));
         final message = subscriber.receivedMessages.first;
-        expect(message, contains('messageType'));
-        expect(message, contains('propertyStatus'));
-        expect(message, contains('temp'));
-        expect(message, contains('25'));
+        expect(message.messageType, equals(WotMessageType.propertyStatus));
+        expect(message.data['temp'], equals(25));
       });
       test('actionNotify sends correct message format', () {
         thing.addAvailableAction(
@@ -473,8 +470,7 @@ void main() {
         // Check if notification was sent (performAction calls actionNotify)
         expect(subscriber.receivedMessages, hasLength(1));
         final message = subscriber.receivedMessages.first;
-        expect(message, contains('messageType'));
-        expect(message, contains('actionStatus'));
+        expect(message.messageType, equals(WotMessageType.actionStatus));
       });
 
       test('eventNotify sends correct message format', () {
@@ -486,9 +482,9 @@ void main() {
 
         expect(subscriber.receivedMessages, hasLength(1));
         final message = subscriber.receivedMessages.first;
-        expect(message, contains('messageType'));
-        expect(message, contains('event'));
-        expect(message, contains('testEvent'));
+        expect(message.messageType, equals(WotMessageType.event));
+        expect(message.data['testEvent'], isNotNull);
+        expect(message.data['testEvent']['data'], equals('test data'));
       });
 
       test('eventNotify with unavailable event does nothing', () {
@@ -673,9 +669,8 @@ void main() {
 }
 
 // Helper class for error testing
-class _ErrorSubscriber extends WotSubscriber {
-  @override
-  void send(String message) {
+class _ErrorSubscriber {
+  void call(WotMessage message) {
     throw Exception('Subscriber error');
   }
 }

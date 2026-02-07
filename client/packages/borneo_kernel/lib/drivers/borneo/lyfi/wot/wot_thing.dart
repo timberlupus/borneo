@@ -9,7 +9,7 @@ import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:logger/logger.dart';
 import 'package:lw_wot/wot.dart';
 
-import 'wot-properties.dart';
+import 'wot_properties.dart';
 
 /// LyfiThing extends WotThing following Mozilla WebThing initialization pattern
 /// This class uses default values during construction and binds to actual hardware asynchronously

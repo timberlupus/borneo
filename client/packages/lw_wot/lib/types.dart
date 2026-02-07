@@ -58,6 +58,29 @@ class WotLink {
   WotLink({required this.rel, required this.href, this.mediaType});
 }
 
-abstract class WotSubscriber {
-  void send(String message);
+typedef WotSubscriber = void Function(WotMessage message);
+
+enum WotMessageType {
+  propertyStatus,
+  actionStatus,
+  event;
+
+  @override
+  String toString() {
+    switch (this) {
+      case WotMessageType.propertyStatus:
+        return 'propertyStatus';
+      case WotMessageType.actionStatus:
+        return 'actionStatus';
+      case WotMessageType.event:
+        return 'event';
+    }
+  }
+}
+
+class WotMessage {
+  final WotMessageType messageType;
+  final Map<String, dynamic> data;
+
+  WotMessage({required this.messageType, required this.data});
 }
