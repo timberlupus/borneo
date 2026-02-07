@@ -2,7 +2,9 @@
 
 import 'dart:async';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
+import 'package:borneo_kernel/drivers/borneo/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
@@ -21,20 +23,20 @@ class LyfiThing extends WotThing {
   final ILyfiDeviceApi lyfiApi;
 
   // Property references
-  late final LyfiPowerProperty onOffProperty;
-  late final LyfiStateProperty stateProperty;
-  late final LyfiModeProperty modeProperty;
+  late final ObservableWotProperty<bool, DevicePowerOnOffChangedEvent> onOffProperty;
+  late final ObservableWotProperty<String, LyfiStateChangedEvent> stateProperty;
+  late final ObservableWotProperty<String, LyfiModeChangedEvent> modeProperty;
   late final WotProperty<List<int>> colorProperty;
-  late final LyfiScheduleProperty scheduleProperty;
-  late final LyfiAcclimationProperty acclimationProperty;
-  late final LyfiLocationProperty locationProperty;
-  late final LyfiCorrectionMethodProperty correctionMethodProperty;
+  late final ObservableWotProperty<ScheduleTable, LyfiScheduleChangedEvent> scheduleProperty;
+  late final ObservableWotProperty<AcclimationSettings, LyfiAcclimationChangedEvent> acclimationProperty;
+  late final ObservableWotProperty<GeoLocation?, LyfiLocationChangedEvent> locationProperty;
+  late final ObservableWotProperty<String, LyfiCorrectionMethodChangedEvent> correctionMethodProperty;
   late final WotProperty<bool> timeZoneEnabledProperty;
   late final WotProperty<int> timeZoneOffsetProperty;
   late final WotProperty<int> keepTempProperty;
   late final WotProperty<int?> temperatureProperty;
-  late final LyfiFanModeProperty fanModeProperty;
-  late final LyfiFanManualPowerProperty fanManualPowerProperty;
+  late final ObservableWotProperty<String, LyfiFanModeChangedEvent> fanModeProperty;
+  late final ObservableWotProperty<int, Object> fanManualPowerProperty;
 
   LyfiThing({
     required this.device,
@@ -54,7 +56,6 @@ class LyfiThing extends WotThing {
     await _bindToHardware();
 
     // 3. Set up event listeners and periodic sync
-    _setupEventSubscriptions();
     _setupPeriodicSync();
   }
 
@@ -62,7 +63,7 @@ class LyfiThing extends WotThing {
   /// This follows Mozilla WebThing pattern of creating Value objects with initial values
   Future<void> _createPropertiesWithDefaults() async {
     // Power property with default false, will be updated when hardware is ready
-    onOffProperty = LyfiPowerProperty(
+    onOffProperty = ObservableWotProperty<bool, DevicePowerOnOffChangedEvent>(
       thing: this,
       deviceEvents: deviceEvents,
       name: 'on',
@@ -76,11 +77,13 @@ class LyfiThing extends WotThing {
         description: 'Power on/off state',
         readOnly: false,
       ),
+      eventName: 'powerChanged',
+      mapper: (event) => event.onOff,
     );
     addProperty(onOffProperty);
 
     // State property with default state
-    stateProperty = LyfiStateProperty(
+    stateProperty = ObservableWotProperty<String, LyfiStateChangedEvent>(
       thing: this,
       deviceEvents: deviceEvents,
       name: 'state',
@@ -97,11 +100,13 @@ class LyfiThing extends WotThing {
         enumValues: LyfiState.values.map((e) => e.name).toList(),
         readOnly: false,
       ),
+      eventName: 'stateChanged',
+      mapper: (event) => event.state.name,
     );
     addProperty(stateProperty);
 
     // Mode property with default mode
-    modeProperty = LyfiModeProperty(
+    modeProperty = ObservableWotProperty<String, LyfiModeChangedEvent>(
       thing: this,
       deviceEvents: deviceEvents,
       name: 'mode',
@@ -116,6 +121,8 @@ class LyfiThing extends WotThing {
         enumValues: LyfiMode.values.map((e) => e.name).toList(),
         readOnly: false,
       ),
+      eventName: 'modeChanged',
+      mapper: (event) => event.mode.name,
     );
     addProperty(modeProperty);
 
@@ -137,7 +144,7 @@ class LyfiThing extends WotThing {
     addProperty(colorProperty);
 
     // Schedule property
-    scheduleProperty = LyfiScheduleProperty(
+    scheduleProperty = ObservableWotProperty<ScheduleTable, LyfiScheduleChangedEvent>(
       thing: this,
       deviceEvents: deviceEvents,
       name: 'schedule',
@@ -151,11 +158,13 @@ class LyfiThing extends WotThing {
         description: 'LED lighting schedule with time instants and colors',
         readOnly: false,
       ),
+      eventName: 'scheduleChanged',
+      mapper: (event) => event.schedule,
     );
     addProperty(scheduleProperty);
 
     // Acclimation property
-    acclimationProperty = LyfiAcclimationProperty(
+    acclimationProperty = ObservableWotProperty<AcclimationSettings, LyfiAcclimationChangedEvent>(
       thing: this,
       deviceEvents: deviceEvents,
       name: 'acclimation',
@@ -174,11 +183,13 @@ class LyfiThing extends WotThing {
         description: 'LED acclimation settings for gradual brightness increase',
         readOnly: false,
       ),
+      eventName: 'acclimationChanged',
+      mapper: (event) => event.settings,
     );
     addProperty(acclimationProperty);
 
     // Location property
-    locationProperty = LyfiLocationProperty(
+    locationProperty = ObservableWotProperty<GeoLocation?, LyfiLocationChangedEvent>(
       thing: this,
       deviceEvents: deviceEvents,
       name: 'location',
@@ -196,11 +207,13 @@ class LyfiThing extends WotThing {
         description: 'Geographic location for sun simulation calculations',
         readOnly: false,
       ),
+      eventName: 'locationChanged',
+      mapper: (event) => event.location,
     );
     addProperty(locationProperty);
 
     // Correction method property
-    correctionMethodProperty = LyfiCorrectionMethodProperty(
+    correctionMethodProperty = ObservableWotProperty<String, LyfiCorrectionMethodChangedEvent>(
       thing: this,
       deviceEvents: deviceEvents,
       name: 'correctionMethod',
@@ -216,6 +229,8 @@ class LyfiThing extends WotThing {
         enumValues: LedCorrectionMethod.values.map((e) => e.name).toList(),
         readOnly: false,
       ),
+      eventName: 'correctionMethodChanged',
+      mapper: (event) => event.method.name,
     );
     addProperty(correctionMethodProperty);
 
@@ -294,7 +309,7 @@ class LyfiThing extends WotThing {
     addProperty(temperatureProperty);
 
     // Fan mode property
-    fanModeProperty = LyfiFanModeProperty(
+    fanModeProperty = ObservableWotProperty<String, LyfiFanModeChangedEvent>(
       thing: this,
       deviceEvents: deviceEvents,
       name: 'fanMode',
@@ -309,11 +324,13 @@ class LyfiThing extends WotThing {
         enumValues: FanMode.values.map((e) => e.name).toList(),
         readOnly: false,
       ),
+      eventName: 'fanModeChanged',
+      mapper: (event) => event.fanMode.name,
     );
     addProperty(fanModeProperty);
 
     // Fan manual power property
-    fanManualPowerProperty = LyfiFanManualPowerProperty(
+    fanManualPowerProperty = ObservableWotProperty<int, Object>(
       thing: this,
       deviceEvents: deviceEvents,
       name: 'fanManualPower',
@@ -329,6 +346,9 @@ class LyfiThing extends WotThing {
         maximum: 100,
         readOnly: false,
       ),
+      subscribe: false,
+      eventName: '', // Not used
+      mapper: (event) => 0, // Not used
     );
     addProperty(fanManualPowerProperty);
   }
@@ -373,19 +393,6 @@ class LyfiThing extends WotThing {
     }
   }
 
-  /// Set up event subscriptions (like Mozilla WebThing GPIO change events)
-  void _setupEventSubscriptions() {
-    onOffProperty.subscribeToEvents();
-    stateProperty.subscribeToEvents();
-    modeProperty.subscribeToEvents();
-    scheduleProperty.subscribeToEvents();
-    acclimationProperty.subscribeToEvents();
-    locationProperty.subscribeToEvents();
-    correctionMethodProperty.subscribeToEvents();
-    fanModeProperty.subscribeToEvents();
-    fanManualPowerProperty.subscribeToEvents();
-  }
-
   /// Lightweight periodic sync - only check critical properties
   void _setupPeriodicSync() {
     _syncTimer = Timer.periodic(Duration(seconds: 30), (timer) async {
@@ -423,16 +430,6 @@ class LyfiThing extends WotThing {
   void dispose() {
     _disposed = true;
     _syncTimer?.cancel();
-
-    onOffProperty.unsubscribeFromEvents();
-    stateProperty.unsubscribeFromEvents();
-    modeProperty.unsubscribeFromEvents();
-    scheduleProperty.unsubscribeFromEvents();
-    acclimationProperty.unsubscribeFromEvents();
-    locationProperty.unsubscribeFromEvents();
-    correctionMethodProperty.unsubscribeFromEvents();
-    fanModeProperty.unsubscribeFromEvents();
-    fanManualPowerProperty.unsubscribeFromEvents();
 
     super.dispose();
   }

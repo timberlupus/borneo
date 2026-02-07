@@ -365,8 +365,8 @@ void main() {
       });
 
       test('addSubscriber and removeSubscriber', () {
-        thing.addSubscriber(subscriber1);
-        thing.addSubscriber(subscriber2);
+        thing.addSubscriber(subscriber1.call);
+        thing.addSubscriber(subscriber2.call);
 
         // Test property notification
         final property = WotProperty<int>(
@@ -381,7 +381,7 @@ void main() {
         expect(subscriber1.receivedMessages, hasLength(1));
         expect(subscriber2.receivedMessages, hasLength(1));
 
-        thing.removeSubscriber(subscriber1);
+        thing.removeSubscriber(subscriber1.call);
         thing.propertyNotify(property);
 
         expect(subscriber1.receivedMessages, hasLength(1)); // No new messages
@@ -390,8 +390,8 @@ void main() {
 
       test('addEventSubscriber and removeEventSubscriber', () {
         thing.addAvailableEvent('testEvent');
-        thing.addEventSubscriber('testEvent', subscriber1);
-        thing.addEventSubscriber('testEvent', subscriber2);
+        thing.addEventSubscriber('testEvent', subscriber1.call);
+        thing.addEventSubscriber('testEvent', subscriber2.call);
 
         final event = WotEvent<String>(thing: thing, name: 'testEvent', data: 'test data');
         thing.eventNotify(event);
@@ -399,7 +399,7 @@ void main() {
         expect(subscriber1.receivedMessages, hasLength(1));
         expect(subscriber2.receivedMessages, hasLength(1));
 
-        thing.removeEventSubscriber('testEvent', subscriber1);
+        thing.removeEventSubscriber('testEvent', subscriber1.call);
         thing.eventNotify(event);
 
         expect(subscriber1.receivedMessages, hasLength(1)); // No new messages
@@ -409,10 +409,10 @@ void main() {
       test('removeSubscriber removes from all events', () {
         thing.addAvailableEvent('event1');
         thing.addAvailableEvent('event2');
-        thing.addEventSubscriber('event1', subscriber1);
-        thing.addEventSubscriber('event2', subscriber1);
+        thing.addEventSubscriber('event1', subscriber1.call);
+        thing.addEventSubscriber('event2', subscriber1.call);
 
-        thing.removeSubscriber(subscriber1);
+        thing.removeSubscriber(subscriber1.call);
 
         final event1 = WotEvent<String>(thing: thing, name: 'event1', data: 'data');
         final event2 = WotEvent<String>(thing: thing, name: 'event2', data: 'data');
@@ -430,7 +430,7 @@ void main() {
 
       setUp(() {
         subscriber = MockSubscriber();
-        thing.addSubscriber(subscriber);
+        thing.addSubscriber(subscriber.call);
         property = WotProperty<int>(
           thing: thing,
           name: 'temp',
@@ -475,7 +475,7 @@ void main() {
 
       test('eventNotify sends correct message format', () {
         thing.addAvailableEvent('testEvent');
-        thing.addEventSubscriber('testEvent', subscriber);
+        thing.addEventSubscriber('testEvent', subscriber.call);
 
         final event = WotEvent<String>(thing: thing, name: 'testEvent', data: 'test data');
         thing.eventNotify(event);
@@ -497,7 +497,7 @@ void main() {
       test('notification error handling', () {
         // Create a subscriber that throws an error
         final errorSubscriber = _ErrorSubscriber();
-        thing.addSubscriber(errorSubscriber);
+        thing.addSubscriber(errorSubscriber.call);
 
         // Should not throw an exception
         expect(() => thing.propertyNotify(property), returnsNormally);
@@ -529,7 +529,7 @@ void main() {
 
         // Set up subscriber
         final subscriber = MockSubscriber();
-        thing.addSubscriber(subscriber);
+        thing.addSubscriber(subscriber.call);
         thing.addEventSubscriber('temperatureChanged', subscriber);
 
         // Set href prefix
