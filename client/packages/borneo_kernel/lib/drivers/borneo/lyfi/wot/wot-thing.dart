@@ -33,6 +33,8 @@ class LyfiThing extends WotThing {
   late final WotProperty<int> timeZoneOffsetProperty;
   late final WotProperty<int> keepTempProperty;
   late final WotProperty<int?> temperatureProperty;
+  late final LyfiFanModeProperty fanModeProperty;
+  late final LyfiFanManualPowerProperty fanManualPowerProperty;
 
   LyfiThing({
     required this.device,
@@ -290,6 +292,45 @@ class LyfiThing extends WotThing {
       ),
     );
     addProperty(temperatureProperty);
+
+    // Fan mode property
+    fanModeProperty = LyfiFanModeProperty(
+      thing: this,
+      deviceEvents: deviceEvents,
+      name: 'fanMode',
+      value: WotValue<String>(
+        initialValue: FanMode.pid.name, // Default PID mode
+        valueForwarder: (update) => lyfiApi.setFanMode(device, FanMode.values.firstWhere((e) => e.name == update)),
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'string',
+        title: 'Fan Mode',
+        description: 'Fan control mode (PID adaptive or manual)',
+        enumValues: FanMode.values.map((e) => e.name).toList(),
+        readOnly: false,
+      ),
+    );
+    addProperty(fanModeProperty);
+
+    // Fan manual power property
+    fanManualPowerProperty = LyfiFanManualPowerProperty(
+      thing: this,
+      deviceEvents: deviceEvents,
+      name: 'fanManualPower',
+      value: WotValue<int>(
+        initialValue: 0, // Default 0% power
+        valueForwarder: (update) => lyfiApi.setFanManualPower(device, update),
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'integer',
+        title: 'Fan Manual Power',
+        description: 'Manual fan power level (0-100%)',
+        minimum: 0,
+        maximum: 100,
+        readOnly: false,
+      ),
+    );
+    addProperty(fanManualPowerProperty);
   }
 
   /// Bind properties to actual hardware state (like Mozilla WebThing ready callback)
@@ -306,6 +347,8 @@ class LyfiThing extends WotThing {
       final timeZoneEnabled = await lyfiApi.getTimeZoneEnabled(device);
       final timeZoneOffset = await lyfiApi.getTimeZoneOffset(device);
       final keepTemp = await lyfiApi.getKeepTemp(device);
+      final fanMode = await lyfiApi.getFanMode(device);
+      final fanPower = await lyfiApi.getFanManualPower(device);
 
       // Update properties with actual values (like notifyOfExternalUpdate in Mozilla WebThing)
       onOffProperty.value.notifyOfExternalUpdate(generalStatus.power);
@@ -320,6 +363,8 @@ class LyfiThing extends WotThing {
       timeZoneOffsetProperty.value.notifyOfExternalUpdate(timeZoneOffset);
       keepTempProperty.value.notifyOfExternalUpdate(keepTemp);
       temperatureProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature);
+      fanModeProperty.value.notifyOfExternalUpdate(fanMode.name);
+      fanManualPowerProperty.value.notifyOfExternalUpdate(fanPower);
 
       logger?.d('LyfiThing: Successfully bound to hardware state');
     } catch (e, stackTrace) {
@@ -337,6 +382,8 @@ class LyfiThing extends WotThing {
     acclimationProperty.subscribeToEvents();
     locationProperty.subscribeToEvents();
     correctionMethodProperty.subscribeToEvents();
+    fanModeProperty.subscribeToEvents();
+    fanManualPowerProperty.subscribeToEvents();
   }
 
   /// Lightweight periodic sync - only check critical properties
@@ -384,6 +431,8 @@ class LyfiThing extends WotThing {
     acclimationProperty.unsubscribeFromEvents();
     locationProperty.unsubscribeFromEvents();
     correctionMethodProperty.unsubscribeFromEvents();
+    fanModeProperty.unsubscribeFromEvents();
+    fanManualPowerProperty.unsubscribeFromEvents();
 
     super.dispose();
   }

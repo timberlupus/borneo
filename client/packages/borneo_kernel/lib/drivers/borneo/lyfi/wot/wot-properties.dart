@@ -230,3 +230,68 @@ class LyfiCorrectionMethodProperty extends WotProperty<String> {
     super.dispose();
   }
 }
+
+/// Custom WotProperty for fan mode that handles its own event subscription
+class LyfiFanModeProperty extends WotProperty<String> {
+  StreamSubscription? _eventSubscription;
+  final DeviceEventBus deviceEvents;
+
+  LyfiFanModeProperty({
+    required super.thing,
+    required this.deviceEvents,
+    required super.name,
+    required super.value,
+    required super.metadata,
+  });
+
+  void subscribeToEvents() {
+    _eventSubscription = deviceEvents.on<LyfiFanModeChangedEvent>().listen((event) {
+      value.notifyOfExternalUpdate(event.fanMode.name);
+      thing.addEvent(WotEvent(thing: thing, name: 'fanModeChanged', data: event.fanMode.name));
+    });
+  }
+
+  void unsubscribeFromEvents() {
+    _eventSubscription?.cancel();
+    _eventSubscription = null;
+  }
+
+  @override
+  void dispose() {
+    unsubscribeFromEvents();
+    super.dispose();
+  }
+}
+
+/// Custom WotProperty for fan manual power that handles its own event subscription
+class LyfiFanManualPowerProperty extends WotProperty<int> {
+  StreamSubscription? _eventSubscription;
+  final DeviceEventBus deviceEvents;
+
+  LyfiFanManualPowerProperty({
+    required super.thing,
+    required this.deviceEvents,
+    required super.name,
+    required super.value,
+    required super.metadata,
+  });
+
+  void subscribeToEvents() {
+    // Note: Currently no event for fan power changes, but keeping the structure for future use
+    // _eventSubscription = deviceEvents.on<LyfiFanManualPowerChangedEvent>().listen((event) {
+    //   value.notifyOfExternalUpdate(event.power);
+    //   thing.addEvent(WotEvent(thing: thing, name: 'fanManualPowerChanged', data: event.power));
+    // });
+  }
+
+  void unsubscribeFromEvents() {
+    _eventSubscription?.cancel();
+    _eventSubscription = null;
+  }
+
+  @override
+  void dispose() {
+    unsubscribeFromEvents();
+    super.dispose();
+  }
+}
