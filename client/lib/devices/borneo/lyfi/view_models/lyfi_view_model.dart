@@ -115,6 +115,10 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   int? _currentTemperature;
   StreamSubscription<int?>? _temperatureSubscription;
 
+  StreamSubscription<double?>? _voltageSubscription;
+  StreamSubscription<double?>? _currentSubscription;
+  StreamSubscription<double?>? _powerSubscription;
+
   double _overallBrightness = 0;
   double get overallBrightness => _overallBrightness;
 
@@ -203,10 +207,22 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         _fanMode = FanMode.values.firstWhere((e) => e.name == value);
         notifyListeners();
       });
+      _voltageSubscription = super.lyfiThing!.voltageProperty.value.onUpdate.listen((value) {
+        super.currentVoltage.value = value;
+      });
+      _currentSubscription = super.lyfiThing!.currentProperty.value.onUpdate.listen((value) {
+        currentCurrent.value = value;
+      });
+      _powerSubscription = super.lyfiThing!.powerProperty.value.onUpdate.listen((value) {
+        currentWatts.value = value;
+      });
       // Set initial values
       _fanPowerRatio = super.lyfiThing!.fanPowerProperty.getValue().toDouble();
       _currentTemperature = super.lyfiThing!.temperatureProperty.getValue();
       _fanMode = FanMode.values.firstWhere((e) => e.name == super.lyfiThing!.fanModeProperty.getValue());
+      super.currentVoltage.value = super.lyfiThing!.voltageProperty.getValue();
+      currentCurrent.value = super.lyfiThing!.currentProperty.getValue();
+      currentWatts.value = super.lyfiThing!.powerProperty.getValue();
     }
     if (super.isOnline && !isSuspectedOffline && boundDevice != null) {
       _temporaryDuration = await executeLyfiCommand(() => _deviceApi.getTemporaryDuration(boundDevice!.device));
@@ -248,6 +264,9 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       _fanModeSubscription?.cancel();
       _fanPowerSubscription?.cancel();
       _temperatureSubscription?.cancel();
+      _voltageSubscription?.cancel();
+      _currentSubscription?.cancel();
+      _powerSubscription?.cancel();
       for (final cvn in _channels) {
         cvn.dispose();
       }

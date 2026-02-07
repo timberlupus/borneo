@@ -16,6 +16,7 @@ import 'package:lw_wot/wot.dart';
 /// This class uses default values during construction and binds to actual hardware asynchronously
 class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   static const int kLightweightPeriodicIntervalSecs = 5;
+
   final Logger? logger;
   final Device device;
   final DeviceEventBus deviceEvents;
@@ -53,6 +54,10 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   late final WotProperty<bool> acclimationActivatedProperty;
   late final WotProperty<bool> cloudActivatedProperty;
   late final WotProperty<double> powerCurrentProperty;
+
+  late final WotProperty<double?> voltageProperty;
+  late final WotProperty<double?> currentProperty;
+  late final WotProperty<double?> powerProperty;
 
   LyfiThing({
     required this.device,
@@ -646,6 +651,63 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       ),
     );
     addProperty(powerCurrentProperty);
+
+    // Voltage property (read-only)
+    voltageProperty = WotProperty<double?>(
+      thing: this,
+      name: 'voltage',
+      value: WotValue<double?>(
+        initialValue: null, // Default null
+        valueForwarder: (update) async {
+          throw UnsupportedError('Voltage is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'number',
+        title: 'Voltage',
+        description: 'Current voltage in volts',
+        readOnly: true,
+      ),
+    );
+    addProperty(voltageProperty);
+
+    // Current property (read-only)
+    currentProperty = WotProperty<double?>(
+      thing: this,
+      name: 'current',
+      value: WotValue<double?>(
+        initialValue: null, // Default null
+        valueForwarder: (update) async {
+          throw UnsupportedError('Current is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'number',
+        title: 'Current',
+        description: 'Current current in amperes',
+        readOnly: true,
+      ),
+    );
+    addProperty(currentProperty);
+
+    // Power property (read-only)
+    powerProperty = WotProperty<double?>(
+      thing: this,
+      name: 'power',
+      value: WotValue<double?>(
+        initialValue: null, // Default null
+        valueForwarder: (update) async {
+          throw UnsupportedError('Power is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'number',
+        title: 'Power',
+        description: 'Current power consumption in watts',
+        readOnly: true,
+      ),
+    );
+    addProperty(powerProperty);
   }
 
   /// Bind properties to actual hardware state (like Mozilla WebThing ready callback)
@@ -705,6 +767,15 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       cloudActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.cloudActivated);
       powerCurrentProperty.value.notifyOfExternalUpdate(lyfiStatus.powerCurrent ?? 0.0);
 
+      // Update power measurement properties
+      voltageProperty.value.notifyOfExternalUpdate(generalStatus.powerVoltage);
+      currentProperty.value.notifyOfExternalUpdate(lyfiStatus.powerCurrent);
+      powerProperty.value.notifyOfExternalUpdate(
+        generalStatus.powerVoltage != null && lyfiStatus.powerCurrent != null
+            ? generalStatus.powerVoltage! * lyfiStatus.powerCurrent!
+            : null,
+      );
+
       logger?.d('LyfiThing: Successfully bound to hardware state');
     } catch (e, stackTrace) {
       // Continue with default values if hardware is not available
@@ -744,6 +815,17 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       acclimationActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.acclimationActivated);
       cloudActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.cloudActivated);
       powerCurrentProperty.value.notifyOfExternalUpdate(lyfiStatus.powerCurrent ?? 0.0);
+
+      // Update power measurement properties
+      voltageProperty.value.notifyOfExternalUpdate(generalStatus.powerVoltage);
+      currentProperty.value.notifyOfExternalUpdate(
+        generalStatus.powerVoltage != null && lyfiStatus.powerCurrent != null ? lyfiStatus.powerCurrent! : null,
+      );
+      powerProperty.value.notifyOfExternalUpdate(
+        generalStatus.powerVoltage != null && lyfiStatus.powerCurrent != null
+            ? generalStatus.powerVoltage! * lyfiStatus.powerCurrent!
+            : null,
+      );
     } catch (e, stackTrace) {
       logger?.e('Lightweight sync failed: $e', error: e, stackTrace: stackTrace);
     }
