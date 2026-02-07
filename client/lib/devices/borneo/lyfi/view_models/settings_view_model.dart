@@ -200,7 +200,6 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     try {
       await api.setFanMode(boundDevice!.device, mode, cancelToken: cancel);
       _fanMode = mode;
-      globalEventBus.fire(LyfiFanModeChangedEvent(boundDevice!.device, fanMode: mode));
       notification.showSuccess(_gt.translate("Fan mode updated successfully"));
     } catch (e) {
       notification.showError(_gt.translate("Failed to update fan mode: $e"));

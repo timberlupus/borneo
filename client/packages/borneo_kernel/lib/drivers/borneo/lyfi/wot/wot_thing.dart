@@ -15,6 +15,7 @@ import 'package:lw_wot/wot.dart';
 /// LyfiThing extends WotThing following Mozilla WebThing initialization pattern
 /// This class uses default values during construction and binds to actual hardware asynchronously
 class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
+  static const int kLightweightPeriodicIntervalSecs = 5;
   final Logger? logger;
   final Device device;
   final DeviceEventBus deviceEvents;
@@ -35,7 +36,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   late final WotProperty<int> timeZoneOffsetProperty;
   late final WotProperty<int> keepTempProperty;
   late final WotProperty<int?> temperatureProperty;
-  late final ObservableWotProperty<String, LyfiFanModeChangedEvent> fanModeProperty;
+  late final WotProperty<String> fanModeProperty;
   late final ObservableWotProperty<int, Object> fanManualPowerProperty;
 
   late final WotProperty<bool> cloudEnabledProperty;
@@ -337,9 +338,8 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     addProperty(temperatureProperty);
 
     // Fan mode property
-    fanModeProperty = ObservableWotProperty<String, LyfiFanModeChangedEvent>(
+    fanModeProperty = WotProperty<String>(
       thing: this,
-      deviceEvents: deviceEvents,
       name: 'fanMode',
       value: WotValue<String>(
         initialValue: FanMode.pid.name, // Default PID mode
@@ -352,8 +352,6 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
         enumValues: FanMode.values.map((e) => e.name).toList(),
         readOnly: false,
       ),
-      eventName: 'fanModeChanged',
-      mapper: (event) => event.fanMode.name,
     );
     addProperty(fanModeProperty);
 
@@ -716,7 +714,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
 
   /// Lightweight periodic sync - only check critical properties
   void _setupPeriodicSync() {
-    _syncTimer = Timer.periodic(Duration(seconds: 30), (timer) async {
+    _syncTimer = Timer.periodic(Duration(seconds: kLightweightPeriodicIntervalSecs), (timer) async {
       if (!isDisposed) {
         await _lightweightSync();
       } else {
@@ -739,7 +737,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       temperatureProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature);
 
       // Sync additional critical properties
-      currentTempProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature ?? 25);
+      currentTempProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature ?? 0);
       fanPowerProperty.value.notifyOfExternalUpdate(lyfiStatus.fanPower ?? 0);
       unscheduledProperty.value.notifyOfExternalUpdate(lyfiStatus.unscheduled);
       temporaryRemainingProperty.value.notifyOfExternalUpdate(lyfiStatus.temporaryRemaining.inSeconds);

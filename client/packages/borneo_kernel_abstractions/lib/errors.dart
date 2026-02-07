@@ -28,7 +28,7 @@ class UnsupportedVersionError extends DeviceError {
 
   @override
   String toString() {
-    var result = 'UnsupportedVersionError: $message';
+    var result = message;
     result += '\nCurrent Version: $currentVersion';
     result += '\nSupported Version: $versionRange';
     return result;

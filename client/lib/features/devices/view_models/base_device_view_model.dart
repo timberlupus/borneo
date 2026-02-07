@@ -5,6 +5,7 @@ import 'package:borneo_kernel_abstractions/device_api.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/widgets.dart';
+import 'package:lw_wot/wot.dart';
 
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
@@ -54,6 +55,8 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   bool get isTimerRunning => _timer?.isActive ?? false;
   BoundDevice? get boundDevice => deviceManager.getBoundDevice(deviceID);
 
+  WotThing? wotThing;
+
   BaseDeviceViewModel({
     required this.deviceID,
     required this.deviceManager,
@@ -63,8 +66,11 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     super.globalEventBus = globalEventBus;
     WidgetsBinding.instance.addObserver(this);
 
+    wotThing = deviceManager.getWotThing(deviceID);
+
     _onDeviceBoundEventSub = deviceManager.allDeviceEvents.on<DeviceBoundEvent>().listen((event) {
       if (event.device.id == deviceID) {
+        wotThing = deviceManager.getWotThing(deviceID);
         final changed = markOnline(notify: false);
         onDeviceBound();
         if (!isTimerRunning) {

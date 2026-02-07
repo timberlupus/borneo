@@ -6,7 +6,6 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
@@ -95,10 +94,10 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   final ScheduleTable scheduledInstants = [];
   final ScheduleTable sunInstants = [];
 
-  int? get currentTempRaw => super.lyfiDeviceStatus?.temperature;
-  int? get currentTemp => super.lyfiDeviceStatus?.temperature == null
+  int? get currentTempRaw => _currentTemperature;
+  int? get currentTemp => _currentTemperature == null
       ? null
-      : localeService.convertTemperatureValue(super.lyfiDeviceStatus!.temperature!.toDouble()).toInt();
+      : localeService.convertTemperatureValue(_currentTemperature!.toDouble()).toInt();
 
   String get temperatureUnitText => localeService.temperatureUnitText;
 
@@ -109,7 +108,12 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   FanMode? _fanMode;
   FanMode? get fanMode => _fanMode;
 
-  StreamSubscription<LyfiFanModeChangedEvent>? _fanModeSubscription;
+  StreamSubscription<String>? _fanModeSubscription;
+
+  StreamSubscription<int>? _fanPowerSubscription;
+
+  int? _currentTemperature;
+  StreamSubscription<int?>? _temperatureSubscription;
 
   double _overallBrightness = 0;
   double get overallBrightness => _overallBrightness;
@@ -130,14 +134,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     required super.notification,
     required this.localeService,
     super.logger,
-  }) {
-    _fanModeSubscription = globalEventBus.on<LyfiFanModeChangedEvent>().listen((event) {
-      if (event.device.id == deviceID) {
-        _fanMode = event.fanMode;
-        notifyListeners();
-      }
-    });
-  }
+  });
 
   Future<T> executeLyfiCommand<T>(
     Future<T> Function() action, {
@@ -192,6 +189,25 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   @override
   Future<void> onInitialize() async {
     await super.onInitialize();
+    if (super.lyfiThing != null) {
+      _fanPowerSubscription = super.lyfiThing!.fanPowerProperty.value.onUpdate.listen((_) {
+        final power = super.lyfiThing!.fanPowerProperty.getValue();
+        _fanPowerRatio = power.toDouble();
+        notifyListeners();
+      });
+      _temperatureSubscription = super.lyfiThing!.temperatureProperty.value.onUpdate.listen((value) {
+        _currentTemperature = value;
+        notifyListeners();
+      });
+      _fanModeSubscription = super.lyfiThing!.fanModeProperty.value.onUpdate.listen((value) {
+        _fanMode = FanMode.values.firstWhere((e) => e.name == value);
+        notifyListeners();
+      });
+      // Set initial values
+      _fanPowerRatio = super.lyfiThing!.fanPowerProperty.getValue().toDouble();
+      _currentTemperature = super.lyfiThing!.temperatureProperty.getValue();
+      _fanMode = FanMode.values.firstWhere((e) => e.name == super.lyfiThing!.fanModeProperty.getValue());
+    }
     if (super.isOnline && !isSuspectedOffline && boundDevice != null) {
       _temporaryDuration = await executeLyfiCommand(() => _deviceApi.getTemporaryDuration(boundDevice!.device));
       _fanMode = await executeLyfiCommand(() => _deviceApi.getFanMode(boundDevice!.device));
@@ -230,6 +246,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     //
     if (!_isDisposed) {
       _fanModeSubscription?.cancel();
+      _fanPowerSubscription?.cancel();
+      _temperatureSubscription?.cancel();
       for (final cvn in _channels) {
         cvn.dispose();
       }
@@ -325,8 +343,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     if (super.isSuspectedOffline) {
       return;
     }
-
-    _fanPowerRatio = super.lyfiDeviceStatus?.fanPower == null ? null : super.lyfiDeviceStatus!.fanPower!.toDouble();
 
     _temporaryRemaining.value = lyfiDeviceStatus?.temporaryRemaining ?? Duration.zero;
 
