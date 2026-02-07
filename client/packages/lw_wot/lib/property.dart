@@ -69,6 +69,16 @@ class WotPropertyMetadata {
   }
 }
 
+abstract class WotWriteGuard {
+  bool canWriteProperty(String propertyName);
+  String? getWriteGuardError(String propertyName);
+}
+
+abstract class WotActionGuard {
+  bool canPerformAction(String actionName);
+  String? getActionGuardError(String actionName);
+}
+
 class WotProperty<T> {
   final String name;
   final WotValue<T> value;
@@ -100,6 +110,12 @@ class WotProperty<T> {
   void validateValue(T v) {
     if (metadata.readOnly == true) {
       throw Exception('Read-only property');
+    }
+    if (thing is WotWriteGuard) {
+      final guard = thing as WotWriteGuard;
+      if (!guard.canWriteProperty(name)) {
+        throw Exception(guard.getWriteGuardError(name) ?? 'Property is not writable');
+      }
     }
   }
 

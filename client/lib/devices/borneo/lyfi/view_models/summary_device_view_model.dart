@@ -10,17 +10,7 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
   final ValueNotifier<LyfiMode?> ledMode = ValueNotifier(null);
 
   LyfiSummaryDeviceViewModel(super.deviceEntity, super.deviceManager, super.globalEventBus) {
-    final stateValue = wotThing?.getProperty(LyfiKnownProperties.kState);
-    if (stateValue != null) {
-      final state = LyfiState.fromString(stateValue as String);
-      ledState.value = state;
-    }
-
-    final modeValue = wotThing?.getProperty(LyfiKnownProperties.kMode);
-    if (modeValue != null) {
-      final mode = LyfiMode.fromString(modeValue as String);
-      ledMode.value = mode;
-    }
+    _syncFromThing();
     wotThing?.addSubscriber(_onStateChanged);
     wotThing?.addSubscriber(_onModeChanged);
   }
@@ -46,6 +36,29 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
   }
 
   void _onModeChanged(WotMessage msg) {
+    final modeValue = wotThing?.getProperty(LyfiKnownProperties.kMode);
+    if (modeValue != null) {
+      final mode = LyfiMode.fromString(modeValue as String);
+      ledMode.value = mode;
+    }
+  }
+
+  @override
+  void onWotThingChanged(WotThing? oldThing, WotThing? newThing) {
+    oldThing?.removeSubscriber(_onStateChanged);
+    oldThing?.removeSubscriber(_onModeChanged);
+    newThing?.addSubscriber(_onStateChanged);
+    newThing?.addSubscriber(_onModeChanged);
+    _syncFromThing();
+  }
+
+  void _syncFromThing() {
+    final stateValue = wotThing?.getProperty(LyfiKnownProperties.kState);
+    if (stateValue != null) {
+      final state = LyfiState.fromString(stateValue as String);
+      ledState.value = state;
+    }
+
     final modeValue = wotThing?.getProperty(LyfiKnownProperties.kMode);
     if (modeValue != null) {
       final mode = LyfiMode.fromString(modeValue as String);

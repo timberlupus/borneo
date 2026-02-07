@@ -6,21 +6,21 @@ import 'package:borneo_kernel/drivers/borneo/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:borneo_kernel/drivers/borneo/wot/borneo_props.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:logger/logger.dart';
 import 'package:lw_wot/wot.dart';
 
-import 'wot_properties.dart';
-
 /// LyfiThing extends WotThing following Mozilla WebThing initialization pattern
 /// This class uses default values during construction and binds to actual hardware asynchronously
-class LyfiThing extends WotThing {
+class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   final Logger? logger;
   final Device device;
   final DeviceEventBus deviceEvents;
   final IBorneoDeviceApi borneoApi;
   final ILyfiDeviceApi lyfiApi;
+  final bool Function()? canWrite;
 
   // Property references
   late final ObservableWotProperty<bool, DevicePowerOnOffChangedEvent> onOffProperty;
@@ -45,7 +45,20 @@ class LyfiThing extends WotThing {
     required this.lyfiApi,
     required super.title,
     this.logger,
+    this.canWrite,
   }) : super(id: device.id, type: ["OnOffSwitch", "Light"], description: "Lyfi LED lighting device");
+
+  @override
+  bool canWriteProperty(String propertyName) => canWrite?.call() ?? true;
+
+  @override
+  String? getWriteGuardError(String propertyName) => 'Device is offline or unbound.';
+
+  @override
+  bool canPerformAction(String actionName) => canWrite?.call() ?? true;
+
+  @override
+  String? getActionGuardError(String actionName) => 'Device is offline or unbound.';
 
   /// Mozilla WebThing style initialization - sync constructor with async hardware binding
   Future<void> initialize() async {

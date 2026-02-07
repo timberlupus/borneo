@@ -176,6 +176,7 @@ final class DeviceManagerImpl extends IDeviceManager {
         await _kernel.unbind(id);
       }
       _kernel.unregisterDevice(id);
+      _disposeWotThing(id);
       final store = stringMapStoreFactory.store(StoreNames.devices);
       await store.record(id).delete(tx);
       allDeviceEvents.fire(DeviceEntityDeletedEvent(id));
@@ -274,14 +275,15 @@ final class DeviceManagerImpl extends IDeviceManager {
     final bindResult = await tryBind(device);
     if (!bindResult) {
       logger?.e('Failed to bind device: $device');
-    } else {
-      // Load WoT Thing for the new device if binding succeeded
-      await _loadWotThingForDevice(device);
-      // Fire event to notify that devices in current scene have been reloaded
-      final currentScene = _sceneManager.current;
-      _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
-      logger?.d('Fired CurrentSceneDevicesReloadedEvent after adding device: ${device.name}');
     }
+
+    // Always create a WotThing twin, even when the device is unbound/offline.
+    await _loadWotThingForDevice(device, replaceExisting: true);
+
+    // Fire event to notify that devices in current scene have been reloaded
+    final currentScene = _sceneManager.current;
+    _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
+    logger?.d('Fired CurrentSceneDevicesReloadedEvent after adding device: ${device.name}');
     return device;
   }
 
@@ -506,12 +508,24 @@ final class DeviceManagerImpl extends IDeviceManager {
   }
 
   /// Load WotThing for a single device
-  Future<void> _loadWotThingForDevice(DeviceEntity device) async {
+  Future<void> _loadWotThingForDevice(DeviceEntity device, {bool replaceExisting = true}) async {
     try {
       final metaModule = _deviceModuleRegistry.metaModules[device.driverID];
       if (metaModule != null) {
         final wotThing = await metaModule.createWotThing(device, this, logger: logger);
+        if (!replaceExisting && _wotThings.containsKey(device.id)) {
+          return;
+        }
+        final oldThing = _wotThings[device.id];
         _wotThings[device.id] = wotThing;
+
+        if (replaceExisting && oldThing != null && oldThing != wotThing) {
+          try {
+            oldThing.dispose();
+          } catch (e) {
+            logger?.w('Failed to dispose replaced WotThing for device ${device.id}: $e');
+          }
+        }
 
         // If device is bound, sync WotThing with actual device state
         if (isBound(device.id)) {
@@ -538,24 +552,17 @@ final class DeviceManagerImpl extends IDeviceManager {
   /// Handle device bound event - sync WotThing if exists, or create if missing
   void _onDeviceBound(DeviceBoundEvent event) async {
     final deviceID = event.device.id;
-    var wotThing = _wotThings[deviceID];
-    if (wotThing == null) {
-      // WoT Thing doesn't exist, try to create it
-      final deviceEntity = await getDevice(deviceID);
-      await _loadWotThingForDevice(deviceEntity);
-      wotThing = _wotThings[deviceID];
-    }
-    if (wotThing != null) {
-      _syncWotThingWithBoundDevice(deviceID, wotThing);
-    }
+    final deviceEntity = await getDevice(deviceID);
+    await _loadWotThingForDevice(deviceEntity, replaceExisting: true);
+
+    final currentScene = _sceneManager.current;
+    _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
   }
 
   /// Handle device removed event - clean up WotThing and notify listeners
   void _onDeviceRemoved(DeviceRemovedEvent event) {
     final deviceID = event.device.id;
-    _disposeWotThing(deviceID);
-
-    // Fire event to notify that devices for current scene have been reloaded
+    // Keep WotThing twins for offline/unbound devices.
     final currentScene = _sceneManager.current;
     _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
     logger?.d('Fired CurrentSceneDevicesReloadedEvent after device removal: $deviceID');

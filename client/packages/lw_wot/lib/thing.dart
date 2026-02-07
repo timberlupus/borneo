@@ -4,6 +4,7 @@ import 'property.dart';
 import 'event.dart';
 import 'action.dart';
 import 'types.dart';
+import 'exceptions.dart';
 
 /// A Web Thing.
 class WotThing {
@@ -261,6 +262,12 @@ class WotThing {
   ///
   /// Returns the action that was created.
   WotAction? performAction(String actionName, [dynamic input]) {
+    if (this is WotActionGuard) {
+      final guard = this as WotActionGuard;
+      if (!guard.canPerformAction(actionName)) {
+        throw InvalidOperationException(message: guard.getActionGuardError(actionName) ?? 'Action is not allowed');
+      }
+    }
     if (!_availableActions.containsKey(actionName)) {
       return null;
     }

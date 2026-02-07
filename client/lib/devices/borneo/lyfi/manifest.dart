@@ -7,7 +7,6 @@ import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
-import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
@@ -123,6 +122,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         lyfiApi: lyfiApi,
         title: device.name,
         logger: logger,
+        canWrite: () => deviceManager.isBound(device.id),
       );
 
       // Initialize the LyfiThing asynchronously (hardware binding)
@@ -131,7 +131,8 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
       return lyfiThing;
     } catch (e) {
       // If API access fails, fall back to basic WotThing
-      throw InvalidOperationException(message: 'Warning: Failed to create LyfiThing with APIs for ${device.id}: $e');
+      logger?.w('Failed to create LyfiThing with APIs for ${device.id}: $e');
+      return _createBasicWotThing(device);
     }
   }
 
@@ -150,7 +151,12 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         thing: thing,
         name: 'on',
         value: WotValue(initialValue: false),
-        metadata: WotPropertyMetadata(title: 'On/Off', type: 'boolean', description: 'Whether the light is turned on'),
+        metadata: WotPropertyMetadata(
+          title: 'On/Off',
+          type: 'boolean',
+          description: 'Whether the light is turned on',
+          readOnly: true,
+        ),
       ),
     );
 
@@ -164,6 +170,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
           type: 'string',
           description: 'Current light state',
           enumValues: ['normal', 'dimming', 'temporary', 'preview'],
+          readOnly: true,
         ),
       ),
     );
@@ -178,6 +185,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
           type: 'string',
           description: 'Current light mode',
           enumValues: ['manual', 'scheduled', 'sun'],
+          readOnly: true,
         ),
       ),
     );
@@ -187,7 +195,12 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         thing: thing,
         name: 'color',
         value: WotValue(initialValue: '#FFFFFF'),
-        metadata: WotPropertyMetadata(title: 'Color', type: 'string', description: 'Current light color'),
+        metadata: WotPropertyMetadata(
+          title: 'Color',
+          type: 'string',
+          description: 'Current light color',
+          readOnly: true,
+        ),
       ),
     );
 

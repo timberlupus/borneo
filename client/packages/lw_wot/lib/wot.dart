@@ -7,3 +7,4 @@ export 'action.dart';
 export 'types.dart';
 export 'utils.dart';
 export 'value.dart';
+export 'exceptions.dart';
