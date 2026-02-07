@@ -6,6 +6,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
@@ -105,6 +106,11 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   double? _fanPowerRatio = 0.0;
   double? get fanPowerRatio => _fanPowerRatio;
 
+  FanMode? _fanMode;
+  FanMode? get fanMode => _fanMode;
+
+  StreamSubscription<LyfiFanModeChangedEvent>? _fanModeSubscription;
+
   double _overallBrightness = 0;
   double get overallBrightness => _overallBrightness;
 
@@ -124,7 +130,14 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     required super.notification,
     required this.localeService,
     super.logger,
-  });
+  }) {
+    _fanModeSubscription = globalEventBus.on<LyfiFanModeChangedEvent>().listen((event) {
+      if (event.device.id == deviceID) {
+        _fanMode = event.fanMode;
+        notifyListeners();
+      }
+    });
+  }
 
   Future<T> executeLyfiCommand<T>(
     Future<T> Function() action, {
@@ -181,6 +194,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     await super.onInitialize();
     if (super.isOnline && !isSuspectedOffline && boundDevice != null) {
       _temporaryDuration = await executeLyfiCommand(() => _deviceApi.getTemporaryDuration(boundDevice!.device));
+      _fanMode = await executeLyfiCommand(() => _deviceApi.getFanMode(boundDevice!.device));
     }
 
     //_channels.length * lyfiBrightnessMax.toDouble();
@@ -215,6 +229,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   void dispose() {
     //
     if (!_isDisposed) {
+      _fanModeSubscription?.cancel();
       for (final cvn in _channels) {
         cvn.dispose();
       }
@@ -291,6 +306,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
     _overallBrightness = 0.0;
     _fanPowerRatio = 0.0;
+    _fanMode = null;
 
     if (_editorState.editor != null) {
       _editorState.editor!.dispose();

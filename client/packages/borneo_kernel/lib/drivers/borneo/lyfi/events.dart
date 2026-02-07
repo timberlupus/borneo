@@ -30,3 +30,8 @@ class LyfiCorrectionMethodChangedEvent extends DeviceStateChangedEvent {
   final LedCorrectionMethod method;
   const LyfiCorrectionMethodChangedEvent(super.device, {required this.method});
 }
+
+class LyfiFanModeChangedEvent extends DeviceStateChangedEvent {
+  final FanMode fanMode;
+  const LyfiFanModeChangedEvent(super.device, {required this.fanMode});
+}

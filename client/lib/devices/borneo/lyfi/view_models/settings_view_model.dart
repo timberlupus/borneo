@@ -3,6 +3,7 @@ import 'package:borneo_app/core/infrastructure/timezone.dart';
 import 'package:borneo_common/exceptions.dart' as bo_ex;
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
@@ -199,6 +200,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     try {
       await api.setFanMode(boundDevice!.device, mode, cancelToken: cancel);
       _fanMode = mode;
+      globalEventBus.fire(LyfiFanModeChangedEvent(boundDevice!.device, fanMode: mode));
       notification.showSuccess(_gt.translate("Fan mode updated successfully"));
     } catch (e) {
       notification.showError(_gt.translate("Failed to update fan mode: $e"));
