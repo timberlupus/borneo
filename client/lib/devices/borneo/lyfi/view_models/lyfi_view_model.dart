@@ -5,7 +5,6 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_view_model.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
@@ -61,13 +60,11 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   final ILocaleService localeService;
   Future<void>? _rapidProbeTask;
 
-  ILyfiDeviceApi get _deviceApi => super.borneoDeviceApi as ILyfiDeviceApi;
-
   Duration _temporaryDuration = Duration.zero;
   Duration get temporaryDuration => _temporaryDuration;
 
-  final ValueNotifier<Duration> _temporaryRemaining = ValueNotifier<Duration>(Duration.zero);
-  ValueNotifier<Duration> get temporaryRemaining => _temporaryRemaining;
+  Duration _temporaryRemaining = Duration.zero;
+  Duration get temporaryRemaining => _temporaryRemaining;
 
   Duration get commandTimeout => _commandTimeout;
 
@@ -118,6 +115,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   StreamSubscription<double?>? _voltageSubscription;
   StreamSubscription<double?>? _currentSubscription;
   StreamSubscription<double?>? _powerSubscription;
+  StreamSubscription<Duration>? _temporaryDurationSubscription;
+  StreamSubscription<Duration>? _temporaryRemainingSubscription;
 
   double _overallBrightness = 0;
   double get overallBrightness => _overallBrightness;
@@ -170,7 +169,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       }
 
       try {
-        await _deviceApi.getLyfiStatus(boundDevice!.device).timeout(_rapidProbeTimeout);
+        await super.lyfiDeviceApi.getLyfiStatus(boundDevice!.device).timeout(_rapidProbeTimeout);
         super.clearSuspectedOffline();
         await refreshStatus();
         return;
@@ -215,6 +214,14 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     _powerSubscription = super.lyfiThing.powerProperty.value.onUpdate.listen((value) {
       currentWatts.value = value;
     });
+    _temporaryDurationSubscription = super.lyfiThing.temporaryDurationProperty.value.onUpdate.listen((value) {
+      _temporaryDuration = value;
+      notifyListeners();
+    });
+    _temporaryRemainingSubscription = super.lyfiThing.temporaryRemainingProperty.value.onUpdate.listen((value) {
+      _temporaryRemaining = value;
+      notifyListeners();
+    });
     // Set initial values
     _fanPowerRatio = super.lyfiThing.fanPowerProperty.getValue().toDouble();
     _currentTemperature = super.lyfiThing.temperatureProperty.getValue();
@@ -222,10 +229,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     super.currentVoltage.value = super.lyfiThing.voltageProperty.getValue();
     currentCurrent.value = super.lyfiThing.currentProperty.getValue();
     currentWatts.value = super.lyfiThing.powerProperty.getValue();
-    if (super.isOnline && !isSuspectedOffline && boundDevice != null) {
-      _temporaryDuration = await executeLyfiCommand(() => _deviceApi.getTemporaryDuration(boundDevice!.device));
-      _fanMode = await executeLyfiCommand(() => _deviceApi.getFanMode(boundDevice!.device));
-    }
+    _temporaryDuration = super.lyfiThing.temporaryDurationProperty.getValue();
+    _temporaryRemaining = super.lyfiThing.temporaryRemainingProperty.getValue();
 
     //_channels.length * lyfiBrightnessMax.toDouble();
 
@@ -236,11 +241,13 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     if (super.isOnline && !isSuspectedOffline && boundDevice != null) {
       switch (mode) {
         case LyfiMode.scheduled:
-          scheduledInstants.addAll(await executeLyfiCommand(() => _deviceApi.getSchedule(boundDevice!.device)));
+          scheduledInstants.addAll(
+            await executeLyfiCommand(() => super.lyfiDeviceApi.getSchedule(boundDevice!.device)),
+          );
           break;
 
         case LyfiMode.sun:
-          sunInstants.addAll(await executeLyfiCommand(() => _deviceApi.getSunSchedule(boundDevice!.device)));
+          sunInstants.addAll(await executeLyfiCommand(() => super.lyfiDeviceApi.getSunSchedule(boundDevice!.device)));
           break;
 
         default:
@@ -265,6 +272,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       _voltageSubscription?.cancel();
       _currentSubscription?.cancel();
       _powerSubscription?.cancel();
+      _temporaryDurationSubscription?.cancel();
+      _temporaryRemainingSubscription?.cancel();
       for (final cvn in _channels) {
         cvn.dispose();
       }
@@ -299,8 +308,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       return;
     }
 
-    _temporaryDuration = await executeLyfiCommand(() => _deviceApi.getTemporaryDuration(boundDevice!.device));
-
     await refreshStatus();
 
     _editorState = _editorState.copyWith(mode: super.mode);
@@ -308,13 +315,15 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     switch (mode) {
       case LyfiMode.scheduled:
         if (scheduledInstants.isEmpty) {
-          scheduledInstants.addAll(await executeLyfiCommand(() => _deviceApi.getSchedule(boundDevice!.device)));
+          scheduledInstants.addAll(
+            await executeLyfiCommand(() => super.lyfiDeviceApi.getSchedule(boundDevice!.device)),
+          );
         }
         break;
 
       case LyfiMode.sun:
         if (sunInstants.isEmpty) {
-          sunInstants.addAll(await executeLyfiCommand(() => _deviceApi.getSunSchedule(boundDevice!.device)));
+          sunInstants.addAll(await executeLyfiCommand(() => super.lyfiDeviceApi.getSunSchedule(boundDevice!.device)));
         }
         break;
 
@@ -359,8 +368,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       return;
     }
 
-    _temporaryRemaining.value = lyfiDeviceStatus?.temporaryRemaining ?? Duration.zero;
-
     bool emptyChannels = _channels.isEmpty;
     if (super.lyfiDeviceStatus != null) {
       double ob = 0;
@@ -376,7 +383,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
 
     if (super.mode == LyfiMode.sun) {
-      final sunSchedule = await _deviceApi.getSunSchedule(boundDevice!.device, cancelToken: cancelToken);
+      final sunSchedule = await super.lyfiDeviceApi.getSunSchedule(boundDevice!.device, cancelToken: cancelToken);
       if (sunSchedule.length == sunInstants.length) {
         for (int i = 0; i < sunSchedule.length; i++) {
           sunInstants[i] = sunSchedule[i];
@@ -394,7 +401,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   }
 
   Future<void> _switchPowerOnOff(bool onOff) async {
-    await executeLyfiCommand(() => _deviceApi.setOnOff(super.boundDevice!.device, onOff));
+    await executeLyfiCommand(() => super.lyfiDeviceApi.setOnOff(super.boundDevice!.device, onOff));
     await refreshStatus();
   }
 
@@ -413,10 +420,10 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   Future<void> _switchTemporaryState() async {
     // Turn the temp mode on
     if (super.state == LyfiState.normal) {
-      await executeLyfiCommand(() => _deviceApi.switchState(super.boundDevice!.device, LyfiState.temporary));
+      await executeLyfiCommand(() => super.lyfiDeviceApi.switchState(super.boundDevice!.device, LyfiState.temporary));
     } else {
       // Restore running mode
-      await executeLyfiCommand(() => _deviceApi.switchState(super.boundDevice!.device, LyfiState.normal));
+      await executeLyfiCommand(() => super.lyfiDeviceApi.switchState(super.boundDevice!.device, LyfiState.normal));
     }
     await refreshStatus();
   }
@@ -434,10 +441,10 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   Future<void> _switchDiscoState() async {
     // Turn the disco mode on
     if (super.state == LyfiState.normal || super.state == LyfiState.temporary) {
-      await executeLyfiCommand(() => _deviceApi.switchState(super.boundDevice!.device, LyfiState.disco));
+      await executeLyfiCommand(() => super.lyfiDeviceApi.switchState(super.boundDevice!.device, LyfiState.disco));
     } else {
       // Restore running mode
-      await executeLyfiCommand(() => _deviceApi.switchState(super.boundDevice!.device, LyfiState.normal));
+      await executeLyfiCommand(() => super.lyfiDeviceApi.switchState(super.boundDevice!.device, LyfiState.normal));
     }
     await refreshStatus();
   }
@@ -474,10 +481,12 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         await editor.save();
         if (editor is ScheduleEditorViewModel) {
           scheduledInstants.clear();
-          scheduledInstants.addAll(await executeLyfiCommand(() => _deviceApi.getSchedule(boundDevice!.device)));
+          scheduledInstants.addAll(
+            await executeLyfiCommand(() => super.lyfiDeviceApi.getSchedule(boundDevice!.device)),
+          );
         } else if (editor is SunEditorViewModel) {
           sunInstants.clear();
-          sunInstants.addAll(await executeLyfiCommand(() => _deviceApi.getSunSchedule(boundDevice!.device)));
+          sunInstants.addAll(await executeLyfiCommand(() => super.lyfiDeviceApi.getSunSchedule(boundDevice!.device)));
         }
       }
     }
@@ -522,7 +531,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         notifyAppError("Unable to switch to Sun Simulation mode, the device's timezone is not set.");
         return;
       }
-      final location = await executeLyfiCommand(() => _deviceApi.getLocation(super.boundDevice!.device));
+      final location = await executeLyfiCommand(() => super.lyfiDeviceApi.getLocation(super.boundDevice!.device));
       if (location == null) {
         notifyAppError("Unable to switch to Sun Simulation mode, the device's geographic location is not set.");
         return;
@@ -606,8 +615,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       borneoInfo: super.borneoDeviceInfo!,
       ledInfo: lyfiDeviceInfo,
       ledStatus: lyfiDeviceStatus!,
-      powerBehavior: await executeLyfiCommand(() => _deviceApi.getPowerBehavior(boundDevice!.device)),
-      location: await executeLyfiCommand(() => _deviceApi.getLocation(boundDevice!.device)),
+      powerBehavior: await executeLyfiCommand(() => super.lyfiDeviceApi.getPowerBehavior(boundDevice!.device)),
+      location: await executeLyfiCommand(() => super.lyfiDeviceApi.getLocation(boundDevice!.device)),
     );
     await vm.initialize();
     return vm;

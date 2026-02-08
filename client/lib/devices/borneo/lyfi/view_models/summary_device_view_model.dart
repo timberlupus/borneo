@@ -45,6 +45,7 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
 
   @override
   void onWotThingChanged(WotThing? oldThing, WotThing? newThing) {
+    super.onWotThingChanged(oldThing, newThing);
     oldThing?.removeSubscriber(_onStateChanged);
     oldThing?.removeSubscriber(_onModeChanged);
     newThing?.addSubscriber(_onStateChanged);

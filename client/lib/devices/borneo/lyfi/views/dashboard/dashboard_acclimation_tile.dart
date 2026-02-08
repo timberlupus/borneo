@@ -48,12 +48,7 @@ class DashboardAcclimationTile extends StatelessWidget {
                           final route = MaterialPageRoute(
                             builder: (context) => AcclimationScreen(deviceID: vm.deviceID),
                           );
-                          try {
-                            vm.stopTimer();
-                            await Navigator.push(context, route);
-                          } finally {
-                            vm.startTimer();
-                          }
+                          await Navigator.push(context, route);
                         }
                       }
                     : null,

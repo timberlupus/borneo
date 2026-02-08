@@ -4,7 +4,6 @@ import 'package:borneo_app/devices/borneo/lyfi/core/wot.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/features/devices/models/events.dart';
 import 'package:borneo_app/core/models/events.dart';
-import 'package:borneo_kernel/drivers/borneo/events.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:event_bus/event_bus.dart';
@@ -29,7 +28,6 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
 
   late final StreamSubscription<DeviceBoundEvent> _boundEventSub;
   late final StreamSubscription<DeviceRemovedEvent> _removedEventSub;
-  late final StreamSubscription<DevicePowerOnOffChangedEvent> _powerEventSub;
   late final StreamSubscription<DeviceEntityUpdatedEvent> _deviceUpdatedSub;
   late final StreamSubscription<LoadingDriverFailedEvent> _loadingFailedEventSub;
   late final StreamSubscription<CurrentSceneDevicesReloadedEvent> _sceneReloadedSub;
@@ -42,10 +40,10 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
     super.globalEventBus = globalEventBus;
     _boundEventSub = deviceManager.allDeviceEvents.on<DeviceBoundEvent>().listen(_onBound);
     _removedEventSub = deviceManager.allDeviceEvents.on<DeviceRemovedEvent>().listen(_onRemoved);
-    _powerEventSub = deviceManager.allDeviceEvents.on<DevicePowerOnOffChangedEvent>().listen(_onPowerChanged);
     _deviceUpdatedSub = deviceManager.allDeviceEvents.on<DeviceEntityUpdatedEvent>().listen(_onDeviceUpdated);
     _loadingFailedEventSub = deviceManager.allDeviceEvents.on<LoadingDriverFailedEvent>().listen(_onLoadingFailed);
     _sceneReloadedSub = globalEventBus.on<CurrentSceneDevicesReloadedEvent>().listen(_onSceneReloaded);
+    wotThing?.addSubscriber(_onPowerPropertyChanged);
 
     _refreshWotThing();
   }
@@ -54,10 +52,10 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
   void dispose() {
     _boundEventSub.cancel();
     _removedEventSub.cancel();
-    _powerEventSub.cancel();
     _deviceUpdatedSub.cancel();
     _loadingFailedEventSub.cancel();
     _sceneReloadedSub.cancel();
+    wotThing?.removeSubscriber(_onPowerPropertyChanged);
     super.dispose();
   }
 
@@ -68,7 +66,6 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
   void _onBound(DeviceBoundEvent event) {
     if (event.device.id == deviceEntity.id) {
       _isOnline = true;
-      _refreshWotThing();
       notifyListeners();
     }
   }
@@ -81,8 +78,19 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
     }
   }
 
+  void _onPowerPropertyChanged(WotMessage msg) {
+    final onValue = wotThing?.getProperty(LyfiKnownProperties.kOn);
+    if (onValue != null && _isPowerOn != onValue) {
+      _isPowerOn = onValue as bool;
+      notifyListeners();
+    }
+  }
+
   @protected
-  void onWotThingChanged(WotThing? oldThing, WotThing? newThing) {}
+  void onWotThingChanged(WotThing? oldThing, WotThing? newThing) {
+    oldThing?.removeSubscriber(_onPowerPropertyChanged);
+    newThing?.addSubscriber(_onPowerPropertyChanged);
+  }
 
   void _refreshWotThing() {
     final oldThing = wotThing;
@@ -96,13 +104,6 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
 
     if (oldThing != wotThing) {
       onWotThingChanged(oldThing, wotThing);
-    }
-  }
-
-  void _onPowerChanged(DevicePowerOnOffChangedEvent event) {
-    if (event.device.id == deviceEntity.id) {
-      _isPowerOn = event.onOff;
-      notifyListeners();
     }
   }
 

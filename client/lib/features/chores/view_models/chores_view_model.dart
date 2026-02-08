@@ -54,6 +54,10 @@ class ChoresViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> refresh() async {
+    await _reloadChores();
+  }
+
   Future<void> _reloadChores() async {
     try {
       _chores = _choreManager.getAvailableChores();

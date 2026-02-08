@@ -21,7 +21,7 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   bool _isOn = false;
   bool get isOn => _isOn;
 
-  bool get canMeasureVoltage => super.isOnline && isOn;
+  bool get canMeasureVoltage => super.isOnline && isOn && borneoDeviceStatus?.powerVoltage != null;
 
   final ValueNotifier<double?> currentVoltage = ValueNotifier<double?>(null);
   final IAppNotificationService notification;

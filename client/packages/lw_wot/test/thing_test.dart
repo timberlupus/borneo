@@ -530,7 +530,7 @@ void main() {
         // Set up subscriber
         final subscriber = MockSubscriber();
         thing.addSubscriber(subscriber.call);
-        thing.addEventSubscriber('temperatureChanged', subscriber);
+        thing.addEventSubscriber('temperatureChanged', subscriber.call);
 
         // Set href prefix
         thing.setHrefPrefix('/api/things/temp-sensor');
