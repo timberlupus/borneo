@@ -392,17 +392,13 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
   }
 
-  void switchPowerOnOff(bool onOff) async {
+  void switchPowerOnOff(bool onOff) {
     if (isSuspectedOffline) {
       notifyAppError('Device is offline. Please retry after reconnection.');
       return;
     }
-    await _switchPowerOnOff(onOff);
-  }
-
-  Future<void> _switchPowerOnOff(bool onOff) async {
-    await executeLyfiCommand(() => super.lyfiDeviceApi.setOnOff(super.boundDevice!.device, onOff));
-    await refreshStatus();
+    super.lyfiThing.onOffProperty.setValue(onOff);
+    refreshStatus();
   }
 
   bool get canSwitchTemporaryState =>

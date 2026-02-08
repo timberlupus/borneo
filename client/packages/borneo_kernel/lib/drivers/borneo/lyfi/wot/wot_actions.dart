@@ -5,6 +5,26 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:lw_wot/wot.dart';
 
+/// Custom action for switching Lyfi states
+class LyfiSwitchStateAction extends WotAction<Map<String, dynamic>> {
+  final LyfiState targetState;
+  final ILyfiDeviceApi lyfiApi;
+  final Device device;
+
+  LyfiSwitchStateAction({
+    required super.id,
+    required super.thing,
+    required this.targetState,
+    required this.lyfiApi,
+    required this.device,
+  }) : super(name: 'switchState', input: {'state': targetState.name});
+
+  @override
+  Future<void> performAction() async {
+    await lyfiApi.switchState(device, targetState);
+  }
+}
+
 /// Custom action for switching Lyfi modes
 class LyfiSwitchModeAction extends WotAction<Map<String, dynamic>?> {
   final LyfiMode targetMode;

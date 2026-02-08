@@ -7,6 +7,7 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel/drivers/borneo/wot/borneo_props.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/wot/wot_actions.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:logger/logger.dart';
@@ -71,7 +72,10 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     required super.title,
     this.logger,
     this.canWrite,
-  }) : super(id: device.id, type: ["OnOffSwitch", "Light"], description: "Lyfi LED lighting device");
+  }) : super(id: device.id, type: ["OnOffSwitch", "Light"], description: "Lyfi LED lighting device") {
+    _createPropertiesWithDefaults();
+    _createActions();
+  }
 
   factory LyfiThing.offline({
     required Device device,
@@ -114,21 +118,15 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
 
   /// Mozilla WebThing style initialization - sync constructor with async hardware binding
   Future<void> initialize() async {
-    // 1. Create properties with default/last known values first (like Mozilla WebThing)
-    await _createPropertiesWithDefaults();
-
     if (!isOffline) {
-      // 2. Set up hardware binding asynchronously (like Mozilla WebThing ready callback)
       await _bindToHardware();
-
-      // 3. Set up event listeners and periodic sync
       _setupPeriodicSync();
     }
   }
 
   /// Create properties with reasonable defaults first, then bind to hardware
   /// This follows Mozilla WebThing pattern of creating Value objects with initial values
-  Future<void> _createPropertiesWithDefaults() async {
+  void _createPropertiesWithDefaults() {
     // Power property with default false, will be updated when hardware is ready
     onOffProperty = ObservableWotProperty<bool, DevicePowerOnOffChangedEvent>(
       thing: this,
@@ -762,6 +760,159 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       ),
     );
     addProperty(powerProperty);
+  }
+
+  void _createActions() {
+    // Switch state action
+    addAvailableAction(
+      'switchState',
+      WotActionMetadata(
+        title: 'Switch State',
+        description: 'Switch the device to a different operating state',
+        input: {'state': 'string'},
+      ),
+      (thing, input) {
+        final stateName = input['state'] as String;
+        final targetState = LyfiState.values.firstWhere((e) => e.name == stateName);
+        return LyfiSwitchStateAction(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          thing: thing,
+          targetState: targetState,
+          lyfiApi: lyfiApi!,
+          device: device,
+        );
+      },
+    );
+
+    // Switch mode action
+    addAvailableAction(
+      'switchMode',
+      WotActionMetadata(
+        title: 'Switch Mode',
+        description: 'Switch the device to a different lighting mode',
+        input: {'mode': 'string', 'color': 'array'},
+      ),
+      (thing, input) {
+        final modeName = input['mode'] as String;
+        final targetMode = LyfiMode.values.firstWhere((e) => e.name == modeName);
+        final color = input['color'] as List<int>?;
+        return LyfiSwitchModeAction(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          thing: thing,
+          targetMode: targetMode,
+          lyfiApi: lyfiApi!,
+          device: device,
+          color: color,
+        );
+      },
+    );
+
+    // Set color action
+    addAvailableAction(
+      'setColor',
+      WotActionMetadata(
+        title: 'Set Color',
+        description: 'Set the LED channel brightness values',
+        input: {'color': 'array'},
+      ),
+      (thing, input) {
+        final color = input['color'] as List<int>;
+        return LyfiSetColorAction(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          thing: thing,
+          color: color,
+          lyfiApi: lyfiApi!,
+          device: device,
+        );
+      },
+    );
+
+    // Set schedule action
+    addAvailableAction(
+      'setSchedule',
+      WotActionMetadata(
+        title: 'Set Schedule',
+        description: 'Set the lighting schedule with time instants and colors',
+        input: {'schedule': 'array'},
+      ),
+      (thing, input) {
+        final scheduleData = input['schedule'] as List<dynamic>;
+        final schedule = scheduleData.map((s) => ScheduledInstant.fromPayload(s as Map<String, dynamic>)).toList();
+        return LyfiSetScheduleAction(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          thing: thing,
+          schedule: schedule,
+          lyfiApi: lyfiApi!,
+          device: device,
+        );
+      },
+    );
+
+    // Set acclimation action
+    addAvailableAction(
+      'setAcclimation',
+      WotActionMetadata(
+        title: 'Set Acclimation',
+        description: 'Configure acclimation settings for gradual brightness increase',
+        input: {'enabled': 'boolean', 'startTimestamp': 'number', 'startPercent': 'number', 'days': 'number'},
+      ),
+      (thing, input) {
+        final settings = AcclimationSettings(
+          enabled: input['enabled'] as bool,
+          startTimestamp: DateTime.fromMillisecondsSinceEpoch((input['startTimestamp'] as num).toInt() * 1000),
+          startPercent: input['startPercent'] as int,
+          days: input['days'] as int,
+        );
+        return LyfiSetAcclimationAction(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          thing: thing,
+          settings: settings,
+          lyfiApi: lyfiApi!,
+          device: device,
+        );
+      },
+    );
+
+    // Set location action
+    addAvailableAction(
+      'setLocation',
+      WotActionMetadata(
+        title: 'Set Location',
+        description: 'Set the geographic location for sun simulation',
+        input: {'lat': 'number', 'lng': 'number'},
+      ),
+      (thing, input) {
+        final location = GeoLocation(lat: input['lat'] as double, lng: input['lng'] as double);
+        return LyfiSetLocationAction(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          thing: thing,
+          location: location,
+          lyfiApi: lyfiApi!,
+          device: device,
+        );
+      },
+    );
+
+    // Set correction method action
+    addAvailableAction(
+      'setCorrectionMethod',
+      WotActionMetadata(
+        title: 'Set Correction Method',
+        description: 'Set the LED brightness correction method',
+        input: {'method': 'string'},
+      ),
+      (thing, input) {
+        final methodName = input['method'] as String;
+        final method = LedCorrectionMethod.values.firstWhere((e) => e.name == methodName);
+        return LyfiSetCorrectionMethodAction(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          thing: thing,
+          method: method,
+          lyfiApi: lyfiApi!,
+          device: device,
+        );
+      },
+    );
   }
 
   /// Bind properties to actual hardware state (like Mozilla WebThing ready callback)
