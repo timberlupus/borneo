@@ -27,7 +27,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   bool isOffline = false;
 
   // Property references
-  late final ObservableWotProperty<bool, DevicePowerOnOffChangedEvent> onOffProperty;
+  late final ObservableWotProperty<bool, DevicePowerOnOffChangedEvent> onProperty;
   late final ObservableWotProperty<String, LyfiStateChangedEvent> stateProperty;
   late final ObservableWotProperty<String, LyfiModeChangedEvent> modeProperty;
   late final WotProperty<List<int>> colorProperty;
@@ -128,13 +128,13 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   /// This follows Mozilla WebThing pattern of creating Value objects with initial values
   void _createPropertiesWithDefaults() {
     // Power property with default false, will be updated when hardware is ready
-    onOffProperty = ObservableWotProperty<bool, DevicePowerOnOffChangedEvent>(
+    onProperty = ObservableWotProperty<bool, DevicePowerOnOffChangedEvent>(
       thing: this,
       deviceEvents: deviceEvents,
       name: 'on',
       value: WotValue<bool>(
         initialValue: false, // Default value, updated in _bindToHardware
-        valueForwarder: (update) => isOffline ? Future.value() : borneoApi!.setOnOff(device, update),
+        valueForwarder: (update) => isOffline ? Future.value() : unawaited(borneoApi!.setOnOff(device, update)),
       ),
       metadata: WotPropertyMetadata(
         type: 'boolean',
@@ -142,10 +142,10 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
         description: 'Power on/off state',
         readOnly: false,
       ),
-      eventName: 'powerChanged',
+      eventName: 'onChanged',
       mapper: (event) => event.onOff,
     );
-    addProperty(onOffProperty);
+    addProperty(onProperty);
 
     // State property with default state
     stateProperty = ObservableWotProperty<String, LyfiStateChangedEvent>(
@@ -837,7 +837,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       ),
       (thing, input) {
         final scheduleData = input['schedule'] as List<dynamic>;
-        final schedule = scheduleData.map((s) => ScheduledInstant.fromPayload(s as Map<String, dynamic>)).toList();
+        final schedule = scheduleData.map((s) => ScheduledInstant.fromMap(s as Map<String, dynamic>)).toList();
         return LyfiSetScheduleAction(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           thing: thing,
@@ -941,7 +941,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     // final deviceInfo = await lyfiApi.getDeviceInfo(device); // Skip for now
 
     // Update properties with actual values (like notifyOfExternalUpdate in Mozilla WebThing)
-    onOffProperty.value.notifyOfExternalUpdate(generalStatus.power);
+    onProperty.value.notifyOfExternalUpdate(generalStatus.power);
     stateProperty.value.notifyOfExternalUpdate(lyfiStatus.state.name);
     modeProperty.value.notifyOfExternalUpdate(lyfiStatus.mode.name);
     colorProperty.value.notifyOfExternalUpdate(actualColor);
@@ -1000,7 +1000,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     try {
       final generalStatus = await borneoApi!.getGeneralDeviceStatus(device);
 
-      onOffProperty.value.notifyOfExternalUpdate(generalStatus.power);
+      onProperty.value.notifyOfExternalUpdate(generalStatus.power);
 
       // Sync mode and state
       final lyfiStatus = await lyfiApi!.getLyfiStatus(device);

@@ -118,6 +118,9 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   StreamSubscription<Duration>? _temporaryDurationSubscription;
   StreamSubscription<Duration>? _temporaryRemainingSubscription;
 
+  StreamSubscription<String>? _stateSubscription;
+  StreamSubscription<String>? _modeSubscription;
+
   double _overallBrightness = 0;
   double get overallBrightness => _overallBrightness;
 
@@ -192,36 +195,52 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   @override
   Future<void> onInitialize() async {
     await super.onInitialize();
+
     _fanPowerSubscription = super.lyfiThing.fanPowerProperty.value.onUpdate.listen((_) {
       final power = super.lyfiThing.fanPowerProperty.getValue();
       _fanPowerRatio = power.toDouble();
       notifyListeners();
     });
+
     _temperatureSubscription = super.lyfiThing.temperatureProperty.value.onUpdate.listen((value) {
       _currentTemperature = value;
       notifyListeners();
     });
+
     _fanModeSubscription = super.lyfiThing.fanModeProperty.value.onUpdate.listen((value) {
       _fanMode = FanMode.values.firstWhere((e) => e.name == value);
       notifyListeners();
     });
+
     _voltageSubscription = super.lyfiThing.voltageProperty.value.onUpdate.listen((value) {
       super.currentVoltage.value = value;
     });
+
     _currentSubscription = super.lyfiThing.currentProperty.value.onUpdate.listen((value) {
       currentCurrent.value = value;
     });
+
     _powerSubscription = super.lyfiThing.powerProperty.value.onUpdate.listen((value) {
       currentWatts.value = value;
     });
+
     _temporaryDurationSubscription = super.lyfiThing.temporaryDurationProperty.value.onUpdate.listen((value) {
       _temporaryDuration = value;
       notifyListeners();
     });
+
     _temporaryRemainingSubscription = super.lyfiThing.temporaryRemainingProperty.value.onUpdate.listen((value) {
       _temporaryRemaining = value;
       notifyListeners();
     });
+
+    _stateSubscription = super.lyfiThing.stateProperty.value.onUpdate.listen(_onStateChanged);
+
+    _modeSubscription = super.lyfiThing.modeProperty.value.onUpdate.listen((value) {
+      final newMode = LyfiState.fromString(value);
+      notifyListeners();
+    });
+
     // Set initial values
     _fanPowerRatio = super.lyfiThing.fanPowerProperty.getValue().toDouble();
     _currentTemperature = super.lyfiThing.temperatureProperty.getValue();
@@ -274,6 +293,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       _powerSubscription?.cancel();
       _temporaryDurationSubscription?.cancel();
       _temporaryRemainingSubscription?.cancel();
+      _stateSubscription?.cancel();
+      _modeSubscription?.cancel();
       for (final cvn in _channels) {
         cvn.dispose();
       }
@@ -397,8 +418,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       notifyAppError('Device is offline. Please retry after reconnection.');
       return;
     }
-    super.lyfiThing.onOffProperty.setValue(onOff);
-    refreshStatus();
+    super.lyfiThing.onProperty.setValue(onOff);
   }
 
   bool get canSwitchTemporaryState =>
@@ -421,7 +441,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       // Restore running mode
       await executeLyfiCommand(() => super.lyfiDeviceApi.switchState(super.boundDevice!.device, LyfiState.normal));
     }
-    await refreshStatus();
   }
 
   bool get canSwitchDiscoState =>
@@ -442,11 +461,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       // Restore running mode
       await executeLyfiCommand(() => super.lyfiDeviceApi.switchState(super.boundDevice!.device, LyfiState.normal));
     }
-    await refreshStatus();
-  }
-
-  void toggleLock(bool isLocked) async {
-    await _toggleLock(isLocked);
   }
 
   void _scheduleEditorDispose(IEditor editor) {
@@ -465,14 +479,12 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     });
   }
 
-  Future<void> _toggleLock(bool newIsLocked) async {
-    if (isSuspectedOffline) {
-      return;
-    }
-    if (!super.isLocked) {
+  Future<void> _onStateChanged(String value) async {
+    final newState = LyfiState.fromString(value);
+    if (newState == LyfiState.dimming) {
+      await _toggleEditor(super.mode);
+    } else if (newState == LyfiState.normal) {
       final editor = _editorState.editor;
-      assert(editor != null);
-      // Exiting the edit mode
       if (editor != null && editor.isChanged) {
         await editor.save();
         if (editor is ScheduleEditorViewModel) {
@@ -485,26 +497,26 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
           sunInstants.addAll(await executeLyfiCommand(() => super.lyfiDeviceApi.getSunSchedule(boundDevice!.device)));
         }
       }
-    }
-
-    if (newIsLocked) {
-      // Exiting edit mode - switch to normal state
-      super.setState(LyfiState.normal);
-      await refreshStatus();
       final previousEditor = _editorState.editor;
       _editorState = _editorState.copyWith(status: EditorStatus.idle, editor: null, clearError: true);
       if (previousEditor != null) {
         _scheduleEditorDispose(previousEditor);
       }
-      notifyListeners();
+    }
+    notifyListeners();
+  }
+
+  void toggleLock(bool newIsLocked) {
+    if (isSuspectedOffline) {
+      return;
+    }
+
+    if (newIsLocked) {
+      // Exiting edit mode - switch to normal state
+      super.setState(LyfiState.normal);
     } else {
       // Entering edit mode - wait for state to change to dimming before creating editor
       super.setState(LyfiState.dimming);
-      await refreshStatus();
-
-      await _toggleEditor(super.mode);
-      // Notify listeners so UI awaiting readiness can proceed
-      notifyListeners();
     }
   }
 

@@ -18,8 +18,7 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
 
   DateTime get deviceClock => borneoDeviceStatus!.timestamp.toLocal();
 
-  bool _isOn = false;
-  bool get isOn => _isOn;
+  bool get isOn => wotThing.getProperty<bool>('on')!;
 
   bool get canMeasureVoltage => super.isOnline && isOn && borneoDeviceStatus?.powerVoltage != null;
 
@@ -27,6 +26,7 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   final IAppNotificationService notification;
 
   StreamSubscription? _generalStatusSubscription;
+  StreamSubscription? _onOffSubscription;
 
   @override
   RssiLevel? get rssiLevel =>
@@ -47,24 +47,29 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
     required this.notification,
     required super.wotThing,
     super.logger,
-  });
-
-  @override
-  @protected
-  Future<void> onInitialize() async {
-    // await super.onInitialize();
-    await _initializeTimezone();
-  }
-
-  @override
-  void onDeviceBound() {
+  }) {
     _subscribeToGeneralStatus();
   }
 
   @override
-  void onDeviceRemoved() {
-    _unsubscribeFromGeneralStatus();
+  @protected
+  Future<void> onInitialize() async {
+    await _initializeTimezone();
   }
+
+  @override
+  void dispose() {
+    if (!isDisposed) {
+      super.dispose();
+      _unsubscribeFromGeneralStatus();
+    }
+  }
+
+  @override
+  void onDeviceBound() {}
+
+  @override
+  void onDeviceRemoved() {}
 
   Future<void> _initializeTimezone() async {
     try {
@@ -77,17 +82,20 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   }
 
   void _subscribeToGeneralStatus() {
-    final property = wotThing.findProperty('generalStatus');
-    if (property != null) {
-      _generalStatusSubscription = property.value.onUpdate.listen((status) {
-        notifyListeners();
-      });
-    }
+    _generalStatusSubscription = wotThing.findProperty('generalStatus')?.value.onUpdate.listen((status) {
+      notifyListeners();
+    });
+
+    _onOffSubscription = wotThing.findProperty('on')?.value.onUpdate.listen((value) {
+      notifyListeners();
+    });
   }
 
   void _unsubscribeFromGeneralStatus() {
     _generalStatusSubscription?.cancel();
     _generalStatusSubscription = null;
+    _onOffSubscription?.cancel();
+    _onOffSubscription = null;
   }
 
   Future<void> checkDeviceTimezone() async {
@@ -131,14 +139,12 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
       return;
     }
 
-    final oldIsOn = _isOn;
     final oldTimezone = _deviceTimezone;
     final status = await borneoDeviceApi.getGeneralDeviceStatus(super.boundDevice!.device, cancelToken: cancelToken);
-    _isOn = status.power;
     _deviceTimezone = status.timezone;
 
     // Only notify if something actually changed
-    if (_isOn != oldIsOn || _deviceTimezone != oldTimezone) {
+    if (_deviceTimezone != oldTimezone) {
       notifyListeners();
     }
   }

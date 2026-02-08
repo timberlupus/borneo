@@ -91,9 +91,8 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
       return;
     }
     try {
-      lyfiThing.modeProperty.setValue(newMode.name);
+      lyfiThing.performAction('switchMode', {'mode': newMode.name, 'color': null})!.start();
     } catch (_) {
-      refreshStatus();
       rethrow;
     }
   }
@@ -105,9 +104,8 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
       return;
     }
     try {
-      lyfiThing.stateProperty.setValue(newState.name);
+      lyfiThing.performAction('switchState', {'state': newState.name})!.start();
     } catch (_) {
-      refreshStatus();
       rethrow;
     }
   }

@@ -22,6 +22,7 @@ class LyfiSwitchStateAction extends WotAction<Map<String, dynamic>> {
   @override
   Future<void> performAction() async {
     await lyfiApi.switchState(device, targetState);
+    finish();
   }
 }
 
