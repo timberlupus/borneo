@@ -31,10 +31,10 @@ class AcclimationViewModel extends BaseLyfiDeviceViewModel {
   }
 
   AcclimationViewModel({
-    required super.deviceID,
     required super.deviceManager,
     required super.globalEventBus,
     required super.notification,
+    required super.wotThing,
     super.logger,
   });
 

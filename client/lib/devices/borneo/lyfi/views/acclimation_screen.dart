@@ -19,10 +19,10 @@ class AcclimationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = _buildSettingItems(context);
     final vm = AcclimationViewModel(
-      deviceID: deviceID,
       deviceManager: context.read<IDeviceManager>(),
       globalEventBus: context.read<EventBus>(),
       notification: context.read<IAppNotificationService>(),
+      wotThing: context.read<IDeviceManager>().getWotThing(deviceID)!,
       logger: context.read<Logger>(),
     );
     return Scaffold(

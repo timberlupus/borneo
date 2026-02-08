@@ -10,9 +10,9 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   ILyfiDeviceApi get lyfiDeviceApi => super.boundDevice!.driver as ILyfiDeviceApi;
   LyfiDeviceInfo get lyfiDeviceInfo => lyfiDeviceApi.getLyfiInfo(super.boundDevice!.device);
 
-  LyfiDeviceStatus? get lyfiDeviceStatus => lyfiThing?.lyfiStatusProperty.value.get();
+  LyfiDeviceStatus? get lyfiDeviceStatus => lyfiThing.lyfiStatusProperty.value.get();
 
-  LyfiThing? get lyfiThing => wotThing as LyfiThing?;
+  LyfiThing get lyfiThing => wotThing as LyfiThing;
 
   double? get nominalPower => lyfiDeviceInfo.nominalPower;
 
@@ -38,24 +38,22 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   }
 
   void _subscribeToLyfiThing() {
-    if (lyfiThing != null) {
-      _stateSubscription = lyfiThing!.stateProperty.value.onUpdate.listen((stateName) {
-        final newState = LyfiState.fromString(stateName);
-        if (state != newState) {
-          notifyListeners();
-        }
-      });
-      _modeSubscription = lyfiThing!.modeProperty.value.onUpdate.listen((modeName) {
-        final newMode = LyfiMode.fromString(modeName);
-        if (mode != newMode) {
-          notifyListeners();
-        }
-      });
-
-      _statusSubscription = lyfiThing!.lyfiStatusProperty.value.onUpdate.listen((status) {
+    _stateSubscription = lyfiThing.stateProperty.value.onUpdate.listen((stateName) {
+      final newState = LyfiState.fromString(stateName);
+      if (state != newState) {
         notifyListeners();
-      });
-    }
+      }
+    });
+    _modeSubscription = lyfiThing.modeProperty.value.onUpdate.listen((modeName) {
+      final newMode = LyfiMode.fromString(modeName);
+      if (mode != newMode) {
+        notifyListeners();
+      }
+    });
+
+    _statusSubscription = lyfiThing.lyfiStatusProperty.value.onUpdate.listen((status) {
+      notifyListeners();
+    });
   }
 
   @override
@@ -79,28 +77,28 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
     _statusSubscription = null;
   }
 
-  LyfiMode get mode => LyfiMode.fromString(lyfiThing?.modeProperty.value.get() ?? 'manual');
+  LyfiMode get mode => LyfiMode.fromString(lyfiThing.modeProperty.value.get());
 
   void setMode(LyfiMode newMode) {
     if (newMode == this.mode) {
       return;
     }
     try {
-      lyfiThing?.modeProperty.setValue(newMode.name);
+      lyfiThing.modeProperty.setValue(newMode.name);
     } catch (_) {
       refreshStatus();
       rethrow;
     }
   }
 
-  LyfiState get state => LyfiState.fromString(lyfiThing?.stateProperty.value.get() ?? 'normal');
+  LyfiState get state => LyfiState.fromString(lyfiThing.stateProperty.value.get());
 
   void setState(LyfiState newState) {
     if (newState == this.state) {
       return;
     }
     try {
-      lyfiThing?.stateProperty.setValue(newState.name);
+      lyfiThing.stateProperty.setValue(newState.name);
     } catch (_) {
       refreshStatus();
       rethrow;
@@ -110,10 +108,10 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   bool get isLocked => state.isLocked;
 
   BaseLyfiDeviceViewModel({
-    required super.deviceID,
     required super.deviceManager,
     required super.globalEventBus,
     required super.notification,
+    required super.wotThing,
     super.logger,
   });
 

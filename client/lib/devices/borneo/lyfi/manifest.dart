@@ -29,10 +29,10 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         driverDescriptor: borneoLyfiDriverDescriptor,
         detailsViewBuilder: (_) => LyfiView(),
         detailsViewModelBuilder: (context, deviceID) => LyfiViewModel(
-          deviceID: deviceID,
           deviceManager: context.read<IDeviceManager>(),
           globalEventBus: context.read<EventBus>(),
           notification: context.read<IAppNotificationService>(),
+          wotThing: context.read<IDeviceManager>().getWotThing(deviceID)!,
           localeService: context.read<ILocaleService>(),
           logger: context.read<Logger>(),
         ),

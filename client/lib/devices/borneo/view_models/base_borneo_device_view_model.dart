@@ -12,7 +12,7 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   GeneralBorneoDeviceInfo? get borneoDeviceInfo => borneoDeviceApi.getGeneralDeviceInfo(boundDevice!.device);
 
   GeneralBorneoDeviceStatus? get borneoDeviceStatus =>
-      isOnline ? wotThing?.getProperty<GeneralBorneoDeviceStatus>('generalStatus') : null;
+      isOnline ? wotThing.getProperty<GeneralBorneoDeviceStatus>('generalStatus') : null;
 
   IBorneoDeviceApi get borneoDeviceApi => super.boundDevice!.driver as IBorneoDeviceApi;
 
@@ -42,10 +42,10 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
       _deviceTimezone != null && _localPosixTimezone != null && _deviceTimezone != _localPosixTimezone;
 
   BaseBorneoDeviceViewModel({
-    required super.deviceID,
     required super.deviceManager,
     required super.globalEventBus,
     required this.notification,
+    required super.wotThing,
     super.logger,
   });
 
@@ -77,13 +77,11 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   }
 
   void _subscribeToGeneralStatus() {
-    if (wotThing != null) {
-      final property = wotThing!.findProperty('generalStatus');
-      if (property != null) {
-        _generalStatusSubscription = property.value.onUpdate.listen((status) {
-          notifyListeners();
-        });
-      }
+    final property = wotThing.findProperty('generalStatus');
+    if (property != null) {
+      _generalStatusSubscription = property.value.onUpdate.listen((status) {
+        notifyListeners();
+      });
     }
   }
 

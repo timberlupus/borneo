@@ -23,7 +23,6 @@ abstract class BaseDeviceViewModel extends BaseViewModel
 
   final CancellationToken initializationCancelToken = CancellationToken();
   final IDeviceManager deviceManager;
-  final String deviceID;
   late DeviceEntity deviceEntity;
 
   late final StreamSubscription<DeviceBoundEvent> _onDeviceBoundEventSub;
@@ -32,6 +31,8 @@ abstract class BaseDeviceViewModel extends BaseViewModel
 
   bool isInitialized = false;
   bool _isLoaded = false;
+
+  String get deviceID => wotThing.id;
 
   RssiLevel? get rssiLevel;
 
@@ -55,22 +56,19 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   bool get isTimerRunning => _timer?.isActive ?? false;
   BoundDevice? get boundDevice => deviceManager.getBoundDevice(deviceID);
 
-  WotThing? wotThing;
+  WotThing wotThing;
 
   BaseDeviceViewModel({
-    required this.deviceID,
     required this.deviceManager,
     required EventBus globalEventBus,
+    required this.wotThing,
     super.logger,
   }) {
     super.globalEventBus = globalEventBus;
     WidgetsBinding.instance.addObserver(this);
 
-    wotThing = deviceManager.getWotThing(deviceID);
-
     _onDeviceBoundEventSub = deviceManager.allDeviceEvents.on<DeviceBoundEvent>().listen((event) {
       if (event.device.id == deviceID) {
-        wotThing = deviceManager.getWotThing(deviceID);
         final changed = markOnline(notify: false);
         onDeviceBound();
         if (!isTimerRunning) {
@@ -100,7 +98,6 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     });
   }
 
-  @protected
   Future<void> initialize() async {
     assert(!isInitialized);
     try {

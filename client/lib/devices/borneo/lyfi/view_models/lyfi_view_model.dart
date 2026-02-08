@@ -132,10 +132,10 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   }
 
   LyfiViewModel({
-    required super.deviceID,
     required super.deviceManager,
     required super.globalEventBus,
     required super.notification,
+    required super.wotThing,
     required this.localeService,
     super.logger,
   });
@@ -193,37 +193,35 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   @override
   Future<void> onInitialize() async {
     await super.onInitialize();
-    if (super.lyfiThing != null) {
-      _fanPowerSubscription = super.lyfiThing!.fanPowerProperty.value.onUpdate.listen((_) {
-        final power = super.lyfiThing!.fanPowerProperty.getValue();
-        _fanPowerRatio = power.toDouble();
-        notifyListeners();
-      });
-      _temperatureSubscription = super.lyfiThing!.temperatureProperty.value.onUpdate.listen((value) {
-        _currentTemperature = value;
-        notifyListeners();
-      });
-      _fanModeSubscription = super.lyfiThing!.fanModeProperty.value.onUpdate.listen((value) {
-        _fanMode = FanMode.values.firstWhere((e) => e.name == value);
-        notifyListeners();
-      });
-      _voltageSubscription = super.lyfiThing!.voltageProperty.value.onUpdate.listen((value) {
-        super.currentVoltage.value = value;
-      });
-      _currentSubscription = super.lyfiThing!.currentProperty.value.onUpdate.listen((value) {
-        currentCurrent.value = value;
-      });
-      _powerSubscription = super.lyfiThing!.powerProperty.value.onUpdate.listen((value) {
-        currentWatts.value = value;
-      });
-      // Set initial values
-      _fanPowerRatio = super.lyfiThing!.fanPowerProperty.getValue().toDouble();
-      _currentTemperature = super.lyfiThing!.temperatureProperty.getValue();
-      _fanMode = FanMode.values.firstWhere((e) => e.name == super.lyfiThing!.fanModeProperty.getValue());
-      super.currentVoltage.value = super.lyfiThing!.voltageProperty.getValue();
-      currentCurrent.value = super.lyfiThing!.currentProperty.getValue();
-      currentWatts.value = super.lyfiThing!.powerProperty.getValue();
-    }
+    _fanPowerSubscription = super.lyfiThing.fanPowerProperty.value.onUpdate.listen((_) {
+      final power = super.lyfiThing.fanPowerProperty.getValue();
+      _fanPowerRatio = power.toDouble();
+      notifyListeners();
+    });
+    _temperatureSubscription = super.lyfiThing.temperatureProperty.value.onUpdate.listen((value) {
+      _currentTemperature = value;
+      notifyListeners();
+    });
+    _fanModeSubscription = super.lyfiThing.fanModeProperty.value.onUpdate.listen((value) {
+      _fanMode = FanMode.values.firstWhere((e) => e.name == value);
+      notifyListeners();
+    });
+    _voltageSubscription = super.lyfiThing.voltageProperty.value.onUpdate.listen((value) {
+      super.currentVoltage.value = value;
+    });
+    _currentSubscription = super.lyfiThing.currentProperty.value.onUpdate.listen((value) {
+      currentCurrent.value = value;
+    });
+    _powerSubscription = super.lyfiThing.powerProperty.value.onUpdate.listen((value) {
+      currentWatts.value = value;
+    });
+    // Set initial values
+    _fanPowerRatio = super.lyfiThing.fanPowerProperty.getValue().toDouble();
+    _currentTemperature = super.lyfiThing.temperatureProperty.getValue();
+    _fanMode = FanMode.values.firstWhere((e) => e.name == super.lyfiThing.fanModeProperty.getValue());
+    super.currentVoltage.value = super.lyfiThing.voltageProperty.getValue();
+    currentCurrent.value = super.lyfiThing.currentProperty.getValue();
+    currentWatts.value = super.lyfiThing.powerProperty.getValue();
     if (super.isOnline && !isSuspectedOffline && boundDevice != null) {
       _temporaryDuration = await executeLyfiCommand(() => _deviceApi.getTemporaryDuration(boundDevice!.device));
       _fanMode = await executeLyfiCommand(() => _deviceApi.getFanMode(boundDevice!.device));
@@ -599,10 +597,10 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
     final vm = SettingsViewModel(
       gt,
-      deviceID: deviceID,
       deviceManager: deviceManager,
       globalEventBus: globalEventBus,
       notification: notification,
+      wotThing: wotThing,
       address: deviceEntity.address,
       borneoStatus: borneoDeviceStatus!,
       borneoInfo: super.borneoDeviceInfo!,

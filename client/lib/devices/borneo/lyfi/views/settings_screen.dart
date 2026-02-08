@@ -346,10 +346,10 @@ class SettingsScreen extends StatelessWidget {
 
   void _goControllerSettings(BuildContext context, SettingsViewModel svm) {
     final csvm = ControllerSettingsViewModel(
-      deviceID: svm.deviceID,
       deviceManager: svm.deviceManager,
       globalEventBus: svm.globalEventBus,
       notification: svm.notification,
+      wotThing: svm.wotThing,
     );
     final route = MaterialPageRoute(builder: (context) => ControllerSettingsScreen(csvm));
     Navigator.push(context, route);

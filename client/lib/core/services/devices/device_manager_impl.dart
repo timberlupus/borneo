@@ -380,43 +380,13 @@ final class DeviceManagerImpl extends IDeviceManager {
   }
 
   @override
-  WotThing? getWotThing(String deviceID) {
+  WotThing getWotThing(String deviceID) {
     // Only return WotThings for devices that are already loaded (current scene)
-    return _wotThings[deviceID];
-  }
-
-  @override
-  Future<WotThing?> getOrCreateWotThing(String deviceID) async {
-    // Check if already exists
-    if (_wotThings.containsKey(deviceID)) {
-      return _wotThings[deviceID];
+    final wotThing = _wotThings[deviceID];
+    if (wotThing == null) {
+      throw StateError('WotThing not found for device $deviceID. Ensure the device is in the current scene and WotThing was loaded successfully.');
     }
-
-    try {
-      final device = await getDevice(deviceID);
-
-      // Check if device belongs to current scene
-      if (device.sceneID != _sceneManager.current.id) {
-        logger?.w('Device $deviceID is not in current scene, cannot create WotThing');
-        return null;
-      }
-
-      final metaModule = _deviceModuleRegistry.metaModules[device.driverID];
-      if (metaModule != null) {
-        final wotThing = await metaModule.createWotThing(device, this, logger: logger);
-        _wotThings[deviceID] = wotThing;
-
-        // If device is bound, sync WotThing with actual device state
-        if (isBound(deviceID)) {
-          await _syncWotThingWithBoundDevice(deviceID, wotThing);
-        }
-
-        return wotThing;
-      }
-    } catch (e) {
-      logger?.w('Failed to create WotThing for device $deviceID: $e');
-    }
-    return null;
+    return wotThing;
   }
 
   @override
