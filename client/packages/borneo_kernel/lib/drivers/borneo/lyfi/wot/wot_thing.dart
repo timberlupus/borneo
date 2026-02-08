@@ -935,7 +935,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     // Additional API calls for new properties
     final cloudEnabled = await lyfiApi!.getCloudEnabled(device);
     final temporaryDuration = await lyfiApi!.getTemporaryDuration(device);
-    // final sunSchedule = await lyfiApi!.getSunSchedule(device);
+    final sunSchedule = await lyfiApi!.getSunSchedule(device);
     // final sunCurve = await lyfiApi!.getSunCurve(device);
     // final currentTemp = await lyfiApi.getCurrentTemp(device); // Use lyfiStatus.temperature
     // final deviceInfo = await lyfiApi.getDeviceInfo(device); // Skip for now
@@ -958,7 +958,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
 
     cloudEnabledProperty.value.notifyOfExternalUpdate(cloudEnabled);
     temporaryDurationProperty.value.notifyOfExternalUpdate(temporaryDuration);
-    //  sunScheduleProperty.value.notifyOfExternalUpdate(sunSchedule);
+    sunScheduleProperty.value.notifyOfExternalUpdate(sunSchedule);
     // sunCurveProperty.value.notifyOfExternalUpdate(sunCurve);
     currentTempProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature ?? 25);
     // deviceInfoProperty.value.notifyOfExternalUpdate(deviceInfo);

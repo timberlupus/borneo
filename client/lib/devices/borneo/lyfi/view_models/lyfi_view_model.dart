@@ -120,6 +120,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
   StreamSubscription<String>? _stateSubscription;
   StreamSubscription<String>? _modeSubscription;
+  StreamSubscription<ScheduleTable>? _sunScheduleSubscription;
 
   double _overallBrightness = 0;
   double get overallBrightness => _overallBrightness;
@@ -242,6 +243,13 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       notifyListeners();
     });
 
+    _sunScheduleSubscription = super.lyfiThing.sunScheduleProperty.value.onUpdate.listen((value) {
+      sunInstants
+        ..clear()
+        ..addAll(value);
+      notifyListeners();
+    });
+
     // Set initial values
     _fanPowerRatio = super.lyfiThing.fanPowerProperty.getValue().toDouble();
     _currentTemperature = super.lyfiThing.temperatureProperty.getValue();
@@ -258,20 +266,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
     _editorState = _editorState.copyWith(mode: super.mode);
 
-    if (super.isOnline && !isSuspectedOffline && boundDevice != null) {
-      switch (mode) {
-        case LyfiMode.scheduled:
-          scheduledInstants.addAll(lyfiThing.scheduleProperty.value.get());
-          break;
-
-        case LyfiMode.sun:
-          sunInstants.addAll(lyfiThing.sunScheduleProperty.value.get());
-          break;
-
-        default:
-          break;
-      }
-    }
+    await _syncScheduleTables(mode: super.mode);
 
     // Update schedule
     // final schedule = await _deviceApi.getSchedule(boundDevice.device);
@@ -294,6 +289,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       _temporaryRemainingSubscription?.cancel();
       _stateSubscription?.cancel();
       _modeSubscription?.cancel();
+      _sunScheduleSubscription?.cancel();
       for (final cvn in _channels) {
         cvn.dispose();
       }
@@ -332,22 +328,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
     _editorState = _editorState.copyWith(mode: super.mode);
 
-    switch (mode) {
-      case LyfiMode.scheduled:
-        if (scheduledInstants.isEmpty) {
-          scheduledInstants.addAll(lyfiThing.scheduleProperty.value.get());
-        }
-        break;
-
-      case LyfiMode.sun:
-        if (sunInstants.isEmpty) {
-          sunInstants.addAll(lyfiThing.sunScheduleProperty.value.get());
-        }
-        break;
-
-      default:
-        break;
-    }
+    await _syncScheduleTables(mode: super.mode);
 
     // Update schedule
     if (!super.isLocked) {
@@ -399,14 +380,32 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       }
       _overallBrightness = ob;
     }
+  }
 
-    if (super.mode == LyfiMode.sun) {
-      final sunSchedule = lyfiThing.sunScheduleProperty.value.get();
-      if (sunSchedule.length == sunInstants.length) {
-        for (int i = 0; i < sunSchedule.length; i++) {
-          sunInstants[i] = sunSchedule[i];
+  Future<void> _syncScheduleTables({required LyfiMode mode, bool force = false}) async {
+    if (!super.isOnline || isSuspectedOffline || boundDevice == null) {
+      return;
+    }
+
+    switch (mode) {
+      case LyfiMode.scheduled:
+        if (force || scheduledInstants.isEmpty) {
+          scheduledInstants
+            ..clear()
+            ..addAll(lyfiThing.scheduleProperty.value.get());
         }
-      }
+        break;
+
+      case LyfiMode.sun:
+        if (force || sunInstants.isEmpty) {
+          sunInstants
+            ..clear()
+            ..addAll(lyfiThing.sunScheduleProperty.value.get());
+        }
+        break;
+
+      default:
+        break;
     }
   }
 
@@ -485,11 +484,9 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       if (editor != null && editor.isChanged) {
         await editor.save();
         if (editor is ScheduleEditorViewModel) {
-          scheduledInstants.clear();
-          scheduledInstants.addAll(lyfiThing.scheduleProperty.value.get());
+          await _syncScheduleTables(mode: LyfiMode.scheduled, force: true);
         } else if (editor is SunEditorViewModel) {
-          sunInstants.clear();
-          sunInstants.addAll(lyfiThing.sunScheduleProperty.value.get());
+          await _syncScheduleTables(mode: LyfiMode.sun, force: true);
         }
       }
       final previousEditor = _editorState.editor;
@@ -551,6 +548,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     final previousEditor = _editorState.editor;
     _editorState = _editorState.copyWith(mode: newMode, status: EditorStatus.loading, editor: null, clearError: true);
     notifyListeners();
+
+    await _syncScheduleTables(mode: newMode);
 
     IEditor newEditor;
     switch (newMode) {

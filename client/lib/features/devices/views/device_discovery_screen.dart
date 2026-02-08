@@ -22,15 +22,15 @@ class DeviceDiscoveryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => DeviceDiscoveryViewModel(
-        context.read<Logger>(),
-        context.read<IGroupManager>(),
-        context.read<IDeviceManager>(),
-        context.read<IBleProvisioner>(),
-        context.read<IDeviceModuleRegistry>(),
-        globalEventBus: context.read<EventBus>(),
-        gt: GettextLocalizations.of(context),
-        logger: context.read<Logger>(),
+      create: (cb) => DeviceDiscoveryViewModel(
+        cb.read<Logger>(),
+        cb.read<IGroupManager>(),
+        cb.read<IDeviceManager>(),
+        cb.read<IBleProvisioner>(),
+        cb.read<IDeviceModuleRegistry>(),
+        globalEventBus: cb.read<EventBus>(),
+        gt: GettextLocalizations.of(cb),
+        logger: cb.read<Logger>(),
       )..onInitialize(),
       child: const _DeviceDiscoveryContent(),
     );
