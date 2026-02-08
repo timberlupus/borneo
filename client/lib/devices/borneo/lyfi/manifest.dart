@@ -12,6 +12,7 @@ import 'package:borneo_kernel_abstractions/errors.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:logger/logger.dart';
 import 'package:lw_wot/wot.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/wot.dart';
@@ -21,7 +22,6 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:provider/provider.dart';
 
 import 'package:borneo_kernel/drivers/borneo/lyfi/metadata.dart';
-import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
   LyfiDeviceModuleMetadata()
@@ -36,12 +36,13 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
           notification: context.read<IAppNotificationService>(),
           wotThing: context.read<IDeviceManager>().getWotThing(deviceID),
           localeService: context.read<ILocaleService>(),
+          gt: GettextLocalizations.of(context),
           logger: context.read<Logger>(),
         ),
         deviceIconBuilder: _buildDeviceIcon,
         primaryStateIconBuilder: _buildPrimaryStateIcon,
         secondaryStatesBuilder: _secondaryStatesBuilder,
-        createSummaryVM: (dev, dm, bus) => LyfiSummaryDeviceViewModel(dev, dm, bus),
+        createSummaryVM: (dev, dm, bus, gt) => LyfiSummaryDeviceViewModel(dev, dm, bus, gt: gt),
         createWotThing: _createWotThing,
       );
 

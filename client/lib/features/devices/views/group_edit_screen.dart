@@ -3,6 +3,7 @@ import 'package:borneo_app/features/devices/view_models/group_edit_view_model.da
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
@@ -183,6 +184,7 @@ class GroupEditScreen extends StatelessWidget {
         isCreation: args.isCreation,
         model: args.model,
         globalEventBus: context.read<EventBus>(),
+        gt: GettextLocalizations.of(context),
         logger: context.read<Logger>(),
       ),
       builder: (context, child) => Scaffold(

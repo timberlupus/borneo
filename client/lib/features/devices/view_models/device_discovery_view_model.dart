@@ -24,7 +24,6 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   final IDeviceManager _deviceManager;
   final IBleProvisioner _bleProvisioner;
   final IDeviceModuleRegistry deviceMdoules;
-  final GettextLocalizations _gt;
 
   bool get _isDiscovering => _deviceManager.isDiscoverying;
   bool _isRefreshing = false;
@@ -62,9 +61,9 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     this._groupManager,
     this._deviceManager,
     this._bleProvisioner,
-    this.deviceMdoules,
-    this._gt, {
+    this.deviceMdoules, {
     required super.globalEventBus,
+    required super.gt,
     super.logger,
   }) {
     _deviceAddedEventSub = _deviceManager.allDeviceEvents.on<NewDeviceEntityAddedEvent>().listen(
@@ -171,7 +170,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
       if (_scanCancelToken.isCancelled) return;
       _logger.e('Discovery error', error: e, stackTrace: stackTrace);
       if (!_disposed) {
-        _scanError.value = _gt.translate('Bluetooth scan error, please check if Bluetooth device is enabled.');
+        _scanError.value = gt.translate('Bluetooth scan error, please check if Bluetooth device is enabled.');
       }
     } finally {
       if (!_scanCancelToken.isCancelled && !_disposed) {

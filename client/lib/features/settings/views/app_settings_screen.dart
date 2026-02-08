@@ -4,6 +4,7 @@ import 'package:borneo_app/core/services/url_launcher_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
@@ -32,6 +33,7 @@ class AppSettingsScreen extends StatelessWidget {
       create: (cb) => AppSettingsViewModel(
         globalEventBus: cb.read<EventBus>(),
         localeService: cb.read<ILocaleService>(),
+        gt: GettextLocalizations.of(cb),
         logger: cb.read<Logger>(),
       ),
       builder: (context, child) {

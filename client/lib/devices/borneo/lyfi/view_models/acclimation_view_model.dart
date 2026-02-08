@@ -35,6 +35,7 @@ class AcclimationViewModel extends BaseLyfiDeviceViewModel {
     required super.globalEventBus,
     required super.notification,
     required super.wotThing,
+    required super.gt,
     super.logger,
   });
 

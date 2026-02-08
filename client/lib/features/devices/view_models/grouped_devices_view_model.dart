@@ -7,6 +7,7 @@ import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:cancellation_token/cancellation_token.dart';
+import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:synchronized/synchronized.dart';
 
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
@@ -62,6 +63,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     this._deviceManager,
     this._deviceModuleRegistry, {
     required this.clock,
+    required super.gt,
     super.logger,
   }) {
     super.globalEventBus = globalEventBus;
@@ -147,9 +149,12 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     final newDummyGroup = GroupViewModel(
       DeviceGroupEntity(id: '', sceneID: _sceneManager.current.id, name: 'Ungrouped devices'),
       clock: this.clock,
+      gt: super.gt,
     );
 
-    _groups.addAll(groupEntities.map((g) => GroupViewModel(g, clock: this.clock)).followedBy([newDummyGroup]));
+    _groups.addAll(
+      groupEntities.map((g) => GroupViewModel(g, clock: this.clock, gt: super.gt)).followedBy([newDummyGroup]),
+    );
 
     // Build device group mapping for efficient assignment
     final groupMap = {for (final group in _groups) group.id: group};
@@ -157,7 +162,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     for (final deviceEntity in deviceEntities) {
       final metaModule = _deviceModuleRegistry.metaModules[deviceEntity.driverID];
       if (metaModule != null) {
-        final deviceVM = metaModule.createSummaryVM(deviceEntity, _deviceManager, globalEventBus);
+        final deviceVM = metaModule.createSummaryVM(deviceEntity, _deviceManager, globalEventBus, gt);
         final targetGroup = deviceEntity.groupID != null ? groupMap[deviceEntity.groupID] : newDummyGroup;
 
         if (targetGroup != null) {
@@ -207,7 +212,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     try {
       final metaModule = _deviceModuleRegistry.metaModules[event.device.driverID];
       if (metaModule != null) {
-        final deviceVM = metaModule.createSummaryVM(event.device, _deviceManager, globalEventBus);
+        final deviceVM = metaModule.createSummaryVM(event.device, _deviceManager, globalEventBus, gt);
 
         GroupViewModel targetGroup;
         if (event.device.groupID != null) {

@@ -278,9 +278,9 @@ class _MainScreenState extends State<MainScreen> {
           gm,
           dm,
           ls,
-          GettextLocalizations.of(context),
           notification: ctx.read<IAppNotificationService>(),
           clock: ctx.read<IClock>(),
+          gt: GettextLocalizations.of(context),
           logger: ctx.read<Logger>(),
         );
 
@@ -334,7 +334,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildInitializedContent(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => MyViewModel(), lazy: true),
+        ChangeNotifierProvider(create: (_) => MyViewModel(gt: GettextLocalizations.of(context)), lazy: true),
         ChangeNotifierProvider(
           create: (context) {
             final logger = context.read<Logger>();
@@ -344,7 +344,16 @@ class _MainScreenState extends State<MainScreen> {
             final dm = context.read<IDeviceManager>();
             final dmr = context.read<IDeviceModuleRegistry>();
             final clock = context.read<IClock>();
-            return GroupedDevicesViewModel(globalEventBus, sm, gm, dm, dmr, clock: clock, logger: logger);
+            return GroupedDevicesViewModel(
+              globalEventBus,
+              sm,
+              gm,
+              dm,
+              dmr,
+              clock: clock,
+              gt: context.read<GettextLocalizations>(),
+              logger: logger,
+            );
           },
           lazy: true,
         ),

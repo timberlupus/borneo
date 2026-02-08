@@ -16,7 +16,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   final GeneralBorneoDeviceInfo borneoInfo;
   final LyfiDeviceInfo ledInfo;
   final LyfiDeviceStatus ledStatus;
-  final GettextLocalizations _gt;
+  GettextLocalizations get _gt => super.gt;
 
   ILyfiDeviceApi get api => deviceManager.getBoundDevice(deviceID).api<ILyfiDeviceApi>();
 
@@ -53,8 +53,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   bool get canUpdatePowerBehavior => !isBusy && isOnline;
   bool get isControllerSettingsAvailable => borneoInfo.productMode == ProductMode.standalone;
 
-  SettingsViewModel(
-    this._gt, {
+  SettingsViewModel({
     required super.deviceManager,
     required super.globalEventBus,
     required super.notification,
@@ -66,6 +65,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     required this.ledStatus,
     required GeoLocation? location,
     required PowerBehavior powerBehavior,
+    required super.gt,
+    super.logger,
   }) : _location = location,
        _powerBehavior = powerBehavior,
        _timezone = borneoStatus.timezone;

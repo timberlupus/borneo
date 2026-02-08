@@ -57,6 +57,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     required this.deviceManager,
     required EventBus globalEventBus,
     required this.wotThing,
+    required super.gt,
     super.logger,
   }) {
     super.globalEventBus = globalEventBus;

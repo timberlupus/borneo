@@ -46,6 +46,7 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
     required super.globalEventBus,
     required this.notification,
     required super.wotThing,
+    required super.gt,
     super.logger,
   }) {
     _subscribeToGeneralStatus();

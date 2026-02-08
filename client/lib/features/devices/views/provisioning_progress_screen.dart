@@ -3,6 +3,7 @@ import 'package:borneo_app/features/devices/models/ble_provision_state.dart';
 import 'package:borneo_app/features/devices/view_models/provisioning_progress_view_model.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
@@ -27,6 +28,7 @@ class ProvisioningProgressScreen extends StatelessWidget {
         ssid,
         password,
         globalEventBus: context.read<EventBus>(),
+        gt: GettextLocalizations.of(context),
       )..startProvisioning(),
       child: Scaffold(
         appBar: AppBar(

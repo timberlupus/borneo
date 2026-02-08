@@ -5,7 +5,7 @@ abstract class AbstractScreenViewModel extends BaseViewModel with ViewModelEvent
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
-  AbstractScreenViewModel({required EventBus globalEventBus, super.logger}) {
+  AbstractScreenViewModel({required EventBus globalEventBus, required super.gt, super.logger}) {
     super.globalEventBus = globalEventBus;
   }
 

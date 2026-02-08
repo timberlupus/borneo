@@ -117,6 +117,7 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
     required super.globalEventBus,
     required super.notification,
     required super.wotThing,
+    required super.gt,
     super.logger,
   });
 

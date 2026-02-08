@@ -19,7 +19,7 @@ class GroupViewModel extends BaseViewModel {
 
   bool get isEmpty => _devices.isEmpty;
 
-  GroupViewModel(this.model, {required this.clock}) {
+  GroupViewModel(this.model, {required this.clock, required super.gt}) {
     _lastModified = this.clock.now().millisecondsSinceEpoch;
   }
 

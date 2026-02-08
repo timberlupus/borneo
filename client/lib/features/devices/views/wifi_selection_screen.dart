@@ -3,6 +3,8 @@ import 'package:borneo_app/features/devices/view_models/wifi_selection_view_mode
 import 'package:borneo_app/features/devices/views/provisioning_progress_screen.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
+import 'package:logger/web.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
@@ -27,9 +29,13 @@ class WifiSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) =>
-          WifiSelectionViewModel(context.read<IBleProvisioner>(), deviceName, globalEventBus: context.read<EventBus>())
-            ..onInitialize(),
+      create: (context) => WifiSelectionViewModel(
+        context.read<IBleProvisioner>(),
+        deviceName,
+        globalEventBus: context.read<EventBus>(),
+        gt: GettextLocalizations.of(context),
+        logger: context.read<Logger>(),
+      )..onInitialize(),
       child: Scaffold(
         appBar: AppBar(title: Text(context.translate('Select WiFi'))),
         body: Consumer<WifiSelectionViewModel>(

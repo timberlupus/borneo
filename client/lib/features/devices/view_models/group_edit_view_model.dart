@@ -22,6 +22,7 @@ class GroupEditViewModel extends AbstractScreenViewModel {
     required this.isCreation,
     DeviceGroupEntity? model,
     super.logger,
+    required super.gt,
   }) {
     if (isCreation) {
       name = '';

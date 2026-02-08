@@ -28,8 +28,9 @@ class DeviceDiscoveryScreen extends StatelessWidget {
         context.read<IDeviceManager>(),
         context.read<IBleProvisioner>(),
         context.read<IDeviceModuleRegistry>(),
-        context.read<GettextLocalizations>(),
         globalEventBus: context.read<EventBus>(),
+        gt: GettextLocalizations.of(context),
+        logger: context.read<Logger>(),
       )..onInitialize(),
       child: const _DeviceDiscoveryContent(),
     );

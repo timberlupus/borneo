@@ -35,8 +35,13 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
   late bool _isPowerOn = false;
   bool get isPowerOn => _isPowerOn;
 
-  AbstractDeviceSummaryViewModel(this.deviceEntity, this.deviceManager, EventBus globalEventBus)
-    : _isOnline = deviceManager.isBound(deviceEntity.id) {
+  AbstractDeviceSummaryViewModel(
+    this.deviceEntity,
+    this.deviceManager,
+    EventBus globalEventBus, {
+    required super.gt,
+    super.logger,
+  }) : _isOnline = deviceManager.isBound(deviceEntity.id) {
     super.globalEventBus = globalEventBus;
     _boundEventSub = deviceManager.allDeviceEvents.on<DeviceBoundEvent>().listen(_onBound);
     _removedEventSub = deviceManager.allDeviceEvents.on<DeviceRemovedEvent>().listen(_onRemoved);

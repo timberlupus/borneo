@@ -1,16 +1,19 @@
-import 'package:borneo_app/core/events/app_events.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:logger/logger.dart';
+
+import 'package:borneo_app/core/events/app_events.dart';
 
 abstract class BaseViewModel extends ChangeNotifier {
   final Logger? logger;
   bool _isDisposed = false;
   bool isBusy = false;
+  final GettextLocalizations gt;
 
   bool get isDisposed => _isDisposed;
 
-  BaseViewModel({this.logger});
+  BaseViewModel({required this.gt, this.logger});
 
   @override
   void dispose() {

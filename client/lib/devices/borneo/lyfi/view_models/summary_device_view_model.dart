@@ -9,7 +9,13 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
   final ValueNotifier<LyfiState?> ledState = ValueNotifier(null);
   final ValueNotifier<LyfiMode?> ledMode = ValueNotifier(null);
 
-  LyfiSummaryDeviceViewModel(super.deviceEntity, super.deviceManager, super.globalEventBus) {
+  LyfiSummaryDeviceViewModel(
+    super.deviceEntity,
+    super.deviceManager,
+    super.globalEventBus, {
+    required super.gt,
+    super.logger,
+  }) {
     _syncFromThing();
     wotThing?.addSubscriber(_onStateChanged);
     wotThing?.addSubscriber(_onModeChanged);

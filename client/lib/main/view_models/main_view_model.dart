@@ -51,7 +51,6 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   bool get isScanningDevices => _deviceManager.isDiscoverying;
 
   final IAppNotificationService notification;
-  final GettextLocalizations _gt;
 
   MainViewModel(
     EventBus globalEventBus,
@@ -59,10 +58,10 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
     this._sceneManager,
     this._groupManager,
     this._deviceManager,
-    this._localeService,
-    this._gt, {
+    this._localeService, {
     required this.notification,
     required this.clock,
+    required super.gt,
     super.logger,
   }) {
     this.globalEventBus = globalEventBus;
@@ -124,7 +123,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   void _onAppError(AppErrorEvent event) {
     if (_errorsStack.isEmpty || _errorsStack.last.error.runtimeType != event.error.runtimeType) {
       _errorsStack.add(event);
-      notification.showError(_gt.translate("ERROR"), body: event.message);
+      notification.showError(gt.translate("ERROR"), body: event.message);
     }
     logger?.e('APP_ERROR: ${event.message}', error: event.error, stackTrace: event.stackTrace);
   }

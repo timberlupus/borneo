@@ -139,6 +139,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     required super.notification,
     required super.wotThing,
     required this.localeService,
+    required super.gt,
     super.logger,
   });
 
@@ -539,7 +540,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         notifyAppError("Unable to switch to Sun Simulation mode, the device's timezone is not set.");
         return;
       }
-      final location = await executeLyfiCommand(() => super.lyfiDeviceApi.getLocation(super.boundDevice!.device));
+      final location = super.lyfiThing.locationProperty.value.get();
       if (location == null) {
         notifyAppError("Unable to switch to Sun Simulation mode, the device's geographic location is not set.");
         return;
@@ -613,7 +614,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       throw StateError('Device is not reachable at the moment.');
     }
     final vm = SettingsViewModel(
-      gt,
       deviceManager: deviceManager,
       globalEventBus: globalEventBus,
       notification: notification,
@@ -625,6 +625,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       ledStatus: lyfiDeviceStatus!,
       powerBehavior: await executeLyfiCommand(() => super.lyfiDeviceApi.getPowerBehavior(boundDevice!.device)),
       location: await executeLyfiCommand(() => super.lyfiDeviceApi.getLocation(boundDevice!.device)),
+      gt: gt,
+      logger: super.logger,
     );
     await vm.initialize();
     return vm;

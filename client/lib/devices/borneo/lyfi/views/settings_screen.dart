@@ -10,6 +10,7 @@ import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
@@ -350,6 +351,7 @@ class SettingsScreen extends StatelessWidget {
       globalEventBus: svm.globalEventBus,
       notification: svm.notification,
       wotThing: svm.wotThing,
+      gt: context.read<GettextLocalizations>(),
     );
     final route = MaterialPageRoute(builder: (context) => ControllerSettingsScreen(csvm));
     Navigator.push(context, route);

@@ -13,7 +13,13 @@ class WifiSelectionViewModel extends AbstractScreenViewModel {
   List<WifiNetwork>? get networks => _networks;
   final CancellationToken _scanCancelToken = CancellationToken();
 
-  WifiSelectionViewModel(this._bleProvisioner, this.deviceName, {required super.globalEventBus});
+  WifiSelectionViewModel(
+    this._bleProvisioner,
+    this.deviceName, {
+    required super.globalEventBus,
+    required super.gt,
+    super.logger,
+  });
 
   @override
   Future<void> onInitialize() async {
