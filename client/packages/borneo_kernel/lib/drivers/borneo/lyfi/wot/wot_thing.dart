@@ -59,6 +59,10 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   late final WotProperty<double?> currentProperty;
   late final WotProperty<double?> powerProperty;
 
+  // Temporary properties for refactoring - TODO: Remove after refactoring
+  late final WotProperty<LyfiDeviceStatus> lyfiStatusProperty;
+  late final WotProperty<GeneralBorneoDeviceStatus> generalStatusProperty;
+
   LyfiThing({
     required this.device,
     required this.deviceEvents,
@@ -497,6 +501,64 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       ),
     );
     addProperty(deviceInfoProperty);
+
+    // Temporary Lyfi status property for refactoring - TODO: Remove after refactoring
+    lyfiStatusProperty = WotProperty<LyfiDeviceStatus>(
+      thing: this,
+      name: 'lyfiStatus',
+      value: WotValue<LyfiDeviceStatus>(
+        initialValue: LyfiDeviceStatus(
+          state: LyfiState.normal,
+          mode: LyfiMode.manual,
+          unscheduled: false,
+          temporaryRemaining: Duration.zero,
+          currentColor: [0, 0, 0, 0],
+          manualColor: [0, 0, 0, 0],
+          sunColor: [0, 0, 0, 0],
+          temperature: null,
+          powerCurrent: null,
+        ), // Default values
+        valueForwarder: (update) async {
+          // Allow setting for now during refactoring
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'object',
+        title: 'Lyfi Status',
+        description: 'Temporary property for Lyfi device status during refactoring',
+        readOnly: false,
+      ),
+    );
+    addProperty(lyfiStatusProperty);
+
+    // Temporary general status property for refactoring - TODO: Remove after refactoring
+    generalStatusProperty = WotProperty<GeneralBorneoDeviceStatus>(
+      thing: this,
+      name: 'generalStatus',
+      value: WotValue<GeneralBorneoDeviceStatus>(
+        initialValue: GeneralBorneoDeviceStatus(
+          timestamp: DateTime.now(),
+          bootDuration: Duration.zero,
+          timezone: '',
+          wifiStatus: 0,
+          btStatus: 0,
+          serverStatus: 0,
+          error: 0,
+          shutdownReason: 0,
+          power: false,
+        ), // Default values
+        valueForwarder: (update) async {
+          throw UnsupportedError('General status is read-only during refactoring');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'object',
+        title: 'General Status',
+        description: 'Temporary property for general Borneo device status during refactoring',
+        readOnly: true,
+      ),
+    );
+    addProperty(generalStatusProperty);
 
     // Unscheduled property (read-only)
     unscheduledProperty = WotProperty<bool>(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/features/devices/view_models/base_device_view_model.dart';
 import 'package:borneo_app/core/infrastructure/timezone.dart';
@@ -9,8 +11,8 @@ import 'package:flutter/material.dart';
 abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   GeneralBorneoDeviceInfo? get borneoDeviceInfo => borneoDeviceApi.getGeneralDeviceInfo(boundDevice!.device);
 
-  GeneralBorneoDeviceStatus? _borneoDeviceStatus;
-  GeneralBorneoDeviceStatus? get borneoDeviceStatus => isOnline ? _borneoDeviceStatus : null;
+  GeneralBorneoDeviceStatus? get borneoDeviceStatus =>
+      isOnline ? wotThing?.getProperty<GeneralBorneoDeviceStatus>('generalStatus') : null;
 
   IBorneoDeviceApi get borneoDeviceApi => super.boundDevice!.driver as IBorneoDeviceApi;
 
@@ -24,9 +26,11 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   final ValueNotifier<double?> currentVoltage = ValueNotifier<double?>(null);
   final IAppNotificationService notification;
 
+  StreamSubscription? _generalStatusSubscription;
+
   @override
   RssiLevel? get rssiLevel =>
-      _borneoDeviceStatus?.wifiRssi != null ? RssiLevelExtension.fromRssi(_borneoDeviceStatus!.wifiRssi!) : null;
+      borneoDeviceStatus?.wifiRssi != null ? RssiLevelExtension.fromRssi(borneoDeviceStatus!.wifiRssi!) : null;
 
   String? _deviceTimezone;
   String? get deviceTimezone => _deviceTimezone;
@@ -52,6 +56,16 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
     await _initializeTimezone();
   }
 
+  @override
+  void onDeviceBound() {
+    _subscribeToGeneralStatus();
+  }
+
+  @override
+  void onDeviceRemoved() {
+    _unsubscribeFromGeneralStatus();
+  }
+
   Future<void> _initializeTimezone() async {
     try {
       final tzc = TimezoneConverter();
@@ -60,6 +74,22 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
     } catch (e) {
       logger?.e('Failed to initialize local timezone: $e');
     }
+  }
+
+  void _subscribeToGeneralStatus() {
+    if (wotThing != null) {
+      final property = wotThing!.findProperty('generalStatus');
+      if (property != null) {
+        _generalStatusSubscription = property.value.onUpdate.listen((status) {
+          notifyListeners();
+        });
+      }
+    }
+  }
+
+  void _unsubscribeFromGeneralStatus() {
+    _generalStatusSubscription?.cancel();
+    _generalStatusSubscription = null;
   }
 
   Future<void> checkDeviceTimezone() async {
@@ -107,14 +137,9 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
     final oldTimezone = _deviceTimezone;
     final oldVoltage = currentVoltage.value;
 
-    _borneoDeviceStatus = await borneoDeviceApi.getGeneralDeviceStatus(
-      super.boundDevice!.device,
-      cancelToken: cancelToken,
-    );
-    _isOn = borneoDeviceStatus!.power;
-    _deviceTimezone = _borneoDeviceStatus?.timezone;
-
-    currentVoltage.value = _borneoDeviceStatus?.powerVoltage;
+    final status = await borneoDeviceApi.getGeneralDeviceStatus(super.boundDevice!.device, cancelToken: cancelToken);
+    _isOn = status.power;
+    _deviceTimezone = status.timezone;
 
     // Only notify if something actually changed
     if (_isOn != oldIsOn || _deviceTimezone != oldTimezone || currentVoltage.value != oldVoltage) {

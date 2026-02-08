@@ -272,11 +272,9 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       }
       if (!super.isLocked && super.isOnline && !isSuspectedOffline) {
         try {
-          Future.microtask(() async {
-            if (super.state != LyfiState.normal) {
-              await super.setState(LyfiState.normal);
-            }
-          });
+          if (super.state != LyfiState.normal) {
+            super.setState(LyfiState.normal);
+          }
         } catch (e, stackTrace) {
           logger?.e('Failed to setMode of the device(${super.deviceEntity})', error: e, stackTrace: stackTrace);
         }
@@ -488,7 +486,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
     if (newIsLocked) {
       // Exiting edit mode - switch to normal state
-      await super.setState(LyfiState.normal);
+      super.setState(LyfiState.normal);
       await refreshStatus();
       final previousEditor = _editorState.editor;
       _editorState = _editorState.copyWith(status: EditorStatus.idle, editor: null, clearError: true);
@@ -498,7 +496,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       notifyListeners();
     } else {
       // Entering edit mode - wait for state to change to dimming before creating editor
-      await super.setState(LyfiState.dimming);
+      super.setState(LyfiState.dimming);
       await refreshStatus();
 
       await _toggleEditor(super.mode);
@@ -533,7 +531,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       }
     }
 
-    await super.setMode(newMode);
+    super.setMode(newMode);
     await refreshStatus();
     await _toggleEditor(super.mode);
     notifyListeners();

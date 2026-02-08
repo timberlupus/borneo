@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
@@ -6,12 +7,10 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/material.dart';
 
 abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
-  LyfiDeviceStatus? _lyfiStatus;
-
   ILyfiDeviceApi get lyfiDeviceApi => super.boundDevice!.driver as ILyfiDeviceApi;
   LyfiDeviceInfo get lyfiDeviceInfo => lyfiDeviceApi.getLyfiInfo(super.boundDevice!.device);
 
-  LyfiDeviceStatus? get lyfiDeviceStatus => _lyfiStatus;
+  LyfiDeviceStatus? get lyfiDeviceStatus => lyfiThing?.lyfiStatusProperty.value.get();
 
   LyfiThing? get lyfiThing => wotThing as LyfiThing?;
 
@@ -21,8 +20,9 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
       super.isOnline && !super.isSuspectedOffline && isOn && lyfiDeviceStatus?.powerCurrent != null;
   bool get canMeasurePower => canMeasureCurrent && canMeasureVoltage;
 
-  LyfiMode _mode = LyfiMode.manual;
-  LyfiState _state = LyfiState.normal;
+  StreamSubscription<String>? _stateSubscription;
+  StreamSubscription<String>? _modeSubscription;
+  StreamSubscription<LyfiDeviceStatus>? _statusSubscription;
 
   final ValueNotifier<double?> currentCurrent = ValueNotifier<double?>(null);
   final ValueNotifier<double?> currentWatts = ValueNotifier<double?>(null);
@@ -31,37 +31,78 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   @protected
   Future<void> onInitialize() async {
     super.onInitialize();
+    _subscribeToLyfiThing();
     if (super.isOnline) {
       await super.refreshStatus();
     }
   }
 
-  LyfiMode get mode => _mode;
+  void _subscribeToLyfiThing() {
+    if (lyfiThing != null) {
+      _stateSubscription = lyfiThing!.stateProperty.value.onUpdate.listen((stateName) {
+        final newState = LyfiState.fromString(stateName);
+        if (state != newState) {
+          notifyListeners();
+        }
+      });
+      _modeSubscription = lyfiThing!.modeProperty.value.onUpdate.listen((modeName) {
+        final newMode = LyfiMode.fromString(modeName);
+        if (mode != newMode) {
+          notifyListeners();
+        }
+      });
 
-  Future<void> setMode(LyfiMode newMode) async {
-    if (newMode == _mode) {
+      _statusSubscription = lyfiThing!.lyfiStatusProperty.value.onUpdate.listen((status) {
+        notifyListeners();
+      });
+    }
+  }
+
+  @override
+  void onDeviceBound() {
+    super.onDeviceBound();
+    _subscribeToLyfiThing();
+  }
+
+  @override
+  void onDeviceRemoved() {
+    super.onDeviceRemoved();
+    _unsubscribeFromLyfiThing();
+  }
+
+  void _unsubscribeFromLyfiThing() {
+    _stateSubscription?.cancel();
+    _stateSubscription = null;
+    _modeSubscription?.cancel();
+    _modeSubscription = null;
+    _statusSubscription?.cancel();
+    _statusSubscription = null;
+  }
+
+  LyfiMode get mode => LyfiMode.fromString(lyfiThing?.modeProperty.value.get() ?? 'manual');
+
+  void setMode(LyfiMode newMode) {
+    if (newMode == this.mode) {
       return;
     }
     try {
-      await runDeviceCommand(() => lyfiDeviceApi.switchMode(super.boundDevice!.device, newMode));
-      _mode = newMode;
+      lyfiThing?.modeProperty.setValue(newMode.name);
     } catch (_) {
-      await refreshStatus();
+      refreshStatus();
       rethrow;
     }
   }
 
-  LyfiState get state => _state;
+  LyfiState get state => LyfiState.fromString(lyfiThing?.stateProperty.value.get() ?? 'normal');
 
-  Future<void> setState(LyfiState newState) async {
-    if (newState == _state) {
+  void setState(LyfiState newState) {
+    if (newState == this.state) {
       return;
     }
     try {
-      await runDeviceCommand(() => lyfiDeviceApi.switchState(super.boundDevice!.device, newState));
-      _state = newState;
+      lyfiThing?.stateProperty.setValue(newState.name);
     } catch (_) {
-      await refreshStatus();
+      refreshStatus();
       rethrow;
     }
   }
@@ -79,21 +120,11 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   @override
   Future<void> refreshStatus({CancellationToken? cancelToken}) async {
     await super.refreshStatus(cancelToken: cancelToken);
+  }
 
-    if (!super.isOnline || super.isSuspectedOffline) {
-      return;
-    }
-
-    final oldMode = _mode;
-    final oldState = _state;
-
-    _lyfiStatus = await lyfiDeviceApi.getLyfiStatus(boundDevice!.device, cancelToken: cancelToken);
-    _mode = _lyfiStatus?.mode ?? LyfiMode.manual;
-    _state = _lyfiStatus?.state ?? LyfiState.normal;
-
-    // Only notify if something actually changed
-    if (_mode != oldMode || _state != oldState) {
-      notifyListeners();
-    }
+  @override
+  void dispose() {
+    _unsubscribeFromLyfiThing();
+    super.dispose();
   }
 }
