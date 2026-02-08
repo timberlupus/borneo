@@ -261,13 +261,11 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     if (super.isOnline && !isSuspectedOffline && boundDevice != null) {
       switch (mode) {
         case LyfiMode.scheduled:
-          scheduledInstants.addAll(
-            await executeLyfiCommand(() => super.lyfiDeviceApi.getSchedule(boundDevice!.device)),
-          );
+          scheduledInstants.addAll(lyfiThing.scheduleProperty.value.get());
           break;
 
         case LyfiMode.sun:
-          sunInstants.addAll(await executeLyfiCommand(() => super.lyfiDeviceApi.getSunSchedule(boundDevice!.device)));
+          sunInstants.addAll(lyfiThing.sunScheduleProperty.value.get());
           break;
 
         default:
@@ -337,15 +335,13 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     switch (mode) {
       case LyfiMode.scheduled:
         if (scheduledInstants.isEmpty) {
-          scheduledInstants.addAll(
-            await executeLyfiCommand(() => super.lyfiDeviceApi.getSchedule(boundDevice!.device)),
-          );
+          scheduledInstants.addAll(lyfiThing.scheduleProperty.value.get());
         }
         break;
 
       case LyfiMode.sun:
         if (sunInstants.isEmpty) {
-          sunInstants.addAll(await executeLyfiCommand(() => super.lyfiDeviceApi.getSunSchedule(boundDevice!.device)));
+          sunInstants.addAll(lyfiThing.sunScheduleProperty.value.get());
         }
         break;
 
@@ -405,7 +401,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
 
     if (super.mode == LyfiMode.sun) {
-      final sunSchedule = await super.lyfiDeviceApi.getSunSchedule(boundDevice!.device, cancelToken: cancelToken);
+      final sunSchedule = lyfiThing.sunScheduleProperty.value.get();
       if (sunSchedule.length == sunInstants.length) {
         for (int i = 0; i < sunSchedule.length; i++) {
           sunInstants[i] = sunSchedule[i];
@@ -490,12 +486,10 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         await editor.save();
         if (editor is ScheduleEditorViewModel) {
           scheduledInstants.clear();
-          scheduledInstants.addAll(
-            await executeLyfiCommand(() => super.lyfiDeviceApi.getSchedule(boundDevice!.device)),
-          );
+          scheduledInstants.addAll(lyfiThing.scheduleProperty.value.get());
         } else if (editor is SunEditorViewModel) {
           sunInstants.clear();
-          sunInstants.addAll(await executeLyfiCommand(() => super.lyfiDeviceApi.getSunSchedule(boundDevice!.device)));
+          sunInstants.addAll(lyfiThing.sunScheduleProperty.value.get());
         }
       }
       final previousEditor = _editorState.editor;

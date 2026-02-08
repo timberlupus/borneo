@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:logger/web.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 class WifiSelectionScreen extends StatelessWidget {
   final String deviceName;

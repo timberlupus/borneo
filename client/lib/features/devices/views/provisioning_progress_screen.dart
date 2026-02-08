@@ -5,7 +5,6 @@ import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 class ProvisioningProgressScreen extends StatelessWidget {
   final String deviceName;

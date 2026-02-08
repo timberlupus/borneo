@@ -7,7 +7,6 @@ import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:cancellation_token/cancellation_token.dart';
-import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:synchronized/synchronized.dart';
 
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';

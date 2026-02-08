@@ -11,7 +11,6 @@ import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/shared/view_models/base_view_model.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
-import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 
 enum TabIndices { scenes, devices, my }
 

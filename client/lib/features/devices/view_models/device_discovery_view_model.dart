@@ -10,7 +10,6 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 
 import '../models/events.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
