@@ -20,9 +20,10 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   final Logger? logger;
   final Device device;
   final DeviceEventBus deviceEvents;
-  final IBorneoDeviceApi borneoApi;
-  final ILyfiDeviceApi lyfiApi;
+  IBorneoDeviceApi? borneoApi;
+  ILyfiDeviceApi? lyfiApi;
   final bool Function()? canWrite;
+  bool isOffline = false;
 
   // Property references
   late final ObservableWotProperty<bool, DevicePowerOnOffChangedEvent> onOffProperty;
@@ -53,7 +54,6 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   late final WotProperty<List<int>> sunColorProperty;
   late final WotProperty<bool> acclimationActivatedProperty;
   late final WotProperty<bool> cloudActivatedProperty;
-  late final WotProperty<double> powerCurrentProperty;
 
   late final WotProperty<double?> voltageProperty;
   late final WotProperty<double?> currentProperty;
@@ -73,6 +73,33 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     this.canWrite,
   }) : super(id: device.id, type: ["OnOffSwitch", "Light"], description: "Lyfi LED lighting device");
 
+  factory LyfiThing.offline({
+    required Device device,
+    required DeviceEventBus deviceEvents,
+    required String title,
+    Logger? logger,
+    bool Function()? canWrite,
+  }) {
+    return LyfiThing(
+      device: device,
+      deviceEvents: deviceEvents,
+      borneoApi: null,
+      lyfiApi: null,
+      title: title,
+      logger: logger,
+      canWrite: canWrite,
+    )..isOffline = true;
+  }
+
+  void bindToOnlineApis(IBorneoDeviceApi newBorneoApi, ILyfiDeviceApi newLyfiApi) {
+    if (!isOffline) return;
+    borneoApi = newBorneoApi;
+    lyfiApi = newLyfiApi;
+    isOffline = false;
+    // Re-bind to hardware
+    _bindToHardware();
+  }
+
   @override
   bool canWriteProperty(String propertyName) => canWrite?.call() ?? true;
 
@@ -90,11 +117,13 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     // 1. Create properties with default/last known values first (like Mozilla WebThing)
     await _createPropertiesWithDefaults();
 
-    // 2. Set up hardware binding asynchronously (like Mozilla WebThing ready callback)
-    await _bindToHardware();
+    if (!isOffline) {
+      // 2. Set up hardware binding asynchronously (like Mozilla WebThing ready callback)
+      await _bindToHardware();
 
-    // 3. Set up event listeners and periodic sync
-    _setupPeriodicSync();
+      // 3. Set up event listeners and periodic sync
+      _setupPeriodicSync();
+    }
   }
 
   /// Create properties with reasonable defaults first, then bind to hardware
@@ -107,7 +136,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'on',
       value: WotValue<bool>(
         initialValue: false, // Default value, updated in _bindToHardware
-        valueForwarder: (update) => borneoApi.setOnOff(device, update),
+        valueForwarder: (update) => isOffline ? Future.value() : borneoApi!.setOnOff(device, update),
       ),
       metadata: WotPropertyMetadata(
         type: 'boolean',
@@ -128,7 +157,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       value: WotValue<String>(
         initialValue: LyfiState.values.first.name, // Default state
         valueForwarder: (update) async {
-          await lyfiApi.switchState(device, LyfiState.fromString(update));
+          await lyfiApi!.switchState(device, LyfiState.fromString(update));
         },
       ),
       metadata: WotPropertyMetadata(
@@ -150,7 +179,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'mode',
       value: WotValue<String>(
         initialValue: LyfiMode.values.first.name, // Default mode
-        valueForwarder: (update) => lyfiApi.switchMode(device, LyfiMode.fromString(update)),
+        valueForwarder: (update) => lyfiApi!.switchMode(device, LyfiMode.fromString(update)),
       ),
       metadata: WotPropertyMetadata(
         type: 'string',
@@ -170,7 +199,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'color',
       value: WotValue<List<int>>(
         initialValue: [0, 0, 0, 0], // Default 4-channel all off
-        valueForwarder: (update) => lyfiApi.setColor(device, update),
+        valueForwarder: (update) => lyfiApi!.setColor(device, update),
       ),
       metadata: WotPropertyMetadata(
         type: 'array',
@@ -188,7 +217,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'schedule',
       value: WotValue<ScheduleTable>(
         initialValue: [], // Default empty schedule
-        valueForwarder: (update) => lyfiApi.setSchedule(device, update),
+        valueForwarder: (update) => lyfiApi!.setSchedule(device, update),
       ),
       metadata: WotPropertyMetadata(
         type: 'array',
@@ -213,7 +242,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
           startPercent: 0,
           days: 0,
         ),
-        valueForwarder: (update) => lyfiApi.setAcclimation(device, update),
+        valueForwarder: (update) => lyfiApi!.setAcclimation(device, update),
       ),
       metadata: WotPropertyMetadata(
         type: 'object',
@@ -235,7 +264,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
         initialValue: null, // Default no location
         valueForwarder: (update) async {
           if (update != null) {
-            await lyfiApi.setLocation(device, update);
+            await lyfiApi!.setLocation(device, update);
           }
         },
       ),
@@ -258,7 +287,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       value: WotValue<String>(
         initialValue: LedCorrectionMethod.log.name,
         valueForwarder: (update) =>
-            lyfiApi.setCorrectionMethod(device, LedCorrectionMethodExtension.fromString(update)),
+            lyfiApi!.setCorrectionMethod(device, LedCorrectionMethodExtension.fromString(update)),
       ),
       metadata: WotPropertyMetadata(
         type: 'string',
@@ -278,7 +307,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'timeZoneEnabled',
       value: WotValue<bool>(
         initialValue: false, // Default false
-        valueForwarder: (update) => lyfiApi.setTimeZoneEnabled(device, update),
+        valueForwarder: (update) => lyfiApi!.setTimeZoneEnabled(device, update),
       ),
       metadata: WotPropertyMetadata(
         type: 'boolean',
@@ -295,7 +324,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'timeZoneOffset',
       value: WotValue<int>(
         initialValue: 0, // Default 0 offset
-        valueForwarder: (update) => lyfiApi.setTimeZoneOffset(device, update),
+        valueForwarder: (update) => lyfiApi!.setTimeZoneOffset(device, update),
       ),
       metadata: WotPropertyMetadata(
         type: 'integer',
@@ -312,10 +341,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'keepTemp',
       value: WotValue<int>(
         initialValue: 75, // Default 75°C
-        valueForwarder: (update) async {
-          // Note: This is read-only as it's a safety setting
-          throw UnsupportedError('Keep temperature is read-only for safety');
-        },
+        valueForwarder: (_) => throw UnsupportedError('Keep temperature is read-only for safety'),
       ),
       metadata: WotPropertyMetadata(
         type: 'integer',
@@ -332,10 +358,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'temperature',
       value: WotValue<int?>(
         initialValue: null, // Default null
-        valueForwarder: (update) async {
-          // Read-only property
-          throw UnsupportedError('Temperature is read-only');
-        },
+        valueForwarder: (update) => throw UnsupportedError('Temperature is read-only'),
       ),
       metadata: WotPropertyMetadata(
         type: 'integer',
@@ -352,7 +375,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'fanMode',
       value: WotValue<String>(
         initialValue: FanMode.pid.name, // Default PID mode
-        valueForwarder: (update) => lyfiApi.setFanMode(device, FanMode.values.firstWhere((e) => e.name == update)),
+        valueForwarder: (update) => lyfiApi!.setFanMode(device, FanMode.values.firstWhere((e) => e.name == update)),
       ),
       metadata: WotPropertyMetadata(
         type: 'string',
@@ -371,7 +394,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'fanManualPower',
       value: WotValue<int>(
         initialValue: 0, // Default 0% power
-        valueForwarder: (update) => lyfiApi.setFanManualPower(device, update),
+        valueForwarder: (update) => lyfiApi!.setFanManualPower(device, update),
       ),
       metadata: WotPropertyMetadata(
         type: 'integer',
@@ -393,7 +416,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'cloudEnabled',
       value: WotValue<bool>(
         initialValue: false, // Default false
-        valueForwarder: (update) => lyfiApi.setCloudEnabled(device, update),
+        valueForwarder: (update) => lyfiApi!.setCloudEnabled(device, update),
       ),
       metadata: WotPropertyMetadata(
         type: 'boolean',
@@ -410,7 +433,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'temporaryDuration',
       value: WotValue<int>(
         initialValue: 0, // Default 0 minutes
-        valueForwarder: (update) => lyfiApi.setTemporaryDuration(device, Duration(minutes: update)),
+        valueForwarder: (update) => lyfiApi!.setTemporaryDuration(device, Duration(minutes: update)),
       ),
       metadata: WotPropertyMetadata(
         type: 'integer',
@@ -427,9 +450,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'sunSchedule',
       value: WotValue<List<ScheduledInstant>>(
         initialValue: [], // Default empty
-        valueForwarder: (update) async {
-          throw UnsupportedError('Sun schedule is read-only');
-        },
+        valueForwarder: (update) => throw UnsupportedError('Sun schedule is read-only'),
       ),
       metadata: WotPropertyMetadata(
         type: 'array',
@@ -446,9 +467,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'sunCurve',
       value: WotValue<List<SunCurveItem>>(
         initialValue: [], // Default empty
-        valueForwarder: (update) async {
-          throw UnsupportedError('Sun curve is read-only');
-        },
+        valueForwarder: (_) => throw UnsupportedError('Sun curve is read-only'),
       ),
       metadata: WotPropertyMetadata(
         type: 'array',
@@ -465,9 +484,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'currentTemp',
       value: WotValue<int>(
         initialValue: 25, // Default 25°C
-        valueForwarder: (update) async {
-          throw UnsupportedError('Current temperature is read-only');
-        },
+        valueForwarder: (_) => throw UnsupportedError('Current temperature is read-only'),
       ),
       metadata: WotPropertyMetadata(
         type: 'integer',
@@ -489,9 +506,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
           channelCount: 0,
           channels: [],
         ), // Default empty
-        valueForwarder: (update) async {
-          throw UnsupportedError('Device info is read-only');
-        },
+        valueForwarder: (_) => throw UnsupportedError('Device info is read-only'),
       ),
       metadata: WotPropertyMetadata(
         type: 'object',
@@ -695,25 +710,6 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     );
     addProperty(cloudActivatedProperty);
 
-    // Power current property (read-only)
-    powerCurrentProperty = WotProperty<double>(
-      thing: this,
-      name: 'powerCurrent',
-      value: WotValue<double>(
-        initialValue: 0.0, // Default 0W
-        valueForwarder: (update) async {
-          throw UnsupportedError('Power current is read-only');
-        },
-      ),
-      metadata: WotPropertyMetadata(
-        type: 'number',
-        title: 'Power Current',
-        description: 'Current power consumption in watts',
-        readOnly: true,
-      ),
-    );
-    addProperty(powerCurrentProperty);
-
     // Voltage property (read-only)
     voltageProperty = WotProperty<double?>(
       thing: this,
@@ -739,9 +735,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'current',
       value: WotValue<double?>(
         initialValue: null, // Default null
-        valueForwarder: (update) async {
-          throw UnsupportedError('Current is read-only');
-        },
+        valueForwarder: (update) async => throw UnsupportedError('Current is read-only'),
       ),
       metadata: WotPropertyMetadata(
         type: 'number',
@@ -758,9 +752,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'power',
       value: WotValue<double?>(
         initialValue: null, // Default null
-        valueForwarder: (update) async {
-          throw UnsupportedError('Power is read-only');
-        },
+        valueForwarder: (update) async => throw UnsupportedError('Power is read-only'),
       ),
       metadata: WotPropertyMetadata(
         type: 'number',
@@ -774,75 +766,67 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
 
   /// Bind properties to actual hardware state (like Mozilla WebThing ready callback)
   Future<void> _bindToHardware() async {
-    try {
-      // Get actual device state and update property values
-      final generalStatus = await borneoApi.getGeneralDeviceStatus(device);
-      final lyfiStatus = await lyfiApi.getLyfiStatus(device);
-      final actualColor = await lyfiApi.getColor(device);
-      final schedule = await lyfiApi.getSchedule(device);
-      final acclimation = await lyfiApi.getAcclimation(device);
-      final location = await lyfiApi.getLocation(device);
-      final correctionMethod = await lyfiApi.getCorrectionMethod(device);
-      final timeZoneEnabled = await lyfiApi.getTimeZoneEnabled(device);
-      final timeZoneOffset = await lyfiApi.getTimeZoneOffset(device);
-      final keepTemp = await lyfiApi.getKeepTemp(device);
-      final fanMode = await lyfiApi.getFanMode(device);
-      final fanPower = await lyfiApi.getFanManualPower(device);
+    if (isOffline || borneoApi == null || lyfiApi == null) return;
+    // Get actual device state and update property values
+    final generalStatus = await borneoApi!.getGeneralDeviceStatus(device);
+    final lyfiStatus = await lyfiApi!.getLyfiStatus(device);
+    final actualColor = await lyfiApi!.getColor(device);
+    final schedule = await lyfiApi!.getSchedule(device);
+    final acclimation = await lyfiApi!.getAcclimation(device);
+    final location = await lyfiApi!.getLocation(device);
+    final correctionMethod = await lyfiApi!.getCorrectionMethod(device);
+    final timeZoneEnabled = await lyfiApi!.getTimeZoneEnabled(device);
+    final timeZoneOffset = await lyfiApi!.getTimeZoneOffset(device);
+    final keepTemp = await lyfiApi!.getKeepTemp(device);
+    final fanMode = await lyfiApi!.getFanMode(device);
+    final fanPower = await lyfiApi!.getFanManualPower(device);
 
-      // Additional API calls for new properties
-      final cloudEnabled = await lyfiApi.getCloudEnabled(device);
-      final temporaryDuration = await lyfiApi.getTemporaryDuration(device);
-      final sunSchedule = await lyfiApi.getSunSchedule(device);
-      final sunCurve = await lyfiApi.getSunCurve(device);
-      // final currentTemp = await lyfiApi.getCurrentTemp(device); // Use lyfiStatus.temperature
-      // final deviceInfo = await lyfiApi.getDeviceInfo(device); // Skip for now
+    // Additional API calls for new properties
+    final cloudEnabled = await lyfiApi!.getCloudEnabled(device);
+    final temporaryDuration = await lyfiApi!.getTemporaryDuration(device);
+    final sunSchedule = await lyfiApi!.getSunSchedule(device);
+    final sunCurve = await lyfiApi!.getSunCurve(device);
+    // final currentTemp = await lyfiApi.getCurrentTemp(device); // Use lyfiStatus.temperature
+    // final deviceInfo = await lyfiApi.getDeviceInfo(device); // Skip for now
 
-      // Update properties with actual values (like notifyOfExternalUpdate in Mozilla WebThing)
-      onOffProperty.value.notifyOfExternalUpdate(generalStatus.power);
-      stateProperty.value.notifyOfExternalUpdate(lyfiStatus.state.name);
-      modeProperty.value.notifyOfExternalUpdate(lyfiStatus.mode.name);
-      colorProperty.value.notifyOfExternalUpdate(actualColor);
-      scheduleProperty.value.notifyOfExternalUpdate(schedule);
-      acclimationProperty.value.notifyOfExternalUpdate(acclimation);
-      locationProperty.value.notifyOfExternalUpdate(location);
-      correctionMethodProperty.value.notifyOfExternalUpdate(correctionMethod.name);
-      timeZoneEnabledProperty.value.notifyOfExternalUpdate(timeZoneEnabled);
-      timeZoneOffsetProperty.value.notifyOfExternalUpdate(timeZoneOffset);
-      keepTempProperty.value.notifyOfExternalUpdate(keepTemp);
-      temperatureProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature);
-      fanModeProperty.value.notifyOfExternalUpdate(fanMode.name);
-      fanManualPowerProperty.value.notifyOfExternalUpdate(fanPower);
+    // Update properties with actual values (like notifyOfExternalUpdate in Mozilla WebThing)
+    onOffProperty.value.notifyOfExternalUpdate(generalStatus.power);
+    stateProperty.value.notifyOfExternalUpdate(lyfiStatus.state.name);
+    modeProperty.value.notifyOfExternalUpdate(lyfiStatus.mode.name);
+    colorProperty.value.notifyOfExternalUpdate(actualColor);
+    scheduleProperty.value.notifyOfExternalUpdate(schedule);
+    acclimationProperty.value.notifyOfExternalUpdate(acclimation);
+    locationProperty.value.notifyOfExternalUpdate(location);
+    correctionMethodProperty.value.notifyOfExternalUpdate(correctionMethod.name);
+    timeZoneEnabledProperty.value.notifyOfExternalUpdate(timeZoneEnabled);
+    timeZoneOffsetProperty.value.notifyOfExternalUpdate(timeZoneOffset);
+    keepTempProperty.value.notifyOfExternalUpdate(keepTemp);
+    temperatureProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature);
+    fanModeProperty.value.notifyOfExternalUpdate(fanMode.name);
+    fanManualPowerProperty.value.notifyOfExternalUpdate(fanPower);
 
-      // Update new properties
-      cloudEnabledProperty.value.notifyOfExternalUpdate(cloudEnabled);
-      temporaryDurationProperty.value.notifyOfExternalUpdate(temporaryDuration.inMinutes);
-      sunScheduleProperty.value.notifyOfExternalUpdate(sunSchedule);
-      sunCurveProperty.value.notifyOfExternalUpdate(sunCurve);
-      currentTempProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature ?? 25);
-      // deviceInfoProperty.value.notifyOfExternalUpdate(deviceInfo);
-      unscheduledProperty.value.notifyOfExternalUpdate(lyfiStatus.unscheduled);
-      temporaryRemainingProperty.value.notifyOfExternalUpdate(lyfiStatus.temporaryRemaining.inSeconds);
-      fanPowerProperty.value.notifyOfExternalUpdate(lyfiStatus.fanPower ?? 0);
-      manualColorProperty.value.notifyOfExternalUpdate(lyfiStatus.manualColor);
-      sunColorProperty.value.notifyOfExternalUpdate(lyfiStatus.sunColor);
-      acclimationActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.acclimationActivated);
-      cloudActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.cloudActivated);
-      powerCurrentProperty.value.notifyOfExternalUpdate(lyfiStatus.powerCurrent ?? 0.0);
+    cloudEnabledProperty.value.notifyOfExternalUpdate(cloudEnabled);
+    temporaryDurationProperty.value.notifyOfExternalUpdate(temporaryDuration.inMinutes);
+    sunScheduleProperty.value.notifyOfExternalUpdate(sunSchedule);
+    sunCurveProperty.value.notifyOfExternalUpdate(sunCurve);
+    currentTempProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature ?? 25);
+    // deviceInfoProperty.value.notifyOfExternalUpdate(deviceInfo);
+    unscheduledProperty.value.notifyOfExternalUpdate(lyfiStatus.unscheduled);
+    temporaryRemainingProperty.value.notifyOfExternalUpdate(lyfiStatus.temporaryRemaining.inSeconds);
+    fanPowerProperty.value.notifyOfExternalUpdate(lyfiStatus.fanPower ?? 0);
+    manualColorProperty.value.notifyOfExternalUpdate(lyfiStatus.manualColor);
+    sunColorProperty.value.notifyOfExternalUpdate(lyfiStatus.sunColor);
+    acclimationActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.acclimationActivated);
+    cloudActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.cloudActivated);
 
-      // Update power measurement properties
-      voltageProperty.value.notifyOfExternalUpdate(generalStatus.powerVoltage);
-      currentProperty.value.notifyOfExternalUpdate(lyfiStatus.powerCurrent);
-      powerProperty.value.notifyOfExternalUpdate(
-        generalStatus.powerVoltage != null && lyfiStatus.powerCurrent != null
-            ? generalStatus.powerVoltage! * lyfiStatus.powerCurrent!
-            : null,
-      );
-
-      logger?.d('LyfiThing: Successfully bound to hardware state');
-    } catch (e, stackTrace) {
-      // Continue with default values if hardware is not available
-      logger?.e('LyfiThing: Warning - Failed to bind to hardware: $e', error: e, stackTrace: stackTrace);
-    }
+    // Update power measurement properties
+    voltageProperty.value.notifyOfExternalUpdate(generalStatus.powerVoltage);
+    currentProperty.value.notifyOfExternalUpdate(lyfiStatus.powerCurrent);
+    powerProperty.value.notifyOfExternalUpdate(
+      generalStatus.powerVoltage != null && lyfiStatus.powerCurrent != null
+          ? generalStatus.powerVoltage! * lyfiStatus.powerCurrent!
+          : null,
+    );
   }
 
   /// Lightweight periodic sync - only check critical properties
@@ -859,12 +843,12 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   /// Lightweight sync - only check essential properties to minimize API calls
   Future<void> _lightweightSync() async {
     try {
-      final generalStatus = await borneoApi.getGeneralDeviceStatus(device);
+      final generalStatus = await borneoApi!.getGeneralDeviceStatus(device);
 
       onOffProperty.value.notifyOfExternalUpdate(generalStatus.power);
 
       // Sync mode and state
-      final lyfiStatus = await lyfiApi.getLyfiStatus(device);
+      final lyfiStatus = await lyfiApi!.getLyfiStatus(device);
       modeProperty.value.notifyOfExternalUpdate(lyfiStatus.mode.name);
       stateProperty.value.notifyOfExternalUpdate(lyfiStatus.state.name);
       temperatureProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature);
@@ -876,7 +860,6 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       temporaryRemainingProperty.value.notifyOfExternalUpdate(lyfiStatus.temporaryRemaining.inSeconds);
       acclimationActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.acclimationActivated);
       cloudActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.cloudActivated);
-      powerCurrentProperty.value.notifyOfExternalUpdate(lyfiStatus.powerCurrent ?? 0.0);
 
       // Update power measurement properties
       voltageProperty.value.notifyOfExternalUpdate(generalStatus.powerVoltage);
@@ -889,7 +872,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
             : null,
       );
     } catch (e, stackTrace) {
-      logger?.e('Lightweight sync failed: $e', error: e, stackTrace: stackTrace);
+      logger?.w('Lightweight sync failed: $e', error: e, stackTrace: stackTrace);
     }
   }
 

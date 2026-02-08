@@ -22,7 +22,7 @@ class AcclimationScreen extends StatelessWidget {
       deviceManager: context.read<IDeviceManager>(),
       globalEventBus: context.read<EventBus>(),
       notification: context.read<IAppNotificationService>(),
-      wotThing: context.read<IDeviceManager>().getWotThing(deviceID)!,
+      wotThing: context.read<IDeviceManager>().getWotThing(deviceID),
       logger: context.read<Logger>(),
     );
     return Scaffold(

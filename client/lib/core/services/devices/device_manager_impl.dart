@@ -384,7 +384,9 @@ final class DeviceManagerImpl extends IDeviceManager {
     // Only return WotThings for devices that are already loaded (current scene)
     final wotThing = _wotThings[deviceID];
     if (wotThing == null) {
-      throw StateError('WotThing not found for device $deviceID. Ensure the device is in the current scene and WotThing was loaded successfully.');
+      throw StateError(
+        'WotThing not found for device $deviceID. Ensure the device is in the current scene and WotThing was loaded successfully.',
+      );
     }
     return wotThing;
   }

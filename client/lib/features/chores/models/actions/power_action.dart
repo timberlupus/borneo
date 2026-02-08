@@ -16,11 +16,9 @@ class PowerAction extends ChoreAction {
       return;
     }
     final wotThing = deviceManager.getWotThing(deviceId);
-    if (wotThing != null) {
-      final isOn = wotThing.getProperty("on");
-      if (isOn is bool && isOn) {
-        wotThing.setProperty("on", false);
-      }
+    final isOn = wotThing.getProperty("on");
+    if (isOn is bool && isOn) {
+      wotThing.setProperty("on", false);
     }
   }
 
@@ -30,11 +28,9 @@ class PowerAction extends ChoreAction {
     if (bound == null) return;
 
     final wotThing = deviceManager.getWotThing(deviceId);
-    if (wotThing != null) {
-      final isOn = wotThing.getProperty("on");
-      if (isOn is bool && isOn != prevState) {
-        wotThing.setProperty("on", prevState);
-      }
+    final isOn = wotThing.getProperty("on");
+    if (isOn is bool && isOn != prevState) {
+      wotThing.setProperty("on", prevState);
     }
   }
 

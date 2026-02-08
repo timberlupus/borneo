@@ -17,14 +17,12 @@ final class PowerOffAllChore extends AbstractBuiltinChore {
     final steps = <PowerAction>[];
     for (final bound in deviceManager.boundDevices) {
       final wotThing = deviceManager.getWotThing(bound.device.id);
-      if (wotThing != null) {
-        final onValue = wotThing.getProperty("on");
-        if (onValue != null) {
-          final prevState = onValue as bool;
-          if (prevState) {
-            wotThing.setProperty("on", false);
-            steps.add(PowerAction(deviceId: bound.device.id, prevState: prevState));
-          }
+      final onValue = wotThing.getProperty("on");
+      if (onValue != null) {
+        final prevState = onValue as bool;
+        if (prevState) {
+          wotThing.setProperty("on", false);
+          steps.add(PowerAction(deviceId: bound.device.id, prevState: prevState));
         }
       }
     }

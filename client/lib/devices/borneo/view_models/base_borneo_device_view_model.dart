@@ -21,7 +21,7 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   bool _isOn = false;
   bool get isOn => _isOn;
 
-  bool get canMeasureVoltage => super.isOnline && isOn && borneoDeviceStatus?.powerVoltage != null;
+  bool get canMeasureVoltage => super.isOnline && isOn;
 
   final ValueNotifier<double?> currentVoltage = ValueNotifier<double?>(null);
   final IAppNotificationService notification;
@@ -133,14 +133,12 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
 
     final oldIsOn = _isOn;
     final oldTimezone = _deviceTimezone;
-    final oldVoltage = currentVoltage.value;
-
     final status = await borneoDeviceApi.getGeneralDeviceStatus(super.boundDevice!.device, cancelToken: cancelToken);
     _isOn = status.power;
     _deviceTimezone = status.timezone;
 
     // Only notify if something actually changed
-    if (_isOn != oldIsOn || _deviceTimezone != oldTimezone || currentVoltage.value != oldVoltage) {
+    if (_isOn != oldIsOn || _deviceTimezone != oldTimezone) {
       notifyListeners();
     }
   }

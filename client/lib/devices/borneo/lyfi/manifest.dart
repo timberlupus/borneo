@@ -8,6 +8,8 @@ import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:borneo_kernel_abstractions/errors.dart';
+import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -32,7 +34,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
           deviceManager: context.read<IDeviceManager>(),
           globalEventBus: context.read<EventBus>(),
           notification: context.read<IAppNotificationService>(),
-          wotThing: context.read<IDeviceManager>().getWotThing(deviceID)!,
+          wotThing: context.read<IDeviceManager>().getWotThing(deviceID),
           localeService: context.read<ILocaleService>(),
           logger: context.read<Logger>(),
         ),
@@ -120,6 +122,18 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
 
       // Initialize the LyfiThing asynchronously (hardware binding)
       // Note: This doesn't block creation, initialization happens in background
+      await lyfiThing.initialize();
+      return lyfiThing;
+    } on DeviceNotBoundError {
+      // Create offline LyfiThing
+      final deviceEvents = DeviceEventBus(); // TODO FIXME
+      final lyfiThing = LyfiThing.offline(
+        device: device,
+        deviceEvents: deviceEvents,
+        title: device.name,
+        logger: logger,
+        canWrite: () => false, // Offline, cannot write
+      );
       await lyfiThing.initialize();
       return lyfiThing;
     } catch (e, st) {

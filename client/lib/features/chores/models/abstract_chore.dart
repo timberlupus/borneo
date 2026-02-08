@@ -42,7 +42,6 @@ abstract class AbstractChore with BaseEntity {
 
   bool _hasCapability(BoundDevice bound, String capability, IDeviceManager deviceManager) {
     final wotThing = deviceManager.getWotThing(bound.device.id);
-    if (wotThing == null) return false;
 
     final types = wotThing.getType();
     if (types.contains(capability)) return true;
