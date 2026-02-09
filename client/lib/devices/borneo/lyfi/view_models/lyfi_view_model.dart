@@ -610,8 +610,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       borneoInfo: super.borneoDeviceInfo!,
       ledInfo: lyfiDeviceInfo,
       ledStatus: lyfiDeviceStatus!,
-      powerBehavior: await executeLyfiCommand(() => super.lyfiDeviceApi.getPowerBehavior(boundDevice!.device)),
-      location: await executeLyfiCommand(() => super.lyfiDeviceApi.getLocation(boundDevice!.device)),
+      powerBehavior: super.lyfiThing.powerBehaviorProperty.getValue(),
+      location: super.lyfiThing.locationProperty.getValue(),
       gt: gt,
       logger: super.logger,
     );

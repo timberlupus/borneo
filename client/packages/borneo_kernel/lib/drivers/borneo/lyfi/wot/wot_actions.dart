@@ -1,5 +1,6 @@
 // dart format width=120
 
+import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
@@ -156,5 +157,26 @@ class LyfiSetCorrectionMethodAction extends WotAction<Map<String, dynamic>> {
   @override
   Future<void> performAction() async {
     await lyfiApi.setCorrectionMethod(device, method);
+  }
+}
+
+/// Custom action for setting power behavior
+class LyfiSetPowerBehaviorAction extends WotAction<Map<String, dynamic>> {
+  final PowerBehavior behavior;
+  final IBorneoDeviceApi borneoApi;
+  final Device device;
+
+  LyfiSetPowerBehaviorAction({
+    required super.id,
+    required super.thing,
+    required this.behavior,
+    required this.borneoApi,
+    required this.device,
+  }) : super(name: 'setPowerBehavior', input: {'behavior': behavior.name});
+
+  @override
+  Future<void> performAction() async {
+    await borneoApi.setPowerBehavior(device, behavior);
+    finish();
   }
 }

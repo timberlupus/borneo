@@ -59,6 +59,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   late final WotProperty<double?> voltageProperty;
   late final WotProperty<double?> currentProperty;
   late final WotProperty<double?> powerProperty;
+  late final WotProperty<PowerBehavior> powerBehaviorProperty;
 
   // Temporary properties for refactoring - TODO: Remove after refactoring
   late final WotProperty<LyfiDeviceStatus> lyfiStatusProperty;
@@ -760,6 +761,24 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       ),
     );
     addProperty(powerProperty);
+
+    // Power behavior property (read-only)
+    powerBehaviorProperty = WotProperty<PowerBehavior>(
+      thing: this,
+      name: 'powerBehavior',
+      value: WotValue<PowerBehavior>(
+        initialValue: PowerBehavior.lastPowerState, // Default to last power state
+        valueForwarder: (_) => throw UnsupportedError('Power behavior is read-only'),
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'string',
+        title: 'Power Behavior',
+        description: 'Behavior when power is restored after an outage',
+        enumValues: PowerBehavior.values.map((e) => e.name).toList(),
+        readOnly: true,
+      ),
+    );
+    addProperty(powerBehaviorProperty);
   }
 
   void _createActions() {
@@ -913,6 +932,27 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
         );
       },
     );
+
+    // Set power behavior action
+    addAvailableAction(
+      'setPowerBehavior',
+      WotActionMetadata(
+        title: 'Set Power Behavior',
+        description: 'Set the behavior when power is restored after an outage',
+        input: {'behavior': 'string'},
+      ),
+      (thing, input) {
+        final behaviorName = input['behavior'] as String;
+        final behavior = PowerBehavior.values.firstWhere((e) => e.name == behaviorName);
+        return LyfiSetPowerBehaviorAction(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          thing: thing,
+          behavior: behavior,
+          borneoApi: borneoApi!,
+          device: device,
+        );
+      },
+    );
   }
 
   /// Bind properties to actual hardware state (like Mozilla WebThing ready callback)
@@ -936,6 +976,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     final cloudEnabled = await lyfiApi!.getCloudEnabled(device);
     final temporaryDuration = await lyfiApi!.getTemporaryDuration(device);
     final sunSchedule = await lyfiApi!.getSunSchedule(device);
+    final powerBehavior = await borneoApi!.getPowerBehavior(device);
     // final sunCurve = await lyfiApi!.getSunCurve(device);
     // final currentTemp = await lyfiApi.getCurrentTemp(device); // Use lyfiStatus.temperature
     // final deviceInfo = await lyfiApi.getDeviceInfo(device); // Skip for now
@@ -978,6 +1019,9 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
           ? generalStatus.powerVoltage! * lyfiStatus.powerCurrent!
           : null,
     );
+
+    // Update power behavior property
+    powerBehaviorProperty.value.notifyOfExternalUpdate(powerBehavior);
 
     // Update status properties
     lyfiStatusProperty.value.notifyOfExternalUpdate(lyfiStatus);
