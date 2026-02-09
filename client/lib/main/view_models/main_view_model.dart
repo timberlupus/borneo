@@ -84,6 +84,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
       await _groupManager.initialize();
       await _deviceManager.initialize();
       await _localeService.initialize();
+      await _preloadHomeData();
       logger?.i('MainViewModel initialized.');
     } catch (e, stackTrace) {
       logger?.e("Failed to initialize MainViewModel: $e", error: e, stackTrace: stackTrace);
@@ -93,6 +94,13 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
         notifyListeners();
       }
     }
+  }
+
+  Future<void> _preloadHomeData() async {
+    final scenes = await _sceneManager.all();
+    await Future.wait(scenes.map((scene) => _sceneManager.getDeviceStatistics(scene.id)));
+    await _groupManager.fetchAllGroupsInCurrentScene();
+    await _deviceManager.fetchAllDevicesInScene();
   }
 
   @override

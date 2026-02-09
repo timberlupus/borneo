@@ -424,18 +424,16 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       (super.mode == LyfiMode.scheduled || super.mode == LyfiMode.sun) &&
       (super.state == LyfiState.temporary || super.state == LyfiState.normal);
 
-  void switchTemporaryState() async {
-    assert(super.state == LyfiState.normal || super.state == LyfiState.temporary);
-    await _switchTemporaryState();
-  }
-
-  Future<void> _switchTemporaryState() async {
+  void switchTemporaryState() {
+    if (!(super.state == LyfiState.normal || super.state == LyfiState.temporary)) {
+      throw StateError(gt.translate('Bad device state'));
+    }
     // Turn the temp mode on
     if (super.state == LyfiState.normal) {
-      await executeLyfiCommand(() => super.lyfiDeviceApi.switchState(super.boundDevice!.device, LyfiState.temporary));
+      super.setState(LyfiState.temporary);
     } else {
       // Restore running mode
-      await executeLyfiCommand(() => super.lyfiDeviceApi.switchState(super.boundDevice!.device, LyfiState.normal));
+      super.setState(LyfiState.normal);
     }
   }
 
@@ -446,16 +444,12 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       (super.state == LyfiState.temporary || super.state == LyfiState.normal);
 
   void switchDiscoState() async {
-    await _switchDiscoState();
-  }
-
-  Future<void> _switchDiscoState() async {
     // Turn the disco mode on
     if (super.state == LyfiState.normal || super.state == LyfiState.temporary) {
-      await executeLyfiCommand(() => super.lyfiDeviceApi.switchState(super.boundDevice!.device, LyfiState.disco));
+      super.setState(LyfiState.disco);
     } else {
       // Restore running mode
-      await executeLyfiCommand(() => super.lyfiDeviceApi.switchState(super.boundDevice!.device, LyfiState.normal));
+      super.setState(LyfiState.normal);
     }
   }
 

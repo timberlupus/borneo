@@ -91,7 +91,7 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
       return;
     }
     try {
-      lyfiThing.performAction('switchMode', {'mode': newMode.name, 'color': null})!.start();
+      lyfiThing.performAction('switchMode', {'mode': newMode.name})!.start();
     } catch (_) {
       rethrow;
     }
