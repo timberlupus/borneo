@@ -280,6 +280,8 @@ final class DeviceManagerImpl extends IDeviceManager {
     // Always create a WotThing twin, even when the device is unbound/offline.
     await _loadWotThingForDevice(device, replaceExisting: true);
 
+    allDeviceEvents.fire(NewDeviceEntityAddedEvent(device));
+
     // Fire event to notify that devices in current scene have been reloaded
     final currentScene = _sceneManager.current;
     _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
@@ -310,7 +312,6 @@ final class DeviceManagerImpl extends IDeviceManager {
       model: discovered.model,
     );
     await store.record(device.id).put(tx, device.toMap());
-    allDeviceEvents.fire(NewDeviceEntityAddedEvent(device));
     return device;
   }
 

@@ -99,7 +99,7 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
 
   void _refreshWotThing() {
     final oldThing = wotThing;
-    wotThing = deviceManager.getWotThing(deviceEntity.id);
+    wotThing = deviceManager.hasWotThing(deviceEntity.id) ? deviceManager.getWotThing(deviceEntity.id) : null;
     if (wotThing != null && wotThing!.hasProperty(LyfiKnownProperties.kOn)) {
       final onProp = wotThing?.getProperty(LyfiKnownProperties.kOn);
       if (onProp != null) {
