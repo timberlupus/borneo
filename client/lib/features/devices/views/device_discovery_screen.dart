@@ -21,6 +21,7 @@ class DeviceDiscoveryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gt = GettextLocalizations.of(context);
     return ChangeNotifierProvider(
       create: (cb) => DeviceDiscoveryViewModel(
         cb.read<Logger>(),
@@ -29,7 +30,7 @@ class DeviceDiscoveryScreen extends StatelessWidget {
         cb.read<IBleProvisioner>(),
         cb.read<IDeviceModuleRegistry>(),
         globalEventBus: cb.read<EventBus>(),
-        gt: GettextLocalizations.of(cb),
+        gt: gt,
         logger: cb.read<Logger>(),
       )..onInitialize(),
       child: const _DeviceDiscoveryContent(),

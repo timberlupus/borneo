@@ -27,12 +27,13 @@ class WifiSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gt = GettextLocalizations.of(context);
     return ChangeNotifierProvider(
       create: (context) => WifiSelectionViewModel(
         context.read<IBleProvisioner>(),
         deviceName,
         globalEventBus: context.read<EventBus>(),
-        gt: GettextLocalizations.of(context),
+        gt: gt,
         logger: context.read<Logger>(),
       )..onInitialize(),
       child: Scaffold(

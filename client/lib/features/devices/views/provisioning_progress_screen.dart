@@ -20,6 +20,7 @@ class ProvisioningProgressScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gt = GettextLocalizations.of(context);
     return ChangeNotifierProvider(
       create: (context) => ProvisioningProgressViewModel(
         context.read<IBleProvisioner>(),
@@ -27,7 +28,7 @@ class ProvisioningProgressScreen extends StatelessWidget {
         ssid,
         password,
         globalEventBus: context.read<EventBus>(),
-        gt: GettextLocalizations.of(context),
+        gt: gt,
       )..startProvisioning(),
       child: Scaffold(
         appBar: AppBar(
