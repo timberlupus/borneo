@@ -39,6 +39,10 @@ class DeviceOfflineEvent extends KnownDeviceEvent {
   const DeviceOfflineEvent(super.device);
 }
 
+class DeviceCommunicationEvent extends KnownDeviceEvent {
+  const DeviceCommunicationEvent(super.device);
+}
+
 class LoadingDriverFailedEvent extends KnownDeviceEvent {
   final Object? error;
   final String? message;

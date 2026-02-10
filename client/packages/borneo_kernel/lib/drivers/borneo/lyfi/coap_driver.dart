@@ -99,6 +99,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
       }
 
       final driverData = LyfiCoapDriverData(dev, coapClient, probeCoapClient);
+      coapClient.deviceEvents = driverData.deviceEvents;
       driverData.load();
       dev.setDriverData(driverData);
       succeed = true;
