@@ -236,7 +236,7 @@ class MockDeviceEventBus implements DeviceEventBus {
 
 class MockBorneoDeviceApi implements IBorneoDeviceApi {
   @override
-  GeneralBorneoDeviceInfo getGeneralDeviceInfo(Device device) {
+  Future<GeneralBorneoDeviceInfo> getGeneralDeviceInfo(Device device, {CancellationToken? cancelToken}) async {
     return GeneralBorneoDeviceInfo(
       id: 'mock-id',
       name: 'Mock Device',
@@ -349,7 +349,7 @@ class MockLyfiDeviceApi implements ILyfiDeviceApi {
   }
 
   @override
-  LyfiDeviceInfo getLyfiInfo(Device device, {CancellationToken? cancelToken}) {
+  Future<LyfiDeviceInfo> getLyfiInfo(Device device, {CancellationToken? cancelToken}) async {
     return LyfiDeviceInfo(
       channelCountMax: 4,
       channelCount: 4,

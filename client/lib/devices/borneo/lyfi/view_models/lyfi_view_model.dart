@@ -620,7 +620,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       wotThing: wotThing,
       address: deviceEntity.address,
       borneoStatus: borneoDeviceStatus!,
-      borneoInfo: super.borneoDeviceInfo!,
+      borneoInfo: super.lyfiThing.getProperty<GeneralBorneoDeviceInfo>('generalDeviceInfo')!,
       ledInfo: lyfiDeviceInfo,
       ledStatus: lyfiDeviceStatus!,
       powerBehavior: super.lyfiThing.getProperty<PowerBehavior>('powerBehavior')!,

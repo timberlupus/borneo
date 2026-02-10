@@ -8,8 +8,6 @@ import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:flutter/material.dart';
 
 abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
-  GeneralBorneoDeviceInfo? get borneoDeviceInfo => borneoDeviceApi.getGeneralDeviceInfo(boundDevice!.device);
-
   GeneralBorneoDeviceStatus? get borneoDeviceStatus =>
       isOnline ? wotThing.getProperty<GeneralBorneoDeviceStatus>('generalStatus') : null;
 

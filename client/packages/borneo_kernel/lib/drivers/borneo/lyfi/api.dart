@@ -6,7 +6,7 @@ import 'package:cancellation_token/cancellation_token.dart';
 typedef MyIntList = List<int>;
 
 abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
-  LyfiDeviceInfo getLyfiInfo(Device dev, {CancellationToken? cancelToken});
+  Future<LyfiDeviceInfo> getLyfiInfo(Device dev, {CancellationToken? cancelToken});
   Future<LyfiDeviceStatus> getLyfiStatus(Device dev, {CancellationToken? cancelToken});
 
   Future<LyfiState> getState(Device dev, {CancellationToken? cancelToken});

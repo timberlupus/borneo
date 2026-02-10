@@ -4,7 +4,7 @@ import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 
 import '../../../shared/view_models/base_view_model.dart';
 
-class GroupViewModel extends BaseViewModel {
+class GroupViewModel extends BaseViewModel with ViewModelEventBusMixin {
   List<AbstractDeviceSummaryViewModel> _devices = [];
   final IClock clock;
   late int _lastModified;
@@ -82,10 +82,5 @@ class GroupViewModel extends BaseViewModel {
       clearDevices();
       super.dispose();
     }
-  }
-
-  @override
-  void notifyAppError(String message, {Object? error, StackTrace? stackTrace}) {
-    // TODO
   }
 }

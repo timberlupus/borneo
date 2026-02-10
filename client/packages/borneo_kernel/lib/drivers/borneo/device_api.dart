@@ -250,7 +250,7 @@ abstract class IBorneoDeviceApi extends IDeviceApi {
   Future<String> getCompatible(Device dev, {CancellationToken? cancelToken});
   Future<Version> getFirmwareVersion(Device dev, {CancellationToken? cancelToken});
 
-  GeneralBorneoDeviceInfo getGeneralDeviceInfo(Device dev);
+  Future<GeneralBorneoDeviceInfo> getGeneralDeviceInfo(Device dev, {CancellationToken? cancelToken});
   Future<GeneralBorneoDeviceStatus> getGeneralDeviceStatus(Device dev, {CancellationToken? cancelToken});
 
   Future<DateTime> getHeartbeat(Device dev, {CancellationToken? cancelToken});
@@ -510,12 +510,6 @@ mixin BorneoDeviceCoapApi on Driver implements IBorneoDeviceApi {
       final dd = dev.driverData as BorneoCoapDriverData;
       await dd.coap.putCbor(BorneoPaths.powerBehavior, behavior.index, cancelToken: cancelToken);
     }, cancelToken: cancelToken);
-  }
-
-  @override
-  GeneralBorneoDeviceInfo getGeneralDeviceInfo(Device dev) {
-    final dd = dev.driverData as BorneoCoapDriverData;
-    return dd.generalDeviceInfo;
   }
 
   @override

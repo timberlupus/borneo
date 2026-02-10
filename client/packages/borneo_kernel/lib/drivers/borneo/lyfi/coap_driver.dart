@@ -98,9 +98,7 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
         );
       }
 
-      final generalDeviceInfo = await _getGeneralDeviceInfo(coapClient, cancelToken: cancelToken);
-      final lyfiInfo = await _getLyfiInfo(coapClient, cancelToken: cancelToken);
-      final driverData = LyfiCoapDriverData(dev, coapClient, probeCoapClient, generalDeviceInfo, lyfiInfo);
+      final driverData = LyfiCoapDriverData(dev, coapClient, probeCoapClient);
       driverData.load();
       dev.setDriverData(driverData);
       succeed = true;
@@ -174,16 +172,6 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
     return Version.parse(fwver);
   }
 
-  Future<GeneralBorneoDeviceInfo> _getGeneralDeviceInfo(CoapClient coap, {CancellationToken? cancelToken}) async {
-    final payload = await coap.getCbor<Map>(BorneoPaths.deviceInfo, cancelToken: cancelToken);
-    return GeneralBorneoDeviceInfo.fromMap(payload);
-  }
-
-  Future<LyfiDeviceInfo> _getLyfiInfo(CoapClient coap, {CancellationToken? cancelToken}) async {
-    final payload = await coap.getCbor<Map>(LyfiPaths.info, cancelToken: cancelToken);
-    return LyfiDeviceInfo.fromMap(payload);
-  }
-
   static SupportedDeviceDescriptor? matches(DiscoveredDevice discovered) {
     if (discovered is MdnsDiscoveredDevice) {
       final compatible = utf8.decode(discovered.txt?['compatible'] ?? [], allowMalformed: true);
@@ -207,15 +195,23 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
   }
 
   @override
+  Future<GeneralBorneoDeviceInfo> getGeneralDeviceInfo(Device dev, {CancellationToken? cancelToken}) async {
+    final dd = dev.driverData as LyfiCoapDriverData;
+    final payload = await dd.coap.getCbor<Map>(BorneoPaths.deviceInfo, cancelToken: cancelToken);
+    return GeneralBorneoDeviceInfo.fromMap(payload);
+  }
+
+  @override
   Future<int> getKeepTemp(Device dev, {CancellationToken? cancelToken}) => withQueue(dev, () async {
     final dd = dev.driverData as LyfiCoapDriverData;
     return await dd.coap.getCbor<int>(LyfiPaths.keepTemp, cancelToken: cancelToken);
   }, cancelToken: cancelToken);
 
   @override
-  LyfiDeviceInfo getLyfiInfo(Device dev, {CancellationToken? cancelToken}) {
+  Future<LyfiDeviceInfo> getLyfiInfo(Device dev, {CancellationToken? cancelToken}) async {
     final dd = dev.driverData as LyfiCoapDriverData;
-    return dd.lyfiDeviceInfo;
+    final payload = await dd.coap.getCbor<Map>(LyfiPaths.info, cancelToken: cancelToken);
+    return LyfiDeviceInfo.fromMap(payload);
   }
 
   @override

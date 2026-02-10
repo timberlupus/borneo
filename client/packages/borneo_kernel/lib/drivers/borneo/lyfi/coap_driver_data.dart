@@ -8,13 +8,12 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/coap_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 
 class LyfiCoapDriverData extends BorneoCoapDriverData {
-  final LyfiDeviceInfo _lyfiDeviceInfo;
   bool _disposed = false;
 
   StreamSubscription? _modeChangedSub;
   StreamSubscription? _stateChangedSub;
 
-  LyfiCoapDriverData(super.device, super.coap, super.probeCoap, super._generalDeviceInfo, this._lyfiDeviceInfo);
+  LyfiCoapDriverData(super.device, super.coap, super.probeCoap);
 
   @override
   void load() {
@@ -27,13 +26,6 @@ class LyfiCoapDriverData extends BorneoCoapDriverData {
     _stateChangedSub = coap
         .observeCbor<int>(LyfiPaths.state)
         .listen((state) => super.deviceEvents.fire(LyfiStateChangedEvent(device, state: LyfiState.values[state])));
-  }
-
-  LyfiDeviceInfo get lyfiDeviceInfo {
-    if (super.isDisposed) {
-      ObjectDisposedException(message: 'The object has been disposed.');
-    }
-    return _lyfiDeviceInfo;
   }
 
   @override

@@ -13,6 +13,7 @@ import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:logger/logger.dart';
 import 'package:lw_wot/wot.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 /// LyfiThing extends WotThing following Mozilla WebThing initialization pattern
 /// This class uses default values during construction and binds to actual hardware asynchronously
@@ -545,6 +546,25 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     );
     addProperty(lyfiStatusProperty);
 
+    // General device info property (read-only)
+    final generalDeviceInfoProperty = WotProperty<GeneralBorneoDeviceInfo?>(
+      thing: this,
+      name: 'generalDeviceInfo',
+      value: WotValue<GeneralBorneoDeviceInfo?>(
+        initialValue: null,
+        valueForwarder: (update) async {
+          throw UnsupportedError('General device info is read-only');
+        },
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'object',
+        title: 'General Device Info',
+        description: 'General Borneo device information',
+        readOnly: true,
+      ),
+    );
+    addProperty(generalDeviceInfoProperty);
+
     // Temporary general status property for refactoring - TODO: Remove after refactoring
     final generalStatusProperty = WotProperty<GeneralBorneoDeviceStatus>(
       thing: this,
@@ -994,6 +1014,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     if (isOffline || borneoApi == null || lyfiApi == null) return;
     // Get actual device state and update property values
     final generalStatus = await borneoApi!.getGeneralDeviceStatus(device);
+    final generalDeviceInfo = await borneoApi!.getGeneralDeviceInfo(device);
     final lyfiStatus = await lyfiApi!.getLyfiStatus(device);
     final schedule = await lyfiApi!.getSchedule(device);
     final acclimation = await lyfiApi!.getAcclimation(device);
@@ -1011,7 +1032,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     final sunSchedule = await lyfiApi!.getSunSchedule(device);
 
     final powerBehavior = await borneoApi!.getPowerBehavior(device);
-    final deviceInfo = lyfiApi!.getLyfiInfo(device);
+    final deviceInfo = await lyfiApi!.getLyfiInfo(device);
     // final currentTemp = await lyfiApi.getCurrentTemp(device); // Use lyfiStatus.temperature
     // final deviceInfo = await lyfiApi.getDeviceInfo(device); // Skip for now
 
@@ -1070,6 +1091,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
 
     // Update status properties
     findProperty('lyfiStatus')?.value.notifyOfExternalUpdate(lyfiStatus);
+    findProperty('generalDeviceInfo')?.value.notifyOfExternalUpdate(generalDeviceInfo);
     findProperty('generalStatus')?.value.notifyOfExternalUpdate(generalStatus);
   }
 
@@ -1142,10 +1164,15 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     }
     try {
       final lyfiStatus = await lyfiApi!.getLyfiStatus(device);
-      final deviceInfo = lyfiApi!.getLyfiInfo(device);
+      final deviceInfo = await lyfiApi!.getLyfiInfo(device);
       findProperty('acclimationEnabled')?.value.notifyOfExternalUpdate(lyfiStatus.acclimationEnabled);
       findProperty('acclimationActivated')?.value.notifyOfExternalUpdate(lyfiStatus.acclimationActivated);
       findProperty('lyfiDeviceInfo')?.value.notifyOfExternalUpdate(deviceInfo);
+
+      if (borneoApi != null) {
+        final generalDeviceInfo = await borneoApi!.getGeneralDeviceInfo(device);
+        findProperty('generalDeviceInfo')?.value.notifyOfExternalUpdate(generalDeviceInfo);
+      }
 
       switch (lyfiStatus.mode) {
         case LyfiMode.manual:
