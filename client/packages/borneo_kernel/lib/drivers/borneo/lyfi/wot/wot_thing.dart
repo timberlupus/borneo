@@ -524,7 +524,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       name: 'lyfiDeviceInfo',
       value: WotValue<LyfiDeviceInfo>(
         initialValue: LyfiDeviceInfo(
-          nominalPower: 0,
+          nominalPower: null,
           channelCountMax: 0,
           channelCount: 0,
           channels: [],
@@ -1033,11 +1033,18 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     final cloudEnabled = await lyfiApi!.getCloudEnabled(device);
     final temporaryDuration = await lyfiApi!.getTemporaryDuration(device);
     final sunSchedule = await lyfiApi!.getSunSchedule(device);
-    final sunCurve = await lyfiApi!.getSunCurve(device);
+
     final powerBehavior = await borneoApi!.getPowerBehavior(device);
     final deviceInfo = await lyfiApi!.getLyfiInfo(device);
     // final currentTemp = await lyfiApi.getCurrentTemp(device); // Use lyfiStatus.temperature
     // final deviceInfo = await lyfiApi.getDeviceInfo(device); // Skip for now
+
+    try {
+      final sunCurve = await lyfiApi!.getSunCurve(device);
+      sunCurveProperty.value.notifyOfExternalUpdate(sunCurve);
+    } catch (e) {
+      logger?.w("Failed to get Sun curve: $e");
+    }
 
     // Update properties with actual values (like notifyOfExternalUpdate in Mozilla WebThing)
     onProperty.value.notifyOfExternalUpdate(generalStatus.power);
@@ -1059,7 +1066,6 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     cloudEnabledProperty.value.notifyOfExternalUpdate(cloudEnabled);
     temporaryDurationProperty.value.notifyOfExternalUpdate(temporaryDuration);
     sunScheduleProperty.value.notifyOfExternalUpdate(sunSchedule);
-    sunCurveProperty.value.notifyOfExternalUpdate(sunCurve);
     currentTempProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature ?? 25);
     lyfiDeviceInfoProperty.value.notifyOfExternalUpdate(deviceInfo);
     unscheduledProperty.value.notifyOfExternalUpdate(lyfiStatus.unscheduled);
@@ -1122,6 +1128,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       modeProperty.value.notifyOfExternalUpdate(lyfiStatus.mode.name);
       stateProperty.value.notifyOfExternalUpdate(lyfiStatus.state.name);
       temperatureProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature);
+      colorProperty.value.notifyOfExternalUpdate(lyfiStatus.currentColor);
 
       // Sync additional critical properties
       currentTempProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature ?? 0);
@@ -1189,6 +1196,8 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
           }
           break;
       }
+
+      colorProperty.value.notifyOfExternalUpdate(lyfiStatus.currentColor);
     } catch (e, stackTrace) {
       logger?.w('Low-frequency sync failed: $e', error: e, stackTrace: stackTrace);
     }

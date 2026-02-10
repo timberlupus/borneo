@@ -8,7 +8,6 @@ import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
-import 'package:borneo_kernel_abstractions/errors.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
@@ -136,7 +135,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         deviceEvents: deviceEvents,
         title: device.name,
         logger: logger,
-        canWrite: () => false, // Offline, cannot write
+        canWrite: () => deviceManager.isBound(device.id),
       );
       await lyfiThing.initialize();
       return lyfiThing;

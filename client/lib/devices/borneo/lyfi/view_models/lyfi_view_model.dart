@@ -116,6 +116,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   StreamSubscription<double?>? _powerSubscription;
   StreamSubscription<Duration>? _temporaryDurationSubscription;
   StreamSubscription<Duration>? _temporaryRemainingSubscription;
+  StreamSubscription<List<int>>? _colorSubscription;
 
   StreamSubscription<String>? _stateSubscription;
   StreamSubscription<String>? _modeSubscription;
@@ -224,6 +225,10 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       currentWatts.value = value;
     });
 
+    _colorSubscription = super.lyfiThing.colorProperty.value.onUpdate.listen((value) {
+      _applyColorUpdate(value);
+    });
+
     _temporaryDurationSubscription = super.lyfiThing.temporaryDurationProperty.value.onUpdate.listen((value) {
       _temporaryDuration = value;
       notifyListeners();
@@ -236,10 +241,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
     _stateSubscription = super.lyfiThing.stateProperty.value.onUpdate.listen(_onStateChanged);
 
-    _modeSubscription = super.lyfiThing.modeProperty.value.onUpdate.listen((value) {
-      //final newMode = LyfiMode.fromString(value);
-      notifyListeners();
-    });
+    _modeSubscription = super.lyfiThing.modeProperty.value.onUpdate.listen(_onModeChanged);
 
     _sunScheduleSubscription = super.lyfiThing.sunScheduleProperty.value.onUpdate.listen((value) {
       sunInstants
@@ -284,6 +286,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       _powerSubscription?.cancel();
       _temporaryDurationSubscription?.cancel();
       _temporaryRemainingSubscription?.cancel();
+      _colorSubscription?.cancel();
       _stateSubscription?.cancel();
       _modeSubscription?.cancel();
       _sunScheduleSubscription?.cancel();
@@ -503,8 +506,24 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
 
     super.setMode(newMode);
-    await _toggleEditor(super.mode);
     notifyListeners();
+  }
+
+  Future<void> _onModeChanged(String value) async {
+    final newMode = LyfiMode.fromString(value);
+
+    if (_editorState.mode == newMode && _editorState.status != EditorStatus.error) {
+      notifyListeners();
+      return;
+    }
+
+    if (isLocked || super.state != LyfiState.dimming) {
+      _editorState = _editorState.copyWith(mode: newMode);
+      notifyListeners();
+      return;
+    }
+
+    await _toggleEditor(newMode);
   }
 
   Future<void> _toggleEditor(LyfiMode newMode) async {
@@ -603,5 +622,22 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       ob += metaChannels.channels[i].brightnessRatio * _channels[i].value / lyfiBrightnessMax;
     }
     _overallBrightness = ob;
+  }
+
+  void _applyColorUpdate(List<int> color) {
+    final metaChannels = lyfiThing.lyfiDeviceInfoProperty.getValue();
+    if (_channels.length != color.length || metaChannels.channels.length != color.length) {
+      _initializeChannels();
+      notifyListeners();
+      return;
+    }
+
+    double ob = 0;
+    for (int i = 0; i < color.length; i++) {
+      _channels[i].value = color[i];
+      ob += metaChannels.channels[i].brightnessRatio * color[i] / lyfiBrightnessMax;
+    }
+    _overallBrightness = ob;
+    notifyListeners();
   }
 }

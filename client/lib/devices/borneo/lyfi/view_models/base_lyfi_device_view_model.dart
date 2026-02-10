@@ -15,7 +15,6 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   LyfiThing get lyfiThing => wotThing as LyfiThing;
 
   double? get nominalPower => lyfiDeviceInfo.nominalPower;
-
   bool get canMeasureCurrent =>
       super.isOnline && !super.isSuspectedOffline && isOn && lyfiThing.currentProperty.value.get() != null;
 
@@ -37,16 +36,10 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
 
   void _subscribeToLyfiThing() {
     _stateSubscription = lyfiThing.stateProperty.value.onUpdate.listen((stateName) {
-      final newState = LyfiState.fromString(stateName);
-      if (state != newState) {
-        notifyListeners();
-      }
+      notifyListeners();
     });
     _modeSubscription = lyfiThing.modeProperty.value.onUpdate.listen((modeName) {
-      final newMode = LyfiMode.fromString(modeName);
-      if (mode != newMode) {
-        notifyListeners();
-      }
+      notifyListeners();
     });
 
     _statusSubscription = lyfiThing.lyfiStatusProperty.value.onUpdate.listen((status) {
