@@ -16,7 +16,7 @@ class ManualEditorViewModel extends BaseEditorViewModel {
       throw StateError('Device is not bound.');
     }
 
-    final manualColor = super.lyfiThing.manualColorProperty.getValue();
+    final manualColor = super.lyfiThing.getProperty<List<int>>('manualColor')!;
 
     // Ensure we are in the correct state and mode before proceeding
     if (parent.state != LyfiState.dimming) {

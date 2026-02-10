@@ -18,7 +18,7 @@ class DashboardChart extends StatelessWidget {
         mode: vm.mode,
         state: vm.state,
         isOn: vm.isOn,
-        cloudActivated: vm.lyfiThing.cloudActivatedProperty.getValue(),
+        cloudActivated: vm.lyfiThing.getProperty<bool>('cloudActivated')!,
       ),
       builder: (context, props, _) {
         if (!props.isOnline) {

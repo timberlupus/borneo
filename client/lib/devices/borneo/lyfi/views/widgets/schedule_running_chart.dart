@@ -23,7 +23,7 @@ class ScheduleRunningChart extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
       child: Selector<LyfiViewModel, DateTime>(
-        selector: (context, vm) => vm.lyfiThing.timestampProperty.value.get(),
+        selector: (context, vm) => vm.lyfiThing.getProperty<DateTime>('timestamp')!.toLocal(),
         shouldRebuild: (previous, next) => !previous.isEqualToMinute(next),
         builder: (context, clock, _) {
           const minSpanSeconds = 3 * 3600.0;

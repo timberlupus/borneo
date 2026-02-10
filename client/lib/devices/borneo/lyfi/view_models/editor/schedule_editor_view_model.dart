@@ -274,7 +274,7 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
     }
     final schedule = _entries.map((x) => x.toModel()).toList(growable: false);
     await parent.executeLyfiCommand(() => _deviceApi.setSchedule(parent.boundDevice!.device, schedule));
-    parent.lyfiThing.scheduleProperty.value.notifyOfExternalUpdate(schedule);
+    parent.lyfiThing.findProperty('schedule')?.value.notifyOfExternalUpdate(schedule);
   }
 
   void resetChannelValues() {}

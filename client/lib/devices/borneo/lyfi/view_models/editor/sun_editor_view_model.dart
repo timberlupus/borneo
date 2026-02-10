@@ -33,12 +33,12 @@ class SunEditorViewModel extends BaseEditorViewModel {
       throw StateError('Device is not bound.');
     }
 
-    final sunColor = super.lyfiThing.sunColorProperty.getValue();
+    final sunColor = super.lyfiThing.getProperty<List<int>>('sunColor')!;
     for (int i = 0; i < parent.lyfiDeviceInfo.channels.length; i++) {
       channels[i].value = sunColor[i];
     }
 
-    _sunCurve = super.lyfiThing.sunCurveProperty.getValue();
+    _sunCurve = super.lyfiThing.getProperty<List<SunCurveItem>>('sunCurve')!;
 
     final instants = await parent.executeLyfiCommand(
       () => _deviceApi.getSunSchedule(parent.boundDevice!.device, cancelToken: cancelToken),
@@ -70,7 +70,7 @@ class SunEditorViewModel extends BaseEditorViewModel {
         .map((entry) => ScheduledInstant(instant: entry.instant, color: List<int>.from(entry.color)))
         .toList(growable: false);
 
-    parent.lyfiThing.sunColorProperty.value.notifyOfExternalUpdate(sunColor);
-    parent.lyfiThing.sunScheduleProperty.value.notifyOfExternalUpdate(sunSchedule);
+    parent.lyfiThing.findProperty('sunColor')?.value.notifyOfExternalUpdate(sunColor);
+    parent.lyfiThing.findProperty('sunSchedule')?.value.notifyOfExternalUpdate(sunSchedule);
   }
 }

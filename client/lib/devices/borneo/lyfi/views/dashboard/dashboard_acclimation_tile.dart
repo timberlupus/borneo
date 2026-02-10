@@ -13,8 +13,8 @@ class DashboardAcclimationTile extends StatelessWidget {
       selector: (_, vm) => (
         isOnline: vm.isOnline,
         isOn: vm.isOn,
-        enabled: vm.lyfiThing.acclimationEnabledProperty.getValue(),
-        activated: vm.lyfiThing.acclimationActivatedProperty.getValue(),
+        enabled: vm.lyfiThing.getProperty<bool>('acclimationEnabled')!,
+        activated: vm.lyfiThing.getProperty<bool>('acclimationActivated')!,
       ),
       builder: (context, props, _) {
         final theme = Theme.of(context);

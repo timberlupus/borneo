@@ -5,6 +5,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_view_model.dart';
+import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -197,68 +198,92 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   Future<void> onInitialize() async {
     await super.onInitialize();
 
-    _fanPowerSubscription = super.lyfiThing.fanPowerProperty.value.onUpdate.listen((_) {
-      final power = super.lyfiThing.fanPowerProperty.getValue();
-      _fanPowerRatio = power.toDouble();
-      notifyListeners();
-    });
+    _fanPowerSubscription =
+        super.lyfiThing.findProperty('fanPower')?.value.onUpdate.listen((_) {
+              final power = super.lyfiThing.getProperty<int>('fanPower');
+              _fanPowerRatio = power?.toDouble();
+              notifyListeners();
+            })
+            as StreamSubscription<int>?;
 
-    _temperatureSubscription = super.lyfiThing.temperatureProperty.value.onUpdate.listen((value) {
-      _currentTemperature = value;
-      notifyListeners();
-    });
+    _temperatureSubscription =
+        super.lyfiThing.findProperty('temperature')?.value.onUpdate.listen((value) {
+              _currentTemperature = value;
+              notifyListeners();
+            })
+            as StreamSubscription<int?>?;
 
-    _fanModeSubscription = super.lyfiThing.fanModeProperty.value.onUpdate.listen((value) {
-      _fanMode = FanMode.values.firstWhere((e) => e.name == value);
-      notifyListeners();
-    });
+    _fanModeSubscription =
+        super.lyfiThing.findProperty('fanMode')?.value.onUpdate.listen((value) {
+              _fanMode = FanMode.values.firstWhere((e) => e.name == value);
+              notifyListeners();
+            })
+            as StreamSubscription<String>?;
 
-    _voltageSubscription = super.lyfiThing.voltageProperty.value.onUpdate.listen((value) {
-      super.currentVoltage.value = value;
-    });
+    _voltageSubscription =
+        super.lyfiThing.findProperty('voltage')?.value.onUpdate.listen((value) {
+              super.currentVoltage.value = value;
+            })
+            as StreamSubscription<double?>?;
 
-    _currentSubscription = super.lyfiThing.currentProperty.value.onUpdate.listen((value) {
-      currentCurrent.value = value;
-    });
+    _currentSubscription =
+        super.lyfiThing.findProperty('current')?.value.onUpdate.listen((value) {
+              currentCurrent.value = value;
+            })
+            as StreamSubscription<double?>?;
 
-    _powerSubscription = super.lyfiThing.powerProperty.value.onUpdate.listen((value) {
-      currentWatts.value = value;
-    });
+    _powerSubscription =
+        super.lyfiThing.findProperty('power')?.value.onUpdate.listen((value) {
+              currentWatts.value = value;
+            })
+            as StreamSubscription<double?>?;
 
-    _colorSubscription = super.lyfiThing.colorProperty.value.onUpdate.listen((value) {
-      _applyColorUpdate(value);
-    });
+    _colorSubscription =
+        super.lyfiThing.findProperty('color')?.value.onUpdate.listen((value) {
+              _applyColorUpdate(value);
+            })
+            as StreamSubscription<List<int>>?;
 
-    _temporaryDurationSubscription = super.lyfiThing.temporaryDurationProperty.value.onUpdate.listen((value) {
-      _temporaryDuration = value;
-      notifyListeners();
-    });
+    _temporaryDurationSubscription =
+        super.lyfiThing.findProperty('temporaryDuration')?.value.onUpdate.listen((value) {
+              _temporaryDuration = value;
+              notifyListeners();
+            })
+            as StreamSubscription<Duration>?;
 
-    _temporaryRemainingSubscription = super.lyfiThing.temporaryRemainingProperty.value.onUpdate.listen((value) {
-      _temporaryRemaining = value;
-      notifyListeners();
-    });
+    _temporaryRemainingSubscription =
+        super.lyfiThing.findProperty('temporaryRemaining')?.value.onUpdate.listen((value) {
+              _temporaryRemaining = value;
+              notifyListeners();
+            })
+            as StreamSubscription<Duration>?;
 
-    _stateSubscription = super.lyfiThing.stateProperty.value.onUpdate.listen(_onStateChanged);
+    _stateSubscription =
+        super.lyfiThing.findProperty('state')?.value.onUpdate.listen((value) => _onStateChanged(value))
+            as StreamSubscription<String>?;
 
-    _modeSubscription = super.lyfiThing.modeProperty.value.onUpdate.listen(_onModeChanged);
+    _modeSubscription =
+        super.lyfiThing.findProperty('mode')?.value.onUpdate.listen((value) => _onModeChanged(value))
+            as StreamSubscription<String>?;
 
-    _sunScheduleSubscription = super.lyfiThing.sunScheduleProperty.value.onUpdate.listen((value) {
-      sunInstants
-        ..clear()
-        ..addAll(value);
-      notifyListeners();
-    });
+    _sunScheduleSubscription =
+        super.lyfiThing.findProperty('sunSchedule')?.value.onUpdate.listen((value) {
+              sunInstants
+                ..clear()
+                ..addAll(value);
+              notifyListeners();
+            })
+            as StreamSubscription<ScheduleTable>?;
 
     // Set initial values
-    _fanPowerRatio = super.lyfiThing.fanPowerProperty.getValue().toDouble();
-    _currentTemperature = super.lyfiThing.temperatureProperty.getValue();
-    _fanMode = FanMode.values.firstWhere((e) => e.name == super.lyfiThing.fanModeProperty.getValue());
-    super.currentVoltage.value = super.lyfiThing.voltageProperty.getValue();
-    currentCurrent.value = super.lyfiThing.currentProperty.getValue();
-    currentWatts.value = super.lyfiThing.powerProperty.getValue();
-    _temporaryDuration = super.lyfiThing.temporaryDurationProperty.getValue();
-    _temporaryRemaining = super.lyfiThing.temporaryRemainingProperty.getValue();
+    _fanPowerRatio = super.lyfiThing.getProperty<int>('fanPower')?.toDouble();
+    _currentTemperature = super.lyfiThing.getProperty<int?>('temperature');
+    _fanMode = FanMode.values.firstWhere((e) => e.name == super.lyfiThing.getProperty<String>('fanMode'));
+    super.currentVoltage.value = super.lyfiThing.getProperty<double?>('voltage');
+    currentCurrent.value = super.lyfiThing.getProperty<double?>('current');
+    currentWatts.value = super.lyfiThing.getProperty<double?>('power');
+    _temporaryDuration = super.lyfiThing.getProperty<Duration>('temporaryDuration')!;
+    _temporaryRemaining = super.lyfiThing.getProperty<Duration>('temporaryRemaining')!;
 
     //_channels.length * lyfiBrightnessMax.toDouble();
     _initializeChannels();
@@ -365,7 +390,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         if (force || scheduledInstants.isEmpty) {
           scheduledInstants
             ..clear()
-            ..addAll(lyfiThing.scheduleProperty.value.get());
+            ..addAll(lyfiThing.getProperty<List<ScheduledInstant>>('schedule')!);
         }
         break;
 
@@ -373,7 +398,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         if (force || sunInstants.isEmpty) {
           sunInstants
             ..clear()
-            ..addAll(lyfiThing.sunScheduleProperty.value.get());
+            ..addAll(lyfiThing.getProperty<List<ScheduledInstant>>('sunSchedule')!);
         }
         break;
 
@@ -387,7 +412,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       notifyAppError('Device is offline. Please retry after reconnection.');
       return;
     }
-    super.lyfiThing.onProperty.setValue(onOff);
+    super.lyfiThing.findProperty('on')?.setValue(onOff);
   }
 
   bool get canSwitchTemporaryState =>
@@ -498,7 +523,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         notifyAppError("Unable to switch to Sun Simulation mode, the device's timezone is not set.");
         return;
       }
-      final location = super.lyfiThing.locationProperty.value.get();
+      final location = super.lyfiThing.getProperty<GeoLocation?>('location');
       if (location == null) {
         notifyAppError("Unable to switch to Sun Simulation mode, the device's geographic location is not set.");
         return;
@@ -598,8 +623,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       borneoInfo: super.borneoDeviceInfo!,
       ledInfo: lyfiDeviceInfo,
       ledStatus: lyfiDeviceStatus!,
-      powerBehavior: super.lyfiThing.powerBehaviorProperty.getValue(),
-      location: super.lyfiThing.locationProperty.getValue(),
+      powerBehavior: super.lyfiThing.getProperty<PowerBehavior>('powerBehavior')!,
+      location: super.lyfiThing.getProperty<GeoLocation?>('location'),
       gt: gt,
       logger: super.logger,
     );
@@ -615,8 +640,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       _channels.clear();
     }
     double ob = 0;
-    final currentColor = lyfiThing.colorProperty.getValue();
-    final metaChannels = lyfiThing.lyfiDeviceInfoProperty.getValue();
+    final currentColor = lyfiThing.getProperty<List<int>>('color')!;
+    final metaChannels = lyfiThing.getProperty<LyfiDeviceInfo>('lyfiDeviceInfo')!;
     for (int i = 0; i < currentColor.length; i++) {
       _channels.add(ValueNotifier<int>(currentColor[i]));
       ob += metaChannels.channels[i].brightnessRatio * _channels[i].value / lyfiBrightnessMax;
@@ -625,8 +650,8 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   }
 
   void _applyColorUpdate(List<int> color) {
-    final metaChannels = lyfiThing.lyfiDeviceInfoProperty.getValue();
-    if (_channels.length != color.length || metaChannels.channels.length != color.length) {
+    final metaChannels = lyfiThing.getProperty<LyfiDeviceInfo>('lyfiDeviceInfo');
+    if (metaChannels == null || _channels.length != color.length || metaChannels.channels.length != color.length) {
       _initializeChannels();
       notifyListeners();
       return;

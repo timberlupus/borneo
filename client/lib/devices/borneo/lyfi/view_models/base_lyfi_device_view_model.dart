@@ -8,15 +8,15 @@ import 'package:flutter/material.dart';
 
 abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   ILyfiDeviceApi get lyfiDeviceApi => super.boundDevice!.driver as ILyfiDeviceApi;
-  LyfiDeviceInfo get lyfiDeviceInfo => lyfiThing.lyfiDeviceInfoProperty.getValue();
+  LyfiDeviceInfo get lyfiDeviceInfo => lyfiThing.getProperty<LyfiDeviceInfo>('lyfiDeviceInfo')!;
 
-  LyfiDeviceStatus? get lyfiDeviceStatus => lyfiThing.lyfiStatusProperty.getValue();
+  LyfiDeviceStatus? get lyfiDeviceStatus => lyfiThing.getProperty<LyfiDeviceStatus>('lyfiStatus');
 
   LyfiThing get lyfiThing => wotThing as LyfiThing;
 
   double? get nominalPower => lyfiDeviceInfo.nominalPower;
   bool get canMeasureCurrent =>
-      super.isOnline && !super.isSuspectedOffline && isOn && lyfiThing.currentProperty.value.get() != null;
+      super.isOnline && !super.isSuspectedOffline && isOn && lyfiThing.getProperty<double?>('current') != null;
 
   bool get canMeasurePower => canMeasureCurrent && canMeasureVoltage;
 
@@ -35,16 +35,22 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   }
 
   void _subscribeToLyfiThing() {
-    _stateSubscription = lyfiThing.stateProperty.value.onUpdate.listen((stateName) {
-      notifyListeners();
-    });
-    _modeSubscription = lyfiThing.modeProperty.value.onUpdate.listen((modeName) {
-      notifyListeners();
-    });
+    _stateSubscription =
+        lyfiThing.findProperty('state')?.value.onUpdate.listen((stateName) {
+              notifyListeners();
+            })
+            as StreamSubscription<String>?;
+    _modeSubscription =
+        lyfiThing.findProperty('mode')?.value.onUpdate.listen((modeName) {
+              notifyListeners();
+            })
+            as StreamSubscription<String>?;
 
-    _statusSubscription = lyfiThing.lyfiStatusProperty.value.onUpdate.listen((status) {
-      notifyListeners();
-    });
+    _statusSubscription =
+        lyfiThing.findProperty('lyfiStatus')?.value.onUpdate.listen((status) {
+              notifyListeners();
+            })
+            as StreamSubscription<LyfiDeviceStatus>?;
   }
 
   @override
@@ -73,7 +79,7 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
     _statusSubscription = null;
   }
 
-  LyfiMode get mode => LyfiMode.fromString(lyfiThing.modeProperty.value.get());
+  LyfiMode get mode => LyfiMode.fromString(lyfiThing.getProperty<String>('mode')!);
 
   void setMode(LyfiMode newMode) {
     if (newMode == this.mode) {
@@ -82,7 +88,7 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
     lyfiThing.performAction('switchMode', {'mode': newMode.name})!.start();
   }
 
-  LyfiState get state => LyfiState.fromString(lyfiThing.stateProperty.value.get());
+  LyfiState get state => LyfiState.fromString(lyfiThing.getProperty<String>('state')!);
 
   void setState(LyfiState newState) {
     if (newState == this.state) {
