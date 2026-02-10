@@ -100,9 +100,6 @@ abstract class BaseDeviceViewModel extends BaseViewModel
       _isOnline = deviceManager.isBound(deviceID);
       _isSuspectedOffline = false;
       await onInitialize();
-      if (isOnline) {
-        await refreshStatus();
-      }
     } on IOException catch (ioex, stackTrace) {
       logger?.e(ioex.toString(), error: ioex, stackTrace: stackTrace);
       if (isOnline) {
@@ -313,13 +310,6 @@ abstract class BaseDeviceViewModel extends BaseViewModel
         if (bound) {
           markOnline(notify: false);
         }
-        if (bound || isOnline || isSuspectedOffline) {
-          try {
-            await refreshStatus();
-          } catch (e, stackTrace) {
-            logger?.w('Post-reconnect refresh failed: $e', error: e, stackTrace: stackTrace);
-          }
-        }
       }
     } on TimeoutException catch (e, stackTrace) {
       logger?.w('Reconnect timed out', error: e, stackTrace: stackTrace);
@@ -335,8 +325,6 @@ abstract class BaseDeviceViewModel extends BaseViewModel
       }
     }
   }
-
-  Future<void> refreshStatus({CancellationToken? cancelToken});
 
   Future<void> delete() async {
     assert(!isBusy);

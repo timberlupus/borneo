@@ -5,7 +5,6 @@ import 'package:borneo_app/features/devices/view_models/base_device_view_model.d
 import 'package:borneo_app/core/infrastructure/timezone.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
-import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/material.dart';
 
 abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
@@ -15,8 +14,6 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
       isOnline ? wotThing.getProperty<GeneralBorneoDeviceStatus>('generalStatus') : null;
 
   IBorneoDeviceApi get borneoDeviceApi => super.boundDevice!.driver as IBorneoDeviceApi;
-
-  DateTime get deviceClock => borneoDeviceStatus!.timestamp.toLocal();
 
   bool get isOn => wotThing.getProperty<bool>('on')!;
 
@@ -32,14 +29,13 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   RssiLevel? get rssiLevel =>
       borneoDeviceStatus?.wifiRssi != null ? RssiLevelExtension.fromRssi(borneoDeviceStatus!.wifiRssi!) : null;
 
-  String? _deviceTimezone;
-  String? get deviceTimezone => _deviceTimezone;
+  String? get deviceTimezone => wotThing.getProperty<String>('timezone');
 
   String? _localPosixTimezone;
   String? get localPosixTimezone => _localPosixTimezone;
 
   bool get hasTimezoneMismatch =>
-      _deviceTimezone != null && _localPosixTimezone != null && _deviceTimezone != _localPosixTimezone;
+      deviceTimezone != null && _localPosixTimezone != null && deviceTimezone != _localPosixTimezone;
 
   BaseBorneoDeviceViewModel({
     required super.deviceManager,
@@ -99,18 +95,6 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
     _onOffSubscription = null;
   }
 
-  Future<void> checkDeviceTimezone() async {
-    if (!super.isOnline || _localPosixTimezone == null) return;
-
-    try {
-      final status = await borneoDeviceApi.getGeneralDeviceStatus(super.boundDevice!.device);
-      _deviceTimezone = status.timezone;
-      notifyListeners();
-    } catch (e) {
-      logger?.e('Failed to check device timezone: $e');
-    }
-  }
-
   Future<void> syncDeviceTimezone() async {
     final success = await _syncDeviceTimezone();
     if (success) {
@@ -125,28 +109,12 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
 
     try {
       await borneoDeviceApi.setTimeZone(super.boundDevice!.device, _localPosixTimezone!);
-      _deviceTimezone = _localPosixTimezone;
+      wotThing.findProperty('timezone')?.value.notifyOfExternalUpdate(_localPosixTimezone);
       notifyListeners();
       return true;
     } catch (e) {
       logger?.e('Failed to sync device timezone: $e');
       return false;
-    }
-  }
-
-  @override
-  Future<void> refreshStatus({CancellationToken? cancelToken}) async {
-    if (!super.isOnline) {
-      return;
-    }
-
-    final oldTimezone = _deviceTimezone;
-    final status = await borneoDeviceApi.getGeneralDeviceStatus(super.boundDevice!.device, cancelToken: cancelToken);
-    _deviceTimezone = status.timezone;
-
-    // Only notify if something actually changed
-    if (_deviceTimezone != oldTimezone) {
-      notifyListeners();
     }
   }
 }

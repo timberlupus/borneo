@@ -27,8 +27,18 @@ class GroupViewModel extends BaseViewModel {
     _lastModified = this.clock.now().millisecondsSinceEpoch;
   }
 
-  void addDevice(AbstractDeviceSummaryViewModel device) {
-    _devices = [..._devices, device];
+  void addOrUpdateDevice(AbstractDeviceSummaryViewModel device) {
+    final existingIndex = _devices.indexWhere((d) => d.deviceEntity.id == device.deviceEntity.id);
+    if (existingIndex == -1) {
+      _devices = [..._devices, device];
+    } else {
+      final existingDevice = _devices[existingIndex];
+      if (!existingDevice.isDisposed) {
+        existingDevice.dispose();
+      }
+      _devices = [..._devices];
+      _devices[existingIndex] = device;
+    }
     _updateModified();
     notifyListeners();
   }

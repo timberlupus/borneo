@@ -6,7 +6,6 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/sun_editor_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
-import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
@@ -176,7 +175,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       try {
         await super.lyfiDeviceApi.getLyfiStatus(boundDevice!.device).timeout(_rapidProbeTimeout);
         super.clearSuspectedOffline();
-        await refreshStatus();
         return;
       } on TimeoutException {
         // continue to next attempt
@@ -239,7 +237,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     _stateSubscription = super.lyfiThing.stateProperty.value.onUpdate.listen(_onStateChanged);
 
     _modeSubscription = super.lyfiThing.modeProperty.value.onUpdate.listen((value) {
-      final newMode = LyfiMode.fromString(value);
+      //final newMode = LyfiMode.fromString(value);
       notifyListeners();
     });
 
@@ -261,8 +259,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     _temporaryRemaining = super.lyfiThing.temporaryRemainingProperty.getValue();
 
     //_channels.length * lyfiBrightnessMax.toDouble();
-
-    await refreshStatus();
+    _initializeChannels();
 
     _editorState = _editorState.copyWith(mode: super.mode);
 
@@ -324,11 +321,11 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       return;
     }
 
-    await refreshStatus();
-
     _editorState = _editorState.copyWith(mode: super.mode);
 
     await _syncScheduleTables(mode: super.mode);
+
+    _initializeChannels();
 
     // Update schedule
     if (!super.isLocked) {
@@ -352,33 +349,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     if (_editorState.editor != null) {
       _editorState.editor!.dispose();
       _editorState = _editorState.copyWith(editor: null, status: EditorStatus.idle, clearError: true);
-    }
-  }
-
-  @override
-  Future<void> refreshStatus({CancellationToken? cancelToken}) async {
-    assert(!_isDisposed);
-    if (!super.isOnline || isSuspectedOffline || boundDevice == null) {
-      return;
-    }
-    await super.refreshStatus(cancelToken: cancelToken);
-
-    if (super.isSuspectedOffline) {
-      return;
-    }
-
-    bool emptyChannels = _channels.isEmpty;
-    if (super.lyfiDeviceStatus != null) {
-      double ob = 0;
-      for (int i = 0; i < lyfiDeviceStatus!.currentColor.length; i++) {
-        if (emptyChannels) {
-          _channels.add(ValueNotifier<int>(super.lyfiDeviceStatus!.currentColor[i]));
-        } else {
-          _channels[i].value = super.lyfiDeviceStatus!.currentColor[i];
-        }
-        ob += lyfiDeviceInfo.channels[i].brightnessRatio * _channels[i].value / lyfiBrightnessMax;
-      }
-      _overallBrightness = ob;
     }
   }
 
@@ -533,7 +503,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
 
     super.setMode(newMode);
-    await refreshStatus();
     await _toggleEditor(super.mode);
     notifyListeners();
   }
@@ -617,5 +586,22 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     );
     await vm.initialize();
     return vm;
+  }
+
+  void _initializeChannels() {
+    if (_channels.isNotEmpty) {
+      for (final ch in _channels) {
+        ch.dispose();
+      }
+      _channels.clear();
+    }
+    double ob = 0;
+    final currentColor = lyfiThing.colorProperty.getValue();
+    final metaChannels = lyfiThing.lyfiDeviceInfoProperty.getValue();
+    for (int i = 0; i < currentColor.length; i++) {
+      _channels.add(ValueNotifier<int>(currentColor[i]));
+      ob += metaChannels.channels[i].brightnessRatio * _channels[i].value / lyfiBrightnessMax;
+    }
+    _overallBrightness = ob;
   }
 }

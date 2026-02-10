@@ -125,7 +125,10 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
       // Note: This doesn't block creation, initialization happens in background
       await lyfiThing.initialize();
       return lyfiThing;
-    } on DeviceNotBoundError {
+    } catch (e, st) {
+      // If API access fails, fall back to basic WotThing
+      logger?.w('Failed to create online device with APIs for ${device.id}: $e', error: e, stackTrace: st);
+
       // Create offline LyfiThing
       final deviceEvents = DeviceEventBus(); // TODO FIXME
       final lyfiThing = LyfiThing.offline(
@@ -137,10 +140,6 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
       );
       await lyfiThing.initialize();
       return lyfiThing;
-    } catch (e, st) {
-      // If API access fails, fall back to basic WotThing
-      logger?.e('Failed to create LyfiThing with APIs for ${device.id}: $e', error: e, stackTrace: st);
-      rethrow;
     }
   }
 }

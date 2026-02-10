@@ -4,14 +4,13 @@ import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/wot/wot_thing.dart';
-import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/material.dart';
 
 abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   ILyfiDeviceApi get lyfiDeviceApi => super.boundDevice!.driver as ILyfiDeviceApi;
-  LyfiDeviceInfo get lyfiDeviceInfo => lyfiDeviceApi.getLyfiInfo(super.boundDevice!.device);
+  LyfiDeviceInfo get lyfiDeviceInfo => lyfiThing.lyfiDeviceInfoProperty.getValue();
 
-  LyfiDeviceStatus? get lyfiDeviceStatus => lyfiThing.lyfiStatusProperty.value.get();
+  LyfiDeviceStatus? get lyfiDeviceStatus => lyfiThing.lyfiStatusProperty.getValue();
 
   LyfiThing get lyfiThing => wotThing as LyfiThing;
 
@@ -34,9 +33,6 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   Future<void> onInitialize() async {
     super.onInitialize();
     _subscribeToLyfiThing();
-    if (super.isOnline) {
-      await super.refreshStatus();
-    }
   }
 
   void _subscribeToLyfiThing() {
@@ -112,11 +108,6 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
     required super.gt,
     super.logger,
   });
-
-  @override
-  Future<void> refreshStatus({CancellationToken? cancelToken}) async {
-    await super.refreshStatus(cancelToken: cancelToken);
-  }
 
   @override
   void dispose() {

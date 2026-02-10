@@ -37,8 +37,9 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   late final ObservableWotProperty<AcclimationSettings, LyfiAcclimationChangedEvent> acclimationProperty;
   late final ObservableWotProperty<GeoLocation?, LyfiLocationChangedEvent> locationProperty;
   late final ObservableWotProperty<String, LyfiCorrectionMethodChangedEvent> correctionMethodProperty;
-  late final WotProperty<bool> timeZoneEnabledProperty;
-  late final WotProperty<int> timeZoneOffsetProperty;
+  late final WotProperty<String> timezoneProperty;
+  late final WotProperty<bool> timezoneEnabledProperty;
+  late final WotProperty<int> timezoneOffsetProperty;
   late final WotProperty<int> keepTempProperty;
   late final WotProperty<int?> temperatureProperty;
   late final WotProperty<String> fanModeProperty;
@@ -49,12 +50,13 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   late final WotProperty<List<ScheduledInstant>> sunScheduleProperty;
   late final WotProperty<List<SunCurveItem>> sunCurveProperty;
   late final WotProperty<int> currentTempProperty;
-  late final WotProperty<LyfiDeviceInfo> deviceInfoProperty;
+  late final WotProperty<LyfiDeviceInfo> lyfiDeviceInfoProperty;
   late final WotProperty<bool> unscheduledProperty;
   late final WotProperty<Duration> temporaryRemainingProperty;
   late final WotProperty<int> fanPowerProperty;
   late final WotProperty<List<int>> manualColorProperty;
   late final WotProperty<List<int>> sunColorProperty;
+  late final WotProperty<bool> acclimationEnabledProperty;
   late final WotProperty<bool> acclimationActivatedProperty;
   late final WotProperty<bool> cloudActivatedProperty;
 
@@ -62,6 +64,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   late final WotProperty<double?> currentProperty;
   late final WotProperty<double?> powerProperty;
   late final WotProperty<PowerBehavior> powerBehaviorProperty;
+  late final WotProperty<DateTime> timestampProperty;
 
   // Temporary properties for refactoring - TODO: Remove after refactoring
   late final WotProperty<LyfiDeviceStatus> lyfiStatusProperty;
@@ -306,10 +309,24 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     );
     addProperty(correctionMethodProperty);
 
-    // Timezone enabled property
-    timeZoneEnabledProperty = WotProperty<bool>(
+    // Timezone property (read-only)
+    timezoneProperty = WotProperty<String>(
       thing: this,
-      name: 'timeZoneEnabled',
+      name: 'timezone',
+      value: WotValue<String>(initialValue: '', valueForwarder: (_) => throw UnsupportedError('Timezone is read-only')),
+      metadata: WotPropertyMetadata(
+        type: 'string',
+        title: 'Timezone',
+        description: 'Device timezone name',
+        readOnly: true,
+      ),
+    );
+    addProperty(timezoneProperty);
+
+    // Timezone enabled property
+    timezoneEnabledProperty = WotProperty<bool>(
+      thing: this,
+      name: 'timezoneEnabled',
       value: WotValue<bool>(
         initialValue: false, // Default false
         valueForwarder: (update) => lyfiApi!.setTimeZoneEnabled(device, update),
@@ -321,12 +338,12 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
         readOnly: false,
       ),
     );
-    addProperty(timeZoneEnabledProperty);
+    addProperty(timezoneEnabledProperty);
 
     // Timezone offset property
-    timeZoneOffsetProperty = WotProperty<int>(
+    timezoneOffsetProperty = WotProperty<int>(
       thing: this,
-      name: 'timeZoneOffset',
+      name: 'timezoneOffset',
       value: WotValue<int>(
         initialValue: 0, // Default 0 offset
         valueForwarder: (update) => lyfiApi!.setTimeZoneOffset(device, update),
@@ -338,7 +355,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
         readOnly: false,
       ),
     );
-    addProperty(timeZoneOffsetProperty);
+    addProperty(timezoneOffsetProperty);
 
     // Keep temperature property
     keepTempProperty = WotProperty<int>(
@@ -501,9 +518,9 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     addProperty(currentTempProperty);
 
     // Device info property (read-only)
-    deviceInfoProperty = WotProperty<LyfiDeviceInfo>(
+    lyfiDeviceInfoProperty = WotProperty<LyfiDeviceInfo>(
       thing: this,
-      name: 'deviceInfo',
+      name: 'lyfiDeviceInfo',
       value: WotValue<LyfiDeviceInfo>(
         initialValue: LyfiDeviceInfo(
           nominalPower: 0,
@@ -515,12 +532,12 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       ),
       metadata: WotPropertyMetadata(
         type: 'object',
-        title: 'Device Info',
-        description: 'Device capabilities and channel metadata',
+        title: 'LyFi Device Info',
+        description: 'LyFi Device capabilities and channel metadata',
         readOnly: true,
       ),
     );
-    addProperty(deviceInfoProperty);
+    addProperty(lyfiDeviceInfoProperty);
 
     // Temporary Lyfi status property for refactoring - TODO: Remove after refactoring
     lyfiStatusProperty = WotProperty<LyfiDeviceStatus>(
@@ -677,6 +694,23 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     );
     addProperty(sunColorProperty);
 
+    // Acclimation enabled property (read-only)
+    acclimationEnabledProperty = WotProperty<bool>(
+      thing: this,
+      name: 'acclimationEnabled',
+      value: WotValue<bool>(
+        initialValue: false,
+        valueForwarder: (update) => throw UnsupportedError('Acclimation enabled is read-only'),
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'boolean',
+        title: 'Acclimation Enabled',
+        description: 'Whether acclimation is enabled',
+        readOnly: true,
+      ),
+    );
+    addProperty(acclimationEnabledProperty);
+
     // Acclimation activated property (read-only)
     acclimationActivatedProperty = WotProperty<bool>(
       thing: this,
@@ -785,6 +819,23 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       ),
     );
     addProperty(powerBehaviorProperty);
+
+    // Timestamp property (read-only)
+    timestampProperty = WotProperty<DateTime>(
+      thing: this,
+      name: 'timestamp',
+      value: WotValue<DateTime>(
+        initialValue: DateTime.now().toUtc(),
+        valueForwarder: (_) => throw UnsupportedError('Timestamp is read-only'),
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'string',
+        title: 'Timestamp',
+        description: 'Device timestamp (UTC)',
+        readOnly: true,
+      ),
+    );
+    addProperty(timestampProperty);
   }
 
   void _createActions() {
@@ -967,7 +1018,6 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     // Get actual device state and update property values
     final generalStatus = await borneoApi!.getGeneralDeviceStatus(device);
     final lyfiStatus = await lyfiApi!.getLyfiStatus(device);
-    final actualColor = await lyfiApi!.getColor(device);
     final schedule = await lyfiApi!.getSchedule(device);
     final acclimation = await lyfiApi!.getAcclimation(device);
     final location = await lyfiApi!.getLocation(device);
@@ -984,6 +1034,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     final sunSchedule = await lyfiApi!.getSunSchedule(device);
     final sunCurve = await lyfiApi!.getSunCurve(device);
     final powerBehavior = await borneoApi!.getPowerBehavior(device);
+    final deviceInfo = await lyfiApi!.getLyfiInfo(device);
     // final currentTemp = await lyfiApi.getCurrentTemp(device); // Use lyfiStatus.temperature
     // final deviceInfo = await lyfiApi.getDeviceInfo(device); // Skip for now
 
@@ -991,13 +1042,14 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     onProperty.value.notifyOfExternalUpdate(generalStatus.power);
     stateProperty.value.notifyOfExternalUpdate(lyfiStatus.state.name);
     modeProperty.value.notifyOfExternalUpdate(lyfiStatus.mode.name);
-    colorProperty.value.notifyOfExternalUpdate(actualColor);
+    colorProperty.value.notifyOfExternalUpdate(lyfiStatus.currentColor);
     scheduleProperty.value.notifyOfExternalUpdate(schedule);
     acclimationProperty.value.notifyOfExternalUpdate(acclimation);
     locationProperty.value.notifyOfExternalUpdate(location);
     correctionMethodProperty.value.notifyOfExternalUpdate(correctionMethod.name);
-    timeZoneEnabledProperty.value.notifyOfExternalUpdate(timeZoneEnabled);
-    timeZoneOffsetProperty.value.notifyOfExternalUpdate(timeZoneOffset);
+    timezoneProperty.value.notifyOfExternalUpdate(generalStatus.timezone);
+    timezoneEnabledProperty.value.notifyOfExternalUpdate(timeZoneEnabled);
+    timezoneOffsetProperty.value.notifyOfExternalUpdate(timeZoneOffset);
     keepTempProperty.value.notifyOfExternalUpdate(keepTemp);
     temperatureProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature);
     fanModeProperty.value.notifyOfExternalUpdate(fanMode.name);
@@ -1008,12 +1060,13 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     sunScheduleProperty.value.notifyOfExternalUpdate(sunSchedule);
     sunCurveProperty.value.notifyOfExternalUpdate(sunCurve);
     currentTempProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature ?? 25);
-    // deviceInfoProperty.value.notifyOfExternalUpdate(deviceInfo);
+    lyfiDeviceInfoProperty.value.notifyOfExternalUpdate(deviceInfo);
     unscheduledProperty.value.notifyOfExternalUpdate(lyfiStatus.unscheduled);
     temporaryRemainingProperty.value.notifyOfExternalUpdate(lyfiStatus.temporaryRemaining);
     fanPowerProperty.value.notifyOfExternalUpdate(lyfiStatus.fanPower ?? 0);
     manualColorProperty.value.notifyOfExternalUpdate(lyfiStatus.manualColor);
     sunColorProperty.value.notifyOfExternalUpdate(lyfiStatus.sunColor);
+    acclimationEnabledProperty.value.notifyOfExternalUpdate(lyfiStatus.acclimationEnabled);
     acclimationActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.acclimationActivated);
     cloudActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.cloudActivated);
 
@@ -1028,6 +1081,9 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
 
     // Update power behavior property
     powerBehaviorProperty.value.notifyOfExternalUpdate(powerBehavior);
+
+    // Update timestamp property
+    timestampProperty.value.notifyOfExternalUpdate(generalStatus.timestamp);
 
     // Update status properties
     lyfiStatusProperty.value.notifyOfExternalUpdate(lyfiStatus);
@@ -1073,6 +1129,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       temporaryRemainingProperty.value.notifyOfExternalUpdate(lyfiStatus.temporaryRemaining);
       cloudActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.cloudActivated);
       sunColorProperty.value.notifyOfExternalUpdate(lyfiStatus.sunColor);
+      acclimationEnabledProperty.value.notifyOfExternalUpdate(lyfiStatus.acclimationEnabled);
 
       // Update power measurement properties
       voltageProperty.value.notifyOfExternalUpdate(generalStatus.powerVoltage);
@@ -1088,6 +1145,8 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       // Update status properties
       lyfiStatusProperty.value.notifyOfExternalUpdate(lyfiStatus);
       generalStatusProperty.value.notifyOfExternalUpdate(generalStatus);
+      timestampProperty.value.notifyOfExternalUpdate(generalStatus.timestamp);
+      timezoneProperty.value.notifyOfExternalUpdate(generalStatus.timezone);
     } catch (e, stackTrace) {
       logger?.w('Lightweight sync failed: $e', error: e, stackTrace: stackTrace);
     }
@@ -1099,7 +1158,10 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     }
     try {
       final lyfiStatus = await lyfiApi!.getLyfiStatus(device);
+      final deviceInfo = await lyfiApi!.getLyfiInfo(device);
+      acclimationEnabledProperty.value.notifyOfExternalUpdate(lyfiStatus.acclimationEnabled);
       acclimationActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.acclimationActivated);
+      lyfiDeviceInfoProperty.value.notifyOfExternalUpdate(deviceInfo);
 
       switch (lyfiStatus.mode) {
         case LyfiMode.manual:

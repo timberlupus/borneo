@@ -165,7 +165,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
         final targetGroup = deviceEntity.groupID != null ? groupMap[deviceEntity.groupID] : newDummyGroup;
 
         if (targetGroup != null) {
-          targetGroup.addDevice(deviceVM);
+          targetGroup.addOrUpdateDevice(deviceVM);
         }
       }
     }
@@ -220,7 +220,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
           targetGroup = dummyGroup;
         }
 
-        targetGroup.addDevice(deviceVM);
+        targetGroup.addOrUpdateDevice(deviceVM);
         logger?.i('Device ${event.device.name} added to group ${targetGroup.name}');
       }
     } catch (e, stackTrace) {

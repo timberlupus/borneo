@@ -1,7 +1,6 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
-import 'package:cancellation_token/cancellation_token.dart';
 
 class AcclimationViewModel extends BaseLyfiDeviceViewModel {
   late final AcclimationSettings _origSettings;
@@ -99,11 +98,6 @@ class AcclimationViewModel extends BaseLyfiDeviceViewModel {
 
     super.lyfiDeviceApi.setAcclimation(super.boundDevice!.device, acc);
     _isChanged = false;
-  }
-
-  @override
-  Future<void> refreshStatus({CancellationToken? cancelToken}) async {
-    await super.refreshStatus(cancelToken: cancelToken);
   }
 
   @override
