@@ -93,10 +93,10 @@ void main() {
       thing.addProperty(operationModeProperty);
 
       // Verify property creation
-      expect(operationModeProperty.getName(), equals('operationMode'));
+      expect(operationModeProperty.name, equals('operationMode'));
       expect(operationModeProperty.getValue(), equals('idle'));
-      expect(operationModeProperty.getMetadata().enumValues, equals(['idle', 'active', 'maintenance', 'error']));
-      expect(operationModeProperty.getMetadata().readOnly, isFalse);
+      expect(operationModeProperty.metadata.enumValues, equals(['idle', 'active', 'maintenance', 'error']));
+      expect(operationModeProperty.metadata.readOnly, isFalse);
     });
 
     test('Set and get enum property value', () {
@@ -123,7 +123,7 @@ void main() {
       expect(priorityProperty.getValue(), equals('critical'));
 
       // Verify enum value list
-      expect(priorityProperty.getMetadata().enumValues, containsAll(['low', 'medium', 'high', 'critical']));
+      expect(priorityProperty.metadata.enumValues, containsAll(['low', 'medium', 'high', 'critical']));
     });
 
     test('Property description contains enum info', () {
@@ -168,7 +168,7 @@ void main() {
       thing.addProperty(statusProperty);
 
       // Verify read-only property
-      expect(statusProperty.getMetadata().readOnly, isTrue);
+      expect(statusProperty.metadata.readOnly, isTrue);
 
       // Attempting to set a read-only property should throw
       expect(() => statusProperty.setValue('disconnected'), throwsA(isA<Exception>()));
@@ -330,13 +330,13 @@ void main() {
       expect(thermostat.getProperty('targetTemperature'), isNotNull);
 
       // Verify enum property constraints
-      expect(workModeProperty.getMetadata().enumValues, equals(['auto', 'manual', 'schedule', 'vacation']));
-      expect(fanSpeedProperty.getMetadata().enumValues, equals(['low', 'medium', 'high', 'auto']));
+      expect(workModeProperty.metadata.enumValues, equals(['auto', 'manual', 'schedule', 'vacation']));
+      expect(fanSpeedProperty.metadata.enumValues, equals(['low', 'medium', 'high', 'auto']));
 
       // Verify numeric property constraints
-      expect(targetTempProperty.getMetadata().minimum, equals(10));
-      expect(targetTempProperty.getMetadata().maximum, equals(35));
-      expect(targetTempProperty.getMetadata().unit, equals('°C'));
+      expect(targetTempProperty.metadata.minimum, equals(10));
+      expect(targetTempProperty.metadata.maximum, equals(35));
+      expect(targetTempProperty.metadata.unit, equals('°C'));
 
       // Test property value setting
       workModeProperty.setValue('manual');

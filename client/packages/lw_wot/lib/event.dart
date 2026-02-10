@@ -42,10 +42,6 @@ class WotEvent<Data> {
     hrefPrefix = prefix;
   }
 
-  String getName() => name;
-  Data? getData() => data;
-  String getTime() => time;
-  dynamic getThing() => thing;
   Map<String, dynamic> asEventDescription() {
     final description = <String, dynamic>{
       name: <String, dynamic>{'timestamp': time},

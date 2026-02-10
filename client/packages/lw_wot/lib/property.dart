@@ -84,11 +84,11 @@ class WotProperty<T> {
   final WotValue<T> value;
   final WotPropertyMetadata metadata;
   String hrefPrefix = '';
-  late final String href;
+  late final String _href;
   final WotThing thing;
 
   WotProperty({required this.thing, required this.name, required this.value, required this.metadata}) {
-    href = '/properties/$name';
+    _href = '/properties/$name';
     value.onUpdate.listen((_) => thing.propertyNotify(this));
   }
 
@@ -96,16 +96,12 @@ class WotProperty<T> {
     hrefPrefix = prefix;
   }
 
-  String getHref() => hrefPrefix + href;
+  String get href => hrefPrefix + _href;
   T getValue() => value.get();
   void setValue(T newValue) {
     validateValue(newValue);
     value.set(newValue);
   }
-
-  String getName() => name;
-  dynamic getThing() => thing;
-  WotPropertyMetadata getMetadata() => metadata;
 
   void validateValue(T v) {
     if (metadata.readOnly == true) {
@@ -121,7 +117,7 @@ class WotProperty<T> {
 
   Map<String, dynamic> asPropertyDescription() {
     final desc = Map<String, dynamic>.from(metadata.toMap());
-    desc['links'] = (desc['links'] ?? [])..add({'rel': 'property', 'href': getHref()});
+    desc['links'] = (desc['links'] ?? [])..add({'rel': 'property', 'href': href});
     return desc;
   }
 

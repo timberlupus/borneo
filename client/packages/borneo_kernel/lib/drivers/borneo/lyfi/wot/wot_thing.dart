@@ -68,6 +68,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     borneoApi = newBorneoApi;
     lyfiApi = newLyfiApi;
     isOffline = false;
+    findProperty('online')?.value.notifyOfExternalUpdate(true);
     // Re-bind to hardware
     await _bindToHardware();
   }
@@ -96,6 +97,23 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   /// Create properties with reasonable defaults first, then bind to hardware
   /// This follows Mozilla WebThing pattern of creating Value objects with initial values
   void _createPropertiesWithDefaults() {
+    // Online property - indicates connection status
+    final onlineProperty = WotProperty<bool>(
+      thing: this,
+      name: 'online',
+      value: WotValue<bool>(
+        initialValue: !isOffline,
+        valueForwarder: (_) => throw UnsupportedError('Online status is read-only'),
+      ),
+      metadata: WotPropertyMetadata(
+        type: 'boolean',
+        title: 'Online',
+        description: 'Device connection status',
+        readOnly: true,
+      ),
+    );
+    addProperty(onlineProperty);
+
     // Power property with default false, will be updated when hardware is ready
     final onProperty = ObservableWotProperty<bool, DevicePowerOnOffChangedEvent>(
       thing: this,

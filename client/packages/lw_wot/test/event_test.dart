@@ -58,20 +58,20 @@ void main() {
       final eventData = {'temperature': 25.5, 'unit': 'celsius'};
       final event = WotEvent<Map<String, dynamic>>(thing: thing, name: 'temperatureChanged', data: eventData);
 
-      expect(event.getName(), equals('temperatureChanged'));
-      expect(event.getData(), equals(eventData));
-      expect(event.getThing(), equals(thing));
-      expect(event.getTime(), isNotNull);
-      expect(event.getTime(), matches(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00'));
+      expect(event.name, equals('temperatureChanged'));
+      expect(event.data, equals(eventData));
+      expect(event.thing, equals(thing));
+      expect(event.time, isNotNull);
+      expect(event.time, matches(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00'));
     });
 
     test('event without data', () {
       final event = WotEvent<String?>(thing: thing, name: 'buttonPressed');
 
-      expect(event.getName(), equals('buttonPressed'));
-      expect(event.getData(), isNull);
-      expect(event.getThing(), equals(thing));
-      expect(event.getTime(), isNotNull);
+      expect(event.name, equals('buttonPressed'));
+      expect(event.data, isNull);
+      expect(event.thing, equals(thing));
+      expect(event.time, isNotNull);
     });
 
     test('setHrefPrefix updates prefix correctly', () {
@@ -114,19 +114,19 @@ void main() {
     test('events with different data types', () {
       // String data
       final stringEvent = WotEvent<String>(thing: thing, name: 'message', data: 'Hello World');
-      expect(stringEvent.getData(), equals('Hello World'));
+      expect(stringEvent.data, equals('Hello World'));
 
       // Numeric data
       final numberEvent = WotEvent<double>(thing: thing, name: 'measurement', data: 42.5);
-      expect(numberEvent.getData(), equals(42.5));
+      expect(numberEvent.data, equals(42.5));
 
       // Boolean data
       final boolEvent = WotEvent<bool>(thing: thing, name: 'status', data: true);
-      expect(boolEvent.getData(), isTrue);
+      expect(boolEvent.data, isTrue);
 
       // List data
       final listEvent = WotEvent<List<int>>(thing: thing, name: 'values', data: [1, 2, 3, 4, 5]);
-      expect(listEvent.getData(), equals([1, 2, 3, 4, 5]));
+      expect(listEvent.data, equals([1, 2, 3, 4, 5]));
     });
 
     test('event timestamp is consistent', () {
@@ -134,8 +134,8 @@ void main() {
       final event2 = WotEvent<String>(thing: thing, name: 'event2', data: 'data2');
 
       // Events created at nearly the same time should have very close timestamps
-      final time1 = DateTime.parse(event1.getTime().replaceAll('+00:00', 'Z'));
-      final time2 = DateTime.parse(event2.getTime().replaceAll('+00:00', 'Z'));
+      final time1 = DateTime.parse(event1.time.replaceAll('+00:00', 'Z'));
+      final time2 = DateTime.parse(event2.time.replaceAll('+00:00', 'Z'));
       final difference = time2.difference(time1).inMilliseconds.abs();
 
       expect(difference, lessThan(100)); // Should be created within 100ms
@@ -164,20 +164,20 @@ void main() {
       final event2 = WotEvent<int>(thing: thing, name: 'counter', data: 2);
       final event3 = WotEvent<int>(thing: thing, name: 'counter', data: 3);
 
-      expect(event1.getName(), equals(event2.getName()));
-      expect(event2.getName(), equals(event3.getName()));
+      expect(event1.name, equals(event2.name));
+      expect(event2.name, equals(event3.name));
 
-      expect(event1.getData(), equals(1));
-      expect(event2.getData(), equals(2));
-      expect(event3.getData(), equals(3));
+      expect(event1.data, equals(1));
+      expect(event2.data, equals(2));
+      expect(event3.data, equals(3));
 
       // All events should have valid timestamps
-      expect(event1.getTime(), isNotNull);
-      expect(event2.getTime(), isNotNull);
-      expect(event3.getTime(), isNotNull);
+      expect(event1.time, isNotNull);
+      expect(event2.time, isNotNull);
+      expect(event3.time, isNotNull);
 
       // Verify timestamp format
-      expect(event1.getTime(), matches(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00'));
+      expect(event1.time, matches(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00'));
     });
 
     test('event with complex nested data structure', () {
@@ -197,7 +197,7 @@ void main() {
 
       final event = WotEvent<Map<String, dynamic>>(thing: thing, name: 'sensorData', data: complexData);
 
-      expect(event.getData(), equals(complexData));
+      expect(event.data, equals(complexData));
 
       final description = event.asEventDescription();
       expect(description['sensorData']['data'], equals(complexData));
@@ -224,8 +224,8 @@ void main() {
       expect(stopwatch.elapsedMilliseconds, lessThan(1000)); // Should be fast
 
       // Verify all events are properly created
-      expect(events.first.getData(), equals(0));
-      expect(events.last.getData(), equals(999));
+      expect(events.first.data, equals(0));
+      expect(events.last.data, equals(999));
     });
   });
 }

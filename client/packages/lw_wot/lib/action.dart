@@ -11,19 +11,19 @@ class WotAction<InputType> {
   final String name;
   final InputType input;
   String hrefPrefix = '';
-  late final String href;
+  late final String _href;
   String status = 'created';
   final String timeRequested;
   String? timeCompleted;
 
   WotAction({required this.id, required this.thing, required this.name, required this.input})
     : timeRequested = utils.timestamp() {
-    href = '/actions/$name/$id';
+    _href = '/actions/$name/$id';
     timeCompleted = null;
   }
   Map<String, dynamic> asActionDescription() {
     final description = <String, dynamic>{
-      name: <String, dynamic>{'href': hrefPrefix + href, 'timeRequested': timeRequested, 'status': status},
+      name: <String, dynamic>{'href': href, 'timeRequested': timeRequested, 'status': status},
     };
 
     if (input != null) {
@@ -41,14 +41,7 @@ class WotAction<InputType> {
     hrefPrefix = prefix;
   }
 
-  String getId() => id;
-  String getName() => name;
-  String getHref() => hrefPrefix + href;
-  String getStatus() => status;
-  WotThing getThing() => thing;
-  String getTimeRequested() => timeRequested;
-  String? getTimeCompleted() => timeCompleted;
-  InputType getInput() => input;
+  String get href => hrefPrefix + _href;
 
   void start() {
     status = 'pending';
