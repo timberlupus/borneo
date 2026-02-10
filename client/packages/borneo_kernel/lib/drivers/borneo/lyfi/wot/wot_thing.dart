@@ -130,8 +130,9 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   Future<void> initialize({CancellationToken? cancelToken}) async {
     if (!isOffline) {
       await _bindToHardware().asCancellable(cancelToken);
-      _setupPeriodicSync();
     }
+
+    _setupPeriodicSync();
   }
 
   /// Create properties with reasonable defaults first, then bind to hardware
@@ -206,7 +207,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       thing: this,
       name: 'color',
       value: WotValue<List<int>>(
-        initialValue: [0, 0, 0, 0], // Default 4-channel all off
+        initialValue: [], // Default 4-channel all off
         valueForwarder: (update) => lyfiApi!.setColor(device, update),
       ),
       metadata: WotPropertyMetadata(
@@ -1093,7 +1094,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   /// Lightweight periodic sync - only check critical properties
   void _setupPeriodicSync() {
     _syncTimer = Timer.periodic(Duration(seconds: kLightweightPeriodicIntervalSecs), (timer) async {
-      if (!isDisposed) {
+      if (!isDisposed && !isOffline) {
         await _lightweightSync();
       } else {
         timer.cancel();
@@ -1101,7 +1102,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     });
 
     _lowFrequencySyncTimer = Timer.periodic(Duration(seconds: kLowFrequencyPeriodicIntervalSecs), (timer) async {
-      if (!isDisposed) {
+      if (!isDisposed && !isOffline) {
         await _lowFrequencySync();
       } else {
         timer.cancel();
