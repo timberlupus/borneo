@@ -10,6 +10,7 @@ import 'package:borneo_kernel/drivers/borneo/wot/borneo_props.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/wot/wot_actions.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:logger/logger.dart';
 import 'package:lw_wot/wot.dart';
 
@@ -17,6 +18,7 @@ import 'package:lw_wot/wot.dart';
 /// This class uses default values during construction and binds to actual hardware asynchronously
 class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   static const int kLightweightPeriodicIntervalSecs = 1;
+  static const int kLowFrequencyPeriodicIntervalSecs = 300;
 
   final Logger? logger;
   final Device device;
@@ -96,13 +98,17 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     )..isOffline = true;
   }
 
-  void bindToOnlineApis(IBorneoDeviceApi newBorneoApi, ILyfiDeviceApi newLyfiApi) {
+  Future<void> bindToOnlineApis(
+    IBorneoDeviceApi newBorneoApi,
+    ILyfiDeviceApi newLyfiApi, {
+    CancellationToken? cancelToken,
+  }) async {
     if (!isOffline) return;
     borneoApi = newBorneoApi;
     lyfiApi = newLyfiApi;
     isOffline = false;
     // Re-bind to hardware
-    _bindToHardware();
+    await _bindToHardware();
   }
 
   @override
@@ -118,9 +124,9 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   String? getActionGuardError(String actionName) => 'Device is offline or unbound.';
 
   /// Mozilla WebThing style initialization - sync constructor with async hardware binding
-  Future<void> initialize() async {
+  Future<void> initialize({CancellationToken? cancelToken}) async {
     if (!isOffline) {
-      await _bindToHardware();
+      await _bindToHardware().asCancellable(cancelToken);
       _setupPeriodicSync();
     }
   }
@@ -241,13 +247,13 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
           startPercent: 0,
           days: 0,
         ),
-        valueForwarder: (update) => lyfiApi!.setAcclimation(device, update),
+        valueForwarder: (_) => throw UnsupportedError('Acclimation is read-only; use action to update'),
       ),
       metadata: WotPropertyMetadata(
         type: 'object',
         title: 'Acclimation',
         description: 'LED acclimation settings for gradual brightness increase',
-        readOnly: false,
+        readOnly: true,
       ),
       eventName: 'acclimationChanged',
       mapper: (event) => event.settings,
@@ -976,8 +982,8 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     final cloudEnabled = await lyfiApi!.getCloudEnabled(device);
     final temporaryDuration = await lyfiApi!.getTemporaryDuration(device);
     final sunSchedule = await lyfiApi!.getSunSchedule(device);
+    final sunCurve = await lyfiApi!.getSunCurve(device);
     final powerBehavior = await borneoApi!.getPowerBehavior(device);
-    // final sunCurve = await lyfiApi!.getSunCurve(device);
     // final currentTemp = await lyfiApi.getCurrentTemp(device); // Use lyfiStatus.temperature
     // final deviceInfo = await lyfiApi.getDeviceInfo(device); // Skip for now
 
@@ -1000,7 +1006,7 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     cloudEnabledProperty.value.notifyOfExternalUpdate(cloudEnabled);
     temporaryDurationProperty.value.notifyOfExternalUpdate(temporaryDuration);
     sunScheduleProperty.value.notifyOfExternalUpdate(sunSchedule);
-    // sunCurveProperty.value.notifyOfExternalUpdate(sunCurve);
+    sunCurveProperty.value.notifyOfExternalUpdate(sunCurve);
     currentTempProperty.value.notifyOfExternalUpdate(lyfiStatus.temperature ?? 25);
     // deviceInfoProperty.value.notifyOfExternalUpdate(deviceInfo);
     unscheduledProperty.value.notifyOfExternalUpdate(lyfiStatus.unscheduled);
@@ -1037,6 +1043,14 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
         timer.cancel();
       }
     });
+
+    _lowFrequencySyncTimer = Timer.periodic(Duration(seconds: kLowFrequencyPeriodicIntervalSecs), (timer) async {
+      if (!isDisposed) {
+        await _lowFrequencySync();
+      } else {
+        timer.cancel();
+      }
+    });
   }
 
   /// Lightweight sync - only check essential properties to minimize API calls
@@ -1057,8 +1071,8 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       fanPowerProperty.value.notifyOfExternalUpdate(lyfiStatus.fanPower ?? 0);
       unscheduledProperty.value.notifyOfExternalUpdate(lyfiStatus.unscheduled);
       temporaryRemainingProperty.value.notifyOfExternalUpdate(lyfiStatus.temporaryRemaining);
-      acclimationActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.acclimationActivated);
       cloudActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.cloudActivated);
+      sunColorProperty.value.notifyOfExternalUpdate(lyfiStatus.sunColor);
 
       // Update power measurement properties
       voltageProperty.value.notifyOfExternalUpdate(generalStatus.powerVoltage);
@@ -1079,15 +1093,55 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     }
   }
 
+  Future<void> _lowFrequencySync() async {
+    if (lyfiApi == null) {
+      return;
+    }
+    try {
+      final lyfiStatus = await lyfiApi!.getLyfiStatus(device);
+      acclimationActivatedProperty.value.notifyOfExternalUpdate(lyfiStatus.acclimationActivated);
+
+      switch (lyfiStatus.mode) {
+        case LyfiMode.manual:
+          {
+            final manualColor = lyfiStatus.manualColor;
+            manualColorProperty.value.notifyOfExternalUpdate(manualColor);
+          }
+          break;
+
+        case LyfiMode.scheduled:
+          {
+            final schedule = await lyfiApi!.getSchedule(device);
+            scheduleProperty.value.notifyOfExternalUpdate(schedule);
+          }
+          break;
+
+        case LyfiMode.sun:
+          {
+            final sunSchedule = await lyfiApi!.getSunSchedule(device);
+            sunScheduleProperty.value.notifyOfExternalUpdate(sunSchedule);
+            final sunCurve = await lyfiApi!.getSunCurve(device);
+            sunCurveProperty.value.notifyOfExternalUpdate(sunCurve);
+            sunColorProperty.value.notifyOfExternalUpdate(lyfiStatus.sunColor);
+          }
+          break;
+      }
+    } catch (e, stackTrace) {
+      logger?.w('Low-frequency sync failed: $e', error: e, stackTrace: stackTrace);
+    }
+  }
+
   // Track disposal and timer
   bool _disposed = false;
   bool get isDisposed => _disposed;
   Timer? _syncTimer;
+  Timer? _lowFrequencySyncTimer;
 
   @override
   void dispose() {
     _disposed = true;
     _syncTimer?.cancel();
+    _lowFrequencySyncTimer?.cancel();
 
     super.dispose();
   }

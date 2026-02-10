@@ -239,7 +239,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     _stateSubscription = super.lyfiThing.stateProperty.value.onUpdate.listen(_onStateChanged);
 
     _modeSubscription = super.lyfiThing.modeProperty.value.onUpdate.listen((value) {
-      final newMode = LyfiState.fromString(value);
+      final newMode = LyfiMode.fromString(value);
       notifyListeners();
     });
 
@@ -548,15 +548,15 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     IEditor newEditor;
     switch (newMode) {
       case LyfiMode.manual:
-        newEditor = ManualEditorViewModel(this);
+        newEditor = ManualEditorViewModel(this, super.lyfiThing);
         break;
 
       case LyfiMode.scheduled:
-        newEditor = ScheduleEditorViewModel(this);
+        newEditor = ScheduleEditorViewModel(this, super.lyfiThing);
         break;
 
       case LyfiMode.sun:
-        newEditor = SunEditorViewModel(this);
+        newEditor = SunEditorViewModel(this, super.lyfiThing);
         break;
     }
 

@@ -19,7 +19,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   bool _isOnline = false;
   bool _isSuspectedOffline = false;
 
-  final CancellationToken initializationCancelToken = CancellationToken();
+  final CancellationToken masterCancellation = CancellationToken();
   final IDeviceManager deviceManager;
   late DeviceEntity deviceEntity;
 
@@ -126,8 +126,8 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     _onDeviceRemovedEventSub.cancel();
     _onDeviceEntityUpdatedEventSub.cancel();
     _reconnectTimer?.cancel();
-    if (!isInitialized) {
-      initializationCancelToken.cancel();
+    if (masterCancellation.hasCancellables) {
+      masterCancellation.cancel();
     }
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();

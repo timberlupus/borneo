@@ -8,7 +8,7 @@ class ManualEditorViewModel extends BaseEditorViewModel {
 
   bool get canChangeColor => canEdit;
 
-  ManualEditorViewModel(super.parent);
+  ManualEditorViewModel(super.parent, super.lyfiThing);
 
   @override
   Future<void> onInitialize({CancellationToken? cancelToken}) async {
@@ -16,9 +16,7 @@ class ManualEditorViewModel extends BaseEditorViewModel {
       throw StateError('Device is not bound.');
     }
 
-    final lyfiStatus = await parent.executeLyfiCommand(
-      () => super.deviceApi.getLyfiStatus(parent.boundDevice!.device, cancelToken: cancelToken),
-    );
+    final manualColor = super.lyfiThing.manualColorProperty.getValue();
 
     // Ensure we are in the correct state and mode before proceeding
     if (parent.state != LyfiState.dimming) {
@@ -29,7 +27,7 @@ class ManualEditorViewModel extends BaseEditorViewModel {
     assert(parent.mode == LyfiMode.manual);
 
     for (int i = 0; i < parent.lyfiDeviceInfo.channels.length; i++) {
-      channels[i].value = lyfiStatus.manualColor[i];
+      channels[i].value = manualColor[i];
     }
   }
 

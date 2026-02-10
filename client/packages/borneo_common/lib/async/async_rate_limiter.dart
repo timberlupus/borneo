@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:cancellation_token/cancellation_token.dart';
 
-class AsyncRateLimiter<T> {
+typedef AsyncTask = Future Function();
+
+class AsyncRateLimiter {
   final CancellationToken _cancel = CancellationToken();
   final Duration interval;
-  final StreamController<T> _controller = StreamController<T>.broadcast();
+  final StreamController<AsyncTask> _controller = StreamController<AsyncTask>.broadcast();
   DateTime? _lastExecutionTime;
-  T? _pendingValue;
+  AsyncTask? _pendingValue;
   bool _isExecuting = false;
 
   AsyncRateLimiter({required this.interval}) {
@@ -16,13 +18,18 @@ class AsyncRateLimiter<T> {
     });
 
     _controller.done.then((_) async {
-      await _executeLastPendingValue().asCancellable(_cancel);
+      if (_cancel.isCancelled) return;
+      try {
+        await _executeLastPendingValue().asCancellable(_cancel);
+      } on CancelledException {
+        return;
+      }
     });
   }
 
-  Stream<T> get stream => _controller.stream;
+  Stream<AsyncTask> get stream => _controller.stream;
 
-  void add(T value) {
+  void add(AsyncTask value) {
     _controller.add(value);
   }
 
@@ -30,38 +37,44 @@ class AsyncRateLimiter<T> {
     if (_isExecuting) return;
 
     _isExecuting = true;
-    while (_pendingValue != null && !_cancel.isCancelled) {
-      final now = DateTime.now();
-      if (_lastExecutionTime == null || now.difference(_lastExecutionTime!) >= interval) {
-        _lastExecutionTime = now;
-        final valueToExecute = _pendingValue;
-        _pendingValue = null; // Clear pending value before executing
-        await _executeTask(valueToExecute as T).asCancellable(_cancel);
+    try {
+      while (_pendingValue != null && !_cancel.isCancelled) {
+        final now = DateTime.now();
+        if (_lastExecutionTime == null || now.difference(_lastExecutionTime!) >= interval) {
+          _lastExecutionTime = now;
+          final valueToExecute = _pendingValue;
+          _pendingValue = null;
+          try {
+            await _executeTask(valueToExecute!).asCancellable(_cancel);
+          } on CancelledException {
+            return;
+          }
+          continue;
+        }
+
+        final remaining = interval - now.difference(_lastExecutionTime!);
+        if (remaining > Duration.zero) {
+          await Future.delayed(remaining);
+        }
       }
-      await Future.delayed(interval); // Ensures interval between executions
+    } finally {
+      _isExecuting = false;
     }
-    _isExecuting = false;
   }
 
   Future<void> _executeLastPendingValue() async {
-    if (_pendingValue != null) {
-      await _executeTask(_pendingValue as T);
+    if (_pendingValue != null && !_cancel.isCancelled) {
+      await _executeTask(_pendingValue!);
       _pendingValue = null;
     }
   }
 
-  Future<void> _executeTask(T task) async {
-    if (task is Future Function()) {
-      await task();
-    } else {
-      throw ArgumentError('Task must be a Future Function()');
-    }
+  Future<void> _executeTask(AsyncTask task) async {
+    await task();
   }
 
   void dispose() {
-    if (_isExecuting) {
-      _cancel.cancel();
-    }
+    _cancel.cancel();
     _controller.close();
   }
 }

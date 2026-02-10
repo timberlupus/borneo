@@ -4,18 +4,18 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart'
 import 'package:borneo_common/async/async_rate_limiter.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/wot/wot_thing.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/material.dart';
 
 abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
-  final AsyncRateLimiter<Future Function()> _colorChangeRateLimiter = AsyncRateLimiter(
-    interval: localDimmingTrackingInterval,
-  );
-  AsyncRateLimiter<Future Function()> get colorChangeRateLimiter => _colorChangeRateLimiter;
+  final AsyncRateLimiter _colorChangeRateLimiter = AsyncRateLimiter(interval: localDimmingTrackingInterval);
+  AsyncRateLimiter get colorChangeRateLimiter => _colorChangeRateLimiter;
 
   final List<ValueNotifier<int>> _channels;
   final List<int> blackColor;
   final LyfiViewModel parent;
+  final LyfiThing lyfiThing;
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
@@ -35,7 +35,7 @@ abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
 
   ILyfiDeviceApi get deviceApi => parent.boundDevice!.driver as ILyfiDeviceApi;
 
-  BaseEditorViewModel(this.parent)
+  BaseEditorViewModel(this.parent, this.lyfiThing)
     : _channels = List.generate(parent.lyfiDeviceInfo.channelCount, growable: false, (index) => ValueNotifier(0)),
       blackColor = List.filled(parent.lyfiDeviceInfo.channelCount, 0, growable: false);
 
@@ -43,7 +43,6 @@ abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
   Future<void> initialize({CancellationToken? cancelToken}) async {
     try {
       await onInitialize(cancelToken: cancelToken);
-      await syncDimmingColor(false, cancelToken: cancelToken);
     } finally {
       _isInitialized = true;
       notifyListeners();

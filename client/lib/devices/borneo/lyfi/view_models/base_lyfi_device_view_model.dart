@@ -90,11 +90,7 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
     if (newMode == this.mode) {
       return;
     }
-    try {
-      lyfiThing.performAction('switchMode', {'mode': newMode.name})!.start();
-    } catch (_) {
-      rethrow;
-    }
+    lyfiThing.performAction('switchMode', {'mode': newMode.name})!.start();
   }
 
   LyfiState get state => LyfiState.fromString(lyfiThing.stateProperty.value.get());
@@ -103,11 +99,7 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
     if (newState == this.state) {
       return;
     }
-    try {
-      lyfiThing.performAction('switchState', {'state': newState.name})!.start();
-    } catch (_) {
-      rethrow;
-    }
+    lyfiThing.performAction('switchState', {'state': newState.name})!.start();
   }
 
   bool get isLocked => state.isLocked;

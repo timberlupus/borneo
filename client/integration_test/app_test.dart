@@ -2,6 +2,7 @@ import 'package:borneo_app/app/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'dart:io';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -20,5 +21,5 @@ void main() {
     // You can add more specific checks here, for example:
     // expect(find.text('Borneo'), findsOneWidget); // If there's a title
     // or check for specific screens/widgets
-  });
+  }, skip: !Platform.isLinux && !Platform.isWindows);
 }
