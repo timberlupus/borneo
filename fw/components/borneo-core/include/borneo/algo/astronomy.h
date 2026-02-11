@@ -14,15 +14,7 @@ struct geo_location {
 /// @brief Convert Unix time to Julian date.
 /// @param t time_t
 /// @return Julian date
-inline float astronomy_julian_date(time_t t)
-{
-    // Calculate days since Unix epoch (integer division)
-    long days = t / 86400;
-    // Calculate remaining seconds (fractional day)
-    float fractional_day = (float)(t % 86400) / 86400.0f;
-    // Add Julian Date offset for Unix epoch (Jan 1, 1970)
-    return (float)days + fractional_day + 2440587.5f;
-}
+float astronomy_julian_date(time_t t);
 
 #ifdef __cplusplus
 }

@@ -39,6 +39,12 @@ int bo_rpc_borneo_lyfi_thermal_manual_fan_put(const CborValue* args, CborEncoder
 int bo_rpc_borneo_lyfi_sun_schedule_get(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_lyfi_sun_curve_get(const CborValue* args, CborEncoder* retvals);
 
+// RPC function declarations for LyFi moon CBOR operations
+int bo_rpc_borneo_lyfi_moon_schedule_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_moon_curve_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_moon_get(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_moon_put(const CborValue* args, CborEncoder* retvals);
+
 // RPC function declarations for LyFi acclimation CBOR operations
 int bo_rpc_borneo_lyfi_acclimation_get(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_lyfi_acclimation_post(const CborValue* args, CborEncoder* retvals);

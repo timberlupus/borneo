@@ -254,6 +254,8 @@ int led_init()
         BO_TRY(led_sun_init());
     }
 
+    BO_TRY(led_moon_init());
+
 #if CONFIG_LYFI_PROTECTION_OVERPOWER_SUPPORT
     // Perform LED channel self-test
     BO_TRY(led_channel_self_test());
@@ -594,6 +596,13 @@ static void system_events_handler(void* handler_args, esp_event_base_t base, int
         if (rc) {
             ESP_LOGE(TAG, "Failed to update solar scheduler");
         }
+
+        if (led_moon_is_enabled()) {
+            rc = led_moon_update_scheduler();
+            if (rc) {
+                ESP_LOGE(TAG, "Failed to update moon scheduler");
+            }
+        }
     } break;
 
     default:
@@ -930,6 +939,8 @@ static void normal_state_run()
     if (led_acclimation_is_enabled()) {
         BO_MUST(led_acclimation_drive(utc_now, color));
     }
+
+    BO_MUST(led_moon_apply_filter(utc_now, color));
 
     // Optional cloud overlay (micro shadow) as a multiplicative filter
 

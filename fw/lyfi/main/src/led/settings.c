@@ -29,6 +29,7 @@
 #define LED_NVS_KEY_RUNNING_MODE "mode"
 #define LED_NVS_KEY_MANUAL_COLOR "mcolor"
 #define LED_NVS_KEY_SUN_COLOR "suncolor"
+#define LED_NVS_KEY_MOON_COLOR "mooncolor"
 #define LED_NVS_KEY_SCHEDULER "sch"
 #define LED_NVS_KEY_TEMPORARY_DURATION "tmpdur"
 #define LED_NVS_KEY_CORRECTION_METHOD "corrmtd"
@@ -42,6 +43,7 @@
 #define LED_NVS_KEY_ACCLIMATION_DURATION "acc.days"
 #define LED_NVS_KEY_ACCLIMATION_START_PERCENT "acc.pc"
 #define LED_NVS_KEY_CLOUD_ENABLED "cloud.en"
+#define LED_NVS_KEY_MOON_ENABLED "moon.en"
 #define LED_NVS_KEY_DIMMING_TIMEOUT "dg_to"
 
 #define TAG "led.settings"
@@ -85,7 +87,8 @@ static const struct led_user_settings LED_DEFAULT_SETTINGS = {
 
     .correction_method = LED_CORRECTION_LOG,
 
-    .sun_color = {0},
+    .sun_color = { 0 },
+    .moon_color = { 0 },
     .scheduler = { 0 },
 
     .location = { // Kunming, China
@@ -302,6 +305,18 @@ int led_load_user_settings()
     }
 
     {
+        size = sizeof(led_color_t);
+        rc = nvs_get_blob(handle, LED_NVS_KEY_MOON_COLOR, &settings->moon_color, &size);
+        if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            memset(settings->moon_color, 0, sizeof(led_color_t));
+            rc = 0;
+        }
+        if (rc) {
+            return rc;
+        }
+    }
+
+    {
         rc = nvs_get_u8(handle, LED_NVS_KEY_CORRECTION_METHOD, &settings->correction_method);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
             settings->correction_method = LED_DEFAULT_SETTINGS.correction_method;
@@ -428,6 +443,26 @@ int led_load_user_settings()
     }
 
     {
+        uint8_t moon_en = 0;
+        rc = nvs_get_u8(handle, LED_NVS_KEY_MOON_ENABLED, &moon_en);
+        if (rc == 0) {
+            if (moon_en) {
+                settings->flags |= LED_OPTION_MOON_ENABLED;
+            }
+            else {
+                settings->flags &= ~LED_OPTION_MOON_ENABLED;
+            }
+        }
+        else if (rc == ESP_ERR_NVS_NOT_FOUND) {
+            settings->flags &= ~LED_OPTION_MOON_ENABLED;
+            rc = 0;
+        }
+        if (rc) {
+            return rc;
+        }
+    }
+
+    {
         rc = nvs_get_u16(handle, LED_NVS_KEY_DIMMING_TIMEOUT, &settings->dimming_timeout_sec);
         if (rc == ESP_ERR_NVS_NOT_FOUND) {
             settings->dimming_timeout_sec = CONFIG_LYFI_DIMMING_TIMEOUT_DEFAULT;
@@ -464,6 +499,7 @@ int led_save_user_settings()
     BO_TRY(nvs_set_blob(handle, LED_NVS_KEY_SCHEDULER, &settings->scheduler, sizeof(struct led_scheduler)));
     BO_TRY(nvs_set_blob(handle, LED_NVS_KEY_MANUAL_COLOR, settings->manual_color, sizeof(led_color_t)));
     BO_TRY(nvs_set_blob(handle, LED_NVS_KEY_SUN_COLOR, settings->sun_color, sizeof(led_color_t)));
+    BO_TRY(nvs_set_blob(handle, LED_NVS_KEY_MOON_COLOR, settings->moon_color, sizeof(led_color_t)));
 
     if (led_has_geo_location()) {
         BO_TRY(nvs_set_blob(handle, LED_NVS_KEY_LOC, &settings->location, sizeof(struct geo_location)));
@@ -476,6 +512,7 @@ int led_save_user_settings()
     BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_DURATION, settings->acclimation.duration));
     BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_ACCLIMATION_START_PERCENT, settings->acclimation.start_percent));
     BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_CLOUD_ENABLED, (uint8_t)(settings->flags & LED_OPTION_CLOUD_ENABLED)));
+    BO_TRY(nvs_set_u8(handle, LED_NVS_KEY_MOON_ENABLED, (uint8_t)(settings->flags & LED_OPTION_MOON_ENABLED)));
     BO_TRY(nvs_set_u16(handle, LED_NVS_KEY_DIMMING_TIMEOUT, settings->dimming_timeout_sec));
 
     BO_TRY(nvs_commit(handle));

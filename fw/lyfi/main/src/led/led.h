@@ -55,7 +55,7 @@ enum led_running_modes {
 };
 
 enum led_option_flags {
-    LED_OPTION_LUNAR_ENABLED = 1,
+    LED_OPTION_MOON_ENABLED = 1,
     LED_OPTION_HAS_GEO_LOCATION = 2,
     LED_OPTION_ACCLIMATION_ENABLED = 4, ///< Whether acclimation is enabled
     LED_OPTION_TZ_ENABLED = 8, ///< Whether timezone is enabled
@@ -98,6 +98,7 @@ struct led_user_settings {
     struct led_scheduler scheduler; ///< Scheduling scheduler for scheduled state
     led_color_t manual_color; ///< Manual dimming color settings.
     led_color_t sun_color; ///< Sun simulation color settings.
+    led_color_t moon_color; ///< Moon simulation color settings.
     uint8_t correction_method; ///< Brightness correction method: Log/Exp/Linear/CIE1931
 
     struct geo_location location; ///< The location for Solar and Lunar simulation.
@@ -127,6 +128,10 @@ struct led_status {
 
     time_t sun_next_reschedule_time_utc; ///< The next rescheduling time in UTC
     struct led_scheduler sun_scheduler; ///< The scheduler of sun simulation for today
+
+    time_t moon_next_recalc_time_utc; ///< The next recalculation time in UTC
+    struct led_scheduler moon_scheduler; ///< The scheduler of moon simulation for today
+    bool moon_activated;
 
     struct led_user_settings settings;
     SemaphoreHandle_t settings_lock;
@@ -225,6 +230,12 @@ int led_sun_update_scheduler();
 bool led_sun_is_in_progress(const struct tm* local_tm);
 void led_sun_drive(time_t utc_now, led_color_t color);
 bool led_sun_can_active();
+
+int led_moon_init();
+int led_moon_update_scheduler();
+bool led_moon_is_enabled();
+int led_moon_set(const led_color_t color, bool enabled);
+int led_moon_apply_filter(time_t utc_now, led_color_t color);
 
 bool led_acclimation_is_enabled();
 bool led_acclimation_is_activated();
