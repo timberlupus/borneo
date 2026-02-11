@@ -254,6 +254,20 @@ class ScheduledInstant {
   bool get isZero => !color.any((x) => x != 0);
 }
 
+class MoonConfig {
+  final bool enabled;
+  final List<int> color;
+  const MoonConfig({required this.enabled, required this.color});
+
+  factory MoonConfig.fromMap(dynamic map) {
+    return MoonConfig(enabled: map['enabled'], color: List<int>.from(map['color'], growable: false));
+  }
+
+  Map<String, dynamic> toPayload() {
+    return {'enabled': enabled, 'color': color};
+  }
+}
+
 class SunCurveItem {
   final Duration instant;
   final double brightness;
@@ -273,6 +287,35 @@ class SunCurveItem {
       return true;
     }
     if (other is! SunCurveItem) {
+      return false;
+    }
+    const double tolerance = 0.00001;
+    return instant == other.instant && (brightness - other.brightness).abs() < tolerance;
+  }
+
+  @override
+  int get hashCode => Object.hash(instant, brightness);
+}
+
+class MoonCurveItem {
+  final Duration instant;
+  final double brightness;
+  const MoonCurveItem({required this.instant, required this.brightness});
+
+  factory MoonCurveItem.fromMap(Map map) {
+    final hours = map['time'] as double;
+    return MoonCurveItem(
+      instant: Duration(seconds: (hours * 3600.0).round()),
+      brightness: map['brightness'],
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! MoonCurveItem) {
       return false;
     }
     const double tolerance = 0.00001;

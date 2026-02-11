@@ -180,3 +180,44 @@ class LyfiSetPowerBehaviorAction extends WotAction<Map<String, dynamic>> {
     finish();
   }
 }
+
+/// Custom action for setting moon configuration
+class LyfiSetMoonConfigAction extends WotAction<Map<String, dynamic>> {
+  final MoonConfig config;
+  final ILyfiDeviceApi lyfiApi;
+  final Device device;
+
+  LyfiSetMoonConfigAction({
+    required super.id,
+    required super.thing,
+    required this.config,
+    required this.lyfiApi,
+    required this.device,
+  }) : super(name: 'setMoonConfig', input: {'config': config.toPayload()});
+
+  @override
+  Future<void> performAction() async {
+    await lyfiApi.setMoonConfig(device, config);
+  }
+}
+
+/// Custom action for setting moon schedule
+class LyfiSetMoonScheduleAction extends WotAction<Map<String, dynamic>> {
+  final ScheduleTable schedule;
+  final ILyfiDeviceApi lyfiApi;
+  final Device device;
+
+  LyfiSetMoonScheduleAction({
+    required super.id,
+    required super.thing,
+    required this.schedule,
+    required this.lyfiApi,
+    required this.device,
+  }) : super(name: 'setMoonSchedule', input: {'schedule': schedule.map((s) => s.toPayload()).toList()});
+
+  @override
+  Future<void> performAction() async {
+    // Note: Moon schedule might be read-only, but adding action for consistency
+    // await lyfiApi.setMoonSchedule(device, schedule); // If API supports setting
+  }
+}

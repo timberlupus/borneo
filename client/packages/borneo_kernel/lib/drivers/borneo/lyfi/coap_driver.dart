@@ -44,6 +44,10 @@ class LyfiPaths {
   static final Uri sunSchedule = Uri(path: '/borneo/lyfi/sun/schedule');
   static final Uri sunCurve = Uri(path: '/borneo/lyfi/sun/curve');
 
+  static final Uri moonConfig = Uri(path: '/borneo/lyfi/moon');
+  static final Uri moonSchedule = Uri(path: '/borneo/lyfi/moon/schedule');
+  static final Uri moonCurve = Uri(path: '/borneo/lyfi/moon/curve');
+
   static final Uri currentTemp = Uri(path: '/borneo/lyfi/thermal/temp/current');
   static final Uri keepTemp = Uri(path: '/borneo/lyfi/thermal/temp/keep');
   static final Uri fanMode = Uri(path: '/borneo/lyfi/thermal/fan/mode');
@@ -396,6 +400,34 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
     final dd = dev.data<LyfiCoapDriverData>();
     final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.sunCurve, cancelToken: cancelToken);
     return items.map((x) => SunCurveItem.fromMap(x!)).toList();
+  }, cancelToken: cancelToken);
+
+  @override
+  Future<MoonConfig> getMoonConfig(Device dev, {CancellationToken? cancelToken}) => withQueue(dev, () async {
+    final dd = dev.data<LyfiCoapDriverData>();
+    final map = await dd.coap.getCbor<Map>(LyfiPaths.moonConfig, cancelToken: cancelToken);
+    return MoonConfig.fromMap(map);
+  }, cancelToken: cancelToken);
+
+  @override
+  Future<void> setMoonConfig(Device dev, MoonConfig config, {CancellationToken? cancelToken}) =>
+      withQueue(dev, () async {
+        final dd = dev.data<LyfiCoapDriverData>();
+        await dd.coap.putCbor(LyfiPaths.moonConfig, config.toPayload(), cancelToken: cancelToken);
+      }, cancelToken: cancelToken);
+
+  @override
+  Future<ScheduleTable> getMoonSchedule(Device dev, {CancellationToken? cancelToken}) => withQueue(dev, () async {
+    final dd = dev.data<LyfiCoapDriverData>();
+    final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.moonSchedule, cancelToken: cancelToken);
+    return items.map((x) => ScheduledInstant.fromMap(x!)).toList();
+  }, cancelToken: cancelToken);
+
+  @override
+  Future<List<MoonCurveItem>> getMoonCurve(Device dev, {CancellationToken? cancelToken}) => withQueue(dev, () async {
+    final dd = dev.data<LyfiCoapDriverData>();
+    final items = await dd.coap.getCbor<List<dynamic>>(LyfiPaths.moonCurve, cancelToken: cancelToken);
+    return items.map((x) => MoonCurveItem.fromMap(x!)).toList();
   }, cancelToken: cancelToken);
 
   @override

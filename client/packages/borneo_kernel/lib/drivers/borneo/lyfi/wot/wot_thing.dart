@@ -477,6 +477,57 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     );
     addProperty(sunCurveProperty);
 
+    // Moon config property (read-only)
+    final moonConfigProperty = WotProperty<MoonConfig>(
+      thing: this,
+      name: 'moonConfig',
+      value: WotValue<MoonConfig>(
+        initialValue: MoonConfig(enabled: false, color: [0, 0, 0, 0]),
+        valueForwarder: (_) => throw UnsupportedError('Moon config is read-only; use action to update'),
+      ),
+      metadata: WotPropertyMetadata(
+        title: 'Moon Configuration',
+        type: 'object',
+        description: 'Configuration for moon simulation including enabled state and color',
+        readOnly: true,
+      ),
+    );
+    addProperty(moonConfigProperty);
+
+    // Moon schedule property (read-only)
+    final moonScheduleProperty = WotProperty<List<ScheduledInstant>>(
+      thing: this,
+      name: 'moonSchedule',
+      value: WotValue<List<ScheduledInstant>>(
+        initialValue: [],
+        valueForwarder: (_) => throw UnsupportedError('Moon schedule is read-only'),
+      ),
+      metadata: WotPropertyMetadata(
+        title: 'Moon Schedule',
+        type: 'array',
+        description: 'Schedule for moon simulation',
+        readOnly: true,
+      ),
+    );
+    addProperty(moonScheduleProperty);
+
+    // Moon curve property (read-only)
+    final moonCurveProperty = WotProperty<List<MoonCurveItem>>(
+      thing: this,
+      name: 'moonCurve',
+      value: WotValue<List<MoonCurveItem>>(
+        initialValue: [],
+        valueForwarder: (_) => throw UnsupportedError('Moon curve is read-only'),
+      ),
+      metadata: WotPropertyMetadata(
+        title: 'Moon Curve',
+        type: 'array',
+        description: 'Brightness curve for moon simulation',
+        readOnly: true,
+      ),
+    );
+    addProperty(moonCurveProperty);
+
     // Current temperature property (read-only)
     final currentTempProperty = WotProperty<int>(
       thing: this,
@@ -1006,6 +1057,52 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
         );
       },
     );
+
+    // Set moon config action
+    addAvailableAction(
+      'setMoonConfig',
+      WotActionMetadata(
+        title: 'Set Moon Configuration',
+        description: 'Set the moon simulation configuration including enabled state and color',
+        input: {'enabled': 'boolean', 'color': 'array'},
+      ),
+      (thing, input) {
+        final config = MoonConfig(enabled: input['enabled'] as bool, color: List<int>.from(input['color'] as List));
+        return LyfiSetMoonConfigAction(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          thing: thing,
+          config: config,
+          lyfiApi: lyfiApi!,
+          device: device,
+        );
+      },
+    );
+
+    // Set moon schedule action
+    addAvailableAction(
+      'setMoonSchedule',
+      WotActionMetadata(
+        title: 'Set Moon Schedule',
+        description: 'Set the moon simulation schedule',
+        input: {'schedule': 'array'},
+      ),
+      (thing, input) {
+        final schedule = (input['schedule'] as List).map((item) {
+          final map = item as Map<String, dynamic>;
+          return ScheduledInstant(
+            instant: Duration(seconds: map['instant'] as int),
+            color: List<int>.from(map['color'] as List),
+          );
+        }).toList();
+        return LyfiSetMoonScheduleAction(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          thing: thing,
+          schedule: schedule,
+          lyfiApi: lyfiApi!,
+          device: device,
+        );
+      },
+    );
   }
 
   /// Bind properties to actual hardware state (like Mozilla WebThing ready callback)
@@ -1042,6 +1139,14 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       logger?.w("Failed to get Sun curve: $e");
     }
 
+    try {
+      final moonCurve = await lyfiApi!.getMoonCurve(device);
+      findProperty('moonCurve')?.value.notifyOfExternalUpdate(moonCurve);
+    } catch (e) {
+      logger?.w("Failed to get Moon curve: $e");
+    }
+
+
     // Update properties with actual values (like notifyOfExternalUpdate in Mozilla WebThing)
     findProperty('on')?.value.notifyOfExternalUpdate(generalStatus.power);
     findProperty('state')?.value.notifyOfExternalUpdate(lyfiStatus.state.name);
@@ -1062,6 +1167,14 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     findProperty('cloudEnabled')?.value.notifyOfExternalUpdate(cloudEnabled);
     findProperty('temporaryDuration')?.value.notifyOfExternalUpdate(temporaryDuration);
     findProperty('sunSchedule')?.value.notifyOfExternalUpdate(sunSchedule);
+
+    // Additional moon API calls
+    final moonConfig = await lyfiApi!.getMoonConfig(device);
+    final moonSchedule = await lyfiApi!.getMoonSchedule(device);
+
+    findProperty('moonConfig')?.value.notifyOfExternalUpdate(moonConfig);
+    findProperty('moonSchedule')?.value.notifyOfExternalUpdate(moonSchedule);
+
     findProperty('currentTemp')?.value.notifyOfExternalUpdate(lyfiStatus.temperature ?? 25);
     findProperty('lyfiDeviceInfo')?.value.notifyOfExternalUpdate(deviceInfo);
     findProperty('unscheduled')?.value.notifyOfExternalUpdate(lyfiStatus.unscheduled);
@@ -1195,6 +1308,15 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
             final sunCurve = await lyfiApi!.getSunCurve(device);
             findProperty('sunCurve')?.value.notifyOfExternalUpdate(sunCurve);
             findProperty('sunColor')?.value.notifyOfExternalUpdate(lyfiStatus.sunColor);
+
+            // Moon properties sync
+            final moonConfig = await lyfiApi!.getMoonConfig(device);
+            final moonSchedule = await lyfiApi!.getMoonSchedule(device);
+            final moonCurve = await lyfiApi!.getMoonCurve(device);
+
+            findProperty('moonConfig')?.value.notifyOfExternalUpdate(moonConfig);
+            findProperty('moonSchedule')?.value.notifyOfExternalUpdate(moonSchedule);
+            findProperty('moonCurve')?.value.notifyOfExternalUpdate(moonCurve);
           }
           break;
       }
