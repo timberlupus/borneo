@@ -70,7 +70,7 @@ class ScheduleEditorView extends StatelessWidget {
       series.add(
         LineChartBarData(
           isCurved: false,
-          barWidth: 2.5,
+          barWidth: 1.5,
           color: channelColor,
           dotData: const FlDotData(show: true),
           spots: spots,

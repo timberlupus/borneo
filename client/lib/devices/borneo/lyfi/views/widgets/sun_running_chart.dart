@@ -60,7 +60,7 @@ class SunRunningChart extends StatelessWidget {
       series.add(
         LineChartBarData(
           isCurved: false,
-          barWidth: 2.5,
+          barWidth: 1.5,
           color: HexColor.fromHex(channelInfoList[channelIndex].color),
           dotData: const FlDotData(show: false),
           spots: spots,

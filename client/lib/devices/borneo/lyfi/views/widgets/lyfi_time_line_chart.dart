@@ -160,7 +160,6 @@ class LyfiTimeLineChart extends StatelessWidget {
           Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.75),
         ],
       ),
-      dashArray: const [3, 2],
       strokeWidth: 3,
       label: VerticalLineLabel(
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
