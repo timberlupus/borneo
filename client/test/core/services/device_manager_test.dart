@@ -465,8 +465,7 @@ class TestDriver extends Driver {
   Future<bool> heartbeat(Device dev, {CancellationToken? cancelToken}) async => true;
 
   @override
-  void dispose() {
-  }
+  void dispose() {}
 }
 
 class TestGlobalDevicesEventBus extends EventBus implements GlobalDevicesEventBus {}
