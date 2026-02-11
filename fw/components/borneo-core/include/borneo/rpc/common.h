@@ -22,6 +22,7 @@ int bo_rpc_borneo_power_behavior_put(const CborValue* args, CborEncoder* retvals
 // RPC function declarations for RTC-related CBOR operations
 int bo_rpc_rtc_local_get(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_rtc_local_post(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_rtc_timestamp_get(const CborValue* args, CborEncoder* retvals);
 
 // RPC function declarations for settings-related CBOR operations
 int bo_rpc_borneo_settings_timezone_get(const CborValue* args, CborEncoder* retvals);

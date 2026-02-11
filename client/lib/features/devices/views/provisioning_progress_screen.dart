@@ -3,8 +3,8 @@ import 'package:borneo_app/features/devices/models/ble_provision_state.dart';
 import 'package:borneo_app/features/devices/view_models/provisioning_progress_view_model.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 class ProvisioningProgressScreen extends StatelessWidget {
   final String deviceName;
@@ -20,6 +20,7 @@ class ProvisioningProgressScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gt = GettextLocalizations.of(context);
     return ChangeNotifierProvider(
       create: (context) => ProvisioningProgressViewModel(
         context.read<IBleProvisioner>(),
@@ -27,6 +28,7 @@ class ProvisioningProgressScreen extends StatelessWidget {
         ssid,
         password,
         globalEventBus: context.read<EventBus>(),
+        gt: gt,
       )..startProvisioning(),
       child: Scaffold(
         appBar: AppBar(

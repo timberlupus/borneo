@@ -52,3 +52,11 @@ int bo_rpc_rtc_local_post(const CborValue* args, CborEncoder* retvals)
 
     return 0;
 }
+
+int bo_rpc_rtc_timestamp_get(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args; // No input args for GET
+    uint32_t timestamp = bo_rtc_get_timestamp();
+    BO_TRY(cbor_encode_uint(retvals, timestamp));
+    return 0;
+}

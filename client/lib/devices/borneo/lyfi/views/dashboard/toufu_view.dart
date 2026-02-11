@@ -14,7 +14,7 @@ class DashboardToufu extends StatelessWidget {
   final Color? arcColor;
   final List<GaugeSegment> segments;
 
-  const DashboardToufu({
+  DashboardToufu({
     required this.title,
     required this.value,
     required this.center,
@@ -27,7 +27,22 @@ class DashboardToufu extends StatelessWidget {
     this.arcColor,
     this.segments = const [],
     super.key,
-  });
+  }) {
+    assert(!minValue.isNaN);
+    assert(!maxValue.isNaN);
+    assert(!value.isNaN);
+    assert(maxValue != 0);
+
+    final minRounded = minValue.roundToDouble();
+    final maxRounded = maxValue.roundToDouble();
+    final valueRounded = value.roundToDouble();
+
+    assert(minRounded <= maxRounded);
+    assert(valueRounded >= minRounded && valueRounded <= maxRounded);
+    assert(segments.every((segment) => !segment.from.isNaN && !segment.to.isNaN));
+    assert(segments.every((segment) => segment.from <= segment.to));
+    assert(segments.every((segment) => segment.from >= minRounded && segment.to <= maxRounded));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +51,9 @@ class DashboardToufu extends StatelessWidget {
     final progColor = progressColor ?? Theme.of(context).colorScheme.primary;
     final arcColor = this.arcColor ?? Theme.of(context).colorScheme.onSurfaceVariant;
 
-    assert(!minValue.isNaN);
-    assert(!maxValue.isNaN);
-    assert(!value.isNaN);
+    final minRounded = minValue.roundToDouble();
+    final maxRounded = maxValue.roundToDouble();
+    final valueRounded = value.roundToDouble();
 
     return Card(
       margin: const EdgeInsets.all(0),
@@ -69,14 +84,14 @@ class DashboardToufu extends StatelessWidget {
                       children: [
                         Expanded(
                           child: AnimatedRadialGauge(
-                            initialValue: minValue.roundToDouble(),
+                            initialValue: minRounded,
                             duration: const Duration(milliseconds: 1000),
                             curve: Curves.decelerate,
-                            value: value.roundToDouble(),
+                            value: valueRounded,
                             radius: null,
                             axis: GaugeAxis(
-                              min: minValue.roundToDouble(),
-                              max: maxValue.roundToDouble(),
+                              min: minRounded,
+                              max: maxRounded,
                               degrees: 270,
                               style: GaugeAxisStyle(
                                 thickness: 10.5,

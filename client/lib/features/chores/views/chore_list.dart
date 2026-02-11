@@ -86,7 +86,7 @@ class _ChoreListState extends State<ChoreList> {
               Text(context.translate('Error loading chores'), style: TextStyle(color: theme.colorScheme.error)),
               const SizedBox(height: 8),
               ElevatedButton(
-                onPressed: () => context.read<ChoresViewModel>().initialize(),
+                onPressed: () => context.read<ChoresViewModel>().refresh(),
                 child: Text(context.translate('Retry')),
               ),
             ],

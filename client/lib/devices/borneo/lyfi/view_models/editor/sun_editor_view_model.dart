@@ -19,7 +19,7 @@ class SunEditorViewModel extends BaseEditorViewModel {
 
   List<SunCurveItem> _sunCurve = const [];
 
-  SunEditorViewModel(super.parent);
+  SunEditorViewModel(super.parent, super.lyfiThing);
 
   @override
   Future<void> onInitialize({CancellationToken? cancelToken}) async {
@@ -33,16 +33,16 @@ class SunEditorViewModel extends BaseEditorViewModel {
       throw StateError('Device is not bound.');
     }
 
-    final lyfiStatus = await parent.executeLyfiCommand(
-      () => _deviceApi.getLyfiStatus(parent.boundDevice!.device, cancelToken: cancelToken),
-    );
+    final sunColor = super.lyfiThing.getProperty<List<int>>('sunColor')!;
     for (int i = 0; i < parent.lyfiDeviceInfo.channels.length; i++) {
-      channels[i].value = lyfiStatus.sunColor[i];
+      channels[i].value = sunColor[i];
     }
 
-    _sunCurve = await parent.executeLyfiCommand(() => _deviceApi.getSunCurve(parent.boundDevice!.device));
+    _sunCurve = super.lyfiThing.getProperty<List<SunCurveItem>>('sunCurve')!;
 
-    final instants = await parent.executeLyfiCommand(() => _deviceApi.getSunSchedule(parent.boundDevice!.device));
+    final instants = await parent.executeLyfiCommand(
+      () => _deviceApi.getSunSchedule(parent.boundDevice!.device, cancelToken: cancelToken),
+    );
     _sunInstants = instants;
   }
 
@@ -61,6 +61,16 @@ class SunEditorViewModel extends BaseEditorViewModel {
 
   @override
   Future<void> save() async {
-    //do nothing
+    if (parent.isSuspectedOffline || parent.boundDevice == null) {
+      return;
+    }
+
+    final sunColor = channels.map((x) => x.value).toList(growable: false);
+    final sunSchedule = _sunInstants
+        .map((entry) => ScheduledInstant(instant: entry.instant, color: List<int>.from(entry.color)))
+        .toList(growable: false);
+
+    parent.lyfiThing.findProperty('sunColor')?.value.notifyOfExternalUpdate(sunColor);
+    parent.lyfiThing.findProperty('sunSchedule')?.value.notifyOfExternalUpdate(sunSchedule);
   }
 }

@@ -27,6 +27,7 @@ class WotValue<T> {
   }
 
   T get() => _lastValue;
+
   void notifyOfExternalUpdate(T value) {
     if (_isDisposed) {
       return;

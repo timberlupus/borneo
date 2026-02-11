@@ -5,6 +5,7 @@ import 'package:borneo_kernel_abstractions/device_api.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/widgets.dart';
+import 'package:lw_wot/wot.dart';
 
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
@@ -15,14 +16,11 @@ import 'package:borneo_app/shared/view_models/base_view_model.dart';
 
 abstract class BaseDeviceViewModel extends BaseViewModel
     with WidgetsBindingObserver, ViewModelEventBusMixin, ViewModelInitFutureMixin {
-  static const Duration timerDuration = Duration(seconds: 1);
-
   bool _isOnline = false;
   bool _isSuspectedOffline = false;
 
-  final CancellationToken initializationCancelToken = CancellationToken();
+  final CancellationToken masterCancellation = CancellationToken();
   final IDeviceManager deviceManager;
-  final String deviceID;
   late DeviceEntity deviceEntity;
 
   late final StreamSubscription<DeviceBoundEvent> _onDeviceBoundEventSub;
@@ -32,13 +30,12 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   bool isInitialized = false;
   bool _isLoaded = false;
 
+  String get deviceID => wotThing.id;
+
   RssiLevel? get rssiLevel;
 
   bool get isLoaded => _isLoaded;
 
-  Timer? _timer;
-
-  Timer? get timer => _timer;
   bool get isOnline => _isOnline;
   bool get isSuspectedOffline => _isSuspectedOffline;
   bool _isReconnecting = false;
@@ -51,13 +48,16 @@ abstract class BaseDeviceViewModel extends BaseViewModel
 
   String get name => deviceEntity.name;
   String get model => deviceEntity.model;
-  bool get isTimerRunning => _timer?.isActive ?? false;
+
   BoundDevice? get boundDevice => deviceManager.getBoundDevice(deviceID);
 
+  WotThing wotThing;
+
   BaseDeviceViewModel({
-    required this.deviceID,
     required this.deviceManager,
     required EventBus globalEventBus,
+    required this.wotThing,
+    required super.gt,
     super.logger,
   }) {
     super.globalEventBus = globalEventBus;
@@ -67,9 +67,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
       if (event.device.id == deviceID) {
         final changed = markOnline(notify: false);
         onDeviceBound();
-        if (!isTimerRunning) {
-          startTimer();
-        }
+
         if (changed) {
           notifyListeners();
         }
@@ -94,7 +92,6 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     });
   }
 
-  @protected
   Future<void> initialize() async {
     assert(!isInitialized);
     try {
@@ -103,9 +100,6 @@ abstract class BaseDeviceViewModel extends BaseViewModel
       _isOnline = deviceManager.isBound(deviceID);
       _isSuspectedOffline = false;
       await onInitialize();
-      if (isOnline) {
-        await refreshStatus();
-      }
     } on IOException catch (ioex, stackTrace) {
       logger?.e(ioex.toString(), error: ioex, stackTrace: stackTrace);
       if (isOnline) {
@@ -115,9 +109,6 @@ abstract class BaseDeviceViewModel extends BaseViewModel
       logger?.e('Failed to initialize device(${deviceEntity.toString()}): $e', error: e, stackTrace: stackTrace);
       super.notifyAppError('Failed to initialize device: $e', stackTrace: stackTrace);
     } finally {
-      if (isOnline) {
-        startTimer();
-      }
       isInitialized = true;
     }
   }
@@ -127,15 +118,13 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   @override
   void dispose() {
     assert(!isDisposed);
-    if (isTimerRunning) {
-      stopTimer();
-    }
+
     _onDeviceBoundEventSub.cancel();
     _onDeviceRemovedEventSub.cancel();
     _onDeviceEntityUpdatedEventSub.cancel();
     _reconnectTimer?.cancel();
-    if (!isInitialized) {
-      initializationCancelToken.cancel();
+    if (masterCancellation.hasCancellables) {
+      masterCancellation.cancel();
     }
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -200,9 +189,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     _isOnline = false;
     _isSuspectedOffline = false;
     _stopReconnectCountdown(notify: false);
-    if (isTimerRunning) {
-      stopTimer();
-    }
+
     if (!isDisposed && notify) {
       notifyListeners();
     }
@@ -323,13 +310,6 @@ abstract class BaseDeviceViewModel extends BaseViewModel
         if (bound) {
           markOnline(notify: false);
         }
-        if (bound || isOnline || isSuspectedOffline) {
-          try {
-            await refreshStatus();
-          } catch (e, stackTrace) {
-            logger?.w('Post-reconnect refresh failed: $e', error: e, stackTrace: stackTrace);
-          }
-        }
       }
     } on TimeoutException catch (e, stackTrace) {
       logger?.w('Reconnect timed out', error: e, stackTrace: stackTrace);
@@ -346,44 +326,9 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     }
   }
 
-  Future<void> refreshStatus({CancellationToken? cancelToken});
-
-  Future<void> _periodicRefreshTask(CancellationToken? cancelToken) async {
-    if (!hasListeners || isBusy || !isOnline || isDisposed || (boundDevice?.device.driverData.isBusy ?? true)) {
-      return;
-    }
-    try {
-      await refreshStatus(cancelToken: cancelToken);
-    } on CancelledException catch (e, stackTrace) {
-      logger?.i('A periodic refresh task has been cancelled.', error: e, stackTrace: stackTrace);
-    } on IOException catch (ioex, stackTrace) {
-      logger?.e('Failed to refresh device status: $ioex', error: ioex, stackTrace: stackTrace);
-    } catch (e, stackTrace) {
-      logger?.i("Failed to refresh device status: $e", error: e, stackTrace: stackTrace);
-      notifyAppError(e.toString(), error: e, stackTrace: stackTrace);
-    }
-  }
-
-  void startTimer() {
-    assert(!isDisposed);
-
-    if (!isTimerRunning) {
-      _timer = Timer.periodic(timerDuration, (_) => _periodicRefreshTask(null));
-    }
-  }
-
-  void stopTimer() {
-    assert(!isDisposed);
-
-    if (isTimerRunning) {
-      _timer?.cancel();
-      _timer = null;
-    }
-  }
-
   Future<void> delete() async {
     assert(!isBusy);
-    stopTimer();
+
     isBusy = true;
     try {
       await deviceManager.delete(deviceID);
@@ -397,15 +342,5 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      if (isTimerRunning) {
-        stopTimer();
-      }
-    } else if (state == AppLifecycleState.resumed) {
-      if (isOnline && !isTimerRunning) {
-        startTimer();
-      }
-    }
-  }
+  void didChangeAppLifecycleState(AppLifecycleState state) {}
 }

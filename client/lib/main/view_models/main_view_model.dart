@@ -11,7 +11,6 @@ import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/shared/view_models/base_view_model.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
-import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 
 enum TabIndices { scenes, devices, my }
 
@@ -51,7 +50,6 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   bool get isScanningDevices => _deviceManager.isDiscoverying;
 
   final IAppNotificationService notification;
-  final GettextLocalizations _gt;
 
   MainViewModel(
     EventBus globalEventBus,
@@ -59,10 +57,10 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
     this._sceneManager,
     this._groupManager,
     this._deviceManager,
-    this._localeService,
-    this._gt, {
+    this._localeService, {
     required this.notification,
     required this.clock,
+    required super.gt,
     super.logger,
   }) {
     this.globalEventBus = globalEventBus;
@@ -86,6 +84,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
       await _groupManager.initialize();
       await _deviceManager.initialize();
       await _localeService.initialize();
+      await _preloadHomeData();
       logger?.i('MainViewModel initialized.');
     } catch (e, stackTrace) {
       logger?.e("Failed to initialize MainViewModel: $e", error: e, stackTrace: stackTrace);
@@ -95,6 +94,13 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
         notifyListeners();
       }
     }
+  }
+
+  Future<void> _preloadHomeData() async {
+    final scenes = await _sceneManager.all();
+    await Future.wait(scenes.map((scene) => _sceneManager.getDeviceStatistics(scene.id)));
+    await _groupManager.fetchAllGroupsInCurrentScene();
+    await _deviceManager.fetchAllDevicesInScene();
   }
 
   @override
@@ -124,7 +130,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   void _onAppError(AppErrorEvent event) {
     if (_errorsStack.isEmpty || _errorsStack.last.error.runtimeType != event.error.runtimeType) {
       _errorsStack.add(event);
-      notification.showError(_gt.translate("ERROR"), body: event.message);
+      notification.showError(gt.translate("ERROR"), body: event.message);
     }
     logger?.e('APP_ERROR: ${event.message}', error: event.error, stackTrace: event.stackTrace);
   }

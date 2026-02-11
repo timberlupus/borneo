@@ -3,7 +3,7 @@ import 'package:borneo_app/features/devices/view_models/group_edit_view_model.da
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
@@ -176,6 +176,7 @@ class GroupEditScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GroupEditArguments args = ModalRoute.of(context)!.settings.arguments as GroupEditArguments;
+    final gt = GettextLocalizations.of(context);
 
     return ChangeNotifierProvider<GroupEditViewModel>(
       create: (context) => GroupEditViewModel(
@@ -183,6 +184,7 @@ class GroupEditScreen extends StatelessWidget {
         isCreation: args.isCreation,
         model: args.model,
         globalEventBus: context.read<EventBus>(),
+        gt: gt,
         logger: context.read<Logger>(),
       ),
       builder: (context, child) => Scaffold(

@@ -26,6 +26,8 @@ class ProvisioningProgressViewModel extends AbstractScreenViewModel {
     this.ssid,
     this.password, {
     required super.globalEventBus,
+    required super.gt,
+    super.logger,
   });
 
   @override

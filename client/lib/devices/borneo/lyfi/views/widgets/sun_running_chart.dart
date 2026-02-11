@@ -22,7 +22,7 @@ class SunRunningChart extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
       child: Selector<LyfiViewModel, DateTime>(
-        selector: (context, vm) => vm.deviceClock,
+        selector: (context, vm) => vm.lyfiThing.getProperty<DateTime>('timestamp')!.toLocal(),
         shouldRebuild: (previous, next) => !previous.isEqualToSecond(next),
         builder: (context, clock, _) {
           final double sunriseInstant = sunInstants.isNotEmpty

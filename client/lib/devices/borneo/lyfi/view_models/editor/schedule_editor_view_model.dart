@@ -68,7 +68,7 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
 
   ILyfiDeviceApi get _deviceApi => parent.boundDevice!.driver as ILyfiDeviceApi;
 
-  ScheduleEditorViewModel(super.parent) : easySetupViewModel = EasySetupViewModel();
+  ScheduleEditorViewModel(super.parent, super.lyfiThing) : easySetupViewModel = EasySetupViewModel();
 
   @override
   Future<void> onInitialize({CancellationToken? cancelToken}) async {
@@ -76,14 +76,11 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
       throw StateError('Device is not bound.');
     }
 
-    final deviceSideInstants = await parent.executeLyfiCommand(
-      () => super.deviceApi.getSchedule(parent.boundDevice!.device),
-    );
+    final cachedInstants = parent.scheduledInstants;
+    _entries.addAll(cachedInstants.map((x) => ScheduleEntryViewModel(x)));
 
-    _entries.addAll(deviceSideInstants.map((x) => ScheduleEntryViewModel(x)));
-
-    if (deviceSideInstants.isNotEmpty) {
-      var currentEntryIndex = deviceSideInstants.indexWhere((x) => !x.isZero);
+    if (cachedInstants.isNotEmpty) {
+      var currentEntryIndex = cachedInstants.indexWhere((x) => !x.isZero);
       if (currentEntryIndex < 0) {
         currentEntryIndex = 0;
       }
@@ -272,11 +269,12 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
 
   @override
   Future<void> save() async {
-    final schedule = _entries.map((x) => x.toModel());
     if (parent.isSuspectedOffline || parent.boundDevice == null) {
       return;
     }
+    final schedule = _entries.map((x) => x.toModel()).toList(growable: false);
     await parent.executeLyfiCommand(() => _deviceApi.setSchedule(parent.boundDevice!.device, schedule));
+    parent.lyfiThing.findProperty('schedule')?.value.notifyOfExternalUpdate(schedule);
   }
 
   void resetChannelValues() {}

@@ -32,17 +32,13 @@ class BorneoCoapClient extends CoapClient {
     final CoapMulticastResponseHandler? onMulticastResponse,
     final CancellationToken? cancellationToken,
   }) async {
-    try {
-      return await super.send(request);
-    } on IOException {
-      if (offlineDetectionEnabled && deviceEvents != null) {
-        // Emit an event to notify that the device is offline
-        if (logger != null) {
-          logger!.w('Device ${device.id} is offline. Emitting DeviceOfflineEvent.');
-        }
-        deviceEvents!.fire(DeviceOfflineEvent(device));
-      }
-      rethrow;
+    final response = await super
+        .send(request, onMulticastResponse: onMulticastResponse)
+        .asCancellable(cancellationToken);
+    // On successful communication, emit event to reset heartbeat
+    if (request.isAcknowledged) {
+      deviceEvents?.fire(DeviceCommunicationEvent(device));
     }
+    return response;
   }
 }

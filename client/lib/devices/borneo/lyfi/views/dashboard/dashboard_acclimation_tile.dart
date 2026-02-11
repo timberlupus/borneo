@@ -13,8 +13,8 @@ class DashboardAcclimationTile extends StatelessWidget {
       selector: (_, vm) => (
         isOnline: vm.isOnline,
         isOn: vm.isOn,
-        enabled: vm.isOnline ? vm.lyfiDeviceStatus?.acclimationEnabled ?? false : false,
-        activated: vm.isOnline ? vm.lyfiDeviceStatus?.acclimationActivated ?? false : false,
+        enabled: vm.lyfiThing.getProperty<bool>('acclimationEnabled')!,
+        activated: vm.lyfiThing.getProperty<bool>('acclimationActivated')!,
       ),
       builder: (context, props, _) {
         final theme = Theme.of(context);
@@ -48,12 +48,7 @@ class DashboardAcclimationTile extends StatelessWidget {
                           final route = MaterialPageRoute(
                             builder: (context) => AcclimationScreen(deviceID: vm.deviceID),
                           );
-                          try {
-                            vm.stopTimer();
-                            await Navigator.push(context, route);
-                          } finally {
-                            vm.startTimer();
-                          }
+                          await Navigator.push(context, route);
                         }
                       }
                     : null,

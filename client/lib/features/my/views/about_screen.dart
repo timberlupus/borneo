@@ -1,6 +1,6 @@
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/core/services/url_launcher_service.dart';
-import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +24,7 @@ class AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ChangeNotifierProvider<AboutViewModel>(
-    create: (_) => AboutViewModel()..initialize(),
+    create: (_) => AboutViewModel(gt: GettextLocalizations.of(context))..initialize(),
     builder: (context, child) {
       return buildBody(context);
     },

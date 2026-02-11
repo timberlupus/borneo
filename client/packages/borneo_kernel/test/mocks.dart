@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:borneo_kernel/drivers/borneo/device_api.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/driver.dart';
 import 'package:borneo_kernel_abstractions/driver_registry.dart';
+import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_kernel_abstractions/mdns.dart';
 import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
 import 'package:borneo_kernel_abstractions/models/driver_data.dart';
@@ -194,4 +198,172 @@ DriverDescriptor createTestDriverDescriptor(String id, MockDriver driver) {
     discoveryMethod: const MdnsDeviceDiscoveryMethod('_test._tcp'),
   );
   return descriptor;
+}
+
+class MockDevice extends Device {
+  MockDevice(String id, String address) : super(id: id, address: Uri.parse(address), fingerprint: 'test-$id');
+
+  @override
+  DriverData get driverData => TestDriverData(this);
+
+  @override
+  Future<void> setDriverData(DriverData driverData, {CancellationToken? cancelToken}) async {
+    // Mock implementation
+  }
+}
+
+class MockDeviceEventBus implements DeviceEventBus {
+  final EventBus _eventBus = EventBus();
+
+  @override
+  void fire(event) {
+    _eventBus.fire(event);
+  }
+
+  @override
+  Stream<T> on<T>() {
+    return _eventBus.on<T>();
+  }
+
+  @override
+  void destroy() {
+    _eventBus.destroy();
+  }
+
+  @override
+  StreamController get streamController => _eventBus.streamController;
+}
+
+class MockBorneoDeviceApi implements IBorneoDeviceApi {
+  @override
+  Future<GeneralBorneoDeviceInfo> getGeneralDeviceInfo(Device device, {CancellationToken? cancelToken}) async {
+    return GeneralBorneoDeviceInfo(
+      id: 'mock-id',
+      name: 'Mock Device',
+      compatible: 'test',
+      serno: '123456',
+      productMode: ProductMode.standalone,
+      manufName: 'Mock Manufacturer',
+      modelName: 'Mock Model',
+      hwVer: Version.parse('1.0.0'),
+      fwVer: Version.parse('1.0.0'),
+      isCE: true,
+    );
+  }
+
+  @override
+  Future<GeneralBorneoDeviceStatus> getGeneralDeviceStatus(Device device, {CancellationToken? cancelToken}) async {
+    return GeneralBorneoDeviceStatus(
+      power: true,
+      timestamp: DateTime.now(),
+      bootDuration: Duration(seconds: 30),
+      timezone: 'UTC',
+    );
+  }
+
+  @override
+  Future<PowerBehavior> getPowerBehavior(Device device, {CancellationToken? cancelToken}) async {
+    return PowerBehavior.lastPowerState;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return super.noSuchMethod(invocation);
+  }
+}
+
+class MockLyfiDeviceApi implements ILyfiDeviceApi {
+  @override
+  Future<LyfiDeviceStatus> getLyfiStatus(Device device, {CancellationToken? cancelToken}) async {
+    return LyfiDeviceStatus(
+      state: LyfiState.normal,
+      mode: LyfiMode.manual,
+      unscheduled: true,
+      temporaryRemaining: Duration.zero,
+      currentColor: [0, 0, 0, 0],
+      manualColor: [0, 0, 0, 0],
+      sunColor: [0, 0, 0, 0],
+      temperature: 25,
+      powerCurrent: 0.0,
+    );
+  }
+
+  @override
+  Future<ScheduleTable> getSchedule(Device device, {CancellationToken? cancelToken}) async {
+    return [];
+  }
+
+  @override
+  Future<AcclimationSettings> getAcclimation(Device device, {CancellationToken? cancelToken}) async {
+    return AcclimationSettings(enabled: false, startTimestamp: DateTime.now(), startPercent: 0, days: 0);
+  }
+
+  @override
+  Future<GeoLocation?> getLocation(Device device, {CancellationToken? cancelToken}) async {
+    return null;
+  }
+
+  @override
+  Future<LedCorrectionMethod> getCorrectionMethod(Device device, {CancellationToken? cancelToken}) async {
+    return LedCorrectionMethod.linear;
+  }
+
+  @override
+  Future<bool> getTimeZoneEnabled(Device device, {CancellationToken? cancelToken}) async {
+    return false;
+  }
+
+  @override
+  Future<int> getTimeZoneOffset(Device device, {CancellationToken? cancelToken}) async {
+    return 0;
+  }
+
+  @override
+  Future<bool> getCloudEnabled(Device device, {CancellationToken? cancelToken}) async {
+    return false;
+  }
+
+  @override
+  Future<int> getKeepTemp(Device device, {CancellationToken? cancelToken}) async {
+    return 25;
+  }
+
+  @override
+  Future<FanMode> getFanMode(Device device, {CancellationToken? cancelToken}) async {
+    return FanMode.pid;
+  }
+
+  @override
+  Future<int> getFanManualPower(Device device, {CancellationToken? cancelToken}) async {
+    return 50;
+  }
+
+  @override
+  Future<Duration> getTemporaryDuration(Device device, {CancellationToken? cancelToken}) async {
+    return Duration(hours: 1);
+  }
+
+  @override
+  Future<List<ScheduledInstant>> getSunSchedule(Device device, {CancellationToken? cancelToken}) async {
+    return [];
+  }
+
+  @override
+  Future<LyfiDeviceInfo> getLyfiInfo(Device device, {CancellationToken? cancelToken}) async {
+    return LyfiDeviceInfo(
+      channelCountMax: 4,
+      channelCount: 4,
+      channels: [
+        LyfiChannelInfo(name: 'Red', color: 'red', wavelength: 650, brightnessRatio: 1.0),
+        LyfiChannelInfo(name: 'Green', color: 'green', wavelength: 520, brightnessRatio: 1.0),
+        LyfiChannelInfo(name: 'Blue', color: 'blue', wavelength: 450, brightnessRatio: 1.0),
+        LyfiChannelInfo(name: 'White', color: 'white', wavelength: 4000, brightnessRatio: 1.0),
+      ],
+    );
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return super.noSuchMethod(invocation);
+  }
 }

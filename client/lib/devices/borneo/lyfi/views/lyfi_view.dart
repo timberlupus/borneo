@@ -3,6 +3,7 @@ import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
@@ -171,13 +172,15 @@ class LyfiView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final device = ModalRoute.of(context)!.settings.arguments as DeviceEntity;
+    final gt = GettextLocalizations.of(context);
     return ChangeNotifierProvider(
       create: (cb) => LyfiViewModel(
-        deviceID: device.id,
         deviceManager: cb.read<IDeviceManager>(),
         globalEventBus: cb.read<EventBus>(),
         notification: cb.read<IAppNotificationService>(),
+        wotThing: cb.read<IDeviceManager>().getWotThing(device.id),
         localeService: cb.read<ILocaleService>(),
+        gt: gt,
         logger: cb.read<Logger>(),
       ),
       builder: (context, child) {

@@ -11,7 +11,12 @@ const kBrightnessKey = "app.brightness";
 const kLocaleKey = "app.locale";
 
 class AppSettingsViewModel extends AbstractScreenViewModel {
-  AppSettingsViewModel({required super.globalEventBus, required super.logger, required this.localeService});
+  AppSettingsViewModel({
+    required super.globalEventBus,
+    required super.logger,
+    required this.localeService,
+    required super.gt,
+  });
 
   final ILocaleService localeService;
 

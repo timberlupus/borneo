@@ -106,18 +106,18 @@ void main() {
     test('basic property creation and getters', () {
       final property = WotProperty<int>(thing: thing, name: 'testProp', value: value, metadata: metadata);
 
-      expect(property.getName(), equals('testProp'));
-      expect(property.getValue(), equals(42));
-      expect(property.getThing(), equals(thing));
-      expect(property.getMetadata(), equals(metadata));
-      expect(property.getHref(), equals('/properties/testProp'));
+      expect(property.name, equals('testProp'));
+      expect(property.value.get(), equals(42));
+      expect(property.thing, equals(thing));
+      expect(property.metadata, equals(metadata));
+      expect(property.href, equals('/properties/testProp'));
     });
 
     test('setHrefPrefix updates href correctly', () {
       final property = WotProperty<int>(thing: thing, name: 'testProp', value: value, metadata: metadata);
       property.setHrefPrefix('/api/v1');
 
-      expect(property.getHref(), equals('/api/v1/properties/testProp'));
+      expect(property.href, equals('/api/v1/properties/testProp'));
     });
 
     test('setValue updates value correctly', () {

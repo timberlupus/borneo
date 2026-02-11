@@ -1,9 +1,30 @@
 // dart format width=120
 
+import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:lw_wot/wot.dart';
+
+/// Custom action for switching Lyfi states
+class LyfiSwitchStateAction extends WotAction<Map<String, dynamic>> {
+  final LyfiState targetState;
+  final ILyfiDeviceApi lyfiApi;
+  final Device device;
+
+  LyfiSwitchStateAction({
+    required super.id,
+    required super.thing,
+    required this.targetState,
+    required this.lyfiApi,
+    required this.device,
+  }) : super(name: 'switchState', input: {'state': targetState.name});
+
+  @override
+  Future<void> performAction() async {
+    await lyfiApi.switchState(device, targetState);
+  }
+}
 
 /// Custom action for switching Lyfi modes
 class LyfiSwitchModeAction extends WotAction<Map<String, dynamic>?> {
@@ -95,6 +116,7 @@ class LyfiSetAcclimationAction extends WotAction<Map<String, dynamic>> {
   @override
   Future<void> performAction() async {
     await lyfiApi.setAcclimation(device, settings);
+    thing.findProperty('acclimation')?.value.notifyOfExternalUpdate(settings);
   }
 }
 
@@ -135,5 +157,26 @@ class LyfiSetCorrectionMethodAction extends WotAction<Map<String, dynamic>> {
   @override
   Future<void> performAction() async {
     await lyfiApi.setCorrectionMethod(device, method);
+  }
+}
+
+/// Custom action for setting power behavior
+class LyfiSetPowerBehaviorAction extends WotAction<Map<String, dynamic>> {
+  final PowerBehavior behavior;
+  final IBorneoDeviceApi borneoApi;
+  final Device device;
+
+  LyfiSetPowerBehaviorAction({
+    required super.id,
+    required super.thing,
+    required this.behavior,
+    required this.borneoApi,
+    required this.device,
+  }) : super(name: 'setPowerBehavior', input: {'behavior': behavior.name});
+
+  @override
+  Future<void> performAction() async {
+    await borneoApi.setPowerBehavior(device, behavior);
+    finish();
   }
 }

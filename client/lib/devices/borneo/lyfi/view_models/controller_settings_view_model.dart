@@ -86,10 +86,11 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
   }
 
   ControllerSettingsViewModel({
-    required super.deviceID,
     required super.deviceManager,
     required super.globalEventBus,
     required super.notification,
+    required super.gt,
+    required super.wotThing,
   });
 
   @override

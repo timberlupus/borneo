@@ -7,10 +7,11 @@ import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
-import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:logger/logger.dart';
 import 'package:lw_wot/wot.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/wot.dart';
@@ -20,7 +21,6 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:provider/provider.dart';
 
 import 'package:borneo_kernel/drivers/borneo/lyfi/metadata.dart';
-import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
   LyfiDeviceModuleMetadata()
@@ -30,17 +30,18 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         driverDescriptor: borneoLyfiDriverDescriptor,
         detailsViewBuilder: (_) => LyfiView(),
         detailsViewModelBuilder: (context, deviceID) => LyfiViewModel(
-          deviceID: deviceID,
           deviceManager: context.read<IDeviceManager>(),
           globalEventBus: context.read<EventBus>(),
           notification: context.read<IAppNotificationService>(),
+          wotThing: context.read<IDeviceManager>().getWotThing(deviceID),
           localeService: context.read<ILocaleService>(),
+          gt: GettextLocalizations.of(context),
           logger: context.read<Logger>(),
         ),
         deviceIconBuilder: _buildDeviceIcon,
         primaryStateIconBuilder: _buildPrimaryStateIcon,
         secondaryStatesBuilder: _secondaryStatesBuilder,
-        createSummaryVM: (dev, dm, bus) => LyfiSummaryDeviceViewModel(dev, dm, bus),
+        createSummaryVM: (dev, dm, bus, gt) => LyfiSummaryDeviceViewModel(dev, dm, bus, gt: gt),
         createWotThing: _createWotThing,
       );
 
@@ -101,13 +102,6 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
   }
 
   static Future<WotThing> _createWotThing(DeviceEntity device, IDeviceManager deviceManager, {Logger? logger}) async {
-    // Check if device is bound to get access to APIs
-    if (!deviceManager.isBound(device.id)) {
-      // Device not bound, create a basic WotThing with default values
-      // This can happen during initialization before device binding is complete
-      return _createBasicWotThing(device);
-    }
-
     try {
       // Get the bound device and extract APIs
       final boundDevice = deviceManager.getBoundDevice(device.id);
@@ -123,74 +117,28 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
         lyfiApi: lyfiApi,
         title: device.name,
         logger: logger,
+        canWrite: () => deviceManager.isBound(device.id),
       );
 
       // Initialize the LyfiThing asynchronously (hardware binding)
       // Note: This doesn't block creation, initialization happens in background
       await lyfiThing.initialize();
       return lyfiThing;
-    } catch (e) {
+    } catch (e, st) {
       // If API access fails, fall back to basic WotThing
-      throw InvalidOperationException(message: 'Warning: Failed to create LyfiThing with APIs for ${device.id}: $e');
+      logger?.w('Failed to create online device with APIs for ${device.id}: $e', error: e, stackTrace: st);
+
+      // Create offline LyfiThing
+      final deviceEvents = DeviceEventBus(); // TODO FIXME
+      final lyfiThing = LyfiThing.offline(
+        device: device,
+        deviceEvents: deviceEvents,
+        title: device.name,
+        logger: logger,
+        canWrite: () => deviceManager.isBound(device.id),
+      );
+      await lyfiThing.initialize();
+      return lyfiThing;
     }
-  }
-
-  /// Creates a basic WotThing when device is not bound or APIs are unavailable
-  static WotThing _createBasicWotThing(DeviceEntity device) {
-    final thing = WotThing(
-      id: device.id,
-      title: device.name,
-      type: ['Light'],
-      description: 'Borneo LyFi LED Controller',
-    );
-
-    // Add Lyfi-specific properties with default values
-    thing.addProperty(
-      WotProperty(
-        thing: thing,
-        name: 'on',
-        value: WotValue(initialValue: false),
-        metadata: WotPropertyMetadata(title: 'On/Off', type: 'boolean', description: 'Whether the light is turned on'),
-      ),
-    );
-
-    thing.addProperty(
-      WotProperty(
-        thing: thing,
-        name: 'state',
-        value: WotValue(initialValue: 'normal'),
-        metadata: WotPropertyMetadata(
-          title: 'State',
-          type: 'string',
-          description: 'Current light state',
-          enumValues: ['normal', 'dimming', 'temporary', 'preview'],
-        ),
-      ),
-    );
-
-    thing.addProperty(
-      WotProperty(
-        thing: thing,
-        name: 'mode',
-        value: WotValue(initialValue: 'manual'),
-        metadata: WotPropertyMetadata(
-          title: 'Mode',
-          type: 'string',
-          description: 'Current light mode',
-          enumValues: ['manual', 'scheduled', 'sun'],
-        ),
-      ),
-    );
-
-    thing.addProperty(
-      WotProperty(
-        thing: thing,
-        name: 'color',
-        value: WotValue(initialValue: '#FFFFFF'),
-        metadata: WotPropertyMetadata(title: 'Color', type: 'string', description: 'Current light color'),
-      ),
-    );
-
-    return thing;
   }
 }

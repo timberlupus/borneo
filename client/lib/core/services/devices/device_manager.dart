@@ -45,7 +45,6 @@ abstract class IDeviceManager implements IDisposable {
   Future<void> stopDiscovery();
 
   // WotThing methods
-  WotThing? getWotThing(String deviceID);
-  Future<WotThing?> getOrCreateWotThing(String deviceID);
+  WotThing getWotThing(String deviceID);
   bool hasWotThing(String deviceID);
 }

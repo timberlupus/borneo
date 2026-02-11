@@ -824,14 +824,17 @@ int led_switch_mode(uint8_t mode)
 
     case LED_MODE_MANUAL: {
         BO_TRY(led_mode_manual_entry());
+        ESP_LOGI(TAG, "Switched to LED mode: `manual`");
     } break;
 
     case LED_MODE_SCHEDULED: {
         BO_TRY(led_mode_scheduled_entry());
+        ESP_LOGI(TAG, "Switched to LED mode: `scheduled`");
     } break;
 
     case LED_MODE_SUN: {
         BO_TRY(led_mode_sun_entry());
+        ESP_LOGI(TAG, "Switched to LED mode: `sun`");
     } break;
 
     default:

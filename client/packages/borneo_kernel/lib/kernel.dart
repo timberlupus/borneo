@@ -43,6 +43,7 @@ final class DefaultKernel implements IKernel {
   final CancellationToken _masterCancelToken = CancellationToken();
   late final StreamSubscription<DeviceOfflineEvent> _deviceOfflineSub;
   late final StreamSubscription<FoundDeviceEvent> _foundDeviceEventSub;
+  late final StreamSubscription<DeviceCommunicationEvent> _deviceCommunicationSub;
 
   // Fine-grained locking: per-device bind locks + lightweight state lock
   final Map<String, Lock> _deviceBindLocks = {};
@@ -106,6 +107,10 @@ final class DefaultKernel implements IKernel {
       }
     });
 
+    _deviceCommunicationSub = _events.on<DeviceCommunicationEvent>().listen((event) {
+      _onDeviceCommunication(event.device.id);
+    });
+
     _foundDeviceEventSub = _events.on<FoundDeviceEvent>().listen(_onDeviceFound);
   }
 
@@ -139,6 +144,7 @@ final class DefaultKernel implements IKernel {
 
       _deviceOfflineSub.cancel();
       _foundDeviceEventSub.cancel();
+      _deviceCommunicationSub.cancel();
 
       for (final subscription in _observationSubscriptions.values) {
         subscription.cancel();
@@ -453,6 +459,17 @@ final class DefaultKernel implements IKernel {
 
       // Reset timeout timer
       _resetObservationTimeout(deviceId);
+    });
+  }
+
+  void _onDeviceCommunication(String deviceId) {
+    _observationLock.synchronized(() {
+      if (_missedObservations.containsKey(deviceId)) {
+        // Reset missed observations counter
+        _missedObservations[deviceId] = 0;
+        // Reset timeout timer
+        _resetObservationTimeout(deviceId);
+      }
     });
   }
 

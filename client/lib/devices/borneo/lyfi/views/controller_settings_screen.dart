@@ -47,10 +47,12 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
 
         return ChangeNotifierProvider.value(
           value: widget.vm,
-          builder: (context, child) => GenericSettingsScreen(
-            title: context.translate("Controller Settings"),
-            appBarActions: _buildAppBarActions(context, snapshot, isInitialized),
-            children: _buildSettingGroups(context, isInitialized),
+          builder: (context, child) => Consumer<ControllerSettingsViewModel>(
+            builder: (context, vm, child) => GenericSettingsScreen(
+              title: context.translate("Controller Settings"),
+              appBarActions: _buildAppBarActions(context, snapshot, isInitialized),
+              children: _buildSettingGroups(context, isInitialized),
+            ),
           ),
         );
       },

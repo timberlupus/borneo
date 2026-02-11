@@ -19,7 +19,7 @@ class DashboardTemporaryTile extends StatelessWidget {
         state: vm.state,
         canSwitch: vm.canSwitchTemporaryState,
         total: vm.temporaryDuration,
-        remain: vm.temporaryRemaining.value,
+        remain: vm.temporaryRemaining,
         isOnline: vm.isOnline,
       ),
       builder: (context, props, _) {
@@ -78,8 +78,8 @@ class DashboardTemporaryTile extends StatelessWidget {
                             child: isActive
                                 ? SizedBox(
                                     key: const ValueKey('active'),
-                                    width: 24,
-                                    height: 24,
+                                    width: 40,
+                                    height: 40,
                                     child: Padding(
                                       padding: EdgeInsets.all(4),
                                       child: CircularProgressIndicator(
@@ -96,7 +96,7 @@ class DashboardTemporaryTile extends StatelessWidget {
                                 : Container(
                                     key: const ValueKey('inactive'),
                                     alignment: Alignment.center,
-                                    child: Icon(Icons.flashlight_on, size: 24, color: effectiveIconColor),
+                                    child: Icon(Icons.flashlight_on, size: 40, color: effectiveIconColor),
                                   ),
                           ),
                           const SizedBox(width: 8),

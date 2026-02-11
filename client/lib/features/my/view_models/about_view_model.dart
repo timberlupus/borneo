@@ -8,6 +8,8 @@ class AboutViewModel extends BaseViewModel with ViewModelEventBusMixin {
 
   bool _isInitialized = false;
 
+  AboutViewModel({required super.gt});
+
   bool get isInitialized => _isInitialized;
 
   Future<void> initialize() async {

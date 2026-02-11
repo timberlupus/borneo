@@ -41,21 +41,21 @@ void main() {
 
     test('basic properties', () {
       final action = WotAction<String>(id: 'aid', thing: thing, name: 'aname', input: 'input');
-      expect(action.getId(), equals('aid'));
-      expect(action.getName(), equals('aname'));
-      expect(action.getStatus(), equals('created'));
-      expect(action.getHref(), contains('aname'));
-      expect(action.getInput(), equals('input'));
-      expect(action.getThing(), equals(thing));
-      expect(action.getTimeRequested(), isNotNull);
-      expect(action.getTimeCompleted(), isNull);
+      expect(action.id, equals('aid'));
+      expect(action.name, equals('aname'));
+      expect(action.status, equals('created'));
+      expect(action.href, contains('aname'));
+      expect(action.input, equals('input'));
+      expect(action.thing, equals(thing));
+      expect(action.timeRequested, isNotNull);
+      expect(action.timeCompleted, isNull);
     });
 
     test('setHrefPrefix updates href correctly', () {
       final action = WotAction<String>(id: 'aid', thing: thing, name: 'aname', input: 'input');
       action.setHrefPrefix('/prefix');
       expect(action.hrefPrefix, equals('/prefix'));
-      expect(action.getHref(), equals('/prefix/actions/aname/aid'));
+      expect(action.href, equals('/prefix/actions/aname/aid'));
     });
 
     test('asActionDescription returns correct format', () {
@@ -93,33 +93,33 @@ void main() {
         input: {'shouldFail': false},
       );
 
-      expect(action.getStatus(), equals('created'));
+      expect(action.status, equals('created'));
       expect(action.wasPerformed, isFalse);
 
       action.start();
-      expect(action.getStatus(), equals('pending'));
+      expect(action.status, equals('pending'));
 
       // Wait for action to complete
       await Future.delayed(Duration(milliseconds: 50));
 
-      expect(action.getStatus(), equals('completed'));
+      expect(action.status, equals('completed'));
       expect(action.wasPerformed, isTrue);
-      expect(action.getTimeCompleted(), isNotNull);
+      expect(action.timeCompleted, isNotNull);
     });
 
     test('action lifecycle - failed execution', () async {
       final action = TestAction(id: 'fail-action', thing: thing, name: 'failAction', input: {'shouldFail': true});
 
       action.start();
-      expect(action.getStatus(), equals('pending'));
+      expect(action.status, equals('pending'));
 
       // Wait for action to fail and finish
       await Future.delayed(Duration(milliseconds: 50));
 
-      expect(action.getStatus(), equals('completed'));
+      expect(action.status, equals('completed'));
       expect(action.wasPerformed, isFalse);
       expect(action.error, equals('Test error'));
-      expect(action.getTimeCompleted(), isNotNull);
+      expect(action.timeCompleted, isNotNull);
     });
 
     test('action cancellation', () async {
@@ -133,11 +133,11 @@ void main() {
       final action1 = WotAction<int>(id: 'id1', thing: thing, name: 'sameName', input: 42);
       final action2 = WotAction<int>(id: 'id2', thing: thing, name: 'sameName', input: 24);
 
-      expect(action1.getId(), equals('id1'));
-      expect(action2.getId(), equals('id2'));
-      expect(action1.getName(), equals(action2.getName()));
-      expect(action1.getInput(), equals(42));
-      expect(action2.getInput(), equals(24));
+      expect(action1.id, equals('id1'));
+      expect(action2.id, equals('id2'));
+      expect(action1.name, equals(action2.name));
+      expect(action1.input, equals(42));
+      expect(action2.input, equals(24));
     });
 
     test('action with complex input types', () {
@@ -158,7 +158,7 @@ void main() {
         input: complexInput,
       );
 
-      expect(action.getInput(), equals(complexInput));
+      expect(action.input, equals(complexInput));
 
       final description = action.asActionDescription();
       expect(description['complexAction']['input'], equals(complexInput));
@@ -168,15 +168,15 @@ void main() {
       final action = WotAction<String>(id: 'status-test', thing: thing, name: 'statusTest', input: 'test');
 
       // Initial state
-      expect(action.getStatus(), equals('created'));
+      expect(action.status, equals('created'));
 
       // Manual status changes
       action.start();
-      expect(action.getStatus(), equals('pending'));
+      expect(action.status, equals('pending'));
 
       action.finish();
-      expect(action.getStatus(), equals('completed'));
-      expect(action.getTimeCompleted(), isNotNull);
+      expect(action.status, equals('completed'));
+      expect(action.timeCompleted, isNotNull);
     });
   });
 

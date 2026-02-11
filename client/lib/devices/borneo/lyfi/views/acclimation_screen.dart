@@ -6,6 +6,7 @@ import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
@@ -19,10 +20,11 @@ class AcclimationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = _buildSettingItems(context);
     final vm = AcclimationViewModel(
-      deviceID: deviceID,
       deviceManager: context.read<IDeviceManager>(),
       globalEventBus: context.read<EventBus>(),
       notification: context.read<IAppNotificationService>(),
+      wotThing: context.read<IDeviceManager>().getWotThing(deviceID),
+      gt: context.read<GettextLocalizations>(),
       logger: context.read<Logger>(),
     );
     return Scaffold(

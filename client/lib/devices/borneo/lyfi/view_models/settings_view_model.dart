@@ -3,7 +3,6 @@ import 'package:borneo_app/core/infrastructure/timezone.dart';
 import 'package:borneo_common/exceptions.dart' as bo_ex;
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
@@ -17,7 +16,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   final GeneralBorneoDeviceInfo borneoInfo;
   final LyfiDeviceInfo ledInfo;
   final LyfiDeviceStatus ledStatus;
-  final GettextLocalizations _gt;
+  GettextLocalizations get _gt => super.gt;
 
   ILyfiDeviceApi get api => deviceManager.getBoundDevice(deviceID).api<ILyfiDeviceApi>();
 
@@ -54,12 +53,11 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   bool get canUpdatePowerBehavior => !isBusy && isOnline;
   bool get isControllerSettingsAvailable => borneoInfo.productMode == ProductMode.standalone;
 
-  SettingsViewModel(
-    this._gt, {
-    required super.deviceID,
+  SettingsViewModel({
     required super.deviceManager,
     required super.globalEventBus,
     required super.notification,
+    required super.wotThing,
     required this.address,
     required this.borneoStatus,
     required this.borneoInfo,
@@ -67,6 +65,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     required this.ledStatus,
     required GeoLocation? location,
     required PowerBehavior powerBehavior,
+    required super.gt,
+    super.logger,
   }) : _location = location,
        _powerBehavior = powerBehavior,
        _timezone = borneoStatus.timezone;
@@ -200,7 +200,6 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     try {
       await api.setFanMode(boundDevice!.device, mode, cancelToken: cancel);
       _fanMode = mode;
-      globalEventBus.fire(LyfiFanModeChangedEvent(boundDevice!.device, fanMode: mode));
       notification.showSuccess(_gt.translate("Fan mode updated successfully"));
     } catch (e) {
       notification.showError(_gt.translate("Failed to update fan mode: $e"));
