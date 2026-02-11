@@ -8,8 +8,8 @@ Borneo Client is a cross-platform Flutter application for controlling Borneo-IoT
 
 - **Framework**: Flutter
 - **Language**: Dart
-- **Platforms**: iOS, Android, Web, Desktop
-- **State Management**: Provider/Bloc (check code)
+- **Platforms**: iOS, Android, Linux, Desktop
+- **State Management**: Provider
 - **Networking**: CoAP with CBOR
 
 ## Project Structure
