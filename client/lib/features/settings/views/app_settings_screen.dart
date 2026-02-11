@@ -28,11 +28,12 @@ class AppSettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gt = GettextLocalizations.of(context);
     return ChangeNotifierProvider(
       create: (cb) => AppSettingsViewModel(
         globalEventBus: cb.read<EventBus>(),
         localeService: cb.read<ILocaleService>(),
-        gt: GettextLocalizations.of(cb),
+        gt: gt,
         logger: cb.read<Logger>(),
       ),
       builder: (context, child) {

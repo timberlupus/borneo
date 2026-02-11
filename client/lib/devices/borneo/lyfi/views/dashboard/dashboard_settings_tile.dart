@@ -17,6 +17,7 @@ class DashboardSettingsTile extends StatelessWidget {
         final isDisabled = !canChangeSettings;
         final iconColor = isDisabled ? theme.colorScheme.primary.withValues(alpha: 0.38) : theme.colorScheme.primary;
         final textColor = isDisabled ? theme.colorScheme.primary.withValues(alpha: 0.38) : theme.colorScheme.primary;
+        final gt = GettextLocalizations.of(context);
         return AspectRatio(
           aspectRatio: 1,
           child: Container(
@@ -32,7 +33,7 @@ class DashboardSettingsTile extends StatelessWidget {
                     ? null
                     : () async {
                         final lyfi = context.read<LyfiViewModel>();
-                        final vm = await lyfi.loadSettings(GettextLocalizations.of(context));
+                        final vm = await lyfi.loadSettings(gt);
                         final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
                         if (context.mounted) {
                           Navigator.push(context, route);

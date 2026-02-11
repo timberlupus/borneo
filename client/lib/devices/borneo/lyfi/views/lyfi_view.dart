@@ -172,6 +172,7 @@ class LyfiView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final device = ModalRoute.of(context)!.settings.arguments as DeviceEntity;
+    final gt = GettextLocalizations.of(context);
     return ChangeNotifierProvider(
       create: (cb) => LyfiViewModel(
         deviceManager: cb.read<IDeviceManager>(),
@@ -179,7 +180,7 @@ class LyfiView extends StatelessWidget {
         notification: cb.read<IAppNotificationService>(),
         wotThing: cb.read<IDeviceManager>().getWotThing(device.id),
         localeService: cb.read<ILocaleService>(),
-        gt: GettextLocalizations.of(context),
+        gt: gt,
         logger: cb.read<Logger>(),
       ),
       builder: (context, child) {

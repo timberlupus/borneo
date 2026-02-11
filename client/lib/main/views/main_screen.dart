@@ -263,6 +263,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final gt = GettextLocalizations.of(context);
     return ChangeNotifierProvider(
       create: (ctx) {
         final bus = ctx.read<EventBus>();
@@ -280,7 +281,7 @@ class _MainScreenState extends State<MainScreen> {
           ls,
           notification: ctx.read<IAppNotificationService>(),
           clock: ctx.read<IClock>(),
-          gt: GettextLocalizations.of(context),
+          gt: gt,
           logger: ctx.read<Logger>(),
         );
 
@@ -332,9 +333,10 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildInitializedContent(BuildContext context) {
+    final gt = GettextLocalizations.of(context);
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => MyViewModel(gt: GettextLocalizations.of(context)), lazy: true),
+        ChangeNotifierProvider(create: (_) => MyViewModel(gt: gt), lazy: true),
         ChangeNotifierProvider(
           create: (context) {
             final logger = context.read<Logger>();

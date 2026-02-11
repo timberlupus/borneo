@@ -176,6 +176,7 @@ class GroupEditScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GroupEditArguments args = ModalRoute.of(context)!.settings.arguments as GroupEditArguments;
+    final gt = GettextLocalizations.of(context);
 
     return ChangeNotifierProvider<GroupEditViewModel>(
       create: (context) => GroupEditViewModel(
@@ -183,7 +184,7 @@ class GroupEditScreen extends StatelessWidget {
         isCreation: args.isCreation,
         model: args.model,
         globalEventBus: context.read<EventBus>(),
-        gt: GettextLocalizations.of(context),
+        gt: gt,
         logger: context.read<Logger>(),
       ),
       builder: (context, child) => Scaffold(
