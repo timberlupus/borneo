@@ -15,7 +15,6 @@ class DashboardSettingsTile extends StatelessWidget {
       selector: (_, vm) => vm.canChangeSettings,
       builder: (context, canChangeSettings, _) {
         final isDisabled = !canChangeSettings;
-        final Color bgColor = theme.colorScheme.surfaceContainerHighest;
         final Color fgColor = theme.colorScheme.onSurface;
         final double disabledAlpha = 0.38;
         final Color effectiveFgColor = isDisabled ? fgColor.withValues(alpha: disabledAlpha) : fgColor;
