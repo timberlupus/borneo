@@ -57,15 +57,15 @@ class DashboardView extends StatelessWidget {
                 SizedBox(height: 16),
                 Row(
                   children: [
-                    Expanded(child: DashboardDimmingTile()),
+                    Expanded(flex: 1, child: DashboardMoonTile()),
                     SizedBox(width: 16),
-                    Expanded(child: DashboardAcclimationTile()),
+                    Expanded(flex: 1, child: DashboardAcclimationTile()),
                   ],
                 ),
                 SizedBox(height: 16),
                 Row(
                   children: [
-                    Expanded(flex: 1, child: DashboardMoonTile()),
+                    Expanded(flex: 1, child: DashboardDimmingTile()),
                     SizedBox(width: 16),
                     Expanded(flex: 1, child: DashboardSettingsTile()),
                   ],

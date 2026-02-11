@@ -78,8 +78,8 @@ class DashboardTemporaryTile extends StatelessWidget {
                             child: isActive
                                 ? SizedBox(
                                     key: const ValueKey('active'),
-                                    width: 40,
-                                    height: 40,
+                                    width: 32,
+                                    height: 32,
                                     child: Padding(
                                       padding: EdgeInsets.all(4),
                                       child: CircularProgressIndicator(
@@ -96,7 +96,7 @@ class DashboardTemporaryTile extends StatelessWidget {
                                 : Container(
                                     key: const ValueKey('inactive'),
                                     alignment: Alignment.center,
-                                    child: Icon(Icons.flashlight_on, size: 40, color: effectiveIconColor),
+                                    child: Icon(Icons.flashlight_on, size: 32, color: effectiveIconColor),
                                   ),
                           ),
                           const SizedBox(width: 8),

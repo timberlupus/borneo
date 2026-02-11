@@ -67,16 +67,16 @@ class DashboardPowerSwitchTile extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             if (!isOn)
-                              Icon(Icons.power_settings_new, color: isDisabled ? disabledColor : Colors.red, size: 40),
+                              Icon(Icons.power_settings_new, color: isDisabled ? disabledColor : Colors.red, size: 32),
                             if (isOn)
                               SizedBox(
-                                height: 40,
-                                width: 40,
+                                height: 32,
+                                width: 32,
                                 child: Center(
                                   child: Icon(
                                     Icons.power_settings_new,
                                     color: isDisabled ? disabledColor : Colors.green,
-                                    size: 40,
+                                    size: 32,
                                   ),
                                 ),
                               ),
