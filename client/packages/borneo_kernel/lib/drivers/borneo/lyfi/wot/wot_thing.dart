@@ -13,7 +13,6 @@ import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:logger/logger.dart';
 import 'package:lw_wot/wot.dart';
-import 'package:pub_semver/pub_semver.dart';
 
 /// LyfiThing extends WotThing following Mozilla WebThing initialization pattern
 /// This class uses default values during construction and binds to actual hardware asynchronously

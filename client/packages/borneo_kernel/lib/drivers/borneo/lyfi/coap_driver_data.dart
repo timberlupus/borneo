@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_common/io/net/coap_client.dart';
 import 'package:borneo_kernel/drivers/borneo/coap_driver_data.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
