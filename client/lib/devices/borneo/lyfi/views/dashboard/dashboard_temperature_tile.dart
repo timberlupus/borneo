@@ -17,9 +17,10 @@ class DashboardTemperatureTile extends StatelessWidget {
     final yellowBg = isDark ? Colors.amber[800]!.withValues(alpha: 0.38) : Colors.amber[100]!;
     final redBg = isDark ? Colors.red[800]!.withValues(alpha: 0.38) : Colors.red[100]!;
 
-    final (isOnline, currentTempRaw, currentTemp, temperatureUnitText) = context
-        .select<LyfiViewModel, (bool, int?, int?, String)>(
-          (vm) => (vm.isOnline, vm.currentTempRaw, vm.currentTemp, vm.localeService.temperatureUnitText),
+    final (isOnline, currentTempRaw, currentTemp, temperatureUnitText, fanPowerRatio) = context
+        .select<LyfiViewModel, (bool, int?, int?, String, double?)>(
+          (vm) =>
+              (vm.isOnline, vm.currentTempRaw, vm.currentTemp, vm.localeService.temperatureUnitText, vm.fanPowerRatio),
         );
 
     Color progressColor;
@@ -34,7 +35,7 @@ class DashboardTemperatureTile extends StatelessWidget {
     }
 
     return DashboardToufu(
-      title: context.translate("Temperature"),
+      title: context.translate("Temperature & Fan"),
       icon: Icons.thermostat,
       foregroundColor: theme.colorScheme.onSurface,
       backgroundColor: theme.colorScheme.surfaceContainerHighest,
@@ -43,50 +44,79 @@ class DashboardTemperatureTile extends StatelessWidget {
       value: currentTempRaw?.toDouble() ?? 0.0,
       minValue: 0,
       maxValue: 105,
-      center: Row(
-        crossAxisAlignment: CrossAxisAlignment.baseline,
+      center: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        textBaseline: TextBaseline.alphabetic,
         children: [
-          if (isOnline && currentTemp != null)
-            ...() {
-              final String tempStr = currentTemp.toString().padLeft(3, '0');
-              final List<String> digits = tempStr.split('');
-              final List<Widget> digitWidgets = [];
-              for (int i = 0; i < digits.length; i++) {
-                final String digit = digits[i];
-                final bool isLeadingZero =
-                    i < digits.length - 1 && digit == '0' && digits.sublist(0, i).every((c) => c == '0');
-                final Color color = isLeadingZero ? theme.colorScheme.outlineVariant : progressColor;
-                digitWidgets.add(
-                  RollingInteger(
-                    value: int.parse(digit),
-                    textStyle: theme.textTheme.headlineLarge?.copyWith(
-                      color: color,
-                      fontFeatures: [FontFeature.tabularFigures()],
-                    ),
-                    duration: const Duration(milliseconds: 300),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            mainAxisAlignment: MainAxisAlignment.center,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              if (isOnline && currentTemp != null)
+                ...() {
+                  final String tempStr = currentTemp.toString().padLeft(3, '0');
+                  final List<String> digits = tempStr.split('');
+                  final List<Widget> digitWidgets = [];
+                  for (int i = 0; i < digits.length; i++) {
+                    final String digit = digits[i];
+                    final bool isLeadingZero =
+                        i < digits.length - 1 && digit == '0' && digits.sublist(0, i).every((c) => c == '0');
+                    final Color color = isLeadingZero ? theme.colorScheme.outlineVariant : progressColor;
+                    digitWidgets.add(
+                      RollingInteger(
+                        value: int.parse(digit),
+                        textStyle: theme.textTheme.headlineLarge?.copyWith(
+                          color: color,
+                          fontFeatures: [FontFeature.tabularFigures()],
+                        ),
+                        duration: const Duration(milliseconds: 300),
+                      ),
+                    );
+                  }
+                  return digitWidgets;
+                }()
+              else
+                Text(
+                  context.translate("N/A"),
+                  style: theme.textTheme.headlineLarge?.copyWith(
+                    fontFeatures: [FontFeature.tabularFigures()],
+                    color: theme.colorScheme.outlineVariant,
                   ),
-                );
-              }
-              return digitWidgets;
-            }()
-          else
-            Text(
-              context.translate("N/A"),
-              style: theme.textTheme.headlineLarge?.copyWith(
-                fontFeatures: [FontFeature.tabularFigures()],
-                color: theme.colorScheme.outlineVariant,
-              ),
-            ),
-          if (isOnline && currentTemp != null)
-            Text(
-              temperatureUnitText,
-              style: theme.textTheme.labelMedium?.copyWith(
-                fontFeatures: [FontFeature.tabularFigures()],
-                color: progressColor,
-              ),
-            ),
+                ),
+              if (isOnline && currentTemp != null)
+                Text(
+                  temperatureUnitText,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontFeatures: [FontFeature.tabularFigures()],
+                    color: progressColor,
+                  ),
+                ),
+            ],
+          ),
+          const Divider(height: 8, thickness: 2.5),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isOnline && fanPowerRatio != null) ...[
+                Icon(Icons.air, size: 16, color: theme.colorScheme.primary),
+                const SizedBox(width: 4),
+                Text(
+                  '${fanPowerRatio.toInt()}%',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ] else
+                Text(
+                  context.translate("N/A"),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.outlineVariant,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
       segments: [

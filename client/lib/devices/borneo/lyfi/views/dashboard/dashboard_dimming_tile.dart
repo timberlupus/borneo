@@ -14,17 +14,16 @@ class DashboardDimmingTile extends StatelessWidget {
       builder: (context, canUnlock, _) {
         final theme = Theme.of(context);
         final isDisabled = !canUnlock;
-        final iconColor = isDisabled ? theme.colorScheme.primary.withValues(alpha: 0.38) : theme.colorScheme.primary;
-        final textColor = isDisabled
-            ? theme.colorScheme.onSurface.withValues(alpha: 0.38)
-            : theme.colorScheme.onSurface;
+        final Color bgColor = theme.colorScheme.surfaceContainerHighest;
+        final Color fgColor = theme.colorScheme.onSurface;
+        final double disabledAlpha = 0.38;
+        final Color effectiveFgColor = isDisabled ? fgColor.withValues(alpha: disabledAlpha) : fgColor;
+        final Color iconColor = theme.colorScheme.primary;
+        final Color effectiveIconColor = isDisabled ? iconColor.withValues(alpha: disabledAlpha) : iconColor;
         return AspectRatio(
-          aspectRatio: 1,
+          aspectRatio: 2.0,
           child: Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(16),
-            ),
+            decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16)),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
@@ -46,26 +45,27 @@ class DashboardDimmingTile extends StatelessWidget {
                         }
                       }
                     : null,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final iconSize = constraints.maxHeight * 0.3;
-                    return Column(
-                      children: [
-                        Expanded(
-                          child: Center(
-                            child: Icon(Icons.tips_and_updates_outlined, size: iconSize, color: iconColor),
-                          ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(Icons.tips_and_updates_outlined, size: 32, color: effectiveIconColor),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.translate('Dimming'),
+                              style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor),
+                            ),
+                          ],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Text(
-                            context.translate('Dimming'),
-                            style: theme.textTheme.titleMedium?.copyWith(color: textColor),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

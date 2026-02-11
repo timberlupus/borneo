@@ -20,23 +20,16 @@ class DashboardAcclimationTile extends StatelessWidget {
         final theme = Theme.of(context);
         final isActive = props.enabled || props.activated;
         final isDisabled = !props.isOnline || !props.isOn;
-        final iconColor = isDisabled
-            ? (isActive
-                  ? theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.38)
-                  : theme.colorScheme.primary.withValues(alpha: 0.38))
-            : (isActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.primary);
-        final textColor = isDisabled
-            ? (isActive
-                  ? theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.38)
-                  : theme.colorScheme.primary.withValues(alpha: 0.38))
-            : (isActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.primary);
+        final Color bgColor = isActive ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainerHighest;
+        final Color fgColor = isActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurface;
+        final double disabledAlpha = 0.38;
+        final Color effectiveFgColor = isDisabled ? fgColor.withValues(alpha: disabledAlpha) : fgColor;
+        final Color iconColor = isActive ? theme.colorScheme.onPrimary : theme.colorScheme.primary;
+        final Color effectiveIconColor = isDisabled ? iconColor.withValues(alpha: disabledAlpha) : iconColor;
         return AspectRatio(
-          aspectRatio: 1,
+          aspectRatio: 2.0,
           child: Container(
-            decoration: BoxDecoration(
-              color: isActive ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(16),
-            ),
+            decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16)),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
@@ -52,26 +45,41 @@ class DashboardAcclimationTile extends StatelessWidget {
                         }
                       }
                     : null,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final iconSize = constraints.maxHeight * 0.3;
-                    return Column(
-                      children: [
-                        Expanded(
-                          child: Center(
-                            child: Icon(Icons.calendar_month_outlined, size: iconSize, color: iconColor),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Stack(
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(Icons.calendar_month_outlined, size: 32, color: effectiveIconColor),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  context.translate("Acclimation"),
+                                  style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (isActive)
+                        Positioned(
+                          right: -16,
+                          bottom: -16,
+                          child: Icon(
+                            Icons.calendar_month_outlined,
+                            size: 64,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.15),
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Text(
-                            context.translate("Acclimation"),
-                            style: theme.textTheme.titleMedium?.copyWith(color: textColor),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                    ],
+                  ),
                 ),
               ),
             ),

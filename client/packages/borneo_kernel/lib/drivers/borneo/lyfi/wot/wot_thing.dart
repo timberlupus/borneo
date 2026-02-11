@@ -1146,7 +1146,6 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
       logger?.w("Failed to get Moon curve: $e");
     }
 
-
     // Update properties with actual values (like notifyOfExternalUpdate in Mozilla WebThing)
     findProperty('on')?.value.notifyOfExternalUpdate(generalStatus.power);
     findProperty('state')?.value.notifyOfExternalUpdate(lyfiStatus.state.name);
