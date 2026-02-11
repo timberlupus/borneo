@@ -178,7 +178,7 @@ msgstr ""
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:132
 msgid "Duration"
-msgstr "Documentation"
+msgstr ""
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:143
 msgid "Start percent"
