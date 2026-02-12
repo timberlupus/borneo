@@ -153,6 +153,7 @@ int moon_calculate_rise_set(float latitude, float longitude, time_t utc_now, flo
 
     float h0_deg = rad_to_deg(acosf(cos_h0));
 
+    // GMST at reference epoch (target midnight UTC)
     double T = (jd0 - 2451545.0) / 36525.0;
     double gmst0 = 100.46061837 + 36000.770053608 * T + 0.000387933 * T * T - (T * T * T) / 38710000.0;
     gmst0 = fmod(gmst0, 360.0);
@@ -160,15 +161,63 @@ int moon_calculate_rise_set(float latitude, float longitude, time_t utc_now, flo
         gmst0 += 360.0;
     }
 
-    float lst_rise = ra_deg - h0_deg;
-    float lst_set = ra_deg + h0_deg;
+    // Approximate transit time (fraction of day, UT)
+    float m0 = (ra_deg - longitude - (float)gmst0) / 360.0f;
+    m0 = m0 - floorf(m0);
 
-    const float gmst_rate = 15.0410686f; // deg per hour
-    float ut_rise = (lst_rise - longitude - (float)gmst0) / gmst_rate;
-    float ut_set = (lst_set - longitude - (float)gmst0) / gmst_rate;
+    // Initial rise/set estimates (fraction of day)
+    float m_rise = m0 - h0_deg / 360.0f;
+    float m_set = m0 + h0_deg / 360.0f;
+    m_rise = m_rise - floorf(m_rise);
+    m_set = m_set - floorf(m_set);
 
-    ut_rise = normalize_hours(ut_rise);
-    ut_set = normalize_hours(ut_set);
+    // Iterative refinement: recompute moon position at estimated times
+    // (Meeus, Astronomical Algorithms, Ch 15 — adapted for lunar motion)
+    const float target_alt = -0.3f;
+    for (int iter = 0; iter < 2; iter++) {
+        // Refine moonrise
+        {
+            float ra_r, dec_r;
+            moon_compute_ra_dec(jd0 + m_rise, &ra_r, &dec_r);
+            float dec_r_rad = deg_to_rad(dec_r);
+            float theta = normalize_deg((float)gmst0 + 360.985647f * m_rise);
+            float H = normalize_deg(theta + longitude - ra_r);
+            if (H > 180.0f) {
+                H -= 360.0f;
+            }
+            float H_rad = deg_to_rad(H);
+            float sin_alt = sinf(lat_rad) * sinf(dec_r_rad) + cosf(lat_rad) * cosf(dec_r_rad) * cosf(H_rad);
+            float alt = rad_to_deg(asinf(sin_alt));
+            float denom = 360.0f * cosf(dec_r_rad) * cosf(lat_rad) * sinf(H_rad);
+            if (fabsf(denom) > 1e-6f) {
+                m_rise += (alt - target_alt) / denom;
+                m_rise = m_rise - floorf(m_rise);
+            }
+        }
+        // Refine moonset
+        {
+            float ra_s, dec_s;
+            moon_compute_ra_dec(jd0 + m_set, &ra_s, &dec_s);
+            float dec_s_rad = deg_to_rad(dec_s);
+            float theta = normalize_deg((float)gmst0 + 360.985647f * m_set);
+            float H = normalize_deg(theta + longitude - ra_s);
+            if (H > 180.0f) {
+                H -= 360.0f;
+            }
+            float H_rad = deg_to_rad(H);
+            float sin_alt = sinf(lat_rad) * sinf(dec_s_rad) + cosf(lat_rad) * cosf(dec_s_rad) * cosf(H_rad);
+            float alt = rad_to_deg(asinf(sin_alt));
+            float denom = 360.0f * cosf(dec_s_rad) * cosf(lat_rad) * sinf(H_rad);
+            if (fabsf(denom) > 1e-6f) {
+                m_set += (alt - target_alt) / denom;
+                m_set = m_set - floorf(m_set);
+            }
+        }
+    }
+
+    // Convert from fraction of day (UT) to local hours
+    float ut_rise = m_rise * 24.0f;
+    float ut_set = m_set * 24.0f;
 
     *moonrise = normalize_hours(ut_rise + local_tz_offset);
     *moonset = normalize_hours(ut_set + local_tz_offset);
