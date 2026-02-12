@@ -36,6 +36,8 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   late final StreamSubscription<DeviceDiscoveringStoppedEvent> _deviceDiscoveringStoppedEventSub;
 
   final List<AppErrorEvent> _errorsStack = [];
+  AppErrorEvent? _lastShownError;
+  DateTime? _lastShownTime;
 
   String get errorMessage => _errorsStack.last.message;
 
@@ -128,9 +130,14 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   }
 
   void _onAppError(AppErrorEvent event) {
-    if (_errorsStack.isEmpty || _errorsStack.last.error.runtimeType != event.error.runtimeType) {
+    final now = clock.now();
+    if (_lastShownError == null ||
+        _lastShownError!.error.runtimeType != event.error.runtimeType ||
+        now.difference(_lastShownTime!) > const Duration(seconds: 15)) {
       _errorsStack.add(event);
       notification.showError(gt.translate("ERROR"), body: event.message);
+      _lastShownError = event;
+      _lastShownTime = now;
     }
     logger?.e('APP_ERROR: ${event.message}', error: event.error, stackTrace: event.stackTrace);
   }
