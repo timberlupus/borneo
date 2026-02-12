@@ -409,6 +409,11 @@ int led_load_user_settings()
         else if (rc) {
             return rc;
         }
+        // Validate loaded value
+        if (settings->acclimation.duration < LED_ACCLIMATION_DAYS_MIN
+            || settings->acclimation.duration > LED_ACCLIMATION_DAYS_MAX) {
+            settings->acclimation.duration = LED_DEFAULT_SETTINGS.acclimation.duration;
+        }
     }
 
     {
@@ -419,6 +424,10 @@ int led_load_user_settings()
         }
         else if (rc) {
             return rc;
+        }
+        // Validate loaded value
+        if (settings->acclimation.start_percent < 10 || settings->acclimation.start_percent > 90) {
+            settings->acclimation.start_percent = LED_DEFAULT_SETTINGS.acclimation.start_percent;
         }
     }
 

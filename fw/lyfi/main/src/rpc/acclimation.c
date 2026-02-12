@@ -64,18 +64,6 @@ int bo_rpc_borneo_lyfi_acclimation_post(const CborValue* args, CborEncoder* retv
     BO_TRY(cbor_value_map_find_value(args, "startPercent", &value));
     BO_TRY(cbor_value_get_int_checked(&value, &start_percent));
 
-    if (start_time <= 0) {
-        return -ERANGE;
-    }
-
-    if (duration > LED_ACCLIMATION_DAYS_MAX || duration < LED_ACCLIMATION_DAYS_MIN) {
-        return -ERANGE;
-    }
-
-    if (start_percent < 10 || start_percent > 90) {
-        return -ERANGE;
-    }
-
     struct led_acclimation_settings acc = {
         .start_utc = start_time,
         .duration = (uint8_t)duration,

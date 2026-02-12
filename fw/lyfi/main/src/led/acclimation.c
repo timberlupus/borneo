@@ -45,6 +45,9 @@ int led_acclimation_drive(time_t utc_now, led_color_t color)
     }
 
     struct led_acclimation_settings* acc = &_led.settings.acclimation;
+    if (acc->duration == 0) {
+        goto exit;
+    }
     time_t end_time_utc = acc->start_utc + (SECS_PER_DAY * acc->duration);
 
     if (utc_now >= acc->start_utc && utc_now <= end_time_utc) {
@@ -86,6 +89,18 @@ int led_acclimation_set(const struct led_acclimation_settings* settings, bool en
 {
     if (settings == NULL) {
         return -EINVAL;
+    }
+
+    if (settings->start_utc <= 0) {
+        return -ERANGE;
+    }
+
+    if (settings->duration < LED_ACCLIMATION_DAYS_MIN || settings->duration > LED_ACCLIMATION_DAYS_MAX) {
+        return -ERANGE;
+    }
+
+    if (settings->start_percent < 10 || settings->start_percent > 90) {
+        return -ERANGE;
     }
 
     portENTER_CRITICAL(&g_led_spinlock);
