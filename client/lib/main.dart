@@ -11,6 +11,7 @@ import 'package:borneo_app/core/services/devices/static_modular_driver_registry.
 import 'package:borneo_kernel/kernel.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 // import 'package:flutter_gettext/gettext/gettext.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
@@ -52,6 +53,7 @@ Future<void> main() async {
   runZonedGuarded(
     () async {
       WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
       FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
       final db = await openDatabase();
