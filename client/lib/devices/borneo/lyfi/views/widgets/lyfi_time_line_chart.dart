@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 class LyfiTimeLineChart extends StatelessWidget {
   final List<LineChartBarData> lineBarsData;
@@ -29,7 +30,7 @@ class LyfiTimeLineChart extends StatelessWidget {
     this.animationDuration = const Duration(milliseconds: 200),
     this.allowZoom = false,
     this.lineTouchData,
-    this.labelAngleRadians = 0, //math.pi / 4,
+    this.labelAngleRadians = math.pi / 2, //math.pi / 4,
     this.maxScale,
   });
 
@@ -73,23 +74,20 @@ class LyfiTimeLineChart extends StatelessWidget {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 28,
+              reservedSize: 32,
               interval: xInterval,
               getTitlesWidget: (value, meta) {
                 final text = _formatAxisLabel(value);
                 return SideTitleWidget(
                   angle: labelAngleRadians,
                   meta: meta,
-                  space: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 0),
-                    child: Text(
-                      text,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.labelSmall?.copyWith(color: cs.onSurface.withValues(alpha: 0.38), fontSize: 9),
-                    ),
+                  space: 8,
+                  child: Text(
+                    text,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelSmall?.copyWith(color: cs.onSurface.withValues(alpha: 0.38), fontSize: 9),
                   ),
                 );
               },
@@ -167,8 +165,8 @@ class LyfiTimeLineChart extends StatelessWidget {
           fontFeatures: [FontFeature.tabularFigures()],
           backgroundColor: Colors.transparent,
         ),
-        padding: EdgeInsetsGeometry.zero,
-        alignment: const Alignment(0, -1.5),
+        padding: EdgeInsetsGeometry.fromLTRB(0, -20, 0, 0),
+        alignment: Alignment.topCenter,
         show: true,
         labelResolver: (vl) => _formatNowLabel(vl.x),
       ),

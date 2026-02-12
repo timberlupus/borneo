@@ -59,6 +59,16 @@ class ScheduleRunningChart extends StatelessWidget {
   List<LineChartBarData> buildLineData(LyfiViewModel vm, List<ScheduledInstant> instants) {
     final series = <LineChartBarData>[];
     for (int channelIndex = 0; channelIndex < vm.channels.length; channelIndex++) {
+      bool allZero = true;
+      for (final instant in instants) {
+        if (instant.color[channelIndex] != 0) {
+          allZero = false;
+          break;
+        }
+      }
+      if (allZero) {
+        continue;
+      }
       final spots = <FlSpot>[];
       for (final entry in instants) {
         double x = entry.instant.inSeconds.toDouble();
@@ -66,7 +76,6 @@ class ScheduleRunningChart extends StatelessWidget {
         final spot = FlSpot(x, y);
         spots.add(spot);
       }
-      // Skip empty channel
       series.add(
         LineChartBarData(
           isCurved: false,
