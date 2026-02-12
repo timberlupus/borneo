@@ -17,6 +17,13 @@ struct moon_instant {
 };
 
 /**
+ * @brief Calculate moon phase angle from Julian date.
+ * @param jd Julian date
+ * @return Phase angle in degrees (0-360, 0=new moon)
+ */
+float moon_phase_angle(float jd);
+
+/**
  * @brief Calculate moon illumination fraction from Julian date.
  * @param jd Julian date
  * @return Illumination fraction (0.0 to 1.0)

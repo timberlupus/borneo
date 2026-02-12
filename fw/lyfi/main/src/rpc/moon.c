@@ -11,6 +11,7 @@
 
 #include <borneo/system.h>
 #include <borneo/rtc.h>
+#include <borneo/algo/astronomy.h>
 
 #include "../led/led.h"
 #include "../moon.h"
@@ -122,6 +123,27 @@ int bo_rpc_borneo_lyfi_moon_put(const CborValue* args, CborEncoder* retvals)
     BO_TRY(cbor_value_get_led_color(&value, color));
 
     BO_TRY(led_moon_set(color, enabled));
+
+    return 0;
+}
+
+int bo_rpc_borneo_lyfi_moon_status_get(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args;
+
+    time_t utc_now = time(NULL);
+    float jd_now = astronomy_julian_date(utc_now);
+
+    CborEncoder root_map;
+    BO_TRY(cbor_encoder_create_map(retvals, &root_map, CborIndefiniteLength));
+
+    BO_TRY(cbor_encode_text_stringz(&root_map, "phaseAngle"));
+    BO_TRY(cbor_encode_float(&root_map, moon_phase_angle(jd_now)));
+
+    BO_TRY(cbor_encode_text_stringz(&root_map, "illumination"));
+    BO_TRY(cbor_encode_float(&root_map, moon_illumination(jd_now)));
+
+    BO_TRY(cbor_encoder_close_container(retvals, &root_map));
 
     return 0;
 }

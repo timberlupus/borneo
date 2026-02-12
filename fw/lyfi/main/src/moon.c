@@ -90,6 +90,16 @@ float moon_illumination(float jd)
     return 0.5f * (1.0f - cosf(phase));
 }
 
+float moon_phase_angle(float jd)
+{
+    float age = fmodf(jd - NEW_MOON_JD, SYNODIC_MONTH);
+    if (age < 0.0f) {
+        age += SYNODIC_MONTH;
+    }
+
+    return 360.0f * age / SYNODIC_MONTH;
+}
+
 int moon_calculate_rise_set(float latitude, float longitude, time_t utc_now, float target_tz_offset,
                             float local_tz_offset, const struct tm* tm_local, float* moonrise, float* moonset,
                             float* decl_out, float* illum_out)

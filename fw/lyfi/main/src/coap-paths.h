@@ -7,6 +7,8 @@ extern "C" {
 #define LYFI_COAP_PATH_LED_STATE "borneo/lyfi/state"
 #define LYFI_COAP_PATH_LED_MODE "borneo/lyfi/mode"
 #define LYFI_COAP_PATH_TEMPERATURE "borneo/lyfi/temperature"
+#define LYFI_COAP_PATH_MOON "borneo/lyfi/moon"
+#define LYFI_COAP_PATH_MOON_STATUS "borneo/lyfi/moon/status"
 
 #ifdef __cplusplus
 }

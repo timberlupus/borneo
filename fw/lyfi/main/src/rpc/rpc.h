@@ -44,6 +44,7 @@ int bo_rpc_borneo_lyfi_moon_schedule_get(const CborValue* args, CborEncoder* ret
 int bo_rpc_borneo_lyfi_moon_curve_get(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_lyfi_moon_get(const CborValue* args, CborEncoder* retvals);
 int bo_rpc_borneo_lyfi_moon_put(const CborValue* args, CborEncoder* retvals);
+int bo_rpc_borneo_lyfi_moon_status_get(const CborValue* args, CborEncoder* retvals);
 
 // RPC function declarations for LyFi acclimation CBOR operations
 int bo_rpc_borneo_lyfi_acclimation_get(const CborValue* args, CborEncoder* retvals);
