@@ -18,7 +18,7 @@ import 'package:lw_wot/wot.dart';
 /// This class uses default values during construction and binds to actual hardware asynchronously
 class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   static const int kLightweightPeriodicIntervalSecs = 1;
-  static const int kLowFrequencyPeriodicIntervalSecs = 300;
+  static const int kLowFrequencyPeriodicIntervalSecs = 15;
 
   final Logger? logger;
   final Device device;
@@ -1323,22 +1323,20 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
             final sunCurve = await lyfiApi!.getSunCurve(device);
             findProperty('sunCurve')?.value.notifyOfExternalUpdate(sunCurve);
             findProperty('sunColor')?.value.notifyOfExternalUpdate(lyfiStatus.sunColor);
-
-            // Moon properties sync
-            final moonConfig = await lyfiApi!.getMoonConfig(device);
-            final moonSchedule = await lyfiApi!.getMoonSchedule(device);
-            final moonCurve = await lyfiApi!.getMoonCurve(device);
-            final moonStatus = await lyfiApi!.getMoonStatus(device);
-
-            findProperty('moonConfig')?.value.notifyOfExternalUpdate(moonConfig);
-            findProperty('moonSchedule')?.value.notifyOfExternalUpdate(moonSchedule);
-            findProperty('moonCurve')?.value.notifyOfExternalUpdate(moonCurve);
-            findProperty('moonStatus')?.value.notifyOfExternalUpdate(moonStatus);
           }
           break;
       }
 
-      findProperty('color')?.value.notifyOfExternalUpdate(lyfiStatus.currentColor);
+      // Moon properties sync
+      final moonConfig = await lyfiApi!.getMoonConfig(device);
+      final moonSchedule = await lyfiApi!.getMoonSchedule(device);
+      final moonCurve = await lyfiApi!.getMoonCurve(device);
+      final moonStatus = await lyfiApi!.getMoonStatus(device);
+
+      findProperty('moonConfig')?.value.notifyOfExternalUpdate(moonConfig);
+      findProperty('moonSchedule')?.value.notifyOfExternalUpdate(moonSchedule);
+      findProperty('moonCurve')?.value.notifyOfExternalUpdate(moonCurve);
+      findProperty('moonStatus')?.value.notifyOfExternalUpdate(moonStatus);
     } catch (e, stackTrace) {
       logger?.w('Low-frequency sync failed: $e', error: e, stackTrace: stackTrace);
     }
