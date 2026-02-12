@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
+import '../moon_screen.dart';
 
 class DashboardMoonTile extends StatelessWidget {
   const DashboardMoonTile({super.key});
@@ -28,8 +29,12 @@ class DashboardMoonTile extends StatelessWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: props.isOnline && props.isOn
-                    ? () {
-                        // TODO: Add navigation or action
+                    ? () async {
+                        if (context.mounted) {
+                          final vm = context.read<LyfiViewModel>();
+                          final route = MaterialPageRoute(builder: (context) => MoonScreen(deviceID: vm.deviceID));
+                          await Navigator.push(context, route);
+                        }
                       }
                     : null,
                 child: Padding(
@@ -45,7 +50,7 @@ class DashboardMoonTile extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              context.translate("Moon"),
+                              context.translate('Moonlight'),
                               style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor),
                             ),
                           ],

@@ -199,10 +199,10 @@ class LyfiView extends StatelessWidget {
                       width: double.infinity,
                       child: LinearProgressIndicator(
                         backgroundColor: Colors.transparent,
-                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onPrimary),
+                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
                       ),
                     ),
-                    Expanded(child: Container()),
+                    Expanded(child: const SizedBox.shrink()),
                   ],
                 ),
               );
