@@ -65,7 +65,7 @@ class DashboardMoonTile extends StatelessWidget {
         final Color fgColor = isMoonActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurface;
         final double disabledAlpha = 0.38;
         final Color effectiveFgColor = isDisabled ? fgColor.withValues(alpha: disabledAlpha) : fgColor;
-        final Color iconColor = isMoonActive ? theme.colorScheme.onPrimary : theme.colorScheme.primary;
+        final Color iconColor = isMoonActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.primary;
         final Color effectiveIconColor = isDisabled ? iconColor.withValues(alpha: disabledAlpha) : iconColor;
         final String title = context.translate('Moonlight');
         final IconData iconData = isMoonActive && moonStatus != null
@@ -129,7 +129,7 @@ class DashboardMoonTile extends StatelessWidget {
                                     softWrap: false,
                                   ),
                                   Text(
-                                    '${moonStatus!.illumination.toStringAsFixed(0)}%',
+                                    '${(moonStatus.illumination * 100.0).toStringAsFixed(0)}%',
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: effectiveFgColor,
                                       fontFeatures: [FontFeature.tabularFigures()],
