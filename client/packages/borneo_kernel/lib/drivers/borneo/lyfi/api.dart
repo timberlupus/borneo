@@ -50,6 +50,7 @@ abstract class ILyfiDeviceApi extends IBorneoDeviceApi {
 
   Future<MoonConfig> getMoonConfig(Device dev, {CancellationToken? cancelToken});
   Future<void> setMoonConfig(Device dev, MoonConfig config, {CancellationToken? cancelToken});
+  Future<MoonStatus> getMoonStatus(Device dev, {CancellationToken? cancelToken});
 
   Future<ScheduleTable> getMoonSchedule(Device dev, {CancellationToken? cancelToken});
   Future<List<MoonCurveItem>> getMoonCurve(Device dev, {CancellationToken? cancelToken});

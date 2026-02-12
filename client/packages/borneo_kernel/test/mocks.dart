@@ -354,6 +354,11 @@ class MockLyfiDeviceApi implements ILyfiDeviceApi {
   }
 
   @override
+  Future<MoonStatus> getMoonStatus(Device device, {CancellationToken? cancelToken}) async {
+    return MoonStatus(phaseAngle: 0.0, illumination: 0.0);
+  }
+
+  @override
   Future<ScheduleTable> getMoonSchedule(Device device, {CancellationToken? cancelToken}) async {
     return [];
   }

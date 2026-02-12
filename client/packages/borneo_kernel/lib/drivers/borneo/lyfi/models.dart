@@ -4,7 +4,7 @@ import 'package:cbor/cbor.dart';
 
 typedef ScheduleTable = List<ScheduledInstant>;
 
-class LyfiChannelInfo {
+final class LyfiChannelInfo {
   final String name;
   final String color;
   final int wavelength;
@@ -27,7 +27,7 @@ class LyfiChannelInfo {
   }
 }
 
-class LyfiDeviceInfo {
+final class LyfiDeviceInfo {
   final double? nominalPower;
   final int channelCountMax;
   final int channelCount;
@@ -97,10 +97,11 @@ extension LedCorrectionMethodExtension on LedCorrectionMethod {
   };
 }
 
-class GeoLocation {
+final class GeoLocation {
   final double lat;
   final double lng;
-  GeoLocation({required this.lat, required this.lng});
+
+  const GeoLocation({required this.lat, required this.lng});
 
   @override
   String toString() => "(${lat.toStringAsFixed(4)}, ${lng.toStringAsFixed(4)})";
@@ -134,13 +135,13 @@ class GeoLocation {
   }
 }
 
-class AcclimationSettings {
+final class AcclimationSettings {
   final bool enabled;
   final DateTime startTimestamp;
   final int startPercent;
   final int days;
 
-  AcclimationSettings({
+  const AcclimationSettings({
     required this.enabled,
     required this.startTimestamp,
     required this.startPercent,
@@ -179,7 +180,7 @@ class AcclimationSettings {
   int get hashCode => enabled.hashCode ^ startTimestamp.hashCode ^ startPercent.hashCode ^ days.hashCode;
 }
 
-class LyfiDeviceStatus {
+final class LyfiDeviceStatus {
   final LyfiState state;
   final LyfiMode mode;
   final bool unscheduled;
@@ -234,7 +235,7 @@ class LyfiDeviceStatus {
   }
 }
 
-class ScheduledInstant {
+final class ScheduledInstant {
   final Duration instant;
   final List<int> color;
   const ScheduledInstant({required this.instant, required this.color});
@@ -254,7 +255,7 @@ class ScheduledInstant {
   bool get isZero => !color.any((x) => x != 0);
 }
 
-class MoonConfig {
+final class MoonConfig {
   final bool enabled;
   final List<int> color;
   const MoonConfig({required this.enabled, required this.color});
@@ -268,7 +269,21 @@ class MoonConfig {
   }
 }
 
-class SunCurveItem {
+final class MoonStatus {
+  final double phaseAngle;
+  final double illumination;
+  const MoonStatus({required this.phaseAngle, required this.illumination});
+
+  factory MoonStatus.fromMap(dynamic map) {
+    return MoonStatus(phaseAngle: map['phaseAngle'], illumination: map['illumination']);
+  }
+
+  Map<String, dynamic> toPayload() {
+    return {'phaseAngle': phaseAngle, 'illumination': illumination};
+  }
+}
+
+final class SunCurveItem {
   final Duration instant;
   final double brightness;
   const SunCurveItem({required this.instant, required this.brightness});
@@ -297,7 +312,7 @@ class SunCurveItem {
   int get hashCode => Object.hash(instant, brightness);
 }
 
-class MoonCurveItem {
+final class MoonCurveItem {
   final Duration instant;
   final double brightness;
   const MoonCurveItem({required this.instant, required this.brightness});

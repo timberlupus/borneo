@@ -1,9 +1,13 @@
-import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/toufu_view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
-import '../../view_models/lyfi_view_model.dart';
+
+import 'package:community_material_icon/community_material_icon.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+
+import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/toufu_view.dart';
 import 'package:gauge_indicator/gauge_indicator.dart';
+
+import '../../view_models/lyfi_view_model.dart';
 import '../widgets/rolling_integer.dart';
 
 class DashboardTemperatureTile extends StatelessWidget {
@@ -98,10 +102,10 @@ class DashboardTemperatureTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (isOnline && fanPowerRatio != null) ...[
-                Icon(Icons.air, size: 16, color: theme.colorScheme.primary),
+                Icon(CommunityMaterialIcons.fan, size: 16, color: theme.colorScheme.primary),
                 const SizedBox(width: 4),
                 Text(
-                  '${fanPowerRatio.toInt()}%',
+                  '${fanPowerRatio.toInt().toString().padLeft(3)}%',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.primary,
                     fontFeatures: [FontFeature.tabularFigures()],

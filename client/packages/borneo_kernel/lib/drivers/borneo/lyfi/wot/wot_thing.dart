@@ -494,6 +494,20 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     );
     addProperty(moonConfigProperty);
 
+    // Moon status property (read-only)
+    final moonStatusProperty = WotProperty<MoonStatus>(
+      thing: this,
+      name: 'moonStatus',
+      value: WotValue<MoonStatus>(initialValue: MoonStatus(phaseAngle: 0.0, illumination: 0.0)),
+      metadata: WotPropertyMetadata(
+        title: 'Moon Status',
+        type: 'object',
+        description: 'Current moon phase angle and illumination percentage',
+        readOnly: true,
+      ),
+    );
+    addProperty(moonStatusProperty);
+
     // Moon schedule property (read-only)
     final moonScheduleProperty = WotProperty<List<ScheduledInstant>>(
       thing: this,
@@ -1170,9 +1184,11 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
     // Additional moon API calls
     final moonConfig = await lyfiApi!.getMoonConfig(device);
     final moonSchedule = await lyfiApi!.getMoonSchedule(device);
+    final moonStatus = await lyfiApi!.getMoonStatus(device);
 
     findProperty('moonConfig')?.value.notifyOfExternalUpdate(moonConfig);
     findProperty('moonSchedule')?.value.notifyOfExternalUpdate(moonSchedule);
+    findProperty('moonStatus')?.value.notifyOfExternalUpdate(moonStatus);
 
     findProperty('currentTemp')?.value.notifyOfExternalUpdate(lyfiStatus.temperature ?? 25);
     findProperty('lyfiDeviceInfo')?.value.notifyOfExternalUpdate(deviceInfo);
@@ -1312,10 +1328,12 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
             final moonConfig = await lyfiApi!.getMoonConfig(device);
             final moonSchedule = await lyfiApi!.getMoonSchedule(device);
             final moonCurve = await lyfiApi!.getMoonCurve(device);
+            final moonStatus = await lyfiApi!.getMoonStatus(device);
 
             findProperty('moonConfig')?.value.notifyOfExternalUpdate(moonConfig);
             findProperty('moonSchedule')?.value.notifyOfExternalUpdate(moonSchedule);
             findProperty('moonCurve')?.value.notifyOfExternalUpdate(moonCurve);
+            findProperty('moonStatus')?.value.notifyOfExternalUpdate(moonStatus);
           }
           break;
       }

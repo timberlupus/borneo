@@ -47,6 +47,7 @@ class LyfiPaths {
   static final Uri moonConfig = Uri(path: '/borneo/lyfi/moon');
   static final Uri moonSchedule = Uri(path: '/borneo/lyfi/moon/schedule');
   static final Uri moonCurve = Uri(path: '/borneo/lyfi/moon/curve');
+  static final Uri moonStatus = Uri(path: '/borneo/lyfi/moon/status');
 
   static final Uri currentTemp = Uri(path: '/borneo/lyfi/thermal/temp/current');
   static final Uri keepTemp = Uri(path: '/borneo/lyfi/thermal/temp/keep');
@@ -407,6 +408,13 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
     final dd = dev.data<LyfiCoapDriverData>();
     final map = await dd.coap.getCbor<Map>(LyfiPaths.moonConfig, cancelToken: cancelToken);
     return MoonConfig.fromMap(map);
+  }, cancelToken: cancelToken);
+
+  @override
+  Future<MoonStatus> getMoonStatus(Device dev, {CancellationToken? cancelToken}) => withQueue(dev, () async {
+    final dd = dev.data<LyfiCoapDriverData>();
+    final map = await dd.coap.getCbor<Map>(LyfiPaths.moonStatus, cancelToken: cancelToken);
+    return MoonStatus.fromMap(map);
   }, cancelToken: cancelToken);
 
   @override
