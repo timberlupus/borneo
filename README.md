@@ -38,7 +38,7 @@ This project delivers a full-stack solution for aquarium automation:
 
 ### Powerful Hardware
 - **OSHWA Certified**: Pro-grade designs (Model BLC06MK1) using [Horizon EDA](https://horizon-eda.org).
-  [![OSHWA Badge](assets/buce-oshwa.png)](https://certification.oshwa.org/cn000017.html)
+  [![OSHWA Badge](assets/buce-oshwa.svg)](https://certification.oshwa.org/cn000017.html)
 - **High Performance**: Optimized for ESP32/ESP32-C3/C5 with unified board definitions.
 - **Precision Dimming**: 6-channel PWM with smooth 10-bit resolution and soft-start technology.
 - **Expandable**: Reference designs for LED lamps, drivers, and even dosing pumps.
