@@ -77,8 +77,8 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
                   onPressed: isInitialized && context.read<ControllerSettingsViewModel>().canSubmit
                       ? () => _showSubmitConfirmationDialog(context)
                       : null,
-                  icon: const Icon(Icons.upload),
-                  label: Text(context.translate('Submit')),
+                  icon: const Icon(Icons.check, size: 24),
+                  label: Text(context.translate('Apply')),
                 ),
               ),
       ),

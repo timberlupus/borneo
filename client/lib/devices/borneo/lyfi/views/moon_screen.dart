@@ -49,8 +49,8 @@ class MoonScreen extends StatelessWidget {
               Consumer<MoonViewModel>(
                 builder: (context, vm, _) => TextButton.icon(
                   onPressed: vm.canSubmit ? () => onSubmit(vm, context) : null,
-                  icon: const Icon(Icons.upload),
-                  label: Text(context.translate('Submit')),
+                  icon: const Icon(Icons.check, size: 24),
+                  label: Text(context.translate('Apply')),
                 ),
               ),
             ],

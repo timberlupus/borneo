@@ -36,10 +36,14 @@ class AcclimationScreen extends StatelessWidget {
             title: Text(context.translate('Acclimation')),
             actions: [
               Consumer<AcclimationViewModel>(
+                builder: (context, vm, _) =>
+                    Switch(value: vm.enabled, onChanged: !vm.isBusy && vm.isOnline && vm.isOn ? vm.setEanbled : null),
+              ),
+              Consumer<AcclimationViewModel>(
                 builder: (context, vm, _) => TextButton.icon(
                   onPressed: vm.canSubmit ? () => onSubmit(vm, context) : null,
-                  icon: const Icon(Icons.upload),
-                  label: Text(context.translate('Submit')),
+                  icon: const Icon(Icons.check, size: 24),
+                  label: Text(context.translate('Apply')),
                 ),
               ),
             ],
@@ -79,14 +83,6 @@ class AcclimationScreen extends StatelessWidget {
     final tileColor = Theme.of(context).colorScheme.surfaceContainerHighest;
     return <Widget>[
       ListTile(title: Text(context.translate('SETTINGS'), style: Theme.of(context).textTheme.titleSmall)),
-      Consumer<AcclimationViewModel>(
-        builder: (context, vm, _) => SwitchListTile(
-          title: Text(context.translate("Enabled")),
-          tileColor: tileColor,
-          value: vm.enabled,
-          onChanged: !vm.isBusy && vm.isOnline && vm.isOn ? vm.setEanbled : null,
-        ),
-      ),
 
       Consumer<AcclimationViewModel>(
         builder: (context, vm, _) => ListTile(

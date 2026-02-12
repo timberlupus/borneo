@@ -51,17 +51,13 @@ class BrightnessSliderList<TEditor extends IEditor> extends StatelessWidget {
       );
       sliders.add(slider);
     }
-    return ScreenTopRoundedContainer(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      padding: padding,
-      child: ListView.separated(
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        primary: true,
-        itemCount: editor.availableChannelCount,
-        itemBuilder: (context, index) => sliders[index],
-        separatorBuilder: (context, index) => Divider(height: 1, color: Theme.of(context).dividerColor),
-      ),
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      primary: true,
+      itemCount: editor.availableChannelCount,
+      itemBuilder: (context, index) => sliders[index],
+      separatorBuilder: (context, index) => Divider(height: 1, color: Theme.of(context).dividerColor),
     );
   }
 }

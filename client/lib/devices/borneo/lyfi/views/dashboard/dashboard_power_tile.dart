@@ -29,7 +29,7 @@ class DashboardPowerTile extends StatelessWidget {
         final disabledColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
         final Color fgColor = theme.colorScheme.onSurface;
         final Color arcColor = theme.colorScheme.outlineVariant;
-        final Color progressColor = isOnline ? theme.colorScheme.tertiary : disabledColor;
+        final Color progressColor = isOnline ? theme.colorScheme.primary : disabledColor;
         final Color textPrimary = theme.colorScheme.primary;
         final Color textOnSurface = theme.colorScheme.onSurface;
         return ListenableBuilder(
@@ -91,7 +91,7 @@ class DashboardPowerTile extends StatelessWidget {
                     else ...[
                       Text(
                         context.translate("N/A"),
-                        style: theme.textTheme.titleLarge?.copyWith(
+                        style: theme.textTheme.headlineLarge?.copyWith(
                           color: theme.colorScheme.outlineVariant,
                           fontFeatures: [FontFeature.tabularFigures()],
                         ),
@@ -99,32 +99,34 @@ class DashboardPowerTile extends StatelessWidget {
                     ],
                   ],
                 ),
-                if (props.canMeasurePower && isOnline) const Divider(height: 8, thickness: 2.5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (props.canMeasureVoltage && isOnline)
-                      Text(
-                        '${vm.currentVoltage.value!.toStringAsFixed(1)}V',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: textOnSurface,
-                          fontFeatures: [FontFeature.tabularFigures()],
+                if (props.canMeasurePower && isOnline) ...[
+                  const Divider(height: 8, thickness: 2.5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (props.canMeasureVoltage && isOnline)
+                        Text(
+                          '${vm.currentVoltage.value!.toStringAsFixed(1)}V',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: textOnSurface,
+                            fontFeatures: [FontFeature.tabularFigures()],
+                          ),
                         ),
-                      ),
-                    if (props.canMeasureCurrent && isOnline) const SizedBox(width: 4),
-                    if (props.canMeasureCurrent && isOnline)
-                      Text("·", style: theme.textTheme.bodySmall?.copyWith(color: textOnSurface)),
-                    if (props.canMeasureCurrent && isOnline) const SizedBox(width: 4),
-                    if (vm.canMeasureCurrent && isOnline)
-                      Text(
-                        '${vm.currentCurrent.value!.toStringAsFixed(1)}A',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: textOnSurface,
-                          fontFeatures: [FontFeature.tabularFigures()],
+                      if (props.canMeasureCurrent && isOnline) const SizedBox(width: 4),
+                      if (props.canMeasureCurrent && isOnline)
+                        Text("·", style: theme.textTheme.bodySmall?.copyWith(color: textOnSurface)),
+                      if (props.canMeasureCurrent && isOnline) const SizedBox(width: 4),
+                      if (vm.canMeasureCurrent && isOnline)
+                        Text(
+                          '${vm.currentCurrent.value!.toStringAsFixed(1)}A',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: textOnSurface,
+                            fontFeatures: [FontFeature.tabularFigures()],
+                          ),
                         ),
-                      ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
