@@ -6,28 +6,27 @@ import '../../view_models/lyfi_view_model.dart';
 import '../moon_screen.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 
-String getMoonPhaseName(double angle) {
-  // Assume angle in degrees, 0-360
-  if (angle < 22.5 || angle >= 337.5) return 'New Moon';
-  if (angle < 67.5) return 'Waxing Crescent';
-  if (angle < 112.5) return 'First Quarter';
-  if (angle < 157.5) return 'Waxing Gibbous';
-  if (angle < 202.5) return 'Full Moon';
-  if (angle < 247.5) return 'Waning Gibbous';
-  if (angle < 292.5) return 'Last Quarter';
-  return 'Waning Crescent';
-}
+String getMoonPhaseName(double angle) => switch (angle) {
+  _ when angle < 22.5 || angle >= 337.5 => 'New Moon',
+  _ when angle < 67.5 => 'Waxing Crescent',
+  _ when angle < 112.5 => 'First Quarter',
+  _ when angle < 157.5 => 'Waxing Gibbous',
+  _ when angle < 202.5 => 'Full Moon',
+  _ when angle < 247.5 => 'Waning Gibbous',
+  _ when angle < 292.5 => 'Last Quarter',
+  _ => 'Waning Crescent',
+};
 
-IconData getMoonPhaseIcon(double angle) {
-  if (angle < 22.5 || angle >= 337.5) return CommunityMaterialIcons.moon_new;
-  if (angle < 67.5) return CommunityMaterialIcons.moon_waxing_crescent;
-  if (angle < 112.5) return CommunityMaterialIcons.moon_first_quarter;
-  if (angle < 157.5) return CommunityMaterialIcons.moon_waxing_gibbous;
-  if (angle < 202.5) return CommunityMaterialIcons.moon_full;
-  if (angle < 247.5) return CommunityMaterialIcons.moon_waning_gibbous;
-  if (angle < 292.5) return CommunityMaterialIcons.moon_last_quarter;
-  return CommunityMaterialIcons.moon_waning_crescent;
-}
+IconData getMoonPhaseIcon(double angle) => switch (angle) {
+  _ when angle < 22.5 || angle >= 337.5 => CommunityMaterialIcons.moon_new,
+  _ when angle < 67.5 => CommunityMaterialIcons.moon_waxing_crescent,
+  _ when angle < 112.5 => CommunityMaterialIcons.moon_first_quarter,
+  _ when angle < 157.5 => CommunityMaterialIcons.moon_waxing_gibbous,
+  _ when angle < 202.5 => CommunityMaterialIcons.moon_full,
+  _ when angle < 247.5 => CommunityMaterialIcons.moon_waning_gibbous,
+  _ when angle < 292.5 => CommunityMaterialIcons.moon_last_quarter,
+  _ => CommunityMaterialIcons.moon_waning_crescent,
+};
 
 class DashboardMoonTile extends StatelessWidget {
   const DashboardMoonTile({super.key});
@@ -111,13 +110,32 @@ class DashboardMoonTile extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(title, style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor)),
-                            if (moonStatus != null || !isMoonActive)
+                            if (!isMoonActive)
                               Text(
                                 subtitle,
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: effectiveFgColor,
                                   fontFeatures: [FontFeature.tabularFigures()],
                                 ),
+                              )
+                            else
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    getMoonPhaseName(moonStatus!.phaseAngle),
+                                    style: theme.textTheme.bodySmall?.copyWith(color: effectiveFgColor),
+                                    softWrap: false,
+                                  ),
+                                  Text(
+                                    '${moonStatus!.illumination.toStringAsFixed(0)}%',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: effectiveFgColor,
+                                      fontFeatures: [FontFeature.tabularFigures()],
+                                    ),
+                                  ),
+                                ],
                               ),
                           ],
                         ),
