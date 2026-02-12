@@ -1,4 +1,4 @@
-# BorneoIoT: A Based Full-Stack Open-Source Aquarium LED WiFi Controller
+# BorneoIoT: A State-of-the-Art Full-Stack Open-Source Aquarium LED WiFi Controller
 
 ![Firmware Build Status](https://github.com/borneo-iot/borneo/actions/workflows/fw-ci.yml/badge.svg)
 ![Firmware Release Status](https://github.com/borneo-iot/borneo/actions/workflows/fw-release.yml/badge.svg)
@@ -10,7 +10,8 @@
         <a href="https://www.borneoiot.com"><b>Website</b></a> •
         <a href="https://docs.borneoiot.com"><b>Documentation</b></a> •
         <a href="https://github.com/borneo-iot/borneo/discussions"><b>Forum</b></a> •
-        <a href="https://discord.gg/EFJTm7PpEs"><b>Discord</b></a>
+        <a href="https://discord.gg/EFJTm7PpEs"><b>Discord</b></a> •
+        <a href="https://flasher.borneoiot.com"><b>Web Firmware Flasher</b></a>
 </p>
 
 <p align="center">
@@ -22,11 +23,11 @@
 
 ---
 
-**Borneo** is a professional-grade, open-source ecosystem designed for aquarium enthusiasts and DIYers. It provides a complete end-to-end solution—from hardware schematics to embedded firmware and a modern mobile app—to build and control high-performance aquarium LED lighting systems.
+**Borneo** is a professional-grade, open-source smart aquarium LED designed for aquarium enthusiasts and DIYers. It provides a complete end-to-end solution—from hardware schematics to embedded firmware and a modern mobile app—to build and control high-performance aquarium LED lighting systems.
 
 ## One System, Three Pillars
 
-This project delivers a full-stack solution for aquarium automation:
+This project delivers a full-stack solution for smart aquarium LED:
 
 1.  **Hardware**: Certified open-source PCB designs targeting the ESP32 family, featuring 6-channel PWM dimming and modular architecture.
 2.  **Firmware**: A robust ESP-IDF based firmware implementing CoAP/CBOR protocols, sunrise/sunset simulation, and cooling control.
@@ -73,6 +74,7 @@ This project delivers a full-stack solution for aquarium automation:
 ## Getting Started
 
 - **New Users**: Check out our [**Getting Started Guide**](https://docs.borneoiot.com/getting-started).
+- If you are a new user looking to quickly experience our firmware, you can directly use our web firmware flasher to flash the latest version of the firmware to your ESP32 series development board: https://flasher.borneoiot.com/
 - **Hardware**: Find schematics and BoM files in the [`hw/`](hw/) directory.
 - **Firmware**: Compilation instructions are available in the [`fw/`](fw/) folder.
 
