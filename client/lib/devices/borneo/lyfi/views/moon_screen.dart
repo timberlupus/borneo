@@ -6,13 +6,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:logger/logger.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 
 import 'package:provider/provider.dart';
 import 'brightness_slider_list.dart';
+import 'widgets/moon_running_chart.dart';
 
 class MoonScreen extends StatelessWidget {
   final String deviceID;
   const MoonScreen({required this.deviceID, super.key});
+
+  Widget buildGraph(BuildContext context, MoonViewModel vm) {
+    return Selector<MoonViewModel, ({List<LyfiChannelInfo> channels, ScheduleTable instants})>(
+      selector: (context, vm) => (channels: vm.editor.deviceInfo.channels, instants: vm.editor.moonInstants),
+      builder: (context, selected, _) =>
+          MoonRunningChart(moonInstants: selected.instants, channelInfoList: selected.channels),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,22 +67,19 @@ class MoonScreen extends StatelessWidget {
                   return Column(
                     mainAxisSize: MainAxisSize.max,
                     children: [
+                      Container(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        padding: const EdgeInsets.all(0),
+                        child: AspectRatio(
+                          aspectRatio: 1.5,
+                          child: Consumer<MoonViewModel>(builder: (context, vm, _) => buildGraph(context, vm)),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                       Expanded(
-                        child: ListView(
-                          physics: ClampingScrollPhysics(),
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                              child: Text(
-                                context.translate('Brightness'),
-                                style: Theme.of(context).textTheme.titleSmall,
-                              ),
-                            ),
-                            Consumer<MoonViewModel>(
-                              builder: (context, vm, _) =>
-                                  BrightnessSliderList(vm.editor, disabled: !vm.enabled || !vm.canEdit),
-                            ),
-                          ],
+                        child: Consumer<MoonViewModel>(
+                          builder: (context, vm, _) =>
+                              BrightnessSliderList(vm.editor, disabled: !vm.enabled || !vm.canEdit),
                         ),
                       ),
                     ],

@@ -90,6 +90,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   EditorState get editorState => _editorState;
   final ScheduleTable scheduledInstants = [];
   final ScheduleTable sunInstants = [];
+  final ScheduleTable moonInstants = [];
 
   int? get currentTempRaw => _currentTemperature;
   int? get currentTemp => _currentTemperature == null
@@ -97,6 +98,50 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       : localeService.convertTemperatureValue(_currentTemperature!.toDouble()).toInt();
 
   String get temperatureUnitText => localeService.temperatureUnitText;
+
+  bool get isMoonTime => currentMoonBrightness > 0;
+
+  double _getCurrentBrightness(List<ScheduledInstant> instants, Duration currentTime) {
+    if (instants.isEmpty) return 0.0;
+    for (int i = 0; i < instants.length - 1; i++) {
+      final start = instants[i];
+      final end = instants[i + 1];
+      if (currentTime >= start.instant &&
+          currentTime <= end.instant &&
+          start.color.isNotEmpty &&
+          end.color.isNotEmpty) {
+        final startBrightness = start.color[0].toDouble();
+        final endBrightness = end.color[0].toDouble();
+        final total = end.instant - start.instant;
+        final elapsed = currentTime - start.instant;
+        final ratio = elapsed.inMilliseconds / total.inMilliseconds;
+        return startBrightness + (endBrightness - startBrightness) * ratio;
+      }
+    }
+    return 0.0;
+  }
+
+  double get currentMoonBrightness {
+    final now = DateTime.now();
+    final today = Duration(hours: now.hour, minutes: now.minute, seconds: now.second);
+    return _getCurrentBrightness(moonInstants, today);
+  }
+
+  double get currentSunBrightness {
+    final now = DateTime.now();
+    final today = Duration(hours: now.hour, minutes: now.minute, seconds: now.second);
+    return _getCurrentBrightness(sunInstants, today) / 100.0; // assuming color[0] is 0-100
+  }
+
+  String? get nextMoonTime {
+    if (moonInstants.isEmpty) return null;
+    final sorted = moonInstants.toList()..sort((a, b) => a.instant.compareTo(b.instant));
+    final first = sorted.first;
+    final duration = first.instant;
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+  }
 
   // LyFi device status and info
   double? _fanPowerRatio = 0.0;
@@ -122,6 +167,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   StreamSubscription<String>? _stateSubscription;
   StreamSubscription<String>? _modeSubscription;
   StreamSubscription<ScheduleTable>? _sunScheduleSubscription;
+  StreamSubscription<ScheduleTable>? _moonScheduleSubscription;
 
   double _overallBrightness = 0;
   double get overallBrightness => _overallBrightness;
@@ -275,6 +321,15 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
             })
             as StreamSubscription<ScheduleTable>?;
 
+    _moonScheduleSubscription =
+        super.lyfiThing.findProperty('moonSchedule')?.value.onUpdate.listen((value) {
+              moonInstants
+                ..clear()
+                ..addAll(value);
+              notifyListeners();
+            })
+            as StreamSubscription<ScheduleTable>?;
+
     // Set initial values
     _fanPowerRatio = super.lyfiThing.getProperty<int>('fanPower')?.toDouble();
     _currentTemperature = super.lyfiThing.getProperty<int?>('temperature');
@@ -289,6 +344,10 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     _initializeChannels();
 
     _editorState = _editorState.copyWith(mode: super.mode);
+
+    moonInstants
+      ..clear()
+      ..addAll(super.lyfiThing.getProperty<ScheduleTable>('moonSchedule')!);
 
     await _syncScheduleTables(mode: super.mode);
 
@@ -315,6 +374,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       _stateSubscription?.cancel();
       _modeSubscription?.cancel();
       _sunScheduleSubscription?.cancel();
+      _moonScheduleSubscription?.cancel();
       for (final cvn in _channels) {
         cvn.dispose();
       }

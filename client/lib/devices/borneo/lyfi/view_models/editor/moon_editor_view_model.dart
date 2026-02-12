@@ -1,5 +1,6 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/ieditor.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,8 @@ class MoonEditorViewModel extends ChangeNotifier implements IEditor {
   final BaseLyfiDeviceViewModel parent;
   final List<ValueNotifier<int>> _channels;
   final List<int> blackColor;
+
+  ILyfiDeviceApi get _deviceApi => parent.boundDevice!.driver as ILyfiDeviceApi;
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
@@ -32,7 +35,14 @@ class MoonEditorViewModel extends ChangeNotifier implements IEditor {
   LyfiDeviceInfo get deviceInfo => parent.lyfiDeviceInfo;
 
   @override
-  bool get canEdit => parent.isOnline && !parent.isSuspectedOffline && parent.isOn;
+  bool get canEdit => parent.isOnline && !parent.isSuspectedOffline && parent.isOn && parent.mode == LyfiMode.sun;
+
+  bool get canChangeColor => canEdit;
+
+  ScheduleTable _moonInstants = const [];
+  ScheduleTable get moonInstants => _moonInstants;
+
+  List<MoonCurveItem> _moonCurve = const [];
 
   MoonEditorViewModel(this.parent)
     : _channels = List.generate(parent.lyfiDeviceInfo.channelCount, growable: false, (index) => ValueNotifier(0)),
@@ -49,7 +59,6 @@ class MoonEditorViewModel extends ChangeNotifier implements IEditor {
   }
 
   Future<void> onInitialize({CancellationToken? cancelToken}) async {
-    // Ensure we are in the correct state
     if (parent.boundDevice == null) {
       throw StateError('Device is not bound.');
     }
@@ -58,6 +67,11 @@ class MoonEditorViewModel extends ChangeNotifier implements IEditor {
     for (int i = 0; i < parent.lyfiDeviceInfo.channels.length; i++) {
       channels[i].value = moonConfig.color[i];
     }
+
+    _moonCurve = parent.lyfiThing.getProperty<List<MoonCurveItem>>('moonCurve')!;
+
+    final instants = await _deviceApi.getMoonSchedule(parent.boundDevice!.device, cancelToken: cancelToken);
+    _moonInstants = instants;
   }
 
   @override
