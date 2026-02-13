@@ -31,7 +31,6 @@ class SceneManagerImpl extends ISceneManager {
   final IClock clock;
   bool _isInitialized = false;
 
-  late final IGroupManager _groupManager;
   late final IDeviceManager _deviceManager;
 
   late SceneEntity _current;
@@ -54,7 +53,6 @@ class SceneManagerImpl extends ISceneManager {
     if (_isInitialized) {
       return;
     }
-    _groupManager = groupManager;
     _deviceManager = deviceManager;
     return await _db.transaction((tx) async {
       await _ensureCurrentSceneExists(tx);

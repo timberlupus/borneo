@@ -226,8 +226,3 @@ void main() {
     });
   });
 }
-
-class _MockDriverData {
-  @override
-  String toString() => 'MockDriverData';
-}

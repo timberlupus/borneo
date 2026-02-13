@@ -10,6 +10,7 @@ import 'package:borneo_kernel/drivers/borneo/wot/borneo_props.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/wot/wot_actions.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
+import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:logger/logger.dart';
 import 'package:lw_wot/wot.dart';
@@ -20,42 +21,43 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   static const int kLightweightPeriodicIntervalSecs = 1;
   static const int kLowFrequencyPeriodicIntervalSecs = 15;
 
+  final IKernel kernel;
   final Logger? logger;
   final Device device;
   final DeviceEventBus deviceEvents;
   IBorneoDeviceApi? borneoApi;
   ILyfiDeviceApi? lyfiApi;
-  final bool Function()? canWrite;
+  bool canWrite() => kernel.isBound(device.id);
   bool isOffline = false;
 
   LyfiThing({
+    required this.kernel,
     required this.device,
     required this.deviceEvents,
     required this.borneoApi,
     required this.lyfiApi,
     required super.title,
     this.logger,
-    this.canWrite,
   }) : super(id: device.id, type: ["OnOffSwitch", "Light"], description: "Lyfi LED lighting device") {
     _createPropertiesWithDefaults();
     _createActions();
   }
 
   factory LyfiThing.offline({
+    required IKernel kernel,
     required Device device,
     required DeviceEventBus deviceEvents,
     required String title,
     Logger? logger,
-    bool Function()? canWrite,
   }) {
     return LyfiThing(
+      kernel: kernel,
       device: device,
       deviceEvents: deviceEvents,
       borneoApi: null,
       lyfiApi: null,
       title: title,
       logger: logger,
-      canWrite: canWrite,
     )..isOffline = true;
   }
 
@@ -74,13 +76,13 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
   }
 
   @override
-  bool canWriteProperty(String propertyName) => canWrite?.call() ?? true;
+  bool canWriteProperty(String propertyName) => canWrite.call();
 
   @override
   String? getWriteGuardError(String propertyName) => 'Device is offline or unbound.';
 
   @override
-  bool canPerformAction(String actionName) => canWrite?.call() ?? true;
+  bool canPerformAction(String actionName) => canWrite.call();
 
   @override
   String? getActionGuardError(String actionName) => 'Device is offline or unbound.';

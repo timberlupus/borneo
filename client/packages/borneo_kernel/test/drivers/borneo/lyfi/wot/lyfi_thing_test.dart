@@ -11,6 +11,7 @@ void main() {
     late MockBorneoDeviceApi mockBorneoApi;
     late MockLyfiDeviceApi mockLyfiApi;
     late MockLogger mockLogger;
+    late MockKernel mockKernel;
 
     setUp(() {
       mockDevice = MockDevice('test-device', 'http://192.168.1.100');
@@ -18,11 +19,13 @@ void main() {
       mockBorneoApi = MockBorneoDeviceApi();
       mockLyfiApi = MockLyfiDeviceApi();
       mockLogger = MockLogger();
+      mockKernel = MockKernel();
     });
 
     group('Constructor', () {
       test('should create LyfiThing with required parameters', () {
         final lyfiThing = LyfiThing(
+          kernel: mockKernel,
           device: mockDevice,
           deviceEvents: mockDeviceEventBus,
           borneoApi: mockBorneoApi,
@@ -40,6 +43,7 @@ void main() {
 
       test('should create offline LyfiThing using factory constructor', () {
         final lyfiThing = LyfiThing.offline(
+          kernel: mockKernel,
           device: mockDevice,
           deviceEvents: mockDeviceEventBus,
           title: 'Offline Lyfi',
@@ -55,8 +59,9 @@ void main() {
     });
 
     group('Guard Methods', () {
-      test('canWriteProperty should return true by default', () {
+      test('canWriteProperty should return false by default', () {
         final lyfiThing = LyfiThing(
+          kernel: mockKernel,
           device: mockDevice,
           deviceEvents: mockDeviceEventBus,
           borneoApi: mockBorneoApi,
@@ -64,17 +69,17 @@ void main() {
           title: 'Test Lyfi',
         );
 
-        expect(lyfiThing.canWriteProperty('on'), isTrue);
+        expect(lyfiThing.canWriteProperty('on'), isFalse);
       });
 
       test('canWriteProperty should use canWrite function when provided', () {
         final lyfiThing = LyfiThing(
+          kernel: mockKernel,
           device: mockDevice,
           deviceEvents: mockDeviceEventBus,
           borneoApi: mockBorneoApi,
           lyfiApi: mockLyfiApi,
           title: 'Test Lyfi',
-          canWrite: () => false,
         );
 
         expect(lyfiThing.canWriteProperty('on'), isFalse);
@@ -82,6 +87,7 @@ void main() {
 
       test('getWriteGuardError should return appropriate error message', () {
         final lyfiThing = LyfiThing(
+          kernel: mockKernel,
           device: mockDevice,
           deviceEvents: mockDeviceEventBus,
           borneoApi: mockBorneoApi,
@@ -92,8 +98,9 @@ void main() {
         expect(lyfiThing.getWriteGuardError('on'), equals('Device is offline or unbound.'));
       });
 
-      test('canPerformAction should return true by default', () {
+      test('canPerformAction should return false by default', () {
         final lyfiThing = LyfiThing(
+          kernel: mockKernel,
           device: mockDevice,
           deviceEvents: mockDeviceEventBus,
           borneoApi: mockBorneoApi,
@@ -101,17 +108,17 @@ void main() {
           title: 'Test Lyfi',
         );
 
-        expect(lyfiThing.canPerformAction('test-action'), isTrue);
+        expect(lyfiThing.canPerformAction('test-action'), isFalse);
       });
 
       test('canPerformAction should use canWrite function when provided', () {
         final lyfiThing = LyfiThing(
+          kernel: mockKernel,
           device: mockDevice,
           deviceEvents: mockDeviceEventBus,
           borneoApi: mockBorneoApi,
           lyfiApi: mockLyfiApi,
           title: 'Test Lyfi',
-          canWrite: () => false,
         );
 
         expect(lyfiThing.canPerformAction('test-action'), isFalse);
@@ -119,6 +126,7 @@ void main() {
 
       test('getActionGuardError should return appropriate error message', () {
         final lyfiThing = LyfiThing(
+          kernel: mockKernel,
           device: mockDevice,
           deviceEvents: mockDeviceEventBus,
           borneoApi: mockBorneoApi,
@@ -133,6 +141,7 @@ void main() {
     group('bindToOnlineApis', () {
       test('should bind APIs and set offline to false', () async {
         final lyfiThing = LyfiThing.offline(
+          kernel: mockKernel,
           device: mockDevice,
           deviceEvents: mockDeviceEventBus,
           title: 'Offline Lyfi',
@@ -149,6 +158,7 @@ void main() {
 
       test('should not bind if already online', () async {
         final lyfiThing = LyfiThing(
+          kernel: mockKernel,
           device: mockDevice,
           deviceEvents: mockDeviceEventBus,
           borneoApi: mockBorneoApi,
@@ -170,6 +180,7 @@ void main() {
     group('initialize', () {
       test('should initialize online device', () async {
         final lyfiThing = LyfiThing(
+          kernel: mockKernel,
           device: mockDevice,
           deviceEvents: mockDeviceEventBus,
           borneoApi: mockBorneoApi,
@@ -190,6 +201,7 @@ void main() {
 
       test('should initialize offline device without binding', () async {
         final lyfiThing = LyfiThing.offline(
+          kernel: mockKernel,
           device: mockDevice,
           deviceEvents: mockDeviceEventBus,
           title: 'Offline Lyfi',

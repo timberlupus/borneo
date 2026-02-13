@@ -42,8 +42,6 @@ class MoonEditorViewModel extends ChangeNotifier implements IEditor {
   ScheduleTable _moonInstants = const [];
   ScheduleTable get moonInstants => _moonInstants;
 
-  List<MoonCurveItem> _moonCurve = const [];
-
   MoonEditorViewModel(this.parent)
     : _channels = List.generate(parent.lyfiDeviceInfo.channelCount, growable: false, (index) => ValueNotifier(0)),
       blackColor = List.filled(parent.lyfiDeviceInfo.channelCount, 0, growable: false);
@@ -67,8 +65,6 @@ class MoonEditorViewModel extends ChangeNotifier implements IEditor {
     for (int i = 0; i < parent.lyfiDeviceInfo.channels.length; i++) {
       channels[i].value = moonConfig.color[i];
     }
-
-    _moonCurve = parent.lyfiThing.getProperty<List<MoonCurveItem>>('moonCurve')!;
 
     final instants = await _deviceApi.getMoonSchedule(parent.boundDevice!.device, cancelToken: cancelToken);
     _moonInstants = instants;

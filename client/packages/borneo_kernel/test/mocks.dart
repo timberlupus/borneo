@@ -15,18 +15,19 @@ import 'package:borneo_kernel_abstractions/models/driver_descriptor.dart';
 import 'package:borneo_kernel_abstractions/models/heartbeat_method.dart';
 import 'package:borneo_kernel_abstractions/models/io.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
+import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
-import 'package:logger/logger.dart';
+import 'package:logger/logger.dart' as logger_pkg;
 import 'package:pub_semver/pub_semver.dart';
 
-class MockLogger extends Logger {
+class MockLogger extends logger_pkg.Logger {
   final List<String> logs = [];
 
-  MockLogger() : super(printer: PrettyPrinter());
+  MockLogger() : super();
 
   @override
-  void log(Level level, dynamic message, {Object? error, StackTrace? stackTrace, DateTime? time}) {
+  void log(logger_pkg.Level level, dynamic message, {Object? error, StackTrace? stackTrace, DateTime? time}) {
     // Do nothing
   }
 }
@@ -192,7 +193,7 @@ DriverDescriptor createTestDriverDescriptor(String id, MockDriver driver) {
   descriptor = DriverDescriptor(
     id: id,
     name: 'Test Driver $id',
-    factory: ({Logger? logger}) => driver,
+    factory: ({logger_pkg.Logger? logger}) => driver,
     matches: (discovered) => createTestDeviceDescriptor(id, discovered.host, descriptor),
     heartbeatMethod: HeartbeatMethod.poll,
     discoveryMethod: const MdnsDeviceDiscoveryMethod('_test._tcp'),
@@ -376,6 +377,70 @@ class MockLyfiDeviceApi implements ILyfiDeviceApi {
       ],
     );
   }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return super.noSuchMethod(invocation);
+  }
+}
+
+class MockKernel implements IKernel {
+  @override
+  Iterable<BoundDevice> get boundDevices => [];
+
+  @override
+  bool get isInitialized => true;
+
+  @override
+  GlobalDevicesEventBus get events => GlobalDevicesEventBus();
+
+  @override
+  Iterable<Driver> get activatedDrivers => [];
+
+  @override
+  bool get isBusy => false;
+
+  @override
+  bool get isScanning => false;
+
+  @override
+  Future<void> start() async {}
+
+  @override
+  bool isBound(String deviceID) => false;
+
+  @override
+  BoundDevice getBoundDevice(String deviceID) => throw UnimplementedError();
+
+  @override
+  Future<bool> tryBind(Device device, String driverID, {CancellationToken? cancelToken}) async => true;
+
+  @override
+  Future<void> bind(Device device, String driverID, {CancellationToken? cancelToken}) async {}
+
+  @override
+  Future<void> unbind(String deviceID, {CancellationToken? cancelToken}) async {}
+
+  @override
+  Future<void> unbindAll({CancellationToken? cancelToken}) async {}
+
+  @override
+  Future<void> startDevicesScanning({Duration? timeout, CancellationToken? cancelToken}) async {}
+
+  @override
+  Future<void> stopDevicesScanning() async {}
+
+  @override
+  void registerDevice(BoundDeviceDescriptor device) {}
+
+  @override
+  void registerDevices(Iterable<BoundDeviceDescriptor> devices) {}
+
+  @override
+  void unregisterDevice(String deviceID) {}
+
+  @override
+  Future<void> dispose() async {}
 
   @override
   dynamic noSuchMethod(Invocation invocation) {

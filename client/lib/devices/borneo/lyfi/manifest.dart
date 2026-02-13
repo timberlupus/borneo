@@ -111,13 +111,13 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
 
       // Create the real LyfiThing with API connections
       final lyfiThing = LyfiThing(
+        kernel: deviceManager.kernel,
         device: boundDevice.device,
         deviceEvents: deviceEvents,
         borneoApi: borneoApi,
         lyfiApi: lyfiApi,
         title: device.name,
         logger: logger,
-        canWrite: () => deviceManager.isBound(device.id),
       );
 
       // Initialize the LyfiThing asynchronously (hardware binding)
@@ -131,11 +131,11 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
       // Create offline LyfiThing
       final deviceEvents = DeviceEventBus(); // TODO FIXME
       final lyfiThing = LyfiThing.offline(
+        kernel: deviceManager.kernel,
         device: device,
         deviceEvents: deviceEvents,
         title: device.name,
         logger: logger,
-        canWrite: () => deviceManager.isBound(device.id),
       );
       await lyfiThing.initialize();
       return lyfiThing;
