@@ -1091,32 +1091,6 @@ class LyfiThing extends WotThing implements WotWriteGuard, WotActionGuard {
         );
       },
     );
-
-    // Set moon schedule action
-    addAvailableAction(
-      'setMoonSchedule',
-      WotActionMetadata(
-        title: 'Set Moon Schedule',
-        description: 'Set the moon simulation schedule',
-        input: {'schedule': 'array'},
-      ),
-      (thing, input) {
-        final schedule = (input['schedule'] as List).map((item) {
-          final map = item as Map<String, dynamic>;
-          return ScheduledInstant(
-            instant: Duration(seconds: map['instant'] as int),
-            color: List<int>.from(map['color'] as List),
-          );
-        }).toList();
-        return LyfiSetMoonScheduleAction(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          thing: thing,
-          schedule: schedule,
-          lyfiApi: lyfiApi!,
-          device: device,
-        );
-      },
-    );
   }
 
   /// Bind properties to actual hardware state (like Mozilla WebThing ready callback)
