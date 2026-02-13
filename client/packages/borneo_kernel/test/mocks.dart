@@ -4,17 +4,7 @@ import 'dart:collection';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
-import 'package:borneo_kernel_abstractions/device.dart';
-import 'package:borneo_kernel_abstractions/driver.dart';
-import 'package:borneo_kernel_abstractions/driver_registry.dart';
-import 'package:borneo_kernel_abstractions/events.dart';
-import 'package:borneo_kernel_abstractions/mdns.dart';
-import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
-import 'package:borneo_kernel_abstractions/models/driver_data.dart';
-import 'package:borneo_kernel_abstractions/models/driver_descriptor.dart';
-import 'package:borneo_kernel_abstractions/models/heartbeat_method.dart';
 import 'package:borneo_kernel_abstractions/models/io.dart';
-import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
@@ -385,14 +375,25 @@ class MockLyfiDeviceApi implements ILyfiDeviceApi {
 }
 
 class MockKernel implements IKernel {
+  final GlobalDevicesEventBus _events = GlobalDevicesEventBus();
+  final Map<String, BoundDevice> _boundDevices = {};
+
+  void setBoundDevice(BoundDevice bound) {
+    _boundDevices[bound.device.id] = bound;
+  }
+
+  void clearBoundDevices() {
+    _boundDevices.clear();
+  }
+
   @override
-  Iterable<BoundDevice> get boundDevices => [];
+  Iterable<BoundDevice> get boundDevices => _boundDevices.values;
 
   @override
   bool get isInitialized => true;
 
   @override
-  GlobalDevicesEventBus get events => GlobalDevicesEventBus();
+  GlobalDevicesEventBus get events => _events;
 
   @override
   Iterable<Driver> get activatedDrivers => [];
@@ -407,10 +408,10 @@ class MockKernel implements IKernel {
   Future<void> start() async {}
 
   @override
-  bool isBound(String deviceID) => false;
+  bool isBound(String deviceID) => _boundDevices.containsKey(deviceID);
 
   @override
-  BoundDevice getBoundDevice(String deviceID) => throw UnimplementedError();
+  BoundDevice getBoundDevice(String deviceID) => _boundDevices[deviceID] ?? (throw UnimplementedError());
 
   @override
   Future<bool> tryBind(Device device, String driverID, {CancellationToken? cancelToken}) async => true;

@@ -8,15 +8,12 @@ import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
-import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:logger/logger.dart';
 import 'package:lw_wot/wot.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/wot.dart';
-import 'package:borneo_kernel/drivers/borneo/device_api.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 
 import 'package:provider/provider.dart';
 
@@ -102,43 +99,8 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
   }
 
   static Future<WotThing> _createWotThing(DeviceEntity device, IDeviceManager deviceManager, {Logger? logger}) async {
-    try {
-      // Get the bound device and extract APIs
-      final boundDevice = deviceManager.getBoundDevice(device.id);
-      final borneoApi = boundDevice.api<IBorneoDeviceApi>();
-      final lyfiApi = boundDevice.api<ILyfiDeviceApi>();
-      final deviceEvents = boundDevice.device.driverData.deviceEvents;
-
-      // Create the real LyfiThing with API connections
-      final lyfiThing = LyfiThing(
-        kernel: deviceManager.kernel,
-        device: boundDevice.device,
-        deviceEvents: deviceEvents,
-        borneoApi: borneoApi,
-        lyfiApi: lyfiApi,
-        title: device.name,
-        logger: logger,
-      );
-
-      // Initialize the LyfiThing asynchronously (hardware binding)
-      // Note: This doesn't block creation, initialization happens in background
-      await lyfiThing.initialize();
-      return lyfiThing;
-    } catch (e, st) {
-      // If API access fails, fall back to basic WotThing
-      logger?.w('Failed to create online device with APIs for ${device.id}: $e', error: e, stackTrace: st);
-
-      // Create offline LyfiThing
-      final deviceEvents = DeviceEventBus(); // TODO FIXME
-      final lyfiThing = LyfiThing.offline(
-        kernel: deviceManager.kernel,
-        device: device,
-        deviceEvents: deviceEvents,
-        title: device.name,
-        logger: logger,
-      );
-      await lyfiThing.initialize();
-      return lyfiThing;
-    }
+    final lyfiThing = LyfiThing(kernel: deviceManager.kernel, deviceId: device.id, title: device.name, logger: logger);
+    await lyfiThing.initialize();
+    return lyfiThing;
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:borneo_app/devices/borneo/view_models/base_borneo_device_view_model.dart';
-import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/wot/wot_thing.dart';
@@ -56,11 +55,6 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   @override
   void onDeviceBound() {
     super.onDeviceBound();
-    if (lyfiThing.isOffline && boundDevice != null) {
-      final borneoApi = boundDevice!.api<IBorneoDeviceApi>();
-      final lyfiApi = boundDevice!.api<ILyfiDeviceApi>();
-      lyfiThing.bindToOnlineApis(borneoApi, lyfiApi);
-    }
     _subscribeToLyfiThing();
   }
 

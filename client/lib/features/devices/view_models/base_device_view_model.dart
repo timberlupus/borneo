@@ -16,7 +16,6 @@ import 'package:borneo_app/shared/view_models/base_view_model.dart';
 
 abstract class BaseDeviceViewModel extends BaseViewModel
     with WidgetsBindingObserver, ViewModelEventBusMixin, ViewModelInitFutureMixin {
-  bool _isOnline = false;
   bool _isSuspectedOffline = false;
 
   final CancellationToken masterCancellation = CancellationToken();
@@ -36,7 +35,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
 
   bool get isLoaded => _isLoaded;
 
-  bool get isOnline => _isOnline;
+  bool get isOnline => wotThing.getProperty<bool>('online')!;
   bool get isSuspectedOffline => _isSuspectedOffline;
   bool _isReconnecting = false;
   Timer? _reconnectTimer;
@@ -97,7 +96,6 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     try {
       deviceEntity = await deviceManager.getDevice(deviceID);
       _isLoaded = true;
-      _isOnline = deviceManager.isBound(deviceID);
       _isSuspectedOffline = false;
       await onInitialize();
     } on IOException catch (ioex, stackTrace) {
@@ -165,9 +163,8 @@ abstract class BaseDeviceViewModel extends BaseViewModel
 
   @protected
   bool markOnline({bool notify = true}) {
-    final bool wasOffline = !_isOnline;
+    final bool wasOffline = !isOnline;
     final bool wasSuspected = _isSuspectedOffline;
-    _isOnline = true;
     _isSuspectedOffline = false;
     _stopReconnectCountdown(notify: false);
     if ((wasOffline || wasSuspected) && !isDisposed) {
@@ -182,11 +179,10 @@ abstract class BaseDeviceViewModel extends BaseViewModel
 
   @protected
   bool markOffline({bool notify = true}) {
-    final bool changed = _isOnline || _isSuspectedOffline;
+    final bool changed = isOnline || _isSuspectedOffline;
     if (!changed) {
       return false;
     }
-    _isOnline = false;
     _isSuspectedOffline = false;
     _stopReconnectCountdown(notify: false);
 

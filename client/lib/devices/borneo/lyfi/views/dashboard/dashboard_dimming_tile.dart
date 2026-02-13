@@ -32,7 +32,7 @@ class DashboardDimmingTile extends StatelessWidget {
                     ? () async {
                         final vm = context.read<LyfiViewModel>();
                         // Request entering dimming (unlock) then wait for readiness event-driven
-                        vm.toggleLock(false);
+                        await vm.toggleLock(false);
                         await vm.onDimmingReady();
 
                         if (context.mounted) {

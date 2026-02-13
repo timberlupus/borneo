@@ -56,7 +56,6 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
   bool get isNotEmpty => _entries.isNotEmpty;
 
   List<ScheduleEntryViewModel> get entries => _entries;
-  Iterable<int> get instants => _entries.map((x) => x.instant.inSeconds);
   bool get isPreviewMode => parent.state == LyfiState.preview;
 
   @override
@@ -272,9 +271,8 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
     if (parent.isSuspectedOffline || parent.boundDevice == null) {
       return;
     }
-    final schedule = _entries.map((x) => x.toModel()).toList(growable: false);
-    await parent.executeLyfiCommand(() => _deviceApi.setSchedule(parent.boundDevice!.device, schedule));
-    parent.lyfiThing.findProperty('schedule')?.value.notifyOfExternalUpdate(schedule);
+    final toSave = _entries.map((x) => x.toModel()).toList(growable: false);
+    lyfiThing.performAction('setSchedule', toSave)!.start();
   }
 
   void resetChannelValues() {}

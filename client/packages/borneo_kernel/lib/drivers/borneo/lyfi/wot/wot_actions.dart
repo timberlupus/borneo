@@ -88,6 +88,7 @@ class LyfiSetScheduleAction extends WotAction<Map<String, dynamic>> {
   @override
   Future<void> performAction() async {
     await lyfiApi.setSchedule(device, schedule);
+    thing.findProperty('schedule')!.value.notifyOfExternalUpdate(schedule);
   }
 }
 

@@ -22,13 +22,15 @@ class DimmingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
+      onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         final vm = context.read<LyfiViewModel>();
         if (vm.isOnline && !vm.isLocked && !vm.isSuspectedOffline) {
-          vm.toggleLock(true);
+          await vm.toggleLock(true);
         }
-        Navigator.of(context).pop();
+        if (context.mounted) {
+          Navigator.of(context).pop();
+        }
       },
       child: Scaffold(
         body: Stack(
@@ -36,12 +38,14 @@ class DimmingScreen extends StatelessWidget {
             NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 LyfiAppBar(
-                  onBack: () {
+                  onBack: () async {
                     final vm = context.read<LyfiViewModel>();
                     if (!vm.isLocked && !vm.isSuspectedOffline) {
-                      vm.toggleLock(true);
+                      await vm.toggleLock(true);
                     }
-                    Navigator.of(context).pop();
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
                   },
                 ),
                 const LyfiBusyIndicatorSliver(),

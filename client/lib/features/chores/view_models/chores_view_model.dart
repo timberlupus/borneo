@@ -61,8 +61,8 @@ class ChoresViewModel extends ChangeNotifier {
   Future<void> _reloadChores() async {
     try {
       _chores = _choreManager.getAvailableChores();
-    } catch (e) {
-      _logger?.e('Failed to reload chores: $e');
+    } catch (e, stackTrace) {
+      _logger?.e('Failed to reload chores: $e', error: e, stackTrace: stackTrace);
       _error = e.toString();
     } finally {
       notifyListeners();

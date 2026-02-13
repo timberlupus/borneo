@@ -4,6 +4,7 @@ import 'package:lw_wot/event.dart';
 import 'package:lw_wot/property.dart';
 
 import 'package:borneo_kernel_abstractions/events.dart';
+import 'package:lw_wot/wot.dart';
 
 /// Generic WotProperty that handles event subscription and value mapping
 class ObservableWotProperty<T, E> extends WotProperty<T> {

@@ -349,7 +349,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       ..clear()
       ..addAll(super.lyfiThing.getProperty<ScheduleTable>('moonSchedule')!);
 
-    await _syncScheduleTables(mode: super.mode);
+    _syncScheduleTables(mode: super.mode, force: true);
 
     // Update schedule
     // final schedule = await _deviceApi.getSchedule(boundDevice.device);
@@ -411,7 +411,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
 
     _editorState = _editorState.copyWith(mode: super.mode);
 
-    await _syncScheduleTables(mode: super.mode);
+    _syncScheduleTables(mode: super.mode, force: true);
 
     _initializeChannels();
 
@@ -440,7 +440,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     }
   }
 
-  Future<void> _syncScheduleTables({required LyfiMode mode, bool force = false}) async {
+  void _syncScheduleTables({required LyfiMode mode, bool force = false}) {
     if (!super.isOnline || isSuspectedOffline || boundDevice == null) {
       return;
     }
@@ -532,15 +532,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     if (newState == LyfiState.dimming) {
       await _toggleEditor(super.mode);
     } else if (newState == LyfiState.normal) {
-      final editor = _editorState.editor;
-      if (editor != null && editor.isChanged) {
-        await editor.save();
-        if (editor is ScheduleEditorViewModel) {
-          await _syncScheduleTables(mode: LyfiMode.scheduled, force: true);
-        } else if (editor is SunEditorViewModel) {
-          await _syncScheduleTables(mode: LyfiMode.sun, force: true);
-        }
-      }
+      // Editor disposal only - saving is handled in toggleLock
       final previousEditor = _editorState.editor;
       _editorState = _editorState.copyWith(status: EditorStatus.idle, editor: null, clearError: true);
       if (previousEditor != null) {
@@ -550,13 +542,28 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     notifyListeners();
   }
 
-  void toggleLock(bool newIsLocked) {
+  Future<void> toggleLock(bool newIsLocked) async {
     if (isSuspectedOffline) {
       return;
     }
 
     if (newIsLocked) {
-      // Exiting edit mode - switch to normal state
+      // Exiting edit mode - save changes first, then switch to normal state
+      final editor = _editorState.editor;
+      if (editor != null && editor.isChanged) {
+        try {
+          await editor.save();
+          if (editor is ScheduleEditorViewModel) {
+            _syncScheduleTables(mode: LyfiMode.scheduled, force: true);
+          } else if (editor is SunEditorViewModel) {
+            _syncScheduleTables(mode: LyfiMode.sun, force: true);
+          }
+        } catch (e, stackTrace) {
+          logger?.e('Failed to save editor changes', error: e, stackTrace: stackTrace);
+          notifyAppError('Failed to save changes. Please try again.');
+          return; // Prevent state change if save fails
+        }
+      }
       super.setState(LyfiState.normal);
     } else {
       // Entering edit mode - wait for state to change to dimming before creating editor
@@ -616,7 +623,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
     _editorState = _editorState.copyWith(mode: newMode, status: EditorStatus.loading, editor: null, clearError: true);
     notifyListeners();
 
-    await _syncScheduleTables(mode: newMode);
+    _syncScheduleTables(mode: newMode);
 
     IEditor newEditor;
     switch (newMode) {
