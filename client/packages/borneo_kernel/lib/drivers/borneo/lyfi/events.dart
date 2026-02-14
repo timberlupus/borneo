@@ -11,11 +11,6 @@ class LyfiStateChangedEvent extends DeviceStateChangedEvent {
   const LyfiStateChangedEvent(super.device, {required this.state});
 }
 
-class LyfiScheduleChangedEvent extends DeviceStateChangedEvent {
-  final ScheduleTable schedule;
-  const LyfiScheduleChangedEvent(super.device, {required this.schedule});
-}
-
 class LyfiAcclimationChangedEvent extends DeviceStateChangedEvent {
   final AcclimationSettings settings;
   const LyfiAcclimationChangedEvent(super.device, {required this.settings});

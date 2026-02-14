@@ -179,7 +179,6 @@ class LyfiSetPowerBehaviorAction extends WotAction<Map<String, dynamic>> {
   @override
   Future<void> performAction() async {
     await borneoApi.setPowerBehavior(device, behavior);
-    finish();
   }
 }
 

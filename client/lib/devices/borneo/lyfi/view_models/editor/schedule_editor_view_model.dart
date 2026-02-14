@@ -274,7 +274,7 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
       return;
     }
     final toSave = _entries.map((x) => x.toModel()).toList(growable: false);
-    lyfiThing.performAction('setSchedule', toSave)!.start();
+    await lyfiThing.performAction('setSchedule', toSave)!.invoke().asCancellable(cancelToken);
   }
 
   void resetChannelValues() {}

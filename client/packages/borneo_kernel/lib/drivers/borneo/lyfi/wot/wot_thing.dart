@@ -474,7 +474,6 @@ class LyfiThing extends BorneoThing implements WotWriteGuard, WotActionGuard {
       _device!.driverData.deviceEvents.on<DevicePowerOnOffChangedEvent>().listen(_forwardDeviceEvent),
       _device!.driverData.deviceEvents.on<LyfiStateChangedEvent>().listen(_forwardDeviceEvent),
       _device!.driverData.deviceEvents.on<LyfiModeChangedEvent>().listen(_forwardDeviceEvent),
-      _device!.driverData.deviceEvents.on<LyfiScheduleChangedEvent>().listen(_forwardDeviceEvent),
       _device!.driverData.deviceEvents.on<LyfiAcclimationChangedEvent>().listen(_forwardDeviceEvent),
       _device!.driverData.deviceEvents.on<LyfiLocationChangedEvent>().listen(_forwardDeviceEvent),
       _device!.driverData.deviceEvents.on<LyfiCorrectionMethodChangedEvent>().listen(_forwardDeviceEvent),

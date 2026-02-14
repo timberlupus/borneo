@@ -113,9 +113,8 @@ extension LyfiThingProperties on LyfiThing {
     );
 
     // Schedule property
-    final scheduleProperty = ObservableWotProperty<ScheduleTable, LyfiScheduleChangedEvent>(
+    final scheduleProperty = WotProperty<ScheduleTable>(
       thing: this,
-      deviceEvents: deviceEvents,
       name: 'schedule',
       value: WotValue<ScheduleTable>(
         initialValue: [], // Default empty schedule
@@ -127,8 +126,6 @@ extension LyfiThingProperties on LyfiThing {
         description: 'LED lighting schedule with time instants and colors',
         readOnly: true,
       ),
-      eventName: 'scheduleChanged',
-      mapper: (event) => event.schedule,
     );
     addProperty(scheduleProperty);
 
