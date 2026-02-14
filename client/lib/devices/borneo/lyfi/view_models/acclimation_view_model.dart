@@ -96,7 +96,8 @@ class AcclimationViewModel extends BaseLyfiDeviceViewModel {
       days: _days.round(),
     );
 
-    super.lyfiDeviceApi.setAcclimation(super.boundDevice!.device, acc);
+    await super.lyfiDeviceApi.setAcclimation(super.boundDevice!.device, acc);
+    lyfiThing.findProperty('acclimation')!.value.notifyOfExternalUpdate(acc);
     _isChanged = false;
   }
 

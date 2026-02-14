@@ -1,8 +1,6 @@
 // Dart port of src/action.ts
 // High-level Action base class implementation.
 
-import 'package:cancellation_token/cancellation_token.dart';
-
 import 'utils.dart' as utils;
 import 'thing.dart';
 import 'types.dart';

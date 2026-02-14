@@ -18,7 +18,6 @@ class AcclimationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = _buildSettingItems(context);
     final vm = AcclimationViewModel(
       deviceManager: context.read<IDeviceManager>(),
       globalEventBus: context.read<EventBus>(),
@@ -30,34 +29,43 @@ class AcclimationScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (cb) => vm,
       builder: (context, child) {
-        return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: AppBar(
-            title: Text(context.translate('Acclimation')),
-            actions: [
-              Consumer<AcclimationViewModel>(
-                builder: (context, vm, _) =>
-                    Switch(value: vm.enabled, onChanged: !vm.isBusy && vm.isOnline && vm.isOn ? vm.setEanbled : null),
-              ),
-              Consumer<AcclimationViewModel>(
-                builder: (context, vm, _) => TextButton.icon(
-                  onPressed: vm.canSubmit ? () => onSubmit(vm, context) : null,
-                  icon: const Icon(Icons.check, size: 24),
-                  label: Text(context.translate('Apply')),
+        return FutureBuilder(
+          future: vm.initFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Scaffold(
+                appBar: AppBar(title: Text(context.translate('Acclimation'))),
+                body: Center(child: CircularProgressIndicator()),
+              );
+            } else if (snapshot.hasError) {
+              return Scaffold(
+                appBar: AppBar(title: Text(context.translate('Acclimation'))),
+                body: Center(child: Text('Error: ${snapshot.error}')),
+              );
+            } else {
+              final items = _buildSettingItems(context);
+              return Scaffold(
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                appBar: AppBar(
+                  title: Text(context.translate('Acclimation')),
+                  actions: [
+                    Consumer<AcclimationViewModel>(
+                      builder: (context, vm, _) => Switch(
+                        value: vm.enabled,
+                        onChanged: !vm.isBusy && vm.isOnline && vm.isOn ? vm.setEanbled : null,
+                      ),
+                    ),
+                    Consumer<AcclimationViewModel>(
+                      builder: (context, vm, _) => TextButton.icon(
+                        onPressed: vm.canSubmit ? () => onSubmit(vm, context) : null,
+                        icon: const Icon(Icons.check, size: 24),
+                        label: Text(context.translate('Apply')),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-          body: SafeArea(
-            child: FutureBuilder(
-              future: vm.initFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else {
-                  return Column(
+                body: SafeArea(
+                  child: Column(
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       Expanded(
@@ -69,11 +77,11 @@ class AcclimationScreen extends StatelessWidget {
                         ),
                       ),
                     ],
-                  );
-                }
-              },
-            ),
-          ),
+                  ),
+                ),
+              );
+            }
+          },
         );
       },
     );

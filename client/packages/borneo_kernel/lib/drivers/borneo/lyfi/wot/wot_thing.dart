@@ -22,7 +22,7 @@ part 'wot_thing.actions.dart';
 /// This class uses default values during construction and binds to actual hardware asynchronously
 class LyfiThing extends BorneoThing implements WotWriteGuard, WotActionGuard {
   static const Duration kLightweightInterval = Duration(seconds: 1);
-  static const Duration kLowFrequencyInterval = Duration(seconds: 5);
+  static const Duration kLowFrequencyInterval = Duration(seconds: 30);
 
   final IKernel kernel;
   final Logger? logger;
