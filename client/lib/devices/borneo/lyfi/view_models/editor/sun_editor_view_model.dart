@@ -37,6 +37,7 @@ class SunEditorViewModel extends BaseEditorViewModel {
     for (int i = 0; i < parent.lyfiDeviceInfo.channels.length; i++) {
       channels[i].value = sunColor[i];
     }
+    await super.syncDimmingColor(true, cancelToken: cancelToken);
 
     _sunCurve = super.lyfiThing.getProperty<List<SunCurveItem>>('sunCurve')!;
 

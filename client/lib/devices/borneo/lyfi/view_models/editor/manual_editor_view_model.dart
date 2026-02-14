@@ -29,6 +29,7 @@ class ManualEditorViewModel extends BaseEditorViewModel {
     for (int i = 0; i < parent.lyfiDeviceInfo.channels.length; i++) {
       channels[i].value = manualColor[i];
     }
+    await syncDimmingColor(false, cancelToken: cancelToken);
   }
 
   @override

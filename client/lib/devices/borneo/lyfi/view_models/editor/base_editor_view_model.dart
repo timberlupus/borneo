@@ -71,18 +71,14 @@ abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
           return;
         }
         if (!parent.boundDevice!.device.driverData.isBusy) {
-          await parent.executeLyfiCommand(
-            () => deviceApi.setColor(parent.boundDevice!.device, color, cancelToken: cancelToken),
-          );
+          lyfiThing.setProperty('color', color);
         }
       });
     } else {
       if (parent.isSuspectedOffline || parent.boundDevice == null) {
         return;
       }
-      await parent.executeLyfiCommand(
-        () => deviceApi.setColor(parent.boundDevice!.device, color, cancelToken: cancelToken),
-      );
+      lyfiThing.setProperty('color', color);
     }
   }
 }

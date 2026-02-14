@@ -68,6 +68,7 @@ class LyfiSetColorAction extends WotAction<Map<String, dynamic>> {
   @override
   Future<void> performAction() async {
     await lyfiApi.setColor(device, color);
+    thing.findProperty('color')!.value.notifyOfExternalUpdate(color);
   }
 }
 
@@ -199,5 +200,7 @@ class LyfiSetMoonConfigAction extends WotAction<Map<String, dynamic>> {
   @override
   Future<void> performAction() async {
     await lyfiApi.setMoonConfig(device, config);
+    final curve = await lyfiApi.getMoonCurve(device);
+    thing.findProperty('moonCurve')!.value.notifyOfExternalUpdate(curve);
   }
 }

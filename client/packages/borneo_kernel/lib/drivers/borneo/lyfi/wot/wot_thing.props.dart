@@ -91,7 +91,24 @@ extension LyfiThingProperties on LyfiThing {
       MutableLyfiColorProperty(
         thing: this,
         name: 'color',
-        valueForwarder: (update) => _withLyfiApi((api, device) => api.setColor(device, update)),
+        valueForwarder: (update) async {
+          await _withLyfiApi((api, device) async => await api.setColor(device, update));
+          final state = LyfiState.fromString(getProperty<String>('state')!);
+          if (state == LyfiState.dimming) {
+            final mode = LyfiMode.fromString(getProperty<String>('mode')!);
+            switch (mode) {
+              case LyfiMode.manual:
+                findProperty('manualColor')!.value.notifyOfExternalUpdate(update);
+                break;
+
+              case LyfiMode.sun:
+                findProperty('sunColor')!.value.notifyOfExternalUpdate(update);
+                break;
+              default:
+                break;
+            }
+          }
+        },
       ),
     );
 
@@ -418,9 +435,7 @@ extension LyfiThingProperties on LyfiThing {
       name: 'temporaryRemaining',
       value: WotValue<Duration>(
         initialValue: Duration.zero, // Default zero duration
-        valueForwarder: (update) async {
-          throw UnsupportedError('Temporary remaining is read-only');
-        },
+        valueForwarder: (update) => throw UnsupportedError('Temporary remaining is read-only'),
       ),
       metadata: WotPropertyMetadata(
         type: 'duration',

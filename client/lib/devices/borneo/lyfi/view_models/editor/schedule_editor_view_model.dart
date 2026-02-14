@@ -85,6 +85,8 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
       }
       _setCurrentEntry(currentEntryIndex);
     }
+
+    await syncDimmingColor(false, cancelToken: cancelToken);
   }
 
   void _setCurrentEntry(int? index) {
