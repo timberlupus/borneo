@@ -61,7 +61,7 @@ class SunEditorViewModel extends BaseEditorViewModel {
   }
 
   @override
-  Future<void> save() async {
+  Future<void> save({CancellationToken? cancelToken}) async {
     if (parent.isSuspectedOffline || parent.boundDevice == null) {
       return;
     }

@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 abstract class IEditor extends ChangeNotifier {
   bool get canEdit;
   bool get isChanged;
-  Future<void> save();
+  Future<void> save({CancellationToken? cancelToken});
   Future<void> initialize({CancellationToken? cancelToken});
   Future<void> updateChannelValue(int index, int value);
   int get availableChannelCount;

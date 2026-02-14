@@ -80,7 +80,7 @@ class MoonEditorViewModel extends ChangeNotifier implements IEditor {
   }
 
   @override
-  Future<void> save() async {
+  Future<void> save({CancellationToken? cancelToken}) async {
     if (parent.isSuspectedOffline || parent.boundDevice == null) {
       return;
     }

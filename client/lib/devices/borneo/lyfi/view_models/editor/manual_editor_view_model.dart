@@ -43,7 +43,7 @@ class ManualEditorViewModel extends BaseEditorViewModel {
   }
 
   @override
-  Future<void> save() async {
+  Future<void> save({CancellationToken? cancelToken}) async {
     //do nothing
   }
 }
