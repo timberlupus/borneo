@@ -6,6 +6,7 @@ import 'package:borneo_kernel/drivers/borneo/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/wot/wot_props.dart';
 import 'package:borneo_kernel/drivers/borneo/wot/borneo_props.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/wot/wot_actions.dart';
 import 'package:borneo_kernel/drivers/borneo/wot/borneo_thing.dart';

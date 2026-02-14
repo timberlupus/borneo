@@ -87,21 +87,13 @@ extension LyfiThingProperties on LyfiThing {
 
   void _createLightingProperties() {
     // Color property with default all-off color
-    final colorProperty = WotProperty<List<int>>(
-      thing: this,
-      name: 'color',
-      value: WotValue<List<int>>(
-        initialValue: [], // Default 4-channel all off
+    addProperty(
+      MutableLyfiColorProperty(
+        thing: this,
+        name: 'color',
         valueForwarder: (update) => _withLyfiApi((api, device) => api.setColor(device, update)),
       ),
-      metadata: WotPropertyMetadata(
-        type: 'array',
-        title: 'Color',
-        description: 'LED channel brightness values (0-100 per channel)',
-        readOnly: false,
-      ),
     );
-    addProperty(colorProperty);
 
     // Schedule property
     final scheduleProperty = ObservableWotProperty<ScheduleTable, LyfiScheduleChangedEvent>(
@@ -663,41 +655,11 @@ extension LyfiThingProperties on LyfiThing {
     addProperty(unscheduledProperty);
 
     // Manual color property (read-only)
-    final manualColorProperty = WotProperty<List<int>>(
-      thing: this,
-      name: 'manualColor',
-      value: WotValue<List<int>>(
-        initialValue: [0, 0, 0, 0], // Default all off
-        valueForwarder: (update) async {
-          throw UnsupportedError('Manual color is read-only');
-        },
-      ),
-      metadata: WotPropertyMetadata(
-        type: 'array',
-        title: 'Manual Color',
-        description: 'Stored manual color values',
-        readOnly: true,
-      ),
-    );
+    final manualColorProperty = ReadonlyLyfiColorProperty(thing: this, name: 'manualColor');
     addProperty(manualColorProperty);
 
     // Sun color property (read-only)
-    final sunColorProperty = WotProperty<List<int>>(
-      thing: this,
-      name: 'sunColor',
-      value: WotValue<List<int>>(
-        initialValue: [0, 0, 0, 0], // Default all off
-        valueForwarder: (update) async {
-          throw UnsupportedError('Sun color is read-only');
-        },
-      ),
-      metadata: WotPropertyMetadata(
-        type: 'array',
-        title: 'Sun Color',
-        description: 'Current sun-simulated color values',
-        readOnly: true,
-      ),
-    );
+    final sunColorProperty = ReadonlyLyfiColorProperty(thing: this, name: 'sunColor');
     addProperty(sunColorProperty);
 
     // Acclimation enabled property (read-only)

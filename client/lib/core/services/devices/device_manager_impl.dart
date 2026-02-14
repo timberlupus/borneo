@@ -39,8 +39,6 @@ final class DeviceManagerImpl extends IDeviceManager {
   // event subscriptions
   late final StreamSubscription<UnboundDeviceDiscoveredEvent> _unboundDeviceDiscoveredEventSub;
   late final StreamSubscription<CurrentSceneChangedEvent> _currentSceneChangedEventSub;
-  late final StreamSubscription<DeviceBoundEvent> _deviceBoundEventSub;
-  late final StreamSubscription<DeviceRemovedEvent> _deviceRemovedEventSub;
 
   // WotThing management
   final Map<String, WotThing> _wotThings = {};
@@ -64,10 +62,6 @@ final class DeviceManagerImpl extends IDeviceManager {
 
     // Listen for scene changes to manage WotThing lifecycle
     _currentSceneChangedEventSub = _globalBus.on<CurrentSceneChangedEvent>().listen(_onCurrentSceneChanged);
-
-    // Listen for device binding events to sync WotThings
-    _deviceBoundEventSub = allDeviceEvents.on<DeviceBoundEvent>().listen(_onDeviceBound);
-    _deviceRemovedEventSub = allDeviceEvents.on<DeviceRemovedEvent>().listen(_onDeviceRemoved);
   }
 
   @override
@@ -93,9 +87,9 @@ final class DeviceManagerImpl extends IDeviceManager {
       await _kernel.start();
 
       unawaited(() async {
-        await _rebindAll(devices);
-        // Load WotThings for current scene after devices are bound
+        // Load WotThings for current scene alongside device load, regardless of online state.
         await _loadWotThingsForCurrentScene();
+        await _rebindAll(devices);
 
         final currentScene = _sceneManager.current;
         _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
@@ -113,10 +107,7 @@ final class DeviceManagerImpl extends IDeviceManager {
     if (!_isDisposed) {
       _unboundDeviceDiscoveredEventSub.cancel();
       _currentSceneChangedEventSub.cancel();
-      _deviceBoundEventSub.cancel();
-      _deviceRemovedEventSub.cancel();
 
-      // Dispose all WotThings
       _disposeAllWotThings();
 
       _isDisposed = true;
@@ -143,8 +134,8 @@ final class DeviceManagerImpl extends IDeviceManager {
       _kernel.unregisterAllDevices();
       final devices = await fetchAllDevicesInScene();
       _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
-      await _rebindAll(devices);
       await _reloadWotThingsForCurrentScene();
+      await _rebindAll(devices);
     });
   }
 
@@ -272,13 +263,14 @@ final class DeviceManagerImpl extends IDeviceManager {
         : await _addNewDeviceToStore(discovered, tx: tx);
 
     _kernel.registerDevice(BoundDeviceDescriptor(device: device, driverID: device.driverID));
+
+    // Always create a WotThing twin, even when the device is unbound/offline.
+    await _loadWotThingForDevice(device, replaceExisting: true);
+
     final bindResult = await tryBind(device);
     if (!bindResult) {
       logger?.e('Failed to bind device: $device');
     }
-
-    // Always create a WotThing twin, even when the device is unbound/offline.
-    await _loadWotThingForDevice(device, replaceExisting: true);
 
     allDeviceEvents.fire(NewDeviceEntityAddedEvent(device));
 
@@ -520,24 +512,5 @@ final class DeviceManagerImpl extends IDeviceManager {
     } catch (e) {
       logger?.w('Failed to sync WotThing for device $deviceID: $e');
     }
-  }
-
-  /// Handle device bound event - sync WotThing if exists, or create if missing
-  void _onDeviceBound(DeviceBoundEvent event) async {
-    final deviceID = event.device.id;
-    final deviceEntity = await getDevice(deviceID);
-    await _loadWotThingForDevice(deviceEntity, replaceExisting: true);
-
-    final currentScene = _sceneManager.current;
-    _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
-  }
-
-  /// Handle device removed event - clean up WotThing and notify listeners
-  void _onDeviceRemoved(DeviceRemovedEvent event) {
-    final deviceID = event.device.id;
-    // Keep WotThing twins for offline/unbound devices.
-    final currentScene = _sceneManager.current;
-    _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
-    logger?.d('Fired CurrentSceneDevicesReloadedEvent after device removal: $deviceID');
   }
 }

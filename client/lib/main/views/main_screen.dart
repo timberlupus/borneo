@@ -272,6 +272,9 @@ class _MainScreenState extends State<MainScreen> {
         final gm = ctx.read<IGroupManager>();
         final dm = ctx.read<IDeviceManager>();
         final ls = ctx.read<ILocaleService>();
+        final notification = ctx.read<IAppNotificationService>();
+        final logger = ctx.read<Logger>();
+        final clock = ctx.read<IClock>();
         final vm = MainViewModel(
           bus,
           bm,
@@ -279,16 +282,19 @@ class _MainScreenState extends State<MainScreen> {
           gm,
           dm,
           ls,
-          notification: ctx.read<IAppNotificationService>(),
-          clock: ctx.read<IClock>(),
+          notification: notification,
+          clock: clock,
           gt: gt,
-          logger: ctx.read<Logger>(),
+          logger: logger,
         );
 
-        final f = vm.initFuture;
-        if (f != null) {
-          // TODO exceptions
-          f.whenComplete(() => FlutterNativeSplash.remove());
+        if (vm.initFuture != null) {
+          vm.initFuture!
+              .catchError((error, stack) {
+                vm.logger?.e('App init failed', error: error, stackTrace: stack);
+                notification.showError(gt.translate('Editor initialization failed. Please retry.'));
+              })
+              .whenComplete(() => FlutterNativeSplash.remove());
         } else {
           FlutterNativeSplash.remove();
         }
