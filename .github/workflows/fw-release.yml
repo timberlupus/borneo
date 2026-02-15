@@ -16,6 +16,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    container: 'espressif/idf:v5.5.2'
     env:
       LYFI_PRODUCTS: bst/ulva6 bst/blc06mk1 bst/xiaoc3 bst/c3devkitm1 bst/c5devkitc1
 
@@ -23,17 +24,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Build LyFi Firmware in Docker
+    - name: Configure git
+      run: git config --global --add safe.directory "*"
+
+    - name: Build LyFi Firmware
+      working-directory: fw/lyfi
       run: |
-        mkdir artifacts
+        . /opt/esp/idf/export.sh
+        mkdir -p ../../artifacts
         for product in ${{ env.LYFI_PRODUCTS }}; do
-          docker run -t \
-            -v "${GITHUB_WORKSPACE}:/app/${{ github.repository }}" \
-            -w "/app/${{ github.repository }}/fw/lyfi" \
-            espressif/idf:v5.5.2 \
-            /bin/bash -c "rm -rf build && git config --global --add safe.directory '*' && idf.py build -DPRODUCT_ID=$product -DCMAKE_BUILD_TYPE=Release && idf.py merge-bin"
-            python fw/scripts/ci/generate_firmware_manifest.py fw/lyfi -o artifacts
+          rm -rf ./build
+          idf.py -DPRODUCT_ID=$product -DCMAKE_BUILD_TYPE=Release build
+          idf.py merge-bin
         done
+        python ../scripts/ci/generate_firmware_manifest.py . -o ../../artifacts
 
     - name: Generate Manifests file
       run: python fw/scripts/ci/merge_manifest.py ./artifacts -o ./artifacts/manifests.json

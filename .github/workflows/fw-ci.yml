@@ -31,4 +31,4 @@ jobs:
       working-directory: fw/lyfi
       run: |
         . /opt/esp/idf/export.sh
-        idf.py build -DPRODUCT_ID=${{ matrix.lyfi_product }} -DCMAKE_BUILD_TYPE=Release
+        idf.py -DPRODUCT_ID=${{ matrix.lyfi_product }} -DCMAKE_BUILD_TYPE=Release build
