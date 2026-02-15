@@ -75,13 +75,17 @@ static void _timer_callback_pid(void* args);
 #define PID_Q 100
 #define PID_PERIOD (1000)
 #define PID_INTEGRAL_RESET_THRESHOLD 3
-#define PID_INTEGRAL_MAX 50000
-#define PID_INTEGRAL_MIN -50000
+#define PID_INTEGRAL_MAX 20000
+#define PID_INTEGRAL_MIN -20000
 
 #define OUTPUT_MIN 10
 #define OUTPUT_MAX 100
 
 #define KEEP_TEMP_MIN 35
+
+// Output slew rate limit: restrict the maximum change per cycle to improve user experience and suppress
+// noise-induced jumps
+#define PID_MAX_STEP 15
 
 const struct thermal_settings THERMAL_DEFAULT_SETTINGS = {
     .kp = 250,
@@ -171,6 +175,12 @@ int load_factory_settings()
     BO_TRY(bo_nvs_get_or_set_i32(handle, THERMAL_NVS_KEY_KD, &_settings.kd, THERMAL_DEFAULT_SETTINGS.kd, &changed));
     BO_TRY(bo_nvs_get_or_set_u8(handle, THERMAL_NVS_KEY_KEEP_TEMP, &_settings.keep_temp,
                                 THERMAL_DEFAULT_SETTINGS.keep_temp, &changed));
+
+    if (_settings.keep_temp < KEEP_TEMP_MIN) {
+        _settings.keep_temp = KEEP_TEMP_MIN;
+        BO_TRY(nvs_set_u8(handle, THERMAL_NVS_KEY_KEEP_TEMP, _settings.keep_temp));
+        changed = true;
+    }
 
     if (changed) {
         BO_TRY(nvs_commit(handle));
@@ -345,7 +355,7 @@ uint8_t thermal_pid_step(int32_t current_temp)
     if (sat_lo && error < 0)
         allow_i = false;
 
-    if (abs(error) >= 2 && allow_i) {
+    if (abs(error) >= PID_INTEGRAL_RESET_THRESHOLD && allow_i) {
         int64_t new_i = (int64_t)pid->integral + (int64_t)ki_eff * error;
         if (new_i > PID_INTEGRAL_MAX)
             new_i = PID_INTEGRAL_MAX;
@@ -370,15 +380,12 @@ uint8_t thermal_pid_step(int32_t current_temp)
         out = (uint8_t)(out_q / PID_Q);
     }
 
-    // Output slew rate limit: restrict the maximum change per cycle to improve user experience and suppress
-    // noise-induced jumps
-    const int32_t max_step = 10;
     // Maximum change of 10% per second
     int32_t delta = (int32_t)out - pid->last_output;
-    if (delta > max_step)
-        delta = max_step;
-    if (delta < -max_step)
-        delta = -max_step;
+    if (delta > PID_MAX_STEP)
+        delta = PID_MAX_STEP;
+    if (delta < -PID_MAX_STEP)
+        delta = -PID_MAX_STEP;
     out = (uint8_t)(pid->last_output + delta);
 
     pid->last_output = out;
@@ -405,6 +412,7 @@ int thermal_set_fan_mode(int fan_mode)
     _settings.fan_mode = fan_mode;
 
     BO_TRY(nvs_commit(handle));
+    BO_TRY(thermal_reinit());
     return 0;
 }
 
