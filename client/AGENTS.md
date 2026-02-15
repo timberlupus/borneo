@@ -58,6 +58,18 @@ Borneo Client is a cross-platform Flutter application for controlling Borneo-IoT
 - Integration tests in `integration_test/`
 - Use `flutter test` to run
 
+### Localization
+
+- To handle localization: First, run the script `python .\scripts\update_translations.py .` to extract and update translation files.
+- Then, translate the `.po` files.
+- During development tasks, do not modify `.po` files temporarily; translate them uniformly before release.
+
+Use the following patterns for localizing user-visible text with `flutter_gettext`:
+
+- Import: `import 'package:gettext_i18n/gettext_i18n.dart';`
+- Positional arguments: `Text(context.translate('There is {0} apple', keyPlural: 'There are {0} apples', pArgs: [1]));`
+- Named arguments: `Text(context.translate('You have {message_count} message', keyPlural: 'You have {message_count} messages', nArgs: {'message_count': 1}));`
+
 ## Contributing
 
 - Follow Flutter conventions
