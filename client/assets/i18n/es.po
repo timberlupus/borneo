@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-12 12:42+0800\n"
+"POT-Creation-Date: 2026-02-15 09:57+0800\n"
 "PO-Revision-Date: 2026-01-03 14:43+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -17,48 +17,48 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: core\services\scene_manager_impl.dart:73
+#: core\services\scene_manager_impl.dart:71
 msgid "My Home"
 msgstr "Mi Casa"
 
-#: core\services\scene_manager_impl.dart:82
+#: core\services\scene_manager_impl.dart:80
 msgid "My Office"
 msgstr "Mi Oficina"
 
-#: devices\borneo\lyfi\manifest.dart:79
+#: devices\borneo\lyfi\manifest.dart:76
 #: devices\borneo\lyfi\views\dashboard\dashboard_fan_tile.dart:15
 #: devices\borneo\lyfi\views\settings_screen.dart:612
 #: devices\borneo\lyfi\views\settings_screen.dart:619
 msgid "Manual"
 msgstr "Manual"
 
-#: devices\borneo\lyfi\manifest.dart:81
+#: devices\borneo\lyfi\manifest.dart:78
 msgid "Scheduled"
 msgstr "Programado"
 
-#: devices\borneo\lyfi\manifest.dart:83
+#: devices\borneo\lyfi\manifest.dart:80
 msgid "Sun Simulation"
 msgstr "Simulación Solar"
 
-#: devices\borneo\lyfi\manifest.dart:92
+#: devices\borneo\lyfi\manifest.dart:89
 msgid "Running"
 msgstr "Ejecutándose"
 
-#: devices\borneo\lyfi\manifest.dart:94
+#: devices\borneo\lyfi\manifest.dart:91
 #: devices\borneo\lyfi\views\dashboard\dashboard_dimming_tile.dart:61
 msgid "Dimming"
 msgstr "Atenuación"
 
-#: devices\borneo\lyfi\manifest.dart:96
+#: devices\borneo\lyfi\manifest.dart:93
 #: devices\borneo\lyfi\views\dashboard\dashboard_temporary_tile.dart:109
 msgid "Temporary"
 msgstr "Temporal"
 
-#: devices\borneo\lyfi\manifest.dart:98
+#: devices\borneo\lyfi\manifest.dart:95
 msgid "Preview"
 msgstr "Vista Previa"
 
-#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:427
+#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:487
 msgid "Bad device state"
 msgstr ""
 
@@ -158,40 +158,38 @@ msgstr "Dispositivo restaurado a configuración de fábrica"
 msgid "Failed to restore device to factory settings: $e"
 msgstr "Error al restaurar el dispositivo a configuración de fábrica: $e"
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:36
+#: devices\borneo\lyfi\views\acclimation_screen.dart:37
+#: devices\borneo\lyfi\views\acclimation_screen.dart:42
+#: devices\borneo\lyfi\views\acclimation_screen.dart:50
 #: devices\borneo\lyfi\views\dashboard\dashboard_acclimation_tile.dart:124
 msgid "Acclimation"
 msgstr "Aclimatación"
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:42
+#: devices\borneo\lyfi\views\acclimation_screen.dart:62
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:81
-#: devices\borneo\lyfi\views\moon_screen.dart:43
-#: features\devices\views\group_edit_screen.dart:91
-#: features\scenes\views\scene_edit_screen.dart:172
-msgid "Submit"
-msgstr "Enviar"
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:338
+#: devices\borneo\lyfi\views\moon_screen.dart:53
+#: shared\widgets\map_location_picker.dart:132
+msgid "Apply"
+msgstr "Aplicar"
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:81
+#: devices\borneo\lyfi\views\acclimation_screen.dart:93
 msgid "SETTINGS"
 msgstr "CONFIGURACIONES"
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:84
-msgid "Enabled"
-msgstr "Habilitado"
-
-#: devices\borneo\lyfi\views\acclimation_screen.dart:94
+#: devices\borneo\lyfi\views\acclimation_screen.dart:98
 msgid "Start date"
 msgstr "Fecha de inicio"
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:131
+#: devices\borneo\lyfi\views\acclimation_screen.dart:135
 msgid "Duration"
 msgstr "Duración"
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:142
+#: devices\borneo\lyfi\views\acclimation_screen.dart:146
 msgid "Start percent"
 msgstr "Porcentaje de inicio"
 
-#: devices\borneo\lyfi\views\acclimation_screen.dart:164
+#: devices\borneo\lyfi\views\acclimation_screen.dart:168
 msgid "Update acclimation settings succeed."
 msgstr "Configuración de aclimatación actualizada exitosamente."
 
@@ -286,11 +284,6 @@ msgstr "Cancelar"
 msgid "Confirm"
 msgstr "Confirmar"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:338
-#: shared\widgets\map_location_picker.dart:132
-msgid "Apply"
-msgstr "Aplicar"
-
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:359
 msgid "Select channel count"
 msgstr ""
@@ -328,9 +321,45 @@ msgstr "Ventilador"
 msgid "N/A"
 msgstr "N/D"
 
-#: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:53
-#: devices\borneo\lyfi\views\moon_screen.dart:33
+#: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:10
+msgid "New Moon"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:11
+msgid "Waxing Crescent"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:12
+msgid "First Quarter"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:13
+msgid "Waxing Gibbous"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:14
+msgid "Full Moon"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:15
+msgid "Waning Gibbous"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:16
+msgid "Last Quarter"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:17
+msgid "Waning Crescent"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:70
+#: devices\borneo\lyfi\views\moon_screen.dart:43
 msgid "Moonlight"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:78
+msgid "Daytime"
 msgstr ""
 
 #: devices\borneo\lyfi\views\dashboard\dashboard_power_tile.dart:38
@@ -346,35 +375,36 @@ msgstr "Configuración"
 msgid "Temperature & Fan"
 msgstr ""
 
-#: devices\borneo\lyfi\views\dimming_screen.dart:81
+#: devices\borneo\lyfi\views\dimming_screen.dart:85
 msgid "MANU"
 msgstr "MAN"
 
-#: devices\borneo\lyfi\views\dimming_screen.dart:86
+#: devices\borneo\lyfi\views\dimming_screen.dart:90
 msgid "SCHED"
 msgstr "PROG"
 
-#: devices\borneo\lyfi\views\dimming_screen.dart:91
+#: devices\borneo\lyfi\views\dimming_screen.dart:95
 msgid "SUN"
 msgstr "SOL"
 
-#: devices\borneo\lyfi\views\dimming_screen.dart:143
+#: devices\borneo\lyfi\views\dimming_screen.dart:147
+#: main\views\main_screen.dart:295
 msgid "Editor initialization failed. Please retry."
 msgstr ""
 
-#: devices\borneo\lyfi\views\dimming_screen.dart:207
+#: devices\borneo\lyfi\views\dimming_screen.dart:211
 msgid "Device connection lost. Controls are locked."
 msgstr "Conexión del dispositivo perdida. Los controles están bloqueados."
 
-#: devices\borneo\lyfi\views\dimming_screen.dart:208
+#: devices\borneo\lyfi\views\dimming_screen.dart:212
 msgid "Connection unstable. Trying to reconnect…"
 msgstr "Conexión inestable. Intentando reconectar…"
 
-#: devices\borneo\lyfi\views\dimming_screen.dart:251
+#: devices\borneo\lyfi\views\dimming_screen.dart:255
 msgid "RETRY"
 msgstr "REINTENTAR"
 
-#: devices\borneo\lyfi\views\dimming_screen.dart:269
+#: devices\borneo\lyfi\views\dimming_screen.dart:273
 msgid "Back to device"
 msgstr "Volver al dispositivo"
 
@@ -434,11 +464,7 @@ msgstr "Confirmación"
 msgid "Are you sure you want to remove all schedule entries?"
 msgstr "¿Está seguro de que desea eliminar todas las entradas del horario?"
 
-#: devices\borneo\lyfi\views\moon_screen.dart:67
-msgid "Brightness"
-msgstr ""
-
-#: devices\borneo\lyfi\views\moon_screen.dart:95
+#: devices\borneo\lyfi\views\moon_screen.dart:102
 msgid "Update moon settings succeed."
 msgstr ""
 
@@ -915,6 +941,11 @@ msgstr "Notas"
 msgid "Operation failed"
 msgstr "Operación fallida"
 
+#: features\devices\views\group_edit_screen.dart:91
+#: features\scenes\views\scene_edit_screen.dart:172
+msgid "Submit"
+msgstr "Enviar"
+
 #: features\devices\views\group_edit_screen.dart:155
 msgid "Group deleted"
 msgstr "Grupo eliminado"
@@ -1135,7 +1166,7 @@ msgstr "Agregar Escena"
 msgid "Devices"
 msgstr "Dispositivos"
 
-#: main\views\main_screen.dart:313
+#: main\views\main_screen.dart:319
 msgid "Press back again to exit"
 msgstr "Presione atrás nuevamente para salir"
 
@@ -1158,6 +1189,9 @@ msgstr "Ubicación actual"
 #: shared\widgets\map_location_picker.dart:225
 msgid "Please select a location"
 msgstr "Por favor seleccione una ubicación"
+
+#~ msgid "Enabled"
+#~ msgstr "Habilitado"
 
 #~ msgid "Acclimation Mode"
 #~ msgstr "Modo de Aclimatación"
