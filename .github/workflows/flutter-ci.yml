@@ -316,11 +316,22 @@ jobs:
             release-artifacts/borneo-app-ce-${{ needs.build-apk.outputs.version }}.apk
             release-artifacts/borneo-app-ce-${{ needs.build-windows.outputs.version }}-windows-x64.zip
 
-      - name: Create and push new latest tag
-        run: |
-          git tag -d release-app-latest || true
-          git tag release-app-latest
-          git push origin release-app-latest --force
+      - name: Manage latest tag via API
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const tag = 'release-app-latest';
+            const ref = `tags/${tag}`;
+            try {
+              await github.rest.git.deleteRef({ owner: context.repo.owner, repo: context.repo.repo, ref });
+              console.log(`Deleted existing tag ${tag}`);
+            } catch (err) {
+              if (err.status !== 404) throw err;
+              console.log(`Tag ${tag} did not exist, proceeding to create`);
+            }
+            await github.rest.git.createRef({ owner: context.repo.owner, repo: context.repo.repo, ref, sha: context.sha });
+            console.log(`Created tag ${tag} pointing to ${context.sha}`);
 
       - name: Remove previous release assets
         uses: actions/github-script@v8
