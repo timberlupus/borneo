@@ -6,15 +6,15 @@ import '../../view_models/lyfi_view_model.dart';
 import '../moon_screen.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 
-String getMoonPhaseName(double angle) => switch (angle) {
-  _ when angle < 22.5 || angle >= 337.5 => 'New Moon',
-  _ when angle < 67.5 => 'Waxing Crescent',
-  _ when angle < 112.5 => 'First Quarter',
-  _ when angle < 157.5 => 'Waxing Gibbous',
-  _ when angle < 202.5 => 'Full Moon',
-  _ when angle < 247.5 => 'Waning Gibbous',
-  _ when angle < 292.5 => 'Last Quarter',
-  _ => 'Waning Crescent',
+String getMoonPhaseName(BuildContext context, double angle) => switch (angle) {
+  _ when angle < 22.5 || angle >= 337.5 => context.translate('New Moon'),
+  _ when angle < 67.5 => context.translate('Waxing Crescent'),
+  _ when angle < 112.5 => context.translate('First Quarter'),
+  _ when angle < 157.5 => context.translate('Waxing Gibbous'),
+  _ when angle < 202.5 => context.translate('Full Moon'),
+  _ when angle < 247.5 => context.translate('Waning Gibbous'),
+  _ when angle < 292.5 => context.translate('Last Quarter'),
+  _ => context.translate('Waning Crescent'),
 };
 
 IconData getMoonPhaseIcon(double angle) => switch (angle) {
@@ -124,7 +124,7 @@ class DashboardMoonTile extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    getMoonPhaseName(moonStatus!.phaseAngle),
+                                    getMoonPhaseName(context, moonStatus!.phaseAngle),
                                     style: theme.textTheme.bodySmall?.copyWith(color: effectiveFgColor),
                                     softWrap: false,
                                   ),
