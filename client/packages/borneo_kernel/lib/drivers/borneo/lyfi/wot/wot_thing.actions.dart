@@ -183,7 +183,7 @@ extension LyfiThingActions on LyfiThing {
           input: {'enabled': 'boolean', 'color': 'array'},
         ),
         (thing, input) {
-          final config = MoonConfig(enabled: input['enabled'] as bool, color: List<int>.from(input['color'] as List));
+          final config = MoonConfig(enabled: input.enabled as bool, color: List<int>.from(input.color as List<int>));
           return LyfiSetMoonConfigAction(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             thing: thing,

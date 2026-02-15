@@ -149,7 +149,7 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
             const LyfiBusyIndicatorSliver(),
             const LyfiStatusBannersSliver(),
           ],
-          body: const SafeArea(top: false, child: DashboardView(key: ValueKey('dashboard'))),
+          body: const SafeArea(top: false, child: _DashboardRouteVisibilityGate()),
         ),
       ),
     );
@@ -164,6 +164,41 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
         await vm.toggleLock(true);
       }
     }
+  }
+}
+
+class _DashboardRouteVisibilityGate extends StatelessWidget {
+  const _DashboardRouteVisibilityGate();
+
+  @override
+  Widget build(BuildContext context) {
+    final route = ModalRoute.of(context);
+    if (route == null) {
+      return const DashboardView(key: ValueKey('dashboard'));
+    }
+
+    final animations = <Listenable>[];
+    if (route.animation != null) {
+      animations.add(route.animation!);
+    }
+    if (route.secondaryAnimation != null) {
+      animations.add(route.secondaryAnimation!);
+    }
+
+    if (animations.isEmpty) {
+      return route.isCurrent
+          ? const DashboardView(key: ValueKey('dashboard'))
+          : const SizedBox.shrink(key: ValueKey('dashboard-paused'));
+    }
+
+    return AnimatedBuilder(
+      animation: Listenable.merge(animations),
+      builder: (context, child) {
+        return route.isCurrent
+            ? const DashboardView(key: ValueKey('dashboard'))
+            : const SizedBox.shrink(key: ValueKey('dashboard-paused'));
+      },
+    );
   }
 }
 

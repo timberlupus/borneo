@@ -67,8 +67,8 @@ class LyfiTimeLineChart extends StatelessWidget {
           drawHorizontalLine: true,
           horizontalInterval: (maxY - minY) * 0.25,
           verticalInterval: xInterval,
-          getDrawingHorizontalLine: (value) => FlLine(color: cs.outlineVariant, strokeWidth: 1.0),
-          getDrawingVerticalLine: (value) => FlLine(color: cs.outlineVariant, strokeWidth: 1.0),
+          getDrawingHorizontalLine: (value) => FlLine(color: cs.outlineVariant, strokeWidth: 1.5),
+          getDrawingVerticalLine: (value) => FlLine(color: cs.outlineVariant, strokeWidth: 1.5),
         ),
         titlesData: FlTitlesData(
           bottomTitles: AxisTitles(

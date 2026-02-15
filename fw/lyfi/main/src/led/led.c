@@ -205,7 +205,7 @@ int led_init()
     BO_TRY_ESP(ledc_timer_config(&ledc_timer));
 
     // More than 8 channels need to initialize the second timer
-    if (led_channel_count() > 8) {
+    if (CONFIG_LYFI_LED_CHANNEL_COUNT > 8) {
         ledc_timer.speed_mode = LEDC_LOW_SPEED_MODE;
         ledc_timer.timer_num = LEDC_TIMER_1;
         BO_TRY_ESP(ledc_timer_config(&ledc_timer));
@@ -214,7 +214,7 @@ int led_init()
     ESP_LOGI(TAG, "PWM timer initialized.");
 
     // Initialize all channels
-    for (size_t ch = 0; ch < factory_settings->channel_count; ch++) {
+    for (size_t ch = 0; ch < CONFIG_LYFI_LED_CHANNEL_COUNT; ch++) {
         _ledc_channels[ch].gpio_num = LED_GPIOS[ch];
         _ledc_channels[ch].intr_type = LEDC_INTR_DISABLE;
         _ledc_channels[ch].hpoint = (ch * LED_MAX_DUTY) / led_channel_count();

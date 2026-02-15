@@ -202,7 +202,7 @@ int led_load_factory_settings()
     BO_TRY(bo_nvs_get_or_set_u8(handle, LED_NVS_KEY_CHANNEL_COUNT, &s_factory_settings.channel_count,
                                 CONFIG_LYFI_LED_CHANNEL_COUNT, &changed));
     // Load channel names and colors from NVS with Kconfig defaults
-    for (uint8_t ch = 0; ch < CONFIG_LYFI_LED_CHANNEL_COUNT && ch < s_factory_settings.channel_count; ch++) {
+    for (uint8_t ch = 0; ch < CONFIG_LYFI_LED_CHANNEL_COUNT; ch++) {
         const struct led_channel_defaults* defaults = &LED_DEFAULT_CHANNELS[ch];
         if (defaults->name == NULL || defaults->color == NULL) {
             continue;

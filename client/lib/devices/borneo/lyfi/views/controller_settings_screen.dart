@@ -43,15 +43,27 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
     return FutureBuilder<void>(
       future: _initFuture,
       builder: (context, snapshot) {
-        final isInitialized = snapshot.connectionState == ConnectionState.done && !snapshot.hasError;
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Scaffold(
+            appBar: AppBar(title: Text(context.translate("Controller Settings"))),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Scaffold(
+            appBar: AppBar(title: Text(context.translate("Controller Settings"))),
+            body: Center(child: Text(context.translate('Initialization failed'))),
+          );
+        }
 
         return ChangeNotifierProvider.value(
           value: widget.vm,
           builder: (context, child) => Consumer<ControllerSettingsViewModel>(
             builder: (context, vm, child) => GenericSettingsScreen(
               title: context.translate("Controller Settings"),
-              appBarActions: _buildAppBarActions(context, snapshot, isInitialized),
-              children: _buildSettingGroups(context, isInitialized),
+              appBarActions: _buildAppBarActions(context),
+              children: _buildSettingGroups(context),
             ),
           ),
         );
@@ -59,40 +71,30 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
     );
   }
 
-  List<Widget> _buildAppBarActions(BuildContext context, AsyncSnapshot<void> snapshot, bool isInitialized) {
+  List<Widget> _buildAppBarActions(BuildContext context) {
     return [
-      AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: snapshot.connectionState == ConnectionState.waiting
-            ? const SizedBox(
-                key: ValueKey('loading'),
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : Selector<ControllerSettingsViewModel, bool>(
-                selector: (context, vm) => vm.hasChanges,
-                builder: (context, hasChanges, child) => TextButton.icon(
-                  key: const ValueKey('submit'),
-                  onPressed: isInitialized && context.read<ControllerSettingsViewModel>().canSubmit
-                      ? () => _showSubmitConfirmationDialog(context)
-                      : null,
-                  icon: const Icon(Icons.check, size: 24),
-                  label: Text(context.translate('Apply')),
-                ),
-              ),
+      Selector<ControllerSettingsViewModel, bool>(
+        selector: (context, vm) => vm.hasChanges,
+        builder: (context, hasChanges, child) => TextButton.icon(
+          key: const ValueKey('submit'),
+          onPressed: context.read<ControllerSettingsViewModel>().canSubmit
+              ? () => _showSubmitConfirmationDialog(context)
+              : null,
+          icon: const Icon(Icons.check, size: 24),
+          label: Text(context.translate('Apply')),
+        ),
       ),
     ];
   }
 
-  List<Widget> _buildSettingGroups(BuildContext context, bool isInitialized) {
+  List<Widget> _buildSettingGroups(BuildContext context) {
     // const rightChevron = CupertinoListTileChevron();
     final tileColor = Theme.of(context).colorScheme.surfaceContainerHighest;
     return <Widget>[
       GenericSettingsGroup(
         title: context.translate('LED CONFIGURATION'),
         children: [
-          if (isInitialized && widget.vm.pwmFreq.available)
+          if (widget.vm.pwmFreq.available)
             Selector<ControllerSettingsViewModel, int?>(
               selector: (context, vm) => vm.pwmFreq.value,
               builder: (context, pwmFreq, child) => ListTile(
@@ -112,13 +114,13 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
       GenericSettingsGroup(
         title: context.translate('LED CHANNELS'),
         children: [
-          if (isInitialized && widget.vm.channelCountSetting.available)
+          if (widget.vm.channelCountSetting.available)
             Selector<ControllerSettingsViewModel, int?>(
               selector: (context, vm) => vm.channelCountSetting.value,
               builder: (context, channelCount, child) => ListTile(
                 dense: true,
                 tileColor: tileColor,
-                title: Text(context.translate('Channel count')),
+                title: Text(context.translate('Enabled channel count')),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [Text('$channelCount'), const SizedBox(width: 8), const Icon(Icons.chevron_right)],
@@ -126,45 +128,45 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
                 onTap: () => _showChannelCountPicker(context),
               ),
             ),
-          if (isInitialized)
-            ...List<Widget>.generate(widget.vm.channelCountSetting.value, (index) {
-              final name = widget.vm.getChannelName(index);
-              final colorStr = widget.vm.getChannelColor(index);
-              if (_channelNameControllers.length <= index) {
-                _channelNameControllers.add(TextEditingController(text: name));
-              } else {
-                final c = _channelNameControllers[index];
-                if (c.text != name) c.text = name;
-              }
+          ...List<Widget>.generate(widget.vm.channels.length, (index) {
+            final channel = widget.vm.channels[index];
+            final name = channel.name;
+            final colorStr = channel.color;
+            if (_channelNameControllers.length <= index) {
+              _channelNameControllers.add(TextEditingController(text: name));
+            } else {
+              final c = _channelNameControllers[index];
+              if (c.text != name) c.text = name;
+            }
 
-              return ListTile(
-                dense: true,
-                tileColor: tileColor,
-                leading: Icon(Icons.circle, color: _parseHexColor(colorStr)),
-                title: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _channelNameControllers[index],
-                        decoration: InputDecoration(
-                          isDense: true,
-                          labelText: context.translate('Name'),
-                          hintText: context.translate('1-15 characters'),
-                        ),
-                        inputFormatters: [LengthLimitingTextInputFormatter(15)],
-                        onChanged: (val) => setState(() => widget.vm.setChannelName(index, val)),
+            return ListTile(
+              dense: true,
+              tileColor: tileColor,
+              leading: Icon(Icons.circle, color: _parseHexColor(colorStr)),
+              title: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _channelNameControllers[index],
+                      decoration: InputDecoration(
+                        isDense: true,
+                        labelText: context.translate('Name'),
+                        hintText: context.translate('1-15 characters'),
                       ),
+                      inputFormatters: [LengthLimitingTextInputFormatter(15)],
+                      onChanged: channel.setName,
                     ),
-                    const SizedBox(width: 12),
-                    IconButton.outlined(
-                      icon: const Icon(Icons.palette_outlined),
-                      tooltip: context.translate('Pick color'),
-                      onPressed: () => _openColorPicker(index),
-                    ),
-                  ],
-                ),
-              );
-            }),
+                  ),
+                  const SizedBox(width: 12),
+                  IconButton.outlined(
+                    icon: const Icon(Icons.palette_outlined),
+                    tooltip: context.translate('Pick color'),
+                    onPressed: () => _openColorPicker(channel),
+                  ),
+                ],
+              ),
+            );
+          }),
         ],
       ),
 
@@ -172,7 +174,7 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
       GenericSettingsGroup(
         title: context.translate('POWER & PROTECTION'),
         children: [
-          if (isInitialized && widget.vm.overpowerEnabled.available)
+          if (widget.vm.overpowerEnabled.available)
             Selector<ControllerSettingsViewModel, bool>(
               selector: (context, vm) => vm.overpowerEnabled.value,
               builder: (context, enabled, child) => SwitchListTile.adaptive(
@@ -183,7 +185,7 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
                 onChanged: (bool value) => context.read<ControllerSettingsViewModel>().overpowerEnabled.setValue(value),
               ),
             ),
-          if (isInitialized && widget.vm.overpowerCutoff.available)
+          if (widget.vm.overpowerCutoff.available)
             ListTile(
               dense: true,
               tileColor: tileColor,
@@ -213,7 +215,7 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
                 },
               ),
             ),
-          if (isInitialized && widget.vm.overtempEnabled.available)
+          if (widget.vm.overtempEnabled.available)
             Selector<ControllerSettingsViewModel, bool>(
               selector: (context, vm) => vm.overtempEnabled.value,
               builder: (context, enabled, child) => SwitchListTile.adaptive(
@@ -224,7 +226,7 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
                 onChanged: (bool value) => context.read<ControllerSettingsViewModel>().overtempEnabled.setValue(value),
               ),
             ),
-          if (isInitialized && widget.vm.overtempCutoff.available)
+          if (widget.vm.overtempCutoff.available)
             Selector<ControllerSettingsViewModel, int?>(
               selector: (context, vm) => vm.overtempCutoff.value,
               builder: (context, cutoff, child) => ListTile(
@@ -311,8 +313,8 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
     return Theme.of(context).colorScheme.primary;
   }
 
-  void _openColorPicker(int index) {
-    final initialColor = _parseHexColor(widget.vm.getChannelColor(index));
+  void _openColorPicker(ChannelSettingsEntry channel) {
+    final initialColor = _parseHexColor(channel.color);
 
     showDialog(
       context: context,
@@ -332,7 +334,7 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
             TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(context.translate('Cancel'))),
             TextButton(
               onPressed: () {
-                _setChannelColorFromPicker(index, selected);
+                _setChannelColorFromPicker(channel, selected);
                 Navigator.of(ctx).pop();
               },
               child: Text(context.translate('Apply')),
@@ -343,11 +345,9 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
     );
   }
 
-  void _setChannelColorFromPicker(int index, Color color) {
+  void _setChannelColorFromPicker(ChannelSettingsEntry channel, Color color) {
     final hex = _colorToHex(color);
-    setState(() {
-      widget.vm.setChannelColor(index, hex);
-    });
+    channel.setColor(hex);
   }
 
   void _showChannelCountPicker(BuildContext context) {

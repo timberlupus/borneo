@@ -46,10 +46,10 @@ class MoonRunningChart extends StatelessWidget {
       series.add(
         LineChartBarData(
           spots: spots,
-          isCurved: true,
+          isCurved: false,
           color: primaryColor,
-          barWidth: 2,
-          dotData: FlDotData(show: false),
+          barWidth: 1.5,
+          dotData: FlDotData(show: true),
           belowBarData: BarAreaData(show: false),
         ),
       );

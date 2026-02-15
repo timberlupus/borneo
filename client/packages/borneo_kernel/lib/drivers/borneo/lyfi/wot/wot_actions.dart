@@ -200,6 +200,7 @@ class LyfiSetMoonConfigAction extends WotAction<Map<String, dynamic>> {
   Future<void> performAction() async {
     await lyfiApi.setMoonConfig(device, config);
     final curve = await lyfiApi.getMoonCurve(device);
+    thing.findProperty('moonConfig')!.value.notifyOfExternalUpdate(config);
     thing.findProperty('moonCurve')!.value.notifyOfExternalUpdate(curve);
   }
 }

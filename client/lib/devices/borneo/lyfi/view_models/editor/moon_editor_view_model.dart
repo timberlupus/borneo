@@ -35,15 +35,18 @@ class MoonEditorViewModel extends ChangeNotifier implements IEditor {
   LyfiDeviceInfo get deviceInfo => parent.lyfiDeviceInfo;
 
   @override
-  bool get canEdit => parent.isOnline && !parent.isSuspectedOffline && parent.isOn && parent.mode == LyfiMode.sun;
+  bool get canEdit => parent.isOnline && !parent.isSuspectedOffline && parent.isOn;
 
   bool get canChangeColor => canEdit;
 
   ScheduleTable _moonInstants = const [];
   ScheduleTable get moonInstants => _moonInstants;
 
+  final List<MoonCurveItem> moonCurve;
+
   MoonEditorViewModel(this.parent)
     : _channels = List.generate(parent.lyfiDeviceInfo.channelCount, growable: false, (index) => ValueNotifier(0)),
+      moonCurve = parent.lyfiThing.getProperty<List<MoonCurveItem>>('moonCurve')!,
       blackColor = List.filled(parent.lyfiDeviceInfo.channelCount, 0, growable: false);
 
   @override
@@ -74,6 +77,12 @@ class MoonEditorViewModel extends ChangeNotifier implements IEditor {
   Future<void> updateChannelValue(int index, int value) async {
     if (index >= 0 && index < channels.length && value != channels[index].value) {
       channels[index].value = value;
+      for (int i = 0; i < _moonInstants.length; i++) {
+        final illum = moonCurve[i].brightness;
+        _moonInstants[i].color[index] = (value * illum).round();
+      }
+      print(_moonInstants);
+
       isChanged = true;
     }
     notifyListeners();
@@ -84,12 +93,5 @@ class MoonEditorViewModel extends ChangeNotifier implements IEditor {
     if (parent.isSuspectedOffline || parent.boundDevice == null) {
       return;
     }
-
-    final moonColor = channels.map((x) => x.value).toList(growable: false);
-
-    parent.lyfiThing
-        .findProperty('moonConfig')
-        ?.value
-        .notifyOfExternalUpdate(MoonConfig(enabled: true, color: moonColor));
   }
 }

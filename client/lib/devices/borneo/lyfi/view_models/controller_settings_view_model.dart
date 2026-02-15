@@ -33,9 +33,60 @@ class NvsSettingEntry<T> {
        _initialValue = initialValue;
 }
 
+class ChannelSettingsEntry {
+  final int index;
+  final void Function() _notifyListeners;
+  final bool Function(String) _validateName;
+
+  String _name;
+  String _initialName;
+  String _color;
+  String _initialColor;
+
+  String get name => _name;
+  String get color => _color;
+  bool get nameChanged => _name != _initialName;
+  bool get colorChanged => _color != _initialColor;
+  bool get changed => _name != _initialName || _color != _initialColor;
+  bool get nameValid => _validateName(_name);
+
+  ChannelSettingsEntry({
+    required this.index,
+    required String name,
+    required String color,
+    required void Function() notifyListeners,
+    required bool Function(String) validateName,
+  }) : _name = name,
+       _initialName = name,
+       _color = color,
+       _initialColor = color,
+       _notifyListeners = notifyListeners,
+       _validateName = validateName;
+
+  void setName(String value) {
+    if (_name != value) {
+      _name = value;
+      _notifyListeners();
+    }
+  }
+
+  void setColor(String value) {
+    if (_color != value) {
+      _color = value;
+      _notifyListeners();
+    }
+  }
+
+  void syncInitial() {
+    _initialName = _name;
+    _initialColor = _color;
+  }
+}
+
 class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
   ILyfiDeviceApi get api => deviceManager.getBoundDevice(deviceID).api<ILyfiDeviceApi>();
 
+  late final int maxChannelCount;
   late final NvsSettingEntry<int> pwmFreq;
   late final NvsSettingEntry<bool> overpowerEnabled;
   late final NvsSettingEntry<int> overpowerCutoff;
@@ -43,12 +94,8 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
   late final NvsSettingEntry<int> overtempCutoff;
   late final NvsSettingEntry<int> channelCountSetting;
 
-  late final int channelCount;
-  late final List<String> _channelNames;
-  late final List<String> _initialChannelNames;
-  late final List<String> _channelColors;
-  late final List<String> _initialChannelColors;
-  late final List<bool> _channelNameValid;
+  late final List<ChannelSettingsEntry> _channels;
+  List<ChannelSettingsEntry> get channels => _channels;
 
   bool get hasChanges {
     final basicChanged =
@@ -58,31 +105,21 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
         overtempEnabled.changed ||
         overtempCutoff.changed ||
         channelCountSetting.changed;
-    final channelChanged = List.generate(
-      channelCount,
-      (i) => _channelNames[i] != _initialChannelNames[i] || _channelColors[i] != _initialChannelColors[i],
-    ).any((x) => x);
+    final channelChanged = _channels.any((channel) => channel.changed);
     return basicChanged || channelChanged;
   }
 
-  bool get canSubmit => hasChanges && _channelNameValid.every((v) => v);
+  bool get canSubmit => hasChanges && _channels.every((channel) => channel.nameValid);
 
-  String getChannelName(int index) => _channelNames[index];
-  String getChannelColor(int index) => _channelColors[index];
-  bool isChannelNameValid(int index) => _channelNameValid[index];
+  String getChannelName(int index) => _channels[index].name;
+  String getChannelColor(int index) => _channels[index].color;
+  bool isChannelNameValid(int index) => _channels[index].nameValid;
   void setChannelName(int index, String value) {
-    if (_channelNames[index] != value) {
-      _channelNames[index] = value;
-      _channelNameValid[index] = _validateChannelName(value);
-      notifyListeners();
-    }
+    _channels[index].setName(value);
   }
 
   void setChannelColor(int index, String value) {
-    if (_channelColors[index] != value) {
-      _channelColors[index] = value;
-      notifyListeners();
-    }
+    _channels[index].setColor(value);
   }
 
   ControllerSettingsViewModel({
@@ -103,28 +140,11 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
     overtempEnabled = NvsSettingEntry<bool>(true, notifyListeners, namespace: "protect", key: "ot.en");
     overtempCutoff = NvsSettingEntry<int>(65, notifyListeners, namespace: "protect", key: "ot.v");
 
-    // Initialize channel metadata from device info
+    // Initialize channel count setting from device info. Channel metadata is loaded from NVS.
     final info = super.lyfiDeviceInfo;
     channelCountSetting = NvsSettingEntry<int>(info.channelCount, notifyListeners, namespace: "led", key: "chcount");
 
-    channelCount = info.channelCountMax;
-    _channelNames = List<String>.generate(
-      channelCount,
-      (i) => i < info.channelCount ? info.channels[i].name : '',
-      growable: false,
-    );
-    _initialChannelNames = List<String>.from(_channelNames, growable: false);
-    _channelColors = List<String>.generate(
-      channelCount,
-      (i) => i < info.channelCount ? info.channels[i].color : '#FFFFFF',
-      growable: false,
-    );
-    _initialChannelColors = List<String>.from(_channelColors, growable: false);
-    _channelNameValid = List<bool>.generate(
-      channelCount,
-      (i) => _validateChannelName(_channelNames[i]),
-      growable: false,
-    );
+    maxChannelCount = info.channelCountMax;
 
     await _initSetting(
       pwmFreq,
@@ -171,6 +191,67 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
         channelCountSetting.key,
       ),
     );
+
+    final channelNames = List<String>.filled(maxChannelCount, '', growable: false);
+    final channelColors = List<String>.filled(maxChannelCount, '#FFFFFF', growable: false);
+    for (int channel = 0; channel < maxChannelCount; channel++) {
+      channelNames[channel] = await _loadChannelNameFromNvs(channel);
+      channelColors[channel] = await _loadChannelColorFromNvs(channel);
+    }
+
+    _channels = List<ChannelSettingsEntry>.generate(
+      maxChannelCount,
+      (i) => ChannelSettingsEntry(
+        index: i,
+        name: channelNames[i],
+        color: channelColors[i],
+        notifyListeners: notifyListeners,
+        validateName: _validateChannelName,
+      ),
+      growable: false,
+    );
+  }
+
+  String _defaultChannelName(int channel) => 'CH${channel + 1}';
+
+  Future<String> _loadChannelNameFromNvs(int channel) async {
+    final key = 'ch$channel.name';
+    final fallback = _defaultChannelName(channel);
+    try {
+      final exists = await this.borneoDeviceApi.factoryNvsExists(boundDevice!.device, 'led', key);
+      if (!exists) {
+        return fallback;
+      }
+
+      final value = await this.borneoDeviceApi.getFactoryNvsString(boundDevice!.device, 'led', key);
+      if (!_validateChannelName(value)) {
+        return fallback;
+      }
+      return value;
+    } catch (error, stackTrace) {
+      super.logger?.w('Failed to read factory NVS led/$key: $error', error: error, stackTrace: stackTrace);
+      return fallback;
+    }
+  }
+
+  Future<String> _loadChannelColorFromNvs(int channel) async {
+    final key = 'ch$channel.color';
+    const fallback = '#FFFFFF';
+    try {
+      final exists = await this.borneoDeviceApi.factoryNvsExists(boundDevice!.device, 'led', key);
+      if (!exists) {
+        return fallback;
+      }
+
+      final value = await this.borneoDeviceApi.getFactoryNvsString(boundDevice!.device, 'led', key);
+      if (value.trim().isEmpty) {
+        return fallback;
+      }
+      return value;
+    } catch (error, stackTrace) {
+      super.logger?.w('Failed to read factory NVS led/$key: $error', error: error, stackTrace: stackTrace);
+      return fallback;
+    }
   }
 
   bool _validateChannelName(String value) {
@@ -271,17 +352,26 @@ class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
     }
 
     // Channel metadata updates (name/color)
-    for (int ch = 0; ch < channelCount; ch++) {
-      final bool nameChanged = _channelNames[ch] != _initialChannelNames[ch];
-      final bool colorChanged = _channelColors[ch] != _initialChannelColors[ch];
-      if (nameChanged) {
-        await this.borneoDeviceApi.setFactoryNvsString(boundDevice!.device, "led", "ch$ch.name", _channelNames[ch]);
+    for (final channel in _channels) {
+      if (channel.nameChanged) {
+        await this.borneoDeviceApi.setFactoryNvsString(
+          boundDevice!.device,
+          "led",
+          "ch${channel.index}.name",
+          channel.name,
+        );
       }
-      if (colorChanged) {
-        await this.borneoDeviceApi.setFactoryNvsString(boundDevice!.device, "led", "ch$ch.color", _channelColors[ch]);
+      if (channel.colorChanged) {
+        await this.borneoDeviceApi.setFactoryNvsString(
+          boundDevice!.device,
+          "led",
+          "ch${channel.index}.color",
+          channel.color,
+        );
       }
-      _initialChannelNames[ch] = _channelNames[ch];
-      _initialChannelColors[ch] = _channelColors[ch];
+      if (channel.changed) {
+        channel.syncInitial();
+      }
     }
 
     await this.borneoDeviceApi.reboot(boundDevice!.device);

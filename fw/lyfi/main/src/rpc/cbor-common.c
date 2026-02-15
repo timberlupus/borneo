@@ -51,6 +51,7 @@ int cbor_value_get_led_color(CborValue* value, led_color_t color)
         return -EINVAL;
     }
 
+    memset(color, 0, sizeof(led_color_t));
     for (size_t ch = 0; ch < led_channel_count(); ch++) {
         int ch_value = 0;
         BO_TRY(cbor_value_get_int_checked(&array, &ch_value));
