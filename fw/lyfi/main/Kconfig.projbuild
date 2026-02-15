@@ -37,9 +37,9 @@ menu "Borneo LyFi"
             default 19000
             range 1000 19000
 
-        config LYFI_DIMMING_TIMEOUT_DEFAULT
-            int "DIMMING mode default timeout (seconds)"
-            default 300
+        config LYFI_DIMMING_TIMEOUT
+            int "DIMMING mode timeout (seconds)"
+            default 900
             range 0 3600
 
     endmenu

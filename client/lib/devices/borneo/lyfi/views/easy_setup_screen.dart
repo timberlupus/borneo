@@ -1,3 +1,4 @@
+import 'package:borneo_app/shared/widgets/screen_top_rounded_container.dart';
 import 'package:borneo_common/duration_ext.dart';
 import 'package:flutter/material.dart';
 
@@ -43,9 +44,8 @@ class EasySetupScreen extends StatelessWidget {
 
   Widget buildBody(BuildContext context) {
     return Column(
-      spacing: 24,
       mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: buildList(context),
     );
@@ -57,7 +57,8 @@ class EasySetupScreen extends StatelessWidget {
       editor.easySetupViewModel.endTime,
     ]);
     return [
-      Expanded(
+      AspectRatio(
+        aspectRatio: 1.0,
         child: TimePicker(
           drawInitHandlerOnTop: true,
           primarySectors: clockTimeFormat.value,
@@ -208,8 +209,12 @@ class EasySetupScreen extends StatelessWidget {
       Expanded(
         child: Selector<ScheduleEditorViewModel, bool>(
           selector: (_, editor) => editor.canEdit,
-          builder: (_, canEdit, _) =>
-              BrightnessSliderList(editor, disabled: !canEdit, padding: EdgeInsets.fromLTRB(0, 24, 0, 24)),
+          builder: (_, canEdit, _) => ScreenTopRoundedContainer(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: SingleChildScrollView(
+              child: BrightnessSliderList(editor, disabled: !canEdit, padding: EdgeInsets.fromLTRB(0, 24, 0, 24)),
+            ),
+          ),
         ),
       ),
     ];

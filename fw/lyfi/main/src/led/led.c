@@ -968,9 +968,6 @@ void dimming_state_entry()
     ESP_LOGI(TAG, "Entering dimming mode.");
 
     led_dimming_reset_timeout();
-    if (_led.settings.dimming_timeout_sec > 0) {
-        ESP_LOGI(TAG, "Dimming timeout set to %u seconds", _led.settings.dimming_timeout_sec);
-    }
 
     switch (_led.settings.mode) {
 
@@ -993,7 +990,7 @@ void dimming_state_entry()
 
 void dimming_state_run()
 {
-    if (_led.settings.dimming_timeout_sec > 0) {
+    if (CONFIG_LYFI_DIMMING_TIMEOUT > 0) {
         int64_t now_ms = bo_timer_uptime_ms();
         int64_t deadline_ms;
         portENTER_CRITICAL(&g_led_spinlock);
@@ -1112,10 +1109,7 @@ int32_t led_get_temporary_remaining()
 static inline void led_dimming_reset_timeout()
 {
     int64_t now_ms = bo_timer_uptime_ms();
-    uint16_t timeout_sec;
-    portENTER_CRITICAL(&g_led_spinlock);
-    timeout_sec = _led.settings.dimming_timeout_sec;
-    portEXIT_CRITICAL(&g_led_spinlock);
+    uint16_t timeout_sec = CONFIG_LYFI_DIMMING_TIMEOUT;
 
     if (timeout_sec > 0) {
         portENTER_CRITICAL(&g_led_spinlock);
@@ -1126,21 +1120,11 @@ static inline void led_dimming_reset_timeout()
 
 int led_set_dimming_timeout(uint32_t timeout_sec)
 {
-    portENTER_CRITICAL(&g_led_spinlock);
-    _led.settings.dimming_timeout_sec = timeout_sec;
-    portEXIT_CRITICAL(&g_led_spinlock);
-    BO_TRY(led_save_user_settings());
-    return 0;
+    // Dimming timeout is now fixed to CONFIG_LYFI_DIMMING_TIMEOUT
+    return -ENOTSUP;
 }
 
-uint32_t led_get_dimming_timeout()
-{
-    uint32_t timeout;
-    portENTER_CRITICAL(&g_led_spinlock);
-    timeout = _led.settings.dimming_timeout_sec;
-    portEXIT_CRITICAL(&g_led_spinlock);
-    return timeout;
-}
+uint32_t led_get_dimming_timeout() { return CONFIG_LYFI_DIMMING_TIMEOUT; }
 
 void led_temporary_state_entry()
 {

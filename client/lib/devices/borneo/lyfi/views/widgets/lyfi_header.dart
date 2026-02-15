@@ -4,7 +4,6 @@ import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 
 import '../../view_models/lyfi_view_model.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 
 /// Sliver AppBar for Lyfi device details, to be shared by Dashboard and Dimming screens.
 class LyfiAppBar extends StatelessWidget {
@@ -36,18 +35,6 @@ class LyfiAppBar extends StatelessWidget {
             IconButton(icon: const Icon(Icons.arrow_back), onPressed: isBusy ? null : onBack),
       ),
       actions: [
-        Selector<LyfiViewModel, LyfiMode>(
-          selector: (_, vm) => vm.mode,
-          builder: (context, mode, _) {
-            final modeIcon = switch (mode) {
-              LyfiMode.manual => Icons.bar_chart_outlined,
-              LyfiMode.scheduled => Icons.alarm_outlined,
-              LyfiMode.sun => Icons.wb_sunny_outlined,
-            };
-            return Icon(modeIcon, size: 24);
-          },
-        ),
-        const SizedBox(width: 8),
         Selector<LyfiViewModel, RssiLevel?>(
           selector: (_, vm) => vm.rssiLevel,
           builder: (content, rssi, _) => Center(

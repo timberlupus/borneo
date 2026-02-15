@@ -20,7 +20,12 @@ class ManualEditorView extends StatelessWidget {
       selector: (context, vm) => (canChangeColor: vm.canChangeColor, isInitialized: vm.isInitialized),
       builder: (context, props, _) {
         if (props.isInitialized) {
-          return BrightnessSliderList(context.read<ManualEditorViewModel>(), disabled: !props.canChangeColor);
+          return SingleChildScrollView(
+            child: Container(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              child: BrightnessSliderList(context.read<ManualEditorViewModel>(), disabled: !props.canChangeColor),
+            ),
+          );
         } else {
           return const SizedBox.shrink();
         }

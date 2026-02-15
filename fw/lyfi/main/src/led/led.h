@@ -106,8 +106,6 @@ struct led_user_settings {
 
     struct led_acclimation_settings acclimation;
 
-    uint16_t dimming_timeout_sec; ///< DIMMING mode timeout in seconds, 0 = disabled
-
     uint32_t flags; ///< The option flags
 };
 

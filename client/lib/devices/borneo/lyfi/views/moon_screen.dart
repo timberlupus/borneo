@@ -78,8 +78,12 @@ class MoonScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       Expanded(
                         child: Consumer<MoonViewModel>(
-                          builder: (context, vm, _) =>
-                              BrightnessSliderList(vm.editor, disabled: !vm.enabled || !vm.canEdit),
+                          builder: (context, vm, _) => SingleChildScrollView(
+                            child: Container(
+                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                              child: BrightnessSliderList(vm.editor, disabled: !vm.enabled || !vm.canEdit),
+                            ),
+                          ),
                         ),
                       ),
                     ],

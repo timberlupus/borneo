@@ -3,6 +3,7 @@ import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 import '../dimming_screen.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 
 class DashboardDimmingTile extends StatelessWidget {
   const DashboardDimmingTile({super.key});
@@ -50,7 +51,17 @@ class DashboardDimmingTile extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.tips_and_updates_outlined, size: 32, color: effectiveIconColor),
+                      Selector<LyfiViewModel, LyfiMode>(
+                        selector: (_, vm) => vm.mode,
+                        builder: (context, mode, _) {
+                          final modeIcon = switch (mode) {
+                            LyfiMode.manual => Icons.bar_chart_outlined,
+                            LyfiMode.scheduled => Icons.alarm_outlined,
+                            LyfiMode.sun => Icons.wb_sunny_outlined,
+                          };
+                          return Icon(modeIcon, size: 32, color: effectiveIconColor);
+                        },
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -60,6 +71,20 @@ class DashboardDimmingTile extends StatelessWidget {
                             Text(
                               context.translate('Dimming'),
                               style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor),
+                            ),
+                            Selector<LyfiViewModel, LyfiMode>(
+                              selector: (_, vm) => vm.mode,
+                              builder: (context, mode, _) {
+                                final modeText = switch (mode) {
+                                  LyfiMode.manual => context.translate('Manual'),
+                                  LyfiMode.scheduled => context.translate('Scheduled'),
+                                  LyfiMode.sun => context.translate('Sun Simulation'),
+                                };
+                                return Text(
+                                  modeText,
+                                  style: theme.textTheme.bodySmall?.copyWith(color: effectiveFgColor),
+                                );
+                              },
                             ),
                           ],
                         ),
