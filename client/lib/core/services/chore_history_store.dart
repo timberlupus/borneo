@@ -44,4 +44,9 @@ class ChoreHistoryStore {
       }
     }
   }
+
+  Future<bool> hasHistoryForChore(String choreId) async {
+    final snapshots = await _store.find(db, finder: Finder(filter: Filter.equals('choreId', choreId)));
+    return snapshots.isNotEmpty;
+  }
 }

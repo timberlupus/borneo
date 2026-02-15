@@ -61,6 +61,13 @@ class _ChoreCardContent extends StatefulWidget {
 class _ChoreCardContentState extends State<_ChoreCardContent> {
   bool _showProgress = false;
   Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.vm.init();
+  }
+
   @override
   void didUpdateWidget(covariant _ChoreCardContent oldWidget) {
     super.didUpdateWidget(oldWidget);

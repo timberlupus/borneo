@@ -5,4 +5,5 @@ abstract class IChoreManager implements IDisposable {
   List<AbstractChore> getAvailableChores();
   Future<void> executeChore(String choreId);
   Future<void> undoChore(String choreId);
+  Future<bool> hasHistoryForChore(String choreId);
 }

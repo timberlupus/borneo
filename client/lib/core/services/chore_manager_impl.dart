@@ -87,6 +87,11 @@ final class ChoreManagerImpl implements IChoreManager {
   }
 
   @override
+  Future<bool> hasHistoryForChore(String choreId) async {
+    return await _historyStore.hasHistoryForChore(choreId);
+  }
+
+  @override
   void dispose() {
     // do nothing
   }

@@ -30,6 +30,15 @@ class ChoreSummaryViewModel extends ChangeNotifier {
   String get name => chore.name;
   String get iconAssetPath => chore.iconAssetPath;
 
+  Future<void> init() async {
+    try {
+      _isActive = await _choreManager.hasHistoryForChore(chore.id);
+      notifyListeners();
+    } catch (e, st) {
+      _logger?.e('Failed to initialize chore state', error: e, stackTrace: st);
+    }
+  }
+
   Future<void> executeChore() async {
     if (_isBusy) return;
     _isBusy = true;
