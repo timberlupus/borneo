@@ -29,4 +29,4 @@ jobs:
 
     - name: Build LyFi Firmware
       working-directory: fw/lyfi
-      run: source /opt/esp/idf/export.sh && idf.py build -DPRODUCT_ID=${{ matrix.lyfi_product }} -DCMAKE_BUILD_TYPE=Release
+      run: . /opt/esp/idf/export.sh && idf.py build -DPRODUCT_ID=${{ matrix.lyfi_product }} -DCMAKE_BUILD_TYPE=Release
