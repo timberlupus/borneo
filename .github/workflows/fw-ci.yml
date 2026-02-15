@@ -18,7 +18,7 @@ jobs:
     container: 'espressif/idf:v5.5.2'
     strategy:
       matrix:
-        lyfi_product: [bst/ulva6, bst/blc06mk1, bst/c5devkitc1]
+        lyfi_product: [bst/ulva6, bst/blc06mk1]
 
     steps:
     - name: Checkout code
