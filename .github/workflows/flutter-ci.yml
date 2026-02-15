@@ -322,7 +322,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const tag = 'release-app-latest';
-            const ref = `tags/${tag}`;
+            const ref = `refs/tags/${tag}`;
             try {
               await github.rest.git.deleteRef({ owner: context.repo.owner, repo: context.repo.repo, ref });
               console.log(`Deleted existing tag ${tag}`);
