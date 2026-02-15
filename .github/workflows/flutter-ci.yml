@@ -304,7 +304,7 @@ jobs:
             echo "prerelease=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create GitHub Release
+      - name: Create Versionized GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: app-ce-v${{ needs.build-apk.outputs.version }}
@@ -315,3 +315,41 @@ jobs:
           files: |
             release-artifacts/borneo-app-ce-${{ needs.build-apk.outputs.version }}.apk
             release-artifacts/borneo-app-ce-${{ needs.build-windows.outputs.version }}-windows-x64.zip
+
+      - name: Create and push new latest tag
+        run: |
+          git tag -d release-app-latest || true
+          git tag release-app-latest
+          git push origin release-app-latest --force
+
+      - name: Remove previous release assets
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const tag = 'release-app-latest';
+            try {
+              const rel = await github.rest.repos.getReleaseByTag({ owner: context.repo.owner, repo: context.repo.repo, tag });
+              const release_id = rel.data.id;
+              const assets = await github.paginate(github.rest.repos.listReleaseAssets, { owner: context.repo.owner, repo: context.repo.repo, release_id });
+              for (const a of assets) {
+                console.log(`Deleting asset ${a.name} (${a.id})`);
+                await github.rest.repos.deleteReleaseAsset({ owner: context.repo.owner, repo: context.repo.repo, asset_id: a.id });
+              }
+              console.log('Previous release assets removed.');
+            } catch (err) {
+              if (err.status === 404) {
+                console.log('Release not found, nothing to delete.');
+              } else {
+                throw err;
+              }
+            }
+
+      - name: Create GitHub Latest App Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: release-app-latest
+          name: Latest App Release
+          draft: false
+          overwrite_files: true
+          files: release-artifacts/*
