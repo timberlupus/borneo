@@ -16,9 +16,8 @@ jobs:
   build-lyfi:
     runs-on: ubuntu-latest
     container: 'espressif/idf:v5.5.2'
-    strategy:
-      matrix:
-        lyfi_product: [bst/ulva6, bst/blc06mk1]
+    env:
+      CI_PRODUCTS: bst/ulva6 bst/blc06mk1
 
     steps:
     - name: Checkout code
@@ -31,4 +30,7 @@ jobs:
       working-directory: fw/lyfi
       run: |
         . /opt/esp/idf/export.sh
-        idf.py -DPRODUCT_ID=${{ matrix.lyfi_product }} -DCMAKE_BUILD_TYPE=Release build
+        for product in ${{ env.CI_PRODUCTS }}; do
+          rm -rf ./build
+          idf.py -DPRODUCT_ID=$product -DCMAKE_BUILD_TYPE=Release build
+        done
