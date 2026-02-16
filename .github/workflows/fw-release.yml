@@ -36,8 +36,8 @@ jobs:
           rm -rf ./build
           idf.py -DPRODUCT_ID=$product -DCMAKE_BUILD_TYPE=Release build
           idf.py merge-bin
+          python ../scripts/ci/generate_firmware_manifest.py . -o ../../artifacts
         done
-        python ../scripts/ci/generate_firmware_manifest.py . -o ../../artifacts
 
     - name: Generate Manifests file
       run: python fw/scripts/ci/merge_manifest.py ./artifacts -o ./artifacts/manifests.json
