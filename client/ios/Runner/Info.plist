@@ -52,14 +52,16 @@
         <key>NSLocationWhenInUseUsageDescription</key>
         <string>We need access to your location to display maps.</string>
         <key>NSLocalNetworkUsageDescription</key>
-        <string>We need access to the local network to discover and connect to Borneo devices.</string>
+        <string>We need access to the local network to discover and connect to Borneo-IoT devices.</string>
         <key>NSBonjourServices</key>
         <array>
             <string>_borneo._udp.</string>
         </array>
         <key>NSBluetoothAlwaysUsageDescription</key>
-        <string>We need access to Bluetooth to provision WiFi networks for Borneo devices.</string>
+        <string>We need access to Bluetooth to provision WiFi networks for Borneo-IoT devices.</string>
         <key>NSBluetoothPeripheralUsageDescription</key>
-        <string>We need access to Bluetooth peripherals to provision WiFi networks for Borneo devices.</string>
+        <string>We need access to Bluetooth peripherals to provision WiFi networks for Borneo-IoT devices.</string>
+        <key>NSPhotoLibraryUsageDescription</key>
+        <string>We need access to your photo library so you can choose scene images for device customization.</string>
     </dict>
 </plist>
