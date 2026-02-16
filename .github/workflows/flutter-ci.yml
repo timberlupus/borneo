@@ -322,7 +322,7 @@ jobs:
             await github.rest.git.createRef({ owner: context.repo.owner, repo: context.repo.repo, ref: fullRef, sha: context.sha });
             console.log(`Created tag ${tag} pointing to ${context.sha}`);
 
-      - name: Remove previous release assets
+      - name: Delete previous latest app release
         uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -330,16 +330,15 @@ jobs:
             const tag = 'release-app-latest';
             try {
               const rel = await github.rest.repos.getReleaseByTag({ owner: context.repo.owner, repo: context.repo.repo, tag });
-              const release_id = rel.data.id;
-              const assets = await github.paginate(github.rest.repos.listReleaseAssets, { owner: context.repo.owner, repo: context.repo.repo, release_id });
-              for (const a of assets) {
-                console.log(`Deleting asset ${a.name} (${a.id})`);
-                await github.rest.repos.deleteReleaseAsset({ owner: context.repo.owner, repo: context.repo.repo, asset_id: a.id });
-              }
-              console.log('Previous release assets removed.');
+              await github.rest.repos.deleteRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: rel.data.id,
+              });
+              console.log('Deleted previous latest app release.');
             } catch (err) {
               if (err.status === 404) {
-                console.log('Release not found, nothing to delete.');
+                console.log('Latest app release not found, nothing to delete.');
               } else {
                 throw err;
               }
