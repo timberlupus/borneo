@@ -74,9 +74,8 @@ static void _timer_callback_pid(void* args);
 
 #define PID_Q 100
 #define PID_PERIOD (1000)
-#define PID_INTEGRAL_RESET_THRESHOLD 3
-#define PID_INTEGRAL_MAX 20000
-#define PID_INTEGRAL_MIN -20000
+#define PID_INTEGRAL_MAX 10000
+#define PID_INTEGRAL_MIN -10000
 
 #define OUTPUT_MIN 10
 #define OUTPUT_MAX 100
@@ -355,7 +354,7 @@ uint8_t thermal_pid_step(int32_t current_temp)
     if (sat_lo && error < 0)
         allow_i = false;
 
-    if (abs(error) >= PID_INTEGRAL_RESET_THRESHOLD && allow_i) {
+    if (abs(error) > 1 && allow_i) {
         int64_t new_i = (int64_t)pid->integral + (int64_t)ki_eff * error;
         if (new_i > PID_INTEGRAL_MAX)
             new_i = PID_INTEGRAL_MAX;
@@ -380,7 +379,6 @@ uint8_t thermal_pid_step(int32_t current_temp)
         out = (uint8_t)(out_q / PID_Q);
     }
 
-    // Maximum change of 10% per second
     int32_t delta = (int32_t)out - pid->last_output;
     if (delta > PID_MAX_STEP)
         delta = PID_MAX_STEP;
