@@ -63,5 +63,7 @@
         <string>We need access to Bluetooth peripherals to provision WiFi networks for Borneo-IoT devices.</string>
         <key>NSPhotoLibraryUsageDescription</key>
         <string>We need access to your photo library so you can choose scene images for device customization.</string>
+        <key>ITSAppUsesNonExemptEncryption</key>
+        <false/>
     </dict>
 </plist>
