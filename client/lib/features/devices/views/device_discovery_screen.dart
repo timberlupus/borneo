@@ -71,131 +71,108 @@ class _DeviceDiscoveryContent extends StatelessWidget {
           ),
         ],
       ),
-      body: FutureBuilder<void>(
-        future: vm.initFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text(context.translate('Searching for devices...'), style: TextStyle(fontSize: 16)),
-                ],
+      body: Column(
+        children: [
+          if (!vm.isMobile)
+            Container(
+              color: Colors.amber.shade100,
+              padding: EdgeInsets.all(8),
+              width: double.infinity,
+              child: Text(
+                context.translate('Device provisioning is only available on iOS and Android.'),
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.black87),
               ),
-            );
-          }
-          return Column(
-            children: [
-              if (!vm.isMobile)
-                Container(
-                  color: Colors.amber.shade100,
-                  padding: EdgeInsets.all(8),
-                  width: double.infinity,
-                  child: Text(
-                    context.translate('Device provisioning is only available on iOS and Android.'),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.black87),
-                  ),
-                ),
-              ValueListenableBuilder<String?>(
-                valueListenable: vm.scanError,
-                builder: (context, error, child) {
-                  if (error == null) return SizedBox();
-                  return Container(
-                    color: Theme.of(context).colorScheme.errorContainer,
-                    padding: EdgeInsets.all(12),
-                    width: double.infinity,
-                    child: Row(
-                      children: [
-                        Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error, size: 20),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            error,
-                            style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 14),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => vm.scanError.value = null,
-                          child: Icon(Icons.close, color: Theme.of(context).colorScheme.error, size: 20),
-                        ),
-                      ],
+            ),
+          ValueListenableBuilder<String?>(
+            valueListenable: vm.scanError,
+            builder: (context, error, child) {
+              if (error == null) return SizedBox();
+              return Container(
+                color: Theme.of(context).colorScheme.errorContainer,
+                padding: EdgeInsets.all(12),
+                width: double.infinity,
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error, size: 20),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(error, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 14)),
                     ),
-                  );
-                },
-              ),
-              Expanded(
-                child: Selector<DeviceDiscoveryViewModel, (bool, List<DiscoverableDevice>)>(
-                  selector: (_, vm) => (vm.isDiscovering, vm.discoverableDevices.value),
-                  builder: (context, state, child) {
-                    final (isDiscovering, devices) = state;
+                    GestureDetector(
+                      onTap: () => vm.scanError.value = null,
+                      child: Icon(Icons.close, color: Theme.of(context).colorScheme.error, size: 20),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          Expanded(
+            child: Selector<DeviceDiscoveryViewModel, (bool, List<DiscoverableDevice>)>(
+              selector: (_, vm) => (vm.isDiscovering, vm.discoverableDevices.value),
+              builder: (context, state, child) {
+                final (isDiscovering, devices) = state;
 
-                    return Stack(
-                      children: [
-                        if (devices.isEmpty)
-                          ListView(
-                            children: [
-                              SizedBox(height: 60),
-                              Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.media_bluetooth_off,
-                                      size: 64,
-                                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.38),
-                                    ),
-                                    SizedBox(height: 16),
-                                    Text(
-                                      context.translate('No devices found'),
-                                      style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.outline),
-                                    ),
-                                  ],
+                return Stack(
+                  children: [
+                    if (devices.isEmpty)
+                      ListView(
+                        children: [
+                          SizedBox(height: 60),
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.media_bluetooth_off,
+                                  size: 64,
+                                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.38),
                                 ),
-                              ),
-                            ],
-                          )
-                        else
-                          ListView.separated(
-                            itemCount: devices.length,
-                            separatorBuilder: (context, index) => Divider(height: 1),
-                            itemBuilder: (context, index) {
-                              final vm = context.read<DeviceDiscoveryViewModel>();
-                              return _buildDeviceTile(context, vm, devices[index]);
-                            },
+                                SizedBox(height: 16),
+                                Text(
+                                  context.translate('No devices found'),
+                                  style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.outline),
+                                ),
+                              ],
+                            ),
                           ),
-                        if (isDiscovering)
-                          Container(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            child: Center(
-                              child: Card(
-                                child: Padding(
-                                  padding: EdgeInsets.all(24),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      CircularProgressIndicator(),
-                                      SizedBox(height: 16),
-                                      Text(
-                                        context.translate('Searching for devices...'),
-                                        style: TextStyle(fontSize: 16),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                        ],
+                      )
+                    else
+                      ListView.separated(
+                        itemCount: devices.length,
+                        separatorBuilder: (context, index) => Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final vm = context.read<DeviceDiscoveryViewModel>();
+                          return _buildDeviceTile(context, vm, devices[index]);
+                        },
+                      ),
+                    if (isDiscovering)
+                      Container(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        child: Center(
+                          child: Card(
+                            child: Padding(
+                              padding: EdgeInsets.all(24),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircularProgressIndicator(),
+                                  SizedBox(height: 16),
+                                  Text(context.translate('Searching for devices...'), style: TextStyle(fontSize: 16)),
+                                ],
                               ),
                             ),
                           ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        },
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -217,7 +194,7 @@ class _DeviceDiscoveryContent extends StatelessWidget {
       leading: _buildDeviceIcon(context, vm, deviceDesc),
       title: Text(deviceDesc.name),
       subtitle: Text(context.translate('Detected on network')),
-      trailing: Icon(Icons.chevron_right),
+      trailing: const Icon(Icons.add),
       onTap: () => _showAddDeviceSheet(context, vm, deviceDesc),
     );
   }
@@ -228,13 +205,13 @@ class _DeviceDiscoveryContent extends StatelessWidget {
         height: 48,
         width: 48,
         decoration: ShapeDecoration(
-          color: Theme.of(context).colorScheme.secondaryContainer,
+          color: Theme.of(context).colorScheme.tertiaryContainer,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(5.0),
-            side: BorderSide(width: 1.5, color: Theme.of(context).colorScheme.secondaryContainer),
+            side: BorderSide(width: 1.5, color: Theme.of(context).colorScheme.tertiaryContainer),
           ),
         ),
-        child: Icon(Icons.bluetooth, size: 24, color: Theme.of(context).colorScheme.onSecondaryContainer),
+        child: Icon(Icons.bluetooth, size: 32, color: Theme.of(context).colorScheme.onTertiaryContainer),
       ),
       title: Text(name),
       subtitle: Text(context.translate('Ready to provision')),

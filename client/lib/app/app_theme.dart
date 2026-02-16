@@ -388,6 +388,11 @@ class BorneoTheme {
     pageTransitionsTheme: PageTransitionsTheme(
       builders: {for (var platform in TargetPlatform.values) platform: const CupertinoPageTransitionsBuilder()},
     ),
+
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: colorScheme.surfaceContainerHighest,
+      surfaceTintColor: Colors.transparent,
+    ),
   );
 
   List<ExtendedColor> get extendedColors => [];

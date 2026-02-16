@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 
 class ConfirmationSheet extends StatelessWidget {
   final String message;
@@ -34,20 +35,21 @@ class ConfirmationSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               TextButton(
-                child: Text('Cancel'),
                 onPressed: () {
                   Navigator.of(context).pop();
                   if (cancelPressed != null) {
                     cancelPressed!();
                   }
                 },
+                child: Text(context.translate('Cancel')),
               ),
-              TextButton(
-                child: Text('Ok'),
+              const SizedBox(width: 8),
+              ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                   okPressed();
                 },
+                child: Text(context.translate('Ok')),
               ),
             ],
           ),

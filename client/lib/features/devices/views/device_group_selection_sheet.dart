@@ -26,6 +26,7 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
         <Widget>[
               if (effectiveExcludeGroupId != '')
                 ListTile(
+                  tileColor: Colors.transparent,
                   title: Text(context.translate('No group')),
                   onTap: () {
                     Navigator.pop(context);
@@ -36,7 +37,7 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
             .followedBy(
               filteredGroups.map((g) {
                 return ListTile(
-                  dense: true,
+                  tileColor: Colors.transparent,
                   title: Text(g.name),
                   onTap: () {
                     Navigator.pop(context);
@@ -51,7 +52,7 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Text(title, textAlign: TextAlign.center),
         ),
         if (subtitle != null)
@@ -65,16 +66,13 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
           ),
         const SizedBox(height: 8),
         Flexible(
-          child: Material(
-            color: Theme.of(context).colorScheme.surfaceContainer,
-            child: ListView.separated(
-              padding: const EdgeInsets.all(0),
-              shrinkWrap: true,
-              physics: const ClampingScrollPhysics(),
-              itemBuilder: (BuildContext context, int index) => tiles[index],
-              separatorBuilder: (BuildContext context, int index) => const Divider(indent: 16, height: 8, thickness: 1),
-              itemCount: tiles.length,
-            ),
+          child: ListView.separated(
+            padding: const EdgeInsets.all(0),
+            shrinkWrap: true,
+            physics: const ClampingScrollPhysics(),
+            itemBuilder: (BuildContext context, int index) => tiles[index],
+            separatorBuilder: (BuildContext context, int index) => const Divider(indent: 16, height: 8, thickness: 1),
+            itemCount: tiles.length,
           ),
         ),
         const SizedBox(height: 16),

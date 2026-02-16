@@ -81,8 +81,6 @@ class MoonEditorViewModel extends ChangeNotifier implements IEditor {
         final illum = moonCurve[i].brightness;
         _moonInstants[i].color[index] = (value * illum).round();
       }
-      print(_moonInstants);
-
       isChanged = true;
     }
     notifyListeners();
