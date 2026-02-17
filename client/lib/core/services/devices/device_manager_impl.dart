@@ -93,9 +93,7 @@ final class DeviceManagerImpl extends IDeviceManager {
 
         final currentScene = _sceneManager.current;
         _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
-        logger?.d('Fired CurrentSceneDevicesReloadedEvent for initial scene: ${currentScene.name}');
       }());
-
       logger?.i('DeviceManagerImpl has been initialized successfully.');
     } finally {
       _isInitialized = true;
@@ -277,7 +275,6 @@ final class DeviceManagerImpl extends IDeviceManager {
     // Fire event to notify that devices in current scene have been reloaded
     final currentScene = _sceneManager.current;
     _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
-    logger?.d('Fired CurrentSceneDevicesReloadedEvent after adding device: ${device.name}');
     return device;
   }
 
@@ -413,7 +410,6 @@ final class DeviceManagerImpl extends IDeviceManager {
     // Fire event to notify that devices for current scene have been reloaded
     final currentScene = _sceneManager.current;
     _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
-    logger?.d('Fired CurrentSceneDevicesReloadedEvent for scene: ${currentScene.name}');
   }
 
   /// Dispose all existing WotThings

@@ -3,7 +3,7 @@ import 'package:borneo_app/features/chores/models/actions/power_action.dart';
 import 'package:borneo_app/features/chores/models/actions/chore_action.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
-import 'package:borneo_kernel_abstractions/models/bound_device.dart';
+import 'package:lw_wot/thing.dart';
 
 import '../../../shared/models/base_entity.dart';
 
@@ -22,9 +22,8 @@ abstract class AbstractChore with BaseEntity {
   });
 
   bool checkAvailable(SceneEntity scene, IDeviceManager deviceManager) {
-    final devices = deviceManager.getBoundDevicesInCurrentScene();
-    final isAvailable = devices.any((d) => matchAllCapabilities(d, deviceManager));
-
+    final things = deviceManager.wotThingsInCurrentScene;
+    final isAvailable = things.any(matchAllCapabilities);
     return isAvailable;
   }
 
@@ -36,22 +35,20 @@ abstract class AbstractChore with BaseEntity {
 
   Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, IDeviceManager deviceManager);
 
-  bool matchAllCapabilities(BoundDevice bound, IDeviceManager deviceManager) {
-    return requiredCapabilities.every((capability) => _hasCapability(bound, capability, deviceManager));
+  bool matchAllCapabilities(WotThing thing) {
+    return requiredCapabilities.every((capability) => _hasCapability(thing, capability));
   }
 
-  bool _hasCapability(BoundDevice bound, String capability, IDeviceManager deviceManager) {
-    final wotThing = deviceManager.getWotThing(bound.device.id);
-
-    final types = wotThing.type;
+  bool _hasCapability(WotThing thing, String capability) {
+    final types = thing.type;
     if (types.contains(capability)) return true;
 
     // Check for capability-specific properties that indicate the capability
     switch (capability) {
       case "OnOffSwitch":
-        return wotThing.hasProperty("on");
-      case "LyfiDevice":
-        return wotThing.hasProperty("state") && wotThing.hasProperty("mode");
+        return thing.hasProperty("on");
+      case "LyfiThing":
+        return thing.hasProperty("state") && thing.hasProperty("mode");
       default:
         return false;
     }

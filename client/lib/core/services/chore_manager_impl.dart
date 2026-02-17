@@ -1,3 +1,4 @@
+import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/services/chore_manager.dart';
 import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/core/services/scene_manager.dart';
@@ -38,6 +39,11 @@ final class ChoreManagerImpl implements IChoreManager {
     this.logger,
   }) : _historyStore = ChoreHistoryStore(_db) {
     allChores.addAll([PowerOffAllChore(), FeedModeChore(), WaterChangeModeChore(), DryScapeModeChore()]);
+
+    // Subscribe to device reload events and publish a ChoresChangedEvent so UI can refresh
+    _globalBus.on<CurrentSceneDevicesReloadedEvent>().listen((event) {
+      _globalBus.fire(ChoresChangedEvent(event.scene));
+    });
   }
 
   @override

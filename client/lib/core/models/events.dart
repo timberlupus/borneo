@@ -49,3 +49,8 @@ class DeviceGroupDeletedEvent {
 }
 
 final class DeviceManagerReadyEvent {}
+
+final class ChoresChangedEvent {
+  final SceneEntity scene;
+  const ChoresChangedEvent(this.scene);
+}

@@ -42,7 +42,7 @@ class LyfiThing extends BorneoThing implements WotWriteGuard, WotActionGuard {
 
   LyfiThing({required this.kernel, required this.deviceId, required super.title, this.logger})
     : deviceEvents = DeviceEventBus(),
-      super(id: deviceId, type: ["OnOffSwitch", "Light"], description: "Lyfi LED lighting device") {
+      super(id: deviceId, type: ["OnOffSwitch", "LyfiThing", "Light"], description: "Lyfi LED lighting device") {
     _createPropertiesWithDefaults();
     _createActions();
     _setupKernelEventSubscriptions();

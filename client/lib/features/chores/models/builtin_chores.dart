@@ -15,14 +15,13 @@ final class PowerOffAllChore extends AbstractBuiltinChore {
   @override
   Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, IDeviceManager deviceManager) async {
     final steps = <PowerAction>[];
-    for (final bound in deviceManager.boundDevices) {
-      final wotThing = deviceManager.getWotThing(bound.device.id);
+    for (final wotThing in deviceManager.wotThingsInCurrentScene) {
       final onValue = wotThing.getProperty("on");
       if (onValue != null) {
         final prevState = onValue as bool;
         if (prevState) {
           wotThing.setProperty("on", false);
-          steps.add(PowerAction(deviceId: bound.device.id, prevState: prevState));
+          steps.add(PowerAction(deviceId: wotThing.id, prevState: prevState));
         }
       }
     }
