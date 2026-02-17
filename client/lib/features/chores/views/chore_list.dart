@@ -39,10 +39,6 @@ class _ChoreListState extends State<ChoreList> {
         selectedSceneId = scenesVm.scenes.firstWhere((s) => s.isSelected).id;
       } catch (_) {}
     }
-    final shouldShowLoading = state.isLoading && state.chores.isEmpty;
-    final shouldShowSceneLoading = scenesVm?.isLoading == true;
-    final showLoading = shouldShowLoading || shouldShowSceneLoading;
-
     return SliverToBoxAdapter(
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -51,24 +47,8 @@ class _ChoreListState extends State<ChoreList> {
           children: [
             Text(context.translate('Chores'), style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                switchInCurve: Curves.easeIn,
-                switchOutCurve: Curves.easeOut,
-                child: showLoading
-                    ? SizedBox(
-                        key: const ValueKey('scene_loading_text'),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 32),
-                          child: Center(child: _FlowingLoadingText()),
-                        ),
-                      )
-                    : _buildContent(context, state, selectedSceneId),
-              ),
-            ),
+            // Always render the chores content; remove the loading animation.
+            _buildContent(context, state, selectedSceneId),
           ],
         ),
       ),
@@ -124,34 +104,21 @@ class _ChoreListState extends State<ChoreList> {
     }
     return Column(
       children: [
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 500),
-          child: GridView.builder(
-            key: ValueKey(chores.length),
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16.0,
-              mainAxisSpacing: 16.0,
-            ),
-            padding: EdgeInsets.zero,
-            itemCount: chores.length,
-            itemBuilder: (_, index) {
-              final chore = chores[index];
-              return TweenAnimationBuilder<double>(
-                key: ValueKey('${selectedSceneId ?? 'none'}-${chore.runtimeType}-${chore.hashCode}'),
-                tween: Tween(begin: 0, end: 1),
-                duration: Duration(milliseconds: 300 + index * 40),
-                curve: Curves.easeOutCubic,
-                builder: (context, value, child) => Opacity(
-                  opacity: value,
-                  child: Transform.translate(offset: Offset(0, (1 - value) * 16), child: child),
-                ),
-                child: ChoreCard(chore),
-              );
-            },
+        GridView.builder(
+          key: ValueKey(chores.length),
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16.0,
+            mainAxisSpacing: 16.0,
           ),
+          padding: EdgeInsets.zero,
+          itemCount: chores.length,
+          itemBuilder: (_, index) {
+            final chore = chores[index];
+            return ChoreCard(chore);
+          },
         ),
         if (vm.error != null && chores.isNotEmpty)
           Container(
@@ -174,88 +141,6 @@ class _ChoreListState extends State<ChoreList> {
           ),
       ],
     );
-  }
-}
-
-class _FlowingLoadingText extends StatefulWidget {
-  const _FlowingLoadingText();
-
-  @override
-  State<_FlowingLoadingText> createState() => _FlowingLoadingTextState();
-}
-
-class _FlowingLoadingTextState extends State<_FlowingLoadingText> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final baseColor = theme.colorScheme.onSurface.withValues(alpha: 0.45);
-    final highlight = theme.colorScheme.onSurface.withValues(alpha: 0.9);
-
-    return Semantics(
-      label: context.translate('Loading chores'),
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(
-                strokeWidth: 2.0,
-                valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
-              ),
-              const SizedBox(width: 12),
-              ShaderMask(
-                shaderCallback: (bounds) {
-                  final width = bounds.width;
-                  final animationValue = _controller.value;
-                  final gradientWidth = width * 0.35;
-                  final dx = (width + gradientWidth) * animationValue - gradientWidth;
-
-                  return LinearGradient(
-                    colors: [baseColor, highlight, baseColor],
-                    stops: const [0.0, 0.5, 1.0],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    transform: GradientTranslation(dx),
-                  ).createShader(bounds);
-                },
-                blendMode: BlendMode.srcIn,
-                child: Text(
-                  context.translate('Loading...'),
-                  style: (theme.textTheme.titleSmall ?? theme.textTheme.bodyLarge)?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class GradientTranslation extends GradientTransform {
-  final double dx;
-  const GradientTranslation(this.dx);
-
-  @override
-  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
-    return Matrix4.translationValues(dx, 0.0, 0.0);
   }
 }
 
