@@ -384,9 +384,12 @@ class BorneoTheme {
     dividerTheme: DividerThemeData(color: colorScheme.outlineVariant),
     listTileTheme: ListTileThemeData(tileColor: colorScheme.surfaceContainer),
 
-    // Material page transition is childish
+    // Prefer Material page transitions by default; use Cupertino on iOS
     pageTransitionsTheme: PageTransitionsTheme(
-      builders: {for (var platform in TargetPlatform.values) platform: const CupertinoPageTransitionsBuilder()},
+      builders: {
+        for (var platform in TargetPlatform.values) platform: const FadeUpwardsPageTransitionsBuilder(),
+        TargetPlatform.iOS: const CupertinoPageTransitionsBuilder(),
+      },
     ),
 
     bottomSheetTheme: BottomSheetThemeData(

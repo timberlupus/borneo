@@ -76,23 +76,26 @@ class BottomSheetPicker extends StatelessWidget {
               separatorBuilder: (context, index) => Divider(height: 1, indent: 20, endIndent: 20),
               itemBuilder: (context, index) {
                 final isSelected = index == selectedIndex;
-                return InkWell(
-                  onTap: () => onItemSelected(index),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            items[index],
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              color: isSelected ? colorScheme.primary : colorScheme.onSurface,
-                              fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => onItemSelected(index),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              items[index],
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+                                fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                              ),
                             ),
                           ),
-                        ),
-                        if (isSelected) Icon(Icons.check, color: colorScheme.primary, size: 20),
-                      ],
+                          if (isSelected) Icon(Icons.check, color: colorScheme.primary, size: 20),
+                        ],
+                      ),
                     ),
                   ),
                 );

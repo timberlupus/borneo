@@ -62,7 +62,7 @@ class _DeviceDiscoveryContent extends StatelessWidget {
                 );
               } else {
                 return IconButton(
-                  icon: Icon(Icons.refresh),
+                  icon: const Icon(Icons.refresh),
                   onPressed: () => ctx.read<DeviceDiscoveryViewModel>().startDiscovery(),
                   tooltip: context.translate('Refresh'),
                 );
@@ -75,19 +75,19 @@ class _DeviceDiscoveryContent extends StatelessWidget {
         children: [
           if (!vm.isMobile)
             Container(
-              color: Colors.amber.shade100,
+              color: Theme.of(context).colorScheme.secondaryContainer,
               padding: EdgeInsets.all(8),
               width: double.infinity,
               child: Text(
                 context.translate('Device provisioning is only available on iOS and Android.'),
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.black87),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer),
               ),
             ),
           ValueListenableBuilder<String?>(
             valueListenable: vm.scanError,
             builder: (context, error, child) {
-              if (error == null) return SizedBox();
+              if (error == null) return const SizedBox();
               return Container(
                 color: Theme.of(context).colorScheme.errorContainer,
                 padding: EdgeInsets.all(12),
@@ -97,11 +97,19 @@ class _DeviceDiscoveryContent extends StatelessWidget {
                     Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error, size: 20),
                     SizedBox(width: 12),
                     Expanded(
-                      child: Text(error, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 14)),
+                      child: Text(
+                        error,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.error),
+                      ),
                     ),
-                    GestureDetector(
-                      onTap: () => vm.scanError.value = null,
-                      child: Icon(Icons.close, color: Theme.of(context).colorScheme.error, size: 20),
+                    IconButton(
+                      onPressed: () => vm.scanError.value = null,
+                      icon: Icon(Icons.close, color: Theme.of(context).colorScheme.error, size: 20),
+                      tooltip: context.translate('Close'),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(minWidth: 40, minHeight: 40),
                     ),
                   ],
                 ),
@@ -119,7 +127,7 @@ class _DeviceDiscoveryContent extends StatelessWidget {
                     if (devices.isEmpty)
                       ListView(
                         children: [
-                          SizedBox(height: 60),
+                          const SizedBox(height: 60),
                           Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -129,10 +137,12 @@ class _DeviceDiscoveryContent extends StatelessWidget {
                                   size: 64,
                                   color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.38),
                                 ),
-                                SizedBox(height: 16),
+                                const SizedBox(height: 16),
                                 Text(
                                   context.translate('No devices found'),
-                                  style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.outline),
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.outline),
                                 ),
                               ],
                             ),
@@ -154,13 +164,16 @@ class _DeviceDiscoveryContent extends StatelessWidget {
                         child: Center(
                           child: Card(
                             child: Padding(
-                              padding: EdgeInsets.all(24),
+                              padding: const EdgeInsets.all(24),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  CircularProgressIndicator(),
-                                  SizedBox(height: 16),
-                                  Text(context.translate('Searching for devices...'), style: TextStyle(fontSize: 16)),
+                                  const CircularProgressIndicator(),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    context.translate('Searching for devices...'),
+                                    style: Theme.of(context).textTheme.bodyLarge,
+                                  ),
                                 ],
                               ),
                             ),
@@ -215,7 +228,7 @@ class _DeviceDiscoveryContent extends StatelessWidget {
       ),
       title: Text(name),
       subtitle: Text(context.translate('Ready to provision')),
-      trailing: Icon(Icons.chevron_right),
+      trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         if (vm.isMobile) {
           final result = await Navigator.push(
