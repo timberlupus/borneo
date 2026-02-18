@@ -9,7 +9,7 @@ import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 import 'package:borneo_app/routes/app_routes.dart';
 import 'package:borneo_app/features/devices/view_models/group_edit_view_model.dart';
 import 'package:borneo_app/features/devices/view_models/group_view_model.dart';
-import 'package:borneo_app/features/devices/views/device_list_tile.dart';
+import 'package:borneo_app/features/devices/views/device_card.dart';
 import 'package:borneo_app/features/devices/view_models/grouped_devices_view_model.dart';
 import 'package:borneo_app/devices/view_models/abstract_device_summary_view_model.dart';
 import 'package:borneo_app/features/devices/widgets/empty_groups_widget.dart';
@@ -32,44 +32,6 @@ class GroupSnapshot {
 }
 
 enum PlusMenuIndexes { addGroup, addDevice }
-
-class InGroupDeviceListView extends StatelessWidget {
-  const InGroupDeviceListView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Selector<GroupViewModel, int>(
-      selector: (_, gvm) => gvm.devices.length,
-      shouldRebuild: (previous, current) => previous != current,
-      builder: (context, deviceCount, child) {
-        if (deviceCount == 0) {
-          return const SizedBox.shrink();
-        }
-        return ListView.separated(
-          padding: const EdgeInsets.all(0),
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: deviceCount,
-          separatorBuilder: (context, index) =>
-              Divider(height: 1, thickness: 1, indent: 72, color: Theme.of(context).colorScheme.surface),
-          itemBuilder: (context, index) {
-            return Selector<GroupViewModel, AbstractDeviceSummaryViewModel>(
-              selector: (_, gvm) => gvm.devices[index],
-              shouldRebuild: (previous, current) => previous != current,
-              builder: (context, deviceVM, child) {
-                return ChangeNotifierProvider.value(
-                  key: ValueKey(deviceVM.deviceEntity.id),
-                  value: deviceVM,
-                  child: DeviceTile(index == deviceCount - 1),
-                );
-              },
-            );
-          },
-        );
-      },
-    );
-  }
-}
 
 class NoDataHintView extends StatelessWidget {
   const NoDataHintView({super.key});
@@ -271,48 +233,80 @@ class DevicesScreen extends StatelessWidget {
   Widget _buildGroupSection(BuildContext context, GroupViewModel g) {
     return ChangeNotifierProvider<GroupViewModel>.value(
       value: g,
-      builder: (context, child) => Selector<GroupViewModel, ({String name, bool isEmpty, bool isDummy, bool isBusy})>(
-        selector: (_, gvm) => (name: gvm.name, isEmpty: gvm.isEmpty, isDummy: gvm.isDummy, isBusy: gvm.isBusy),
-        builder: (context, groupData, child) {
-          if (groupData.isDummy && groupData.isEmpty) {
-            return const SizedBox(height: 0);
-          } else {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Container(
-                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                  height: 48,
-                  child: Row(
-                    children: [
-                      Text(
-                        groupData.name,
-                        textAlign: TextAlign.start,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+      builder: (context, child) =>
+          Selector<GroupViewModel, ({String name, bool isEmpty, bool isDummy, bool isBusy, int deviceCount})>(
+            selector: (_, gvm) => (
+              name: gvm.name,
+              isEmpty: gvm.isEmpty,
+              isDummy: gvm.isDummy,
+              isBusy: gvm.isBusy,
+              deviceCount: gvm.devices.length,
+            ),
+            builder: (context, groupData, child) {
+              if (groupData.isDummy && groupData.isEmpty) {
+                return const SizedBox(height: 0);
+              }
+              final crossAxisCount = (MediaQuery.sizeOf(context).width / 180).clamp(2, 4).toInt();
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Group header
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    height: 48,
+                    child: Row(
+                      children: [
+                        Text(
+                          groupData.name,
+                          textAlign: TextAlign.start,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
                         ),
-                      ),
-                      const Spacer(),
-                      if (!groupData.isDummy)
-                        IconButton(
-                          icon: const Icon(Icons.edit, size: 24),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                          constraints: null,
-                          onPressed: groupData.isDummy || groupData.isBusy
-                              ? null
-                              : () => _showEditGroupPage(context, g.model),
-                        ),
-                    ],
+                        const Spacer(),
+                        if (!groupData.isDummy)
+                          IconButton(
+                            icon: const Icon(Icons.edit, size: 24),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                            constraints: null,
+                            onPressed: groupData.isDummy || groupData.isBusy
+                                ? null
+                                : () => _showEditGroupPage(context, g.model),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                Material(color: Theme.of(context).colorScheme.surfaceContainer, child: const InGroupDeviceListView()),
-              ],
-            );
-          }
-        },
-      ),
+                  // Device card grid
+                  GridView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      childAspectRatio: 1.0,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemCount: groupData.deviceCount,
+                    itemBuilder: (context, index) {
+                      return Selector<GroupViewModel, AbstractDeviceSummaryViewModel>(
+                        selector: (_, gvm) => gvm.devices[index],
+                        shouldRebuild: (previous, current) => previous != current,
+                        builder: (context, deviceVM, _) {
+                          return ChangeNotifierProvider.value(
+                            key: ValueKey(deviceVM.deviceEntity.id),
+                            value: deviceVM,
+                            child: const DeviceCard(),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
     );
   }
 

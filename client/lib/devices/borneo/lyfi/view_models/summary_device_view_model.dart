@@ -8,6 +8,8 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
   bool _disposed = false;
   final ValueNotifier<LyfiState?> ledState = ValueNotifier(null);
   final ValueNotifier<LyfiMode?> ledMode = ValueNotifier(null);
+  final ValueNotifier<List<int>?> channelBrightness = ValueNotifier(null);
+  final ValueNotifier<LyfiDeviceInfo?> lyfiDeviceInfo = ValueNotifier(null);
 
   LyfiSummaryDeviceViewModel(
     super.deviceEntity,
@@ -19,6 +21,8 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
     _syncFromThing();
     wotThing?.addSubscriber(_onStateChanged);
     wotThing?.addSubscriber(_onModeChanged);
+    wotThing?.addSubscriber(_onColorChanged);
+    wotThing?.addSubscriber(_onDeviceInfoChanged);
   }
 
   @override
@@ -26,8 +30,12 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
     if (!_disposed) {
       wotThing?.removeSubscriber(_onStateChanged);
       wotThing?.removeSubscriber(_onModeChanged);
+      wotThing?.removeSubscriber(_onColorChanged);
+      wotThing?.removeSubscriber(_onDeviceInfoChanged);
       ledState.dispose();
       ledMode.dispose();
+      channelBrightness.dispose();
+      lyfiDeviceInfo.dispose();
       super.dispose();
       _disposed = true;
     }
@@ -49,13 +57,31 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
     }
   }
 
+  void _onColorChanged(WotMessage msg) {
+    final color = wotThing?.getProperty<List<int>>('color');
+    if (color != null) {
+      channelBrightness.value = List<int>.from(color);
+    }
+  }
+
+  void _onDeviceInfoChanged(WotMessage msg) {
+    final info = wotThing?.getProperty<LyfiDeviceInfo>('lyfiDeviceInfo');
+    if (info != null) {
+      lyfiDeviceInfo.value = info;
+    }
+  }
+
   @override
   void onWotThingChanged(WotThing? oldThing, WotThing? newThing) {
     super.onWotThingChanged(oldThing, newThing);
     oldThing?.removeSubscriber(_onStateChanged);
     oldThing?.removeSubscriber(_onModeChanged);
+    oldThing?.removeSubscriber(_onColorChanged);
+    oldThing?.removeSubscriber(_onDeviceInfoChanged);
     newThing?.addSubscriber(_onStateChanged);
     newThing?.addSubscriber(_onModeChanged);
+    newThing?.addSubscriber(_onColorChanged);
+    newThing?.addSubscriber(_onDeviceInfoChanged);
     _syncFromThing();
   }
 
@@ -70,6 +96,16 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
     if (modeValue != null) {
       final mode = LyfiMode.fromString(modeValue as String);
       ledMode.value = mode;
+    }
+
+    final color = wotThing?.getProperty<List<int>>('color');
+    if (color != null) {
+      channelBrightness.value = List<int>.from(color);
+    }
+
+    final info = wotThing?.getProperty<LyfiDeviceInfo>('lyfiDeviceInfo');
+    if (info != null) {
+      lyfiDeviceInfo.value = info;
     }
   }
 }

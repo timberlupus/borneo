@@ -24,6 +24,10 @@ abstract class DeviceModuleMetadata {
   createSummaryVM;
   final Future<WotThing> Function(DeviceEntity, IDeviceManager, {Logger? logger}) createWotThing;
 
+  /// Optional: supply a custom center widget for the device card.
+  /// When null the card falls back to [deviceIconBuilder].
+  final Widget Function(BuildContext context, AbstractDeviceSummaryViewModel vm)? summaryContentBuilder;
+
   const DeviceModuleMetadata({
     required this.id,
     required this.name,
@@ -35,5 +39,6 @@ abstract class DeviceModuleMetadata {
     required this.secondaryStatesBuilder,
     required this.createSummaryVM,
     required this.createWotThing,
+    this.summaryContentBuilder,
   });
 }
