@@ -111,11 +111,11 @@ async def demonstrate_ota_usage():
         
         # Command line usage
         print("🛠  Command Line Usage:")
-        print(f"# Update firmware:")
-        print(f"python examples/ota_update.py {device_url} {firmware_file}")
-        print(f"")
-        print(f"# Check status only:")
-        print(f"python examples/ota_update.py {device_url}")
+        print(f"# Update firmware (CLI):")
+        print(f"bocli lota {device_url} {firmware_file}")
+        print("")
+        print(f"# Check status only (CLI):")
+        print(f"bocli lota {device_url} --status-only")
         print()
         
         print("✅ All examples demonstrated successfully!")

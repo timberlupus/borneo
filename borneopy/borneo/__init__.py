@@ -24,5 +24,6 @@ class ScheduleEntry:
 from .esptouch import EspTouch
 from .lyfi import LyfiCoapClient, LedState
 from .device import AbstractBorneoDeviceCoapClient
+from .coap_ota import CoAPFirmwareUpdater, perform_coap_ota
 
-__all__ = ['EspTouch', 'LyfiCoapClient', 'AbstractBorneoDeviceCoapClient', 'LedState', 'LyfiInfo', 'ThermalSettings', 'ScheduleEntry']
+__all__ = ['EspTouch', 'LyfiCoapClient', 'AbstractBorneoDeviceCoapClient', 'LedState', 'LyfiInfo', 'ThermalSettings', 'ScheduleEntry', 'CoAPFirmwareUpdater', 'perform_coap_ota']

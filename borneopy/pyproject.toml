@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "borneoiot"
-version = "0.4.12"
+version = "0.4.13"
 description = "A open-source Python client library for devices under the Borneo-IoT Project"
 readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.6"
+requires-python = ">=3.10"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 
@@ -17,6 +17,7 @@ authors = [
 
 classifiers = [
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
   "Operating System :: OS Independent",
 ]
 
@@ -24,10 +25,15 @@ dependencies = [
   "aiocoap>=0.4.12",
   "cbor2>=5.8.0",
   "aiofiles",
+  "typing-extensions>=4.3.0",
+  "zeroconf==0.148.0",
 ]
 
 [project.urls]
 Homepage = "https://www.borneoiot.com"
+
+[project.scripts]
+bocli = "borneo.cli:run"
 
 [tool.setuptools.packages.find]
 where = ["."]
