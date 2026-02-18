@@ -32,12 +32,21 @@ class GroupViewModel extends BaseViewModel with ViewModelEventBusMixin {
     if (existingIndex == -1) {
       _devices = [..._devices, device];
     } else {
-      final existingDevice = _devices[existingIndex];
-      if (!existingDevice.isDisposed) {
-        existingDevice.dispose();
-      }
+      // Replace the existing VM in the list first so the UI can update and
+      // detach any listeners from the old VM. Dispose the old VM later to
+      // avoid `ValueNotifier`-after-dispose errors (widgets may still be
+      // listening during the current frame).
+      final oldDevice = _devices[existingIndex];
       _devices = [..._devices];
       _devices[existingIndex] = device;
+
+      // Defer disposal to the next microtask/frame so widgets have a chance
+      // to remove their listeners from the old ValueNotifiers first.
+      Future.microtask(() {
+        if (!oldDevice.isDisposed) {
+          oldDevice.dispose();
+        }
+      });
     }
     _updateModified();
     notifyListeners();
