@@ -15,7 +15,7 @@ class MoonRunningChart extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
       child: LyfiTimeLineChart(
-        lineBarsData: buildLineData(lyfiBrightnessMax.toDouble()),
+        lineBarsData: buildLineData(kLyfiBrightnessMax.toDouble()),
         minX: moonInstants.isNotEmpty ? moonInstants.first.instant.inSeconds.toDouble() : 0,
         maxX: moonInstants.isNotEmpty ? moonInstants.last.instant.inSeconds.toDouble() : 24 * 3600,
         minY: 0,

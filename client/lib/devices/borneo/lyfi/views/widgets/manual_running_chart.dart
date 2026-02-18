@@ -32,7 +32,7 @@ class ManualRunningChart extends StatelessWidget {
     // Define the full (100%) gradient as: lightStart -> primaryColor (darker).
     // For current value (x%), only show 0..x% of that gradient: lightStart -> colorAt(x%).
     final lightStart = Color.lerp(primaryColor, Colors.white, 0.7)!; // lighter start
-    final double fraction = (y / lyfiBrightnessMax).clamp(0.0, 1.0).toDouble();
+    final double fraction = (y / kLyfiBrightnessMax).clamp(0.0, 1.0).toDouble();
     final currentEndColor = Color.lerp(lightStart, primaryColor, fraction)!;
     return BarChartGroupData(
       x: x,
@@ -50,7 +50,7 @@ class ManualRunningChart extends StatelessWidget {
           backDrawRodData: BackgroundBarChartRodData(
             show: true,
             fromY: 0,
-            toY: lyfiBrightnessMax.toDouble(),
+            toY: kLyfiBrightnessMax.toDouble(),
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
           ),
         ),

@@ -46,7 +46,7 @@ class ScheduleRunningChart extends StatelessWidget {
             minX: minX,
             maxX: maxX,
             minY: 0,
-            maxY: lyfiBrightnessMax.toDouble(),
+            maxY: kLyfiBrightnessMax.toDouble(),
             currentTime: Duration(hours: clock.hour, minutes: clock.minute, seconds: clock.second),
             allowZoom: true,
             maxScale: maxScale,

@@ -157,7 +157,7 @@ class _LyfiBrightnessChart extends StatelessWidget {
   Widget _buildSingleChannelGauge(BuildContext context, int channelCount) {
     final ch = deviceInfo.channels[0];
     final value = brightness[0];
-    final fraction = (value / lyfiBrightnessMax).clamp(0.0, 1.0).toDouble();
+    final fraction = (value / kLyfiBrightnessMax).clamp(0.0, 1.0).toDouble();
     final pct = (fraction * 100).round();
     final primaryColor = HexColor.fromHex(ch.color);
     final trackColor = Theme.of(context).colorScheme.surfaceContainerLow;
@@ -256,7 +256,7 @@ class _LyfiBrightnessChart extends StatelessWidget {
               backDrawRodData: BackgroundBarChartRodData(
                 show: true,
                 fromY: 0,
-                toY: lyfiBrightnessMax.toDouble(),
+                toY: kLyfiBrightnessMax.toDouble(),
                 color: barBackColor,
               ),
             ),
@@ -268,7 +268,7 @@ class _LyfiBrightnessChart extends StatelessWidget {
     return BarChart(
       BarChartData(
         barGroups: groups,
-        maxY: lyfiBrightnessMax.toDouble(),
+        maxY: kLyfiBrightnessMax.toDouble(),
         groupsSpace: channelCount > 6 ? 4 : 8,
         titlesData: FlTitlesData(
           show: true,
@@ -297,8 +297,9 @@ class _LyfiBrightnessChart extends StatelessWidget {
         ),
         borderData: FlBorderData(show: false),
         gridData: const FlGridData(show: false),
-        barTouchData: BarTouchData(enabled: false),
+        barTouchData: const BarTouchData(enabled: false),
       ),
+      duration: const Duration(seconds: 1),
     );
   }
 }

@@ -19,7 +19,7 @@ class BrightnessSliderListTile extends StatelessWidget {
     required this.color,
     this.disabled = false,
     this.min = 0,
-    this.max = lyfiBrightnessMax,
+    this.max = kLyfiBrightnessMax,
     this.trailing,
     required this.onChanged,
   });

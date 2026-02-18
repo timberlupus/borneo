@@ -9,7 +9,7 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/material.dart';
 
 abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
-  final AsyncRateLimiter _colorChangeRateLimiter = AsyncRateLimiter(interval: localDimmingTrackingInterval);
+  final AsyncRateLimiter _colorChangeRateLimiter = AsyncRateLimiter(interval: kLocalDimmingTrackingInterval);
   AsyncRateLimiter get colorChangeRateLimiter => _colorChangeRateLimiter;
 
   final List<ValueNotifier<int>> _channels;

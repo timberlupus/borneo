@@ -20,7 +20,7 @@ class BrightnessSliderList<TEditor extends IEditor> extends StatelessWidget {
         valueListenable: editor.channels[index],
         builder: (context, channelValue, child) => BrightnessSliderListTile(
           channelName: channelInfo.name,
-          max: lyfiBrightnessMax,
+          max: kLyfiBrightnessMax,
           min: 0,
           value: channelValue,
           color: HexColor.fromHex(channelInfo.color),
@@ -38,7 +38,7 @@ class BrightnessSliderList<TEditor extends IEditor> extends StatelessWidget {
               ),
               SizedBox(height: 4),
               Text(
-                '${(channelValue / lyfiBrightnessMax * 100.0).toStringAsFixed(1).padLeft(5, '\u2007')}%',
+                '${(channelValue / kLyfiBrightnessMax * 100.0).toStringAsFixed(1).padLeft(5, '\u2007')}%',
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(fontFeatures: [FontFeature.tabularFigures()]),
               ),
             ],

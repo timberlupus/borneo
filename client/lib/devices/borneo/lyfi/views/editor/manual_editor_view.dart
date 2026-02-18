@@ -53,7 +53,7 @@ class ManualEditorView extends StatelessWidget {
     // Use a compressed gradient where small values remain light.
     // Full gradient (100%) is lightStart -> primaryColor; for x%, show only 0..x%.
     final lightStart = Color.lerp(primaryColor, Colors.white, 0.7)!;
-    final double fraction = (y / lyfiBrightnessMax).clamp(0.0, 1.0).toDouble();
+    final double fraction = (y / kLyfiBrightnessMax).clamp(0.0, 1.0).toDouble();
     final currentEndColor = Color.lerp(lightStart, primaryColor, fraction)!;
     return BarChartGroupData(
       x: x,
@@ -70,7 +70,7 @@ class ManualEditorView extends StatelessWidget {
           backDrawRodData: BackgroundBarChartRodData(
             show: true,
             fromY: 0,
-            toY: lyfiBrightnessMax.toDouble(),
+            toY: kLyfiBrightnessMax.toDouble(),
             color: barBackColor,
           ),
         ),

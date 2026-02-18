@@ -1,2 +1,2 @@
-const int lyfiBrightnessMax = 4095;
-const localDimmingTrackingInterval = Duration(milliseconds: 20);
+const int kLyfiBrightnessMax = 4095;
+const kLocalDimmingTrackingInterval = Duration(milliseconds: 20);
