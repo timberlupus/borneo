@@ -253,7 +253,7 @@ class DevicesScreen extends StatelessWidget {
                 children: [
                   // Group header
                   Container(
-                    margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                     height: 48,
                     child: Row(
                       children: [
@@ -279,14 +279,14 @@ class DevicesScreen extends StatelessWidget {
                   ),
                   // Device card grid
                   GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
                       childAspectRatio: 1.0,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
                     ),
                     itemCount: groupData.deviceCount,
                     itemBuilder: (context, index) {

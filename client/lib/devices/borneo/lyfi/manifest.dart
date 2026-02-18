@@ -47,13 +47,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
       );
 
   static Widget _buildDeviceIcon(BuildContext context, double iconSize, bool isOnline) {
-    return Icon(
-      Icons.light_outlined,
-      size: iconSize,
-      color: isOnline
-          ? Theme.of(context).colorScheme.primary
-          : Theme.of(context).colorScheme.primary.withValues(alpha: 0.38),
-    );
+    return Icon(Icons.light_outlined, size: iconSize, color: Theme.of(context).colorScheme.primary);
   }
 
   static Widget _buildPrimaryStateIcon(BuildContext context, double iconSize) {
@@ -115,7 +109,7 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
       case LyfiMode.scheduled:
         return context.translate('Scheduled');
       case LyfiMode.sun:
-        return context.translate('Sun Simulation');
+        return context.translate('Sun');
       default:
         return '-';
     }
@@ -214,7 +208,7 @@ class _LyfiBrightnessChart extends StatelessWidget {
 
   Widget _buildBarChart(BuildContext context, int channelCount) {
     final colorScheme = Theme.of(context).colorScheme;
-    final barBackColor = colorScheme.surfaceContainerLow;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Adaptive bar width: shrink as channel count grows
     final barWidth =
@@ -242,6 +236,16 @@ class _LyfiBrightnessChart extends StatelessWidget {
       final lightStart = Color.lerp(primaryColor, Colors.white, 0.7)!;
       final fraction = (value / lyfiBrightnessMax).clamp(0.0, 1.0);
       final currentEndColor = Color.lerp(lightStart, primaryColor, fraction)!;
+
+      // Background rod: desaturate the channel color heavily and blend with the
+      // surface so it looks muted but still carries a hint of the original hue.
+      final hslColor = HSLColor.fromColor(primaryColor);
+      final mutedColor = hslColor
+          .withSaturation((hslColor.saturation * 0.25).clamp(0.0, 1.0))
+          .withLightness(isDark ? 0.15 : 0.85)
+          .toColor();
+      // Blend with surface for a softer look
+      final barBackColor = Color.lerp(colorScheme.surfaceContainerLow, mutedColor, 0.65)!;
 
       groups.add(
         BarChartGroupData(
@@ -288,7 +292,7 @@ class _LyfiBrightnessChart extends StatelessWidget {
                   label,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontSize: channelCount > 6 ? 8.0 : 9.0,
-                    color: colorScheme.onSurface.withValues(alpha: 0.7),
+                    color: colorScheme.onSurface.withValues(alpha: 0.38),
                   ),
                 );
               },

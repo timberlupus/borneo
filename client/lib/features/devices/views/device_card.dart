@@ -30,8 +30,7 @@ class DeviceCard extends StatelessWidget {
       selector: (_, vm) => (isOnline: vm.isOnline, isPowerOn: vm.isPowerOn, name: vm.deviceEntity.name),
       builder: (context, status, _) {
         final colorScheme = Theme.of(context).colorScheme;
-        final isActive = status.isOnline && status.isPowerOn;
-        final bgColor = isActive ? colorScheme.surfaceContainerHighest : colorScheme.surfaceContainerLow;
+        final bgColor = colorScheme.surfaceContainerHighest;
         final fgColor = colorScheme.onSurface;
 
         return ClipRRect(
@@ -46,7 +45,7 @@ class DeviceCard extends StatelessWidget {
                 onTap: vm.isBusy ? null : () => _openDevicePage(context, vm.deviceEntity),
                 borderRadius: BorderRadius.circular(12),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 4, 4, 10),
+                  padding: const EdgeInsets.fromLTRB(8, 0, 4, 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -61,7 +60,9 @@ class DeviceCard extends StatelessWidget {
                               status.name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.labelMedium?.copyWith(color: fgColor),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
                             ),
                           ),
                           _buildPopupMenu(context, fgColor),
@@ -70,7 +71,7 @@ class DeviceCard extends StatelessWidget {
                       // Central content area
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(2, 4, 8, 0),
+                          padding: const EdgeInsets.fromLTRB(2, 4, 8, 8),
                           child: moduleMeta.summaryContentBuilder != null
                               ? moduleMeta.summaryContentBuilder!(context, vm)
                               : Center(
