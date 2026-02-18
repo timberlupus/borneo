@@ -260,15 +260,12 @@ class DevicesScreen extends StatelessWidget {
                         Text(
                           groupData.name,
                           textAlign: TextAlign.start,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const Spacer(),
                         if (!groupData.isDummy)
                           IconButton(
-                            icon: const Icon(Icons.edit, size: 24),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                            icon: Icon(Icons.edit, size: 16, color: Theme.of(context).colorScheme.primary),
                             constraints: null,
                             onPressed: groupData.isDummy || groupData.isBusy
                                 ? null
