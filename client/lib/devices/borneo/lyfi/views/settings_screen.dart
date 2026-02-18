@@ -3,6 +3,7 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/controller_settings_v
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/controller_settings_screen.dart';
 import 'package:borneo_app/shared/widgets/bottom_sheet_picker.dart';
+import 'package:borneo_app/shared/widgets/confirmation_sheet.dart';
 import 'package:borneo_app/shared/widgets/generic_settings_screen.dart';
 import 'package:borneo_app/shared/widgets/map_location_picker.dart';
 import 'package:borneo_common/io/net/rssi.dart';
@@ -330,6 +331,20 @@ class SettingsScreen extends StatelessWidget {
         children: [
           ListTile(
             dense: true,
+            leading: Icon(Icons.wifi_off_outlined),
+            tileColor: tileColor,
+            title: Text(
+              context.translate('Reset device network settings'),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+            subtitle: Text(
+              context.translate('This will disconnect the device from the network and remove saved Wi‑Fi credentials.'),
+            ),
+            trailing: rightChevron,
+            onTap: () => _showNetworkResetDialog(context, vm),
+          ),
+          ListTile(
+            dense: true,
             leading: Icon(Icons.restore_outlined),
             tileColor: tileColor,
             title: Text(
@@ -402,6 +417,21 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _showNetworkResetDialog(BuildContext context, SettingsViewModel vm) async {
+    final confirmed = await AsyncConfirmationSheet.show(
+      context,
+      message: context.translate("Are you sure you want to reset this device's network settings?"),
+    );
+
+    if (!confirmed) return;
+
+    vm.networkReset().then((_) {
+      if (context.mounted) {
+        if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+      }
+    });
   }
 
   void _showManualFanPowerDialog(BuildContext context, SettingsViewModel vm, int currentValue) {

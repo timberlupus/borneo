@@ -30,6 +30,7 @@ class BorneoPaths {
   static final Uri compatible = Uri(path: '/borneo/compatible');
   static final Uri rtcLocal = Uri(path: '/borneo/rtc/local');
   static final Uri rtcTimestamp = Uri(path: '/borneo/rtc/ts');
+  static final Uri networkReset = Uri(path: '/borneo/network/reset');
 
   static final Uri nvsU8 = Uri(path: '/borneo/factory/nvs/u8');
   static final Uri nvsU16 = Uri(path: '/borneo/factory/nvs/u16');
@@ -276,6 +277,7 @@ abstract class IBorneoDeviceApi extends IDeviceApi {
 
   Future<void> reboot(Device dev, {CancellationToken? cancelToken});
   Future<void> factoryReset(Device dev, {CancellationToken? cancelToken});
+  Future<void> networkReset(Device dev, {CancellationToken? cancelToken});
 
   Future<void> beginCheckNewVersion({CancellationToken? cancelToken});
   Future<bool> isCheckingNewVersionAsync({CancellationToken? cancelToken});
@@ -535,6 +537,21 @@ mixin BorneoDeviceCoapApi on Driver implements IBorneoDeviceApi {
       final dd = dev.driverData as BorneoCoapDriverData;
       final response = await dd.coap.postBytes(
         BorneoPaths.factoryReset,
+        payload: simple_cbor.cbor.encode(null),
+        accept: CoapMediaType.applicationCbor,
+      );
+      if (!response.isSuccess) {
+        throw DeviceError("Failed to put `${response.location}`", dev);
+      }
+    }, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<void> networkReset(Device dev, {CancellationToken? cancelToken}) async {
+    await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final response = await dd.coap.postBytes(
+        BorneoPaths.networkReset,
         payload: simple_cbor.cbor.encode(null),
         accept: CoapMediaType.applicationCbor,
       );

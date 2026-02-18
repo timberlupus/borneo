@@ -267,4 +267,18 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       notifyListeners();
     }
   }
+
+  Future<void> networkReset() async {
+    isBusy = true;
+    notifyListeners();
+    try {
+      await api.networkReset(boundDevice!.device);
+      notification.showSuccess(_gt.translate("Device network settings reset"));
+    } catch (e) {
+      notification.showError(_gt.translate("Failed to reset device network settings: $e"));
+    } finally {
+      isBusy = false;
+      notifyListeners();
+    }
+  }
 }
