@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "borneoiot"
+version = "0.4.12"
+description = "A open-source Python client library for devices under the Borneo-IoT Project"
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.6"
+license = { text = "GPL-3.0-or-later" }
+
+authors = [
+  { name = "Yunnan BinaryStars Technologies Co., Ltd.", email = "oldrev@gmail.com" },
+]
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+]
+
+dependencies = [
+  "aiocoap>=0.4.12",
+  "cbor2>=5.8.0",
+  "aiofiles",
+]
+
+[project.urls]
+Homepage = "https://www.borneoiot.com"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["borneo*"]
