@@ -111,22 +111,26 @@ class DeviceCard extends StatelessWidget {
     if (!status.isOnline) {
       final errorMessage = vm.deviceEntity.lastErrorMessage;
       if (errorMessage != null && errorMessage.isNotEmpty) {
-        return GestureDetector(
-          onTap: () {
-            showDialog(
-              context: context,
-              builder: (_) => DeviceErrorDialog(errorMessage: errorMessage),
-            );
-          },
-          child: Row(
-            children: [
-              Icon(Icons.error_outline, size: 12, color: colorScheme.error),
-              const SizedBox(width: 4),
-              Text(
-                context.translate('OFF-LINE'),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(color: colorScheme.error),
-              ),
-            ],
+        return Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (_) => DeviceErrorDialog(errorMessage: errorMessage),
+              );
+            },
+            borderRadius: BorderRadius.circular(4),
+            child: Row(
+              children: [
+                Icon(Icons.error_outline, size: 12, color: colorScheme.error),
+                const SizedBox(width: 4),
+                Text(
+                  context.translate('OFF-LINE'),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(color: colorScheme.error),
+                ),
+              ],
+            ),
           ),
         );
       }
