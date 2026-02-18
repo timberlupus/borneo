@@ -8,12 +8,12 @@ import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:borneo_wot/borneo/lyfi/wot_thing.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:logger/logger.dart';
 import 'package:lw_wot/wot.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/wot.dart';
 
 import 'package:provider/provider.dart';
 

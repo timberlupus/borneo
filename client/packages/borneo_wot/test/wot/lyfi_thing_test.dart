@@ -1,8 +1,7 @@
+import 'package:borneo_wot/borneo/lyfi/wot_thing.dart';
 import 'package:test/test.dart';
 
-import 'package:borneo_kernel/drivers/borneo/lyfi/wot/wot_thing.dart';
-
-import '../../../../mocks.dart';
+import '../mocks.dart';
 
 void main() {
   group('LyfiThing', () {

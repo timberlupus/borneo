@@ -73,6 +73,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  borneo_wot:
+    dependency: "direct main"
+    description:
+      path: "packages/borneo_wot"
+      relative: true
+    source: path
+    version: "1.0.0"
   build:
     dependency: transitive
     description:

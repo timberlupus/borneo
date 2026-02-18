@@ -6,14 +6,13 @@ import 'package:borneo_kernel/drivers/borneo/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/wot/wot_props.dart';
-import 'package:borneo_kernel/drivers/borneo/wot/borneo_props.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/wot/wot_actions.dart';
-import 'package:borneo_kernel/drivers/borneo/wot/borneo_thing.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:logger/logger.dart';
 import 'package:lw_wot/wot.dart';
+import '../../wot.dart';
+import './wot_actions.dart';
+import './wot_props.dart';
 
 part 'wot_thing.props.dart';
 part 'wot_thing.actions.dart';
