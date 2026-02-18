@@ -1,8 +1,9 @@
 import 'package:borneo_app/core/services/db.dart';
 import 'package:borneo_common/exceptions.dart';
-import 'package:test/test.dart';
 
 import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('DBProvider Tests', () {

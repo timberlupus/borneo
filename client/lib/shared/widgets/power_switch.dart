@@ -10,10 +10,10 @@ class PowerButton extends StatefulWidget {
   const PowerButton({super.key, required this.enabled, required this.value, required this.label, this.onChanged});
 
   @override
-  _PowerButtonState createState() => _PowerButtonState();
+  PowerButtonState createState() => PowerButtonState();
 }
 
-class _PowerButtonState extends State<PowerButton> {
+class PowerButtonState extends State<PowerButton> {
   final bool _isLoading = false;
 
   @override

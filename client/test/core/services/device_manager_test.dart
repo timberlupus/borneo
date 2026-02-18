@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:collection';
 
 import 'package:borneo_app/core/models/scene_entity.dart';
@@ -12,9 +11,9 @@ import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast_memory.dart';
-import 'package:test/test.dart';
 
 void main() {
   group('DeviceManagerImpl Tests', () {

@@ -13,10 +13,10 @@ class RollingInteger extends StatefulWidget {
   });
 
   @override
-  _RollingIntegerState createState() => _RollingIntegerState();
+  RollingIntegerState createState() => RollingIntegerState();
 }
 
-class _RollingIntegerState extends State<RollingInteger> with SingleTickerProviderStateMixin {
+class RollingIntegerState extends State<RollingInteger> with SingleTickerProviderStateMixin {
   late int _oldValue;
   late AnimationController _ctrl;
   late Animation<double> _anim;

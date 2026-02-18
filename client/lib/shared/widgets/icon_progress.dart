@@ -19,10 +19,10 @@ class IconProgressBar extends StatefulWidget {
   });
 
   @override
-  _IconProgressBarState createState() => _IconProgressBarState();
+  IconProgressBarState createState() => IconProgressBarState();
 }
 
-class _IconProgressBarState extends State<IconProgressBar> with SingleTickerProviderStateMixin {
+class IconProgressBarState extends State<IconProgressBar> with SingleTickerProviderStateMixin {
   late AnimationController? _controller;
   late Animation<double>? _progressAnimation;
 

@@ -1,6 +1,6 @@
-import 'package:test/test.dart';
 import 'package:borneo_app/devices/borneo/lyfi/manifest.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('LyfiThing Integration Tests', () {

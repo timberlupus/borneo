@@ -19,6 +19,7 @@ class MdnsDiscoveredDevice extends DiscoveredDevice {
   const MdnsDiscoveredDevice({required super.host, super.port, super.name, this.txt, this.serviceType});
 }
 
+/*
 class BleDiscoveredDevice extends DiscoveredDevice {
   const BleDiscoveredDevice({
     required super.host,
@@ -27,3 +28,4 @@ class BleDiscoveredDevice extends DiscoveredDevice {
     //... TODO
   });
 }
+*/

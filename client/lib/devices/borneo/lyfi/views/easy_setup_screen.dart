@@ -3,6 +3,9 @@ import 'package:borneo_common/duration_ext.dart';
 import 'package:flutter/material.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/schedule_editor_view_model.dart';
+import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/ieditor.dart';
+import 'package:cancellation_token/cancellation_token.dart';
+import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:progressive_time_picker/progressive_time_picker.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +35,27 @@ class EasySetupScreen extends StatelessWidget {
       value: editor,
       builder: (context, child) {
         return Scaffold(
-          appBar: AppBar(title: Text(context.translate('Easy Setup'))),
+          appBar: AppBar(
+            title: Text(context.translate('Easy Setup')),
+            actions: [
+              TextButton.icon(
+                onPressed: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.of(context).pop(true);
+                  } else {
+                    Navigator.of(context).pop(true);
+                  }
+                },
+                icon: Icon(Icons.check, size: 18, color: Theme.of(context).colorScheme.onPrimary),
+                label: Text(
+                  context.translate('Apply'),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                ),
+              ),
+            ],
+          ),
           body: SafeArea(
             child: Container(color: Theme.of(context).colorScheme.surface, child: child),
           ),
@@ -209,14 +232,55 @@ class EasySetupScreen extends StatelessWidget {
       Expanded(
         child: Selector<ScheduleEditorViewModel, bool>(
           selector: (_, editor) => editor.canEdit,
-          builder: (_, canEdit, _) => ScreenTopRoundedContainer(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: SingleChildScrollView(
-              child: BrightnessSliderList(editor, disabled: !canEdit, padding: EdgeInsets.fromLTRB(0, 24, 0, 24)),
-            ),
-          ),
+          builder: (_, canEdit, vm) {
+            // Use a temporary editor adapter so Easy Setup slider changes are
+            // local to the EasySetupViewModel until the user taps Apply.
+            final tempEditor = _EasySetupTempEditor(editor);
+            return ScreenTopRoundedContainer(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              child: SingleChildScrollView(
+                child: BrightnessSliderList(tempEditor, disabled: !canEdit, padding: EdgeInsets.fromLTRB(0, 24, 0, 24)),
+              ),
+            );
+          },
         ),
       ),
     ];
   }
+}
+
+class _EasySetupTempEditor extends ChangeNotifier implements IEditor {
+  final ScheduleEditorViewModel _parent;
+
+  _EasySetupTempEditor(this._parent);
+
+  bool get _hasEasyChannels => _parent.easySetupViewModel.channels.isNotEmpty;
+
+  @override
+  bool get canEdit => _parent.canEdit;
+
+  @override
+  bool get isChanged => false;
+
+  @override
+  Future<void> save({CancellationToken? cancelToken}) async {}
+
+  @override
+  Future<void> initialize({CancellationToken? cancelToken}) async {}
+
+  @override
+  Future<void> updateChannelValue(int index, int value) async {
+    if (_hasEasyChannels && index >= 0 && index < _parent.easySetupViewModel.channels.length) {
+      _parent.easySetupViewModel.channels[index].value = value;
+    }
+  }
+
+  @override
+  int get availableChannelCount => _parent.availableChannelCount;
+
+  @override
+  LyfiDeviceInfo get deviceInfo => _parent.deviceInfo;
+
+  @override
+  List<ValueNotifier<int>> get channels => _hasEasyChannels ? _parent.easySetupViewModel.channels : _parent.channels;
 }

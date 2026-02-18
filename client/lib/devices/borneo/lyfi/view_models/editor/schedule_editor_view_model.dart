@@ -292,12 +292,34 @@ class ScheduleEditorViewModel extends BaseEditorViewModel {
   }
 
   Future<void> easySetupEnter() async {
-    clearEntries(notify: false);
+    // Initialize Easy Setup fields from current editor values instead of
+    // clearing the schedule immediately. This ensures the Easy Setup UI
+    // reads the current brightness sliders and sensible times.
+    if (currentEntry != null) {
+      final inst = currentEntry!.instant;
+      final start = Duration(hours: inst.inHours % 24, minutes: inst.inMinutes % 60);
+      easySetupViewModel.startTime.value = start;
+      final defaultSpan = defaultEndTime - defaultStartTime;
+      final proposedEnd = start + defaultSpan;
+      easySetupViewModel.endTime.value = Duration(hours: proposedEnd.inHours % 24, minutes: proposedEnd.inMinutes % 60);
+    } else {
+      easySetupViewModel.startTime.value = defaultStartTime;
+      easySetupViewModel.endTime.value = defaultEndTime;
+    }
+
+    // Also copy current channel slider values into the EasySetupViewModel so
+    // the Easy Setup UI operates on a temporary set of channel values.
+    easySetupViewModel.initChannelsFromList(channels.map((c) => c.value).toList());
+
+    // Do not clear entries here; Apply in the Easy Setup screen will commit.
   }
 
   Future<void> easySetupFinish() async {
     final easyInstants = easySetupViewModel.build(this);
-    if (channels.any((x) => x.value > 0)) {
+    final effectiveChannelValues = easySetupViewModel.channelValues.isNotEmpty
+        ? easySetupViewModel.channelValues
+        : channels.map((x) => x.value).toList();
+    if (effectiveChannelValues.any((v) => v > 0)) {
       await loadCurve(easyInstants);
     }
   }

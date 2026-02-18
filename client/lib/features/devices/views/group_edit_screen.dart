@@ -139,28 +139,29 @@ class GroupEditScreen extends StatelessWidget {
                 ).then((confirmed) async {
                   if (confirmed == true) {
                     // Show loading indicator
-                    final loadingContext = context;
-                    final loadingNavigator = Navigator.of(loadingContext);
-                    showDialog(
-                      context: loadingContext,
-                      barrierDismissible: false,
-                      builder: (dialogContext) => const Center(child: CircularProgressIndicator()),
-                    );
-
-                    try {
-                      await vm.delete();
-                      if (loadingContext.mounted) {
-                        loadingNavigator.pop(); // Close loading dialog
-                        navigator.pop(true); // Return success
-                        notificationService.showSuccess(loadingContext.translate('Group deleted'));
-                      }
-                    } catch (error) {
-                      if (loadingContext.mounted) {
-                        loadingNavigator.pop(); // Close loading dialog
-                        notificationService.showError(
-                          loadingContext.translate('Delete failed'),
-                          body: error.toString(),
-                        );
+                    if (context.mounted) {
+                      final loadingContext = context;
+                      final loadingNavigator = Navigator.of(loadingContext);
+                      showDialog(
+                        context: loadingContext,
+                        barrierDismissible: false,
+                        builder: (dialogContext) => const Center(child: CircularProgressIndicator()),
+                      );
+                      try {
+                        await vm.delete();
+                        if (loadingContext.mounted) {
+                          loadingNavigator.pop(); // Close loading dialog
+                          navigator.pop(true); // Return success
+                          notificationService.showSuccess(loadingContext.translate('Group deleted'));
+                        }
+                      } catch (error) {
+                        if (loadingContext.mounted) {
+                          loadingNavigator.pop(); // Close loading dialog
+                          notificationService.showError(
+                            loadingContext.translate('Delete failed'),
+                            body: error.toString(),
+                          );
+                        }
                       }
                     }
                   }
