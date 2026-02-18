@@ -21,6 +21,7 @@
 #include <borneo/system.h>
 #include <borneo/power.h>
 #include <borneo/nvs.h>
+#include <borneo/rpc/common.h>
 
 #define TAG "borneo-core-coap"
 
@@ -30,14 +31,7 @@ static void coap_hnd_borneo_factory_reset_post(coap_resource_t* resource, coap_s
                                                const coap_pdu_t* request, const coap_string_t* query,
                                                coap_pdu_t* response)
 {
-    BO_COAP_TRY(bo_power_shutdown(0), response);
-    BO_COAP_TRY(bo_wifi_forget(), response);
-
-    BO_COAP_TRY(bo_system_factory_reset(), response);
-
-    // First, return the result, wait for three seconds, and then restart.
-    bo_system_reboot_later(5000);
-
+    BO_COAP_TRY(bo_rpc_borneo_factory_reset_post(NULL, NULL), response);
     coap_pdu_set_code(response, COAP_RESPONSE_CODE(204));
 }
 

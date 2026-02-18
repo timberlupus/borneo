@@ -323,3 +323,14 @@ int bo_rpc_borneo_sensors_get(const CborValue* args, CborEncoder* retvals)
 
     return 0;
 }
+
+int bo_rpc_borneo_network_reset_post(const CborValue* args, CborEncoder* retvals)
+{
+    (void)args; // No input data for reboot
+    (void)retvals; // No output for reboot
+    BO_TRY(bo_power_shutdown(0));
+    BO_TRY(bo_wifi_forget());
+    bo_system_reboot_later(5000);
+
+    return 0;
+}

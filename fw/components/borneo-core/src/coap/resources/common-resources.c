@@ -286,6 +286,14 @@ static void coap_hnd_sensors_get(coap_resource_t* resource, coap_session_t* sess
     return;
 }
 
+static void coap_hnd_borneo_network_reset_post(coap_resource_t* resource, coap_session_t* session,
+                                               const coap_pdu_t* request, const coap_string_t* query,
+                                               coap_pdu_t* response)
+{
+    BO_COAP_TRY(bo_rpc_borneo_network_reset_post(NULL, NULL), response);
+    coap_pdu_set_code(response, COAP_RESPONSE_CODE(204));
+}
+
 COAP_RESOURCE_DEFINE("borneo/info", false, coap_hnd_borneo_info_get, NULL, NULL, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/reboot", false, NULL, coap_hnd_borneo_reboot_post, NULL, NULL);
@@ -311,3 +319,5 @@ COAP_RESOURCE_DEFINE("borneo/rtc/local", false, coap_hnd_rtc_local_get, coap_hnd
 COAP_RESOURCE_DEFINE("borneo/rtc/ts", true, coap_hnd_rtc_timestamp_get, NULL, NULL, NULL);
 
 COAP_RESOURCE_DEFINE("borneo/sensors", false, coap_hnd_sensors_get, NULL, NULL, NULL);
+
+COAP_RESOURCE_DEFINE("borneo/network/reset", false, NULL, coap_hnd_borneo_network_reset_post, NULL, NULL);

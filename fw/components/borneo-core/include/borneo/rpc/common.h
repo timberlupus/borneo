@@ -34,6 +34,12 @@ int bo_rpc_borneo_settings_name_put(const CborValue* args, CborEncoder* retvals)
 // RPC function declarations for sensors
 int bo_rpc_borneo_sensors_get(const CborValue* args, CborEncoder* retvals);
 
+// Networking Methods
+int bo_rpc_borneo_network_reset_post(const CborValue* args, CborEncoder* retvals);
+
+// Factory functions
+int bo_rpc_borneo_factory_reset_post(const CborValue* args, CborEncoder* retvals);
+
 #ifdef __cplusplus
 }
 #endif
