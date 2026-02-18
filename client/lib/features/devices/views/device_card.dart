@@ -30,7 +30,7 @@ class DeviceCard extends StatelessWidget {
       selector: (_, vm) => (isOnline: vm.isOnline, isPowerOn: vm.isPowerOn, name: vm.deviceEntity.name),
       builder: (context, status, _) {
         final colorScheme = Theme.of(context).colorScheme;
-        final bgColor = colorScheme.surfaceContainerHighest;
+        final bgColor = colorScheme.surfaceContainer;
         final fgColor = colorScheme.onSurface;
 
         return ClipRRect(
@@ -53,7 +53,7 @@ class DeviceCard extends StatelessWidget {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          moduleMeta.deviceIconBuilder(context, 16, status.isOnline),
+                          moduleMeta.deviceIconBuilder(context, 24, status.isOnline),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
@@ -62,7 +62,7 @@ class DeviceCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(
                                 context,
-                              ).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
+                              ).textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
                             ),
                           ),
                           _buildPopupMenu(context, fgColor),
@@ -166,12 +166,13 @@ class DeviceCard extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           for (int i = 0; i < widgets.length; i++) ...[
             if (i > 0)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 3),
-                child: Icon(Icons.fiber_manual_record, size: 4, color: fgColor.withValues(alpha: 0.5)),
+              SizedBox(
+                height: 12,
+                child: VerticalDivider(thickness: 1.5, width: 8, color: fgColor.withValues(alpha: 0.38)),
               ),
             widgets[i],
           ],
