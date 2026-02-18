@@ -233,9 +233,6 @@ class _LyfiBrightnessChart extends StatelessWidget {
       final ch = deviceInfo.channels[i];
       final value = brightness[i].toDouble();
       final primaryColor = HexColor.fromHex(ch.color);
-      final lightStart = Color.lerp(primaryColor, Colors.white, 0.7)!;
-      final fraction = (value / lyfiBrightnessMax).clamp(0.0, 1.0);
-      final currentEndColor = Color.lerp(lightStart, primaryColor, fraction)!;
 
       // Background rod: desaturate the channel color heavily and blend with the
       // surface so it looks muted but still carries a hint of the original hue.
@@ -254,11 +251,7 @@ class _LyfiBrightnessChart extends StatelessWidget {
             BarChartRodData(
               toY: value,
               borderRadius: BorderRadius.circular(4),
-              gradient: LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                colors: [lightStart, currentEndColor],
-              ),
+              color: primaryColor,
               width: barWidth,
               backDrawRodData: BackgroundBarChartRodData(
                 show: true,
