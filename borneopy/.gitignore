@@ -17,3 +17,4 @@ htmlcov
 
 # left behind by the formatter sometimes
 .ruff_cache
+.venv
