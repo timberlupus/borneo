@@ -132,4 +132,18 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
       notifyListeners();
     }
   }
+
+  /// Update this view model in-place from another VM for the same device id.
+  ///
+  /// Default implementation updates `deviceEntity`, refreshes the WotThing
+  /// and notifies listeners. Subclasses should override to merge additional
+  /// runtime state (ValueNotifiers, cached properties) while keeping the
+  /// same VM identity so UI listeners remain valid.
+  @mustCallSuper
+  void updateFrom(AbstractDeviceSummaryViewModel other) {
+    assert(deviceEntity.id == other.deviceEntity.id);
+    deviceEntity = other.deviceEntity;
+    _refreshWotThing();
+    notifyListeners();
+  }
 }

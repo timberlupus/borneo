@@ -30,17 +30,21 @@ class GroupViewModel extends BaseViewModel with ViewModelEventBusMixin {
   void addOrUpdateDevice(AbstractDeviceSummaryViewModel device) {
     final existingIndex = _devices.indexWhere((d) => d.deviceEntity.id == device.deviceEntity.id);
     if (existingIndex == -1) {
+      // New device VM: take ownership and manage its lifecycle.
       _devices = [..._devices, device];
     } else {
-      final oldDevice = _devices[existingIndex];
-      _devices = [..._devices];
-      _devices[existingIndex] = device;
+      // Existing VM present -> perform in-place update to preserve identity.
+      final existing = _devices[existingIndex];
 
-      Future.microtask(() {
-        if (!oldDevice.isDisposed) {
-          oldDevice.dispose();
-        }
-      });
+      // Merge state from the incoming (temporary) VM into the existing VM.
+      // Subclasses can override `updateFrom` to merge ValueNotifier state etc.
+      existing.updateFrom(device);
+
+      // The passed-in `device` was only a carrier/temporary instance created by
+      // the factory; dispose it immediately since `existing` remains authoritative.
+      if (!device.isDisposed) {
+        device.dispose();
+      }
     }
     _updateModified();
     notifyListeners();
