@@ -184,11 +184,16 @@ class _DeviceDiscoveryContent extends StatelessWidget {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const CircularProgressIndicator(),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    context.translate('Searching for devices...'),
-                                    style: Theme.of(context).textTheme.bodyLarge,
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                                      const SizedBox(width: 16),
+                                      Text(
+                                        context.translate('Searching for devices...'),
+                                        style: Theme.of(context).textTheme.bodyLarge,
+                                      ),
+                                    ],
                                   ),
                                   const SizedBox(height: 16),
                                   TextButton(
