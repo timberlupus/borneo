@@ -171,11 +171,6 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
       if (!_disposed) {
         _scanError.value = gt.translate('Bluetooth scan error, please check if Bluetooth device is enabled.');
       }
-    } finally {
-      if (!_scanCancelToken.isCancelled && !_disposed) {
-        _isRefreshing = false;
-        notifyListeners();
-      }
     }
   }
 
