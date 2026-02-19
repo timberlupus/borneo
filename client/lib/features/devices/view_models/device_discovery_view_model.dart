@@ -148,9 +148,16 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
       // Start mDNS discovery (runs continuously in background, don't await)
       _deviceManager.startDiscovery();
 
-      // Start BLE discovery (Mobile only) - await this one
+      // Start BLE discovery (Mobile only) - run in background
       if (isMobile) {
-        await _startBleScan();
+        unawaited(
+          _startBleScan().catchError((error, stackTrace) {
+            _logger.e('BLE scan error', error: error, stackTrace: stackTrace);
+            if (!_disposed) {
+              _scanError.value = gt.translate('Bluetooth scan error, please check if Bluetooth device is enabled.');
+            }
+          }),
+        );
       }
 
       if (_scanCancelToken.isCancelled) {
