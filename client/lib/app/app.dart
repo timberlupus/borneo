@@ -47,6 +47,7 @@ class _BorneoAppState extends State<BorneoApp> {
   Locale? _locale;
   late StreamSubscription _localeSub;
   late StreamSubscription _themeSub;
+  ThemeData _currentTheme = ThemeData();
 
   @override
   void initState() {
@@ -114,6 +115,7 @@ class _BorneoAppState extends State<BorneoApp> {
             builder: (context, child) {
               final gt = GettextLocalizations.of(context);
               final theme = Theme.of(context);
+              _currentTheme = theme;
               final effectiveBrightness = _themeMode == ThemeMode.dark
                   ? Brightness.dark
                   : (_themeMode == ThemeMode.light ? Brightness.light : theme.brightness);
@@ -135,7 +137,7 @@ class _BorneoAppState extends State<BorneoApp> {
                 providers: [
                   Provider<GettextLocalizations>(create: (context) => gt),
 
-                  Provider<IAppNotificationService>(create: (context) => AppNotificationServiceImpl(theme)),
+                  Provider<IAppNotificationService>(create: (_) => AppNotificationServiceImpl(() => _currentTheme)),
 
                   Provider<UrlLauncherService>(
                     create: (context) => UrlLauncherService(

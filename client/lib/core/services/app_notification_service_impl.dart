@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
 
 class AppNotificationServiceImpl implements IAppNotificationService {
-  final ThemeData theme;
+  final ThemeData Function() _getTheme;
 
-  AppNotificationServiceImpl(this.theme);
+  AppNotificationServiceImpl(this._getTheme);
   @override
   void showError(String title, {String? body}) {
+    final theme = _getTheme();
     toastification.show(
       type: ToastificationType.error,
       style: ToastificationStyle.minimal,
@@ -23,6 +24,7 @@ class AppNotificationServiceImpl implements IAppNotificationService {
 
   @override
   void showInfo(String title, {String? body}) {
+    final theme = _getTheme();
     toastification.show(
       type: ToastificationType.info,
       style: ToastificationStyle.minimal,
@@ -40,6 +42,7 @@ class AppNotificationServiceImpl implements IAppNotificationService {
 
   @override
   void showNotificationWithAction(String title, {String? body, required Function onTapAction}) {
+    final theme = _getTheme();
     toastification.show(
       type: ToastificationType.info,
       style: ToastificationStyle.minimal,
@@ -54,6 +57,7 @@ class AppNotificationServiceImpl implements IAppNotificationService {
 
   @override
   void showSuccess(String title, {String? body}) {
+    final theme = _getTheme();
     toastification.show(
       type: ToastificationType.success,
       style: ToastificationStyle.minimal,
@@ -70,6 +74,7 @@ class AppNotificationServiceImpl implements IAppNotificationService {
 
   @override
   void showWarning(String title, {String? body}) {
+    final theme = _getTheme();
     toastification.show(
       type: ToastificationType.warning,
       style: ToastificationStyle.minimal,
