@@ -197,37 +197,30 @@ class _MainScreenState extends State<MainScreen> {
               ],
             ),
 
-            bottomNavigationBar: SafeArea(
-              child: BottomNavigationBar(
-                currentIndex: tabIndex.index,
-                onTap: (index) {
-                  if (index != tabIndex.index) {
-                    _pageController.animateToPage(
-                      index,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOutCubic,
-                    );
-                    // onPageChanged will sync the VM index
-                  }
-                },
-                items: [
-                  BottomNavigationBarItem(
-                    icon: const Icon(Icons.house_outlined),
-                    activeIcon: const Icon(Icons.house),
-                    label: context.translate('Scenes'),
-                  ),
-                  BottomNavigationBarItem(
-                    icon: const Icon(Icons.device_hub_outlined),
-                    activeIcon: const Icon(Icons.device_hub),
-                    label: context.translate('Devices'),
-                  ),
-                  BottomNavigationBarItem(
-                    icon: const Icon(Icons.person_outline),
-                    activeIcon: const Icon(Icons.person),
-                    label: context.translate('My'),
-                  ),
-                ],
-              ),
+            bottomNavigationBar: BottomNavigationBar(
+              currentIndex: tabIndex.index,
+              onTap: (index) {
+                if (index != tabIndex.index) {
+                  _pageController.jumpToPage(index);
+                }
+              },
+              items: [
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.house_outlined),
+                  activeIcon: const Icon(Icons.house),
+                  label: context.translate('Scenes'),
+                ),
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.device_hub_outlined),
+                  activeIcon: const Icon(Icons.device_hub),
+                  label: context.translate('Devices'),
+                ),
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.person_outline),
+                  activeIcon: const Icon(Icons.person),
+                  label: context.translate('My'),
+                ),
+              ],
             ),
           ),
         );

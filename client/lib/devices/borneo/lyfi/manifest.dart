@@ -105,11 +105,11 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
   static String _modeText(BuildContext context, LyfiMode? mode) {
     switch (mode) {
       case LyfiMode.manual:
-        return context.translate('Manual');
+        return context.translate('MANU');
       case LyfiMode.scheduled:
-        return context.translate('Scheduled');
+        return context.translate('SCHED');
       case LyfiMode.sun:
-        return context.translate('Sun');
+        return context.translate('SUN');
       default:
         return '-';
     }
@@ -118,13 +118,13 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
   static String _stateText(BuildContext context, LyfiState? state) {
     switch (state) {
       case LyfiState.normal:
-        return context.translate('Running');
+        return context.translate('NORM');
       case LyfiState.dimming:
-        return context.translate('Dimming');
+        return context.translate('DIMM');
       case LyfiState.temporary:
-        return context.translate('Temporary');
+        return context.translate('TEMP');
       case LyfiState.preview:
-        return context.translate('Preview');
+        return context.translate('PREV');
       default:
         return '-';
     }

@@ -32,7 +32,7 @@ class DeviceDiscoveryScreen extends StatelessWidget {
         globalEventBus: cb.read<EventBus>(),
         gt: gt,
         logger: cb.read<Logger>(),
-      )..onInitialize(),
+      )..initialize(),
       child: const _DeviceDiscoveryContent(),
     );
   }
@@ -53,13 +53,7 @@ class _DeviceDiscoveryContent extends StatelessWidget {
             selector: (_, vm) => vm.isDiscovering,
             builder: (ctx, isDiscovering, child) {
               if (isDiscovering) {
-                return TextButton(
-                  onPressed: () => ctx.read<DeviceDiscoveryViewModel>().stopDiscovery(),
-                  child: Text(
-                    context.translate('Stop'),
-                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
-                  ),
-                );
+                return const SizedBox();
               } else {
                 return IconButton(
                   icon: const Icon(Icons.refresh),
@@ -124,30 +118,38 @@ class _DeviceDiscoveryContent extends StatelessWidget {
 
                 return Stack(
                   children: [
-                    if (devices.isEmpty)
-                      ListView(
-                        children: [
-                          const SizedBox(height: 60),
-                          Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.media_bluetooth_off,
-                                  size: 64,
-                                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.38),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  context.translate('No devices found'),
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.outline),
-                                ),
-                              ],
+                    if (devices.isEmpty && vm.isInitialized && !vm.isDiscovering && !vm.isBusy && !vm.isDisposed)
+                      Center(
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 60),
+                            Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.media_bluetooth_off,
+                                    size: 64,
+                                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.38),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    context.translate('No devices found'),
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.outline),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  ElevatedButton.icon(
+                                    onPressed: () => context.read<DeviceDiscoveryViewModel>().startDiscovery(),
+                                    icon: const Icon(Icons.refresh),
+                                    label: Text(context.translate('Scan')),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       )
                     else
                       ListView.separated(
@@ -173,6 +175,11 @@ class _DeviceDiscoveryContent extends StatelessWidget {
                                   Text(
                                     context.translate('Searching for devices...'),
                                     style: Theme.of(context).textTheme.bodyLarge,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  TextButton(
+                                    onPressed: () => context.read<DeviceDiscoveryViewModel>().stopDiscovery(),
+                                    child: Text(context.translate('Cancel')),
                                   ),
                                 ],
                               ),
