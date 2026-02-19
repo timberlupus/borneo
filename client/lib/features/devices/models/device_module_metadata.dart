@@ -2,6 +2,7 @@ import 'package:borneo_app/devices/view_models/abstract_device_summary_view_mode
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/features/devices/view_models/base_device_view_model.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
@@ -22,7 +23,8 @@ abstract class DeviceModuleMetadata {
   final List<Widget> Function(BuildContext, AbstractDeviceSummaryViewModel) secondaryStatesBuilder;
   final AbstractDeviceSummaryViewModel Function(DeviceEntity, IDeviceManager, EventBus, GettextLocalizations)
   createSummaryVM;
-  final Future<WotThing> Function(DeviceEntity, IDeviceManager, {Logger? logger}) createWotThing;
+  final Future<WotThing> Function(DeviceEntity, IDeviceManager, {Logger? logger, CancellationToken? cancelToken})
+  createWotThing;
 
   /// Optional: supply a custom center widget for the device card.
   /// When null the card falls back to [deviceIconBuilder].

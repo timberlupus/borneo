@@ -47,9 +47,6 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   late final List<DeviceGroupEntity> _availableGroups = [];
   List<DeviceGroupEntity> get availableGroups => _availableGroups;
 
-  @override
-  late final Future<void> initFuture;
-
   bool get isDiscovering => _isRefreshing;
 
   // Platform check
@@ -76,10 +73,6 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
 
   @override
   Future<void> onInitialize() async {
-    initFuture = _initialize();
-  }
-
-  Future<void> _initialize() async {
     try {
       _availableGroups.addAll(await _groupManager.fetchAllGroupsInCurrentScene());
       // 延迟到下一帧，确保 UI 完全初始化

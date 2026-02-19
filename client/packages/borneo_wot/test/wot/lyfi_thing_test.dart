@@ -79,7 +79,7 @@ void main() {
           logger: mockLogger,
         );
 
-        await lyfiThing.initialize();
+        await lyfiThing.sync();
 
         // Verify properties are created
         expect(lyfiThing.hasProperty('on'), isTrue);

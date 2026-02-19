@@ -48,13 +48,13 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
     _deviceUpdatedSub = deviceManager.allDeviceEvents.on<DeviceEntityUpdatedEvent>().listen(_onDeviceUpdated);
     _loadingFailedEventSub = deviceManager.allDeviceEvents.on<LoadingDriverFailedEvent>().listen(_onLoadingFailed);
     _sceneReloadedSub = globalEventBus.on<CurrentSceneDevicesReloadedEvent>().listen(_onSceneReloaded);
-    wotThing?.addSubscriber(_onPowerPropertyChanged);
 
     _refreshWotThing();
   }
 
   @override
   void dispose() {
+    if (isDisposed) return;
     _boundEventSub.cancel();
     _removedEventSub.cancel();
     _deviceUpdatedSub.cancel();

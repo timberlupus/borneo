@@ -11,6 +11,7 @@ import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_wot/borneo/lyfi/wot_thing.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -130,11 +131,12 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
     }
   }
 
-  static Future<WotThing> _createWotThing(DeviceEntity device, IDeviceManager deviceManager, {Logger? logger}) async {
-    final lyfiThing = LyfiThing(kernel: deviceManager.kernel, deviceId: device.id, title: device.name, logger: logger);
-    await lyfiThing.initialize();
-    return lyfiThing;
-  }
+  static Future<WotThing> _createWotThing(
+    DeviceEntity device,
+    IDeviceManager deviceManager, {
+    Logger? logger,
+    CancellationToken? cancelToken,
+  }) async => LyfiThing(kernel: deviceManager.kernel, deviceId: device.id, title: device.name, logger: logger);
 }
 
 /// A compact bar chart that displays Lyfi per-channel brightness.

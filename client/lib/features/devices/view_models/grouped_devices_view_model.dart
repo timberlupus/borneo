@@ -133,7 +133,6 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
 
   void _clearAllItems() {
     for (final g in _groups) {
-      g.clearDevices();
       g.dispose();
     }
     _groups.clear();
@@ -242,8 +241,13 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     // Remove the deleted device from UI
     if (changedGroupIndex != -1) {
       final changedGroup = _groups[changedGroupIndex];
-      final deviceToRemove = changedGroup.devices.firstWhere((d) => d.deviceEntity.id == event.id);
-      deviceToRemove.dispose();
+      final deviceIndex = changedGroup.devices.indexWhere((d) => d.deviceEntity.id == event.id);
+      if (deviceIndex != -1) {
+        final deviceToRemove = changedGroup.devices[deviceIndex];
+        if (!deviceToRemove.isDisposed) {
+          deviceToRemove.dispose();
+        }
+      }
       changedGroup.removeDeviceById(event.id);
       // Notify only when necessary
       if (!isDisposed) {

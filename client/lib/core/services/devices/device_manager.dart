@@ -25,11 +25,11 @@ abstract class IDeviceManager implements IDisposable {
   int get wotThingCount;
 
   // Abstract methods
-  Future<void> initialize();
+  Future<void> initialize({CancellationToken? cancelToken});
   bool isBound(String deviceID);
   BoundDevice getBoundDevice(String deviceID);
   Iterable<BoundDevice> getBoundDevicesInCurrentScene();
-  Future<void> reloadAllDevices();
+  Future<void> reloadAllDevices({CancellationToken? cancelToken});
   Future<bool> tryBind(DeviceEntity device);
   Future<void> bind(DeviceEntity device);
   Future<void> unbind(String deviceID);

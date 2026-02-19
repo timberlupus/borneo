@@ -1,5 +1,7 @@
 // Dart port of src/thing.ts
 
+import 'package:cancellation_token/cancellation_token.dart';
+
 import 'property.dart';
 import 'event.dart';
 import 'action.dart';
@@ -88,6 +90,10 @@ class WotThing {
     }
 
     return thing;
+  }
+
+  Future<void> sync({CancellationToken? cancelToken}) async {
+    // Do nothing
   }
 
   /// Get this thing's href.

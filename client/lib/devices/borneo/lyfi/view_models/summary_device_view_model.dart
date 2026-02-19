@@ -5,7 +5,6 @@ import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:lw_wot/wot.dart';
 
 class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
-  bool _disposed = false;
   final ValueNotifier<LyfiState?> ledState = ValueNotifier(null);
   final ValueNotifier<LyfiMode?> ledMode = ValueNotifier(null);
   final ValueNotifier<List<int>?> channelBrightness = ValueNotifier(null);
@@ -17,17 +16,11 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
     super.globalEventBus, {
     required super.gt,
     super.logger,
-  }) {
-    _syncFromThing();
-    wotThing?.addSubscriber(_onStateChanged);
-    wotThing?.addSubscriber(_onModeChanged);
-    wotThing?.addSubscriber(_onColorChanged);
-    wotThing?.addSubscriber(_onDeviceInfoChanged);
-  }
+  });
 
   @override
   void dispose() {
-    if (!_disposed) {
+    if (!isDisposed) {
       wotThing?.removeSubscriber(_onStateChanged);
       wotThing?.removeSubscriber(_onModeChanged);
       wotThing?.removeSubscriber(_onColorChanged);
@@ -37,7 +30,6 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
       channelBrightness.dispose();
       lyfiDeviceInfo.dispose();
       super.dispose();
-      _disposed = true;
     }
   }
 

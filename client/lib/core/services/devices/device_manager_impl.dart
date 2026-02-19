@@ -77,19 +77,19 @@ final class DeviceManagerImpl extends IDeviceManager {
   Iterable<BoundDevice> get boundDevices => _kernel.boundDevices;
 
   @override
-  Future<void> initialize() async {
+  Future<void> initialize({CancellationToken? cancelToken}) async {
     assert(!_isInitialized);
 
     logger?.i('Initializing DeviceManagerImpl...');
     try {
-      final devices = await fetchAllDevicesInScene();
+      final devices = await fetchAllDevicesInScene().asCancellable(cancelToken);
       _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
       await _kernel.start();
 
       unawaited(() async {
         // Load WotThings for current scene alongside device load, regardless of online state.
-        await _loadWotThingsForCurrentScene();
-        await _rebindAll(devices);
+        await _loadWotThingsForCurrentScene(cancelToken: cancelToken);
+        await _rebindAll(devices, cancelToken: cancelToken);
 
         final currentScene = _sceneManager.current;
         _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
@@ -126,24 +126,26 @@ final class DeviceManagerImpl extends IDeviceManager {
   }
 
   @override
-  Future<void> reloadAllDevices() async {
-    await _deviceOperLock.synchronized(() async {
-      await _kernel.unbindAll();
-      _kernel.unregisterAllDevices();
-      final devices = await fetchAllDevicesInScene();
-      _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
-      await _reloadWotThingsForCurrentScene();
-      await _rebindAll(devices);
-    });
+  Future<void> reloadAllDevices({CancellationToken? cancelToken}) async {
+    await _deviceOperLock
+        .synchronized(() async {
+          await _kernel.unbindAll(cancelToken: cancelToken);
+          _kernel.unregisterAllDevices();
+          final devices = await fetchAllDevicesInScene().asCancellable(cancelToken);
+          _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
+          await _reloadWotThingsForCurrentScene(cancelToken: cancelToken);
+          await _rebindAll(devices, cancelToken: cancelToken);
+        })
+        .asCancellable(cancelToken);
   }
 
-  Future<void> _rebindAll(Iterable<DeviceEntity> devices) async {
+  Future<void> _rebindAll(Iterable<DeviceEntity> devices, {CancellationToken? cancelToken}) async {
     await _kernel.unbindAll();
     final futures = <Future>[];
     for (var device in devices) {
       futures.add(tryBind(device));
     }
-    await Future.wait(futures);
+    await Future.wait(futures).asCancellable(cancelToken);
     _globalBus.fire(DeviceManagerReadyEvent());
   }
 
@@ -400,12 +402,12 @@ final class DeviceManagerImpl extends IDeviceManager {
   }
 
   /// Reload WotThings for current scene only
-  Future<void> _reloadWotThingsForCurrentScene() async {
+  Future<void> _reloadWotThingsForCurrentScene({CancellationToken? cancelToken}) async {
     // Dispose of all existing WotThings
     _disposeAllWotThings();
 
     // Load WotThings for devices in current scene
-    await _loadWotThingsForCurrentScene();
+    await _loadWotThingsForCurrentScene(cancelToken: cancelToken);
 
     // Fire event to notify that devices for current scene have been reloaded
     final currentScene = _sceneManager.current;
@@ -440,7 +442,7 @@ final class DeviceManagerImpl extends IDeviceManager {
   }
 
   /// Load WotThings for devices in current scene
-  Future<void> _loadWotThingsForCurrentScene() async {
+  Future<void> _loadWotThingsForCurrentScene({CancellationToken? cancelToken}) async {
     try {
       final devices = await fetchAllDevicesInScene();
       logger?.d('Loading WotThings for ${devices.length} devices in current scene');
@@ -449,7 +451,7 @@ final class DeviceManagerImpl extends IDeviceManager {
         try {
           final metaModule = _deviceModuleRegistry.metaModules[device.driverID];
           if (metaModule != null) {
-            final wotThing = await metaModule.createWotThing(device, this, logger: logger);
+            final wotThing = await metaModule.createWotThing(device, this, logger: logger, cancelToken: cancelToken);
             _wotThings[device.id] = wotThing;
 
             // If device is bound, sync WotThing with actual device state
@@ -469,11 +471,15 @@ final class DeviceManagerImpl extends IDeviceManager {
   }
 
   /// Load WotThing for a single device
-  Future<void> _loadWotThingForDevice(DeviceEntity device, {bool replaceExisting = true}) async {
+  Future<void> _loadWotThingForDevice(
+    DeviceEntity device, {
+    bool replaceExisting = true,
+    CancellationToken? cancelToken,
+  }) async {
     try {
       final metaModule = _deviceModuleRegistry.metaModules[device.driverID];
       if (metaModule != null) {
-        final wotThing = await metaModule.createWotThing(device, this, logger: logger);
+        final wotThing = await metaModule.createWotThing(device, this, logger: logger, cancelToken: cancelToken);
         if (!replaceExisting && _wotThings.containsKey(device.id)) {
           return;
         }
@@ -490,7 +496,7 @@ final class DeviceManagerImpl extends IDeviceManager {
 
         // If device is bound, sync WotThing with actual device state
         if (isBound(device.id)) {
-          await _syncWotThingWithBoundDevice(device.id, wotThing);
+          await _syncWotThingWithBoundDevice(device.id, wotThing, cancelToken: cancelToken);
         }
         logger?.d('Successfully loaded WotThing for device ${device.id}');
       }
@@ -500,10 +506,13 @@ final class DeviceManagerImpl extends IDeviceManager {
   }
 
   /// Sync WotThing properties with actual device state
-  Future<void> _syncWotThingWithBoundDevice(String deviceID, WotThing wotThing) async {
+  Future<void> _syncWotThingWithBoundDevice(
+    String deviceID,
+    WotThing wotThing, {
+    CancellationToken? cancelToken,
+  }) async {
     try {
-      // This is where we would sync WotThing properties with actual device state
-      // For now, we'll leave this as a placeholder for future implementation
+      wotThing.sync(cancelToken: cancelToken);
       logger?.d('WotThing synced for device $deviceID');
     } catch (e) {
       logger?.w('Failed to sync WotThing for device $deviceID: $e');

@@ -76,7 +76,7 @@ class GroupViewModel extends BaseViewModel with ViewModelEventBusMixin {
     }
     _devices = [];
     _updateModified();
-    notifyListeners();
+    if (!isDisposed) notifyListeners();
   }
 
   @override

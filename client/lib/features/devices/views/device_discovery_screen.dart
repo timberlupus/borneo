@@ -32,8 +32,28 @@ class DeviceDiscoveryScreen extends StatelessWidget {
         globalEventBus: cb.read<EventBus>(),
         gt: gt,
         logger: cb.read<Logger>(),
-      )..initialize(),
-      child: const _DeviceDiscoveryContent(),
+      ),
+      builder: (context, _) {
+        final vm = context.read<DeviceDiscoveryViewModel>();
+        return FutureBuilder<void>(
+          future: vm.initFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return Scaffold(
+                appBar: AppBar(title: Text(context.translate('Add Device'))),
+                body: const Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (snapshot.hasError) {
+              return Scaffold(
+                appBar: AppBar(title: Text(context.translate('Add Device'))),
+                body: Center(child: Text(snapshot.error.toString())),
+              );
+            }
+            return const _DeviceDiscoveryContent();
+          },
+        );
+      },
     );
   }
 }
@@ -84,18 +104,18 @@ class _DeviceDiscoveryContent extends StatelessWidget {
               if (error == null) return const SizedBox();
               return Container(
                 color: Theme.of(context).colorScheme.errorContainer,
-                padding: EdgeInsets.all(12),
+                padding: EdgeInsets.all(8),
                 width: double.infinity,
                 child: Row(
                   children: [
-                    Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error, size: 20),
-                    SizedBox(width: 12),
+                    Icon(Icons.error_outline, color: Theme.of(context).colorScheme.onErrorContainer, size: 20),
+                    SizedBox(width: 16),
                     Expanded(
                       child: Text(
                         error,
                         style: Theme.of(
                           context,
-                        ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.error),
+                        ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onErrorContainer),
                       ),
                     ),
                     IconButton(
@@ -103,7 +123,7 @@ class _DeviceDiscoveryContent extends StatelessWidget {
                       icon: Icon(Icons.close, color: Theme.of(context).colorScheme.error, size: 20),
                       tooltip: context.translate('Close'),
                       padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(minWidth: 40, minHeight: 40),
+                      constraints: BoxConstraints(minWidth: 48, minHeight: 48),
                     ),
                   ],
                 ),
@@ -138,12 +158,6 @@ class _DeviceDiscoveryContent extends StatelessWidget {
                                     style: Theme.of(
                                       context,
                                     ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.outline),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  ElevatedButton.icon(
-                                    onPressed: () => context.read<DeviceDiscoveryViewModel>().startDiscovery(),
-                                    icon: const Icon(Icons.refresh),
-                                    label: Text(context.translate('Scan')),
                                   ),
                                 ],
                               ),
@@ -198,11 +212,12 @@ class _DeviceDiscoveryContent extends StatelessWidget {
   }
 
   Widget _buildDeviceTile(BuildContext context, DeviceDiscoveryViewModel vm, DiscoverableDevice device) {
-    if (device.type == DiscoverableDeviceType.provisioned && device.provisionedData != null) {
-      return _buildProvisionedTile(context, vm, device.provisionedData!);
-    } else {
-      return _buildUnprovisionedTile(context, vm, device.name);
-    }
+    // Wrap each tile in a keyed StatefulWidget so only newly inserted items animate.
+    final Widget tile = (device.type == DiscoverableDeviceType.provisioned && device.provisionedData != null)
+        ? _buildProvisionedTile(context, vm, device.provisionedData!)
+        : _buildUnprovisionedTile(context, vm, device.name);
+
+    return _AnimatedDeviceTile(key: ValueKey(device.id), child: tile);
   }
 
   Widget _buildProvisionedTile(
@@ -290,6 +305,49 @@ class _DeviceDiscoveryContent extends StatelessWidget {
         },
         title: 'Registry "${deviceInfo.name}"',
         subtitle: context.translate('Select the group to which the new device belongs:'),
+      ),
+    );
+  }
+}
+
+// Fade-in wrapper for newly inserted device list items.
+class _AnimatedDeviceTile extends StatefulWidget {
+  final Widget child;
+  const _AnimatedDeviceTile({required Key key, required this.child}) : super(key: key);
+
+  @override
+  State<_AnimatedDeviceTile> createState() => _AnimatedDeviceTileState();
+}
+
+class _AnimatedDeviceTileState extends State<_AnimatedDeviceTile> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Respect user's reduce-motion accessibility preference.
+    final reduceMotion = MediaQuery.of(context).accessibleNavigation;
+    if (reduceMotion) return widget.child;
+
+    return FadeTransition(
+      opacity: _animation,
+      child: SlideTransition(
+        position: _animation.drive(Tween<Offset>(begin: const Offset(0, 0.02), end: Offset.zero)),
+        child: widget.child,
       ),
     );
   }
