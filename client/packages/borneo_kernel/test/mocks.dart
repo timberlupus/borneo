@@ -564,9 +564,18 @@ class MockHeartbeatService implements HeartbeatService {
   bool _active = false;
   bool _suspended = false;
   final _failController = StreamController<Device>.broadcast();
+  final _tickController = StreamController<void>.broadcast();
+
+  // for verification
+  final List<BoundDevice> registered = [];
+  final List<String> unregistered = [];
+  final List<String> communicationEvents = [];
 
   @override
   Stream<Device> get onFailure => _failController.stream;
+
+  @override
+  Stream<void> get onTick => _tickController.stream;
 
   @override
   bool get isActive => _active && !_suspended;
@@ -580,6 +589,10 @@ class MockHeartbeatService implements HeartbeatService {
   Future<void> stop() async {
     _active = false;
     _suspended = false;
+    registered.clear();
+    unregistered.clear();
+    communicationEvents.clear();
+    _tickController.close();
   }
 
   @override
@@ -593,10 +606,19 @@ class MockHeartbeatService implements HeartbeatService {
   }
 
   @override
-  void registerDevice(Device device) {}
+  void registerDevice(BoundDevice bound, HeartbeatMethod method) {
+    registered.add(bound);
+  }
 
   @override
-  void unregisterDevice(String deviceID) {}
+  void unregisterDevice(String deviceID) {
+    unregistered.add(deviceID);
+  }
+
+  @override
+  void onDeviceCommunication(String deviceID) {
+    communicationEvents.add(deviceID);
+  }
 }
 
 class MockDriverFactory implements DriverFactory {
