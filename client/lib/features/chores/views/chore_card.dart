@@ -114,21 +114,18 @@ class _ChoreCardContentState extends State<_ChoreCardContent> {
                   Divider(height: 16, thickness: 1.5, color: fgColor.withValues(alpha: 0.2)),
                   Row(
                     children: [
-                      SizedBox(
-                        width: 72, // reserve space to keep left alignment stable
-                        child: AnimatedSwitcher(
-                          duration: kAnimateDuration,
-                          switchInCurve: Curves.easeInOut,
-                          switchOutCurve: Curves.easeInOut,
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              isActive ? context.translate('ACTIVE') : context.translate('INACTIVE'),
-                              key: ValueKey(isActive),
-                              style: TextStyle(
-                                fontSize: textTheme.labelSmall?.fontSize,
-                                color: fgColor.withValues(alpha: 0.7),
-                              ),
+                      AnimatedSwitcher(
+                        duration: kAnimateDuration,
+                        switchInCurve: Curves.easeInOut,
+                        switchOutCurve: Curves.easeInOut,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            isActive ? context.translate('ACTIVE') : context.translate('INACTIVE'),
+                            key: ValueKey(isActive),
+                            style: TextStyle(
+                              fontSize: textTheme.labelSmall?.fontSize,
+                              color: fgColor.withValues(alpha: 0.7),
                             ),
                           ),
                         ),

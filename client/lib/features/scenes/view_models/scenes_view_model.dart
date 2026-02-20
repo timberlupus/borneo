@@ -82,6 +82,9 @@ class ScenesViewModel extends ChangeNotifier {
     }
   }
 
+  @visibleForTesting
+  Future<void> reload({bool preserveOrder = true}) => _reload(preserveOrder: preserveOrder);
+
   Future<void> _reload({bool preserveOrder = true}) async {
     _logger?.d('ScenesViewModel._reload(preserveOrder=$preserveOrder)');
     final scenes = await _sceneManager.all();
@@ -115,6 +118,18 @@ class ScenesViewModel extends ChangeNotifier {
       sceneStates.sort((a, b) => b.scene.lastAccessTime.compareTo(a.scene.lastAccessTime));
       _scenes = sceneStates;
     }
+
+    // make sure the currently active scene (if any) is shown first
+    if (!preserveOrder && _scenes.isNotEmpty) {
+      // only force-reorder when not preserving existing order (i.e. on initial load)
+      final currentId = _sceneManager.current.id;
+      final idx = _scenes.indexWhere((s) => s.id == currentId);
+      if (idx > 0) {
+        final selected = _scenes.removeAt(idx);
+        _scenes.insert(0, selected);
+      }
+    }
+
     notifyListeners();
   }
 
