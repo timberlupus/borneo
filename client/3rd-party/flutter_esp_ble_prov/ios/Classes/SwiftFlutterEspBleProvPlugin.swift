@@ -57,7 +57,7 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
                 security: security
             )
         } else {
-            result("iOS " + UIDevice.current.systemVersion)
+            result(FlutterMethodNotImplemented)
         }
     }
     
@@ -103,6 +103,8 @@ private class BLEProvisionService: ProvisionService {
                 if(error != nil) {
                     NSLog("Error scanning wifi networks, deviceName: \(deviceName) ")
                     ESPErrorHandler.handle(error: error!, result: self.result)
+                    device?.disconnect()
+                    return
                 }
                 self.result(wifiList?.map({(networks: ESPWifiNetwork) -> String in return networks.ssid}))
                 device?.disconnect()
@@ -117,6 +119,8 @@ private class BLEProvisionService: ProvisionService {
                 if(error != nil) {
                     NSLog("Error scanning wifi networks with details, deviceName: \(deviceName) ")
                     ESPErrorHandler.handle(error: error!, result: self.result)
+                    device?.disconnect()
+                    return
                 }
                 self.result(wifiList?.map({(networks: ESPWifiNetwork) -> [String: Any] in 
                     return [

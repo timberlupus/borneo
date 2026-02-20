@@ -85,13 +85,18 @@ class CallContext(val call: MethodCall, val result: Result) {
  * Allows for asynchronously requesting permissions based on platform version.
  *
  * The version switch is required because Bluetooth permission requirements changed at S (31).
+ *
+ * Concurrent calls to [ensure] are queued: only one system permission dialog is shown at a time.
+ * All callers that arrive while a dialog is already visible will be notified together once that
+ * single dialog is dismissed, receiving the same grant result.
  */
 class PermissionManager(val boss: Boss) : PluginRegistry.RequestPermissionsResultListener {
 
-  lateinit var callback: (Boolean) -> Unit
+  // Callers waiting for the in-flight permission dialog to complete.
+  private val pendingCallbacks = mutableListOf<(Boolean) -> Unit>()
 
-  val callbacks = mutableMapOf<Int, (Boolean) -> Unit>()
-  var lastCallbackId = 0
+  // Whether a system permission dialog is currently being shown.
+  private var isRequesting = false
 
   /**
    * Required permissions for the current version of the SDK.
@@ -107,31 +112,42 @@ class PermissionManager(val boss: Boss) : PluginRegistry.RequestPermissionsResul
     }
 
   /**
-   * Check permissions are granted and request them otherwise.
+   * Check permissions are granted and request them otherwise. Invokes the
+   * callback with `true` if *all* requested permissions are granted, `false`
+   * otherwise.
+   *
+   * If a permission dialog is already showing, the callback is queued and will
+   * be notified together with the original caller when that dialog is dismissed.
    */
   fun ensure(fCallback: (Boolean) -> Unit) {
-    callback = fCallback
-    val toRequest: MutableList<String> = mutableListOf()
-    for (p in permissions) {
-      if (ActivityCompat.checkSelfPermission(boss.platformActivity, p) != PackageManager.PERMISSION_GRANTED) {
-        toRequest.add(p)
-      }
+    val toRequest = permissions.filter {
+      ActivityCompat.checkSelfPermission(boss.platformActivity, it) != PackageManager.PERMISSION_GRANTED
     }
-    if (toRequest.size > 0) {
-      ActivityCompat.requestPermissions(boss.platformActivity, toRequest.toTypedArray(), 0)
-    } else {
+
+    if (toRequest.isEmpty()) {
       fCallback(true)
+      return
+    }
+
+    // Enqueue the callback regardless; only open a new dialog if one isn't already showing.
+    pendingCallbacks.add(fCallback)
+    if (!isRequesting) {
+      isRequesting = true
+      ActivityCompat.requestPermissions(boss.platformActivity, toRequest.toTypedArray(), 0)
     }
   }
 
   /**
-   * Called on permission request result.
+   * Called on permission request result. Notifies all queued callers with the
+   * same result and clears the queue.
    */
   override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray): Boolean {
     boss.d("permission result")
-    if (this::callback.isInitialized) {
-      callback(true)
-    }
+    isRequesting = false
+    val granted = grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+    val toNotify = pendingCallbacks.toList()
+    pendingCallbacks.clear()
+    toNotify.forEach { it(granted) }
     return true
   }
 }
@@ -224,7 +240,13 @@ class Boss {
   }
 
   fun call(call: MethodCall, result: Result) {
-    permissionManager.ensure(fun(_: Boolean) {
+    permissionManager.ensure(fun(granted: Boolean) {
+      if (!granted) {
+        // propagate a permission error back to Dart and abort further work
+        result.error("PERMISSION_DENIED", "Required permissions not granted", null)
+        return@ensure
+      }
+
       val ctx = CallContext(call, result)
       when (call.method) {
         platformVersionMethod -> getPlatformVersion(ctx)

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 import 'package:borneo_app/features/devices/models/discoverable_device.dart';
@@ -61,7 +62,10 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     required super.globalEventBus,
     required super.gt,
     super.logger,
+    // helper for testing permission error handling
+    Future<bool> Function()? requestBlePermissions,
   }) {
+    this.requestBlePermissions = requestBlePermissions;
     _deviceAddedEventSub = _deviceManager.allDeviceEvents.on<NewDeviceEntityAddedEvent>().listen(
       (event) => _onNewDeviceEntityAdded(event),
     );
@@ -174,14 +178,58 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     }
   }
 
-  Future<void> _startBleScan() async {
-    // Check permissions
-    await [Permission.locationWhenInUse, Permission.bluetoothScan, Permission.bluetoothConnect].request();
+  /// Requests the set of permissions required for BLE discovery and
+  /// returns `true` if all of them are granted. This method is deliberately
+  /// public so that tests can supply a fake implementation.
+  Future<bool> Function()? requestBlePermissions;
 
-    // Perform scan
-    final devices = await _bleProvisioner.scanBleDevices('BOPROV_', cancelToken: _scanCancelToken);
-    _unprovisioned = devices;
-    _updateDiscoverableList();
+  Future<bool> _ensureBlePermissions() async {
+    // allow injection for tests
+    if (requestBlePermissions != null) {
+      return await requestBlePermissions!();
+    }
+
+    final statuses = await [
+      Permission.locationWhenInUse,
+      Permission.bluetoothScan,
+      Permission.bluetoothConnect,
+    ].request();
+
+    // if any permission is not granted, treat as failure
+    for (var status in statuses.values) {
+      if (!status.isGranted) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  Future<void> _startBleScan() async {
+    final granted = await _ensureBlePermissions();
+    if (!granted) {
+      if (!_disposed) {
+        _scanError.value = gt.translate('Bluetooth permissions are required to discover devices.');
+      }
+      return;
+    }
+
+    try {
+      final devices = await _bleProvisioner.scanBleDevices('BOPROV_', cancelToken: _scanCancelToken);
+      _unprovisioned = devices;
+      _updateDiscoverableList();
+    } on CancelledException {
+      _logger.i('BLE scan was cancelled by user.');
+      return;
+    } catch (e, stackTrace) {
+      _logger.e('BLE provisioning scan failed', error: e, stackTrace: stackTrace);
+      if (!_disposed) {
+        if (e is PlatformException && e.code == 'PERMISSION_DENIED') {
+          _scanError.value = gt.translate('Bluetooth permissions are required to discover devices.');
+        } else {
+          _scanError.value = gt.translate('Bluetooth scan error, please check if Bluetooth device is enabled.');
+        }
+      }
+    }
   }
 
   Future<void> addNewDevice(SupportedDeviceDescriptor deviceInfo, DeviceGroupEntity? group) async {

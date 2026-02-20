@@ -198,7 +198,7 @@ class _DeviceDiscoveryContent extends StatelessWidget {
                                   const SizedBox(height: 16),
                                   TextButton(
                                     onPressed: () => context.read<DeviceDiscoveryViewModel>().stopDiscovery(),
-                                    child: Text(context.translate('Cancel')),
+                                    child: Text(context.translate('Stop')),
                                   ),
                                 ],
                               ),
