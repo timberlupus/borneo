@@ -127,16 +127,24 @@ final class DeviceManagerImpl extends IDeviceManager {
 
   @override
   Future<void> reloadAllDevices({CancellationToken? cancelToken}) async {
-    await _deviceOperLock
-        .synchronized(() async {
-          await _kernel.unbindAll(cancelToken: cancelToken);
-          _kernel.unregisterAllDevices();
-          final devices = await fetchAllDevicesInScene().asCancellable(cancelToken);
-          _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
-          await _reloadWotThingsForCurrentScene(cancelToken: cancelToken);
-          await _rebindAll(devices, cancelToken: cancelToken);
-        })
-        .asCancellable(cancelToken);
+    // suppress periodic heartbeat while performing expensive device
+    // operations; this prevents the timer from racing with the rebind loop
+    // and eliminates spurious CoAP timeouts.
+    _kernel.suspendHeartbeat();
+    try {
+      await _deviceOperLock
+          .synchronized(() async {
+            await _kernel.unbindAll(cancelToken: cancelToken);
+            _kernel.unregisterAllDevices();
+            final devices = await fetchAllDevicesInScene().asCancellable(cancelToken);
+            _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
+            await _reloadWotThingsForCurrentScene(cancelToken: cancelToken);
+            await _rebindAll(devices, cancelToken: cancelToken);
+          })
+          .asCancellable(cancelToken);
+    } finally {
+      _kernel.resumeHeartbeat();
+    }
   }
 
   Future<void> _rebindAll(Iterable<DeviceEntity> devices, {CancellationToken? cancelToken}) async {

@@ -28,6 +28,9 @@ final class DefaultKernel implements IKernel {
   bool _isDisposed = false;
   bool _isScanning = false;
 
+  // When true the periodic _heartbeatPollingPeriodicTask should do nothing.
+  bool _heartbeatSuspended = false;
+
   final Logger _logger;
   final IDriverRegistry _driverRegistry;
   final IMdnsProvider? mdnsProvider;
@@ -520,6 +523,11 @@ final class DefaultKernel implements IKernel {
   }
 
   Future<void> _heartbeatPollingPeriodicTask({CancellationToken? cancelToken}) async {
+    if (_heartbeatSuspended) {
+      _logger.t('Heartbeat polling skipped because suspended.');
+      return;
+    }
+
     if (!isInitialized) {
       return;
     }
@@ -630,6 +638,16 @@ final class DefaultKernel implements IKernel {
       throw InvalidOperationException(message: 'The kernel has not been initialized!');
     }
     assert(!_isDisposed);
+  }
+
+  @override
+  void suspendHeartbeat() {
+    _heartbeatSuspended = true;
+  }
+
+  @override
+  void resumeHeartbeat() {
+    _heartbeatSuspended = false;
   }
 
   Driver _ensureDriverActivated(String driverID) {

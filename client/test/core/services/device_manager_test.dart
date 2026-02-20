@@ -302,6 +302,21 @@ void main() {
         deviceManager.dispose();
       });
     });
+
+    group('Heartbeat suspension', () {
+      test('reloadAllDevices suspends and resumes heartbeat', () async {
+        // Arrange: kernel starts in default state
+        expect(testKernel.heartbeatSuspended, isFalse);
+        expect(testKernel.heartbeatResumed, isFalse);
+
+        // Act
+        await deviceManager.reloadAllDevices();
+
+        // Assert
+        expect(testKernel.heartbeatSuspended, isTrue, reason: 'heartbeat should be suspended before heavy operations');
+        expect(testKernel.heartbeatResumed, isTrue, reason: 'heartbeat should be resumed after operations complete');
+      });
+    });
   });
 }
 
@@ -312,6 +327,10 @@ class TestKernel implements IKernel {
   final List<String> boundDeviceIds = [];
   final List<BoundDevice> _boundDevices = [];
   final TestGlobalDevicesEventBus _events = TestGlobalDevicesEventBus();
+
+  // tracks whether suspend/resume were invoked
+  bool heartbeatSuspended = false;
+  bool heartbeatResumed = false;
 
   // Test tracking
   bool startCalled = false;
@@ -344,6 +363,16 @@ class TestKernel implements IKernel {
   Future<void> start() async {
     startCalled = true;
     _isInitialized = true;
+  }
+
+  @override
+  void suspendHeartbeat() {
+    heartbeatSuspended = true;
+  }
+
+  @override
+  void resumeHeartbeat() {
+    heartbeatResumed = true;
   }
 
   @override

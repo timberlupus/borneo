@@ -1,11 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 
-import 'package:borneo_app/features/scenes/views/scenes_screen.dart';
-import 'package:borneo_app/features/scenes/view_models/scenes_view_model.dart';
 import 'package:event_bus/event_bus.dart';
+
+import 'package:borneo_app/features/scenes/view_models/scenes_view_model.dart';
 
 // core types used by stubs
 import 'package:borneo_app/core/services/scene_manager.dart';

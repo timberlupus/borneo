@@ -427,6 +427,12 @@ class MockKernel implements IKernel {
   Future<void> startDevicesScanning({Duration? timeout, CancellationToken? cancelToken}) async {}
 
   @override
+  void suspendHeartbeat() {}
+
+  @override
+  void resumeHeartbeat() {}
+
+  @override
   Future<void> stopDevicesScanning() async {}
 
   @override
