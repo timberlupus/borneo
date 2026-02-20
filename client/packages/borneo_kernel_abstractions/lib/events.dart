@@ -56,3 +56,10 @@ class DeviceDiscoveringStartedEvent {
 class DeviceDiscoveringStoppedEvent {
   const DeviceDiscoveringStoppedEvent();
 }
+
+/// Fired when a previously discovered (but unbound) device disappears from
+/// a discovery bus.  The listener receives the lost device's id.
+class UnboundDeviceLostEvent {
+  final String deviceId;
+  const UnboundDeviceLostEvent(this.deviceId);
+}

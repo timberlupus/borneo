@@ -457,16 +457,20 @@ class MockKernel implements IKernel {
 
 class MockDiscoveryManager implements DiscoveryManager {
   final _controller = StreamController<DiscoveredDevice>.broadcast();
+  final _lostController = StreamController<String>.broadcast();
   bool _active = false;
 
   @override
   Stream<DiscoveredDevice> get onDeviceFound => _controller.stream;
 
   @override
+  Stream<String> get onDeviceLost => _lostController.stream;
+
+  @override
   bool get isActive => _active;
 
   @override
-  Future<void> start({Duration? timeout}) async {
+  Future<void> start({Duration? timeout, CancellationToken? cancelToken}) async {
     _active = true;
     if (timeout != null) {
       Future.delayed(timeout, () => stop());
@@ -474,30 +478,53 @@ class MockDiscoveryManager implements DiscoveryManager {
   }
 
   @override
-  Future<void> stop() async {
+  Future<void> stop({CancellationToken? cancelToken}) async {
     _active = false;
   }
+
+  @override
+  void registerBus(DeviceBus bus) {}
+
+  @override
+  void unregisterBus(String busId) {}
 
   void addDevice(DiscoveredDevice device) {
     _controller.add(device);
   }
 
+  void emitLost(String id) {
+    _lostController.add(id);
+  }
+
   void dispose() {
     _controller.close();
+    _lostController.close();
   }
 }
 
 class MockBindingEngine implements BindingEngine {
   bool _busy = false;
   final Map<String, bool> _probes = {};
+  final Map<String, BoundDevice> _bound = {};
+
+  bool bindCalled = false;
+  bool unbindCalled = false;
 
   @override
   bool get isBusy => _busy;
 
   @override
+  Iterable<BoundDevice> get boundDevices => _bound.values;
+
+  @override
+  BoundDevice? getBoundDevice(String deviceID) => _bound[deviceID];
+
+  @override
   Future<void> bind(Device device, String driverID, {CancellationToken? cancelToken}) async {
+    bindCalled = true;
     final ok = await tryBind(device, driverID, cancelToken: cancelToken);
     if (!ok) throw Exception('bind failed');
+    _bound[device.id] = BoundDevice(driverID, device, MockDriver('mock'));
   }
 
   @override
@@ -510,9 +537,19 @@ class MockBindingEngine implements BindingEngine {
 
   @override
   Future<void> unbind(String deviceID, {CancellationToken? cancelToken}) async {
+    unbindCalled = true;
     _busy = true;
     await Future.delayed(Duration(milliseconds: 5));
     _busy = false;
+    _bound.remove(deviceID);
+  }
+
+  @override
+  Future<void> unbindAll({CancellationToken? cancelToken}) async {
+    final ids = List<String>.from(_bound.keys);
+    for (final id in ids) {
+      await unbind(id, cancelToken: cancelToken);
+    }
   }
 
   @override

@@ -2,9 +2,48 @@ import 'dart:async';
 
 // imports of interfaces pulled indirectly via mocks
 import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
+import 'package:borneo_kernel_abstractions/events.dart';
+import 'package:borneo_kernel_abstractions/device_bus.dart';
+import 'package:borneo_kernel/discovery_manager_impl.dart';
+import 'package:borneo_kernel/binding_engine_impl.dart';
 import 'package:test/test.dart';
-
 import 'mocks.dart';
+
+// helper dummy bus for testing
+class DummyBus implements DeviceBus {
+  @override
+  String get id => 'dummy';
+
+  final _f = StreamController<DiscoveredDevice>.broadcast();
+  final _l = StreamController<String>.broadcast();
+
+  @override
+  Stream<DiscoveredDevice> get onDeviceFound => _f.stream;
+
+  @override
+  Stream<String> get onDeviceLost => _l.stream;
+
+  bool started = false;
+  @override
+  Future<void> start() async {
+    started = true;
+  }
+
+  @override
+  Future<void> stop() async {
+    started = false;
+  }
+
+  @override
+  Future<void> connect(String deviceId) async {}
+
+  @override
+  Future<void> disconnect(String deviceId) async {}
+
+  // helpers for tests
+  void emitFound(DiscoveredDevice d) => _f.add(d);
+  void emitLost(String id) => _l.add(id);
+}
 
 void main() {
   group('Interface mocks', () {
@@ -34,6 +73,33 @@ void main() {
       expect(result, isFalse);
     });
 
+    test('DefaultBindingEngine binds/unbinds and exposes state', () async {
+      final logger = MockLogger();
+      final registry = MockDriverRegistry();
+      final events = GlobalDevicesEventBus();
+      final drv = MockDriver('drv');
+      registry.addDriver('drv', createTestDriverDescriptor('drv', drv));
+
+      final eng = DefaultBindingEngine(logger, registry, events);
+      expect(eng.boundDevices, isEmpty);
+      final device = TestDevice('a', 'http://a');
+
+      final received = <Object>[];
+      final sub = events.on().listen((e) => received.add(e));
+
+      await eng.bind(device, 'drv');
+      await Future.delayed(Duration.zero);
+      expect(eng.boundDevices.map((b) => b.device.id), contains('a'));
+      expect(received, contains(isA<DeviceBoundEvent>()));
+
+      await eng.unbind('a');
+      await Future.delayed(Duration.zero);
+      expect(eng.boundDevices, isEmpty);
+      expect(received, contains(isA<DeviceRemovedEvent>()));
+
+      await sub.cancel();
+    });
+
     test('HeartbeatService start/suspend/resume', () async {
       final svc = MockHeartbeatService();
       expect(svc.isActive, isFalse);
@@ -60,6 +126,43 @@ void main() {
       disp.fire('no');
       await Future.delayed(Duration.zero);
       expect(list, [1]);
+    });
+
+    test('DefaultDiscoveryManager integrates with mdns provider', () async {
+      final mgr = DefaultDiscoveryManager(
+        MockLogger(),
+        MockDriverRegistry(),
+        GlobalDevicesEventBus(),
+        mdnsProvider: MockMdnsProvider(),
+      );
+      expect(mgr.isActive, isFalse);
+      await mgr.start();
+      expect(mgr.isActive, isTrue);
+      await mgr.stop();
+    });
+
+    test('DiscoveryManager forwards events from registered bus', () async {
+      final mgr = DefaultDiscoveryManager(MockLogger(), MockDriverRegistry(), GlobalDevicesEventBus());
+      // simple bus that emits one found & one lost
+      final bus = DummyBus();
+      mgr.registerBus(bus);
+
+      await mgr.start();
+      expect(bus.started, isTrue);
+
+      final found = <DiscoveredDevice>[];
+      final lost = <String>[];
+      mgr.onDeviceFound.listen(found.add);
+      mgr.onDeviceLost.listen(lost.add);
+
+      final dev = TestMdnsDiscoveredDevice(host: 'h', port: 1);
+      bus.emitFound(dev);
+      await Future.delayed(Duration.zero);
+      expect(found, contains(dev));
+
+      bus.emitLost('gone');
+      await Future.delayed(Duration.zero);
+      expect(lost, contains('gone'));
     });
 
     test('DeviceBus stub provides streams', () async {

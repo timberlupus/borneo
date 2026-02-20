@@ -246,6 +246,43 @@ void main() {
     });
 
     group('Device Discovery', () {
+      test('supports custom DiscoveryManager injection', () async {
+        await kernel.start();
+        final mgr = MockDiscoveryManager();
+        // build new kernel with supplied manager and the same mocks
+        final k2 = DefaultKernel(mockLogger, mockDriverRegistry, mdnsProvider: mockMdnsProvider, discoveryManager: mgr);
+        await k2.start();
+        expect(k2.isScanning, isFalse);
+        await k2.startDevicesScanning();
+        expect(mgr.isActive, isTrue);
+        await k2.stopDevicesScanning();
+        expect(mgr.isActive, isFalse);
+      });
+
+      test('supports custom BindingEngine injection', () async {
+        await kernel.start();
+        final eng = MockBindingEngine();
+        final k2 = DefaultKernel(mockLogger, mockDriverRegistry, mdnsProvider: mockMdnsProvider, bindingEngine: eng);
+        await k2.start();
+        final device = TestDevice('d1', 'http://d1');
+        k2.registerDevice(BoundDeviceDescriptor(device: device, driverID: 'test-driver'));
+        await k2.bind(device, 'test-driver');
+        expect(eng.bindCalled, isTrue);
+      });
+
+      test('kernel forwards unbound device lost events', () async {
+        await kernel.start();
+        final mgr = MockDiscoveryManager();
+        final k2 = DefaultKernel(mockLogger, mockDriverRegistry, mdnsProvider: mockMdnsProvider, discoveryManager: mgr);
+        await k2.start();
+        UnboundDeviceLostEvent? got;
+        k2.events.on<UnboundDeviceLostEvent>().listen((e) {
+          got = e;
+        });
+        mgr.emitLost('abc');
+        await Future.delayed(Duration.zero);
+        expect(got?.deviceId, 'abc');
+      });
       test('should start and stop device scanning', () async {
         await kernel.start();
 
