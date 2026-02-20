@@ -1,4 +1,5 @@
 import 'package:borneo_kernel_abstractions/events.dart';
+import 'package:borneo_kernel_abstractions/event_dispatcher.dart';
 import 'package:borneo_kernel_abstractions/driver.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 
@@ -44,9 +45,13 @@ abstract class IKernel implements IDisposable {
   /// Indicates whether [start] has completed successfully.
   bool get isInitialized;
 
-  /// Event bus exposed by the kernel; all device-related events are fired
-  /// through this bus.
-  GlobalDevicesEventBus get events;
+  /// Event dispatcher exposed by the kernel; all device-related events are
+  /// fired through this dispatcher.  The concrete object may currently be a
+  /// [GlobalDevicesEventBus] for backwards compatibility, but callers should
+  /// program against the [EventDispatcher] interface to avoid depending on a
+  /// global singleton.  Eventually this property will return a
+  /// [DefaultEventDispatcher].
+  EventDispatcher get events;
 
   /// Drivers that have been activated.  Drivers are activated lazily when the
   /// first device requiring them is bound; unused drivers are purged

@@ -11,7 +11,9 @@ import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
-import 'package:flutter_test/flutter_test.dart';
+// hide EventDispatcher because flutter_test also exports a symbol with
+// the same name; we use the one from kernel_abstractions instead.
+import 'package:flutter_test/flutter_test.dart' hide EventDispatcher;
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast_memory.dart';
 
@@ -326,7 +328,7 @@ class TestKernel implements IKernel {
   bool _isInitialized = false;
   final List<String> boundDeviceIds = [];
   final List<BoundDevice> _boundDevices = [];
-  final TestGlobalDevicesEventBus _events = TestGlobalDevicesEventBus();
+  final EventDispatcher _events = DefaultEventDispatcher();
 
   // tracks whether suspend/resume were invoked
   bool heartbeatSuspended = false;
@@ -357,7 +359,7 @@ class TestKernel implements IKernel {
   Iterable<BoundDevice> get boundDevices => _boundDevices;
 
   @override
-  GlobalDevicesEventBus get events => _events;
+  EventDispatcher get events => _events;
 
   @override
   Future<void> start() async {
@@ -497,7 +499,8 @@ class TestDriver extends Driver {
   void dispose() {}
 }
 
-class TestGlobalDevicesEventBus extends EventBus implements GlobalDevicesEventBus {}
+// deprecated test helper; replaced by EventDispatcher
+class TestEventDispatcher extends DefaultEventDispatcher {}
 
 class TestEventBus extends EventBus {}
 

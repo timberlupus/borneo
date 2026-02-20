@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:borneo_kernel/kernel.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
+import 'package:borneo_kernel_abstractions/event_dispatcher.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:test/test.dart';
@@ -31,6 +32,10 @@ void main() {
 
     tearDown(() {
       kernel.dispose();
+    });
+
+    test('uses DefaultEventDispatcher internally', () {
+      expect(kernel.events, isA<DefaultEventDispatcher>());
     });
 
     group('Initialization', () {

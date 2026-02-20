@@ -17,3 +17,24 @@ abstract class EventDispatcher {
   /// method, [on] streams may complete or throw when listened.
   void destroy();
 }
+
+/// Default concrete implementation used throughout the kernel.  It simply
+/// wraps a single broadcast [StreamController] and filters events by type.
+class DefaultEventDispatcher implements EventDispatcher {
+  final _ctrl = StreamController.broadcast();
+
+  @override
+  Stream<T> on<T>() => _ctrl.stream.where((e) => e is T).cast<T>();
+
+  @override
+  void fire(Object event) {
+    if (!_ctrl.isClosed) {
+      _ctrl.add(event);
+    }
+  }
+
+  @override
+  void destroy() {
+    _ctrl.close();
+  }
+}

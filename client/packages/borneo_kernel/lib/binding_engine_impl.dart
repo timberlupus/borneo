@@ -14,7 +14,7 @@ import 'package:borneo_kernel_abstractions/kernel.dart';
 class DefaultBindingEngine implements BindingEngine {
   final Logger _logger;
   final IDriverRegistry _driverRegistry;
-  final GlobalDevicesEventBus _events;
+  final EventDispatcher _events;
 
   // Configurable timeouts carried over from the kernel constructor.
   final Duration localBindTimeout;

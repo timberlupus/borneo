@@ -37,7 +37,11 @@ final class DefaultKernel implements IKernel {
   late final BindingEngine _bindingEngine;
 
   final Map<String, BoundDeviceDescriptor> _registeredDevices = {};
-  final GlobalDevicesEventBus _events = GlobalDevicesEventBus();
+  // use the new interface for dispatching events; currently we create
+  // a DefaultEventDispatcher but expose it as EventDispatcher so callers
+  // are insulated from the concrete type.  This avoids leaking the
+  // legacy GlobalDevicesEventBus throughout the codebase.
+  final EventDispatcher _events = DefaultEventDispatcher();
   final CancellationToken _masterCancelToken = CancellationToken();
   late final StreamSubscription<DeviceOfflineEvent> _deviceOfflineSub;
   late final StreamSubscription<FoundDeviceEvent> _foundDeviceEventSub;
@@ -60,7 +64,7 @@ final class DefaultKernel implements IKernel {
   bool get isInitialized => _isInitialized;
 
   @override
-  GlobalDevicesEventBus get events => _events;
+  EventDispatcher get events => _events;
 
   @override
   Iterable<Driver> get activatedDrivers => _bindingEngine.boundDevices.map((b) => b.driver);

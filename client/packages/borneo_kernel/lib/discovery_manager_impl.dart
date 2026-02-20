@@ -9,6 +9,7 @@ import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
 import 'package:borneo_kernel_abstractions/mdns.dart';
 import 'package:borneo_kernel_abstractions/driver_registry.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
+import 'package:borneo_kernel_abstractions/event_dispatcher.dart';
 import 'package:borneo_kernel_abstractions/device_bus.dart';
 import 'package:event_bus/event_bus.dart';
 
@@ -22,7 +23,7 @@ class DefaultDiscoveryManager implements DiscoveryManager {
   final Logger _logger;
   final IDriverRegistry _driverRegistry;
   final IMdnsProvider? mdnsProvider;
-  final GlobalDevicesEventBus _events;
+  final EventDispatcher _events;
 
   bool _active = false;
 

@@ -5,7 +5,11 @@ import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/features/devices/models/events.dart';
 import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
+import 'package:borneo_kernel_abstractions/event_dispatcher.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
+// `EventDispatcher` replaced the previous EventBus-based global device
+// events.  We still import EventBus for the external globalEventBus parameter
+// but do not rely on it for device manager events.
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lw_wot/wot.dart';
@@ -24,7 +28,7 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
 
   String get name => deviceEntity.name;
 
-  EventBus get deviceEvents => deviceManager.allDeviceEvents;
+  EventDispatcher get deviceEvents => deviceManager.allDeviceEvents;
 
   late final StreamSubscription<DeviceBoundEvent> _boundEventSub;
   late final StreamSubscription<DeviceRemovedEvent> _removedEventSub;

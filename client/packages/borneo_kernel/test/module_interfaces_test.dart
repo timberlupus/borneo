@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_kernel_abstractions/device_bus.dart';
+import 'package:borneo_kernel_abstractions/event_dispatcher.dart';
 import 'package:borneo_kernel/discovery_manager_impl.dart';
 import 'package:borneo_kernel/binding_engine_impl.dart';
 import 'package:test/test.dart';
@@ -76,7 +77,8 @@ void main() {
     test('DefaultBindingEngine binds/unbinds and exposes state', () async {
       final logger = MockLogger();
       final registry = MockDriverRegistry();
-      final events = GlobalDevicesEventBus();
+      // use the new default dispatcher rather than the deprecated global
+      final events = DefaultEventDispatcher();
       final drv = MockDriver('drv');
       registry.addDriver('drv', createTestDriverDescriptor('drv', drv));
 
@@ -132,7 +134,7 @@ void main() {
       final mgr = DefaultDiscoveryManager(
         MockLogger(),
         MockDriverRegistry(),
-        GlobalDevicesEventBus(),
+        DefaultEventDispatcher(),
         mdnsProvider: MockMdnsProvider(),
       );
       expect(mgr.isActive, isFalse);
@@ -142,7 +144,7 @@ void main() {
     });
 
     test('DiscoveryManager forwards events from registered bus', () async {
-      final mgr = DefaultDiscoveryManager(MockLogger(), MockDriverRegistry(), GlobalDevicesEventBus());
+      final mgr = DefaultDiscoveryManager(MockLogger(), MockDriverRegistry(), DefaultEventDispatcher());
       // simple bus that emits one found & one lost
       final bus = DummyBus();
       mgr.registerBus(bus);

@@ -68,7 +68,7 @@ final class DeviceManagerImpl extends IDeviceManager {
   bool get isInitialized => _isInitialized;
 
   @override
-  GlobalDevicesEventBus get allDeviceEvents => _kernel.events;
+  EventDispatcher get allDeviceEvents => _kernel.events;
 
   @override
   IKernel get kernel => _kernel;
