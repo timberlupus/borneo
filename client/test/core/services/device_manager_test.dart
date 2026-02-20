@@ -115,6 +115,7 @@ void main() {
         expect(result.id, equals(testDevice.id));
         expect(result.name, equals(testDevice.name));
         expect(result.sceneID, equals(testDevice.sceneID));
+        expect(result.isDemo, isFalse);
       });
 
       test('should update device name', () async {

@@ -1,7 +1,21 @@
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:flutter_test/flutter_test.dart'
-    show group, tearDown, setUp, equals, expect, test, isNotNull, isNull, containsAll, contains, isNot, isA, throwsA;
+    show
+        group,
+        tearDown,
+        setUp,
+        equals,
+        expect,
+        test,
+        isNotNull,
+        isNull,
+        containsAll,
+        contains,
+        isNot,
+        isA,
+        throwsA,
+        isFalse;
 import 'package:sembast/sembast_memory.dart';
 
 void main() {
@@ -48,6 +62,7 @@ void main() {
         expect(retrievedDevice.address.toString(), equals(testDevice.address.toString()));
         expect(retrievedDevice.compatible, equals(testDevice.compatible));
         expect(retrievedDevice.model, equals(testDevice.model));
+        expect(retrievedDevice.isDemo, isFalse);
       });
 
       test('should update device in database', () async {
@@ -74,6 +89,7 @@ void main() {
         final updatedDevice = DeviceEntity.fromMap(testDevice.id, updatedData!);
         expect(updatedDevice.name, equals('Updated Name'));
         expect(updatedDevice.id, equals(testDevice.id)); // Other fields unchanged
+        expect(updatedDevice.isDemo, isFalse);
       });
 
       test('should delete device from database', () async {

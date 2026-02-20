@@ -3,11 +3,12 @@ import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/models/driver_data.dart';
 
 class DeviceEntity extends Device with BaseEntity {
-  static final String kNameFieldName = "name";
-  static final String kSceneIDFieldName = "sceneID";
-  static final String kGroupIDFieldName = "groupID";
-  static final String kFngerprintFieldName = "fingerprint";
-  static final String kAddressFieldName = "address";
+  static const String kNameFieldName = "name";
+  static const String kSceneIDFieldName = "sceneID";
+  static const String kGroupIDFieldName = "groupID";
+  static const String kFngerprintFieldName = "fingerprint";
+  static const String kAddressFieldName = "address";
+  static const String kIsDemoFieldName = "isDemo";
 
   DriverData? _driverData;
 
@@ -17,6 +18,7 @@ class DeviceEntity extends Device with BaseEntity {
   final String compatible;
   final String name;
   final String model;
+  final bool isDemo;
 
   // Non-persistent field for error messages
   String? lastErrorMessage;
@@ -31,6 +33,7 @@ class DeviceEntity extends Device with BaseEntity {
     required this.name,
     required this.model,
     this.groupID,
+    this.isDemo = false,
   });
 
   factory DeviceEntity.fromMap(String id, Map<String, dynamic> map) {
@@ -44,6 +47,7 @@ class DeviceEntity extends Device with BaseEntity {
       fingerprint: map[kFngerprintFieldName],
       name: map[kNameFieldName],
       model: map['model'],
+      isDemo: map[kIsDemoFieldName] == true,
     );
   }
 
@@ -58,6 +62,7 @@ class DeviceEntity extends Device with BaseEntity {
       kFngerprintFieldName: fingerprint,
       kNameFieldName: name,
       'model': model,
+      kIsDemoFieldName: isDemo,
     };
   }
 

@@ -34,6 +34,7 @@ void main() {
         expect(testDevice.compatible, '1.0.0');
         expect(testDevice.model, 'LYFI-LED-PRO');
         expect(testDevice.groupID, 'group-1');
+        expect(testDevice.isDemo, isFalse);
       });
 
       test('creates device without groupID', () {
@@ -65,6 +66,7 @@ void main() {
         expect(map['fingerprint'], 'device-fingerprint-abc123');
         expect(map['name'], testName);
         expect(map['model'], 'LYFI-LED-PRO');
+        expect(map[DeviceEntity.kIsDemoFieldName], false);
       });
 
       test('creates from map correctly', () {
@@ -90,6 +92,7 @@ void main() {
         expect(device.fingerprint, 'new-fingerprint');
         expect(device.name, 'New Device Name');
         expect(device.model, 'NewModel');
+        expect(device.isDemo, isFalse);
       });
 
       test('handles map without groupID', () {
@@ -106,6 +109,23 @@ void main() {
         final device = DeviceEntity.fromMap('test-id', testMap);
 
         expect(device.groupID, isNull);
+        expect(device.isDemo, isFalse);
+      });
+
+      test('honors isDemo flag in map', () {
+        final testMap = {
+          'sceneID': testSceneId,
+          'address': 'coap://192.168.1.100:5683',
+          'driverID': testDriverId,
+          'compatible': '1.0.0',
+          'fingerprint': 'test-fp',
+          'name': testName,
+          'model': 'TestModel',
+          DeviceEntity.kIsDemoFieldName: true,
+        };
+
+        final device = DeviceEntity.fromMap('demo-id', testMap);
+        expect(device.isDemo, isTrue);
       });
     });
 
@@ -133,6 +153,7 @@ void main() {
         expect(DeviceEntity.kGroupIDFieldName, 'groupID');
         expect(DeviceEntity.kFngerprintFieldName, 'fingerprint');
         expect(DeviceEntity.kAddressFieldName, 'address');
+        expect(DeviceEntity.kIsDemoFieldName, 'isDemo');
       });
     });
 
