@@ -432,6 +432,23 @@ class MockKernel implements IKernel {
   @override
   void resumeHeartbeat() {}
 
+  // new batch signals
+  bool batchEntered = false;
+  bool batchExited = false;
+
+  @override
+  void enterHeartbeatBatch() {
+    batchEntered = true;
+  }
+
+  @override
+  void exitHeartbeatBatch() {
+    batchExited = true;
+  }
+
+  @override
+  HeartbeatState? getHeartbeatState(String deviceID) => null;
+
   @override
   Future<void> stopDevicesScanning() async {}
 

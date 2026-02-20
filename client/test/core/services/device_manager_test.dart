@@ -305,18 +305,18 @@ void main() {
       });
     });
 
-    group('Heartbeat suspension', () {
-      test('reloadAllDevices suspends and resumes heartbeat', () async {
+    group('Heartbeat batch signaling', () {
+      test('reloadAllDevices sends enter/exit batch signals', () async {
         // Arrange: kernel starts in default state
-        expect(testKernel.heartbeatSuspended, isFalse);
-        expect(testKernel.heartbeatResumed, isFalse);
+        expect(testKernel.batchEntered, isFalse);
+        expect(testKernel.batchExited, isFalse);
 
         // Act
         await deviceManager.reloadAllDevices();
 
         // Assert
-        expect(testKernel.heartbeatSuspended, isTrue, reason: 'heartbeat should be suspended before heavy operations');
-        expect(testKernel.heartbeatResumed, isTrue, reason: 'heartbeat should be resumed after operations complete');
+        expect(testKernel.batchEntered, isTrue, reason: 'batch should be entered before heavy operations');
+        expect(testKernel.batchExited, isTrue, reason: 'batch should be exited after operations complete');
       });
     });
   });
@@ -330,9 +330,11 @@ class TestKernel implements IKernel {
   final List<BoundDevice> _boundDevices = [];
   final EventDispatcher _events = DefaultEventDispatcher();
 
-  // tracks whether suspend/resume were invoked
-  bool heartbeatSuspended = false;
-  bool heartbeatResumed = false;
+  // tracks whether heartbeat batch signals were invoked
+  bool heartbeatSuspended = false; // kept for compatibility
+  bool heartbeatResumed = false; // kept for compatibility
+  bool batchEntered = false;
+  bool batchExited = false;
 
   // Test tracking
   bool startCalled = false;
@@ -376,6 +378,19 @@ class TestKernel implements IKernel {
   void resumeHeartbeat() {
     heartbeatResumed = true;
   }
+
+  @override
+  void enterHeartbeatBatch() {
+    batchEntered = true;
+  }
+
+  @override
+  void exitHeartbeatBatch() {
+    batchExited = true;
+  }
+
+  @override
+  HeartbeatState? getHeartbeatState(String deviceID) => null;
 
   @override
   bool isBound(String deviceID) => boundDeviceIds.contains(deviceID);

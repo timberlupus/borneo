@@ -130,7 +130,8 @@ final class DeviceManagerImpl extends IDeviceManager {
     // suppress periodic heartbeat while performing expensive device
     // operations; this prevents the timer from racing with the rebind loop
     // and eliminates spurious CoAP timeouts.
-    _kernel.suspendHeartbeat();
+    // enter batch mode so heartbeat service can suppress ticks
+    _kernel.enterHeartbeatBatch();
     try {
       await _deviceOperLock
           .synchronized(() async {
@@ -143,7 +144,7 @@ final class DeviceManagerImpl extends IDeviceManager {
           })
           .asCancellable(cancelToken);
     } finally {
-      _kernel.resumeHeartbeat();
+      _kernel.exitHeartbeatBatch();
     }
   }
 

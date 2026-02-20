@@ -325,12 +325,29 @@ final class DefaultKernel implements IKernel {
 
   @override
   void suspendHeartbeat() {
+    // deprecated wrapper
     _heartbeatService.suspend();
   }
 
   @override
   void resumeHeartbeat() {
+    // deprecated wrapper
     _heartbeatService.resume();
+  }
+
+  @override
+  void enterHeartbeatBatch() {
+    _heartbeatService.enterBatch();
+  }
+
+  @override
+  void exitHeartbeatBatch() {
+    _heartbeatService.exitBatch();
+  }
+
+  @override
+  HeartbeatState? getHeartbeatState(String deviceID) {
+    return _heartbeatService.getState(deviceID);
   }
 
   void _onDeviceFound(FoundDeviceEvent event) {

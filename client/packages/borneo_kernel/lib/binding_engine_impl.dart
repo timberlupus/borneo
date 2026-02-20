@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:logger/logger.dart';
 import 'package:cancellation_token/cancellation_token.dart';
-import 'package:synchronized/synchronized.dart';
+import 'package:queue/queue.dart';
 
 import 'package:borneo_kernel_abstractions/kernel.dart';
 
@@ -25,15 +25,15 @@ class DefaultBindingEngine implements BindingEngine {
   final Map<String, BoundDevice> _boundDevices = {};
   final Map<String, Driver> _activatedDrivers = {};
   final Map<String, StreamSubscription> _deviceEventRouters = {};
-  final Map<String, Lock> _deviceBindLocks = {};
 
-  final Lock _boundDevicesLock = Lock();
-
-  @override
-  bool get isBusy => _deviceBindLocks.values.any((lock) => lock.inLock);
+  // serializes all bind/unbind work so we don’t need manual locks per device
+  final Queue _queue = Queue();
 
   @override
-  Iterable<BoundDevice> get boundDevices => _boundDevices.values;
+  bool get isBusy => _queue.remainingItemCount > 0;
+
+  @override
+  Iterable<BoundDevice> get boundDevices => List.unmodifiable(_boundDevices.values);
 
   @override
   BoundDevice? getBoundDevice(String deviceID) => _boundDevices[deviceID];
@@ -64,111 +64,75 @@ class DefaultBindingEngine implements BindingEngine {
   }
 
   @override
-  Future<bool> tryBind(Device device, String driverID, {CancellationToken? cancelToken}) async {
+  Future<bool> tryBind(Device device, String driverID, {CancellationToken? cancelToken}) {
     if (getBoundDevice(device.id) != null) {
-      return true;
+      return Future.value(true);
     }
-    try {
-      await bind(device, driverID, cancelToken: cancelToken);
-      return true;
-    } on CancelledException catch (_) {
-      _logger.w('Device($device) binding cancelled');
-      return false;
-    } on TimeoutException catch (error, stackTrace) {
-      _logger.w('Probing device($device) timed out:', error: error, stackTrace: stackTrace);
-      return false;
-    } on DeviceProbeError catch (_) {
-      return false;
-    } catch (e, stackTrace) {
-      _logger.e('Engine error: $e', error: e, stackTrace: stackTrace);
-      _events.fire(LoadingDriverFailedEvent(device, error: e, message: e.toString()));
-      return false;
-    }
+    return _queue.add<bool>(() async {
+      try {
+        await _bindUnlocked(device, driverID, cancelToken: cancelToken);
+        return true;
+      } on CancelledException catch (_) {
+        _logger.w('Device($device) binding cancelled');
+        return false;
+      } on TimeoutException catch (error, stackTrace) {
+        _logger.w('Probing device($device) timed out:', error: error, stackTrace: stackTrace);
+        return false;
+      } on DeviceProbeError catch (_) {
+        return false;
+      } catch (e, stackTrace) {
+        _logger.e('Engine error: $e', error: e, stackTrace: stackTrace);
+        _events.fire(LoadingDriverFailedEvent(device, error: e, message: e.toString()));
+        return false;
+      }
+    });
   }
 
   @override
-  Future<void> bind(Device device, String driverID, {CancellationToken? cancelToken}) async {
-    cancelToken?.throwIfCancelled();
-
-    final deviceLock = _boundDevicesLock.synchronized(() {
-      return _deviceBindLocks.putIfAbsent(device.id, () => Lock());
-    });
-
-    final eventsToFire = [];
-
-    await deviceLock.then(
-      (lock) => lock.synchronized(() async {
-        cancelToken?.throwIfCancelled();
-
-        _logger.i('Binding device: `$device` to driver `$driverID`');
-
-        var driverDesc = _driverRegistry.metaDrivers[driverID];
-        if (driverDesc == null) {
-          final msg = 'Failed to find the driver key `$driverID` for device(`${device.address}`)';
-          _logger.e(msg);
-          throw ArgumentError(msg, 'device');
-        }
-        final driver = _ensureDriverActivated(driverID);
-
-        final driverInitialized = await driver.probe(device, cancelToken: cancelToken);
-
-        if (driverInitialized) {
-          final bound = BoundDevice(driverID, device, driver);
-
-          await _boundDevicesLock.synchronized(() async {
-            _deviceEventRouters[device.id] = bound.device.driverData.deviceEvents.on().listen((event) {
-              _events.fire(event);
-            });
-
-            eventsToFire.add(DeviceBoundEvent(device));
-
-            _boundDevices[device.id] = bound;
-          });
-        } else {
-          throw DeviceProbeError("Failed to probe $device", device);
-        }
-      }, timeout: localBindTimeout),
-    );
-
-    for (final e in eventsToFire) {
-      _events.fire(e);
-    }
+  Future<void> bind(Device device, String driverID, {CancellationToken? cancelToken}) {
+    return _queue.add(() => _bindUnlocked(device, driverID, cancelToken: cancelToken));
   }
 
   @override
-  Future<void> unbind(String deviceID, {CancellationToken? cancelToken}) async {
-    final deviceLock = await _boundDevicesLock.synchronized(() {
-      return _deviceBindLocks[deviceID];
-    });
+  Future<void> unbind(String deviceID, {CancellationToken? cancelToken}) {
+    return _queue.add(() async {
+      final boundDevice = _boundDevices[deviceID];
+      if (boundDevice != null) {
+        await boundDevice.driver.remove(boundDevice.device, cancelToken: cancelToken);
+        boundDevice.dispose();
 
-    if (deviceLock != null) {
-      await deviceLock.synchronized(() async {
-        final boundDevice = _boundDevices[deviceID];
+        _boundDevices.remove(deviceID);
+        _deviceEventRouters[deviceID]?.cancel();
+        _deviceEventRouters.remove(deviceID);
+
+        _purgeUnusedDriver();
+
+        _events.fire(DeviceRemovedEvent(boundDevice.device));
+      }
+    });
+  }
+
+  @override
+  Future<void> unbindAll({CancellationToken? cancelToken}) {
+    // perform all unbinds within the same queue task to avoid deadlock
+    return _queue.add(() async {
+      final ids = List<String>.from(_boundDevices.keys);
+      for (final id in ids) {
+        final boundDevice = _boundDevices[id];
         if (boundDevice != null) {
           await boundDevice.driver.remove(boundDevice.device, cancelToken: cancelToken);
           boundDevice.dispose();
 
-          await _boundDevicesLock.synchronized(() async {
-            _boundDevices.remove(deviceID);
-            _deviceEventRouters[deviceID]?.cancel();
-            _deviceEventRouters.remove(deviceID);
-          });
+          _boundDevices.remove(id);
+          _deviceEventRouters[id]?.cancel();
+          _deviceEventRouters.remove(id);
 
           _purgeUnusedDriver();
 
           _events.fire(DeviceRemovedEvent(boundDevice.device));
         }
-      });
-    }
-  }
-
-  @override
-  Future<void> unbindAll({CancellationToken? cancelToken}) async {
-    // iterate over snapshot to avoid concurrent modification
-    final ids = List<String>.from(_boundDevices.keys);
-    for (final id in ids) {
-      await unbind(id, cancelToken: cancelToken);
-    }
+      }
+    });
   }
 
   @override
@@ -183,6 +147,37 @@ class DefaultBindingEngine implements BindingEngine {
     }
     _activatedDrivers.clear();
     _boundDevices.clear();
-    _deviceBindLocks.clear();
+    _queue.dispose();
+  }
+
+  /// Internal helper that performs the binding logic without enqueuing.
+  Future<void> _bindUnlocked(Device device, String driverID, {CancellationToken? cancelToken}) async {
+    cancelToken?.throwIfCancelled();
+
+    _logger.i('Binding device: `$device` to driver `$driverID`');
+
+    var driverDesc = _driverRegistry.metaDrivers[driverID];
+    if (driverDesc == null) {
+      final msg = 'Failed to find the driver key `$driverID` for device(`${device.address}`)';
+      _logger.e(msg);
+      throw ArgumentError(msg, 'device');
+    }
+    final driver = _ensureDriverActivated(driverID);
+
+    final driverInitialized = await driver.probe(device, cancelToken: cancelToken);
+
+    if (driverInitialized) {
+      final bound = BoundDevice(driverID, device, driver);
+
+      // since we're running in the queue, no additional lock is needed
+      _deviceEventRouters[device.id] = bound.device.driverData.deviceEvents.on().listen((event) {
+        _events.fire(event);
+      });
+
+      _boundDevices[device.id] = bound;
+      _events.fire(DeviceBoundEvent(device));
+    } else {
+      throw DeviceProbeError("Failed to probe $device", device);
+    }
   }
 }

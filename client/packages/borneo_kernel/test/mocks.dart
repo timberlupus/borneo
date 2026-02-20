@@ -432,6 +432,23 @@ class MockKernel implements IKernel {
   @override
   void resumeHeartbeat() {}
 
+  // new batch notification APIs
+  bool batchEntered = false;
+  bool batchExited = false;
+
+  @override
+  void enterHeartbeatBatch() {
+    batchEntered = true;
+  }
+
+  @override
+  void exitHeartbeatBatch() {
+    batchExited = true;
+  }
+
+  @override
+  HeartbeatState? getHeartbeatState(String deviceID) => null;
+
   @override
   Future<void> stopDevicesScanning() async {}
 
@@ -563,8 +580,10 @@ class MockBindingEngine implements BindingEngine {
 class MockHeartbeatService implements HeartbeatService {
   bool _active = false;
   bool _suspended = false;
+  bool _inBatch = false;
   final _failController = StreamController<Device>.broadcast();
   final _tickController = StreamController<void>.broadcast();
+  final _batchController = StreamController<bool>.broadcast();
 
   // for verification
   final List<BoundDevice> registered = [];
@@ -578,7 +597,10 @@ class MockHeartbeatService implements HeartbeatService {
   Stream<void> get onTick => _tickController.stream;
 
   @override
-  bool get isActive => _active && !_suspended;
+  Stream<bool> get batchMode => _batchController.stream;
+
+  @override
+  bool get isActive => _active && !_suspended && !_inBatch;
 
   @override
   Future<void> start() async {
@@ -606,6 +628,18 @@ class MockHeartbeatService implements HeartbeatService {
   }
 
   @override
+  void enterBatch() {
+    _inBatch = true;
+    _batchController.add(true);
+  }
+
+  @override
+  void exitBatch() {
+    _inBatch = false;
+    _batchController.add(false);
+  }
+
+  @override
   void registerDevice(BoundDevice bound, HeartbeatMethod method) {
     registered.add(bound);
   }
@@ -619,6 +653,9 @@ class MockHeartbeatService implements HeartbeatService {
   void onDeviceCommunication(String deviceID) {
     communicationEvents.add(deviceID);
   }
+
+  @override
+  HeartbeatState? getState(String deviceID) => null;
 }
 
 class MockDriverFactory implements DriverFactory {

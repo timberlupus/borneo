@@ -102,7 +102,7 @@ void main() {
       await sub.cancel();
     });
 
-    test('HeartbeatService start/suspend/resume', () async {
+    test('HeartbeatService start/batch/suspend/resume', () async {
       final svc = MockHeartbeatService();
       expect(svc.isActive, isFalse);
       await svc.start();
@@ -111,6 +111,15 @@ void main() {
       expect(svc.isActive, isFalse);
       svc.resume();
       expect(svc.isActive, isTrue);
+
+      // batch signals should be plumbed through
+      final recorded = <bool>[];
+      final sub = svc.batchMode.listen(recorded.add);
+      svc.enterBatch();
+      svc.exitBatch();
+      await Future.delayed(Duration.zero);
+      expect(recorded, [true, false]);
+      await sub.cancel();
     });
 
     test('DriverFactory returns provided driver', () {

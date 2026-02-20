@@ -7,6 +7,7 @@ import 'package:retry/retry.dart';
 
 import 'package:borneo_kernel_abstractions/heartbeat_service.dart';
 import 'package:borneo_kernel_abstractions/models/heartbeat_method.dart';
+import 'package:borneo_kernel_abstractions/models/heartbeat_state.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/driver.dart';
@@ -42,17 +43,20 @@ class DefaultHeartbeatService implements HeartbeatService {
 
   Timer? _timer;
   bool _isStarted = false;
-  bool _suspended = false;
+  bool _inBatch = false;
 
   // state maps keyed by device id
   final Map<String, BoundDevice> _devices = {};
   final Map<String, HeartbeatMethod> _methods = {};
   final Map<String, int> _consecutiveFailures = {};
+  final Map<String, DateTime> _lastSeen = {};
 
   // observation-specific state
   final Map<String, int> _missedObservations = {};
   final Map<String, Timer> _observationTimeoutTimers = {};
   final Map<String, StreamSubscription> _observationSubscriptions = {};
+
+  final StreamController<bool> _batchController = StreamController.broadcast();
 
   final Lock _hbLock = Lock();
   final Lock _observationLock = Lock();
@@ -113,13 +117,31 @@ class DefaultHeartbeatService implements HeartbeatService {
   }
 
   @override
+  void enterBatch() {
+    if (!_inBatch) {
+      _inBatch = true;
+      _batchController.add(true);
+    }
+  }
+
+  @override
+  void exitBatch() {
+    if (_inBatch) {
+      _inBatch = false;
+      _batchController.add(false);
+    }
+  }
+
+  @override
   void suspend() {
-    _suspended = true;
+    // deprecated: forward to batch API for compatibility
+    enterBatch();
   }
 
   @override
   void resume() {
-    _suspended = false;
+    // deprecated: forward to batch API for compatibility
+    exitBatch();
   }
 
   @override
@@ -152,10 +174,12 @@ class DefaultHeartbeatService implements HeartbeatService {
   Stream<void> get onTick => _tickController.stream;
 
   @override
-  bool get isActive => _isStarted && !_suspended;
+  bool get isActive => _isStarted && !_inBatch;
 
   @override
   void onDeviceCommunication(String deviceID) {
+    // tap communication time
+    _lastSeen[deviceID] = DateTime.now();
     // push‑mode devices treat any communication as a heartbeat
     _observationLock.synchronized(() {
       if (_missedObservations.containsKey(deviceID)) {
@@ -243,6 +267,7 @@ class DefaultHeartbeatService implements HeartbeatService {
   }
 
   void _onHeartbeatReceived(String deviceId, dynamic timestamp) {
+    _lastSeen[deviceId] = DateTime.now();
     _observationLock.synchronized(() {
       _logger.d('Heartbeat received for device $deviceId: $timestamp');
 
@@ -294,8 +319,8 @@ class DefaultHeartbeatService implements HeartbeatService {
   }
 
   Future<void> _heartbeatPollingPeriodicTask() async {
-    if (_suspended || !_isStarted) {
-      _logger.t('Heartbeat polling skipped because suspended or stopped.');
+    if (_inBatch || !_isStarted) {
+      _logger.t('Heartbeat polling skipped because batch mode or stopped.');
       return;
     }
 
@@ -344,12 +369,27 @@ class DefaultHeartbeatService implements HeartbeatService {
               _failureController.add(devices[i].device);
             }
           } else {
+            // successful poll, reset failure count and record last seen
             _consecutiveFailures.remove(deviceId);
+            _lastSeen[deviceId] = DateTime.now();
           }
         }
       });
     } catch (e, stackTrace) {
       _logger.w("Failed to do the heartbeat: $e", error: e, stackTrace: stackTrace);
     }
+  }
+
+  @override
+  Stream<bool> get batchMode => _batchController.stream;
+
+  @override
+  HeartbeatState? getState(String deviceID) {
+    if (!_devices.containsKey(deviceID)) return null;
+    return HeartbeatState(
+      consecutiveFailures: _consecutiveFailures[deviceID] ?? 0,
+      missedObservations: _missedObservations[deviceID] ?? 0,
+      lastSeen: _lastSeen[deviceID],
+    );
   }
 }

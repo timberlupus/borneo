@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 import 'package:borneo_kernel_abstractions/models/heartbeat_method.dart';
+import 'package:borneo_kernel_abstractions/models/heartbeat_state.dart';
 
 /// Provides heartbeat functionality for bound devices.  The kernel core may
 /// suspend or resume the service during bulk operations; individual device
@@ -16,11 +17,20 @@ abstract class HeartbeatService {
   /// Stop the heartbeat process and release any timers.
   Future<void> stop();
 
-  /// Suspend all heartbeat polling; subsequent [resume] will restart them.
-  /// This call is idempotent.
+  /// Signals that the kernel is entering or exiting a bulk operation window.
+  ///
+  /// When `enterBatch` is called the service may choose to temporarily ignore
+  /// the periodic tick stream; `exitBatch` returns to normal operation.  This
+  /// replaces the older `suspend`/`resume` API which will be deprecated.
+  void enterBatch();
+  void exitBatch();
+
+  /// **Deprecated.** Use [enterBatch]/[exitBatch] instead.
+  @deprecated
   void suspend();
 
-  /// Resume polling after a suspend.  No-op if not suspended.
+  /// **Deprecated.** Use [enterBatch]/[exitBatch] instead.
+  @deprecated
   void resume();
 
   /// Called by kernel when a device has been bound; service should begin
@@ -47,6 +57,14 @@ abstract class HeartbeatService {
   /// trying to bind unbound devices.
   Stream<void> get onTick;
 
+  /// When bulk‑operation signals are issued this stream emits `true` for enter
+  /// and `false` for exit.  Consumers (including the implementation itself) may
+  /// use this to ignore ticks while the kernel is busy.
+  Stream<bool> get batchMode;
+
   /// Returns whether the service is currently running (not suspended/stopped).
   bool get isActive;
+
+  /// Retrieve the current heartbeat state for a specific device, if tracked.
+  HeartbeatState? getState(String deviceID);
 }

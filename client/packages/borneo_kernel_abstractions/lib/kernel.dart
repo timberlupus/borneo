@@ -1,6 +1,7 @@
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_kernel_abstractions/event_dispatcher.dart';
 import 'package:borneo_kernel_abstractions/driver.dart';
+import 'package:borneo_kernel_abstractions/models/heartbeat_state.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 
 import 'package:borneo_common/borneo_common.dart';
@@ -20,6 +21,7 @@ export 'models/discovered_device.dart';
 export 'models/driver_data.dart';
 export 'models/driver_descriptor.dart';
 export 'models/heartbeat_method.dart';
+export 'models/heartbeat_state.dart';
 export 'models/supported_device_descriptor.dart';
 
 // new kernel interface exports
@@ -75,16 +77,32 @@ abstract class IKernel implements IDisposable {
 
   /// Temporarily suspend the kernel's periodic heartbeat/polling task.
   ///
+  /// **Deprecated.** Use [enterHeartbeatBatch]/[exitHeartbeatBatch] instead.
+  ///
   /// This is intended for long-running operations (bulk bind/unbind,
   /// scene reload, etc.) during which the kernel should not attempt to probe
   /// or bind devices. Callers **must** pair a suspend call with a matching
   /// [resumeHeartbeat] in a `try/finally` block to avoid leaving the kernel
   /// disabled indefinitely.
+  @deprecated
   void suspendHeartbeat();
 
   /// Resume a previously suspended heartbeat task. Safe to call even if the
   /// kernel was not suspended (no-op).
+  @deprecated
   void resumeHeartbeat();
+
+  /// Signal that the kernel is entering a batch of operations during which
+  /// heartbeats should be temporarily ignored.  Callers should pair this with
+  /// [exitHeartbeatBatch] to return to normal processing.
+  void enterHeartbeatBatch();
+
+  /// Exit a previously-entered batch mode started by [enterHeartbeatBatch].
+  void exitHeartbeatBatch();
+
+  /// Returns the current heartbeat state for a given device, or `null` if the
+  /// service has no record for it.
+  HeartbeatState? getHeartbeatState(String deviceID);
 
   /// Retrieve a previously bound device.  Throws if the device is not
   /// registered or not currently bound.

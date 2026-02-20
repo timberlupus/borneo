@@ -163,11 +163,13 @@ void main() {
         expect(kernel.boundDevices.length, equals(0));
       });
 
-      test('heartbeat suspend/resume does not throw', () async {
+      test('heartbeat suspend/resume and batch APIs do not throw', () async {
         await kernel.start();
         kernel.suspendHeartbeat();
         kernel.resumeHeartbeat();
-        // binding while heartbeat suspended should still work
+        kernel.enterHeartbeatBatch();
+        kernel.exitHeartbeatBatch();
+        // binding while heartbeat signals are active should still work
         final device = TestDevice('d1', 'http://1');
         kernel.registerDevice(BoundDeviceDescriptor(device: device, driverID: 'test-driver'));
         await kernel.bind(device, 'test-driver');
