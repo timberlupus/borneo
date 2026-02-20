@@ -21,6 +21,14 @@ export 'models/driver_descriptor.dart';
 export 'models/heartbeat_method.dart';
 export 'models/supported_device_descriptor.dart';
 
+// new kernel interface exports
+export 'discovery_manager.dart';
+export 'binding_engine.dart';
+export 'heartbeat_service.dart';
+export 'driver_factory.dart';
+export 'event_dispatcher.dart';
+export 'device_bus.dart';
+
 /// Core interface for the device management kernel.  The kernel
 /// maintains a set of registered devices, drives the probing/binding
 /// lifecycle and periodically polls bound devices for heartbeat information.

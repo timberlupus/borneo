@@ -157,6 +157,28 @@ void main() {
         await kernel.unbindAll();
         expect(kernel.boundDevices.length, equals(0));
       });
+
+      test('heartbeat suspend/resume does not throw', () async {
+        await kernel.start();
+        kernel.suspendHeartbeat();
+        kernel.resumeHeartbeat();
+        // binding while heartbeat suspended should still work
+        final device = TestDevice('d1', 'http://1');
+        kernel.registerDevice(BoundDeviceDescriptor(device: device, driverID: 'test-driver'));
+        await kernel.bind(device, 'test-driver');
+      });
+
+      test('concurrent binds complete without error', () async {
+        await kernel.start();
+        final deviceA = TestDevice('A', 'http://a');
+        final deviceB = TestDevice('B', 'http://b');
+        kernel.registerDevice(BoundDeviceDescriptor(device: deviceA, driverID: 'test-driver'));
+        kernel.registerDevice(BoundDeviceDescriptor(device: deviceB, driverID: 'test-driver'));
+
+        final f1 = kernel.bind(deviceA, 'test-driver');
+        final f2 = kernel.bind(deviceB, 'test-driver');
+        await Future.wait([f1, f2]);
+      });
     });
 
     group('Event Handling', () {
