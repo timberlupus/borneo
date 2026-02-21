@@ -63,12 +63,12 @@ class BrightnessSliderListTile extends StatelessWidget {
           activeTrackBarHeight: 8,
           inactiveTrackBarHeight: 8,
           activeTrackBar: BoxDecoration(
-            border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerLowest, width: 3.0),
+            border: Border.all(color: Theme.of(context).colorScheme.surfaceDim, width: 4.0),
             color: color,
             borderRadius: BorderRadius.circular(3),
           ),
           inactiveTrackBar: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerLowest,
+            color: Theme.of(context).colorScheme.surfaceDim,
             borderRadius: BorderRadius.circular(3),
           ),
         ),

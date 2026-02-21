@@ -53,7 +53,8 @@ class BrightnessSliderList<TEditor extends IEditor> extends StatelessWidget {
     return ListView.separated(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
-      primary: true,
+      primary: false,
+      padding: EdgeInsets.zero,
       itemCount: editor.availableChannelCount,
       itemBuilder: (context, index) => sliders[index],
       separatorBuilder: (context, index) => Divider(height: 1, color: Theme.of(context).dividerColor),

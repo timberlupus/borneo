@@ -35,7 +35,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
 
   bool get isLoaded => _isLoaded;
 
-  bool get isOnline => wotThing.getProperty<bool>('online')!;
+  bool get isOnline => wotThing.getProperty<bool>('online') ?? false;
   bool get isSuspectedOffline => _isSuspectedOffline;
   bool _isReconnecting = false;
   Timer? _reconnectTimer;
