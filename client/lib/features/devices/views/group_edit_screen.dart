@@ -18,6 +18,7 @@ class GroupEditScreen extends StatelessWidget {
     final vm = context.read<GroupEditViewModel>();
     return [
       TextFormField(
+        key: const Key('field_group_name'),
         initialValue: vm.name,
         decoration: InputDecoration(
           labelText: context.translate('Name'),
@@ -50,6 +51,7 @@ class GroupEditScreen extends StatelessWidget {
       ),
       SizedBox(height: 24),
       ElevatedButton(
+        key: const Key('btn_submit'),
         onPressed: vm.isBusy
             ? null
             : () {
@@ -128,6 +130,7 @@ class GroupEditScreen extends StatelessWidget {
         Builder(
           builder: (BuildContext context) {
             return IconButton(
+              key: const Key('btn_delete_group'),
               onPressed: () {
                 final vm = context.read<GroupEditViewModel>();
                 final notificationService = context.read<IAppNotificationService>();

@@ -164,6 +164,7 @@ class DevicesScreen extends StatelessWidget {
             child: Text(context.translate('Add New Devices')),
           ),
           PopupMenuItem<PlusMenuIndexes>(
+            key: const Key('menu_item_add_group'),
             value: PlusMenuIndexes.addGroup,
             child: Text(context.translate('Add Devices Group')),
           ),
@@ -265,6 +266,7 @@ class DevicesScreen extends StatelessWidget {
                         const Spacer(),
                         if (!groupData.isDummy)
                           IconButton(
+                            key: Key('btn_edit_group_${groupData.name}'),
                             icon: Icon(Icons.edit, size: 16, color: Theme.of(context).colorScheme.primary),
                             constraints: null,
                             onPressed: groupData.isDummy || groupData.isBusy

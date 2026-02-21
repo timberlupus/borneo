@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart' as provider;
+import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -47,6 +48,93 @@ Future<Database> openDatabase() async {
 }
 
 final _fatalErrorLogger = createLogger();
+
+/// Builds the root app widget with all service providers wired up.
+///
+/// All parameters are optional; when omitted the production implementations
+/// are used.  Pass explicit values to inject test-friendly alternatives
+/// (e.g. an in-memory [Database] created with `databaseFactoryMemory`).
+Future<Widget> buildAppWidget({
+  Database? database,
+  SharedPreferences? sharedPreferences,
+  EventBus? eventBus,
+  IDeviceModuleRegistry? deviceModuleRegistry,
+  IMdnsProvider? mdnsProvider,
+}) async {
+  final db = database ?? await openDatabase();
+  final prefs = sharedPreferences ?? await SharedPreferences.getInstance();
+  final bus = eventBus ?? EventBus();
+  final registry = deviceModuleRegistry ?? DeviceModuleRegistry(StaticDeviceModuleHarvester());
+
+  final List<SingleChildWidget> providers = [
+    // Logger
+    provider.Provider<Logger>(
+      create: (_) => createLogger(),
+      lazy: false,
+      dispose: (_, logger) {
+        logger.close();
+      },
+    ),
+
+    // IClock
+    provider.Provider<IClock>(create: (_) => DefaultClock()),
+
+    // DB
+    provider.Provider<Database>(
+      create: (_) => db,
+      lazy: false,
+      dispose: (_, db) {
+        db.close();
+      },
+    ),
+
+    // DeviceExceptionHandler
+    provider.ProxyProvider<Logger, DeviceExceptionHandler>(
+      update: (_, t, r) => r ?? DeviceExceptionHandler(logger: t),
+      lazy: true,
+    ),
+
+    // mDns provider
+    provider.Provider<IMdnsProvider>(create: (_) => mdnsProvider ?? NsdMdnsProvider(), lazy: true),
+
+    // IDeviceModuleRegistry
+    provider.Provider<IDeviceModuleRegistry>(create: (_) => registry, lazy: true),
+
+    // RouteManager
+    provider.ProxyProvider<IDeviceModuleRegistry, RouteManager>(
+      update: (_, reg, rm) => rm ?? RouteManager(reg),
+      lazy: true,
+    ),
+
+    // IDriverRegistry
+    provider.ProxyProvider<IDeviceModuleRegistry, IDriverRegistry>(
+      update: (_, reg, smdr) => smdr ?? StaticModularDriverRegistry(reg),
+      lazy: true,
+    ),
+
+    // IKernel
+    provider.ProxyProvider3<Logger, IDriverRegistry, IMdnsProvider, IKernel>(
+      update: (_, logger, driverReg, nsdMdns, kernel) =>
+          kernel ?? DefaultKernel(logger, driverReg, mdnsProvider: nsdMdns),
+      dispose: (context, kernel) => kernel.dispose(),
+      lazy: true,
+    ),
+
+    // LocaleService
+    provider.Provider<ILocaleService>(create: (_) => AppLocaleService(), lazy: false),
+
+    // EventBus
+    provider.Provider<EventBus>(create: (_) => bus, lazy: false),
+
+    // SharedPreferences
+    provider.Provider<SharedPreferences>(create: (_) => prefs, lazy: false),
+
+    // IBleProvisioner
+    provider.ProxyProvider<Logger, IBleProvisioner>(update: (_, logger, prev) => prev ?? BleProvisioner(), lazy: true),
+  ];
+
+  return provider.MultiProvider(providers: providers, child: BorneoApp());
+}
 
 Future<void> main() async {
   // Ensure binding initialization and app startup occur in the SAME zone as runApp
@@ -109,83 +197,7 @@ Future<void> main() async {
       final sharedPreferences = await SharedPreferences.getInstance();
       final eventBus = EventBus();
 
-      runApp(
-        provider.MultiProvider(
-          providers: [
-            // Logger
-            provider.Provider<Logger>(
-              create: (_) => createLogger(),
-              lazy: false,
-              dispose: (_, logger) {
-                logger.close();
-              },
-            ),
-
-            // IClock
-            provider.Provider<IClock>(create: (_) => DefaultClock()),
-
-            // DB
-            provider.Provider<Database>(
-              create: (_) => db,
-              lazy: false,
-              dispose: (_, db) {
-                db.close();
-              },
-            ),
-
-            // DeviceExceptionhandler
-            provider.ProxyProvider<Logger, DeviceExceptionHandler>(
-              update: (_, t, r) => r ?? DeviceExceptionHandler(logger: t),
-              lazy: true,
-            ),
-
-            // mDns provider
-            provider.Provider<IMdnsProvider>(create: (_) => NsdMdnsProvider(), lazy: true),
-
-            // IDeviceModuleRegistry
-            provider.Provider<IDeviceModuleRegistry>(
-              create: (_) => DeviceModuleRegistry(StaticDeviceModuleHarvester()),
-              lazy: true,
-            ),
-
-            // RouteManager
-            provider.ProxyProvider<IDeviceModuleRegistry, RouteManager>(
-              update: (_, reg, rm) => rm ?? RouteManager(reg),
-              lazy: true,
-            ),
-
-            // IDriverRegistry
-            provider.ProxyProvider<IDeviceModuleRegistry, IDriverRegistry>(
-              update: (_, reg, smdr) => smdr ?? StaticModularDriverRegistry(reg),
-              lazy: true,
-            ),
-
-            // IKernel
-            provider.ProxyProvider3<Logger, IDriverRegistry, IMdnsProvider, IKernel>(
-              update: (_, logger, driverReg, nsdMdns, kernel) =>
-                  kernel ?? DefaultKernel(logger, driverReg, mdnsProvider: nsdMdns),
-              dispose: (context, kernel) => kernel.dispose(),
-              lazy: true,
-            ),
-
-            // LocaleService
-            provider.Provider<ILocaleService>(create: (_) => AppLocaleService(), lazy: false),
-
-            // EventBus
-            provider.Provider<EventBus>(create: (_) => eventBus, lazy: false),
-
-            // SharedPreferences
-            provider.Provider<SharedPreferences>(create: (_) => sharedPreferences, lazy: false),
-
-            // IBleProvisioner
-            provider.ProxyProvider<Logger, IBleProvisioner>(
-              update: (_, logger, prev) => prev ?? BleProvisioner(),
-              lazy: true,
-            ),
-          ],
-          child: BorneoApp(),
-        ),
-      );
+      runApp(await buildAppWidget(database: db, sharedPreferences: sharedPreferences, eventBus: eventBus));
     },
     (Object error, StackTrace stack) {
       _fatalErrorLogger.e(error, error: error, stackTrace: stack);

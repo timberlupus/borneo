@@ -18,6 +18,7 @@ class DeleteGroupDialog extends StatelessWidget {
       actions: [
         TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.translate('Cancel'))),
         TextButton(
+          key: const Key('btn_confirm_delete'),
           onPressed: () => Navigator.pop(context, true),
           style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
           child: Text(context.translate('Delete')),

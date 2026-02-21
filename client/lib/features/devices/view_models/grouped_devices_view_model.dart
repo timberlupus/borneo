@@ -35,7 +35,9 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
   // Getter for error message
 
   bool get isEmpty => _groups.isEmpty;
-  bool get hasNoDevices => _groups.every((g) => g.devices.isEmpty);
+  // True only when there are no user-created groups AND no devices anywhere.
+  // When named groups exist (even without devices) we still show the group list.
+  bool get hasNoDevices => !_groups.any((g) => !g.isDummy) && _groups.every((g) => g.devices.isEmpty);
   bool get isLoading => isBusy;
 
   // Getter for users list

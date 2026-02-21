@@ -96,6 +96,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
           PopupMenuDivider(),
           PopupMenuItem<PlusMenuIndexes>(value: PlusMenuIndexes.addScene, child: Text(context.translate('Add Scene'))),
           PopupMenuItem<PlusMenuIndexes>(
+            key: const Key('menu_item_add_group'),
             value: PlusMenuIndexes.addGroup,
             child: Text(context.translate('Add Devices Group')),
           ),
