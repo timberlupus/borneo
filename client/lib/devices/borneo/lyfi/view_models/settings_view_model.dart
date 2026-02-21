@@ -8,8 +8,6 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:geolocator/geolocator.dart';
 
-import 'package:latlong2/latlong.dart';
-
 class SettingsViewModel extends BaseLyfiDeviceViewModel {
   final Uri address;
   final GeneralBorneoDeviceStatus borneoStatus;
@@ -81,11 +79,10 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     _manualFanPower = await api.getFanManualPower(boundDevice!.device);
   }
 
-  Future<void> updateGeoLocation(LatLng location, {CancellationToken? cancel}) async {
+  Future<void> updateGeoLocation(GeoLocation location, {CancellationToken? cancel}) async {
     try {
-      final loc = GeoLocation(lat: location.latitude, lng: location.longitude);
-      await super.lyfiDeviceApi.setLocation(super.boundDevice!.device, loc, cancelToken: cancel);
-      _location = loc;
+      await super.lyfiDeviceApi.setLocation(super.boundDevice!.device, location, cancelToken: cancel);
+      _location = location;
       notification.showSuccess(_gt.translate("Location updated successfully"));
     } catch (e) {
       notification.showError(_gt.translate("Failed to update device location: $e"));

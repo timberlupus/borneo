@@ -105,9 +105,7 @@ dependencies:
   flutter_colorpicker: ^1.1.0
   equatable: ^2.0.7
   flutter_typeahead: ^5.2.0
-  geocoding: ^4.0.0
-  latlong2: ^0.9.0
-  flutter_map: ^8.1.0
+  flutter_earth_globe: ^2.2.0
   flutter_keyboard_visibility: ^6.0.0
   lat_lng_to_timezone: ^0.2.0
   timezone: ^0.11.0
@@ -195,6 +193,7 @@ flutter:
   assets:
     - assets/i18n/
     - assets/images/
+    - assets/images/2k_earth-day.jpg
     - assets/images/main-logo.png
     - assets/images/scenes/
     - assets/images/scenes/scene-default-noimage.jpg

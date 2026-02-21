@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gettext/flutter_gettext.dart';
-import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_earth_globe/flutter_earth_globe.dart';
+import 'package:flutter_earth_globe/flutter_earth_globe_controller.dart';
+import 'package:flutter_earth_globe/globe_coordinates.dart';
+import 'package:flutter_earth_globe/point.dart';
+import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:lat_lng_to_timezone/lat_lng_to_timezone.dart';
 
 class MapLocationPicker extends StatefulWidget {
-  final LatLng? initialLocation;
+  final GlobeCoordinates? initialLocation;
 
   const MapLocationPicker({super.key, this.initialLocation});
 
@@ -15,112 +17,123 @@ class MapLocationPicker extends StatefulWidget {
 }
 
 class _MapLocationPickerState extends State<MapLocationPicker> {
-  late final MapController _mapController;
-  LatLng? _selectedLocation;
-  LatLng? _userLocation;
+  late final FlutterEarthGlobeController _globeController;
+  GlobeCoordinates? _selectedLocation;
+  GlobeCoordinates? _userLocation;
   String? _currentTimeZone;
 
-  // final TextEditingController _searchController = TextEditingController();
+  static const _selectedPointId = 'selected';
+  static const _userPointId = 'user_location';
 
   @override
   void initState() {
     super.initState();
-    _mapController = MapController();
+    _globeController = FlutterEarthGlobeController(
+      rotationSpeed: 0.0,
+      isZoomEnabled: true,
+      zoom: 0.0,
+      surface: const AssetImage('assets/images/2k_earth-day.jpg'),
+    );
+
     if (widget.initialLocation != null) {
       _selectedLocation = widget.initialLocation;
       _updateTimeZone(_selectedLocation!);
-      _getUserLocation();
-    } else {
-      _getUserLocation().then((_) {
-        if (_userLocation != null) {
-          setState(() {
-            _selectedLocation = _userLocation;
-          });
-          _updateTimeZone(_userLocation!);
-        }
-      });
     }
+
+    _globeController.onLoaded = () {
+      if (_selectedLocation != null) {
+        _globeController.focusOnCoordinates(_selectedLocation!, animate: false);
+        _addSelectedMarker(_selectedLocation!);
+      }
+      _getUserLocation();
+    };
   }
 
   @override
   void dispose() {
-    _mapController.dispose();
+    // Clear the onLoaded callback to prevent stale invocations after unmount.
+    // Do NOT call _globeController.dispose() here — its internal AnimationControllers
+    // (rotationController, decelerationController, etc.) are owned by RotatingGlobeState
+    // and will be disposed when that state is torn down. Double-disposing them causes
+    // "AnimationController.dispose() called more than once".
+    _globeController.onLoaded = null;
     super.dispose();
   }
 
-  Future<void> _getUserLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+  void _addSelectedMarker(GlobeCoordinates coords) {
+    _globeController.removePoint(_selectedPointId);
+    _globeController.addPoint(
+      Point(
+        id: _selectedPointId,
+        coordinates: coords,
+        isLabelVisible: true,
+        // Use transparent dot so only the icon label is visible
+        style: const PointStyle(color: Colors.transparent, size: 0),
+        labelBuilder: (context, point, isHovering, isVisible) =>
+            Icon(Icons.location_pin, color: Theme.of(context).colorScheme.error, size: 36),
+      ),
+    );
+  }
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  void _addUserLocationMarker(GlobeCoordinates coords) {
+    _globeController.removePoint(_userPointId);
+    _globeController.addPoint(
+      Point(
+        id: _userPointId,
+        coordinates: coords,
+        isLabelVisible: true,
+        style: const PointStyle(color: Colors.transparent, size: 0),
+        labelBuilder: (context, point, isHovering, isVisible) => Icon(
+          Icons.my_location,
+          // Semi-transparent to indicate it's the device location, not the selection
+          color: Theme.of(context).colorScheme.primary.withAlpha(160),
+          size: 28,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _getUserLocation() async {
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return;
 
-    permission = await Geolocator.checkPermission();
+    var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) return;
     }
-
     if (permission == LocationPermission.deniedForever) return;
 
-    Position position = await Geolocator.getCurrentPosition();
+    final position = await Geolocator.getCurrentPosition();
     if (!mounted) return;
-    setState(() {
-      _userLocation = LatLng(position.latitude, position.longitude);
-    });
-  }
 
-  void _updateTimeZone(LatLng latLng) {
-    final tz = latLngToTimezoneString(latLng.latitude, latLng.longitude);
-    if (!mounted) return;
-    setState(() {
-      _currentTimeZone = tz;
-    });
-  }
+    final coords = GlobeCoordinates(position.latitude, position.longitude);
+    setState(() => _userLocation = coords);
+    _addUserLocationMarker(coords);
 
-  /*
-  Future<List<String>> _getSuggestions(String query) async {
-    if (query.isEmpty) return [];
-    try {
-      final locations = await placemarkFromCoordinates(
-        widget.initialLocation?.latitude ?? 0.0,
-        widget.initialLocation?.longitude ?? 0.0,
-      );
-      return locations
-          .map((p) => '${p.name}, ${p.locality}, ${p.country}')
-          .where((name) => name.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    } catch (e) {
-      return [];
+    // If no initial location was provided, snap to the user's GPS position.
+    if (widget.initialLocation == null) {
+      setState(() => _selectedLocation = coords);
+      _updateTimeZone(coords);
+      _globeController.focusOnCoordinates(coords, animate: true);
+      _addSelectedMarker(coords);
     }
   }
 
-  Future<void> _onSearchSelected(String suggestion) async {
-    try {
-      final placemarks = await placemarkFromCoordinates(
-        widget.initialLocation?.latitude ?? 0.0,
-        widget.initialLocation?.longitude ?? 0.0,
-      );
-      final selected = placemarks.firstWhere((p) => '${p.name}, ${p.locality}, ${p.country}' == suggestion);
-      final coordinates = await locationFromAddress('${selected.name}, ${selected.locality}, ${selected.country}');
-      final newLocation = LatLng(coordinates.first.latitude, coordinates.first.longitude);
-      setState(() {
-        _selectedLocation = newLocation;
-      });
-      _mapController.move(newLocation, 15.0);
-    } catch (e) {
-      // Handle error
-    }
+  void _updateTimeZone(GlobeCoordinates coords) {
+    final tz = latLngToTimezoneString(coords.latitude, coords.longitude);
+    if (!mounted) return;
+    setState(() => _currentTimeZone = tz);
   }
-  */
 
-  bool _isSameLocation(LatLng? a, LatLng? b, {double epsilon = 1e-6}) {
+  bool _isSameLocation(GlobeCoordinates? a, GlobeCoordinates? b, {double epsilon = 1e-6}) {
     if (a == null || b == null) return false;
     return (a.latitude - b.latitude).abs() < epsilon && (a.longitude - b.longitude).abs() < epsilon;
   }
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Scaffold(
       appBar: AppBar(
         title: Text(context.translate('Select Location')),
@@ -128,113 +141,96 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
             child: FilledButton.icon(
-              icon: Icon(Icons.check, size: 28),
+              icon: const Icon(Icons.check, size: 28),
               label: Text(context.translate("Apply")),
               onPressed: (_selectedLocation == null || _isSameLocation(_selectedLocation, widget.initialLocation))
                   ? null
-                  : () {
-                      Navigator.pop(context, _selectedLocation);
-                    },
+                  : () => Navigator.pop(context, _selectedLocation),
             ),
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: _selectedLocation ?? const LatLng(25.0430, 102.7062),
-              initialZoom: 4.0,
-              minZoom: 3,
-              maxZoom: 19,
-              interactionOptions: InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
-              onTap: (tapPosition, point) {
-                setState(() {
-                  _selectedLocation = point;
-                });
-                _updateTimeZone(point);
-              },
-            ),
-            children: [
-              TileLayer(urlTemplate: 'https://{s}.openstreetmap.org/{z}/{x}/{y}.png', subdomains: const ['tile']),
-              MarkerLayer(
-                markers: [
-                  if (_userLocation != null)
-                    Marker(
-                      point: _userLocation!,
-                      child: Icon(Icons.my_location, color: Theme.of(context).colorScheme.primary, size: 30),
-                    ),
-                  if (_selectedLocation != null)
-                    Marker(
-                      point: _selectedLocation!,
-                      child: Icon(Icons.location_pin, color: Theme.of(context).colorScheme.error, size: 30),
-                    ),
-                ],
-              ),
-            ],
-          ),
-
-          Positioned(
-            right: 24,
-            bottom: 24,
-            child: FloatingActionButton(
-              heroTag: 'locate',
-              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-              foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-              onPressed: _userLocation == null
-                  ? null
-                  : () {
-                      setState(() {
-                        _selectedLocation = _userLocation;
-                      });
-                      if (_userLocation != null) {
-                        _mapController.move(_userLocation!, _mapController.camera.zoom);
-                        _updateTimeZone(_userLocation!);
-                      }
-                    },
-              tooltip: context.translate('Current location'),
-              child: Icon(Icons.my_location, color: Theme.of(context).colorScheme.onSecondaryContainer),
-            ),
-          ),
-
-          Positioned(
-            left: 24,
-            bottom: 24,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.start,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final radius = constraints.biggest.shortestSide * 0.45;
+          // FlutterEarthGlobe internally calls MediaQuery.of(context).size to
+          // compute the sphere centre. Override it to match the actual body
+          // area so the globe is centred rather than offset by the AppBar.
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(size: constraints.biggest),
+            child: Stack(
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer.withAlpha(128),
-                    borderRadius: BorderRadius.circular(12),
+                // 3D globe – fills body, centred via alignment
+                Positioned.fill(
+                  child: FlutterEarthGlobe(
+                    controller: _globeController,
+                    radius: radius,
+                    alignment: Alignment.center,
+                    onTap: (coords) {
+                      if (coords == null) return;
+                      setState(() => _selectedLocation = coords);
+                      _updateTimeZone(coords);
+                      _addSelectedMarker(coords);
+                    },
                   ),
-                  child: DefaultTextStyle(
-                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                      fontSize: 14,
+                ),
+
+                // FAB: snap globe to current GPS position
+                Positioned(
+                  right: 24,
+                  bottom: 24 + bottomPadding,
+                  child: FloatingActionButton(
+                    heroTag: 'locate',
+                    backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                    foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                    tooltip: context.translate('Current location'),
+                    onPressed: _userLocation == null
+                        ? null
+                        : () {
+                            setState(() => _selectedLocation = _userLocation);
+                            _updateTimeZone(_userLocation!);
+                            _addSelectedMarker(_userLocation!);
+                            _globeController.focusOnCoordinates(_userLocation!, animate: true);
+                          },
+                    child: Icon(Icons.my_location, color: Theme.of(context).colorScheme.onSecondaryContainer),
+                  ),
+                ),
+
+                // Bottom-left: coordinates + timezone display
+                Positioned(
+                  left: 24,
+                  bottom: 24 + bottomPadding,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer.withAlpha(180),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _selectedLocation == null
-                              ? context.translate('Please select a location')
-                              : '(${_selectedLocation!.latitude.toStringAsFixed(3)}, ${_selectedLocation!.longitude.toStringAsFixed(3)})',
-                          textAlign: TextAlign.left,
-                        ),
-                        if (_currentTimeZone != null) Text('TZ: $_currentTimeZone'),
-                      ],
+                    child: DefaultTextStyle(
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                        fontSize: 14,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _selectedLocation == null
+                                ? context.translate('Tap globe to select location')
+                                : '(${_selectedLocation!.latitude.toStringAsFixed(3)},'
+                                      ' ${_selectedLocation!.longitude.toStringAsFixed(3)})',
+                          ),
+                          if (_currentTimeZone != null) Text('TZ: $_currentTimeZone'),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

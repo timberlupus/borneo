@@ -11,8 +11,8 @@ import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_earth_globe/globe_coordinates.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:logger/logger.dart';
 
@@ -45,23 +45,25 @@ class SettingsScreen extends StatelessWidget {
 
   Future<void> _pickLocation(BuildContext context, SettingsViewModel vm) async {
     // Build the route with the existing device location if available
-    final LatLng? initialLocation = vm.location != null ? LatLng(vm.location!.lat, vm.location!.lng) : null;
+    final GlobeCoordinates? initialLocation = vm.location != null
+        ? GlobeCoordinates(vm.location!.lat, vm.location!.lng)
+        : null;
 
-    final route = MaterialPageRoute<LatLng?>(
+    final route = MaterialPageRoute<GlobeCoordinates?>(
       builder: (context) => MapLocationPicker(initialLocation: initialLocation),
       fullscreenDialog: true,
     );
 
     try {
-      // Navigate to the picker and await a LatLng (null if cancelled)
-      final LatLng? selectedLocation = await Navigator.of(context).push<LatLng?>(route);
+      // Navigate to the picker and await a GlobeCoordinates (null if cancelled)
+      final GlobeCoordinates? selectedLocation = await Navigator.of(context).push<GlobeCoordinates?>(route);
 
       if (!context.mounted) {
         return;
       }
 
       if (selectedLocation != null) {
-        await vm.updateGeoLocation(selectedLocation);
+        await vm.updateGeoLocation(GeoLocation(lat: selectedLocation.latitude, lng: selectedLocation.longitude));
       }
     } catch (e, stackTrace) {
       if (context.mounted) {
