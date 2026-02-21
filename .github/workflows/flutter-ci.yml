@@ -329,8 +329,12 @@ jobs:
               await github.rest.git.deleteRef({ owner: context.repo.owner, repo: context.repo.repo, ref: refName });
               console.log(`Deleted existing tag ${tag}`);
             } catch (err) {
-              if (err.status !== 404) throw err;
-              console.log(`Tag ${tag} did not exist, proceeding to create`);
+              // GitHub returns 404 _or_ 422 when the tag doesn't exist; ignore both
+              if (err.status === 404 || err.status === 422) {
+                console.log(`Tag ${tag} did not exist, proceeding to create`);
+              } else {
+                throw err;
+              }
             }
             await github.rest.git.createRef({ owner: context.repo.owner, repo: context.repo.repo, ref: fullRef, sha: context.sha });
             console.log(`Created tag ${tag} pointing to ${context.sha}`);
