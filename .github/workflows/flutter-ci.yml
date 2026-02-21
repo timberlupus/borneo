@@ -63,7 +63,7 @@ jobs:
           melos run test:dart --no-select
 
       - name: Install requirements for desktop integration tests and Linux builds)
-        run: sudo apt-get install -y xvfb libgtk-3-0 libblkid1 liblzma5
+        run: sudo apt-get install -y xvfb libgtk-3-dev libstdc++-12-dev
 
       - name: Run linux integration tests
         if: runner.os == 'Linux'
