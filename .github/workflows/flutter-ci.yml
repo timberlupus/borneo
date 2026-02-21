@@ -17,6 +17,7 @@ on:
 
 env:
   FLUTTER_WORKING_DIR: client
+  FLUTTER_VER: 3.38.8
 
 jobs:
   test:
@@ -29,11 +30,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Flutter SDK
+        uses: flutter-actions/setup-flutter@v4
         with:
           channel: stable
-          flutter-version-file: client/pubspec.yaml
+          version: ${{ env.FLUTTER_VER }}
 
       - name: Cache pub dependencies
         uses: actions/cache@v4
@@ -168,12 +169,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Flutter SDK
+        uses: flutter-actions/setup-flutter@v4
         with:
           channel: stable
-          flutter-version-file: client/pubspec.yaml
-          cache: true
+          version: ${{ env.FLUTTER_VER }}
 
       - name: Cache pub dependencies
         uses: actions/cache@v4
@@ -241,12 +241,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Flutter SDK
+        uses: flutter-actions/setup-flutter@v4
         with:
           channel: stable
-          flutter-version-file: client/pubspec.yaml
-          cache: true
+          version: ${{ env.FLUTTER_VER }}
 
       - name: Cache pub dependencies
         uses: actions/cache@v4
