@@ -210,7 +210,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                         color: Theme.of(context).colorScheme.onPrimaryContainer,
                         fontFeatures: const [FontFeature.tabularFigures()],
-                        fontSize: 14,
+                        fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

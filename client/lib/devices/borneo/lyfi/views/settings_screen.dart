@@ -190,7 +190,7 @@ class SettingsScreen extends StatelessWidget {
               leading: const Icon(Icons.location_pin),
               title: Text(context.translate('Location for sun & moon simulation')),
               subtitle: map.location != null
-                  ? Text("(${vm.location!.lat.toStringAsFixed(3)}, ${vm.location!.lng.toStringAsFixed(3)})")
+                  ? Text("(${vm.location!.lat.toStringAsFixed(0)}, ${vm.location!.lng.toStringAsFixed(0)})")
                   : Text(context.translate('Unknown')),
               trailing: rightChevron,
               onTap: map.canUpdate

@@ -62,7 +62,7 @@ class _LinkSection extends StatelessWidget {
         color: Theme.of(context).colorScheme.surface,
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
         child: Material(
-          child: Center(child: Column(children: [titleWidget, if (linkWidget != null) linkWidget])),
+          child: Center(child: Column(children: [titleWidget, ?linkWidget])),
         ),
       ),
     );
