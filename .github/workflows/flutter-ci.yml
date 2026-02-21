@@ -57,13 +57,13 @@ jobs:
       - name: Run analyze
         run: melos run analyze
 
-      - name: Install Xvfb and CMake (required for desktop integration tests and Linux builds)
-        run: sudo apt-get update && sudo apt-get install -y xvfb
-
       - name: Run unit/widget tests
         run: |
           flutter test
           melos run test:dart --no-select
+
+      - name: Install requirements for desktop integration tests and Linux builds)
+        run: sudo apt-get install -y xvfb libgtk-3-0 libblkid1 liblzma5
 
       - name: Run linux integration tests
         if: runner.os == 'Linux'
