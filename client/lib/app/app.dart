@@ -90,6 +90,16 @@ class _BorneoAppState extends State<BorneoApp> {
 
   @override
   Widget build(BuildContext context) {
+    /*
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff493b72), brightness: Brightness.light),
+        useMaterial3: true, // 推荐使用 Material 3
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff493b72), brightness: Brightness.dark),
+        useMaterial3: true, // 推荐使用 Material 3
+      ),
+    */
     return MultiProvider(
       providers: [
         Provider<EventBus>(create: (_) => widget._globalEventBus),

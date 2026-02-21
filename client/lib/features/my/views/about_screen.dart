@@ -8,19 +8,69 @@ import 'package:borneo_app/features/my/view_models/about_view_model.dart';
 
 final Uri _websiteUrl = Uri.parse('https://www.borneoiot.com');
 final Uri _docsUrl = Uri.parse('https://docs.borneoiot.com');
+final Uri _privacyUrl = Uri.parse('https://www.borneoiot.com/app-privacy-policy/');
+
+/// A reusable section displayed on the about screen with a title and a link.
+///
+/// The widget handles translation of the title and launching the provided URL
+/// when tapped. It also shows the host portion of the URL with underline styling.
+class _LinkSection extends StatelessWidget {
+  // URI parsing is runtime, so constructor can't be const.
+  const _LinkSection({required this.title, required this.url, this.hideLink = false});
+
+  final String title; // Already translated by callers when needed
+  final Uri url;
+  final bool hideLink;
+
+  @override
+  Widget build(BuildContext context) {
+    final titleText = context.translate(title);
+    final titleStyle = Theme.of(context).textTheme.titleSmall;
+    final linkStyle = titleStyle?.copyWith(
+      color: Theme.of(context).colorScheme.secondary,
+      decoration: TextDecoration.underline,
+    );
+
+    Widget titleWidget;
+    Widget? linkWidget;
+
+    if (hideLink) {
+      titleWidget = InkWell(
+        onTap: () async {
+          final urlLauncher = UrlLauncherService(
+            notification: Provider.of<IAppNotificationService>(context, listen: false),
+          );
+          await urlLauncher.open(url.toString());
+        },
+        child: Text(titleText, style: linkStyle),
+      );
+    } else {
+      titleWidget = Text(titleText, style: titleStyle);
+      linkWidget = InkWell(
+        onTap: () async {
+          final urlLauncher = UrlLauncherService(
+            notification: Provider.of<IAppNotificationService>(context, listen: false),
+          );
+          await urlLauncher.open(url.toString());
+        },
+        child: Text(url.host, style: linkStyle),
+      );
+    }
+
+    return SliverToBoxAdapter(
+      child: Container(
+        color: Theme.of(context).colorScheme.surface,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        child: Material(
+          child: Center(child: Column(children: [titleWidget, if (linkWidget != null) linkWidget])),
+        ),
+      ),
+    );
+  }
+}
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
-
-  Future<void> _launchWebsite(BuildContext context) async {
-    final urlLauncher = UrlLauncherService(notification: Provider.of<IAppNotificationService>(context, listen: false));
-    await urlLauncher.open(_websiteUrl.toString());
-  }
-
-  Future<void> _launchDocs(BuildContext context) async {
-    final urlLauncher = UrlLauncherService(notification: Provider.of<IAppNotificationService>(context, listen: false));
-    await urlLauncher.open(_docsUrl.toString());
-  }
 
   @override
   Widget build(BuildContext context) => ChangeNotifierProvider<AboutViewModel>(
@@ -83,77 +133,26 @@ class AboutScreen extends StatelessWidget {
               color: Theme.of(context).colorScheme.surface,
               margin: const EdgeInsets.fromLTRB(16, 24, 16, 24),
               child: Center(
-                child: Text(
-                  context.translate('Copyright © Yunnan BinaryStars Technologies, Co., Ltd. All rights reserved.'),
-                  style: Theme.of(context).textTheme.bodySmall,
+                child: Column(
+                  spacing: 4,
+                  children: [
+                    Text(
+                      context.translate('Copyright © Yunnan BinaryStars Technologies, Co., Ltd.'),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    Text(context.translate('All rights reserved.'), style: Theme.of(context).textTheme.bodySmall),
+                  ],
                 ),
               ),
             ),
           ),
 
-          // Home page
-          SliverToBoxAdapter(
-            child: Container(
-              color: Theme.of(context).colorScheme.surface,
-              margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-              child: Material(
-                child: Center(
-                  child: Column(
-                    children: [
-                      Text(context.translate('Website'), style: Theme.of(context).textTheme.titleSmall),
-                      InkWell(
-                        onTap: () async {
-                          await _launchWebsite(context);
-                        },
-                        child: Ink(
-                          child: Text(
-                            _websiteUrl.host,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.secondary,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+          _LinkSection(title: context.translate('Website'), url: _websiteUrl),
 
-          // Docs
-          SliverToBoxAdapter(
-            child: Container(
-              color: Theme.of(context).colorScheme.surface,
-              margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-              child: Material(
-                child: Center(
-                  child: Column(
-                    children: [
-                      Text(context.translate('Documentation'), style: Theme.of(context).textTheme.titleSmall),
-                      InkWell(
-                        onTap: () async {
-                          await _launchDocs(context);
-                        },
-                        child: Ink(
-                          child: Text(
-                            _docsUrl.host,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.secondary,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+          _LinkSection(title: context.translate('Documentation'), url: _docsUrl),
 
-          // Warning
+          _LinkSection(title: context.translate('Privacy Policy'), url: _privacyUrl, hideLink: true),
+
           SliverToBoxAdapter(
             child: Container(
               color: Theme.of(context).colorScheme.surface,

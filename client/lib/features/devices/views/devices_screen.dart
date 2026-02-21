@@ -257,13 +257,24 @@ class DevicesScreen extends StatelessWidget {
                     margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                     height: 48,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           groupData.name,
                           textAlign: TextAlign.start,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        const Spacer(),
+                        // separator line filling the space before edit button
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Divider(
+                            height: 8,
+                            thickness: 8,
+                            color: Theme.of(context).colorScheme.surfaceDim,
+                            radius: const BorderRadius.all(Radius.circular(2.5)),
+                          ),
+                        ),
+                        if (!groupData.isDummy) const SizedBox(width: 8),
                         if (!groupData.isDummy)
                           IconButton(
                             key: Key('btn_edit_group_${groupData.name}'),
