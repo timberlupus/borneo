@@ -51,10 +51,10 @@ jobs:
       - name: Run analyze
         run: melos run analyze
 
-      - name: Install Xvfb (required for desktop integration tests)
+      - name: Install Xvfb and CMake (required for desktop integration tests and Linux builds)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update && sudo apt-get install -y xvfb
+          sudo apt-get update && sudo apt-get install -y xvfb cmake
 
       - name: Run unit/widget tests
         run: |
