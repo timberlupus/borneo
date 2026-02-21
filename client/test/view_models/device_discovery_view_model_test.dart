@@ -1,6 +1,8 @@
 import 'dart:collection';
 
-import 'package:flutter_test/flutter_test.dart';
+// hide EventDispatcher from flutter_test to avoid collision with our
+// abstraction type which is exported transitively by kernel.dart.
+import 'package:flutter_test/flutter_test.dart' hide EventDispatcher;
 import 'package:flutter/services.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
@@ -57,7 +59,7 @@ class FakeDeviceManager implements IDeviceManager {
   bool get isDiscoverying => false;
 
   @override
-  GlobalDevicesEventBus get allDeviceEvents => GlobalDevicesEventBus();
+  EventDispatcher get allDeviceEvents => DefaultEventDispatcher();
 
   @override
   Iterable<BoundDevice> get boundDevices => const [];

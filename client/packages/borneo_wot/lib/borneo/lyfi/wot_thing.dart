@@ -101,18 +101,13 @@ class LyfiThing extends BorneoThing implements WotWriteGuard, WotActionGuard {
     // final currentTemp = await lyfiApi.getCurrentTemp(device); // Use lyfiStatus.temperature
     // final deviceInfo = await lyfiApi.getDeviceInfo(device); // Skip for now
 
-    try {
-      final sunCurve = await lyfiApi.getSunCurve(device, cancelToken: cancelToken);
-      findProperty('sunCurve')?.value.notifyOfExternalUpdate(sunCurve);
-    } catch (e) {
-      logger?.w("Failed to get Sun curve: $e");
-    }
-
-    try {
-      final moonCurve = await lyfiApi.getMoonCurve(device, cancelToken: cancelToken);
-      findProperty('moonCurve')?.value.notifyOfExternalUpdate(moonCurve);
-    } catch (e) {
-      logger?.w("Failed to get Moon curve: $e");
+    if (lyfiStatus.mode == LyfiMode.sun) {
+      try {
+        final sunCurve = await lyfiApi.getSunCurve(device, cancelToken: cancelToken);
+        findProperty('sunCurve')?.value.notifyOfExternalUpdate(sunCurve);
+      } catch (e) {
+        logger?.w("Failed to get Sun curve: $e");
+      }
     }
 
     // Update properties with actual values (like notifyOfExternalUpdate in Mozilla WebThing)
@@ -138,12 +133,20 @@ class LyfiThing extends BorneoThing implements WotWriteGuard, WotActionGuard {
 
     // Additional moon API calls
     final moonConfig = await lyfiApi.getMoonConfig(device, cancelToken: cancelToken);
-    final moonSchedule = await lyfiApi.getMoonSchedule(device, cancelToken: cancelToken);
-    final moonStatus = await lyfiApi.getMoonStatus(device, cancelToken: cancelToken);
-
     findProperty('moonConfig')?.value.notifyOfExternalUpdate(moonConfig);
-    findProperty('moonSchedule')?.value.notifyOfExternalUpdate(moonSchedule);
-    findProperty('moonStatus')?.value.notifyOfExternalUpdate(moonStatus);
+
+    if (moonConfig.enabled) {
+      try {
+        final moonSchedule = await lyfiApi.getMoonSchedule(device, cancelToken: cancelToken);
+        final moonStatus = await lyfiApi.getMoonStatus(device, cancelToken: cancelToken);
+        final moonCurve = await lyfiApi.getMoonCurve(device, cancelToken: cancelToken);
+        findProperty('moonCurve')?.value.notifyOfExternalUpdate(moonCurve);
+        findProperty('moonSchedule')?.value.notifyOfExternalUpdate(moonSchedule);
+        findProperty('moonStatus')?.value.notifyOfExternalUpdate(moonStatus);
+      } catch (e) {
+        logger?.w("Failed to get Moon curve: $e");
+      }
+    }
 
     findProperty('currentTemp')?.value.notifyOfExternalUpdate(lyfiStatus.temperature ?? 25);
     findProperty('lyfiDeviceInfo')?.value.notifyOfExternalUpdate(deviceInfo);
@@ -301,13 +304,15 @@ class LyfiThing extends BorneoThing implements WotWriteGuard, WotActionGuard {
 
       // Moon properties sync
       final moonConfig = await lyfiApi.getMoonConfig(device);
-      final moonSchedule = await lyfiApi.getMoonSchedule(device);
-      final moonCurve = await lyfiApi.getMoonCurve(device);
+      if (moonConfig.enabled) {
+        final moonSchedule = await lyfiApi.getMoonSchedule(device);
+        final moonCurve = await lyfiApi.getMoonCurve(device);
+        findProperty('moonSchedule')?.value.notifyOfExternalUpdate(moonSchedule);
+        findProperty('moonCurve')?.value.notifyOfExternalUpdate(moonCurve);
+      }
       final moonStatus = await lyfiApi.getMoonStatus(device);
 
       findProperty('moonConfig')?.value.notifyOfExternalUpdate(moonConfig);
-      findProperty('moonSchedule')?.value.notifyOfExternalUpdate(moonSchedule);
-      findProperty('moonCurve')?.value.notifyOfExternalUpdate(moonCurve);
       findProperty('moonStatus')?.value.notifyOfExternalUpdate(moonStatus);
     } catch (e, stackTrace) {
       logger?.w('Low-frequency sync failed: $e', error: e, stackTrace: stackTrace);

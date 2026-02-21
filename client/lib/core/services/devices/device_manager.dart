@@ -14,7 +14,11 @@ abstract class IDeviceManager implements IDisposable {
 
   // Abstract properties and methods
   bool get isInitialized;
-  GlobalDevicesEventBus get allDeviceEvents;
+
+  /// Stream of all device-related events exposed by the manager.  The
+  /// concrete type is an [EventDispatcher] which allows callers to filter
+  /// by event type without depending on the old global bus.
+  EventDispatcher get allDeviceEvents;
   IKernel get kernel;
   Iterable<BoundDevice> get boundDevices;
   bool get isDiscoverying;

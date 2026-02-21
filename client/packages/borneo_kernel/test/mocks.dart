@@ -373,7 +373,7 @@ class MockLyfiDeviceApi implements ILyfiDeviceApi {
 }
 
 class MockKernel implements IKernel {
-  final GlobalDevicesEventBus _events = GlobalDevicesEventBus();
+  final EventDispatcher _events = DefaultEventDispatcher();
   final Map<String, BoundDevice> _boundDevices = {};
 
   void setBoundDevice(BoundDevice bound) {
@@ -391,7 +391,7 @@ class MockKernel implements IKernel {
   bool get isInitialized => true;
 
   @override
-  GlobalDevicesEventBus get events => _events;
+  EventDispatcher get events => _events;
 
   @override
   Iterable<Driver> get activatedDrivers => [];
@@ -427,6 +427,29 @@ class MockKernel implements IKernel {
   Future<void> startDevicesScanning({Duration? timeout, CancellationToken? cancelToken}) async {}
 
   @override
+  void suspendHeartbeat() {}
+
+  @override
+  void resumeHeartbeat() {}
+
+  // new batch notification APIs
+  bool batchEntered = false;
+  bool batchExited = false;
+
+  @override
+  void enterHeartbeatBatch() {
+    batchEntered = true;
+  }
+
+  @override
+  void exitHeartbeatBatch() {
+    batchExited = true;
+  }
+
+  @override
+  HeartbeatState? getHeartbeatState(String deviceID) => null;
+
+  @override
   Future<void> stopDevicesScanning() async {}
 
   @override
@@ -445,4 +468,244 @@ class MockKernel implements IKernel {
   dynamic noSuchMethod(Invocation invocation) {
     return super.noSuchMethod(invocation);
   }
+}
+
+// ---------- mocks for new kernel interfaces ----------
+
+class MockDiscoveryManager implements DiscoveryManager {
+  final _controller = StreamController<DiscoveredDevice>.broadcast();
+  final _lostController = StreamController<String>.broadcast();
+  bool _active = false;
+
+  @override
+  Stream<DiscoveredDevice> get onDeviceFound => _controller.stream;
+
+  @override
+  Stream<String> get onDeviceLost => _lostController.stream;
+
+  @override
+  bool get isActive => _active;
+
+  @override
+  Future<void> start({Duration? timeout, CancellationToken? cancelToken}) async {
+    _active = true;
+    if (timeout != null) {
+      Future.delayed(timeout, () => stop());
+    }
+  }
+
+  @override
+  Future<void> stop({CancellationToken? cancelToken}) async {
+    _active = false;
+  }
+
+  @override
+  void registerBus(DeviceBus bus) {}
+
+  @override
+  void unregisterBus(String busId) {}
+
+  void addDevice(DiscoveredDevice device) {
+    _controller.add(device);
+  }
+
+  void emitLost(String id) {
+    _lostController.add(id);
+  }
+
+  void dispose() {
+    _controller.close();
+    _lostController.close();
+  }
+}
+
+class MockBindingEngine implements BindingEngine {
+  bool _busy = false;
+  final Map<String, bool> _probes = {};
+  final Map<String, BoundDevice> _bound = {};
+
+  bool bindCalled = false;
+  bool unbindCalled = false;
+
+  @override
+  bool get isBusy => _busy;
+
+  @override
+  Iterable<BoundDevice> get boundDevices => _bound.values;
+
+  @override
+  BoundDevice? getBoundDevice(String deviceID) => _bound[deviceID];
+
+  @override
+  Future<void> bind(Device device, String driverID, {CancellationToken? cancelToken}) async {
+    bindCalled = true;
+    final ok = await tryBind(device, driverID, cancelToken: cancelToken);
+    if (!ok) throw Exception('bind failed');
+    _bound[device.id] = BoundDevice(driverID, device, MockDriver('mock'));
+  }
+
+  @override
+  Future<bool> tryBind(Device device, String driverID, {CancellationToken? cancelToken}) async {
+    _busy = true;
+    await Future.delayed(Duration(milliseconds: 10));
+    _busy = false;
+    return _probes[device.id] ?? true;
+  }
+
+  @override
+  Future<void> unbind(String deviceID, {CancellationToken? cancelToken}) async {
+    unbindCalled = true;
+    _busy = true;
+    await Future.delayed(Duration(milliseconds: 5));
+    _busy = false;
+    _bound.remove(deviceID);
+  }
+
+  @override
+  Future<void> unbindAll({CancellationToken? cancelToken}) async {
+    final ids = List<String>.from(_bound.keys);
+    for (final id in ids) {
+      await unbind(id, cancelToken: cancelToken);
+    }
+  }
+
+  @override
+  void dispose() {}
+
+  void setProbeResult(String deviceID, bool result) {
+    _probes[deviceID] = result;
+  }
+}
+
+class MockHeartbeatService implements HeartbeatService {
+  bool _active = false;
+  bool _suspended = false;
+  bool _inBatch = false;
+  final _failController = StreamController<Device>.broadcast();
+  final _tickController = StreamController<void>.broadcast();
+  final _batchController = StreamController<bool>.broadcast();
+
+  // for verification
+  final List<BoundDevice> registered = [];
+  final List<String> unregistered = [];
+  final List<String> communicationEvents = [];
+
+  @override
+  Stream<Device> get onFailure => _failController.stream;
+
+  @override
+  Stream<void> get onTick => _tickController.stream;
+
+  @override
+  Stream<bool> get batchMode => _batchController.stream;
+
+  @override
+  bool get isActive => _active && !_suspended && !_inBatch;
+
+  @override
+  Future<void> start() async {
+    _active = true;
+  }
+
+  @override
+  Future<void> stop() async {
+    _active = false;
+    _suspended = false;
+    registered.clear();
+    unregistered.clear();
+    communicationEvents.clear();
+    _tickController.close();
+  }
+
+  @override
+  void suspend() {
+    _suspended = true;
+  }
+
+  @override
+  void resume() {
+    _suspended = false;
+  }
+
+  @override
+  void enterBatch() {
+    _inBatch = true;
+    _batchController.add(true);
+  }
+
+  @override
+  void exitBatch() {
+    _inBatch = false;
+    _batchController.add(false);
+  }
+
+  @override
+  void registerDevice(BoundDevice bound, HeartbeatMethod method) {
+    registered.add(bound);
+  }
+
+  @override
+  void unregisterDevice(String deviceID) {
+    unregistered.add(deviceID);
+  }
+
+  @override
+  void onDeviceCommunication(String deviceID) {
+    communicationEvents.add(deviceID);
+  }
+
+  @override
+  HeartbeatState? getState(String deviceID) => null;
+}
+
+class MockDriverFactory implements DriverFactory {
+  final Map<String, Driver> _map = {};
+
+  @override
+  Driver create(String driverID, {logger_pkg.Logger? logger}) {
+    return _map[driverID]!;
+  }
+
+  void add(String id, Driver driver) {
+    _map[id] = driver;
+  }
+}
+
+class MockEventDispatcher implements EventDispatcher {
+  final _ctrl = StreamController.broadcast();
+
+  @override
+  Stream<T> on<T>() => _ctrl.stream.where((e) => e is T).cast<T>();
+
+  @override
+  void fire(Object event) => _ctrl.add(event);
+
+  @override
+  void destroy() => _ctrl.close();
+}
+
+class MockDeviceBus implements DeviceBus {
+  @override
+  String get id => 'mock';
+
+  final _found = StreamController<DiscoveredDevice>.broadcast();
+  final _lost = StreamController<String>.broadcast();
+
+  @override
+  Future<void> connect(String deviceId) async {}
+
+  @override
+  Stream<DiscoveredDevice> get onDeviceFound => _found.stream;
+
+  @override
+  Stream<String> get onDeviceLost => _lost.stream;
+
+  @override
+  Future<void> disconnect(String deviceId) async {}
+
+  @override
+  Future<void> start() async {}
+
+  @override
+  Future<void> stop() async {}
 }

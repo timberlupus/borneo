@@ -11,7 +11,9 @@ import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
-import 'package:flutter_test/flutter_test.dart';
+// hide EventDispatcher because flutter_test also exports a symbol with
+// the same name; we use the one from kernel_abstractions instead.
+import 'package:flutter_test/flutter_test.dart' hide EventDispatcher;
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast_memory.dart';
 
@@ -302,6 +304,21 @@ void main() {
         deviceManager.dispose();
       });
     });
+
+    group('Heartbeat batch signaling', () {
+      test('reloadAllDevices sends enter/exit batch signals', () async {
+        // Arrange: kernel starts in default state
+        expect(testKernel.batchEntered, isFalse);
+        expect(testKernel.batchExited, isFalse);
+
+        // Act
+        await deviceManager.reloadAllDevices();
+
+        // Assert
+        expect(testKernel.batchEntered, isTrue, reason: 'batch should be entered before heavy operations');
+        expect(testKernel.batchExited, isTrue, reason: 'batch should be exited after operations complete');
+      });
+    });
   });
 }
 
@@ -311,7 +328,13 @@ class TestKernel implements IKernel {
   bool _isInitialized = false;
   final List<String> boundDeviceIds = [];
   final List<BoundDevice> _boundDevices = [];
-  final TestGlobalDevicesEventBus _events = TestGlobalDevicesEventBus();
+  final EventDispatcher _events = DefaultEventDispatcher();
+
+  // tracks whether heartbeat batch signals were invoked
+  bool heartbeatSuspended = false; // kept for compatibility
+  bool heartbeatResumed = false; // kept for compatibility
+  bool batchEntered = false;
+  bool batchExited = false;
 
   // Test tracking
   bool startCalled = false;
@@ -338,13 +361,36 @@ class TestKernel implements IKernel {
   Iterable<BoundDevice> get boundDevices => _boundDevices;
 
   @override
-  GlobalDevicesEventBus get events => _events;
+  EventDispatcher get events => _events;
 
   @override
   Future<void> start() async {
     startCalled = true;
     _isInitialized = true;
   }
+
+  @override
+  void suspendHeartbeat() {
+    heartbeatSuspended = true;
+  }
+
+  @override
+  void resumeHeartbeat() {
+    heartbeatResumed = true;
+  }
+
+  @override
+  void enterHeartbeatBatch() {
+    batchEntered = true;
+  }
+
+  @override
+  void exitHeartbeatBatch() {
+    batchExited = true;
+  }
+
+  @override
+  HeartbeatState? getHeartbeatState(String deviceID) => null;
 
   @override
   bool isBound(String deviceID) => boundDeviceIds.contains(deviceID);
@@ -468,7 +514,8 @@ class TestDriver extends Driver {
   void dispose() {}
 }
 
-class TestGlobalDevicesEventBus extends EventBus implements GlobalDevicesEventBus {}
+// deprecated test helper; replaced by EventDispatcher
+class TestEventDispatcher extends DefaultEventDispatcher {}
 
 class TestEventBus extends EventBus {}
 

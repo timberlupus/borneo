@@ -49,3 +49,4 @@ packages/*/build
 
 .claude
 CLAUDE.md
+.design-docs

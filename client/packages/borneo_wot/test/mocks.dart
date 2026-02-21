@@ -373,7 +373,7 @@ class MockLyfiDeviceApi implements ILyfiDeviceApi {
 }
 
 class MockKernel implements IKernel {
-  final GlobalDevicesEventBus _events = GlobalDevicesEventBus();
+  final EventDispatcher _events = DefaultEventDispatcher();
   final Map<String, BoundDevice> _boundDevices = {};
 
   void setBoundDevice(BoundDevice bound) {
@@ -391,7 +391,7 @@ class MockKernel implements IKernel {
   bool get isInitialized => true;
 
   @override
-  GlobalDevicesEventBus get events => _events;
+  EventDispatcher get events => _events;
 
   @override
   Iterable<Driver> get activatedDrivers => [];
@@ -425,6 +425,29 @@ class MockKernel implements IKernel {
 
   @override
   Future<void> startDevicesScanning({Duration? timeout, CancellationToken? cancelToken}) async {}
+
+  @override
+  void suspendHeartbeat() {}
+
+  @override
+  void resumeHeartbeat() {}
+
+  // new batch signals
+  bool batchEntered = false;
+  bool batchExited = false;
+
+  @override
+  void enterHeartbeatBatch() {
+    batchEntered = true;
+  }
+
+  @override
+  void exitHeartbeatBatch() {
+    batchExited = true;
+  }
+
+  @override
+  HeartbeatState? getHeartbeatState(String deviceID) => null;
 
   @override
   Future<void> stopDevicesScanning() async {}

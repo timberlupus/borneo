@@ -1,12 +1,19 @@
 import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
+import 'package:borneo_kernel_abstractions/event_dispatcher.dart';
 import 'package:event_bus/event_bus.dart';
 
 import 'models/discovered_device.dart';
 
 class DeviceEventBus extends EventBus {}
 
-class GlobalDevicesEventBus extends EventBus {}
+/// @deprecated Use [EventDispatcher] / [DefaultEventDispatcher] instead.
+///
+/// This class remains for compatibility during the kernel-refactor branch,
+/// but new code should rely on the abstration interfaces and inject a
+/// dispatcher instance.  It will be removed once the migration completes.
+@Deprecated('Use EventDispatcher and DefaultEventDispatcher (will be removed)')
+class GlobalDevicesEventBus extends EventBus implements EventDispatcher {}
 
 class FoundDeviceEvent {
   final DiscoveredDevice discovered;
@@ -55,4 +62,11 @@ class DeviceDiscoveringStartedEvent {
 
 class DeviceDiscoveringStoppedEvent {
   const DeviceDiscoveringStoppedEvent();
+}
+
+/// Fired when a previously discovered (but unbound) device disappears from
+/// a discovery bus.  The listener receives the lost device's id.
+class UnboundDeviceLostEvent {
+  final String deviceId;
+  const UnboundDeviceLostEvent(this.deviceId);
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:borneo_kernel/kernel.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
+import 'package:borneo_kernel_abstractions/event_dispatcher.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:test/test.dart';
@@ -31,6 +32,10 @@ void main() {
 
     tearDown(() {
       kernel.dispose();
+    });
+
+    test('uses DefaultEventDispatcher internally', () {
+      expect(kernel.events, isA<DefaultEventDispatcher>());
     });
 
     group('Initialization', () {
@@ -157,6 +162,30 @@ void main() {
         await kernel.unbindAll();
         expect(kernel.boundDevices.length, equals(0));
       });
+
+      test('heartbeat suspend/resume and batch APIs do not throw', () async {
+        await kernel.start();
+        kernel.suspendHeartbeat();
+        kernel.resumeHeartbeat();
+        kernel.enterHeartbeatBatch();
+        kernel.exitHeartbeatBatch();
+        // binding while heartbeat signals are active should still work
+        final device = TestDevice('d1', 'http://1');
+        kernel.registerDevice(BoundDeviceDescriptor(device: device, driverID: 'test-driver'));
+        await kernel.bind(device, 'test-driver');
+      });
+
+      test('concurrent binds complete without error', () async {
+        await kernel.start();
+        final deviceA = TestDevice('A', 'http://a');
+        final deviceB = TestDevice('B', 'http://b');
+        kernel.registerDevice(BoundDeviceDescriptor(device: deviceA, driverID: 'test-driver'));
+        kernel.registerDevice(BoundDeviceDescriptor(device: deviceB, driverID: 'test-driver'));
+
+        final f1 = kernel.bind(deviceA, 'test-driver');
+        final f2 = kernel.bind(deviceB, 'test-driver');
+        await Future.wait([f1, f2]);
+      });
     });
 
     group('Event Handling', () {
@@ -224,6 +253,43 @@ void main() {
     });
 
     group('Device Discovery', () {
+      test('supports custom DiscoveryManager injection', () async {
+        await kernel.start();
+        final mgr = MockDiscoveryManager();
+        // build new kernel with supplied manager and the same mocks
+        final k2 = DefaultKernel(mockLogger, mockDriverRegistry, mdnsProvider: mockMdnsProvider, discoveryManager: mgr);
+        await k2.start();
+        expect(k2.isScanning, isFalse);
+        await k2.startDevicesScanning();
+        expect(mgr.isActive, isTrue);
+        await k2.stopDevicesScanning();
+        expect(mgr.isActive, isFalse);
+      });
+
+      test('supports custom BindingEngine injection', () async {
+        await kernel.start();
+        final eng = MockBindingEngine();
+        final k2 = DefaultKernel(mockLogger, mockDriverRegistry, mdnsProvider: mockMdnsProvider, bindingEngine: eng);
+        await k2.start();
+        final device = TestDevice('d1', 'http://d1');
+        k2.registerDevice(BoundDeviceDescriptor(device: device, driverID: 'test-driver'));
+        await k2.bind(device, 'test-driver');
+        expect(eng.bindCalled, isTrue);
+      });
+
+      test('kernel forwards unbound device lost events', () async {
+        await kernel.start();
+        final mgr = MockDiscoveryManager();
+        final k2 = DefaultKernel(mockLogger, mockDriverRegistry, mdnsProvider: mockMdnsProvider, discoveryManager: mgr);
+        await k2.start();
+        UnboundDeviceLostEvent? got;
+        k2.events.on<UnboundDeviceLostEvent>().listen((e) {
+          got = e;
+        });
+        mgr.emitLost('abc');
+        await Future.delayed(Duration.zero);
+        expect(got?.deviceId, 'abc');
+      });
       test('should start and stop device scanning', () async {
         await kernel.start();
 

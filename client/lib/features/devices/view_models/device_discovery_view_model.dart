@@ -63,9 +63,8 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     required super.gt,
     super.logger,
     // helper for testing permission error handling
-    Future<bool> Function()? requestBlePermissions,
+    this.requestBlePermissions,
   }) {
-    this.requestBlePermissions = requestBlePermissions;
     _deviceAddedEventSub = _deviceManager.allDeviceEvents.on<NewDeviceEntityAddedEvent>().listen(
       (event) => _onNewDeviceEntityAdded(event),
     );
