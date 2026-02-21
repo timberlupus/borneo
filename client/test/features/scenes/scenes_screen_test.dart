@@ -5,9 +5,15 @@ import 'package:event_bus/event_bus.dart';
 
 import 'package:borneo_app/features/scenes/view_models/scenes_view_model.dart';
 
+// kernel abstractions types
+import 'package:borneo_kernel_abstractions/event_dispatcher.dart' as kd;
+import 'package:borneo_kernel_abstractions/events.dart' show DeviceBoundEvent, DeviceRemovedEvent;
+
 // core types used by stubs
 import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
+import 'package:borneo_app/features/devices/models/device_entity.dart';
+import 'package:borneo_app/features/devices/models/events.dart';
 import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/models/device_statistics.dart';
 import 'package:cancellation_token/cancellation_token.dart';
@@ -53,7 +59,12 @@ class _DummySceneManager implements ISceneManager {
   }) => throw UnimplementedError();
 }
 
-class _DummyDeviceManager implements IDeviceManager {
+class _StubDeviceManager implements IDeviceManager {
+  final kd.EventDispatcher _events = kd.DefaultEventDispatcher();
+
+  @override
+  kd.EventDispatcher get allDeviceEvents => _events;
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -65,6 +76,8 @@ class _StubSceneManager implements ISceneManager {
   bool get isInitialized => true;
 
   final List<SceneEntity> list;
+  final Map<String, DeviceStatistics> statsByScene = {};
+
   _StubSceneManager(this.list);
 
   @override
@@ -72,8 +85,11 @@ class _StubSceneManager implements ISceneManager {
 
   @override
   Future<List<SceneEntity>> all({Transaction? tx}) async => List.from(list);
+
   @override
-  Future<DeviceStatistics> getDeviceStatistics(String sceneID) async => DeviceStatistics(0, 0);
+  Future<DeviceStatistics> getDeviceStatistics(String sceneID) async {
+    return statsByScene[sceneID] ?? DeviceStatistics(0, 0);
+  }
 
   /// change which item is marked current; returns the updated scene
   @override
@@ -117,7 +133,7 @@ class _StubSceneManager implements ISceneManager {
 class FakeScenesViewModel extends ScenesViewModel {
   bool _overrideLoading = false;
 
-  FakeScenesViewModel() : super(_DummySceneManager(), _DummyDeviceManager(), EventBus(), null);
+  FakeScenesViewModel() : super(_DummySceneManager(), _StubDeviceManager(), EventBus(), null);
 
   @override
   bool get isLoading => _overrideLoading;
@@ -186,7 +202,7 @@ void main() {
       ];
 
       final manager = _StubSceneManager(scenes);
-      final vm = ScenesViewModel(manager, _DummyDeviceManager(), EventBus(), null);
+      final vm = ScenesViewModel(manager, _StubDeviceManager(), EventBus(), null);
 
       await vm.initialize();
 
@@ -196,6 +212,86 @@ void main() {
         equals(manager.current.id),
         reason: 'The current scene should be reordered to index 0',
       );
+    });
+
+    test('device bound/removed events trigger statistics reload', () async {
+      final now = DateTime.now();
+      final scenes = [SceneEntity(id: 'a', name: 'A', isCurrent: true, lastAccessTime: now)];
+      final manager = _StubSceneManager(scenes);
+      manager.statsByScene['a'] = DeviceStatistics(1, 1);
+      final deviceBus = _StubDeviceManager();
+      final vm = ScenesViewModel(manager, deviceBus, EventBus(), null);
+
+      await vm.initialize();
+      expect(vm.scenes.first.activeDeviceCount, equals(1));
+
+      // simulate device becoming active in scene 'a'
+      manager.statsByScene['a'] = DeviceStatistics(1, 2);
+      final boundDevice = DeviceEntity(
+        id: 'd1',
+        address: Uri.parse('coap://localhost'),
+        fingerprint: 'fp',
+        sceneID: 'a',
+        driverID: 'drv',
+        compatible: 'foo',
+        name: 'D1',
+        model: 'M',
+      );
+      deviceBus.allDeviceEvents.fire(DeviceBoundEvent(boundDevice));
+      // allow reload to complete
+      await Future<void>.delayed(Duration.zero);
+      expect(vm.scenes.first.activeDeviceCount, equals(2));
+
+      // simulate device removed
+      manager.statsByScene['a'] = DeviceStatistics(1, 1);
+      deviceBus.allDeviceEvents.fire(DeviceRemovedEvent(boundDevice));
+      await Future<void>.delayed(Duration.zero);
+      expect(vm.scenes.first.activeDeviceCount, equals(1));
+    });
+
+    test('moving device between scenes causes reload', () async {
+      final now = DateTime.now();
+      final scenes = [
+        SceneEntity(id: 'a', name: 'A', isCurrent: true, lastAccessTime: now),
+        SceneEntity(id: 'b', name: 'B', isCurrent: false, lastAccessTime: now),
+      ];
+      final manager = _StubSceneManager(scenes);
+      manager.statsByScene['a'] = DeviceStatistics(1, 1);
+      manager.statsByScene['b'] = DeviceStatistics(0, 0);
+      final deviceBus = _StubDeviceManager();
+      final vm = ScenesViewModel(manager, deviceBus, EventBus(), null);
+      await vm.initialize();
+      expect(vm.scenes.first.activeDeviceCount, equals(1));
+      expect(vm.scenes.last.activeDeviceCount, equals(0));
+
+      // move device from a to b
+      final old = DeviceEntity(
+        id: 'd2',
+        address: Uri.parse('coap://localhost'),
+        fingerprint: 'fp2',
+        sceneID: 'a',
+        driverID: 'drv',
+        compatible: 'foo',
+        name: 'D2',
+        model: 'M',
+      );
+      final updated = DeviceEntity(
+        id: 'd2',
+        address: Uri.parse('coap://localhost'),
+        fingerprint: 'fp2',
+        sceneID: 'b', // moved
+        driverID: 'drv',
+        compatible: 'foo',
+        name: 'D2',
+        model: 'M',
+      );
+      manager.statsByScene['a'] = DeviceStatistics(1, 0);
+      manager.statsByScene['b'] = DeviceStatistics(1, 1);
+      deviceBus.allDeviceEvents.fire(DeviceEntityUpdatedEvent(old, updated));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(vm.scenes.first.activeDeviceCount, equals(0));
+      expect(vm.scenes.last.activeDeviceCount, equals(1));
     });
 
     test('preserving order does not move newly selected scene to front', () async {
@@ -208,7 +304,7 @@ void main() {
 
       final manager = _StubSceneManager(scenes);
       final bus = EventBus();
-      final vm = ScenesViewModel(manager, _DummyDeviceManager(), bus, null);
+      final vm = ScenesViewModel(manager, _StubDeviceManager(), bus, null);
 
       await vm.initialize();
       // initial order has current at front

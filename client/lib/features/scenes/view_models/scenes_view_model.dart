@@ -6,6 +6,9 @@ import 'package:event_bus/event_bus.dart';
 
 import '../../../core/models/device_statistics.dart';
 import '../../../core/models/events.dart';
+// events fired by kernel/device manager
+import 'package:borneo_kernel_abstractions/events.dart';
+import '../../devices/models/events.dart';
 import '../../../core/models/scene_entity.dart';
 import '../../../core/services/devices/device_manager.dart';
 import '../../../core/services/scene_manager.dart';
@@ -38,11 +41,12 @@ class SceneSummaryModel {
 
 class ScenesViewModel extends ChangeNotifier {
   final ISceneManager _sceneManager;
+  final IDeviceManager _deviceManager;
   final EventBus _eventBus;
   final Logger? _logger;
 
-  // deviceManager for future use (parity) and event triggers handled via eventBus
-  ScenesViewModel(this._sceneManager, IDeviceManager deviceManager, this._eventBus, this._logger) {
+  // deviceManager used to monitor bound/removed/scene-move events
+  ScenesViewModel(this._sceneManager, this._deviceManager, this._eventBus, this._logger) {
     _setupEventListeners();
   }
 
@@ -59,6 +63,9 @@ class ScenesViewModel extends ChangeNotifier {
   late final StreamSubscription<SceneDeletedEvent> _sceneDeletedSub;
   late final StreamSubscription<SceneUpdatedEvent> _sceneUpdatedSub;
   late final StreamSubscription<DeviceManagerReadyEvent> _deviceManagerReadySub;
+  late final StreamSubscription<DeviceBoundEvent> _deviceBoundSub;
+  late final StreamSubscription<DeviceRemovedEvent> _deviceRemovedSub;
+  late final StreamSubscription<DeviceEntityUpdatedEvent> _deviceEntityUpdatedSub;
 
   void _setupEventListeners() {
     _currentSceneChangedSub = _eventBus.on<CurrentSceneChangedEvent>().listen(_onCurrentSceneChanged);
@@ -66,6 +73,17 @@ class ScenesViewModel extends ChangeNotifier {
     _sceneDeletedSub = _eventBus.on<SceneDeletedEvent>().listen(_onSceneDeleted);
     _sceneUpdatedSub = _eventBus.on<SceneUpdatedEvent>().listen(_onSceneUpdated);
     _deviceManagerReadySub = _eventBus.on<DeviceManagerReadyEvent>().listen(_onDeviceManagerReady);
+
+    // listen to device manager events so we can keep the active counts up to date
+    _deviceBoundSub = _deviceManager.allDeviceEvents.on<DeviceBoundEvent>().listen((_) {
+      unawaited(_reload(preserveOrder: true));
+    });
+    _deviceRemovedSub = _deviceManager.allDeviceEvents.on<DeviceRemovedEvent>().listen((_) {
+      unawaited(_reload(preserveOrder: true));
+    });
+    _deviceEntityUpdatedSub = _deviceManager.allDeviceEvents.on<DeviceEntityUpdatedEvent>().listen(
+      _onDeviceEntityUpdated,
+    );
   }
 
   Future<void> initialize() async {
@@ -176,6 +194,13 @@ class ScenesViewModel extends ChangeNotifier {
     if (!_isLoading) _reload(preserveOrder: true);
   }
 
+  void _onDeviceEntityUpdated(DeviceEntityUpdatedEvent event) {
+    // if a device moves between scenes we need to refresh statistics
+    if (event.old.sceneID != event.updated.sceneID) {
+      if (!_isLoading) _reload(preserveOrder: true);
+    }
+  }
+
   @override
   void dispose() {
     _currentSceneChangedSub.cancel();
@@ -183,6 +208,9 @@ class ScenesViewModel extends ChangeNotifier {
     _sceneDeletedSub.cancel();
     _sceneUpdatedSub.cancel();
     _deviceManagerReadySub.cancel();
+    _deviceBoundSub.cancel();
+    _deviceRemovedSub.cancel();
+    _deviceEntityUpdatedSub.cancel();
     super.dispose();
   }
 }
