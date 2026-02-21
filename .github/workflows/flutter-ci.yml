@@ -51,10 +51,21 @@ jobs:
       - name: Run analyze
         run: melos run analyze
 
-      - name: Run tests
+      - name: Install Xvfb (required for desktop integration tests)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update && sudo apt-get install -y xvfb
+
+      - name: Run unit/widget tests
         run: |
           flutter test
           melos run test:dart --no-select
+
+      - name: Run linux integration tests
+        if: runner.os == 'Linux'
+        # desktop integration tests run on the same container; wrap in Xvfb
+        run: |
+          xvfb-run flutter test integration_test/app_test.dart -d linux
 
   build-apk:
     needs: test
