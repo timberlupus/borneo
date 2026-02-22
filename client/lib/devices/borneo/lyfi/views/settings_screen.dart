@@ -4,16 +4,15 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.d
 import 'package:borneo_app/devices/borneo/lyfi/views/controller_settings_screen.dart';
 import 'package:borneo_app/shared/widgets/bottom_sheet_picker.dart';
 import 'package:borneo_app/shared/widgets/confirmation_sheet.dart';
-import 'package:borneo_app/shared/widgets/generic_settings_screen.dart';
 import 'package:borneo_app/shared/widgets/map_location_picker.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_earth_globe/globe_coordinates.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:logger/logger.dart';
 
 import 'package:provider/provider.dart';
@@ -26,7 +25,10 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: vm,
-      builder: (context, child) => GenericSettingsScreen(children: _buildSettingGroups(context)),
+      builder: (context, child) => Scaffold(
+        appBar: AppBar(title: Text(context.translate('Settings')), elevation: 1),
+        body: SafeArea(child: _buildSettingsList(context)),
+      ),
     );
   }
 
@@ -73,293 +75,192 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
-  List<Widget> _buildSettingGroups(BuildContext context) {
-    const rightChevron = CupertinoListTileChevron();
-    final tileColor = Theme.of(context).colorScheme.surfaceContainerHighest;
-    return <Widget>[
-      GenericSettingsGroup(
-        title: context.translate('DEVICE INFORMATION'),
-        children: [
-          Selector<SettingsViewModel, String>(
-            selector: (_, vm) => vm.name,
-            builder: (context, name, _) => ListTile(
-              dense: true,
-              tileColor: tileColor,
-              leading: Icon(Icons.info_outline),
+  SettingsList _buildSettingsList(BuildContext context) {
+    final lvm = context.watch<SettingsViewModel>();
+    return SettingsList(
+      sections: [
+        SettingsSection(
+          title: Text(context.translate('DEVICE INFORMATION')),
+          tiles: [
+            SettingsTile.navigation(
+              leading: const Icon(Icons.info_outline),
               title: Text(context.translate('Name')),
-              subtitle: Text(name),
-              trailing: rightChevron,
-              onTap: () => _showNameDialog(context, vm),
+              value: Text(lvm.name),
+              onPressed: (bc) => _showNameDialog(bc, vm),
             ),
-          ),
-          ListTile(
-            dense: true,
-            tileColor: tileColor,
-            leading: Icon(Icons.info_outline),
-            title: Text(context.translate('Manufacturer & Model')),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [Text(vm.borneoInfo.manufName), Text(vm.borneoInfo.modelName)],
+            SettingsTile(
+              leading: const Icon(Icons.info_outline),
+              title: Text(context.translate('Manufacturer & Model')),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [Text(lvm.borneoInfo.manufName), Text(lvm.borneoInfo.modelName)],
+              ),
             ),
-          ),
-          ListTile(
-            dense: true,
-            tileColor: tileColor,
-            leading: const Icon(Icons.numbers_outlined),
-            title: Text(context.translate('Serial number')),
-            trailing: Text(vm.borneoInfo.serno.substring(0, 12)),
-          ),
-          ListTile(
-            dense: true,
-            tileColor: tileColor,
-            leading: _buildWifiRssiIcon(context),
-            title: Text(context.translate('Device address')),
-            trailing: Text(vm.address.toString()),
-          ),
-          if (vm.isControllerSettingsAvailable)
-            ListTile(
-              dense: true,
-              tileColor: tileColor,
-              leading: const Icon(Icons.factory_outlined),
-              title: Text(context.translate('Controller Settings')),
-              trailing: rightChevron,
-              onTap: () => _goControllerSettings(context, vm),
+            SettingsTile(
+              leading: const Icon(Icons.numbers_outlined),
+              title: Text(context.translate('Serial number')),
+              value: Text(lvm.borneoInfo.serno.substring(0, 12)),
             ),
-        ],
-      ),
-      GenericSettingsGroup(
-        title: context.translate('DEVICE STATUS'),
-        children: [
-          Selector<SettingsViewModel, ({bool canUpdate, String? tz, DateTime timestamp})>(
-            selector: (_, vm) =>
-                (canUpdate: vm.canUpdateTimezone, tz: vm.timezone, timestamp: vm.borneoStatus.timestamp),
-            builder: (context, map, _) => ListTile(
-              dense: true,
-              tileColor: tileColor,
+            SettingsTile(
+              leading: _buildWifiRssiIcon(context),
+              title: Text(context.translate('Device address')),
+              trailing: Text(lvm.address.toString()),
+            ),
+            if (lvm.isControllerSettingsAvailable)
+              SettingsTile.navigation(
+                leading: const Icon(Icons.factory_outlined),
+                title: Text(context.translate('Controller Settings')),
+                onPressed: (bc) => _goControllerSettings(bc, vm),
+              ),
+          ],
+        ),
+        SettingsSection(
+          title: Text(context.translate('DEVICE STATUS')),
+          tiles: [
+            SettingsTile.navigation(
               leading: const Icon(Icons.access_time_outlined),
               title: Text(context.translate('Device time & time zone')),
-              subtitle: Column(
+              description: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(map.timestamp.toString()),
-                  Text(map.tz != null ? map.tz! : context.translate('Unknown time zone')),
+                  Text(lvm.borneoStatus.timestamp.toString()),
+                  Text(lvm.timezone ?? context.translate('Unknown time zone')),
                 ],
               ),
-              trailing: rightChevron,
-              onTap: map.canUpdate ? vm.updateTimezone : null,
+              enabled: lvm.canUpdateTimezone,
+              onPressed: (bc) => vm.updateTimezone(),
             ),
-          ),
-          Selector<SettingsViewModel, ({bool canUpdate, PowerBehavior behavior})>(
-            selector: (_, vm) => (canUpdate: vm.canUpdatePowerBehavior, behavior: vm.powerBehavior),
-            builder: (context, map, _) => ListTile(
-              dense: true,
+            SettingsTile.navigation(
               leading: const Icon(Icons.settings_power_outlined),
-              tileColor: tileColor,
               title: Text(context.translate('Power status at startup')),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(_formatPowerBehavior(context, map.behavior)),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.chevron_right),
-                ],
+              trailing: Text(_formatPowerBehavior(context, lvm.powerBehavior)),
+              enabled: lvm.canUpdatePowerBehavior,
+              onPressed: (bc) => _showPowerBehaviorPicker(bc, vm),
+            ),
+            SettingsTile(
+              leading: const Icon(Icons.power_off),
+              title: Text(context.translate('Last shutdown')),
+              trailing: Text(lvm.borneoStatus.shutdownTimestamp?.toString() ?? context.translate('N/A')),
+              description: Text(
+                context.translate("Reason code: {reasonCode}", nArgs: {"reasonCode": lvm.borneoStatus.shutdownReason}),
               ),
-              onTap: map.canUpdate ? () => _showPowerBehaviorPicker(context, vm) : null,
             ),
-          ),
-          ListTile(
-            dense: true,
-            tileColor: tileColor,
-            leading: const Icon(Icons.power_off),
-            title: Text(context.translate('Last shutdown')),
-            trailing: Text(vm.borneoStatus.shutdownTimestamp?.toString() ?? context.translate('N/A')),
-            subtitle: Text(
-              context.translate("Reason code: {reasonCode}", nArgs: {"reasonCode": vm.borneoStatus.shutdownReason}),
-            ),
-          ),
-        ],
-      ),
-      GenericSettingsGroup(
-        title: context.translate('LIGHTING'),
-        children: [
-          Selector<SettingsViewModel, ({bool canUpdate, GeoLocation? location})>(
-            selector: (_, vm) => (canUpdate: vm.canUpdateGeoLocation, location: vm.location),
-            builder: (context, map, _) => ListTile(
-              dense: true,
-              tileColor: tileColor,
+          ],
+        ),
+        SettingsSection(
+          title: Text(context.translate('LIGHTING')),
+          tiles: [
+            SettingsTile.navigation(
               leading: const Icon(Icons.location_pin),
               title: Text(context.translate('Location for sun & moon simulation')),
-              subtitle: map.location != null
-                  ? Text("(${vm.location!.lat.toStringAsFixed(0)}, ${vm.location!.lng.toStringAsFixed(0)})")
+              value: lvm.location != null
+                  ? Text("(${lvm.location!.lat.toStringAsFixed(0)}, ${lvm.location!.lng.toStringAsFixed(0)})")
                   : Text(context.translate('Unknown')),
-              trailing: rightChevron,
-              onTap: map.canUpdate
-                  ? () async {
-                      if (context.mounted) {
-                        await _pickLocation(context, vm);
-                      }
+              enabled: lvm.canUpdateGeoLocation,
+              onPressed: (bc) async {
+                if (bc.mounted) {
+                  await _pickLocation(bc, vm);
+                }
+              },
+            ),
+            SettingsTile.navigation(
+              title: Text(context.translate('Correction curve')),
+              trailing: Text(_formatCorrectionMethod(context, lvm.correctionMethod)),
+              enabled: lvm.canUpdateCorrectionMethod,
+              onPressed: (bc) => _showCorrectionMethodPicker(bc, vm),
+            ),
+            SettingsTile.navigation(
+              title: Text(context.translate('Temporary light duration')),
+              trailing: Text(_formatDuration(context, lvm.temporaryDuration)),
+              enabled: lvm.canUpdateTemporaryDuration,
+              onPressed: (bc) => _showTemporaryDurationPicker(bc, vm),
+            ),
+            SettingsTile.switchTile(
+              title: Text(context.translate('Cloud simulation')),
+              description: Text(context.translate('Simulate cloud shadow effect')),
+              initialValue: lvm.cloudEnabled,
+              enabled: lvm.canUpdateCloudEnabled,
+              onToggle: lvm.canUpdateCloudEnabled
+                  ? (bool value) async {
+                      await vm.updateCloudEnabled(value);
                     }
                   : null,
             ),
-          ),
-          Selector<SettingsViewModel, ({bool canUpdate, LedCorrectionMethod correctionMethod})>(
-            selector: (_, vm) => (canUpdate: vm.canUpdateCorrectionMethod, correctionMethod: vm.correctionMethod),
-            builder: (context, map, _) => ListTile(
-              dense: true,
-              tileColor: tileColor,
-              title: Text(context.translate('Correction curve')),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(_formatCorrectionMethod(context, map.correctionMethod)),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.chevron_right),
-                ],
-              ),
-              onTap: map.canUpdate ? () => _showCorrectionMethodPicker(context, vm) : null,
-            ),
-          ),
-          Selector<SettingsViewModel, ({bool canUpdate, Duration duration})>(
-            selector: (_, vm) => (canUpdate: vm.canUpdateTemporaryDuration, duration: vm.temporaryDuration),
-            builder: (context, map, _) => ListTile(
-              dense: true,
-              tileColor: tileColor,
-              title: Text(context.translate('Temporary light on duration')),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(_formatDuration(context, map.duration)),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.chevron_right),
-                ],
-              ),
-              onTap: map.canUpdate ? () => _showTemporaryDurationPicker(context, vm) : null,
-            ),
-          ),
-          Selector<SettingsViewModel, ({bool canUpdate, bool cloudEnabled})>(
-            selector: (_, vm) => (canUpdate: vm.canUpdateCloudEnabled, cloudEnabled: vm.cloudEnabled),
-            builder: (context, map, _) => ListTile(
-              dense: true,
-              tileColor: tileColor,
-              title: Text(context.translate('Cloud simulation')),
-              subtitle: Text(context.translate('Simulate cloud shadow effect')),
-              trailing: Switch(
-                value: map.cloudEnabled,
-                onChanged: map.canUpdate
-                    ? (bool value) async {
-                        await vm.updateCloudEnabled(value);
-                      }
-                    : null,
-              ),
-            ),
-          ),
-        ],
-      ),
-
-      GenericSettingsGroup(
-        title: context.translate('THERMAL MANAGEMENT'),
-        children: [
-          Selector<SettingsViewModel, ({bool canUpdate, FanMode fanMode})>(
-            selector: (_, vm) => (canUpdate: vm.canUpdateFanMode, fanMode: vm.fanMode),
-            builder: (context, map, _) => ListTile(
-              dense: true,
-              tileColor: tileColor,
+          ],
+        ),
+        SettingsSection(
+          title: Text(context.translate('THERMAL MANAGEMENT')),
+          tiles: [
+            SettingsTile.navigation(
               title: Text(context.translate('Fan mode')),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(_formatFanMode(context, map.fanMode)),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.chevron_right),
-                ],
-              ),
-              onTap: map.canUpdate ? () => _showFanModePicker(context, vm) : null,
+              trailing: Text(_formatFanMode(context, lvm.fanMode)),
+              enabled: lvm.canUpdateFanMode,
+              onPressed: (bc) => _showFanModePicker(bc, vm),
             ),
-          ),
-          Selector<SettingsViewModel, ({bool canUpdate, int manualFanPower, FanMode fanMode})>(
-            selector: (_, vm) =>
-                (canUpdate: vm.canUpdateManualFanPower, manualFanPower: vm.manualFanPower, fanMode: vm.fanMode),
-            builder: (context, map, _) => ListTile(
-              dense: true,
-              tileColor: tileColor,
+            SettingsTile.navigation(
               title: Text(
                 context.translate('Manual fan power'),
-                style: map.fanMode == FanMode.manual
+                style: lvm.fanMode == FanMode.manual
                     ? null
                     : TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
               ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '${map.manualFanPower}%',
-                    style: map.fanMode == FanMode.manual
-                        ? Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.primary)
-                        : Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
-                          ),
-                  ),
-                  SizedBox(width: 8),
-                  rightChevron,
-                ],
+              trailing: Text(
+                '${lvm.manualFanPower}%',
+                style: lvm.fanMode == FanMode.manual
+                    ? Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.primary)
+                    : Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+                      ),
               ),
-              onTap: map.canUpdate ? () => _showManualFanPowerDialog(context, vm, map.manualFanPower) : null,
+              enabled: lvm.canUpdateManualFanPower,
+              onPressed: (bc) => _showManualFanPowerDialog(bc, vm, lvm.manualFanPower),
             ),
-          ),
-        ],
-      ),
-
-      GenericSettingsGroup(
-        title: context.translate('VERSION & UPGRADE'),
-        children: [
-          ListTile(
-            dense: true,
-            leading: const Icon(Icons.info_outline),
-            tileColor: tileColor,
-            title: Text(context.translate('Hardware version')),
-            trailing: Text(vm.borneoInfo.hwVer.toString()),
-          ),
-          ListTile(
-            dense: true,
-            leading: const Icon(Icons.info_outline),
-            tileColor: tileColor,
-            title: Text(context.translate('Firmware version')),
-            trailing: Text(vm.borneoInfo.fwVer.toString() + (vm.borneoInfo.isCE ? " (CE)" : " (PRO)")),
-          ),
-        ],
-      ),
-      GenericSettingsGroup(
-        title: context.translate('DANGER ZONE'),
-        children: [
-          ListTile(
-            dense: true,
-            leading: Icon(Icons.wifi_off_outlined),
-            tileColor: tileColor,
-            title: Text(
-              context.translate('Reset device network settings'),
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ],
+        ),
+        SettingsSection(
+          title: Text(context.translate('VERSION & UPGRADE')),
+          tiles: [
+            SettingsTile(
+              leading: const Icon(Icons.info_outline),
+              title: Text(context.translate('Hardware version')),
+              trailing: Text(lvm.borneoInfo.hwVer.toString()),
             ),
-            subtitle: Text(
-              context.translate('This will disconnect the device from the network and remove saved Wi‑Fi credentials.'),
+            SettingsTile(
+              leading: const Icon(Icons.info_outline),
+              title: Text(context.translate('Firmware version')),
+              trailing: Text(lvm.borneoInfo.fwVer.toString() + (lvm.borneoInfo.isCE ? " (CE)" : " (PRO)")),
             ),
-            trailing: rightChevron,
-            onTap: () => _showNetworkResetDialog(context, vm),
-          ),
-          ListTile(
-            dense: true,
-            leading: Icon(Icons.restore_outlined),
-            tileColor: tileColor,
-            title: Text(
-              context.translate('Restore to factory settings'),
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ],
+        ),
+        SettingsSection(
+          title: Text(context.translate('DANGER ZONE')),
+          tiles: [
+            SettingsTile.navigation(
+              leading: const Icon(Icons.wifi_off_outlined),
+              title: Text(
+                context.translate('Reset device network settings'),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+              description: Text(
+                context.translate(
+                  'This will disconnect the device from the network and remove saved Wi‑Fi credentials.',
+                ),
+              ),
+              onPressed: (bc) => _showNetworkResetDialog(bc, vm),
             ),
-            subtitle: Text(context.translate('Your device will lose all custom settings.')),
-            trailing: rightChevron,
-            onTap: () => _showFactoryResetDialog(context, vm),
-          ),
-        ],
-      ),
-    ];
+            SettingsTile.navigation(
+              leading: const Icon(Icons.restore_outlined),
+              title: Text(
+                context.translate('Restore to factory settings'),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+              description: Text(context.translate('Your device will lose all custom settings.')),
+              onPressed: (bc) => _showFactoryResetDialog(bc, vm),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   void _goControllerSettings(BuildContext context, SettingsViewModel svm) {

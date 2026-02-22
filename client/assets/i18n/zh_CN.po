@@ -548,7 +548,7 @@ msgid "Correction curve"
 msgstr "矫正曲线"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:225
-msgid "Temporary light on duration"
+msgid "Temporary light duration"
 msgstr "临时开灯时长"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:242
