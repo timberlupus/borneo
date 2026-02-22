@@ -193,8 +193,17 @@ msgid "Duration"
 msgstr "Duración"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:146
-msgid "Start percent"
-msgstr "Porcentaje de inicio"
+msgid "Start strength"
+msgstr "Fuerza inicial"
+
+msgid "Select Duration"
+msgstr "Seleccionar Duración"
+
+msgid "Select Start strength"
+msgstr "Seleccionar fuerza inicial"
+
+msgid "days"
+msgstr "días"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:168
 msgid "Update acclimation settings succeed."
