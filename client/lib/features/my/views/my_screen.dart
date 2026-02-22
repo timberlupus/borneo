@@ -28,6 +28,7 @@ class MyScreen extends StatelessWidget {
                 Navigator.push(context, route);
               },
             ),
+            Divider(indent: 48, height: 1.5, thickness: 1.5, color: Theme.of(context).scaffoldBackgroundColor),
             ListTile(
               title: Text(context.translate('About')),
               leading: Icon(Icons.info_outline),

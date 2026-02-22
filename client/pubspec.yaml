@@ -80,6 +80,7 @@ dependencies:
   synchronized: ^3.4.0
   collection: ^1.18.0
   polly_dart: ^0.0.7
+  flutter_settings_ui: ^3.0.0
 
   # Third-party libraries
   flutter_esp_ble_prov:

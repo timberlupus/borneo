@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 
+// expose the generic picker alongside the legacy implementation
+export 'generic_bottom_sheet_picker.dart';
+
+import 'generic_bottom_sheet_picker.dart';
+
 /// A custom bottom sheet picker that provides a clean, native iOS/Android experience
-/// for selecting from a list of options.
+/// for selecting from a list of **string** options.
+///
+/// The legacy API remains available for backwards compatibility, but
+/// internally it now delegates to [GenericBottomSheetPicker] so the two
+/// implementations share the same behaviour and styling.
 class BottomSheetPicker extends StatelessWidget {
   final String title;
   final List<String> items;
@@ -23,18 +32,24 @@ class BottomSheetPicker extends StatelessWidget {
     required int selectedIndex,
     required ValueChanged<int> onItemSelected,
   }) {
-    return showModalBottomSheet(
+    // convert to generic entries
+    final entries = items.map((s) => GenericBottomSheetPickerEntry<String>(value: s, label: s)).toList();
+
+    final selectedValue = (selectedIndex >= 0 && selectedIndex < items.length)
+        ? items[selectedIndex]
+        : (items.isNotEmpty ? items.first : null);
+
+    return GenericBottomSheetPicker.show<String>(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => BottomSheetPicker(
-        title: title,
-        items: items,
-        selectedIndex: selectedIndex,
-        onItemSelected: (index) {
-          onItemSelected(index);
-          Navigator.of(context).pop();
-        },
-      ),
+      title: title,
+      entries: entries,
+      selectedValue: selectedValue,
+      onValueSelected: (val) {
+        final idx = items.indexOf(val);
+        if (idx != -1) {
+          onItemSelected(idx);
+        }
+      },
     );
   }
 
