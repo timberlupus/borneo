@@ -18,6 +18,7 @@ class SceneCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Card(
+      key: Key('scene_card_${scene.name}'),
       margin: const EdgeInsets.symmetric(vertical: 8),
       clipBehavior: Clip.antiAlias,
       borderOnForeground: true,
@@ -140,6 +141,7 @@ class SceneCard extends StatelessWidget {
         color: Colors.black.withValues(alpha: 0.32),
         child: InkWell(
           onTap: () => _showEditSceneScreen(context),
+          key: Key('btn_edit_scene_${scene.name}'),
           child: const SizedBox(
             width: 44,
             height: 44,

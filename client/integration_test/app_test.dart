@@ -13,6 +13,7 @@ import 'package:borneo_app/main.dart' as app;
 
 // bring in other test suites so this file serves as the aggregate entry point
 import 'device_group_test.dart' as device_group_test;
+import 'scenes_test.dart' as scenes_test;
 
 // ---------------------------------------------------------------------------
 // Fake implementations for testing
@@ -72,4 +73,5 @@ void main() {
 
   // delegate additional tests to other files
   device_group_test.deviceGroupTests();
+  scenes_test.scenesTests();
 }

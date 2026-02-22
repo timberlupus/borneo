@@ -122,6 +122,7 @@ class _SceneEditScreenState extends State<SceneEditScreen> {
         hintStyle: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
         hintText: context.translate('Enter the required scene name'),
       ),
+      key: const Key('field_scene_name'),
       validator: (value) {
         if (value?.trim().isEmpty ?? true) {
           return context.translate('Please enter the scene name');
@@ -144,6 +145,7 @@ class _SceneEditScreenState extends State<SceneEditScreen> {
         hintText: context.translate('Enter the optional notes for this scene'),
         labelText: context.translate('Notes'),
       ),
+      key: const Key('field_scene_notes'),
       onSaved: (value) {
         vm.updateNotes(value ?? '');
       },
@@ -170,6 +172,7 @@ class _SceneEditScreenState extends State<SceneEditScreen> {
         child: vm.isLoading
             ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
             : Text(context.translate('Submit')),
+        key: const Key('btn_submit'),
       ),
     );
   }
@@ -179,45 +182,43 @@ class _SceneEditScreenState extends State<SceneEditScreen> {
     return [
       if (vm.deletionAvailable)
         IconButton(
+          key: const Key('btn_delete_scene'),
           onPressed: vm.isLoading
               ? null
-              : () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return ConfirmationSheet(
-                        message: context.translate(
-                          'Are you sure you want to delete this scene? This action cannot be undone.',
-                        ),
-                        okPressed: () async {
-                          final success = await vm.delete();
-                          if (success) {
-                            if (context.mounted) {
-                              Navigator.of(context).pop(true);
-                            }
-                          } else if (context.mounted) {
-                            final error = vm.error;
-                            switch (error) {
-                              case 'last_scene':
-                                notificationService.showWarning(
-                                  context.translate('Cannot Delete Scene'),
-                                  body: context.translate('Cannot delete the last remaining scene.'),
-                                );
-                                break;
-                              case 'devices_or_groups':
-                                notificationService.showWarning(
-                                  context.translate('Cannot Delete Scene'),
-                                  body: context.translate(
-                                    'This scene contains devices or device groups. Please remove all devices and groups from this scene before deleting it.',
-                                  ),
-                                );
-                                break;
-                            }
-                          }
-                        },
-                      );
-                    },
+              : () async {
+                  // reuse AsyncConfirmationSheet to expose known keys
+                  final confirmed = await AsyncConfirmationSheet.show(
+                    context,
+                    message: context.translate(
+                      'Are you sure you want to delete this scene? This action cannot be undone.',
+                    ),
                   );
+                  if (!confirmed) return;
+
+                  final success = await vm.delete();
+                  if (success) {
+                    if (context.mounted) {
+                      Navigator.of(context).pop(true);
+                    }
+                  } else if (context.mounted) {
+                    final error = vm.error;
+                    switch (error) {
+                      case 'last_scene':
+                        notificationService.showWarning(
+                          context.translate('Cannot Delete Scene'),
+                          body: context.translate('Cannot delete the last remaining scene.'),
+                        );
+                        break;
+                      case 'devices_or_groups':
+                        notificationService.showWarning(
+                          context.translate('Cannot Delete Scene'),
+                          body: context.translate(
+                            'This scene contains devices or device groups. Please remove all devices and groups from this scene before deleting it.',
+                          ),
+                        );
+                        break;
+                    }
+                  }
                 },
           icon: const Icon(Icons.delete_outline),
         ),

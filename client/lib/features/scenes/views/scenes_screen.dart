@@ -60,7 +60,11 @@ class _ScenesScreenState extends State<ScenesScreen> {
                 width: kToolbarHeight,
                 child: vm.isLoading
                     ? const Padding(padding: EdgeInsets.all(12.0), child: CircularProgressIndicator(strokeWidth: 2))
-                    : IconButton(icon: const Icon(Icons.add_outlined), onPressed: () => _showNewSceneScreen(context)),
+                    : IconButton(
+                        key: const Key('btn_add_scene'),
+                        icon: const Icon(Icons.add_outlined),
+                        onPressed: () => _showNewSceneScreen(context),
+                      ),
               ),
             ],
           ),
@@ -159,6 +163,7 @@ class _SceneListState extends State<_SceneList> {
             },
           ),
           child: ListView.separated(
+            key: const Key('scene_list'),
             controller: _scrollController,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             separatorBuilder: (_, _) => const SizedBox(width: 16),
