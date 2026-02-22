@@ -6,7 +6,7 @@ import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:sembast/sembast_memory.dart';
+import 'package:sembast/sembast_memory.dart' hide Finder;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:borneo_app/main.dart' as app;
@@ -41,6 +41,21 @@ Future<Widget> _buildTestApp({IDeviceModuleRegistry? registry}) async {
 // Tests
 // ---------------------------------------------------------------------------
 
+/// Repeatedly pumps the tester until [finder] is found or the [timeout]
+/// expires.  This is more reliable than `pumpAndSettle` when the UI shows an
+/// indefinite animation (e.g. a loading spinner) that would otherwise keep
+/// scheduling frames.
+Future<void> _waitFor(WidgetTester tester, Finder finder, {Duration timeout = const Duration(seconds: 5)}) async {
+  final end = DateTime.now().add(timeout);
+  while (DateTime.now().isBefore(end)) {
+    await tester.pump(const Duration(milliseconds: 100));
+    if (tester.any(finder)) return;
+  }
+  // Final check to produce a sensible failure message
+  await tester.pump();
+  expect(tester.any(finder), true, reason: 'Expected $finder to appear within $timeout');
+}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -62,6 +77,11 @@ void main() {
     await tester.tap(find.byIcon(Icons.device_hub_outlined));
     await tester.pumpAndSettle();
 
+    // Devices screen should be fully initialized before we continue.  The title
+    // contains the current scene name which is "My Home" in the fresh
+    // in-memory database.
+    await _waitFor(tester, find.text('Devices in My Home'));
+
     // open add menu and select Add Devices Group
     await tester.tap(find.byIcon(Icons.add_outlined));
     await tester.pumpAndSettle();
@@ -71,12 +91,9 @@ void main() {
     // fill in group name and submit
     await tester.enterText(find.byKey(const Key('field_group_name')), 'Test Group');
     await tester.tap(find.byKey(const Key('btn_submit')));
-    // Give DB write + EventBus async delivery + reload time to complete.
+    // give database and event bus a moment to complete, then wait for list update
     await tester.pump(const Duration(milliseconds: 500));
-    await tester.pumpAndSettle();
-
-    // verify group shows up in list
-    expect(find.text('Test Group'), findsOneWidget);
+    await _waitFor(tester, find.text('Test Group'));
 
     // edit the group
     await tester.tap(find.byKey(const Key('btn_edit_group_Test Group')));
@@ -86,7 +103,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('field_group_name')), 'Updated Group');
     await tester.tap(find.byKey(const Key('btn_submit')));
     await tester.pump(const Duration(milliseconds: 500));
-    await tester.pumpAndSettle();
+    await _waitFor(tester, find.text('Updated Group'));
 
     expect(find.text('Updated Group'), findsOneWidget);
 
@@ -101,8 +118,6 @@ void main() {
     // confirm deletion
     await tester.tap(find.byKey(const Key('btn_confirm_delete')));
     await tester.pump(const Duration(milliseconds: 500));
-    await tester.pumpAndSettle();
-
     // group should no longer be present
     expect(find.text('Updated Group'), findsNothing);
   });
