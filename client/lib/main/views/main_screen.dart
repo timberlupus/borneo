@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:logger/logger.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
@@ -27,6 +28,7 @@ import '../../features/devices/views/devices_screen.dart';
 import '../../features/my/views/my_screen.dart';
 
 import '../view_models/main_view_model.dart';
+import '../../routes/route_manager.dart';
 
 enum PlusMenuIndexes { addScene, addGroup, addDevice }
 
@@ -143,86 +145,101 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  late final PageController _pageController;
+  // controller for persistent_bottom_nav_bar package
+  late final PersistentTabController _persistentController;
+
+  // One GlobalKey per tab so we can interrogate each tab's Navigator state
+  // and manually pop sub-pages when the Android back button is pressed.
+  final List<GlobalKey<NavigatorState>> _tabNavKeys = List.generate(3, (_) => GlobalKey<NavigatorState>());
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: 0);
+    _persistentController = PersistentTabController(initialIndex: 0);
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
     super.dispose();
   }
 
   Widget buildScaffold(BuildContext context) {
     final mainVM = context.read<MainViewModel>();
+    final routeManager = context.read<RouteManager>();
+
+    List<Widget> buildScreens() => const [
+      ProvideScenesViewModel(child: ScenesScreen(key: ValueKey('scenes'))),
+      DevicesScreen(key: ValueKey('devices')),
+      MyScreen(key: ValueKey('my')),
+    ];
+
+    // Each tab needs its own RouteAndNavigatorSettings so that
+    // Navigator.of(context).pushNamed(...) calls inside tabs can resolve
+    // named routes (device detail pages, discovery screen, etc.).
+    // We also pass individual GlobalKeys so the outer PopScope can check
+    // whether a tab's navigator can pop before running the exit logic.
+    RouteAndNavigatorSettings tabNavSettings(int index) =>
+        RouteAndNavigatorSettings(onGenerateRoute: routeManager.onGenerateRoute, navigatorKey: _tabNavKeys[index]);
+
+    List<PersistentBottomNavBarItem> navBarItems() => [
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.house),
+        inactiveIcon: const Icon(Icons.house_outlined),
+        title: context.translate('Scenes'),
+        activeColorPrimary: Theme.of(context).colorScheme.primary,
+        inactiveColorPrimary: Theme.of(context).colorScheme.onSurface,
+        routeAndNavigatorSettings: tabNavSettings(0),
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.device_hub),
+        inactiveIcon: const Icon(Icons.device_hub_outlined),
+        title: context.translate('Devices'),
+        activeColorPrimary: Theme.of(context).colorScheme.primary,
+        inactiveColorPrimary: Theme.of(context).colorScheme.onSurface,
+        routeAndNavigatorSettings: tabNavSettings(1),
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.person),
+        inactiveIcon: const Icon(Icons.person_outline),
+        title: context.translate('My'),
+        activeColorPrimary: Theme.of(context).colorScheme.primary,
+        inactiveColorPrimary: Theme.of(context).colorScheme.onSurface,
+        routeAndNavigatorSettings: tabNavSettings(2),
+      ),
+    ];
+
     return Selector<MainViewModel, TabIndices>(
       selector: (context, vm) => vm.currentTabIndex,
       builder: (context, tabIndex, child) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_pageController.hasClients) {
-            final current = _pageController.page?.round() ?? _pageController.initialPage;
-            if (current != tabIndex.index) {
-              _pageController.animateToPage(
-                tabIndex.index,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutCubic,
-              );
-            }
-          }
-        });
+        // keep controller in sync with view model state
+        if (_persistentController.index != tabIndex.index) {
+          _persistentController.jumpToTab(tabIndex.index);
+        }
 
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: const SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
             statusBarIconBrightness: Brightness.dark,
           ),
-          child: Scaffold(
-            appBar: null,
-            body: PageView(
-              controller: _pageController,
-              // Enable user swipe to switch tabs
-              physics: const PageScrollPhysics(),
-              onPageChanged: (index) {
-                if (index != tabIndex.index) {
-                  mainVM.setIndex(TabIndices.values[index]);
-                }
-              },
-              children: const [
-                ProvideScenesViewModel(child: ScenesScreen(key: ValueKey('scenes'))),
-                DevicesScreen(key: ValueKey('devices')),
-                MyScreen(key: ValueKey('my')),
-              ],
-            ),
-
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex: tabIndex.index,
-              onTap: (index) {
-                if (index != tabIndex.index) {
-                  _pageController.jumpToPage(index);
-                }
-              },
-              items: [
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.house_outlined),
-                  activeIcon: const Icon(Icons.house),
-                  label: context.translate('Scenes'),
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.device_hub_outlined),
-                  activeIcon: const Icon(Icons.device_hub),
-                  label: context.translate('Devices'),
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.person_outline),
-                  activeIcon: const Icon(Icons.person),
-                  label: context.translate('My'),
-                ),
-              ],
-            ),
+          child: PersistentTabView(
+            context,
+            controller: _persistentController,
+            screens: buildScreens(),
+            items: navBarItems(),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            //Theme.of(context).bottomNavigationBarTheme.backgroundColor ??
+            //Theme.of(context).colorScheme.surfaceContainerHighest,
+            // Back-button handling is fully managed by the outer PopScope
+            // with per-tab navigator-key checks, so we disable the built-in
+            // handler to avoid double-handling.
+            handleAndroidBackButtonPress: false,
+            resizeToAvoidBottomInset: true,
+            onItemSelected: (index) {
+              if (index != tabIndex.index) {
+                mainVM.setIndex(TabIndices.values[index]);
+              }
+            },
+            navBarStyle: NavBarStyle.style9,
           ),
         );
       },
@@ -304,6 +321,15 @@ class _MainScreenState extends State<MainScreen> {
             onPopInvokedWithResult: (didPop, _) async {
               if (didPop) return;
 
+              // If the current tab's inner Navigator has pages above root,
+              // pop those first – no exit prompt in that case.
+              final tabNavState = _tabNavKeys[_persistentController.index].currentState;
+              if (tabNavState != null && tabNavState.canPop()) {
+                tabNavState.pop();
+                return;
+              }
+
+              // We're at the navigation root: apply double-back-to-exit.
               final shouldPop = await vm.handleWillPop();
               if (!shouldPop) {
                 if (context.mounted) {
@@ -313,11 +339,7 @@ class _MainScreenState extends State<MainScreen> {
                   ).showInfo(context.translate('Press back again to exit'));
                 }
               } else if (context.mounted) {
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
-                } else {
-                  SystemNavigator.pop();
-                }
+                SystemNavigator.pop();
               }
             },
             child: Selector<MainViewModel, bool>(

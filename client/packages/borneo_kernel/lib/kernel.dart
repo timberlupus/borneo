@@ -180,9 +180,20 @@ final class DefaultKernel implements IKernel {
         } else {
           final count = (_backoffCount[id] ?? 0) + 1;
           _backoffCount[id] = count;
-          // interval = min(base * 2^count, maxBackoff)
-          final wait = baseInterval * (1 << (count - 1));
-          _nextBindAttempt[id] = now.add(wait < _maxBackoff ? wait : _maxBackoff);
+          // interval = min(base * 2^(count-1), maxBackoff)
+          // protect against integer overflow or resulting duration overflowing
+          // the valid DateTime range. 1 << (count-1) may overflow when count is
+          // huge, so clamp the shift amount.
+          const int maxShift = 62; // safe even on 64-bit
+          final int shift = (count - 1).clamp(0, maxShift);
+          final Duration candidate = baseInterval * (1 << shift);
+          final Duration wait = candidate < _maxBackoff ? candidate : _maxBackoff;
+          try {
+            _nextBindAttempt[id] = now.add(wait);
+          } on RangeError catch (_) {
+            // if adding still produces an invalid DateTime, fall back to maxBackoff
+            _nextBindAttempt[id] = now.add(_maxBackoff);
+          }
         }
       }
     });

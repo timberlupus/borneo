@@ -28,11 +28,11 @@ class DashboardChart extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.wifi_off, size: 64, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
-                  const SizedBox(height: 16),
+                  Icon(Icons.wifi_off, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+                  const SizedBox(height: 8),
                   Text(
                     context.translate('Device Offline'),
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),

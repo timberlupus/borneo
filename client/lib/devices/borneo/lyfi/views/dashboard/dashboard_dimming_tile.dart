@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 import '../dimming_screen.dart';
@@ -37,11 +38,11 @@ class DashboardDimmingTile extends StatelessWidget {
                         await vm.onDimmingReady();
 
                         if (context.mounted) {
-                          await Navigator.push(
+                          await PersistentNavBarNavigator.pushNewScreen(
                             context,
-                            MaterialPageRoute(
-                              builder: (_) => ChangeNotifierProvider.value(value: vm, child: const DimmingScreen()),
-                            ),
+                            screen: ChangeNotifierProvider.value(value: vm, child: const DimmingScreen()),
+                            withNavBar: false,
+                            pageTransitionAnimation: PageTransitionAnimation.slideRight,
                           );
                         }
                       }
