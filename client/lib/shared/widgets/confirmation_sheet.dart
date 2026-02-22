@@ -90,13 +90,15 @@ class AsyncConfirmationSheet extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 TextButton(
-                  child: Text('Cancel'),
+                  key: const Key('btn_cancel_delete'),
+                  child: Text(context.translate('Cancel')),
                   onPressed: () {
                     Navigator.of(context).pop(false);
                   },
                 ),
                 TextButton(
-                  child: Text('Ok'),
+                  key: const Key('btn_confirm_delete'),
+                  child: Text(context.translate('Ok')),
                   onPressed: () {
                     Navigator.of(context).pop(true);
                   },

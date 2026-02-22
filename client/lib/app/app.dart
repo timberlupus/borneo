@@ -36,7 +36,8 @@ final kSupportedLocales = LanguageConfig.supportedLocales;
 
 class BorneoApp extends StatefulWidget {
   final EventBus _globalEventBus = EventBus();
-  BorneoApp({super.key});
+  final Locale? initialLocale;
+  BorneoApp({super.key, this.initialLocale});
 
   @override
   State<BorneoApp> createState() => _BorneoAppState();
@@ -52,8 +53,20 @@ class _BorneoAppState extends State<BorneoApp> {
   @override
   void initState() {
     super.initState();
-    _loadThemeMode().then((mode) => setState(() => _themeMode = mode));
-    _loadLocale().then((loc) => setState(() => _locale = loc));
+    // Only trigger a rebuild if the loaded theme mode differs from the current
+    // default to avoid a spurious rebuild that can upset nested navigators and
+    // cause stateless-widget form keys to be recreated.
+    _loadThemeMode().then((mode) {
+      if (mode != _themeMode) setState(() => _themeMode = mode);
+    });
+    // Apply the pre-loaded initial locale synchronously so the first frame
+    // already uses the correct locale (avoids race with async _loadLocale).
+    _locale = widget.initialLocale;
+    _loadLocale().then((loc) {
+      // Only trigger a rebuild if the locale actually differs to avoid a
+      // spurious second rebuild that can upset nested navigators.
+      if (loc != _locale) setState(() => _locale = loc);
+    });
     _localeSub = widget._globalEventBus.on<AppLocaleChangedEvent>().listen((event) {
       setState(() {
         _locale = event.locale;

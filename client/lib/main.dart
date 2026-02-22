@@ -27,6 +27,7 @@ import 'package:sembast/sembast.dart';
 import 'package:window_size/window_size.dart';
 
 import 'app/app.dart';
+import 'core/config/language_config.dart';
 import 'routes/route_manager.dart';
 
 import 'core/services/db.dart';
@@ -65,6 +66,11 @@ Future<Widget> buildAppWidget({
   final prefs = sharedPreferences ?? await SharedPreferences.getInstance();
   final bus = eventBus ?? EventBus();
   final registry = deviceModuleRegistry ?? DeviceModuleRegistry(StaticDeviceModuleHarvester());
+
+  // Read locale synchronously from the already-loaded SharedPreferences so the
+  // first frame uses the correct locale instead of the system locale.
+  final localeStr = prefs.getString('app.locale');
+  final initialLocale = localeStr != null ? LanguageConfig.languageCodeToLocale(localeStr) : null;
 
   final List<SingleChildWidget> providers = [
     // Logger
@@ -133,7 +139,10 @@ Future<Widget> buildAppWidget({
     provider.ProxyProvider<Logger, IBleProvisioner>(update: (_, logger, prev) => prev ?? BleProvisioner(), lazy: true),
   ];
 
-  return provider.MultiProvider(providers: providers, child: BorneoApp());
+  return provider.MultiProvider(
+    providers: providers,
+    child: BorneoApp(initialLocale: initialLocale),
+  );
 }
 
 Future<void> main() async {

@@ -11,6 +11,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:borneo_app/main.dart' as app;
 
+// bring in other test suites so this file serves as the aggregate entry point
+import 'device_group_test.dart' as device_group_test;
+
 // ---------------------------------------------------------------------------
 // Fake implementations for testing
 // ---------------------------------------------------------------------------
@@ -67,58 +70,6 @@ void main() {
     expect(find.byType(MaterialApp), findsOneWidget);
   }, skip: !Platform.isLinux && !Platform.isWindows);
 
-  testWidgets('Manage device groups via UI', (WidgetTester tester) async {
-    await tester.pumpWidget(await _buildTestApp());
-    await tester.pumpAndSettle();
-
-    // navigate to devices tab by tapping bottom navigation icon
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.byIcon(Icons.device_hub_outlined), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.device_hub_outlined));
-    await tester.pumpAndSettle();
-
-    // Devices screen should be fully initialized before we continue.  The title
-    // contains the current scene name which is "My Home" in the fresh
-    // in-memory database.
-    await _waitFor(tester, find.text('Devices in My Home'));
-
-    // open add menu and select Add Devices Group
-    await tester.tap(find.byIcon(Icons.add_outlined));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('menu_item_add_group')));
-    await tester.pumpAndSettle();
-
-    // fill in group name and submit
-    await tester.enterText(find.byKey(const Key('field_group_name')), 'Test Group');
-    await tester.tap(find.byKey(const Key('btn_submit')));
-    // give database and event bus a moment to complete, then wait for list update
-    await tester.pump(const Duration(milliseconds: 500));
-    await _waitFor(tester, find.text('Test Group'));
-
-    // edit the group
-    await tester.tap(find.byKey(const Key('btn_edit_group_Test Group')));
-    await tester.pumpAndSettle();
-
-    // change name and submit
-    await tester.enterText(find.byKey(const Key('field_group_name')), 'Updated Group');
-    await tester.tap(find.byKey(const Key('btn_submit')));
-    await tester.pump(const Duration(milliseconds: 500));
-    await _waitFor(tester, find.text('Updated Group'));
-
-    expect(find.text('Updated Group'), findsOneWidget);
-
-    // delete the group
-    await tester.tap(find.byKey(const Key('btn_edit_group_Updated Group')));
-    await tester.pumpAndSettle();
-
-    // tap delete icon in app bar
-    await tester.tap(find.byKey(const Key('btn_delete_group')));
-    await tester.pumpAndSettle();
-
-    // confirm deletion
-    await tester.tap(find.byKey(const Key('btn_confirm_delete')));
-    await tester.pump(const Duration(milliseconds: 500));
-    // group should no longer be present
-    expect(find.text('Updated Group'), findsNothing);
-  });
+  // delegate additional tests to other files
+  device_group_test.deviceGroupTests();
 }

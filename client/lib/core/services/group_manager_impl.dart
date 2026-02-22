@@ -62,18 +62,14 @@ class GroupManagerImpl extends IGroupManager {
 
   @override
   Future<void> create({required String name, String notes = '', Transaction? tx}) async {
+    final store = stringMapStoreFactory.store(StoreNames.groups);
+    final group = DeviceGroupEntity(id: BaseEntity.generateID(), sceneID: _scenes.current.id, name: name, notes: notes);
     if (tx == null) {
-      await _db.transaction((tx) async {
-        await create(name: name, tx: tx);
+      await _db.transaction((innerTx) async {
+        await store.record(group.id).put(innerTx, group.toMap());
       });
+      _globalBus.fire(DeviceGroupCreatedEvent(group));
     } else {
-      final store = stringMapStoreFactory.store(StoreNames.groups);
-      final group = DeviceGroupEntity(
-        id: BaseEntity.generateID(),
-        sceneID: _scenes.current.id,
-        name: name,
-        notes: notes,
-      );
       await store.record(group.id).put(tx, group.toMap());
       _globalBus.fire(DeviceGroupCreatedEvent(group));
     }
@@ -82,7 +78,20 @@ class GroupManagerImpl extends IGroupManager {
   @override
   Future<void> update(String id, {required String name, String notes = '', Transaction? tx}) async {
     if (tx == null) {
-      await _db.transaction((tx) => update(id, name: name, notes: notes, tx: tx));
+      final store = stringMapStoreFactory.store(StoreNames.groups);
+      late DeviceGroupEntity group;
+      await _db.transaction((innerTx) async {
+        final record = await store.record(id).update(innerTx, {
+          DeviceGroupEntity.kNameField: name,
+          DeviceGroupEntity.kNotesFieldName: notes,
+        });
+        if (record == null) {
+          throw InvalidOperationException(message: 'Failed to update record');
+        }
+        group = DeviceGroupEntity.fromMap(id, record);
+      });
+      // Fire event AFTER transaction commits so handlers read up-to-date data.
+      _globalBus.fire(DeviceGroupUpdatedEvent(group));
     } else {
       final store = stringMapStoreFactory.store(StoreNames.groups);
       final record = await store.record(id).update(tx, {
@@ -100,7 +109,17 @@ class GroupManagerImpl extends IGroupManager {
   @override
   Future<void> delete(String id, {Transaction? tx}) async {
     if (tx == null) {
-      await _db.transaction((tx) => delete(id, tx: tx));
+      // Set the `groupID` of all devices to null and delete the group record,
+      // then fire the event AFTER the transaction commits.
+      await _db.transaction((innerTx) async {
+        final deviceStore = stringMapStoreFactory.store(StoreNames.devices);
+        await deviceStore.update(innerTx, {
+          DeviceEntity.kGroupIDFieldName: null,
+        }, finder: Finder(filter: Filter.equals(DeviceEntity.kGroupIDFieldName, id)));
+        final groupStore = stringMapStoreFactory.store(StoreNames.groups);
+        await groupStore.record(id).delete(innerTx);
+      });
+      _globalBus.fire(DeviceGroupDeletedEvent(id));
     } else {
       // Set the `groupID` all the devices to null
       final deviceStore = stringMapStoreFactory.store(StoreNames.devices);

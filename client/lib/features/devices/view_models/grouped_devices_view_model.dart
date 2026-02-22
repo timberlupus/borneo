@@ -7,6 +7,7 @@ import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:cancellation_token/cancellation_token.dart';
+import 'package:flutter/widgets.dart';
 import 'package:synchronized/synchronized.dart';
 
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
@@ -281,13 +282,18 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
 
   void _onDeviceGroupCreated(DeviceGroupCreatedEvent event) {
     // Use reload with lock to prevent race conditions
-    if (!isDisposed && !_isInitialized) return;
+    if (isDisposed) return;
 
     _deviceOperLock.synchronized(() async {
       if (isDisposed) return;
       await _reloadAll();
       if (!isDisposed) {
-        notifyListeners();
+        // Use post-frame callback to avoid triggering a rebuild mid-navigation
+        // (e.g. while PersistentBottomNavBar is popping a route, its Navigator
+        // _history may be temporarily empty which causes an assertion error).
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!isDisposed) notifyListeners();
+        });
       }
     });
   }

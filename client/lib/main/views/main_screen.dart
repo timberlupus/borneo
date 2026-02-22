@@ -50,13 +50,17 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Future<void> showNewGroupScreen(BuildContext context) async {
-    await Navigator.push(
+    final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (context) => GroupEditScreen(),
         settings: RouteSettings(arguments: GroupEditArguments(isCreation: true)),
       ),
     );
+    // Refresh the device list when a group was successfully created.
+    if (result == true && context.mounted) {
+      context.read<GroupedDevicesViewModel>().refresh();
+    }
   }
 
   Future<void> showNewSceneScreen(BuildContext context) async {
@@ -379,7 +383,7 @@ class _MainScreenState extends State<MainScreen> {
               logger: logger,
             );
           },
-          lazy: true,
+          lazy: false,
         ),
       ],
       child: buildScaffold(context),
