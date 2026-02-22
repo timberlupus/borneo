@@ -78,7 +78,6 @@ class SettingsScreen extends StatelessWidget {
   SettingsList _buildSettingsList(BuildContext context) {
     final lvm = context.watch<SettingsViewModel>();
     return SettingsList(
-      platform: DevicePlatform.iOS,
       sections: [
         SettingsSection(
           title: Text(context.translate('DEVICE INFORMATION')),
@@ -93,8 +92,7 @@ class SettingsScreen extends StatelessWidget {
               descriptionInlineIos: true,
               description: Row(
                 spacing: 8,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [Text(lvm.borneoInfo.manufName), Text(lvm.borneoInfo.modelName)],
               ),
             ),
@@ -128,7 +126,6 @@ class SettingsScreen extends StatelessWidget {
               title: Text(context.translate('Device time & time zone')),
               descriptionInlineIos: true,
               description: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 8,
                 children: [
                   Text(lvm.borneoStatus.timestamp.toString()),

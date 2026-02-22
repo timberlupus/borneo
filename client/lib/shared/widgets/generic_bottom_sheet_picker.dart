@@ -115,28 +115,18 @@ class GenericBottomSheetPicker<T> extends StatelessWidget {
               itemBuilder: (context, index) {
                 final entry = entries[index];
                 final isSelected = entry.value == effective;
-                return Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => onValueSelected(entry.value),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              entry.label,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: isSelected ? colorScheme.primary : colorScheme.onSurface,
-                                fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
-                              ),
-                            ),
-                          ),
-                          if (isSelected) Icon(Icons.check, color: colorScheme.primary, size: 20),
-                        ],
-                      ),
+                return ListTile(
+                  title: Text(
+                    entry.label,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+                      fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
                     ),
                   ),
+                  trailing: isSelected ? Icon(Icons.check, color: colorScheme.primary, size: 20) : null,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                  onTap: () => onValueSelected(entry.value),
+                  dense: true,
                 );
               },
             ),
