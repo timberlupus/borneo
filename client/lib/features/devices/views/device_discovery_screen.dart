@@ -304,9 +304,6 @@ class _DeviceDiscoveryContent extends StatelessWidget {
         onTapGroup: (g) {
           vm.addNewDevice(deviceInfo, g);
           Navigator.pop(context); // Close sheet
-          // Optionally close screen or show snackbar.
-          // Existing logic had a snackbar listener.
-          context.read<IAppNotificationService>().showSuccess(context.translate('Device Added'));
         },
         title: 'Registry "${deviceInfo.name}"',
         subtitle: context.translate('Select the group to which the new device belongs:'),
