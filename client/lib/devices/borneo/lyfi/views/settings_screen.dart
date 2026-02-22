@@ -78,50 +78,58 @@ class SettingsScreen extends StatelessWidget {
   SettingsList _buildSettingsList(BuildContext context) {
     final lvm = context.watch<SettingsViewModel>();
     return SettingsList(
+      platform: DevicePlatform.iOS,
       sections: [
         SettingsSection(
           title: Text(context.translate('DEVICE INFORMATION')),
           tiles: [
             SettingsTile.navigation(
-              leading: const Icon(Icons.info_outline),
               title: Text(context.translate('Name')),
-              value: Text(lvm.name),
+              trailing: Text(lvm.name),
               onPressed: (bc) => _showNameDialog(bc, vm),
             ),
             SettingsTile(
-              leading: const Icon(Icons.info_outline),
               title: Text(context.translate('Manufacturer & Model')),
-              trailing: Column(
+              descriptionInlineIos: true,
+              description: Row(
+                spacing: 8,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [Text(lvm.borneoInfo.manufName), Text(lvm.borneoInfo.modelName)],
               ),
             ),
             SettingsTile(
-              leading: const Icon(Icons.numbers_outlined),
-              title: Text(context.translate('Serial number')),
-              value: Text(lvm.borneoInfo.serno.substring(0, 12)),
+              title: Text(context.translate('Serial Number')),
+              trailing: Text(lvm.borneoInfo.serno.substring(0, 12)),
             ),
             SettingsTile(
-              leading: _buildWifiRssiIcon(context),
               title: Text(context.translate('Device address')),
-              trailing: Text(lvm.address.toString()),
+              trailing: _buildWifiRssiIcon(context),
+              descriptionInlineIos: true,
+              description: Text(lvm.address.toString()),
             ),
-            if (lvm.isControllerSettingsAvailable)
+          ],
+        ),
+
+        if (lvm.isControllerSettingsAvailable)
+          SettingsSection(
+            title: Text(context.translate('STANDALONE CONTROLLER')),
+            tiles: [
               SettingsTile.navigation(
-                leading: const Icon(Icons.factory_outlined),
                 title: Text(context.translate('Controller Settings')),
                 onPressed: (bc) => _goControllerSettings(bc, vm),
               ),
-          ],
-        ),
+            ],
+          ),
         SettingsSection(
           title: Text(context.translate('DEVICE STATUS')),
           tiles: [
             SettingsTile.navigation(
-              leading: const Icon(Icons.access_time_outlined),
               title: Text(context.translate('Device time & time zone')),
-              description: Column(
+              descriptionInlineIos: true,
+              description: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 8,
                 children: [
                   Text(lvm.borneoStatus.timestamp.toString()),
                   Text(lvm.timezone ?? context.translate('Unknown time zone')),
@@ -131,16 +139,15 @@ class SettingsScreen extends StatelessWidget {
               onPressed: (bc) => vm.updateTimezone(),
             ),
             SettingsTile.navigation(
-              leading: const Icon(Icons.settings_power_outlined),
               title: Text(context.translate('Power status at startup')),
               trailing: Text(_formatPowerBehavior(context, lvm.powerBehavior)),
               enabled: lvm.canUpdatePowerBehavior,
               onPressed: (bc) => _showPowerBehaviorPicker(bc, vm),
             ),
             SettingsTile(
-              leading: const Icon(Icons.power_off),
               title: Text(context.translate('Last shutdown')),
               trailing: Text(lvm.borneoStatus.shutdownTimestamp?.toString() ?? context.translate('N/A')),
+              descriptionInlineIos: true,
               description: Text(
                 context.translate("Reason code: {reasonCode}", nArgs: {"reasonCode": lvm.borneoStatus.shutdownReason}),
               ),
@@ -151,9 +158,10 @@ class SettingsScreen extends StatelessWidget {
           title: Text(context.translate('LIGHTING')),
           tiles: [
             SettingsTile.navigation(
-              leading: const Icon(Icons.location_pin),
-              title: Text(context.translate('Location for sun & moon simulation')),
-              value: lvm.location != null
+              title: Text(context.translate('Device Location')),
+              description: Text(context.translate('Geo location')),
+              descriptionInlineIos: true,
+              trailing: lvm.location != null
                   ? Text("(${lvm.location!.lat.toStringAsFixed(0)}, ${lvm.location!.lng.toStringAsFixed(0)})")
                   : Text(context.translate('Unknown')),
               enabled: lvm.canUpdateGeoLocation,
@@ -178,6 +186,7 @@ class SettingsScreen extends StatelessWidget {
             SettingsTile.switchTile(
               title: Text(context.translate('Cloud simulation')),
               description: Text(context.translate('Simulate cloud shadow effect')),
+              descriptionInlineIos: true,
               initialValue: lvm.cloudEnabled,
               enabled: lvm.canUpdateCloudEnabled,
               onToggle: lvm.canUpdateCloudEnabled
@@ -198,22 +207,12 @@ class SettingsScreen extends StatelessWidget {
               onPressed: (bc) => _showFanModePicker(bc, vm),
             ),
             SettingsTile.navigation(
-              title: Text(
-                context.translate('Manual fan power'),
-                style: lvm.fanMode == FanMode.manual
-                    ? null
-                    : TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
-              ),
-              trailing: Text(
-                '${lvm.manualFanPower}%',
-                style: lvm.fanMode == FanMode.manual
-                    ? Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.primary)
-                    : Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
-                      ),
-              ),
+              title: Text(context.translate('Manual fan power')),
+              trailing: Text('${lvm.manualFanPower}%'),
               enabled: lvm.canUpdateManualFanPower,
-              onPressed: (bc) => _showManualFanPowerDialog(bc, vm, lvm.manualFanPower),
+              onPressed: lvm.canUpdateManualFanPower
+                  ? (bc) => _showManualFanPowerDialog(bc, vm, lvm.manualFanPower)
+                  : null,
             ),
           ],
         ),
@@ -221,12 +220,10 @@ class SettingsScreen extends StatelessWidget {
           title: Text(context.translate('VERSION & UPGRADE')),
           tiles: [
             SettingsTile(
-              leading: const Icon(Icons.info_outline),
               title: Text(context.translate('Hardware version')),
               trailing: Text(lvm.borneoInfo.hwVer.toString()),
             ),
             SettingsTile(
-              leading: const Icon(Icons.info_outline),
               title: Text(context.translate('Firmware version')),
               trailing: Text(lvm.borneoInfo.fwVer.toString() + (lvm.borneoInfo.isCE ? " (CE)" : " (PRO)")),
             ),
@@ -236,25 +233,17 @@ class SettingsScreen extends StatelessWidget {
           title: Text(context.translate('DANGER ZONE')),
           tiles: [
             SettingsTile.navigation(
-              leading: const Icon(Icons.wifi_off_outlined),
               title: Text(
                 context.translate('Reset device network settings'),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
-              description: Text(
-                context.translate(
-                  'This will disconnect the device from the network and remove saved Wi‑Fi credentials.',
-                ),
-              ),
               onPressed: (bc) => _showNetworkResetDialog(bc, vm),
             ),
             SettingsTile.navigation(
-              leading: const Icon(Icons.restore_outlined),
               title: Text(
                 context.translate('Restore to factory settings'),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
-              description: Text(context.translate('Your device will lose all custom settings.')),
               onPressed: (bc) => _showFactoryResetDialog(bc, vm),
             ),
           ],

@@ -1,6 +1,7 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/moon_view_model.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
+import 'package:borneo_app/shared/widgets/screen_top_rounded_container.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
@@ -78,9 +79,9 @@ class MoonScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       Expanded(
                         child: Consumer<MoonViewModel>(
-                          builder: (context, vm, _) => SingleChildScrollView(
-                            child: Container(
-                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          builder: (context, vm, _) => ScreenTopRoundedContainer(
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                            child: SingleChildScrollView(
                               child: BrightnessSliderList(vm.editor, disabled: !vm.enabled || !vm.canEdit),
                             ),
                           ),

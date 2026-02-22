@@ -15,7 +15,9 @@ class ScreenTopRoundedContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bg = color ?? Theme.of(context).colorScheme.surface;
-    final future = ScreenCornerRadius.get().catchError((_) => ScreenRadius.value(0.0));
+    final future = ScreenCornerRadius.get().catchError((_) {
+      return ScreenRadius.value(0.0);
+    });
 
     return FutureBuilder<ScreenRadius?>(
       future: future,

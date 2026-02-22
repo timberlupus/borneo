@@ -44,7 +44,11 @@ class BrightnessSliderListTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(32),
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Center(
-              child: Icon(Icons.circle, color: color, size: handlerSize * 0.60),
+              child: Icon(
+                Icons.circle,
+                color: disabled ? color : color.withValues(alpha: 0.38),
+                size: handlerSize * 0.60,
+              ),
             ),
           ),
         ),
@@ -63,8 +67,8 @@ class BrightnessSliderListTile extends StatelessWidget {
           activeTrackBarHeight: 8,
           inactiveTrackBarHeight: 8,
           activeTrackBar: BoxDecoration(
-            border: Border.all(color: Theme.of(context).colorScheme.surfaceDim, width: 4.0),
-            color: color,
+            border: Border.all(color: Theme.of(context).colorScheme.surfaceDim, width: 1.5),
+            color: disabled ? color.withValues(alpha: 0.38) : color,
             borderRadius: BorderRadius.circular(3),
           ),
           inactiveTrackBar: BoxDecoration(
