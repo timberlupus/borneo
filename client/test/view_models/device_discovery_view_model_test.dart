@@ -2,6 +2,7 @@ import 'dart:collection';
 
 // hide EventDispatcher from flutter_test to avoid collision with our
 // abstraction type which is exported transitively by kernel.dart.
+import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:flutter_test/flutter_test.dart' hide EventDispatcher;
 import 'package:flutter/services.dart';
 import 'package:event_bus/event_bus.dart';
@@ -176,6 +177,12 @@ class FakeBleProvisioner implements IBleProvisioner {
 
   @override
   Future<void> provisionWifi(String deviceName, String ssid, String password, {CancellationToken? cancelToken}) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<GeneralBorneoDeviceInfo> fetchDeviceInfo({required String deviceName, CancellationToken? cancelToken}) {
+    // TODO: implement fetchDeviceInfo
     throw UnimplementedError();
   }
 }

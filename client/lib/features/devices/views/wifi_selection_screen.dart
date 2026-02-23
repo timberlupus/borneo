@@ -1,3 +1,4 @@
+import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_app/features/devices/view_models/wifi_selection_view_model.dart';
 import 'package:borneo_app/features/devices/views/provisioning_progress_screen.dart';
@@ -34,6 +35,7 @@ class WifiSelectionScreen extends StatelessWidget {
         deviceName,
         globalEventBus: context.read<EventBus>(),
         gt: gt,
+        notificationService: context.read<IAppNotificationService>(),
         logger: context.read<Logger>(),
       )..onInitialize(),
       child: Scaffold(
