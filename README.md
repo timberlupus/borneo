@@ -1,4 +1,4 @@
-# BorneoIoT: A State-of-the-Art Full-Stack Open-Source Aquarium LED WiFi Controller
+# BorneoIoT: A State-of-the-Art Full-Stack Open-Source Aquarium LED WiFi Dimmer
 
 ![Firmware Build Status](https://github.com/borneo-iot/borneo/actions/workflows/fw-ci.yml/badge.svg)
 ![Firmware Release Status](https://github.com/borneo-iot/borneo/actions/workflows/fw-release.yml/badge.svg)
@@ -23,7 +23,7 @@
 
 ---
 
-**Borneo** is a professional-grade, open-source smart aquarium LED designed for aquarium enthusiasts and DIYers. It provides a complete end-to-end solution—from hardware schematics to embedded firmware and a modern mobile app—to build and control high-performance aquarium LED lighting systems.
+**Borneo-IoT** is a professional-grade, modular open-source smart aquarium platform designed for aquarium enthusiasts and DIYers. It provides a complete end-to-end solution—from hardware schematics to embedded firmware and a modern mobile app—to build and control high-performance aquarium LED lighting systems.
 
 ## One System, Three Pillars
 
@@ -41,7 +41,7 @@ This project delivers a full-stack solution for smart aquarium LED:
 - **OSHWA Certified**: Pro-grade designs (Model BLC06MK1) using [Horizon EDA](https://horizon-eda.org).
   [![OSHWA Badge](assets/buce-oshwa.svg)](https://certification.oshwa.org/cn000017.html)
 - **High Performance**: Optimized for ESP32/ESP32-C3/C5 with unified board definitions.
-- **Precision Dimming**: 6-channel PWM with smooth 10-bit resolution and soft-start technology.
+- **Precision Dimming**: 6-channel PWM with smooth 12-bit resolution and soft-start technology.
 - **Expandable**: Reference designs for LED lamps, drivers, and even dosing pumps.
 
 ### Intelligent Firmware
@@ -62,7 +62,7 @@ This project delivers a full-stack solution for smart aquarium LED:
 | Directory | Content | Description |
 | :--- | :--- | :--- |
 | [**`hw/`**](hw/) | **Hardware** | PCB designs (Horizon EDA), 3D models, and PDF schematics.[^2] |
-| [**`fw/`**](fw/) | **Firmware** | ESP-IDF source code for LED controllers and upcoming devices. |
+| [**`fw/`**](fw/) | **Firmware** | ESP-IDF source code for LED dimmers and upcoming devices. |
 | [**`client/`**](client/) | **Mobile App** | Flutter source code for the cross-platform mobile application. |
 | [**`borneopy/`**](borneopy/) | **Python SDK** | Python client library for desktop control and scripting. |
 
