@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-23 00:07+0800\n"
+"POT-Creation-Date: 2026-02-23 20:54+0800\n"
 "PO-Revision-Date: 2024-12-22 15:38+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -42,23 +42,23 @@ msgstr "日出日落"
 
 #: devices\borneo\lyfi\manifest.dart:122
 msgid "NORM"
-msgstr ""
+msgstr "常规"
 
 #: devices\borneo\lyfi\manifest.dart:124
 msgid "DIMM"
-msgstr ""
+msgstr "调光"
 
 #: devices\borneo\lyfi\manifest.dart:126
 msgid "TEMP"
-msgstr ""
+msgstr "温度"
 
 #: devices\borneo\lyfi\manifest.dart:128
 msgid "PREV"
-msgstr ""
+msgstr "之前"
 
 #: devices\borneo\lyfi\view_models\lyfi_view_model.dart:487
 msgid "Bad device state"
-msgstr ""
+msgstr "设备状态异常"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:86
 msgid "Location updated successfully"
@@ -146,7 +146,7 @@ msgstr "设备名更新成功"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:247
 msgid "Failed to update device name: $e"
-msgstr ""
+msgstr "更新设备名称失败：$e"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:259
 msgid "Device restored to factory settings"
@@ -158,11 +158,11 @@ msgstr "恢复设备到出厂设置失败：$e"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:273
 msgid "Device network settings reset"
-msgstr ""
+msgstr "设备网络设置已重置"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:275
 msgid "Failed to reset device network settings: $e"
-msgstr ""
+msgstr "重置设备网络设置失败：$e"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:37
 #: devices\borneo\lyfi\views\acclimation_screen.dart:42
@@ -186,7 +186,7 @@ msgstr "设置"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:79
 msgid "Enable acclimation"
-msgstr ""
+msgstr "启用适应模式"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:84
 msgid "Start date"
@@ -194,7 +194,7 @@ msgstr "开始"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:87
 msgid "Null"
-msgstr ""
+msgstr "空"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:106
 msgid "Duration"
@@ -225,7 +225,7 @@ msgstr "控制器设置"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:56
 msgid "Initialization failed"
-msgstr ""
+msgstr "初始化失败"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:95
 msgid "LED CONFIGURATION"
@@ -241,12 +241,12 @@ msgstr "LED 通道"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:123
 msgid "Enabled channel count"
-msgstr ""
+msgstr "启用通道数量"
 
 #: devices\borneo\lyfi\views\controller_settings_screen.dart:153
 #: devices\borneo\lyfi\views\settings_screen.dart:86
 #: features\devices\views\group_edit_screen.dart:47
-#: features\scenes\views\scene_edit_screen.dart:121
+#: features\scenes\views\scene_edit_screen.dart:122
 msgid "Name"
 msgstr "名称"
 
@@ -299,7 +299,7 @@ msgstr ""
 #: devices\borneo\lyfi\views\settings_screen.dart:288
 #: devices\borneo\lyfi\views\settings_screen.dart:351
 #: devices\borneo\lyfi\views\settings_screen.dart:408
-#: features\devices\views\wifi_selection_screen.dart:101
+#: features\devices\views\wifi_selection_screen.dart:103
 #: main\views\main_screen.dart:270 shared\widgets\confirmation_sheet.dart:45
 #: shared\widgets\confirmation_sheet.dart:94
 #: shared\widgets\generic_settings_screen.dart:74
@@ -365,7 +365,7 @@ msgstr "风扇"
 #: devices\borneo\lyfi\views\editor\sun_editor_view.dart:41
 #: devices\borneo\lyfi\views\settings_screen.dart:146
 msgid "N/A"
-msgstr "不适用"
+msgstr "无"
 
 #: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:10
 msgid "New Moon"
@@ -493,11 +493,11 @@ msgstr "确认"
 
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:269
 msgid "Are you sure you want to remove all schedule entries?"
-msgstr "你确定要将此设备恢复到出厂设置？"
+msgstr "您确定要删除所有日程条目吗？"
 
 #: devices\borneo\lyfi\views\moon_screen.dart:107
 msgid "Update moon settings succeed."
-msgstr ""
+msgstr "月相设置已更新。"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:83
 msgid "DEVICE INFORMATION"
@@ -509,15 +509,15 @@ msgstr "制造商与型号"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:100
 msgid "Serial Number"
-msgstr ""
+msgstr "序列号"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:104
 msgid "Device address"
-msgstr "设备"
+msgstr "设备地址"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:114
 msgid "STANDALONE CONTROLLER"
-msgstr ""
+msgstr "独立控制器"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:123
 msgid "DEVICE STATUS"
@@ -550,11 +550,11 @@ msgstr "灯光"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:158
 msgid "Device Location"
-msgstr ""
+msgstr "设备位置"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:159
 msgid "Geo location"
-msgstr ""
+msgstr "地理位置"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:163
 msgid "Unknown"
@@ -606,7 +606,7 @@ msgstr "危险区域"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:234
 msgid "Reset device network settings"
-msgstr ""
+msgstr "重置设备网络设置"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:241
 msgid "Restore to factory settings"
@@ -646,7 +646,7 @@ msgstr "执行恢复"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:314
 msgid "Are you sure you want to reset this device's network settings?"
-msgstr ""
+msgstr "您确定要重置此设备的网络设置吗？"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:332
 msgid "Set Manual Fan Power"
@@ -659,28 +659,28 @@ msgstr "设置"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:371
 msgid "Device name cannot be empty."
-msgstr ""
+msgstr "设备名不能为空。"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:374
 msgid "Device name cannot be pure whitespace."
-msgstr ""
+msgstr "设备名不能只包含空白字符。"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:377
 msgid "Device name cannot have leading or trailing whitespace."
-msgstr ""
+msgstr "设备名不能有前导或尾随空格。"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:380
 msgid ""
 "Device name is too long. Maximum length is 63 bytes when encoded as UTF-8."
-msgstr ""
+msgstr "设备名太长。UTF-8 编码下最大为 63 字节。"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:389
 msgid "Set Device Name"
-msgstr ""
+msgstr "设置设备名称"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:395
 msgid "Device Name"
-msgstr ""
+msgstr "设备名称"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:433
 #: devices\borneo\lyfi\views\settings_screen.dart:441
@@ -699,7 +699,7 @@ msgstr "与之前相同"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:449
 msgid "Select power status"
-msgstr ""
+msgstr "选择开机电源状态"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:461
 #: devices\borneo\lyfi\views\settings_screen.dart:471
@@ -728,7 +728,7 @@ msgstr "CIE1931"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:481
 msgid "Select correction curve"
-msgstr ""
+msgstr "选择校正曲线"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:492
 #: devices\borneo\lyfi\views\settings_screen.dart:505
@@ -772,7 +772,7 @@ msgstr "12 小时"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:518
 msgid "Select duration"
-msgstr ""
+msgstr "选择持续时间"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:530
 #: devices\borneo\lyfi\views\settings_screen.dart:537
@@ -781,7 +781,7 @@ msgstr "PID 自适应"
 
 #: devices\borneo\lyfi\views\settings_screen.dart:544
 msgid "Select fan mode"
-msgstr ""
+msgstr "选择风扇模式"
 
 #: devices\borneo\lyfi\views\widgets\lyfi_header.dart:117
 msgid "Sync Timezone"
@@ -798,8 +798,9 @@ msgid ""
 msgstr "设备离线，请检查网络连接和设备电源。"
 
 #: devices\views\device_offline_view.dart:36
-#: features\devices\views\device_discovery_screen.dart:124
+#: features\devices\views\device_discovery_screen.dart:120
 #: features\devices\views\provisioning_progress_screen.dart:107
+#: features\devices\views\provisioning_screen.dart:488
 msgid "Close"
 msgstr "关闭"
 
@@ -821,8 +822,9 @@ msgstr "加载日常维护条目错误"
 
 #: features\chores\views\chore_list.dart:70
 #: features\chores\views\chore_list.dart:137
+#: features\devices\views\provisioning_screen.dart:493
 #: features\scenes\views\scenes_screen.dart:46
-#: features\scenes\views\scenes_screen.dart:87
+#: features\scenes\views\scenes_screen.dart:91
 msgid "Retry"
 msgstr "重试"
 
@@ -834,16 +836,21 @@ msgstr "无日常维护条目"
 msgid "No chores available for devices in the current scene."
 msgstr "当前场景无可用日常维护条目"
 
-#: features\devices\view_models\device_discovery_view_model.dart:160
-#: features\devices\view_models\device_discovery_view_model.dart:175
-#: features\devices\view_models\device_discovery_view_model.dart:228
+#: features\devices\view_models\device_discovery_view_model.dart:177
+#: features\devices\view_models\device_discovery_view_model.dart:192
+#: features\devices\view_models\device_discovery_view_model.dart:245
 msgid "Bluetooth scan error, please check if Bluetooth device is enabled."
-msgstr ""
+msgstr "蓝牙扫描错误，请检查蓝牙设备是否已启用。"
 
-#: features\devices\view_models\device_discovery_view_model.dart:210
-#: features\devices\view_models\device_discovery_view_model.dart:226
+#: features\devices\view_models\device_discovery_view_model.dart:227
+#: features\devices\view_models\device_discovery_view_model.dart:243
 msgid "Bluetooth permissions are required to discover devices."
-msgstr ""
+msgstr "发现设备需要蓝牙权限。"
+
+#: features\devices\view_models\provisioning_wizard_view_model.dart:61
+#: features\devices\view_models\wifi_selection_view_model.dart:46
+msgid "The WiFi scanning has been cancelled."
+msgstr "WiFi 扫描已取消。"
 
 #: features\devices\views\device_card.dart:130
 #: features\devices\views\device_card.dart:143
@@ -881,52 +888,51 @@ msgstr "新建设备组"
 msgid "Select the group to which device \"{deviceName}\" belongs:"
 msgstr "选择设备“{deviceName}”所属的分组："
 
-#: features\devices\views\device_discovery_screen.dart:43
-#: features\devices\views\device_discovery_screen.dart:49
-#: features\devices\views\device_discovery_screen.dart:70
+#: features\devices\views\device_discovery_screen.dart:39
+#: features\devices\views\device_discovery_screen.dart:45
+#: features\devices\views\device_discovery_screen.dart:66
 msgid "Add Device"
 msgstr "添加设备"
 
-#: features\devices\views\device_discovery_screen.dart:81
+#: features\devices\views\device_discovery_screen.dart:77
+#: features\devices\views\provisioning_screen.dart:247
 msgid "Refresh"
 msgstr "刷新"
 
-#: features\devices\views\device_discovery_screen.dart:96
+#: features\devices\views\device_discovery_screen.dart:92
 msgid "Device provisioning is only available on iOS and Android."
 msgstr "设备配置仅在 iOS 和 Android 上可用。"
 
-#: features\devices\views\device_discovery_screen.dart:157
+#: features\devices\views\device_discovery_screen.dart:153
 msgid "No devices found"
 msgstr "未找到设备"
 
-#: features\devices\views\device_discovery_screen.dart:193
+#: features\devices\views\device_discovery_screen.dart:187
 msgid "Searching for devices..."
 msgstr "正在搜索设备..."
 
-#: features\devices\views\device_discovery_screen.dart:201
+#: features\devices\views\device_discovery_screen.dart:192
+#, python-brace-format
+msgid "{0} seconds remaining"
+msgstr "还剩 {0} 秒"
+
+#: features\devices\views\device_discovery_screen.dart:200
 #: features\devices\views\provisioning_progress_screen.dart:41
+#: features\devices\views\provisioning_screen.dart:68
 msgid "Stop"
 msgstr "停止"
 
-#: features\devices\views\device_discovery_screen.dart:236
+#: features\devices\views\device_discovery_screen.dart:235
 msgid "Detected on network"
 msgstr "在网络上检测到"
 
-#: features\devices\views\device_discovery_screen.dart:257
+#: features\devices\views\device_discovery_screen.dart:259
 msgid "Ready to provision"
 msgstr "准备配置"
 
-#: features\devices\views\device_discovery_screen.dart:309
-msgid "Device Added"
-msgstr ""
-
-#: features\devices\views\device_discovery_screen.dart:312
-msgid "Select the group to which the new device belongs:"
-msgstr "请选择该设备所属的分组："
-
 #: features\devices\views\device_error_dialog.dart:12
 msgid "Device Error"
-msgstr ""
+msgstr "设备错误"
 
 #: features\devices\views\device_error_dialog.dart:14
 msgid "OK"
@@ -958,27 +964,27 @@ msgid "Devices in {currentScene}"
 msgstr "{currentScene}中的设备"
 
 #: features\devices\views\group_edit_screen.dart:49
-#: features\scenes\views\scene_edit_screen.dart:123
+#: features\scenes\views\scene_edit_screen.dart:124
 msgid "Enter the required scene name"
 msgstr "输入必须的场景名称"
 
 #: features\devices\views\group_edit_screen.dart:53
-#: features\scenes\views\scene_edit_screen.dart:127
+#: features\scenes\views\scene_edit_screen.dart:129
 msgid "Please enter the scene name"
 msgstr "请输入场景名称"
 
 #: features\devices\views\group_edit_screen.dart:68
-#: features\scenes\views\scene_edit_screen.dart:144
+#: features\scenes\views\scene_edit_screen.dart:146
 msgid "Enter the optional notes for this scene"
 msgstr "输入该场景的备注文字（可选）"
 
 #: features\devices\views\group_edit_screen.dart:69
-#: features\scenes\views\scene_edit_screen.dart:145
+#: features\scenes\views\scene_edit_screen.dart:147
 msgid "Notes"
 msgstr "备注"
 
 #: features\devices\views\group_edit_screen.dart:85
-#: features\scenes\views\scene_edit_screen.dart:172
+#: features\scenes\views\scene_edit_screen.dart:176
 msgid "Submit"
 msgstr "提交"
 
@@ -989,12 +995,16 @@ msgid ""
 "\n"
 "Devices in this group will be moved to the \"Ungrouped\" area."
 msgstr ""
+"您确定要删除 \"{0}\" 分组吗？\n"
+"\n"
+"该分组中的设备将被移动到“未分组”区域。"
 
 #: features\devices\views\group_edit_screen.dart:168
 msgid "Group deleted"
 msgstr "分组已删除"
 
 #: features\devices\views\group_edit_screen.dart:174
+#: features\scenes\views\scene_edit_screen.dart:246
 msgid "Delete failed"
 msgstr "删除失败"
 
@@ -1015,45 +1025,66 @@ msgid "Provisioning"
 msgstr "配置"
 
 #: features\devices\views\provisioning_progress_screen.dart:73
+#: features\devices\views\provisioning_screen.dart:464
 msgid "Provisioning Successful!"
 msgstr "配置成功！"
 
 #: features\devices\views\provisioning_progress_screen.dart:101
+#: features\devices\views\provisioning_screen.dart:465
 msgid "Unknown Error"
 msgstr "未知错误"
 
-#: features\devices\views\wifi_selection_screen.dart:40
-msgid "Select WiFi"
-msgstr "选择 WiFi"
+#: features\devices\views\provisioning_screen.dart:60
+msgid "Device Setup"
+msgstr ""
 
-#: features\devices\views\wifi_selection_screen.dart:52
+#: features\devices\views\provisioning_screen.dart:241
+#: features\devices\views\wifi_selection_screen.dart:54
 msgid "No WiFi networks found"
 msgstr "未找到 WiFi 网络"
 
-#: features\devices\views\wifi_selection_screen.dart:87
+#: features\devices\views\provisioning_screen.dart:324
+#: features\devices\views\wifi_selection_screen.dart:95
+msgid "Password"
+msgstr "密码"
+
+#: features\devices\views\provisioning_screen.dart:338
+msgid "Back"
+msgstr ""
+
+#: features\devices\views\provisioning_screen.dart:342
+#: features\devices\views\wifi_selection_screen.dart:118
+msgid "Provision"
+msgstr "配置"
+
+#: features\devices\views\provisioning_screen.dart:475
+msgid "Done"
+msgstr ""
+
+#: features\devices\views\provisioning_screen.dart:480
+msgid "Returning automatically..."
+msgstr ""
+
+#: features\devices\views\wifi_selection_screen.dart:42
+msgid "Select WiFi"
+msgstr "选择 WiFi"
+
+#: features\devices\views\wifi_selection_screen.dart:89
 #, python-format
 msgid "Enter Password for %s"
 msgstr "输入 %s 的密码"
 
-#: features\devices\views\wifi_selection_screen.dart:93
-msgid "Password"
-msgstr "密码"
-
-#: features\devices\views\wifi_selection_screen.dart:116
-msgid "Provision"
-msgstr "配置"
-
 #: features\devices\widgets\empty_groups_widget.dart:20
 msgid "No Devices"
-msgstr ""
+msgstr "暂无设备"
 
 #: features\devices\widgets\empty_groups_widget.dart:23
 msgid "Add devices to get started"
-msgstr ""
+msgstr "添加设备以开始使用"
 
 #: features\devices\widgets\empty_groups_widget.dart:31
 msgid "Add Devices"
-msgstr ""
+msgstr "添加设备"
 
 #: features\my\views\about_screen.dart:114
 #, python-brace-format
@@ -1062,11 +1093,11 @@ msgstr "版本：{verText} 构建号：{buildNumberText}"
 
 #: features\my\views\about_screen.dart:140
 msgid "Copyright © Yunnan BinaryStars Technologies, Co., Ltd."
-msgstr ""
+msgstr "版权所有 © 云南伴星科技有限公司"
 
 #: features\my\views\about_screen.dart:143
 msgid "All rights reserved."
-msgstr ""
+msgstr "保留所有权利。"
 
 #: features\my\views\about_screen.dart:150
 msgid "Website"
@@ -1078,7 +1109,7 @@ msgstr "文档"
 
 #: features\my\views\about_screen.dart:154
 msgid "Privacy Policy"
-msgstr ""
+msgstr "隐私政策"
 
 #: features\my\views\about_screen.dart:162
 msgid ""
@@ -1094,43 +1125,48 @@ msgstr ""
 msgid "About"
 msgstr "关于"
 
-#: features\scenes\views\scene_card.dart:202
+#: features\scenes\views\scene_card.dart:204
 #, python-brace-format
 msgid "{0} devices"
 msgstr "{0} 个设备"
 
-#: features\scenes\views\scene_card.dart:211
+#: features\scenes\views\scene_card.dart:213
 #, python-brace-format
 msgid "{0} active"
 msgstr "{0} 个活跃中"
 
-#: features\scenes\views\scene_edit_screen.dart:35
+#: features\scenes\views\scene_edit_screen.dart:36
 msgid "New Scene"
 msgstr "新建场景"
 
-#: features\scenes\views\scene_edit_screen.dart:35
+#: features\scenes\views\scene_edit_screen.dart:36
 msgid "Edit Scene"
 msgstr "新建场景"
 
-#: features\scenes\views\scene_edit_screen.dart:71
+#: features\scenes\views\scene_edit_screen.dart:72
 msgid "Scene Image"
 msgstr "场景图片"
 
-#: features\scenes\views\scene_edit_screen.dart:190
+#: features\scenes\views\scene_edit_screen.dart:200
+#, python-brace-format
 msgid ""
-"Are you sure you want to delete this scene? This action cannot be undone."
-msgstr "你确定要删除此场景？此操作不可撤销。"
+"Are you sure you want to delete \"{0}\" scene? This action cannot be undone."
+msgstr "您确定要删除 \"{0}\" 场景吗？此操作无法撤销。"
 
-#: features\scenes\views\scene_edit_screen.dart:203
-#: features\scenes\views\scene_edit_screen.dart:209
+#: features\scenes\views\scene_edit_screen.dart:223
+msgid "Scene deleted"
+msgstr "场景已删除"
+
+#: features\scenes\views\scene_edit_screen.dart:229
+#: features\scenes\views\scene_edit_screen.dart:237
 msgid "Cannot Delete Scene"
 msgstr "无法删除场景"
 
-#: features\scenes\views\scene_edit_screen.dart:204
+#: features\scenes\views\scene_edit_screen.dart:230
 msgid "Cannot delete the last remaining scene."
 msgstr "无法删除最后剩下的场景。"
 
-#: features\scenes\views\scene_edit_screen.dart:211
+#: features\scenes\views\scene_edit_screen.dart:239
 msgid ""
 "This scene contains devices or device groups. Please remove all devices and "
 "groups from this scene before deleting it."
@@ -1170,7 +1206,7 @@ msgstr "暗色"
 
 #: features\settings\views\app_settings_screen.dart:80
 msgid "Select Theme"
-msgstr ""
+msgstr "选择主题"
 
 #: features\settings\views\app_settings_screen.dart:93
 msgid "Language"
@@ -1178,7 +1214,7 @@ msgstr "语言"
 
 #: features\settings\views\app_settings_screen.dart:106
 msgid "Select Language"
-msgstr ""
+msgstr "选择语言"
 
 #: features\settings\views\app_settings_screen.dart:122
 msgid "Temperature Unit"
@@ -1186,15 +1222,15 @@ msgstr "温度单位"
 
 #: features\settings\views\app_settings_screen.dart:126
 msgid "℃"
-msgstr ""
+msgstr "℃"
 
 #: features\settings\views\app_settings_screen.dart:127
 msgid "℉"
-msgstr ""
+msgstr "℉"
 
 #: features\settings\views\app_settings_screen.dart:135
 msgid "Select Temperature Unit"
-msgstr ""
+msgstr "选择温度单位"
 
 #: features\settings\views\app_settings_screen.dart:137
 msgid "℃ (Celsius)"
@@ -1243,7 +1279,7 @@ msgstr "再次按下后退将退出软件"
 #: shared\widgets\confirmation_sheet.dart:53
 #: shared\widgets\confirmation_sheet.dart:101
 msgid "Ok"
-msgstr ""
+msgstr "确定"
 
 #: shared\widgets\device_status_indicator.dart:39
 msgid "Device offline"
@@ -1263,7 +1299,14 @@ msgstr "当前位置"
 
 #: shared\widgets\map_location_picker.dart:220
 msgid "Tap globe to select location"
-msgstr ""
+msgstr "点击地球以选择位置"
+
+#~ msgid "Select the group to which the new device belongs:"
+#~ msgstr "请选择该设备所属的分组："
+
+#~ msgid ""
+#~ "Are you sure you want to delete this scene? This action cannot be undone."
+#~ msgstr "你确定要删除此场景？此操作不可撤销。"
 
 #~ msgid "days"
 #~ msgstr "天"
