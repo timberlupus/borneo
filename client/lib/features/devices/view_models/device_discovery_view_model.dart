@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
-import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 import 'package:borneo_app/features/devices/models/discoverable_device.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
-import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/shared/view_models/abstract_screen_view_model.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:cancellation_token/cancellation_token.dart';
@@ -16,11 +14,14 @@ import '../models/events.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 
+const int kDiscoveryTimeoutSeconds = 10;
+
 class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   bool _disposed = false;
   late CancellationToken _scanCancelToken = CancellationToken();
+  Timer? _countdownTimer;
+  int _remainingSeconds = kDiscoveryTimeoutSeconds;
   final Logger _logger;
-  final IGroupManager _groupManager;
   final IDeviceManager _deviceManager;
   final IBleProvisioner _bleProvisioner;
   final IDeviceModuleRegistry deviceMdoules;
@@ -45,17 +46,14 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   DeviceEntity? _lastestAddedDevice;
   DeviceEntity? get lastestAddedDevice => _lastestAddedDevice;
 
-  late final List<DeviceGroupEntity> _availableGroups = [];
-  List<DeviceGroupEntity> get availableGroups => _availableGroups;
-
   bool get isDiscovering => _isRefreshing;
+  int get remainingSeconds => _remainingSeconds;
 
   // Platform check
   bool get isMobile => defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS;
 
   DeviceDiscoveryViewModel(
     this._logger,
-    this._groupManager,
     this._deviceManager,
     this._bleProvisioner,
     this.deviceMdoules, {
@@ -77,7 +75,6 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   @override
   Future<void> onInitialize() async {
     try {
-      _availableGroups.addAll(await _groupManager.fetchAllGroupsInCurrentScene());
       // 延迟到下一帧，确保 UI 完全初始化
       await Future.delayed(Duration.zero);
       await startDiscovery();
@@ -87,6 +84,8 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   @override
   void dispose() {
     if (!_disposed) {
+      _countdownTimer?.cancel();
+      _countdownTimer = null;
       _deviceAddedEventSub.cancel();
       _newDeviceFoundEventSub.cancel();
       _discoverableDevices.dispose();
@@ -100,6 +99,9 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   }
 
   Future<void> _stopRefresh() async {
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
+    _remainingSeconds = kDiscoveryTimeoutSeconds;
     _isRefreshing = false;
     _scanCancelToken.cancel();
     try {
@@ -138,6 +140,21 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     _updateDiscoverableList();
 
     _isRefreshing = true;
+    _remainingSeconds = kDiscoveryTimeoutSeconds;
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_disposed) {
+        timer.cancel();
+        return;
+      }
+      _remainingSeconds--;
+      if (_remainingSeconds <= 0) {
+        timer.cancel();
+        _countdownTimer = null;
+        stopDiscovery();
+      } else {
+        notifyListeners();
+      }
+    });
     if (!_disposed) {
       notifyListeners(); // Update UI to show loading
     }
@@ -231,8 +248,8 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     }
   }
 
-  Future<void> addNewDevice(SupportedDeviceDescriptor deviceInfo, DeviceGroupEntity? group) async {
-    await _deviceManager.addNewDevice(deviceInfo, groupID: group?.id);
+  Future<void> addNewDevice(SupportedDeviceDescriptor deviceInfo) async {
+    await _deviceManager.addNewDevice(deviceInfo, groupID: null);
   }
 
   Future<void> _onNewDeviceEntityAdded(NewDeviceEntityAddedEvent event) async {

@@ -11,10 +11,8 @@ import 'package:sembast/sembast.dart';
 
 import 'package:borneo_app/features/devices/view_models/device_discovery_view_model.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
-import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
-import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
 import 'package:lw_wot/wot.dart';
@@ -24,33 +22,6 @@ import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 
 // Minimal implementations / fakes for the interfaces used by the view model.
-
-class FakeGroupManager implements IGroupManager {
-  @override
-  bool get isInitialized => true;
-
-  @override
-  Future<void> create({required String name, String notes = '', Transaction? tx}) async {}
-
-  @override
-  Future<void> delete(String id, {Transaction? tx}) async {}
-
-  @override
-  Future<DeviceGroupEntity> fetch(String id, {Transaction? tx}) async {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<List<DeviceGroupEntity>> fetchAllGroupsInCurrentScene({Transaction? tx}) async {
-    return [];
-  }
-
-  @override
-  Future<void> initialize() async {}
-
-  @override
-  Future<void> update(String id, {required String name, String notes = '', Transaction? tx}) async {}
-}
 
 class FakeDeviceManager implements IDeviceManager {
   // ignore: unused_field
@@ -213,7 +184,6 @@ void main() {
       bleProv = FakeBleProvisioner();
       vm = DeviceDiscoveryViewModel(
         Logger(),
-        FakeGroupManager(),
         FakeDeviceManager(),
         bleProv,
         FakeDeviceModuleRegistry(),
@@ -235,7 +205,6 @@ void main() {
       // create new vm with permission true
       vm = DeviceDiscoveryViewModel(
         Logger(),
-        FakeGroupManager(),
         FakeDeviceManager(),
         bleProv,
         FakeDeviceModuleRegistry(),
@@ -259,7 +228,6 @@ void main() {
       };
       vm = DeviceDiscoveryViewModel(
         Logger(),
-        FakeGroupManager(),
         FakeDeviceManager(),
         errorProv,
         FakeDeviceModuleRegistry(),

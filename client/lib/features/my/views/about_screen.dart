@@ -89,7 +89,7 @@ class AboutScreen extends StatelessWidget {
             snap: false,
             floating: false,
             expandedHeight: 200,
-            foregroundColor: Colors.white,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
             backgroundColor: Color.fromARGB(0xff, 0x3e, 0x36, 0x58),
             flexibleSpace: FlexibleSpaceBar(
               expandedTitleScale: 1.0,
@@ -103,7 +103,9 @@ class AboutScreen extends StatelessWidget {
                     builder: (context, vm, child) => vm.isInitialized
                         ? Text(
                             vm.packageInfo.appName,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
                           )
                         : Container(),
                   ),

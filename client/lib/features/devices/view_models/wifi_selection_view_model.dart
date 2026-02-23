@@ -33,11 +33,13 @@ class WifiSelectionViewModel extends AbstractScreenViewModel {
     isBusy = true;
     notifyListeners();
     try {
+      /*
       var deviceInfoPayload = await _bleProvisioner.fetchDeviceInfo(
         deviceName: deviceName,
         cancelToken: _scanCancelToken,
       );
       Future.delayed(Duration(milliseconds: 500)).asCancellable(_scanCancelToken);
+      */
       // Assuming PoP is empty string as decided
       _networks = await _bleProvisioner.scanWifiNetworks(deviceName, cancelToken: _scanCancelToken);
     } on CancelledException {

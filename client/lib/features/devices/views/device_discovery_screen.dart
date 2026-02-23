@@ -1,7 +1,5 @@
-import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/features/devices/models/discoverable_device.dart';
-import 'package:borneo_app/features/devices/views/device_group_selection_sheet.dart';
-import 'package:borneo_app/features/devices/views/wifi_selection_screen.dart';
+import 'package:borneo_app/features/devices/views/provisioning_screen.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
@@ -11,7 +9,6 @@ import 'package:provider/provider.dart';
 import '../../../core/services/devices/device_manager.dart';
 import '../../../core/services/devices/ble_provisioner.dart';
 import '../view_models/device_discovery_view_model.dart';
-import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
@@ -25,7 +22,6 @@ class DeviceDiscoveryScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (cb) => DeviceDiscoveryViewModel(
         cb.read<Logger>(),
-        cb.read<IGroupManager>(),
         cb.read<IDeviceManager>(),
         cb.read<IBleProvisioner>(),
         cb.read<IDeviceModuleRegistry>(),
@@ -131,10 +127,10 @@ class _DeviceDiscoveryContent extends StatelessWidget {
             },
           ),
           Expanded(
-            child: Selector<DeviceDiscoveryViewModel, (bool, List<DiscoverableDevice>)>(
-              selector: (_, vm) => (vm.isDiscovering, vm.discoverableDevices.value),
+            child: Selector<DeviceDiscoveryViewModel, (bool, List<DiscoverableDevice>, int)>(
+              selector: (_, vm) => (vm.isDiscovering, vm.discoverableDevices.value, vm.remainingSeconds),
               builder: (context, state, child) {
-                final (isDiscovering, devices) = state;
+                final (isDiscovering, devices, remainingSeconds) = state;
 
                 return Stack(
                   children: [
@@ -167,8 +163,9 @@ class _DeviceDiscoveryContent extends StatelessWidget {
                       )
                     else
                       ListView.separated(
+                        primary: true,
                         itemCount: devices.length,
-                        separatorBuilder: (context, index) => Divider(height: 1),
+                        separatorBuilder: (context, index) => const SizedBox(height: 1.5),
                         itemBuilder: (context, index) {
                           final vm = context.read<DeviceDiscoveryViewModel>();
                           return _buildDeviceTile(context, vm, devices[index]);
@@ -184,16 +181,18 @@ class _DeviceDiscoveryContent extends StatelessWidget {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-                                      const SizedBox(width: 16),
-                                      Text(
-                                        context.translate('Searching for devices...'),
-                                        style: Theme.of(context).textTheme.bodyLarge,
-                                      ),
-                                    ],
+                                  SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5)),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    context.translate('Searching for devices...'),
+                                    style: Theme.of(context).textTheme.bodyLarge,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    context.translate('{0} seconds remaining', pArgs: [remainingSeconds]),
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline),
                                   ),
                                   const SizedBox(height: 16),
                                   TextButton(
@@ -235,7 +234,10 @@ class _DeviceDiscoveryContent extends StatelessWidget {
       title: Text(deviceDesc.name),
       subtitle: Text(context.translate('Detected on network')),
       trailing: const Icon(Icons.add),
-      onTap: () => _showAddDeviceSheet(context, vm, deviceDesc),
+      onTap: () async {
+        await vm.addNewDevice(deviceDesc);
+        if (context.mounted) Navigator.pop(context);
+      },
     );
   }
 
@@ -260,7 +262,7 @@ class _DeviceDiscoveryContent extends StatelessWidget {
         if (vm.isMobile) {
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => WifiSelectionScreen(deviceName: name)),
+            MaterialPageRoute(builder: (_) => ProvisioningScreen(deviceName: name)),
           );
           // Check if we need to refresh after provisioning
           if (result != null && result is Map && result['refresh'] == true) {
@@ -293,21 +295,6 @@ class _DeviceDiscoveryContent extends StatelessWidget {
         ),
       ),
       child: Center(child: iconWidget),
-    );
-  }
-
-  void _showAddDeviceSheet(BuildContext context, DeviceDiscoveryViewModel vm, SupportedDeviceDescriptor deviceInfo) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) => DeviceGroupSelectionSheet(
-        availableGroups: vm.availableGroups,
-        onTapGroup: (g) {
-          vm.addNewDevice(deviceInfo, g);
-          Navigator.pop(context); // Close sheet
-        },
-        title: 'Registry "${deviceInfo.name}"',
-        subtitle: context.translate('Select the group to which the new device belongs:'),
-      ),
     );
   }
 }
