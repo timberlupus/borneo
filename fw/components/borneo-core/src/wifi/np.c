@@ -44,8 +44,8 @@ typedef struct {
 static np_context_t* s_np_ctx = NULL;
 
 static void get_device_service_name(char* service_name, size_t max);
-static esp_err_t custom_prov_data_handler(uint32_t session_id, const uint8_t* inbuf, ssize_t inlen, uint8_t** outbuf,
-                                          ssize_t* outlen, void* priv_data);
+static esp_err_t cbor_prov_data_handler(uint32_t session_id, const uint8_t* inbuf, ssize_t inlen, uint8_t** outbuf,
+                                        ssize_t* outlen, void* priv_data);
 
 /* Event handler for NETWORK_PROV_EVENT */
 static void network_prov_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
@@ -123,8 +123,9 @@ int bo_wifi_np_start()
     network_prov_security_t security = NETWORK_PROV_SECURITY_0;
     const void* sec_params = NULL;
     const char* service_key = NULL;
+    BO_TRY_ESP(network_prov_mgr_endpoint_create("cbor"));
     BO_TRY_ESP(network_prov_mgr_start_provisioning(security, sec_params, s_np_ctx->service_name, service_key));
-    BO_TRY_ESP(network_prov_mgr_endpoint_register("rpc", custom_prov_data_handler, NULL));
+    BO_TRY_ESP(network_prov_mgr_endpoint_register("cbor", cbor_prov_data_handler, NULL));
 
     return 0;
 }
@@ -154,14 +155,24 @@ static void send_error_response(uint8_t* buf, size_t buf_size, uint32_t req_id, 
     *outlen = (ssize_t)cbor_encoder_get_buffer_size(&encoder, buf);
 }
 
-esp_err_t custom_prov_data_handler(uint32_t session_id, const uint8_t* inbuf, ssize_t inlen, uint8_t** outbuf,
-                                   ssize_t* outlen, void* priv_data)
+esp_err_t cbor_prov_data_handler(uint32_t session_id, const uint8_t* inbuf, ssize_t inlen, uint8_t** outbuf,
+                                 ssize_t* outlen, void* priv_data)
 {
-    static uint8_t resp_buf[1024];
+    /* BLE/protocomm assumes the response buffer is heap-allocated and will
+       call free() on it once the data has been sent.  Allocate here and
+       transfer ownership to the transport. */
+    const size_t resp_buf_size = 1024;
+    uint8_t* resp_buf = malloc(resp_buf_size);
+    if (resp_buf == NULL) {
+        ESP_LOGE(TAG, "RPC: failed to allocate response buffer");
+        *outbuf = NULL;
+        *outlen = 0;
+        return ESP_ERR_NO_MEM;
+    }
 
     if (!inbuf || inlen <= 0) {
         ESP_LOGE(TAG, "RPC: empty request");
-        send_error_response(resp_buf, sizeof(resp_buf), 0, outbuf, outlen);
+        send_error_response(resp_buf, resp_buf_size, 0, outbuf, outlen);
         return ESP_OK;
     }
 
@@ -197,7 +208,7 @@ esp_err_t custom_prov_data_handler(uint32_t session_id, const uint8_t* inbuf, ss
     if (cbor_value_map_find_value(&it, "m", &field) != CborNoError || !cbor_value_is_integer(&field)
         || cbor_value_get_int(&field, &method) != CborNoError) {
         ESP_LOGE(TAG, "RPC: missing method");
-        send_error_response(resp_buf, sizeof(resp_buf), req_id, outbuf, outlen);
+        send_error_response(resp_buf, resp_buf_size, req_id, outbuf, outlen);
         return ESP_OK;
     }
 
@@ -205,16 +216,16 @@ esp_err_t custom_prov_data_handler(uint32_t session_id, const uint8_t* inbuf, ss
 
     /* Encode response envelope */
     CborEncoder encoder, root_map;
-    cbor_encoder_init(&encoder, resp_buf, sizeof(resp_buf), 0);
-    cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength);
-    cbor_encode_text_stringz(&root_map, "v");
-    cbor_encode_int(&root_map, 1);
-    cbor_encode_text_stringz(&root_map, "id");
-    cbor_encode_uint(&root_map, req_id);
+    cbor_encoder_init(&encoder, resp_buf, resp_buf_size, 0);
+    BO_TRY(cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength));
+    BO_TRY(cbor_encode_text_stringz(&root_map, "v"));
+    BO_TRY(cbor_encode_int(&root_map, 1));
+    BO_TRY(cbor_encode_text_stringz(&root_map, "id"));
+    BO_TRY(cbor_encode_uint(&root_map, req_id));
 
     /* Dispatch */
     int32_t err_code = 0;
-    cbor_encode_text_stringz(&root_map, "r");
+    BO_TRY(cbor_encode_text_stringz(&root_map, "r"));
     switch (method) {
     case BO_PROV_METHOD_GET_DEVICE_INFO: {
         int rc = bo_rpc_borneo_info_get(NULL, &root_map);
@@ -223,14 +234,14 @@ esp_err_t custom_prov_data_handler(uint32_t session_id, const uint8_t* inbuf, ss
     }
     default:
         ESP_LOGW(TAG, "RPC: unknown method %d", method);
-        cbor_encode_null(&root_map);
+        BO_TRY(cbor_encode_null(&root_map));
         err_code = -1;
         break;
     }
 
-    cbor_encode_text_stringz(&root_map, "e");
-    cbor_encode_int(&root_map, err_code);
-    cbor_encoder_close_container(&encoder, &root_map);
+    BO_TRY(cbor_encode_text_stringz(&root_map, "e"));
+    BO_TRY(cbor_encode_int(&root_map, err_code));
+    BO_TRY(cbor_encoder_close_container(&encoder, &root_map));
 
     *outbuf = resp_buf;
     *outlen = (ssize_t)cbor_encoder_get_buffer_size(&encoder, resp_buf);
