@@ -230,7 +230,7 @@ class _MainScreenState extends State<MainScreen> {
             controller: _persistentController,
             screens: buildScreens(),
             items: navBarItems(),
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor!,
             //Theme.of(context).bottomNavigationBarTheme.backgroundColor ??
             //Theme.of(context).colorScheme.surfaceContainerHighest,
             // Back-button handling is fully managed by the outer PopScope
@@ -243,7 +243,7 @@ class _MainScreenState extends State<MainScreen> {
                 mainVM.setIndex(TabIndices.values[index]);
               }
             },
-            navBarStyle: NavBarStyle.style9,
+            navBarStyle: NavBarStyle.style1,
           ),
         );
       },
