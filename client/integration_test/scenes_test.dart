@@ -111,8 +111,9 @@ void scenesTests() {
     }
     // ensure current scene indicator moved (the edit button should show on selected card)
     expect(find.byKey(const Key('btn_edit_scene_My Home')), findsOneWidget);
-    // "Test Scene" is off-screen at this point, so its widget is not built
-    expect(find.byKey(const Key('scene_card_Test Scene')), findsNothing);
+    // On narrow/mobile viewports the "Test Scene" card will be off-screen and
+    // not built, but on wide desktop windows it can remain visible.  Don't
+    // assert anything here; the scroll loop below handles both cases.
 
     // scroll back to "Test Scene" to bring its card into the tree
     for (int i = 0; i < 10; i++) {
