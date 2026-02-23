@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <inttypes.h>
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
@@ -16,9 +17,12 @@
 #include <esp_netif.h>
 #include <nvs_flash.h>
 
+#include <cbor.h>
+
 #include <network_provisioning/manager.h>
 #include <network_provisioning/scheme_ble.h>
 #include <borneo/common.h>
+#include <borneo/rpc/common.h>
 #include <borneo/system.h>
 #include <borneo/wifi.h>
 
@@ -29,6 +33,10 @@
 #define TAG "network-prov"
 #define SSID_PREFIX "BOPROV_"
 
+enum {
+    BO_PROV_METHOD_GET_DEVICE_INFO = 1,
+};
+
 typedef struct {
     char service_name[16];
 } np_context_t;
@@ -36,6 +44,8 @@ typedef struct {
 static np_context_t* s_np_ctx = NULL;
 
 static void get_device_service_name(char* service_name, size_t max);
+static esp_err_t custom_prov_data_handler(uint32_t session_id, const uint8_t* inbuf, ssize_t inlen, uint8_t** outbuf,
+                                          ssize_t* outlen, void* priv_data);
 
 /* Event handler for NETWORK_PROV_EVENT */
 static void network_prov_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
@@ -114,6 +124,7 @@ int bo_wifi_np_start()
     const void* sec_params = NULL;
     const char* service_key = NULL;
     BO_TRY_ESP(network_prov_mgr_start_provisioning(security, sec_params, s_np_ctx->service_name, service_key));
+    BO_TRY_ESP(network_prov_mgr_endpoint_register("rpc", custom_prov_data_handler, NULL));
 
     return 0;
 }
@@ -123,6 +134,108 @@ static void get_device_service_name(char* service_name, size_t max)
     uint8_t eth_mac[6];
     esp_wifi_get_mac(WIFI_IF_STA, eth_mac);
     snprintf(service_name, max, "%s%02X%02X%02X", SSID_PREFIX, eth_mac[3], eth_mac[4], eth_mac[5]);
+}
+
+static void send_error_response(uint8_t* buf, size_t buf_size, uint32_t req_id, uint8_t** outbuf, ssize_t* outlen)
+{
+    CborEncoder encoder, root_map;
+    cbor_encoder_init(&encoder, buf, buf_size, 0);
+    cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength);
+    cbor_encode_text_stringz(&root_map, "v");
+    cbor_encode_int(&root_map, 1);
+    cbor_encode_text_stringz(&root_map, "id");
+    cbor_encode_uint(&root_map, req_id);
+    cbor_encode_text_stringz(&root_map, "e");
+    cbor_encode_int(&root_map, -1);
+    cbor_encode_text_stringz(&root_map, "r");
+    cbor_encode_null(&root_map);
+    cbor_encoder_close_container(&encoder, &root_map);
+    *outbuf = buf;
+    *outlen = (ssize_t)cbor_encoder_get_buffer_size(&encoder, buf);
+}
+
+esp_err_t custom_prov_data_handler(uint32_t session_id, const uint8_t* inbuf, ssize_t inlen, uint8_t** outbuf,
+                                   ssize_t* outlen, void* priv_data)
+{
+    static uint8_t resp_buf[1024];
+
+    if (!inbuf || inlen <= 0) {
+        ESP_LOGE(TAG, "RPC: empty request");
+        send_error_response(resp_buf, sizeof(resp_buf), 0, outbuf, outlen);
+        return ESP_OK;
+    }
+
+    /* Parse request */
+    CborParser parser;
+    CborValue it;
+    if (cbor_parser_init(inbuf, (size_t)inlen, 0, &parser, &it) != CborNoError || !cbor_value_is_map(&it)) {
+        ESP_LOGE(TAG, "RPC: malformed CBOR request");
+        send_error_response(resp_buf, sizeof(resp_buf), 0, outbuf, outlen);
+        return ESP_OK;
+    }
+
+    /* Extract 'v' (protocol version) */
+    CborValue field;
+    int version = 0;
+    if (cbor_value_map_find_value(&it, "v", &field) != CborNoError || !cbor_value_is_integer(&field)
+        || cbor_value_get_int(&field, &version) != CborNoError || version != 1) {
+        ESP_LOGE(TAG, "RPC: bad or missing version");
+        send_error_response(resp_buf, sizeof(resp_buf), 0, outbuf, outlen);
+        return ESP_OK;
+    }
+
+    /* Extract 'id' (request id) */
+    uint32_t req_id = 0;
+    uint64_t req_id_raw = 0;
+    if (cbor_value_map_find_value(&it, "id", &field) == CborNoError && cbor_value_is_unsigned_integer(&field)) {
+        cbor_value_get_uint64(&field, &req_id_raw);
+        req_id = (uint32_t)req_id_raw;
+    }
+
+    /* Extract 'm' (method) */
+    int method = 0;
+    if (cbor_value_map_find_value(&it, "m", &field) != CborNoError || !cbor_value_is_integer(&field)
+        || cbor_value_get_int(&field, &method) != CborNoError) {
+        ESP_LOGE(TAG, "RPC: missing method");
+        send_error_response(resp_buf, sizeof(resp_buf), req_id, outbuf, outlen);
+        return ESP_OK;
+    }
+
+    ESP_LOGI(TAG, "RPC: method=%d id=%" PRIu32, method, req_id);
+
+    /* Encode response envelope */
+    CborEncoder encoder, root_map;
+    cbor_encoder_init(&encoder, resp_buf, sizeof(resp_buf), 0);
+    cbor_encoder_create_map(&encoder, &root_map, CborIndefiniteLength);
+    cbor_encode_text_stringz(&root_map, "v");
+    cbor_encode_int(&root_map, 1);
+    cbor_encode_text_stringz(&root_map, "id");
+    cbor_encode_uint(&root_map, req_id);
+
+    /* Dispatch */
+    int32_t err_code = 0;
+    cbor_encode_text_stringz(&root_map, "r");
+    switch (method) {
+    case BO_PROV_METHOD_GET_DEVICE_INFO: {
+        int rc = bo_rpc_borneo_info_get(NULL, &root_map);
+        err_code = (rc != 0) ? -1 : 0;
+        break;
+    }
+    default:
+        ESP_LOGW(TAG, "RPC: unknown method %d", method);
+        cbor_encode_null(&root_map);
+        err_code = -1;
+        break;
+    }
+
+    cbor_encode_text_stringz(&root_map, "e");
+    cbor_encode_int(&root_map, err_code);
+    cbor_encoder_close_container(&encoder, &root_map);
+
+    *outbuf = resp_buf;
+    *outlen = (ssize_t)cbor_encoder_get_buffer_size(&encoder, resp_buf);
+
+    return ESP_OK;
 }
 
 #endif // CONFIG_BORNEO_PROV_METHOD_NP
