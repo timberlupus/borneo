@@ -14,10 +14,8 @@ on:
       - 'client/**'
       - '.github/workflows/flutter-ci.yml'
   workflow_dispatch:
-
 env:
   FLUTTER_WORKING_DIR: client
-  FLUTTER_VER: 3.38.8
 
 jobs:
   test:
@@ -30,11 +28,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Flutter SDK
-        uses: flutter-actions/setup-flutter@v4
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
-          version: ${{ env.FLUTTER_VER }}
+          flutter-version-file: client/pubspec.yaml
+          cache: true
 
       - name: Cache pub dependencies
         uses: actions/cache@v4
@@ -75,7 +74,6 @@ jobs:
   build-apk:
     needs: test
     runs-on: ubuntu-latest
-    container: 'ghcr.io/cirruslabs/flutter:{{ env.FLUTTER_VER }}'
     defaults:
       run:
         working-directory: ${{ env.FLUTTER_WORKING_DIR }}
@@ -109,6 +107,13 @@ jobs:
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEYSTORE_KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: client/pubspec.yaml
+          cache: true
 
       - name: Cache pub dependencies
         uses: actions/cache@v4
@@ -170,11 +175,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Flutter SDK
-        uses: flutter-actions/setup-flutter@v4
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
-          version: ${{ env.FLUTTER_VER }}
+          flutter-version-file: client/pubspec.yaml
+          cache: true
 
       - name: Cache pub dependencies
         uses: actions/cache@v4
@@ -242,11 +248,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Flutter SDK
-        uses: flutter-actions/setup-flutter@v4
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
-          version: ${{ env.FLUTTER_VER }}
+          flutter-version-file: client/pubspec.yaml
+          cache: true
 
       - name: Cache pub dependencies
         uses: actions/cache@v4

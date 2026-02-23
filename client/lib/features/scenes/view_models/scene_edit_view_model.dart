@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 
 import '../../../core/models/scene_entity.dart';
 import '../../../core/services/scene_manager.dart';
-import '../../../core/exceptions/scene_deletion_exceptions.dart';
 
 class SceneEditViewModel extends ChangeNotifier {
   final ISceneManager _sceneManager;
@@ -19,13 +18,13 @@ class SceneEditViewModel extends ChangeNotifier {
   String _notes;
   String? _imagePath;
   bool _isLoading = false;
-  String? _error;
-
+  // Note: errors are surfaced by throwing exceptions rather than
+  // storing string codes.  View code should catch and inspect
+  // specific exception types.
   String get name => _name;
   String get notes => _notes;
   String? get imagePath => _imagePath;
   bool get isLoading => _isLoading;
-  String? get error => _error;
   bool get deletionAvailable => !isCreation;
 
   void updateName(String name) {
@@ -46,7 +45,6 @@ class SceneEditViewModel extends ChangeNotifier {
   Future<bool> submit() async {
     if (_isLoading) return false;
     _isLoading = true;
-    _error = null;
     notifyListeners();
     try {
       if (isCreation) {
@@ -54,42 +52,28 @@ class SceneEditViewModel extends ChangeNotifier {
       } else {
         await _sceneManager.update(id: id!, name: _name, notes: _notes, imagePath: _imagePath);
       }
-      _isLoading = false;
-      notifyListeners();
       return true;
     } catch (e) {
+      // caller may want to display a message; rethrow or wrap if needed
+      rethrow;
+    } finally {
       _isLoading = false;
-      _error = 'Failed to ${isCreation ? 'create' : 'update'} scene `$_name`: $e';
       notifyListeners();
-      return false;
     }
   }
 
-  Future<bool> delete() async {
-    if (isCreation || _isLoading) return false;
+  /// Attempts to delete the scene.  Throws if the operation fails.
+  /// View code should catch the specific exceptions defined in
+  /// `scene_deletion_exceptions.dart` and react accordingly.
+  Future<void> delete() async {
+    if (isCreation || _isLoading) return;
     _isLoading = true;
-    _error = null;
     notifyListeners();
     try {
       await _sceneManager.delete(id!);
+    } finally {
       _isLoading = false;
       notifyListeners();
-      return true;
-    } on CannotDeleteLastSceneException {
-      _isLoading = false;
-      _error = 'last_scene';
-      notifyListeners();
-      return false;
-    } on SceneContainsDevicesOrGroupsException {
-      _isLoading = false;
-      _error = 'devices_or_groups';
-      notifyListeners();
-      return false;
-    } catch (_) {
-      _isLoading = false;
-      _error = 'unknown';
-      notifyListeners();
-      return false;
     }
   }
 }
