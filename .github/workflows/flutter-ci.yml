@@ -66,10 +66,11 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y xvfb libgtk-3-dev libstdc++-12-dev
 
       - name: Run linux integration tests
-        uses: coactions/setup-xvfb@v1
-        with:
-          working-directory: ${{ env.FLUTTER_WORKING_DIR }}
-          run: flutter test integration_test/app_test.dart -d linux -r github
+        if: runner.os == 'Linux'
+        # desktop integration tests run on the same container; wrap in Xvfb
+        run: |
+          xvfb-run flutter test integration_test/app_test.dart -d linux -r github
+
 
   build-apk:
     needs: test
