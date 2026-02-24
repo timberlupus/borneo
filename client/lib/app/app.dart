@@ -121,7 +121,7 @@ class _BorneoAppState extends State<BorneoApp> {
       child: Builder(
         builder: (context) {
           return MaterialApp(
-            title: 'Borneo-IoT',
+            title: 'Borneo Aqua',
             theme: BorneoTheme(Theme.of(context).textTheme).light(),
             darkTheme: BorneoTheme(Theme.of(context).textTheme).dark(),
             themeMode: _themeMode,
