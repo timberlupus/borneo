@@ -50,7 +50,7 @@
         <key>UIViewControllerBasedStatusBarAppearance</key>
         <false/>
         <key>NSLocationWhenInUseUsageDescription</key>
-        <string>We need access to your location to display maps.</string>
+        <string>We need your location to sync local sunrise, sunset, and moon phases with your Borneo-IoT smart light.</string>
         <key>NSLocalNetworkUsageDescription</key>
         <string>We need access to the local network to discover and connect to Borneo-IoT devices.</string>
         <key>NSBonjourServices</key>
@@ -62,7 +62,9 @@
         <key>NSBluetoothPeripheralUsageDescription</key>
         <string>We need access to Bluetooth peripherals to provision WiFi networks for Borneo-IoT devices.</string>
         <key>NSPhotoLibraryUsageDescription</key>
-        <string>We need access to your photo library so you can choose scene images for device customization.</string>
+        <string>We need access to your photo library so you can choose scene images.</string>
+        <key>NSCameraUsageDescription</key>
+        <string>We need access to your camera so you can custom scene images.</string>
         <key>ITSAppUsesNonExemptEncryption</key>
         <false/>
     </dict>
