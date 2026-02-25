@@ -11,6 +11,7 @@ import 'package:borneo_app/features/devices/view_models/group_edit_view_model.da
 import 'package:borneo_app/features/devices/view_models/group_view_model.dart';
 import 'package:borneo_app/features/devices/views/device_card.dart';
 import 'package:borneo_app/features/devices/view_models/grouped_devices_view_model.dart';
+import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/devices/view_models/abstract_device_summary_view_model.dart';
 import 'package:borneo_app/features/devices/widgets/empty_groups_widget.dart';
 import 'group_edit_screen.dart';
@@ -174,14 +175,13 @@ class DevicesScreen extends StatelessWidget {
   }
 
   SliverAppBar _buildAppBar(BuildContext context) {
+    final scene = context.select<GroupedDevicesViewModel, SceneEntity>((vm) => vm.currentScene);
+
     return SliverAppBar(
       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       foregroundColor: Colors.white,
       title: Text(
-        context.translate(
-          'Devices in {currentScene}',
-          nArgs: {'currentScene': context.read<GroupedDevicesViewModel>().currentScene.name},
-        ),
+        context.translate('Devices in {currentScene}', nArgs: {'currentScene': scene.name}),
         style: Theme.of(context).appBarTheme.titleTextStyle?.copyWith(
           color: Colors.white,
           shadows: [const Shadow(blurRadius: 4.0, color: Colors.black, offset: Offset(2.0, 2.0))],
@@ -208,9 +208,9 @@ class DevicesScreen extends StatelessWidget {
           blendMode: BlendMode.srcATop,
           child: ImageFiltered(
             imageFilter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
-            child: context.read<GroupedDevicesViewModel>().currentScene.imagePath != null
+            child: scene.imagePath != null
                 ? Image.file(
-                    File(context.read<GroupedDevicesViewModel>().currentScene.imagePath!),
+                    File(scene.imagePath!),
                     fit: BoxFit.cover,
                     height: double.infinity,
                     width: double.infinity,

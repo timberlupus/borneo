@@ -52,8 +52,11 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
   late final StreamSubscription<NewDeviceEntityAddedEvent> _deviceAddedEventSub;
   late final StreamSubscription<DeviceEntityDeletedEvent> _deviceDeletedEventSub;
   late final StreamSubscription<CurrentSceneChangedEvent> _currentSceneChangedEventSub;
+  // we now also listen for SceneUpdatedEvent so that if the current scene's
+  // properties (e.g. imagePath/name) are changed by the editor, we can
+  // notify listeners and update any dependent UI.
+  late final StreamSubscription<SceneUpdatedEvent> _sceneUpdatedEventSub;
 
-  // Device group event subscriptions
   late final StreamSubscription<DeviceGroupCreatedEvent> _deviceGroupCreatedEventSub;
   late final StreamSubscription<DeviceGroupDeletedEvent> _deviceGroupDeletedEventSub;
   late final StreamSubscription<DeviceGroupUpdatedEvent> _deviceGroupUpdatedEventSub;
@@ -76,6 +79,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
       (event) => _onDeviceDeleted(event),
     );
     _currentSceneChangedEventSub = super.globalEventBus.on<CurrentSceneChangedEvent>().listen(_onCurrentSceneChanged);
+    _sceneUpdatedEventSub = super.globalEventBus.on<SceneUpdatedEvent>().listen(_onSceneUpdated);
 
     _deviceGroupCreatedEventSub = super.globalEventBus.on<DeviceGroupCreatedEvent>().listen(_onDeviceGroupCreated);
 
@@ -107,6 +111,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     _deviceGroupCreatedEventSub.cancel();
     _deviceGroupDeletedEventSub.cancel();
     _deviceGroupUpdatedEventSub.cancel();
+    _sceneUpdatedEventSub.cancel();
 
     super.dispose();
   }
@@ -277,6 +282,17 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
   void _onCurrentSceneChanged(CurrentSceneChangedEvent event) {
     if (!super.isDisposed && _isInitialized && !super.isBusy) {
       _tryReloadAll();
+    }
+  }
+
+  void _onSceneUpdated(SceneUpdatedEvent event) {
+    // if the updated scene matches current, trigger listeners so views can
+    // rebuild (e.g. AppBar image/name)
+    if (!super.isDisposed && _isInitialized) {
+      if (event.scene.id == _sceneManager.current.id) {
+        // _sceneManager.current already updated by manager; simply notify
+        notifyListeners();
+      }
     }
   }
 

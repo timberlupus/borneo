@@ -1,11 +1,9 @@
 import 'dart:collection';
-import 'dart:io';
 
 import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:sembast/sembast_memory.dart' hide Finder;
 import 'package:shared_preferences/shared_preferences.dart';
 

@@ -4,7 +4,6 @@ import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel_abstractions/models/prov.dart';
 import 'package:cancellation_token/cancellation_token.dart';
-import 'package:cbor/cbor.dart';
 import 'package:cbor/simple.dart' as simple_cbor;
 import 'package:flutter_esp_ble_prov/flutter_esp_ble_prov.dart';
 

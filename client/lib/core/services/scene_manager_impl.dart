@@ -233,6 +233,11 @@ class SceneManagerImpl extends ISceneManager {
         throw InvalidOperationException(message: 'Failed to update record');
       }
       final scene = SceneEntity.fromMap(id, record);
+      // if this is the current scene, keep _current in sync so callers using
+      // the getter see the latest values without requiring a reload.
+      if (_current.id == id) {
+        _current = scene;
+      }
       _globalEventBus.fire(SceneUpdatedEvent(scene));
       return scene;
     }
