@@ -6,7 +6,6 @@ import 'package:event_bus/event_bus.dart';
 import 'package:borneo_app/features/scenes/view_models/scenes_view_model.dart';
 
 // kernel abstractions types
-import 'package:borneo_kernel_abstractions/event_dispatcher.dart' as kd;
 import 'package:borneo_kernel_abstractions/events.dart' show DeviceBoundEvent, DeviceRemovedEvent;
 
 // core types used by stubs
@@ -20,6 +19,7 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:sembast/sembast.dart';
+import '../../mocks/mocks.dart';
 
 // Minimal stub implementations to satisfy ScenesViewModel constructor
 class _DummySceneManager implements ISceneManager {
@@ -59,81 +59,11 @@ class _DummySceneManager implements ISceneManager {
   }) => throw UnimplementedError();
 }
 
-class _StubDeviceManager implements IDeviceManager {
-  final kd.EventDispatcher _events = kd.DefaultEventDispatcher();
-
-  @override
-  kd.EventDispatcher get allDeviceEvents => _events;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-/// simple scene manager that returns a fixed list and reports whichever
-/// item has `isCurrent == true` as the current scene.
-class _StubSceneManager implements ISceneManager {
-  @override
-  bool get isInitialized => true;
-
-  final List<SceneEntity> list;
-  final Map<String, DeviceStatistics> statsByScene = {};
-
-  _StubSceneManager(this.list);
-
-  @override
-  SceneEntity get current => list.firstWhere((s) => s.isCurrent);
-
-  @override
-  Future<List<SceneEntity>> all({Transaction? tx}) async => List.from(list);
-
-  @override
-  Future<DeviceStatistics> getDeviceStatistics(String sceneID) async {
-    return statsByScene[sceneID] ?? DeviceStatistics(0, 0);
-  }
-
-  /// change which item is marked current; returns the updated scene
-  @override
-  Future<SceneEntity> changeCurrent(String newSceneID) async {
-    for (var i = 0; i < list.length; i++) {
-      final s = list[i];
-      if (s.id == newSceneID) {
-        list[i] = s.copyWith(isCurrent: true);
-      } else if (s.isCurrent) {
-        list[i] = s.copyWith(isCurrent: false);
-      }
-    }
-    return current;
-  }
-
-  // unused members
-  @override
-  SceneEntity? get located => null;
-  @override
-  Future<SceneEntity> create({required String name, required String notes, String? imagePath}) =>
-      throw UnimplementedError();
-  @override
-  Future<void> delete(String id, {Transaction? tx}) => throw UnimplementedError();
-  @override
-  Future<SceneEntity> single(String key, {Transaction? tx}) => throw UnimplementedError();
-  @override
-  Future<SceneEntity> getLastAccessed({CancellationToken? cancelToken}) => throw UnimplementedError();
-  @override
-  Future<void> initialize(IGroupManager groupManager, IDeviceManager deviceManager) => throw UnimplementedError();
-  @override
-  Future<SceneEntity> update({
-    required String id,
-    required String name,
-    required String notes,
-    String? imagePath,
-    Transaction? tx,
-  }) => throw UnimplementedError();
-}
-
 // subclass ScenesViewModel so provider type matches
 class FakeScenesViewModel extends ScenesViewModel {
   bool _overrideLoading = false;
 
-  FakeScenesViewModel() : super(_DummySceneManager(), _StubDeviceManager(), EventBus(), null);
+  FakeScenesViewModel() : super(_DummySceneManager(), StubDeviceManager(), EventBus(), null);
 
   @override
   bool get isLoading => _overrideLoading;
@@ -201,8 +131,8 @@ void main() {
         SceneEntity(id: 'c', name: 'C', isCurrent: false, lastAccessTime: now),
       ];
 
-      final manager = _StubSceneManager(scenes);
-      final vm = ScenesViewModel(manager, _StubDeviceManager(), EventBus(), null);
+      final manager = StubSceneManager(scenes);
+      final vm = ScenesViewModel(manager, StubDeviceManager(), EventBus(), null);
 
       await vm.initialize();
 
@@ -217,7 +147,7 @@ void main() {
     test('device bound/removed events trigger statistics reload', () async {
       final now = DateTime.now();
       final scenes = [SceneEntity(id: 'a', name: 'A', isCurrent: true, lastAccessTime: now)];
-      final manager = _StubSceneManager(scenes);
+      final manager = StubSceneManager(scenes);
       manager.statsByScene['a'] = DeviceStatistics(1, 1);
       final deviceBus = _StubDeviceManager();
       final vm = ScenesViewModel(manager, deviceBus, EventBus(), null);
@@ -255,7 +185,7 @@ void main() {
         SceneEntity(id: 'a', name: 'A', isCurrent: true, lastAccessTime: now),
         SceneEntity(id: 'b', name: 'B', isCurrent: false, lastAccessTime: now),
       ];
-      final manager = _StubSceneManager(scenes);
+      final manager = StubSceneManager(scenes);
       manager.statsByScene['a'] = DeviceStatistics(1, 1);
       manager.statsByScene['b'] = DeviceStatistics(0, 0);
       final deviceBus = _StubDeviceManager();
@@ -302,9 +232,9 @@ void main() {
         SceneEntity(id: 'c', name: 'C', isCurrent: false, lastAccessTime: now),
       ];
 
-      final manager = _StubSceneManager(scenes);
+      final manager = StubSceneManager(scenes);
       final bus = EventBus();
-      final vm = ScenesViewModel(manager, _StubDeviceManager(), bus, null);
+      final vm = ScenesViewModel(manager, StubDeviceManager(), bus, null);
 
       await vm.initialize();
       // initial order has current at front
@@ -332,3 +262,7 @@ void main() {
     });
   });
 }
+
+// a tiny alias so the tests above can construct it without importing a
+// full stub definition multiple times
+class _StubDeviceManager extends StubDeviceManager {}

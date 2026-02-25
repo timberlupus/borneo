@@ -9,13 +9,13 @@ import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
-import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 // hide EventDispatcher because flutter_test also exports a symbol with
 // the same name; we use the one from kernel_abstractions instead.
 import 'package:flutter_test/flutter_test.dart' hide EventDispatcher;
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast_memory.dart';
+import '../../mocks/mocks.dart';
 
 void main() {
   group('DeviceManagerImpl Tests', () {
@@ -322,197 +322,9 @@ void main() {
   });
 }
 
-// Simple test doubles without complex inheritance issues
-class TestKernel implements IKernel {
-  bool _isScanning = false;
-  bool _isInitialized = false;
-  final List<String> boundDeviceIds = [];
-  final List<BoundDevice> _boundDevices = [];
-  final EventDispatcher _events = DefaultEventDispatcher();
+// the shared mocks imported transitively via mocks.dart
 
-  // tracks whether heartbeat batch signals were invoked
-  bool heartbeatSuspended = false; // kept for compatibility
-  bool heartbeatResumed = false; // kept for compatibility
-  bool batchEntered = false;
-  bool batchExited = false;
-
-  // Test tracking
-  bool startCalled = false;
-  bool bindCalled = false;
-  bool tryBindCalled = false;
-  bool unbindCalled = false;
-  bool startScanningCalled = false;
-  bool stopScanningCalled = false;
-
-  String? lastBoundDeviceId;
-  String? lastUnboundDeviceId;
-  bool tryBindResult = true;
-
-  @override
-  bool get isScanning => _isScanning;
-
-  @override
-  bool get isInitialized => _isInitialized;
-
-  @override
-  Iterable<Driver> get activatedDrivers => [];
-
-  @override
-  Iterable<BoundDevice> get boundDevices => _boundDevices;
-
-  @override
-  EventDispatcher get events => _events;
-
-  @override
-  Future<void> start() async {
-    startCalled = true;
-    _isInitialized = true;
-  }
-
-  @override
-  void suspendHeartbeat() {
-    heartbeatSuspended = true;
-  }
-
-  @override
-  void resumeHeartbeat() {
-    heartbeatResumed = true;
-  }
-
-  @override
-  void enterHeartbeatBatch() {
-    batchEntered = true;
-  }
-
-  @override
-  void exitHeartbeatBatch() {
-    batchExited = true;
-  }
-
-  @override
-  HeartbeatState? getHeartbeatState(String deviceID) => null;
-
-  @override
-  bool isBound(String deviceID) => boundDeviceIds.contains(deviceID);
-
-  @override
-  BoundDevice getBoundDevice(String deviceID) {
-    // Create a mock BoundDevice for testing
-    final device = TestDevice(deviceID);
-    final driver = TestDriver();
-    return BoundDevice('test-driver', device, driver);
-  }
-
-  @override
-  Future<bool> tryBind(dynamic device, String driverID, {CancellationToken? cancelToken}) async {
-    tryBindCalled = true;
-    lastBoundDeviceId = device.id;
-    if (tryBindResult) {
-      boundDeviceIds.add(device.id);
-      final testDevice = TestDevice(device.id);
-      final testDriver = TestDriver();
-      _boundDevices.add(BoundDevice(driverID, testDevice, testDriver));
-    }
-    return tryBindResult;
-  }
-
-  @override
-  Future<void> bind(dynamic device, String driverID, {CancellationToken? cancelToken}) async {
-    bindCalled = true;
-    lastBoundDeviceId = device.id;
-    boundDeviceIds.add(device.id);
-    final testDevice = TestDevice(device.id);
-    final testDriver = TestDriver();
-    _boundDevices.add(BoundDevice(driverID, testDevice, testDriver));
-  }
-
-  @override
-  Future<void> unbind(String deviceID, {CancellationToken? cancelToken}) async {
-    unbindCalled = true;
-    lastUnboundDeviceId = deviceID;
-    boundDeviceIds.remove(deviceID);
-    _boundDevices.removeWhere((d) => d.device.id == deviceID);
-  }
-
-  @override
-  Future<void> unbindAll({CancellationToken? cancelToken}) async {
-    boundDeviceIds.clear();
-    _boundDevices.clear();
-  }
-
-  @override
-  void registerDevice(dynamic descriptor) {}
-
-  @override
-  void registerDevices(Iterable<dynamic> descriptors) {}
-
-  @override
-  void unregisterDevice(String deviceID) {}
-
-  @override
-  void unregisterAllDevices() {}
-
-  @override
-  Future<void> startDevicesScanning({Duration? timeout, CancellationToken? cancelToken}) async {
-    startScanningCalled = true;
-    _isScanning = true;
-  }
-
-  @override
-  Future<void> stopDevicesScanning() async {
-    stopScanningCalled = true;
-    _isScanning = false;
-  }
-
-  @override
-  void dispose() {}
-
-  @override
-  bool get isBusy => false;
-}
-
-class TestBoundDevice {
-  final Device device;
-
-  TestBoundDevice(this.device);
-}
-
-class TestDevice extends Device {
-  late DriverData _driverData;
-
-  TestDevice(String id) : super(id: id, fingerprint: 'test-fingerprint', address: Uri.parse('coap://localhost:5683')) {
-    _driverData = TestDriverData(this);
-  }
-
-  @override
-  DriverData get driverData => _driverData;
-
-  @override
-  Future<void> setDriverData(DriverData data, {CancellationToken? cancelToken}) async {
-    _driverData = data;
-  }
-}
-
-class TestDriverData extends DriverData {
-  TestDriverData(super.device);
-
-  @override
-  void dispose() {}
-}
-
-class TestDriver extends Driver {
-  @override
-  Future<bool> probe(Device dev, {CancellationToken? cancelToken}) async => true;
-
-  @override
-  Future<bool> remove(Device dev, {CancellationToken? cancelToken}) async => true;
-
-  @override
-  Future<bool> heartbeat(Device dev, {CancellationToken? cancelToken}) async => true;
-
-  @override
-  void dispose() {}
-}
+// remaining per-test helpers that aren't reused elsewhere
 
 // deprecated test helper; replaced by EventDispatcher
 class TestEventDispatcher extends DefaultEventDispatcher {}
@@ -540,66 +352,5 @@ class TestGroupManager implements IGroupManager {
 
 class TestDeviceModuleRegistry implements IDeviceModuleRegistry {
   @override
-  UnmodifiableMapView<String, DeviceModuleMetadata> get metaModules =>
-      UnmodifiableMapView(<String, DeviceModuleMetadata>{});
-}
-
-class TestLogger implements Logger {
-  final List<String> messages = [];
-
-  @override
-  void v(dynamic message, {DateTime? time, Object? error, StackTrace? stackTrace}) {
-    messages.add('V: $message');
-  }
-
-  @override
-  void d(dynamic message, {DateTime? time, Object? error, StackTrace? stackTrace}) {
-    messages.add('D: $message');
-  }
-
-  @override
-  void i(dynamic message, {DateTime? time, Object? error, StackTrace? stackTrace}) {
-    messages.add('I: $message');
-  }
-
-  @override
-  void w(dynamic message, {DateTime? time, Object? error, StackTrace? stackTrace}) {
-    messages.add('W: $message');
-  }
-
-  @override
-  void e(dynamic message, {DateTime? time, Object? error, StackTrace? stackTrace}) {
-    messages.add('E: $message');
-  }
-
-  @override
-  void wtf(dynamic message, {DateTime? time, Object? error, StackTrace? stackTrace}) {
-    messages.add('WTF: $message');
-  }
-
-  @override
-  void log(Level level, dynamic message, {DateTime? time, Object? error, StackTrace? stackTrace}) {
-    messages.add('${level.name}: $message');
-  }
-
-  @override
-  bool isClosed() => false;
-
-  @override
-  Future<void> close() async {}
-
-  // Simplified - handle missing methods
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
-
-class TestSupportedDeviceDescriptor implements SupportedDeviceDescriptor {
-  @override
-  final String fingerprint;
-
-  TestSupportedDeviceDescriptor(this.fingerprint);
-
-  // Simplified - handle missing methods
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
+  UnmodifiableMapView<String, DeviceModuleMetadata> get metaModules => UnmodifiableMapView({});
 }

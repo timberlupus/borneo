@@ -19,7 +19,7 @@ import 'package:lw_wot/wot.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter_esp_ble_prov/flutter_esp_ble_prov.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
-import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
+import '../mocks/mocks.dart';
 
 // Minimal implementations / fakes for the interfaces used by the view model.
 
@@ -163,18 +163,6 @@ class FakeDeviceModuleRegistry extends IDeviceModuleRegistry {
   UnmodifiableMapView<String, DeviceModuleMetadata> get metaModules => UnmodifiableMapView({});
 }
 
-class FakeGettextLocalizations implements GettextLocalizations {
-  @override
-  String translate(
-    String key, {
-    String? domain,
-    String? keyPlural,
-    String msgctxt = '',
-    Map<String, Object>? nArgs,
-    List<Object>? pArgs,
-  }) => key;
-}
-
 void main() {
   group('DeviceDiscoveryViewModel permissions', () {
     late DeviceDiscoveryViewModel vm;
@@ -188,7 +176,7 @@ void main() {
         bleProv,
         FakeDeviceModuleRegistry(),
         globalEventBus: EventBus(),
-        gt: FakeGettextLocalizations(),
+        gt: FakeGettext(),
         logger: Logger(),
         requestBlePermissions: () async => false,
       );
@@ -209,7 +197,7 @@ void main() {
         bleProv,
         FakeDeviceModuleRegistry(),
         globalEventBus: EventBus(),
-        gt: FakeGettextLocalizations(),
+        gt: FakeGettext(),
         logger: Logger(),
         requestBlePermissions: () async => true,
       );
@@ -232,7 +220,7 @@ void main() {
         errorProv,
         FakeDeviceModuleRegistry(),
         globalEventBus: EventBus(),
-        gt: FakeGettextLocalizations(),
+        gt: FakeGettext(),
         logger: Logger(),
         requestBlePermissions: () async => true,
       );
