@@ -84,6 +84,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Get build number from git
+        id: get_build_number
+        run: echo "build_number=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
+
       - name: Decode keystore from base64
         shell: bash
         run: |
@@ -149,7 +153,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Build APK
-        run: flutter build apk --release --target-platform android-arm64 --build-number ${{ github.run_number }}
+        run: flutter build apk --release --target-platform android-arm64 --build-number ${{ steps.get_build_number.outputs.build_number }}
 
       - name: Rename APK with version
         run: |
@@ -174,6 +178,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Get build number from git
+        id: get_build_number
+        run: echo "build_number=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -223,7 +231,7 @@ jobs:
           echo "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Build Windows executable
-        run: flutter build windows --release --build-number ${{ github.run_number }}
+        run: flutter build windows --release --build-number ${{ steps.get_build_number.outputs.build_number }}
 
       - name: Create and zip Windows release
         run: |
@@ -247,6 +255,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Get build number from git
+        id: get_build_number
+        run: echo "build_number=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -290,7 +302,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Build iOS app (no codesign)
-        run: flutter build ios --release --no-codesign --build-number ${{ github.run_number }}
+        run: flutter build ios --release --no-codesign --build-number ${{ steps.get_build_number.outputs.build_number }}
 
   release:
     needs: [build-apk, build-windows, build-ios]
