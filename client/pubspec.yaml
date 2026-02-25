@@ -118,6 +118,7 @@ dependencies:
 
 
 dev_dependencies:
+  pub_semver: ^2.2.0
   build_runner: ^2.4.13
   mockito: ^5.4.0
   melos: ^7.4.0
