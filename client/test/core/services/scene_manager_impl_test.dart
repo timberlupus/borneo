@@ -7,6 +7,10 @@ import 'package:sembast/sembast_memory.dart';
 import '../../mocks/mocks.dart';
 
 void main() {
+  // some tests in this file access asset bundles via ServicesBinding; ensure
+  // the binding is initialized before any code runs.
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('SceneManagerImpl', () {
     late SceneManagerImpl manager;
     late EventBus bus;
