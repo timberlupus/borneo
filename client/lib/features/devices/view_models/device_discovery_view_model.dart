@@ -9,6 +9,7 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:borneo_app/core/services/platform_service.dart';
 
 import '../models/events.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
@@ -25,6 +26,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   final IDeviceManager _deviceManager;
   final IBleProvisioner _bleProvisioner;
   final IDeviceModuleRegistry deviceMdoules;
+  final PlatformService _platformService;
 
   bool get _isDiscovering => _deviceManager.isDiscoverying;
   bool _isRefreshing = false;
@@ -50,13 +52,14 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   int get remainingSeconds => _remainingSeconds;
 
   // Platform check
-  bool get isMobile => defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS;
+  bool get isMobile => _platformService.isMobile;
 
   DeviceDiscoveryViewModel(
     this._logger,
     this._deviceManager,
     this._bleProvisioner,
-    this.deviceMdoules, {
+    this.deviceMdoules,
+    this._platformService, {
     required super.globalEventBus,
     required super.gt,
     super.logger,

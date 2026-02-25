@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart' as provider;
+import 'package:borneo_app/core/services/platform_service.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:event_bus/event_bus.dart';
@@ -128,6 +129,9 @@ Future<Widget> buildAppWidget({
 
     // LocaleService
     provider.Provider<ILocaleService>(create: (_) => AppLocaleService(), lazy: false),
+
+    // PlatformService (used by various components to make platform checks testable)
+    provider.Provider<PlatformService>(create: (_) => PlatformServiceImpl(), lazy: false),
 
     // EventBus
     provider.Provider<EventBus>(create: (_) => bus, lazy: false),

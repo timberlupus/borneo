@@ -13,6 +13,7 @@ import 'package:borneo_app/features/devices/view_models/device_discovery_view_mo
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
+import 'package:borneo_app/core/services/platform_service.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/features/devices/models/device_module_metadata.dart';
 import 'package:lw_wot/wot.dart';
@@ -22,6 +23,43 @@ import 'package:borneo_kernel_abstractions/kernel.dart';
 import '../mocks/mocks.dart';
 
 // Minimal implementations / fakes for the interfaces used by the view model.
+
+// A tiny fake that lets tests pretend they are running on a particular
+// platform without depending on the real `dart:io` APIs.
+class FakePlatformService implements PlatformService {
+  @override
+  bool isWeb;
+
+  @override
+  bool isAndroid;
+
+  @override
+  bool isIOS;
+
+  @override
+  bool isWindows;
+
+  @override
+  bool isMacOS;
+
+  @override
+  bool isLinux;
+
+  FakePlatformService({
+    this.isWeb = false,
+    this.isAndroid = false,
+    this.isIOS = false,
+    this.isWindows = false,
+    this.isMacOS = false,
+    this.isLinux = false,
+  });
+
+  @override
+  bool get isMobile => isAndroid || isIOS;
+
+  @override
+  bool get isDesktop => isWindows || isMacOS || isLinux;
+}
 
 class FakeDeviceManager implements IDeviceManager {
   // ignore: unused_field
@@ -168,21 +206,29 @@ void main() {
     late DeviceDiscoveryViewModel vm;
     late FakeBleProvisioner bleProv;
 
-    setUp(() {
-      bleProv = FakeBleProvisioner();
-      vm = DeviceDiscoveryViewModel(
+    // helper to construct a VM configured for mobile/desktop and an optional
+    // permission stub.
+    DeviceDiscoveryViewModel makeVm({
+      required bool mobile,
+      Future<bool> Function()? permissions,
+      FakeBleProvisioner? ble,
+    }) {
+      bleProv = ble ?? FakeBleProvisioner();
+      return DeviceDiscoveryViewModel(
         Logger(),
         FakeDeviceManager(),
         bleProv,
         FakeDeviceModuleRegistry(),
+        FakePlatformService(isAndroid: mobile, isIOS: false, isWindows: !mobile),
         globalEventBus: EventBus(),
         gt: FakeGettext(),
         logger: Logger(),
-        requestBlePermissions: () async => false,
+        requestBlePermissions: permissions ?? () async => false,
       );
-    });
+    }
 
     test('startDiscovery does not call BLE scan when permissions denied', () async {
+      vm = makeVm(mobile: true, permissions: () async => false);
       expect(bleProv.scanCalled, isFalse);
       await vm.startDiscovery();
       expect(bleProv.scanCalled, isFalse);
@@ -190,44 +236,29 @@ void main() {
     });
 
     test('startDiscovery calls BLE scan when permissions granted', () async {
-      // create new vm with permission true
-      vm = DeviceDiscoveryViewModel(
-        Logger(),
-        FakeDeviceManager(),
-        bleProv,
-        FakeDeviceModuleRegistry(),
-        globalEventBus: EventBus(),
-        gt: FakeGettext(),
-        logger: Logger(),
-        requestBlePermissions: () async => true,
-      );
-
+      vm = makeVm(mobile: true, permissions: () async => true);
       await vm.startDiscovery();
-      // allow _startBleScan unawaited future to run
+      // scanning happens asynchronously; give it a chance
       await Future.delayed(Duration.zero);
       expect(bleProv.scanCalled, isTrue);
     });
 
     test('startDiscovery handles platform exception permission denial', () async {
       final errorProv = FakeBleProvisioner();
-      // override to throw
       errorProv.scanImpl = (String prefix, {CancellationToken? cancelToken}) async {
         throw PlatformException(code: 'PERMISSION_DENIED', message: 'nope');
       };
-      vm = DeviceDiscoveryViewModel(
-        Logger(),
-        FakeDeviceManager(),
-        errorProv,
-        FakeDeviceModuleRegistry(),
-        globalEventBus: EventBus(),
-        gt: FakeGettext(),
-        logger: Logger(),
-        requestBlePermissions: () async => true,
-      );
-
+      vm = makeVm(mobile: true, permissions: () async => true, ble: errorProv);
       await vm.startDiscovery();
       await Future.delayed(Duration.zero);
       expect(vm.scanError.value, 'Bluetooth permissions are required to discover devices.');
+    });
+
+    test('non‑mobile platforms skip BLE scan entirely', () async {
+      vm = makeVm(mobile: false, permissions: () async => true);
+      await vm.startDiscovery();
+      expect(bleProv.scanCalled, isFalse);
+      expect(vm.scanError.value, isNull);
     });
   });
 }

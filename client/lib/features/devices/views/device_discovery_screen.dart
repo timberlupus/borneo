@@ -2,6 +2,7 @@ import 'package:borneo_app/features/devices/models/discoverable_device.dart';
 import 'package:borneo_app/features/devices/views/provisioning_screen.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:flutter/material.dart';
+import 'package:borneo_app/core/services/platform_service.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,7 @@ class DeviceDiscoveryScreen extends StatelessWidget {
         cb.read<IDeviceManager>(),
         cb.read<IBleProvisioner>(),
         cb.read<IDeviceModuleRegistry>(),
+        cb.read<PlatformService>(), // injected platform helper
         globalEventBus: cb.read<EventBus>(),
         gt: gt,
         logger: cb.read<Logger>(),
