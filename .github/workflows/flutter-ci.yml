@@ -181,7 +181,9 @@ jobs:
 
       - name: Get build number from git
         id: get_build_number
-        run: echo "build_number=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
+        run: |
+          $count = git rev-list --count HEAD
+          echo "build_number=$count" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
