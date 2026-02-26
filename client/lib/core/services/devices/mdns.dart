@@ -30,10 +30,24 @@ class NsdMdnsDiscovery implements IMdnsDiscovery {
     _isStopped = true;
   }
 
+  // On Windows, `service.host` often contains a ".local" name which cannot
+  // be resolved by the platform DNS resolver.  The nsd plugin is capable of
+  // performing an IP lookup (see `ipLookupType`); when that happens the result
+  // appears in `service.addresses`.  We prefer the first numeric address when
+  // available so callers get something that can be passed directly to
+  // `InternetAddress.parse` or `Uri`.
   void _onServiceDiscovered(nsd.Service service, nsd.ServiceStatus status) {
     if (status == nsd.ServiceStatus.found) {
+      // choose a usable host string
+      String host;
+      if (service.addresses != null && service.addresses!.isNotEmpty) {
+        host = service.addresses!.first.address;
+      } else {
+        host = service.host ?? 'UNKNOWN';
+      }
+
       final discovered = MdnsDiscoveredDevice(
-        host: service.host ?? 'ERROR!!!',
+        host: host,
         port: service.port,
         serviceType: service.type,
         name: service.name,
