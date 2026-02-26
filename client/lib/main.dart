@@ -154,7 +154,11 @@ Future<void> main() async {
   runZonedGuarded(
     () async {
       WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+      // portrait lock is only necessary on phones/tablets; desktop apps are
+      // already freeform and we enforce a 9:19.5 ratio ourselves below.
+      if (!(Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+        SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+      }
       FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
       final db = await openDatabase();
@@ -167,10 +171,14 @@ Future<void> main() async {
           final screenWidth = screenSize.width;
           final screenHeight = screenSize.height;
 
-          // Define portrait aspect ratio (width/height ≈ 0.4615)
+          // Define portrait aspect ratio (width/height ≈ 0.4615).
+          // this value is used both for the initial frame and to enforce
+          // the ratio whenever the window is resized.
           const double aspectRatio = 9 / 19.5;
 
-          // Calculate window height: set to 80% of screen height, clamped between 600 and 960
+          // Calculate window height: set to 80% of screen height, clamped
+          // between 600 and 960 so the window isn't ridiculous on very large
+          // or very small screens.
           double height = screenHeight * 0.8;
           if (height > 960) height = 960; // Upper limit
           if (height < 600) height = 600; // Lower limit for usability
@@ -178,15 +186,19 @@ Future<void> main() async {
           // Calculate width based on aspect ratio
           double width = height * aspectRatio;
 
-          // Ensure width does not exceed 90% of screen width
+          // Ensure width does not exceed 90% of screen width; adjust height
+          // accordingly to keep the aspect ratio.
           if (width > screenWidth * 0.9) {
             width = screenWidth * 0.9;
-            height = width / aspectRatio; // Recalculate height to maintain ratio
+            height = width / aspectRatio;
           }
 
-          // Set window size and position
-          setWindowMinSize(Size(width * 0.5, height * 0.5)); // Min size is 50% of calculated
-          setWindowMaxSize(Size(width, height)); // Max size is calculated value
+          // Allow the user to resize freely, but keep the aspect ratio fixed by
+          // listening for metric changes.  We still provide reasonable minimums
+          // so the window remains portrait-ish and usable.
+          setWindowMinSize(Size(width * 0.3, height * 0.3));
+          // don't set a hard max size; the enforcer will clamp the ratio.
+
           setWindowFrame(
             Rect.fromLTWH(
               (screenWidth - width) / 2, // Center horizontally
@@ -195,14 +207,19 @@ Future<void> main() async {
               height,
             ),
           );
+
+          // Attach a metrics observer to enforce the aspect ratio whenever the
+          // user resizes the window manually.
+          WidgetsBinding.instance.addObserver(_AspectRatioEnforcer(aspectRatio));
         } else {
-          // Fallback to fixed size if screen info unavailable
+          // Fallback to fixed size if screen info unavailable.  We still
+          // enforce the portrait ratio, but allow arbitrary resizing.
           const double aspectRatio = 9 / 19.5;
           const double height = 960;
           final double width = height * aspectRatio;
-          setWindowMinSize(Size(width, height));
-          setWindowMaxSize(Size(width, height));
+          setWindowMinSize(Size(width * 0.3, height * 0.3));
           setWindowFrame(Rect.fromLTWH(100, 100, width, height));
+          WidgetsBinding.instance.addObserver(_AspectRatioEnforcer(aspectRatio));
         }
       }
 
@@ -216,4 +233,45 @@ Future<void> main() async {
       _fatalErrorLogger.e(error, error: error, stackTrace: stack);
     },
   );
+}
+
+/// A [WidgetsBindingObserver] that keeps the desktop window locked to a
+/// particular aspect ratio whenever the user resizes it.  The approach is
+/// simple: watch for metric changes, query the current frame, then immediately
+/// adjust whichever dimension drifted away from the target ratio.
+///
+/// This is necessary because the `window_size` plugin doesn't provide a built‑
+/// in API for aspect‑ratio constraints, so we implement one ourselves.
+class _AspectRatioEnforcer with WidgetsBindingObserver {
+  final double aspectRatio;
+
+  _AspectRatioEnforcer(this.aspectRatio);
+
+  @override
+  void didChangeMetrics() {
+    // ignore: unawaited_futures
+    _enforce();
+  }
+
+  Future<void> _enforce() async {
+    final info = await getWindowInfo();
+    final frame = info.frame;
+    if (frame == null) return;
+
+    final currentRatio = frame.width / frame.height;
+    if ((currentRatio - aspectRatio).abs() < 0.005) return; // already close
+
+    double newWidth = frame.width;
+    double newHeight = frame.height;
+
+    if (currentRatio > aspectRatio) {
+      // window is too wide, shrink width
+      newWidth = frame.height * aspectRatio;
+    } else {
+      // window is too tall, shrink height
+      newHeight = frame.width / aspectRatio;
+    }
+
+    setWindowFrame(Rect.fromLTWH(frame.left, frame.top, newWidth, newHeight));
+  }
 }
