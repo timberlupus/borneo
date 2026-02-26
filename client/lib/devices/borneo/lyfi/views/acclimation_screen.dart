@@ -82,10 +82,15 @@ class AcclimationScreen extends StatelessWidget {
             ),
             SettingsTile.navigation(
               title: Text(context.translate('Start date')),
-              value: Text(
-                vm.startTimestamp.toLocal().year < 2025
-                    ? context.translate('Null')
-                    : DateFormat.yMd().format(vm.startTimestamp.toLocal()),
+              value: Builder(
+                builder: (ctx) {
+                  final locale = Localizations.localeOf(ctx).toString();
+                  return Text(
+                    vm.startTimestamp.toLocal().year < 2025
+                        ? context.translate('Not set')
+                        : DateFormat.yMd(locale).format(vm.startTimestamp.toLocal()),
+                  );
+                },
               ),
               onPressed: !vm.isBusy && vm.isOnline
                   ? (bc) async {

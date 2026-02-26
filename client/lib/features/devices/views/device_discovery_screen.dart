@@ -91,8 +91,9 @@ class _DeviceDiscoveryContent extends StatelessWidget {
               padding: EdgeInsets.all(8),
               width: double.infinity,
               child: Text(
-                context.translate('Device provisioning is only available on iOS and Android.'),
-                textAlign: TextAlign.center,
+                context.translate(
+                  'Bluetooth is not supported on this system; device WiFi provisioning is unavailable.',
+                ),
                 style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer),
               ),
             ),
