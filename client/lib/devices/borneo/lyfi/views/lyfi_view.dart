@@ -149,7 +149,7 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
             const LyfiBusyIndicatorSliver(),
             const LyfiStatusBannersSliver(),
           ],
-          body: const SafeArea(top: false, child: _DashboardRouteVisibilityGate()),
+          body: _DashboardRouteVisibilityGate(),
         ),
       ),
     );

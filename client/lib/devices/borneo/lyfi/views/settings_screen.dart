@@ -27,7 +27,7 @@ class SettingsScreen extends StatelessWidget {
       value: vm,
       builder: (context, child) => Scaffold(
         appBar: AppBar(title: Text(context.translate('Settings')), elevation: 1),
-        body: SafeArea(child: _buildSettingsList(context)),
+        body: _buildSettingsList(context),
       ),
     );
   }
@@ -84,18 +84,11 @@ class SettingsScreen extends StatelessWidget {
           tiles: [
             SettingsTile.navigation(
               title: Text(context.translate('Name')),
-              trailing: Text(lvm.name),
+              value: Text(lvm.name),
               onPressed: (bc) => _showNameDialog(bc, vm),
             ),
-            SettingsTile(
-              title: Text(context.translate('Manufacturer & Model')),
-              descriptionInlineIos: true,
-              description: Row(
-                spacing: 8,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [Text(lvm.borneoInfo.manufName), Text(lvm.borneoInfo.modelName)],
-              ),
-            ),
+            SettingsTile(title: Text(context.translate('Manufacturer')), trailing: Text(lvm.borneoInfo.modelName)),
+            SettingsTile(title: Text(context.translate('Model')), trailing: Text(lvm.borneoInfo.manufName)),
             SettingsTile(
               title: Text(context.translate('Serial Number')),
               trailing: Text(lvm.borneoInfo.serno.substring(0, 12)),
@@ -119,6 +112,7 @@ class SettingsScreen extends StatelessWidget {
               ),
             ],
           ),
+
         SettingsSection(
           title: Text(context.translate('DEVICE STATUS')),
           tiles: [
@@ -137,7 +131,7 @@ class SettingsScreen extends StatelessWidget {
             ),
             SettingsTile.navigation(
               title: Text(context.translate('Power status at startup')),
-              trailing: Text(_formatPowerBehavior(context, lvm.powerBehavior)),
+              value: Text(_formatPowerBehavior(context, lvm.powerBehavior)),
               enabled: lvm.canUpdatePowerBehavior,
               onPressed: (bc) => _showPowerBehaviorPicker(bc, vm),
             ),
@@ -158,7 +152,7 @@ class SettingsScreen extends StatelessWidget {
               title: Text(context.translate('Device Location')),
               description: Text(context.translate('Geo location')),
               descriptionInlineIos: true,
-              trailing: lvm.location != null
+              value: lvm.location != null
                   ? Text("(${lvm.location!.lat.toStringAsFixed(0)}, ${lvm.location!.lng.toStringAsFixed(0)})")
                   : Text(context.translate('Unknown')),
               enabled: lvm.canUpdateGeoLocation,
@@ -170,13 +164,13 @@ class SettingsScreen extends StatelessWidget {
             ),
             SettingsTile.navigation(
               title: Text(context.translate('Correction curve')),
-              trailing: Text(_formatCorrectionMethod(context, lvm.correctionMethod)),
+              value: Text(_formatCorrectionMethod(context, lvm.correctionMethod)),
               enabled: lvm.canUpdateCorrectionMethod,
               onPressed: (bc) => _showCorrectionMethodPicker(bc, vm),
             ),
             SettingsTile.navigation(
               title: Text(context.translate('Temporary light duration')),
-              trailing: Text(_formatDuration(context, lvm.temporaryDuration)),
+              value: Text(_formatDuration(context, lvm.temporaryDuration)),
               enabled: lvm.canUpdateTemporaryDuration,
               onPressed: (bc) => _showTemporaryDurationPicker(bc, vm),
             ),
@@ -199,13 +193,13 @@ class SettingsScreen extends StatelessWidget {
           tiles: [
             SettingsTile.navigation(
               title: Text(context.translate('Fan mode')),
-              trailing: Text(_formatFanMode(context, lvm.fanMode)),
+              value: Text(_formatFanMode(context, lvm.fanMode)),
               enabled: lvm.canUpdateFanMode,
               onPressed: (bc) => _showFanModePicker(bc, vm),
             ),
             SettingsTile.navigation(
               title: Text(context.translate('Manual fan power')),
-              trailing: Text('${lvm.manualFanPower}%'),
+              value: Text('${lvm.manualFanPower}%'),
               enabled: lvm.canUpdateManualFanPower,
               onPressed: lvm.canUpdateManualFanPower
                   ? (bc) => _showManualFanPowerDialog(bc, vm, lvm.manualFanPower)

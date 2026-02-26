@@ -74,8 +74,7 @@ class ManualRunningChart extends StatelessWidget {
     assert(vm.isOnline);
     return MultiValueListenableBuilder<int>(
       valueNotifiers: vm.channels,
-      builder: (context, values, _) => Padding(
-        padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
+      builder: (context, values, _) => Expanded(
         child: LyfiColorChart(
           BarChartData(
             barGroups: buildGroupDataItems(context),

@@ -51,7 +51,7 @@ class DimmingScreen extends StatelessWidget {
                 const LyfiBusyIndicatorSliver(),
                 const LyfiStatusBannersSliver(),
               ],
-              body: const SafeArea(top: false, child: DimmingView()),
+              body: DimmingView(),
             ),
             const _ConnectionGuardOverlay(),
           ],

@@ -57,7 +57,7 @@ class AcclimationScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                body: SafeArea(child: _buildSettingsList(context)),
+                body: _buildSettingsList(context),
               );
             }
           },

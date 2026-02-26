@@ -49,7 +49,7 @@ class AppSettingsScreen extends StatelessWidget {
             } else {
               return Scaffold(
                 appBar: AppBar(title: Text(context.translate('App Settings')), elevation: 1),
-                body: SafeArea(child: buildItems(context)),
+                body: buildItems(context),
               );
             }
           },

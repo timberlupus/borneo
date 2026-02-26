@@ -47,38 +47,36 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
               }),
             )
             .toList();
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(title, textAlign: TextAlign.center),
+        ),
+        if (subtitle != null)
           Container(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text(title, textAlign: TextAlign.center),
-          ),
-          if (subtitle != null)
-            Container(
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Text(
-                subtitle!,
-                textAlign: TextAlign.start,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).hintColor),
-              ),
-            ),
-          const SizedBox(height: 8),
-          Flexible(
-            child: ListView.separated(
-              padding: const EdgeInsets.all(0),
-              shrinkWrap: true,
-              physics: const ClampingScrollPhysics(),
-              itemBuilder: (BuildContext context, int index) => tiles[index],
-              separatorBuilder: (BuildContext context, int index) => const Divider(indent: 16, height: 8, thickness: 1),
-              itemCount: tiles.length,
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Text(
+              subtitle!,
+              textAlign: TextAlign.start,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).hintColor),
             ),
           ),
-          const SizedBox(height: 16),
-        ],
-      ),
+        const SizedBox(height: 8),
+        Flexible(
+          child: ListView.separated(
+            padding: const EdgeInsets.all(0),
+            shrinkWrap: true,
+            physics: const ClampingScrollPhysics(),
+            itemBuilder: (BuildContext context, int index) => tiles[index],
+            separatorBuilder: (BuildContext context, int index) => const Divider(indent: 16, height: 8, thickness: 1),
+            itemCount: tiles.length,
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }

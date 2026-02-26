@@ -56,42 +56,40 @@ class MoonScreen extends StatelessWidget {
               ),
             ],
           ),
-          body: SafeArea(
-            child: FutureBuilder(
-              future: vm.initFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else {
-                  return Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Container(
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                        padding: const EdgeInsets.all(0),
-                        child: AspectRatio(
-                          aspectRatio: 1.5,
-                          child: Consumer<MoonViewModel>(builder: (context, vm, _) => buildGraph(context, vm)),
-                        ),
+          body: FutureBuilder(
+            future: vm.initFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else {
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Container(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      padding: const EdgeInsets.all(0),
+                      child: AspectRatio(
+                        aspectRatio: 1.5,
+                        child: Consumer<MoonViewModel>(builder: (context, vm, _) => buildGraph(context, vm)),
                       ),
-                      const SizedBox(height: 24),
-                      Expanded(
-                        child: Consumer<MoonViewModel>(
-                          builder: (context, vm, _) => ScreenTopRoundedContainer(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                            child: SingleChildScrollView(
-                              child: BrightnessSliderList(vm.editor, disabled: !vm.enabled || !vm.canEdit),
-                            ),
+                    ),
+                    const SizedBox(height: 24),
+                    Expanded(
+                      child: Consumer<MoonViewModel>(
+                        builder: (context, vm, _) => ScreenTopRoundedContainer(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          child: SingleChildScrollView(
+                            child: BrightnessSliderList(vm.editor, disabled: !vm.enabled || !vm.canEdit),
                           ),
                         ),
                       ),
-                    ],
-                  );
-                }
-              },
-            ),
+                    ),
+                  ],
+                );
+              }
+            },
           ),
         );
       },

@@ -12,9 +12,7 @@ class GenericSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(title), actions: appBarActions, elevation: 1),
-      body: SafeArea(
-        child: ListView.builder(itemCount: children.length, itemBuilder: (context, index) => children[index]),
-      ),
+      body: ListView.builder(itemCount: children.length, itemBuilder: (context, index) => children[index]),
     );
   }
 }

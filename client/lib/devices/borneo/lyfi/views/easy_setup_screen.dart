@@ -56,9 +56,7 @@ class EasySetupScreen extends StatelessWidget {
               ),
             ],
           ),
-          body: SafeArea(
-            child: Container(color: Theme.of(context).colorScheme.surface, child: child),
-          ),
+          body: Container(color: Theme.of(context).colorScheme.surface, child: child),
         );
       },
       child: buildBody(context),
