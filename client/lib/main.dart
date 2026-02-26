@@ -256,7 +256,6 @@ class _AspectRatioEnforcer with WidgetsBindingObserver {
   Future<void> _enforce() async {
     final info = await getWindowInfo();
     final frame = info.frame;
-    if (frame == null) return;
 
     final currentRatio = frame.width / frame.height;
     if ((currentRatio - aspectRatio).abs() < 0.005) return; // already close
