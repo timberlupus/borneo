@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:logger/logger.dart';
 import 'package:cancellation_token/cancellation_token.dart';
+import 'package:meta/meta.dart';
 
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
@@ -364,6 +365,12 @@ final class DefaultKernel implements IKernel {
   // helper moved to HeartbeatService
 
   // full heartbeat polling and observation logic moved into service
+
+  /// Exposed for testing so we can drive the heartbeat service without
+  /// relying on a real timer.  The implementation simply forwards to the
+  /// private `_onHeartbeatTick` method.
+  @visibleForTesting
+  Future<void> runHeartbeatTick() => _onHeartbeatTick();
 
   void _ensureStarted() {
     if (_isInitialized == false) {

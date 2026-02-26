@@ -13,8 +13,11 @@ import 'mocks.dart';
 // binding engine used by race test; removing the device during tryBind triggers
 // the earlier ConcurrentModificationError in the kernel's heartbeat logic.
 class RaceBindingEngine extends MockBindingEngine {
-  final DefaultKernel kernel;
-  RaceBindingEngine(this.kernel);
+  // kernel instance is assigned after creation because we need to pass the
+  // engine itself into the kernel constructor.
+  late DefaultKernel kernel;
+
+  RaceBindingEngine();
 
   @override
   Future<bool> tryBind(Device device, String driverID, {CancellationToken? cancelToken}) async {
@@ -210,13 +213,15 @@ void main() {
       test('heartbeat tick tolerates concurrent modification', () async {
         await kernel.start();
 
-        final raceEngine = RaceBindingEngine(kernel);
+        final raceEngine = RaceBindingEngine();
         final k2 = DefaultKernel(
           mockLogger,
           mockDriverRegistry,
           mdnsProvider: mockMdnsProvider,
           bindingEngine: raceEngine,
         );
+        // now that k2 exists we can link the engine back to it
+        raceEngine.kernel = k2;
         await k2.start();
 
         final device = TestDevice('d1', 'http://1');
@@ -224,7 +229,7 @@ void main() {
 
         // invoke the private tick via `dynamic` to mimic the timer; the
         // important part is that it does not throw.
-        expect(() async => await (k2 as dynamic)._onHeartbeatTick(), returnsNormally);
+        expect(() async => await k2.runHeartbeatTick(), returnsNormally);
 
         // after the tick the device should indeed have been unregistered
         expect(() => k2.getBoundDevice('d1'), throwsA(isA<ArgumentError>()));

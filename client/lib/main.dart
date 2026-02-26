@@ -11,6 +11,9 @@ import 'package:borneo_app/core/services/devices/static_modular_driver_registry.
 import 'package:borneo_kernel/kernel.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:flutter/material.dart';
+import 'package:screen_corner_radius/screen_corner_radius.dart';
+
+import 'core/models/platform_device_info.dart';
 import 'package:flutter/services.dart';
 // import 'package:flutter_gettext/gettext/gettext.dart';
 import 'package:logger/logger.dart';
@@ -62,6 +65,10 @@ Future<Widget> buildAppWidget({
   EventBus? eventBus,
   IDeviceModuleRegistry? deviceModuleRegistry,
   IMdnsProvider? mdnsProvider,
+
+  /// Optional override of the screen radius, used by tests or fallback
+  /// environments.  If `null` the real plugin result is fetched.
+  ScreenRadius? screenRadiusOverride,
 }) async {
   final db = database ?? await openDatabase();
   final prefs = sharedPreferences ?? await SharedPreferences.getInstance();
@@ -72,6 +79,20 @@ Future<Widget> buildAppWidget({
   // first frame uses the correct locale instead of the system locale.
   final localeStr = prefs.getString('app.locale');
   final initialLocale = localeStr != null ? LanguageConfig.languageCodeToLocale(localeStr) : null;
+
+  // determine platform device info before constructing providers
+  ScreenRadius screenRadius;
+  if (screenRadiusOverride != null) {
+    screenRadius = screenRadiusOverride;
+  } else {
+    try {
+      screenRadius = (await ScreenCornerRadius.get()) ?? ScreenRadius.value(0);
+    } catch (_) {
+      // plugin failed (tests, desktop, etc.) – fall back to 0
+      screenRadius = ScreenRadius.value(0);
+    }
+  }
+  final platformInfo = PlatformDeviceInfo(screenCornerRadius: screenRadius);
 
   final List<SingleChildWidget> providers = [
     // Logger
@@ -132,6 +153,9 @@ Future<Widget> buildAppWidget({
 
     // PlatformService (used by various components to make platform checks testable)
     provider.Provider<PlatformService>(create: (_) => PlatformServiceImpl(), lazy: false),
+
+    // device-specific information (corner radii, etc.)
+    provider.Provider<PlatformDeviceInfo>(create: (_) => platformInfo, lazy: false),
 
     // EventBus
     provider.Provider<EventBus>(create: (_) => bus, lazy: false),
