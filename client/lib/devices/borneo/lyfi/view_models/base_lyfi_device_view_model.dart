@@ -36,18 +36,24 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   void _subscribeToLyfiThing() {
     _stateSubscription =
         lyfiThing.findProperty('state')?.value.onUpdate.listen((stateName) {
-              notifyListeners();
+              if (!isDisposed) {
+                notifyListeners();
+              }
             })
             as StreamSubscription<String>?;
     _modeSubscription =
         lyfiThing.findProperty('mode')?.value.onUpdate.listen((modeName) {
-              notifyListeners();
+              if (!isDisposed) {
+                notifyListeners();
+              }
             })
             as StreamSubscription<String>?;
 
     _statusSubscription =
         lyfiThing.findProperty('lyfiStatus')?.value.onUpdate.listen((status) {
-              notifyListeners();
+              if (!isDisposed) {
+                notifyListeners();
+              }
             })
             as StreamSubscription<LyfiDeviceStatus>?;
   }
