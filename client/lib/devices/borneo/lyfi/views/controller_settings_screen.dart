@@ -3,11 +3,12 @@ import 'package:borneo_app/shared/widgets/bottom_sheet_picker.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import 'package:provider/provider.dart';
-import 'package:toastification/toastification.dart';
+
+import 'package:borneo_app/devices/borneo/lyfi/views/dimmer_channel_view.dart';
+import 'package:borneo_app/devices/borneo/lyfi/view_models/channel_settings_view_model.dart';
 
 class ControllerSettingsScreen extends StatefulWidget {
   final ControllerSettingsViewModel vm;
@@ -20,7 +21,7 @@ class ControllerSettingsScreen extends StatefulWidget {
 class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
   late Future<void> _initFuture;
   late final TextEditingController _overpowerCutoffController;
-  final List<TextEditingController> _channelNameControllers = [];
+  // channel editing is now delegated to a separate screen; controllers are unused
 
   @override
   void initState() {
@@ -32,9 +33,6 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
   @override
   void dispose() {
     _overpowerCutoffController.dispose();
-    for (final c in _channelNameControllers) {
-      c.dispose();
-    }
     super.dispose();
   }
 
@@ -126,45 +124,23 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
                 ),
               ),
 
-            ...List<CustomSettingsTile>.generate(widget.vm.channels.length, (index) {
-              final channel = widget.vm.channels[index];
-              final name = channel.name;
-              final colorStr = channel.color;
-              if (_channelNameControllers.length <= index) {
-                _channelNameControllers.add(TextEditingController(text: name));
-              } else {
-                final c = _channelNameControllers[index];
-                if (c.text != name) c.text = name;
-              }
-
-              return CustomSettingsTile(
-                child: ListTile(
-                  dense: true,
-                  tileColor: tileColor,
-                  leading: Icon(Icons.circle, color: _parseHexColor(colorStr)),
-                  title: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _channelNameControllers[index],
-                          decoration: InputDecoration(
-                            isDense: true,
-                            labelText: context.translate('Name'),
-                            hintText: context.translate('1-15 characters'),
-                          ),
-                          inputFormatters: [LengthLimitingTextInputFormatter(15)],
-                          onChanged: channel.setName,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      IconButton.outlined(
-                        icon: const Icon(Icons.palette_outlined),
-                        tooltip: context.translate('Pick color'),
-                        onPressed: () => _openColorPicker(channel),
-                      ),
-                    ],
+            ...List<SettingsTile>.generate(widget.vm.channels.length, (index) {
+              final ch = widget.vm.channels[index];
+              return SettingsTile.navigation(
+                leading: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _parseHexColor(ch.color),
+                    border: Border.all(color: Theme.of(context).colorScheme.surfaceDim, width: 1.5),
                   ),
                 ),
+                title: Text(
+                  ch.name,
+                  style: ch.nameValid ? null : TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+                onPressed: (bc) => _editChannel(bc, index),
               );
             }),
           ],
@@ -224,35 +200,22 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
                     ),
                   ),
                 ),
+
               if (widget.vm.overtempEnabled.available)
-                CustomSettingsTile(
-                  child: Selector<ControllerSettingsViewModel, bool>(
-                    selector: (context, vm) => vm.overtempEnabled.value,
-                    builder: (context, enabled, child) => SwitchListTile.adaptive(
-                      dense: true,
-                      tileColor: tileColor,
-                      title: Text(context.translate("Overtemperature enabled")),
-                      value: enabled,
-                      onChanged: (bool value) =>
-                          context.read<ControllerSettingsViewModel>().overtempEnabled.setValue(value),
-                    ),
-                  ),
+                SettingsTile.switchTile(
+                  initialValue: widget.vm.overtempEnabled.value,
+                  onToggle: (bool value) => context.read<ControllerSettingsViewModel>().overtempEnabled.setValue(value),
+                  title: Text(context.translate("Overtemperature enabled")),
                 ),
+
               if (widget.vm.overtempCutoff.available)
-                CustomSettingsTile(
-                  child: Selector<ControllerSettingsViewModel, int?>(
+                SettingsTile.navigation(
+                  title: Text(context.translate('Overtemperature cut-off')),
+                  value: Selector<ControllerSettingsViewModel, int?>(
                     selector: (context, vm) => vm.overtempCutoff.value,
-                    builder: (context, cutoff, child) => ListTile(
-                      dense: true,
-                      tileColor: tileColor,
-                      title: Text(context.translate('Overtemperature cut-off')),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [Text('$cutoff ℃'), const SizedBox(width: 8), const Icon(Icons.chevron_right)],
-                      ),
-                      onTap: () => _showOvertempCutoffPicker(context),
-                    ),
+                    builder: (context, cutoff, child) => Text('$cutoff ℃'),
                   ),
+                  onPressed: (bc) => _showOvertempCutoffPicker(bc),
                 ),
             ],
           ),
@@ -328,41 +291,16 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
     return Theme.of(context).colorScheme.primary;
   }
 
-  void _openColorPicker(ChannelSettingsEntry channel) {
-    final initialColor = _parseHexColor(channel.color);
-
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        Color selected = initialColor;
-        return AlertDialog(
-          title: Text(context.translate('Pick color')),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              hexInputBar: true,
-              enableAlpha: false,
-              pickerColor: initialColor,
-              onColorChanged: (c) => selected = c,
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(context.translate('Cancel'))),
-            TextButton(
-              onPressed: () {
-                _setChannelColorFromPicker(channel, selected);
-                Navigator.of(ctx).pop();
-              },
-              child: Text(context.translate('Apply')),
-            ),
-          ],
-        );
-      },
+  void _editChannel(BuildContext context, int index) {
+    final vm = ChannelSettingsViewModel(
+      index: index,
+      readName: widget.vm.getChannelName,
+      readColor: widget.vm.getChannelColor,
+      writeName: widget.vm.setChannelName,
+      writeColor: widget.vm.setChannelColor,
     );
-  }
-
-  void _setChannelColorFromPicker(ChannelSettingsEntry channel, Color color) {
-    final hex = _colorToHex(color);
-    channel.setColor(hex);
+    final route = MaterialPageRoute(builder: (ctx) => DimmerChannelView(vm: vm));
+    Navigator.push(context, route);
   }
 
   void _showChannelCountPicker(BuildContext context) {
@@ -437,12 +375,5 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
         widget.vm.overtempCutoff.setValue(selectedOption['value'] as int);
       },
     );
-  }
-
-  String _colorToHex(Color color) {
-    final r = color.intRed.toRadixString(16).padLeft(2, '0');
-    final g = color.intGreen.toRadixString(16).padLeft(2, '0');
-    final b = color.intBlue.toRadixString(16).padLeft(2, '0');
-    return '#$r$g$b'.toUpperCase();
   }
 }

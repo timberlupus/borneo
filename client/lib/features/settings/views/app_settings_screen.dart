@@ -66,7 +66,7 @@ class AppSettingsScreen extends StatelessWidget {
           SettingsTile.navigation(
             leading: const Icon(Icons.settings_brightness_outlined),
             title: Text(context.translate('Theme')),
-            trailing: Selector<AppSettingsViewModel, ThemeMode>(
+            value: Selector<AppSettingsViewModel, ThemeMode>(
               selector: (_, vm) => vm.themeMode,
               builder: (context, themeMode, _) => Text(switch (themeMode) {
                 ThemeMode.system => context.translate('System'),
@@ -91,7 +91,7 @@ class AppSettingsScreen extends StatelessWidget {
           SettingsTile.navigation(
             leading: Icon(Icons.language_outlined),
             title: Text(context.translate('Language')),
-            trailing: Selector<AppSettingsViewModel, Locale?>(
+            value: Selector<AppSettingsViewModel, Locale?>(
               selector: (_, vm) => vm.locale,
               builder: (context, locale, _) {
                 final display = LanguageConfig.getLocaleDisplayName(locale ?? const Locale('en', 'US'));
@@ -120,7 +120,7 @@ class AppSettingsScreen extends StatelessWidget {
           SettingsTile.navigation(
             leading: Icon(Icons.thermostat_outlined),
             title: Text(context.translate('Temperature Unit')),
-            trailing: Selector<AppSettingsViewModel, String>(
+            value: Selector<AppSettingsViewModel, String>(
               selector: (_, vm) => vm.temperatureUnit,
               builder: (context, unit, _) => Text(switch (unit) {
                 'C' => context.translate('℃'),

@@ -139,7 +139,8 @@ class GenericBottomSheetPicker<T> extends StatelessWidget {
                   clipBehavior: Clip.hardEdge,
                   padding: EdgeInsets.zero,
                   itemCount: entries.length,
-                  separatorBuilder: (context, index) => Divider(height: 1, indent: 20, endIndent: 20),
+                  separatorBuilder: (context, index) =>
+                      Divider(height: 1, indent: 20, endIndent: 20, color: Theme.of(context).colorScheme.surfaceDim),
                   itemBuilder: (context, index) {
                     final entry = entries[index];
                     final isSelected = entry.value == effective;
