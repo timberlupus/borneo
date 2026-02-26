@@ -12,7 +12,7 @@ class MoonRunningChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
       child: LyfiTimeLineChart(
         lineBarsData: buildLineData(kLyfiBrightnessMax.toDouble()),
