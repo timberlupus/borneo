@@ -1,6 +1,8 @@
+import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
+import 'package:logger/web.dart';
 import 'package:provider/provider.dart';
 import '../../view_models/lyfi_view_model.dart';
 import '../settings_screen.dart';
@@ -32,16 +34,7 @@ class DashboardSettingsTile extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
-                onTap: isDisabled
-                    ? null
-                    : () async {
-                        final lyfi = context.read<LyfiViewModel>();
-                        final vm = await lyfi.loadSettings(gt);
-                        final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
-                        if (context.mounted) {
-                          Navigator.push(context, route);
-                        }
-                      },
+                onTap: isDisabled ? null : () => _openSettings(context, gt),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
@@ -70,5 +63,21 @@ class DashboardSettingsTile extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _openSettings(BuildContext context, GettextLocalizations gt) async {
+    final lyfiVM = context.read<LyfiViewModel>();
+    try {
+      final vm = await lyfiVM.loadSettings(gt);
+      final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
+      if (context.mounted) {
+        Navigator.push(context, route);
+      }
+    } catch (e, st) {
+      if (context.mounted) {
+        context.read<IAppNotificationService>().showError(context.translate('Error'), body: e.toString());
+        context.read<Logger?>()?.e('Failed to open settings', error: e, stackTrace: st);
+      }
+    }
   }
 }
