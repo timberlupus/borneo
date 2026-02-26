@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:borneo_app/features/devices/view_models/device_discovery_view_model.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
@@ -226,6 +227,32 @@ void main() {
         requestBlePermissions: permissions ?? () async => false,
       );
     }
+
+    test('blePermissionList returns Android permissions on Android', () {
+      vm = makeVm(mobile: true);
+      final perms = vm.blePermissionList();
+      expect(perms, containsAll([Permission.locationWhenInUse, Permission.bluetoothScan, Permission.bluetoothConnect]));
+      expect(perms.length, 3);
+    });
+
+    test('blePermissionList returns iOS permissions on iOS', () {
+      // manual iOS platform service, bypassing makeVm helper
+      bleProv = FakeBleProvisioner();
+      vm = DeviceDiscoveryViewModel(
+        Logger(),
+        FakeDeviceManager(),
+        bleProv,
+        FakeDeviceModuleRegistry(),
+        FakePlatformService(isIOS: true),
+        globalEventBus: EventBus(),
+        gt: FakeGettext(),
+        logger: Logger(),
+        requestBlePermissions: () async => true,
+      );
+      final perms = vm.blePermissionList();
+      expect(perms, containsAll([Permission.bluetooth, Permission.locationWhenInUse]));
+      expect(perms.length, 2);
+    });
 
     test('startDiscovery does not call BLE scan when permissions denied', () async {
       vm = makeVm(mobile: true, permissions: () async => false);

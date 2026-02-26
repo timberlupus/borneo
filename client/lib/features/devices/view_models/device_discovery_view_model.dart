@@ -202,17 +202,31 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   /// public so that tests can supply a fake implementation.
   Future<bool> Function()? requestBlePermissions;
 
+  @visibleForTesting
+  List<Permission> blePermissionList() {
+    // iOS only has a single Bluetooth permission; Android requires location +
+    // separate scan/connect permissions.  The list is kept in a method so tests
+    // can verify the behaviour without mocking the plugin itself.
+    if (_platformService.isIOS) {
+      return [
+        Permission.bluetooth,
+        // location may also be required when scanning on iOS
+        Permission.locationWhenInUse,
+      ];
+    } else {
+      return [Permission.locationWhenInUse, Permission.bluetoothScan, Permission.bluetoothConnect];
+    }
+  }
+
   Future<bool> _ensureBlePermissions() async {
     // allow injection for tests
     if (requestBlePermissions != null) {
       return await requestBlePermissions!();
     }
 
-    final statuses = await [
-      Permission.locationWhenInUse,
-      Permission.bluetoothScan,
-      Permission.bluetoothConnect,
-    ].request();
+    final permissions = blePermissionList();
+    final statuses = await permissions.request();
+    _logger.d('BLE permission statuses: $statuses');
 
     // if any permission is not granted, treat as failure
     for (var status in statuses.values) {
