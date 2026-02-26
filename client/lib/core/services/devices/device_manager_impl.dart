@@ -20,7 +20,6 @@ import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
-import 'package:borneo_common/io/net/network_interface_helper.dart';
 
 final class DeviceManagerImpl extends IDeviceManager {
   final Logger? logger;
@@ -297,9 +296,6 @@ final class DeviceManagerImpl extends IDeviceManager {
     assert(isInitialized);
     final store = stringMapStoreFactory.store(StoreNames.devices);
 
-    final networkInterface = await NetworkInterfaceHelper.inferNetworkInterface(discovered.address.host);
-    logger?.d('Inferred network interface for new device ${discovered.fingerprint}: $networkInterface');
-
     final device = DeviceEntity(
       id: BaseEntity.generateID(),
       sceneID: _sceneManager.current.id,
@@ -358,9 +354,6 @@ final class DeviceManagerImpl extends IDeviceManager {
   Future<void> _onUnboundDeviceDiscovered(UnboundDeviceDiscoveredEvent event) async {
     logger?.i('Device discovered: ${event.matched}');
     assert(isInitialized);
-
-    final networkInterface = await NetworkInterfaceHelper.inferNetworkInterface(event.matched.address.host);
-    logger?.d('Inferred network interface for device ${event.matched.fingerprint}: $networkInterface');
 
     return await _db.transaction((tx) async {
       final existed = await singleOrDefaultByFingerprint(event.matched.fingerprint, tx: tx);

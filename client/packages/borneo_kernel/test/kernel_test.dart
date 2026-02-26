@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:borneo_kernel/kernel.dart';
+import 'package:borneo_kernel_abstractions/device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_kernel_abstractions/event_dispatcher.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
@@ -8,6 +9,21 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:test/test.dart';
 
 import 'mocks.dart';
+
+// binding engine used by race test; removing the device during tryBind triggers
+// the earlier ConcurrentModificationError in the kernel's heartbeat logic.
+class RaceBindingEngine extends MockBindingEngine {
+  final DefaultKernel kernel;
+  RaceBindingEngine(this.kernel);
+
+  @override
+  Future<bool> tryBind(Device device, String driverID, {CancellationToken? cancelToken}) async {
+    // unregister the device *before* doing any async work so the heartbeat
+    // snapshot sees the removal happen mid-iteration.
+    kernel.unregisterDevice(device.id);
+    return super.tryBind(device, driverID, cancelToken: cancelToken);
+  }
+}
 
 void main() {
   group('DefaultKernel', () {
@@ -185,6 +201,33 @@ void main() {
         final f1 = kernel.bind(deviceA, 'test-driver');
         final f2 = kernel.bind(deviceB, 'test-driver');
         await Future.wait([f1, f2]);
+      });
+
+      // simulate the ConcurrentModificationError that was previously observed
+      // when a device was removed from the registered list while the heartbeat
+      // tick was iterating.  the race engine unregisters during tryBind to
+      // force the condition.
+      test('heartbeat tick tolerates concurrent modification', () async {
+        await kernel.start();
+
+        final raceEngine = RaceBindingEngine(kernel);
+        final k2 = DefaultKernel(
+          mockLogger,
+          mockDriverRegistry,
+          mdnsProvider: mockMdnsProvider,
+          bindingEngine: raceEngine,
+        );
+        await k2.start();
+
+        final device = TestDevice('d1', 'http://1');
+        k2.registerDevice(BoundDeviceDescriptor(device: device, driverID: 'test-driver'));
+
+        // invoke the private tick via `dynamic` to mimic the timer; the
+        // important part is that it does not throw.
+        expect(() async => await (k2 as dynamic)._onHeartbeatTick(), returnsNormally);
+
+        // after the tick the device should indeed have been unregistered
+        expect(() => k2.getBoundDevice('d1'), throwsA(isA<ArgumentError>()));
       });
     });
 

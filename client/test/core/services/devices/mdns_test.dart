@@ -1,6 +1,5 @@
 import 'dart:io';
 
-
 import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_app/core/services/devices/mdns.dart';
