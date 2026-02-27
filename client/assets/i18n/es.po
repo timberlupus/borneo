@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-27 00:26+0800\n"
+"POT-Creation-Date: 2026-02-28 02:29+0800\n"
 "PO-Revision-Date: 2026-01-03 14:43+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -173,8 +173,7 @@ msgid "Acclimation"
 msgstr "Aclimatación"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:55
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:84
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:340
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:85
 #: devices\borneo\lyfi\views\easy_setup_screen.dart:51
 #: devices\borneo\lyfi\views\moon_screen.dart:54
 #: shared\widgets\map_location_picker.dart:145
@@ -217,74 +216,58 @@ msgstr "Seleccionar fuerza inicial"
 msgid "Update acclimation settings succeed."
 msgstr "Configuración de aclimatación actualizada exitosamente."
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:48
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:55
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:64
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:46
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:53
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:63
 #: devices\borneo\lyfi\views\settings_screen.dart:110
 msgid "Controller Settings"
 msgstr "Configuración del Controlador"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:56
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:54
 msgid "Initialization failed"
 msgstr "Inicialización fallida"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:95
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:96
 msgid "LED CONFIGURATION"
 msgstr "CONFIGURACIÓN LED"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:103
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:100
 msgid "PWM frequency"
 msgstr "Frecuencia PWM"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:115
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:111
 msgid "LED CHANNELS"
 msgstr "CANALES LED"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:123
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:115
 msgid "Enabled channel count"
 msgstr "Número de canales habilitados"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:153
-#: devices\borneo\lyfi\views\settings_screen.dart:86
-#: features\devices\views\group_edit_screen.dart:47
-#: features\scenes\views\scene_edit_screen.dart:122
-msgid "Name"
-msgstr "Nombre"
-
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:154
-msgid "1-15 characters"
-msgstr "1-15 caracteres"
-
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:163
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:324
-msgid "Pick color"
-msgstr "Elegir color"
-
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:175
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:151
 msgid "POWER & PROTECTION"
 msgstr "ENERGÍA Y PROTECCIÓN"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:183
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:158
 msgid "Overpower enabled"
 msgstr "Sobrepotencia habilitada"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:192
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:162
 msgid "Overpower cut-off"
 msgstr "Corte por sobrepotencia"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:224
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:193
 msgid "Overtemperature enabled"
 msgstr "Sobretemperatura habilitada"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:235
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:198
 msgid "Overtemperature cut-off"
 msgstr "Corte por sobretemperatura"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:279
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:242
 msgid "Confirm Submit"
 msgstr "Confirmar Envío"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:282
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:245
 msgid ""
 "Please carefully check the configuration. Incorrect configuration may cause "
 "hardware damage or other dangerous situations. Submitting will reboot the "
@@ -296,8 +279,7 @@ msgstr ""
 "envío reiniciará el dispositivo.\n"
 "¿Desea continuar?"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:286
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:334
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:249
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:278
 #: devices\borneo\lyfi\views\settings_screen.dart:282
 #: devices\borneo\lyfi\views\settings_screen.dart:345
@@ -309,20 +291,20 @@ msgstr ""
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:297
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:260
 #: devices\borneo\lyfi\views\editor\schedule_editor_view.dart:284
 msgid "Confirm"
 msgstr "Confirmar"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:359
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:297
 msgid "Select channel count"
 msgstr "Seleccionar número de canales"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:393
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:331
 msgid "Select PWM frequency"
 msgstr "Seleccionar frecuencia PWM"
 
-#: devices\borneo\lyfi\views\controller_settings_screen.dart:417
+#: devices\borneo\lyfi\views\controller_settings_screen.dart:355
 msgid "Select overtemperature cut-off"
 msgstr "Seleccionar corte por sobretemperatura"
 
@@ -415,11 +397,15 @@ msgstr "Durante el día"
 msgid "LED Power"
 msgstr "Potencia LED"
 
-#: devices\borneo\lyfi\views\dashboard\dashboard_settings_tile.dart:58
+#: devices\borneo\lyfi\views\dashboard\dashboard_settings_tile.dart:51
 #: devices\borneo\lyfi\views\settings_screen.dart:29
 #: features\my\views\my_screen.dart:26
 msgid "Settings"
 msgstr "Configuración"
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_settings_tile.dart:78
+msgid "Error"
+msgstr ""
 
 #: devices\borneo\lyfi\views\dashboard\dashboard_temperature_tile.dart:42
 msgid "Temperature & Fan"
@@ -428,6 +414,34 @@ msgstr "Temperatura y Ventilador"
 #: devices\borneo\lyfi\views\dashboard\dashboard_temporary_tile.dart:109
 msgid "Temporary"
 msgstr "Temporal"
+
+#: devices\borneo\lyfi\views\dimmer_channel_view.dart:22
+msgid "Channel Settings"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dimmer_channel_view.dart:31
+#: shared\widgets\generic_settings_screen.dart:57
+msgid "Save"
+msgstr "Guardar"
+
+#: devices\borneo\lyfi\views\dimmer_channel_view.dart:44
+#: devices\borneo\lyfi\views\settings_screen.dart:86
+#: features\devices\views\group_edit_screen.dart:47
+#: features\scenes\views\scene_edit_screen.dart:122
+msgid "Name"
+msgstr "Nombre"
+
+#: devices\borneo\lyfi\views\dimmer_channel_view.dart:45
+msgid "1-15 characters"
+msgstr "1-15 caracteres"
+
+#: devices\borneo\lyfi\views\dimmer_channel_view.dart:46
+msgid "Invalid name"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dimmer_channel_view.dart:51
+msgid "Color"
+msgstr ""
 
 #: devices\borneo\lyfi\views\dimming_screen.dart:147
 #: main\views\main_screen.dart:310
@@ -814,8 +828,8 @@ msgstr ""
 
 #: devices\views\device_offline_view.dart:36
 #: features\devices\views\device_discovery_screen.dart:123
-#: features\devices\views\provisioning_progress_screen.dart:107
-#: features\devices\views\provisioning_screen.dart:488
+#: features\devices\views\provisioning_progress_screen.dart:108
+#: features\devices\views\provisioning_screen.dart:514
 msgid "Close"
 msgstr "Cerrar"
 
@@ -837,7 +851,7 @@ msgstr "Error al cargar tareas"
 
 #: features\chores\views\chore_list.dart:70
 #: features\chores\views\chore_list.dart:137
-#: features\devices\views\provisioning_screen.dart:493
+#: features\devices\views\provisioning_screen.dart:519
 #: features\scenes\views\scenes_screen.dart:46
 #: features\scenes\views\scenes_screen.dart:91
 msgid "Retry"
@@ -851,20 +865,20 @@ msgstr "Sin tareas"
 msgid "No chores available for devices in the current scene."
 msgstr "No hay tareas disponibles para los dispositivos en la escena actual."
 
-#: features\devices\view_models\device_discovery_view_model.dart:180
-#: features\devices\view_models\device_discovery_view_model.dart:195
-#: features\devices\view_models\device_discovery_view_model.dart:262
+#: features\devices\view_models\device_discovery_view_model.dart:220
+#: features\devices\view_models\device_discovery_view_model.dart:235
+#: features\devices\view_models\device_discovery_view_model.dart:321
 msgid "Bluetooth scan error, please check if Bluetooth device is enabled."
 msgstr ""
 "Error de escaneo Bluetooth, por favor compruebe si el dispositivo Bluetooth "
 "está habilitado."
 
-#: features\devices\view_models\device_discovery_view_model.dart:244
-#: features\devices\view_models\device_discovery_view_model.dart:260
+#: features\devices\view_models\device_discovery_view_model.dart:284
+#: features\devices\view_models\device_discovery_view_model.dart:319
 msgid "Bluetooth permissions are required to discover devices."
 msgstr "Se requieren permisos de Bluetooth para descubrir dispositivos."
 
-#: features\devices\view_models\provisioning_wizard_view_model.dart:55
+#: features\devices\view_models\provisioning_wizard_view_model.dart:85
 #: features\devices\view_models\wifi_selection_view_model.dart:46
 msgid "The WiFi scanning has been cancelled."
 msgstr "El escaneo de WiFi ha sido cancelado."
@@ -912,7 +926,7 @@ msgid "Add Device"
 msgstr "Agregar Dispositivo"
 
 #: features\devices\views\device_discovery_screen.dart:79
-#: features\devices\views\provisioning_screen.dart:247
+#: features\devices\views\provisioning_screen.dart:251
 msgid "Refresh"
 msgstr "Actualizar"
 
@@ -937,7 +951,7 @@ msgstr "Quedan {0} segundos"
 
 #: features\devices\views\device_discovery_screen.dart:203
 #: features\devices\views\provisioning_progress_screen.dart:41
-#: features\devices\views\provisioning_screen.dart:68
+#: features\devices\views\provisioning_screen.dart:72
 msgid "Stop"
 msgstr "Detener"
 
@@ -945,7 +959,7 @@ msgstr "Detener"
 msgid "Detected on network"
 msgstr "Detectado en la red"
 
-#: features\devices\views\device_discovery_screen.dart:262
+#: features\devices\views\device_discovery_screen.dart:263
 msgid "Ready to provision"
 msgstr "Listo para aprovisionar"
 
@@ -1040,45 +1054,58 @@ msgstr "Editar Grupo de Dispositivo"
 msgid "Provisioning"
 msgstr "Aprovisionamiento"
 
-#: features\devices\views\provisioning_progress_screen.dart:73
-#: features\devices\views\provisioning_screen.dart:464
+#: features\devices\views\provisioning_progress_screen.dart:74
+#: features\devices\views\provisioning_screen.dart:474
 msgid "Provisioning Successful!"
 msgstr "¡Aprovisionamiento exitoso!"
 
-#: features\devices\views\provisioning_progress_screen.dart:101
-#: features\devices\views\provisioning_screen.dart:465
+#: features\devices\views\provisioning_progress_screen.dart:102
+#: features\devices\views\provisioning_screen.dart:475
 msgid "Unknown Error"
 msgstr "Error desconocido"
 
-#: features\devices\views\provisioning_screen.dart:60
+#: features\devices\views\provisioning_screen.dart:64
 msgid "Device Setup"
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:241
+#: features\devices\views\provisioning_screen.dart:245
 #: features\devices\views\wifi_selection_screen.dart:54
 msgid "No WiFi networks found"
 msgstr "No se encontraron redes WiFi"
 
-#: features\devices\views\provisioning_screen.dart:324
+#: features\devices\views\provisioning_screen.dart:329
 #: features\devices\views\wifi_selection_screen.dart:95
 msgid "Password"
 msgstr "Contraseña"
 
-#: features\devices\views\provisioning_screen.dart:338
+#: features\devices\views\provisioning_screen.dart:343
 msgid "Back"
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:342
+#: features\devices\views\provisioning_screen.dart:347
 #: features\devices\views\wifi_selection_screen.dart:118
 msgid "Provision"
 msgstr "Aprovisionar"
 
-#: features\devices\views\provisioning_screen.dart:475
+#: features\devices\views\provisioning_screen.dart:390
+#, python-brace-format
+msgid "Time remaining: {0} seconds"
+msgstr ""
+
+#: features\devices\views\provisioning_screen.dart:391
+msgid "Waiting for device to join network"
+msgstr ""
+
+#: features\devices\views\provisioning_screen.dart:487
+msgid "Adding device to your list..."
+msgstr ""
+
+#: features\devices\views\provisioning_screen.dart:501
 msgid "Done"
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:480
-msgid "Returning automatically..."
+#: features\devices\views\provisioning_screen.dart:506
+msgid "You can finish now without waiting."
 msgstr ""
 
 #: features\devices\views\wifi_selection_screen.dart:42
@@ -1305,10 +1332,6 @@ msgstr "Aceptar"
 msgid "Device offline"
 msgstr "Dispositivo fuera de línea"
 
-#: shared\widgets\generic_settings_screen.dart:57
-msgid "Save"
-msgstr "Guardar"
-
 #: shared\widgets\map_location_picker.dart:139
 msgid "Select Location"
 msgstr "Seleccionar Ubicación"
@@ -1320,6 +1343,9 @@ msgstr "Ubicación actual"
 #: shared\widgets\map_location_picker.dart:220
 msgid "Tap globe to select location"
 msgstr "Toque el globo para seleccionar la ubicación"
+
+#~ msgid "Pick color"
+#~ msgstr "Elegir color"
 
 #~ msgid "Null"
 #~ msgstr "Nulo"

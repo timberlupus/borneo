@@ -1,7 +1,9 @@
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
+import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/features/devices/models/ble_provision_state.dart';
 import 'package:borneo_app/features/devices/view_models/provisioning_wizard_view_model.dart';
+import 'package:borneo_app/routes/app_routes.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
@@ -29,6 +31,7 @@ class ProvisioningScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => ProvisioningWizardViewModel(
         context.read<IBleProvisioner>(),
+        context.read<IDeviceManager>(),
         deviceName,
         globalEventBus: context.read<EventBus>(),
         gt: gt,
@@ -50,7 +53,8 @@ class _ProvisioningScreenBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<ProvisioningWizardViewModel>();
-    final provisioning = vm.step == ProvisioningWizardStep.provisioning;
+    // treat as "in progress" only while still within registration countdown
+    final provisioning = vm.step == ProvisioningWizardStep.provisioning && vm.registerRemainingSeconds > 0;
 
     return PopScope(
       // Block the system back gesture while provisioning is in progress.
@@ -320,6 +324,7 @@ class _EnterPasswordStepState extends State<_EnterPasswordStep> {
             autofocus: true,
             controller: _passwordController,
             obscureText: _obscure,
+            textInputAction: TextInputAction.go,
             decoration: InputDecoration(
               labelText: context.translate('Password'),
               border: const OutlineInputBorder(),
@@ -365,6 +370,7 @@ class _ProvisioningStep extends StatelessWidget {
   static const _progressSteps = [
     (BleProvisioningState.sendingCredentials, 'Sending Credentials'),
     (BleProvisioningState.connectingToWifi, 'Connecting to WiFi'),
+    (BleProvisioningState.registeringDevice, 'Registering Device'),
   ];
 
   @override
@@ -377,6 +383,15 @@ class _ProvisioningStep extends StatelessWidget {
           Icon(Icons.wifi_tethering_outlined, size: 96, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 32),
           ..._progressSteps.map((entry) => _buildProgressRow(context, entry.$1, entry.$2)),
+          if (vm.provisioningState == BleProvisioningState.registeringDevice) ...[
+            const SizedBox(height: 24),
+            Text(
+              vm.registerRemainingSeconds > 0
+                  ? context.translate('Time remaining: {0} seconds', pArgs: [vm.registerRemainingSeconds])
+                  : context.translate('Waiting for device to join network'),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
         ],
       ),
     );
@@ -431,20 +446,15 @@ class _DoneStep extends StatefulWidget {
 }
 
 class _DoneStepState extends State<_DoneStep> {
-  bool _autoPending = false;
-
   @override
   void initState() {
     super.initState();
-    if (widget.vm.provisioningSucceeded) {
-      _autoPending = true;
-      // Auto-return to device list after showing success for 2 s.
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          Navigator.of(context).pop({'refresh': true});
-        }
-      });
-    }
+    // all business logic lives in the ViewModel; nothing to subscribe here
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -468,17 +478,33 @@ class _DoneStepState extends State<_DoneStep> {
           ),
           const SizedBox(height: 32),
           if (succeeded) ...[
-            // Auto-pops, but also show a manual "Done" button.
+            if (!widget.vm.autoAdded) ...[
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: cs.primary)),
+                  const SizedBox(width: 12),
+                  Text(context.translate('Adding device to your list...')),
+                ],
+              ),
+              const SizedBox(height: 24),
+            ],
             FilledButton.icon(
-              onPressed: () => Navigator.of(context).pop({'refresh': true}),
+              onPressed: (widget.vm.autoAdded || widget.vm.registerRemainingSeconds <= 0)
+                  ? () {
+                      Navigator.of(
+                        context,
+                      ).popUntil((route) => route.settings.name == AppRoutes.kDevices || route.isFirst);
+                    }
+                  : null,
               icon: const Icon(Icons.check),
               label: Text(context.translate('Done')),
             ),
-            if (_autoPending) ...[
+            if (!widget.vm.autoAdded && widget.vm.registerRemainingSeconds <= 0) ...[
               const SizedBox(height: 12),
               Text(
-                context.translate('Returning automatically...'),
-                style: TextStyle(fontSize: 12, color: cs.onSurface.withValues(alpha: 0.55)),
+                context.translate('You can finish now without waiting.'),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
           ] else ...[

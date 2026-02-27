@@ -17,6 +17,11 @@ import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 
 const int kDiscoveryTimeoutSeconds = 10;
 
+/// When automatic post‑provisioning mode is enabled we keep the mDNS listener
+/// active for this many seconds in order to pick up the newly‑added device.
+/// 30 s should be plenty in almost all environments.
+const int kAutoAddTimeoutSeconds = 30;
+
 class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   bool _disposed = false;
   late CancellationToken _scanCancelToken = CancellationToken();
@@ -27,6 +32,14 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   final IBleProvisioner _bleProvisioner;
   final IDeviceModuleRegistry deviceMdoules;
   final PlatformService _platformService;
+
+  // cache BLE name -> resolved device name as obtained via fetchDeviceInfo
+  final Map<String, String> _resolvedDeviceNames = {};
+
+  // when true we will automatically add any provisioned device we see
+  // via mDNS (used after provisioning completes).
+  bool _autoAddWhenFound = false;
+  Timer? _autoAddTimer;
 
   bool get _isDiscovering => _deviceManager.isDiscoverying;
   bool _isRefreshing = false;
@@ -89,6 +102,8 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     if (!_disposed) {
       _countdownTimer?.cancel();
       _countdownTimer = null;
+      _autoAddTimer?.cancel();
+      _autoAddTimer = null;
       _deviceAddedEventSub.cancel();
       _newDeviceFoundEventSub.cancel();
       _discoverableDevices.dispose();
@@ -107,6 +122,12 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     _remainingSeconds = kDiscoveryTimeoutSeconds;
     _isRefreshing = false;
     _scanCancelToken.cancel();
+
+    // also cancel auto‑add mode
+    _autoAddTimer?.cancel();
+    _autoAddTimer = null;
+    _autoAddWhenFound = false;
+
     try {
       if (_isDiscovering) {
         await _deviceManager.stopDiscovery();
@@ -130,7 +151,26 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     return true;
   }
 
-  Future<void> startDiscovery() async {
+  /// Begins discovery.  Normally this just runs the regular mDNS scan and
+  /// optionally a BLE scan if running on mobile.  If [autoAdd] is true we
+  /// additionally keep the mDNS listener active for [autoAddTimeoutSeconds]
+  /// and add any newly‑found device to the ungrouped pool.
+  Future<void> startDiscovery({bool autoAdd = false, int autoAddTimeoutSeconds = kAutoAddTimeoutSeconds}) async {
+    if (_isRefreshing) return; // Already refreshing
+
+    // cancel any previous auto‑add timer
+    _autoAddTimer?.cancel();
+    _autoAddWhenFound = autoAdd;
+    if (autoAdd) {
+      _autoAddTimer = Timer(Duration(seconds: autoAddTimeoutSeconds), () {
+        _autoAddWhenFound = false;
+        _autoAddTimer = null;
+      });
+    }
+
+    // reset resolved name cache when starting a fresh scan
+    _resolvedDeviceNames.clear();
+
     if (_isRefreshing) return; // Already refreshing
 
     // Create new cancellation token for this operation
@@ -248,8 +288,27 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
 
     try {
       final devices = await _bleProvisioner.scanBleDevices('BOPROV_', cancelToken: _scanCancelToken);
-      _unprovisioned = devices;
-      _updateDiscoverableList();
+      // Instead of publishing raw names immediately, resolve each one and only
+      // add to the unprovisioned list when we have a display name (or fall back
+      // to the BLE name if resolution fails).  This avoids flicker in the UI.
+      _unprovisioned.clear();
+      for (var name in devices) {
+        if (_scanCancelToken.isCancelled) break;
+        try {
+          final info = await _bleProvisioner.fetchDeviceInfo(deviceName: name, cancelToken: _scanCancelToken);
+          // require successful info; if name blank treat as failure too
+          if (info.name.isNotEmpty) {
+            _resolvedDeviceNames[name] = info.name;
+            _unprovisioned.add(name);
+            _updateDiscoverableList();
+          } else {
+            _logger.w('Resolved info had empty name for $name, skipping');
+          }
+        } catch (e, st) {
+          _logger.w('Failed to resolve name for $name - omitting', error: e, stackTrace: st);
+          // skip device entirely
+        }
+      }
     } on CancelledException {
       _logger.i('BLE scan was cancelled by user.');
       return;
@@ -261,6 +320,24 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
         } else {
           _scanError.value = gt.translate('Bluetooth scan error, please check if Bluetooth device is enabled.');
         }
+      }
+    }
+  }
+
+  /// Attempts to resolve a set of BLE names using [IBleProvisioner.fetchDeviceInfo].
+  ///
+  /// Each result is stored in [_resolvedDeviceNames] and triggers a UI refresh.
+  Future<void> _resolveDeviceNames(List<String> names) async {
+    for (var name in names) {
+      if (_scanCancelToken.isCancelled) return;
+      try {
+        final info = await _bleProvisioner.fetchDeviceInfo(deviceName: name, cancelToken: _scanCancelToken);
+        if (info.name.isNotEmpty) {
+          _resolvedDeviceNames[name] = info.name;
+          _updateDiscoverableList();
+        }
+      } catch (e, st) {
+        _logger.w('Failed to resolve name for $name', error: e, stackTrace: st);
       }
     }
   }
@@ -284,6 +361,13 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
       // Avoid duplicates
       if (!_provisioned.any((d) => d.fingerprint == event.device.fingerprint)) {
         _provisioned.add(event.device);
+        if (_autoAddWhenFound) {
+          try {
+            await addNewDevice(event.device);
+          } catch (e, st) {
+            _logger.e('Auto‑add failed', error: e, stackTrace: st);
+          }
+        }
         _updateDiscoverableList();
       }
     } finally {
@@ -297,8 +381,10 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     // Provisioned first
     list.addAll(_provisioned.map((d) => DiscoverableDevice.provisioned(d)));
 
-    // Unprovisioned second
-    list.addAll(_unprovisioned.map((name) => DiscoverableDevice.unprovisioned(name)));
+    // Unprovisioned second; include any resolved names we have cached
+    list.addAll(
+      _unprovisioned.map((name) => DiscoverableDevice.unprovisioned(name, resolvedName: _resolvedDeviceNames[name])),
+    );
 
     _discoverableDevices.value = list;
   }

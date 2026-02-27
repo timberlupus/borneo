@@ -222,7 +222,7 @@ class _DeviceDiscoveryContent extends StatelessWidget {
     // Wrap each tile in a keyed StatefulWidget so only newly inserted items animate.
     final Widget tile = (device.type == DiscoverableDeviceType.provisioned && device.provisionedData != null)
         ? _buildProvisionedTile(context, vm, device.provisionedData!)
-        : _buildUnprovisionedTile(context, vm, device.name);
+        : _buildUnprovisionedTile(context, vm, device);
 
     return _AnimatedDeviceTile(key: ValueKey(device.id), child: tile);
   }
@@ -244,7 +244,8 @@ class _DeviceDiscoveryContent extends StatelessWidget {
     );
   }
 
-  Widget _buildUnprovisionedTile(BuildContext context, DeviceDiscoveryViewModel vm, String name) {
+  Widget _buildUnprovisionedTile(BuildContext context, DeviceDiscoveryViewModel vm, DiscoverableDevice device) {
+    final bleName = device.bleName ?? '';
     return ListTile(
       leading: Container(
         height: 48,
@@ -258,18 +259,18 @@ class _DeviceDiscoveryContent extends StatelessWidget {
         ),
         child: Icon(Icons.bluetooth, size: 32, color: Theme.of(context).colorScheme.onTertiaryContainer),
       ),
-      title: Text(name),
+      title: Text(device.name),
       subtitle: Text(context.translate('Ready to provision')),
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         if (vm.isMobile) {
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => ProvisioningScreen(deviceName: name)),
+            MaterialPageRoute(builder: (_) => ProvisioningScreen(deviceName: bleName)),
           );
-          // Check if we need to refresh after provisioning
+          // Check if we need to refresh after provisioning; enable auto‑add mode
           if (result != null && result is Map && result['refresh'] == true) {
-            vm.startDiscovery();
+            vm.startDiscovery(autoAdd: true);
           }
         }
       },
