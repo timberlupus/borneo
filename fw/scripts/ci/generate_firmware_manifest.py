@@ -4,6 +4,7 @@ import os
 import sys
 import shutil
 import argparse
+import hashlib
 
 def main():
     parser = argparse.ArgumentParser(description='Generate firmware manifest and copy binary')
@@ -98,6 +99,14 @@ def main():
     shutil.copy2(source_bin, dest_bin)
     print(f"Copied {source_bin} to {dest_bin}")
 
+    # Calculate sha256 of the copied binary
+    sha256_hash = hashlib.sha256()
+    with open(dest_bin, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(chunk)
+    binary_sha256 = sha256_hash.hexdigest()
+    print(f"SHA256 of {dest_bin}: {binary_sha256}")
+
     # Generate manifest
     manifest = {
         "name": device_name,
@@ -106,6 +115,7 @@ def main():
         "manufacturer": manufacturer,
         "compatible": compatible,
         "version": version,
+        "sha256": binary_sha256,
         "new_install_prompt_erase": True,
         "new_install_improv_wait_time": 0,
         "builds": [
