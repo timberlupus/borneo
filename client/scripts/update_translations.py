@@ -45,8 +45,19 @@ def generate_pot(project_path):
 
     # Step 3: Generate .pot file
     pot_output_path = os.path.join(assets_path, "messages.pot")
-    dart_files_string = " ".join(dart_files)
-    command = f"xgettext --from-code=UTF-8 -L Python --keyword=translate --output={pot_output_path} --directory={lib_path} {dart_files_string}"
+
+    # Windows can hit command line limits when passing many files directly.
+    # Write the list of Dart files to a temporary file and use --files-from.
+    import tempfile
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as tf:
+        for f in dart_files:
+            tf.write(f + "\n")
+        file_list_path = tf.name
+
+    command = (
+        f"xgettext --from-code=UTF-8 -L Python --keyword=translate "
+        f"--output={pot_output_path} --directory={lib_path} --files-from={file_list_path}"
+    )
     run_command(command)
 
     # Step 4: Use msginit to create .po files for each language
