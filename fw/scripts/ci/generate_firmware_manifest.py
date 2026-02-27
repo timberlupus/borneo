@@ -5,6 +5,7 @@ import sys
 import shutil
 import argparse
 import hashlib
+import datetime
 
 def main():
     parser = argparse.ArgumentParser(description='Generate firmware manifest and copy binary')
@@ -108,6 +109,9 @@ def main():
     print(f"SHA256 of {dest_bin}: {binary_sha256}")
 
     # Generate manifest
+    # timestamp in milliseconds since epoch
+    timestamp_ms = int(datetime.datetime.utcnow().timestamp() * 1000)
+
     manifest = {
         "name": device_name,
         "product_id": product_id,
@@ -116,6 +120,7 @@ def main():
         "compatible": compatible,
         "version": version,
         "sha256": binary_sha256,
+        "timestamp": timestamp_ms,
         "new_install_prompt_erase": True,
         "new_install_improv_wait_time": 0,
         "builds": [
