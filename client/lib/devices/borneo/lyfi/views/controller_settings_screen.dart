@@ -90,8 +90,6 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
 
   /// Convert the old widget-based groups into a [SettingsList] with sections.
   SettingsList _buildSettingsList(BuildContext context) {
-    final tileColor = Theme.of(context).colorScheme.surfaceContainerHighest;
-
     return SettingsList(
       sections: [
         SettingsSection(
@@ -113,15 +111,13 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
           title: Text(context.translate('LED CHANNELS')),
           tiles: [
             if (widget.vm.channelCountSetting.available)
-              CustomSettingsTile(
-                child: SettingsTile.navigation(
-                  title: Text(context.translate('Enabled channel count')),
-                  value: Selector<ControllerSettingsViewModel, int?>(
-                    selector: (context, vm) => vm.channelCountSetting.value,
-                    builder: (context, channelCount, child) => Text('$channelCount'),
-                  ),
-                  onPressed: (bc) => _showChannelCountPicker(bc),
+              SettingsTile.navigation(
+                title: Text(context.translate('Enabled channel count')),
+                value: Selector<ControllerSettingsViewModel, int?>(
+                  selector: (context, vm) => vm.channelCountSetting.value,
+                  builder: (context, channelCount, child) => Text('$channelCount'),
                 ),
+                onPressed: (bc) => _showChannelCountPicker(bc),
               ),
 
             ...List<SettingsTile>.generate(widget.vm.channels.length, (index) {
@@ -155,49 +151,38 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
             title: Text(context.translate('POWER & PROTECTION')),
             tiles: [
               if (widget.vm.overpowerEnabled.available)
-                CustomSettingsTile(
-                  child: Selector<ControllerSettingsViewModel, bool>(
-                    selector: (context, vm) => vm.overpowerEnabled.value,
-                    builder: (context, enabled, child) => SwitchListTile.adaptive(
-                      dense: true,
-                      tileColor: tileColor,
-                      title: Text(context.translate("Overpower enabled")),
-                      value: enabled,
-                      onChanged: (bool value) =>
-                          context.read<ControllerSettingsViewModel>().overpowerEnabled.setValue(value),
-                    ),
-                  ),
+                SettingsTile.switchTile(
+                  initialValue: widget.vm.overpowerEnabled.value,
+                  onToggle: (bool value) =>
+                      context.read<ControllerSettingsViewModel>().overpowerEnabled.setValue(value),
+                  title: Text(context.translate("Overpower enabled")),
                 ),
               if (widget.vm.overpowerCutoff.available)
-                CustomSettingsTile(
-                  child: ListTile(
-                    dense: true,
-                    tileColor: tileColor,
-                    title: Text(context.translate('Overpower cut-off')),
-                    trailing: Selector<ControllerSettingsViewModel, int>(
-                      selector: (context, vm) => vm.overpowerCutoff.value,
-                      builder: (context, cutoff, child) {
-                        final cutoffText = cutoff.toString();
-                        if (_overpowerCutoffController.text != cutoffText) {
-                          _overpowerCutoffController.value = TextEditingValue(
-                            text: cutoffText,
-                            selection: TextSelection.collapsed(offset: cutoffText.length),
-                          );
-                        }
-                        return SizedBox(
-                          width: 120,
-                          child: TextField(
-                            controller: _overpowerCutoffController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                            textAlign: TextAlign.end,
-                            decoration: InputDecoration(isDense: true, hintText: '1 - 99999'),
-                            onChanged: _onOverpowerCutoffChanged,
-                            onSubmitted: _onOverpowerCutoffChanged,
-                          ),
+                SettingsTile.navigation(
+                  title: Text(context.translate('Overpower cut-off')),
+                  value: Selector<ControllerSettingsViewModel, int>(
+                    selector: (context, vm) => vm.overpowerCutoff.value,
+                    builder: (context, cutoff, child) {
+                      final cutoffText = cutoff.toString();
+                      if (_overpowerCutoffController.text != cutoffText) {
+                        _overpowerCutoffController.value = TextEditingValue(
+                          text: cutoffText,
+                          selection: TextSelection.collapsed(offset: cutoffText.length),
                         );
-                      },
-                    ),
+                      }
+                      return SizedBox(
+                        width: 120,
+                        child: TextField(
+                          controller: _overpowerCutoffController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          textAlign: TextAlign.end,
+                          decoration: InputDecoration(isDense: true, hintText: '1 - 99999'),
+                          onChanged: _onOverpowerCutoffChanged,
+                          onSubmitted: _onOverpowerCutoffChanged,
+                        ),
+                      );
+                    },
                   ),
                 ),
 
