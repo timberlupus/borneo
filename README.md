@@ -62,6 +62,8 @@ This project delivers a full-stack solution for smart aquarium LED:
 
 [Schematics & BoM](hw/)
 
+![Ulva-6](assets/ulva6.jpg)
+
 ### Firmware
 
 - **Sunrise/sunset curves** with millisecond-smooth transitions
