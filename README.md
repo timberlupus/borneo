@@ -15,14 +15,12 @@
         <a href="https://docs.borneoiot.com"><b>Documentation</b></a> •
         <a href="https://github.com/borneo-iot/borneo/discussions"><b>Forum</b></a> •
         <a href="https://discord.gg/EFJTm7PpEs"><b>Discord</b></a> •
-        <a href="https://flasher.borneoiot.com"><b>Web Firmware Flasher</b></a>
 </p>
 
 <p align="center">
     <a href="https://www.crowdsupply.com/borneo-iot/buce-aquarium-led-controller" target="_blank" rel="noopener">
         <img alt="Crowd Supply: Subscribe" src="https://img.shields.io/badge/Subscribe-Crowd%20Supply-009999?style=for-the-badge&logo=crowdsupply" />
     </a>
-    &nbsp;
     <a href="https://flasher.borneoiot.com">
         <img src="https://img.shields.io/badge/⚡%20Flash%20Firmware-Web%20Flasher-blue?style=for-the-badge" alt="Web Flasher">
     </a>
