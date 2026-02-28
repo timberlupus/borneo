@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:borneo_app/devices/borneo/lyfi/core/wot.dart';
 import 'package:borneo_app/devices/borneo/view_models/base_borneo_summary_device_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:flutter/material.dart';
 import 'package:lw_wot/wot.dart';
 
 class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
@@ -37,7 +38,9 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
     final stateValue = wotThing?.getProperty(LyfiKnownProperties.kState);
     if (stateValue != null) {
       final state = LyfiState.fromString(stateValue as String);
-      ledState.value = state;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ledState.value = state;
+      });
     }
   }
 
@@ -45,21 +48,28 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
     final modeValue = wotThing?.getProperty(LyfiKnownProperties.kMode);
     if (modeValue != null) {
       final mode = LyfiMode.fromString(modeValue as String);
-      ledMode.value = mode;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ledMode.value = mode;
+      });
     }
   }
 
   void _onColorChanged(WotMessage msg) {
     final color = wotThing?.getProperty<List<int>>('color');
     if (color != null) {
-      channelBrightness.value = List<int>.from(color);
+      // defer assignment to avoid modifying notifier during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        channelBrightness.value = List<int>.from(color);
+      });
     }
   }
 
   void _onDeviceInfoChanged(WotMessage msg) {
     final info = wotThing?.getProperty<LyfiDeviceInfo>('lyfiDeviceInfo');
     if (info != null) {
-      lyfiDeviceInfo.value = info;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        lyfiDeviceInfo.value = info;
+      });
     }
   }
 
@@ -78,26 +88,38 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
   }
 
   void _syncFromThing() {
+    LyfiState? newState;
+    LyfiMode? newMode;
+    List<int>? newColor;
+    LyfiDeviceInfo? newInfo;
+
     final stateValue = wotThing?.getProperty(LyfiKnownProperties.kState);
     if (stateValue != null) {
-      final state = LyfiState.fromString(stateValue as String);
-      ledState.value = state;
+      newState = LyfiState.fromString(stateValue as String);
     }
 
     final modeValue = wotThing?.getProperty(LyfiKnownProperties.kMode);
     if (modeValue != null) {
-      final mode = LyfiMode.fromString(modeValue as String);
-      ledMode.value = mode;
+      newMode = LyfiMode.fromString(modeValue as String);
     }
 
     final color = wotThing?.getProperty<List<int>>('color');
     if (color != null) {
-      channelBrightness.value = List<int>.from(color);
+      newColor = List<int>.from(color);
     }
 
     final info = wotThing?.getProperty<LyfiDeviceInfo>('lyfiDeviceInfo');
     if (info != null) {
-      lyfiDeviceInfo.value = info;
+      newInfo = info;
+    }
+
+    if (newState != null || newMode != null || newColor != null || newInfo != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (newState != null) ledState.value = newState;
+        if (newMode != null) ledMode.value = newMode;
+        if (newColor != null) channelBrightness.value = newColor;
+        if (newInfo != null) lyfiDeviceInfo.value = newInfo;
+      });
     }
   }
 }
