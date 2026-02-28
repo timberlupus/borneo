@@ -118,7 +118,7 @@ class AboutScreen extends ConsumerWidget {
                   loading: () => Container(),
                   error: (e, _) => Container(),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
                 _LinkSection(title: context.translate('Website'), url: _websiteUrl),
 
@@ -149,7 +149,6 @@ The author assumes no responsibility or liability for any direct or indirect con
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
-            const SizedBox(height: 16),
           ],
         ),
       ),
