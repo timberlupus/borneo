@@ -78,6 +78,7 @@ class SettingsScreen extends StatelessWidget {
   SettingsList _buildSettingsList(BuildContext context) {
     final lvm = context.watch<SettingsViewModel>();
     return SettingsList(
+      platform: DevicePlatform.iOS,
       sections: [
         SettingsSection(
           title: Text(context.translate('DEVICE INFORMATION')),
@@ -117,15 +118,9 @@ class SettingsScreen extends StatelessWidget {
           title: Text(context.translate('DEVICE STATUS')),
           tiles: [
             SettingsTile.navigation(
-              title: Text(context.translate('Device time & time zone')),
+              title: Text(context.translate('Time zone')),
               descriptionInlineIos: true,
-              description: Row(
-                spacing: 8,
-                children: [
-                  Text(lvm.borneoStatus.timestamp.toString()),
-                  Text(lvm.timezone ?? context.translate('Unknown time zone')),
-                ],
-              ),
+              value: Text(lvm.timezone ?? context.translate('No time zone')),
               enabled: lvm.canUpdateTimezone,
               onPressed: (bc) => vm.updateTimezone(),
             ),
