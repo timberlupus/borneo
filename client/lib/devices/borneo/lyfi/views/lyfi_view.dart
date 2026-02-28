@@ -144,6 +144,8 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: NestedScrollView(
+          // turn off scrolling so the details screen remains fixed
+          physics: const NeverScrollableScrollPhysics(),
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             LyfiAppBar(onBack: () => goBack(context)),
             const LyfiBusyIndicatorSliver(),

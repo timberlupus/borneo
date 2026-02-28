@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
+
+import 'package:borneo_app/features/devices/widgets/dashboard_tile.dart';
+
 import '../../view_models/lyfi_view_model.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import '../disco_page.dart';
@@ -39,104 +42,91 @@ class DashboardTemporaryTile extends StatelessWidget {
         final Color effectiveFgColor = isDisabled ? fgColor.withValues(alpha: disabledAlpha) : fgColor;
         final Color iconColor = isActive ? theme.colorScheme.onPrimary : theme.colorScheme.primary;
         final Color effectiveIconColor = isDisabled ? iconColor.withValues(alpha: disabledAlpha) : iconColor;
-        return AspectRatio(
-          aspectRatio: 2.0,
-          child: Container(
-            decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16)),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: props.canSwitch ? () => context.read<LyfiViewModel>().switchTemporaryState() : null,
-                onLongPress: props.canSwitch
-                    ? () async {
-                        HapticFeedback.mediumImpact();
-                        final vm = context.read<LyfiViewModel>();
-                        if (!vm.canSwitchDiscoState) return;
+        return DashboardTile(
+          backgroundColor: bgColor,
+          disabled: !props.canSwitch || !props.isOnline,
+          onPressed: props.canSwitch ? () => context.read<LyfiViewModel>().switchTemporaryState() : null,
+          onLongPressed: props.canSwitch
+              ? () async {
+                  HapticFeedback.mediumImpact();
+                  final vm = context.read<LyfiViewModel>();
+                  if (!vm.canSwitchDiscoState) return;
 
-                        vm.switchDiscoState();
-                        if (context.mounted) {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ChangeNotifierProvider.value(value: vm, child: const DiscoPage()),
-                            ),
-                          );
-                        }
-                      }
-                    : null,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Stack(
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 300),
-                            transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                            child: isActive
-                                ? SizedBox(
-                                    key: const ValueKey('active'),
-                                    width: 32,
-                                    height: 32,
-                                    child: Padding(
-                                      padding: EdgeInsets.all(4),
-                                      child: CircularProgressIndicator(
-                                        strokeAlign: 1,
-                                        strokeWidth: 2,
-                                        value: props.total.inSeconds > 0
-                                            ? props.remain.inSeconds / props.total.inSeconds
-                                            : 0.0,
-                                        backgroundColor: theme.colorScheme.shadow,
-                                        valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimaryContainer),
-                                      ),
-                                    ),
-                                  )
-                                : Container(
-                                    key: const ValueKey('inactive'),
-                                    alignment: Alignment.center,
-                                    child: Icon(Icons.flashlight_on, size: 32, color: effectiveIconColor),
-                                  ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  context.translate("Temporary"),
-                                  style: theme.textTheme.titleSmall?.copyWith(color: effectiveFgColor),
-                                ),
-                                if (isActive && remainText.isNotEmpty)
-                                  Text(
-                                    remainText,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: effectiveFgColor,
-                                      fontFeatures: [FontFeature.tabularFigures()],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
+                  vm.switchDiscoState();
+                  if (context.mounted) {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ChangeNotifierProvider.value(value: vm, child: const DiscoPage()),
                       ),
-                      if (isActive)
-                        Positioned(
-                          right: -16,
-                          bottom: -16,
-                          child: Icon(
-                            Icons.flashlight_on,
-                            size: 64,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.15),
+                    );
+                  }
+                }
+              : null,
+          child: Stack(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                    child: isActive
+                        ? SizedBox(
+                            key: const ValueKey('active'),
+                            width: 32,
+                            height: 32,
+                            child: Padding(
+                              padding: EdgeInsets.all(4),
+                              child: CircularProgressIndicator(
+                                strokeAlign: 1,
+                                strokeWidth: 2,
+                                value: props.total.inSeconds > 0 ? props.remain.inSeconds / props.total.inSeconds : 0.0,
+                                backgroundColor: theme.colorScheme.shadow,
+                                valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimaryContainer),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            key: const ValueKey('inactive'),
+                            alignment: Alignment.center,
+                            child: Icon(Icons.flashlight_on, size: 32, color: effectiveIconColor),
                           ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.translate("Temporary"),
+                          style: theme.textTheme.titleSmall?.copyWith(color: effectiveFgColor),
                         ),
-                    ],
+                        if (isActive && remainText.isNotEmpty)
+                          Text(
+                            remainText,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: effectiveFgColor,
+                              fontFeatures: [FontFeature.tabularFigures()],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              if (isActive)
+                Positioned(
+                  right: -16,
+                  bottom: -16,
+                  child: Icon(
+                    Icons.flashlight_on,
+                    size: 64,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.15),
                   ),
                 ),
-              ),
-            ),
+            ],
           ),
         );
       },

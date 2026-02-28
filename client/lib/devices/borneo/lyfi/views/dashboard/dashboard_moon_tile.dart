@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 import 'package:community_material_icon/community_material_icon.dart';
+
+import 'package:borneo_app/features/devices/widgets/dashboard_tile.dart';
+
 import '../../view_models/lyfi_view_model.dart';
 import '../moon_screen.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
@@ -76,75 +79,65 @@ class DashboardMoonTile extends StatelessWidget {
             : props.nextMoonTime != null
             ? '${context.translate('Rises at')} ${props.nextMoonTime!}'
             : context.translate('Daytime');
-        return AspectRatio(
-          aspectRatio: 2.0,
-          child: Container(
-            decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16)),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: props.isOnline && props.isOn
-                    ? () async {
-                        if (context.mounted) {
-                          final vm = context.read<LyfiViewModel>();
-                          final route = MaterialPageRoute(builder: (context) => MoonScreen(deviceID: vm.deviceID));
-                          await Navigator.push(context, route);
-                        }
-                      }
-                    : null,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                        child: Icon(iconData, size: 32, color: effectiveIconColor, key: ValueKey(iconData)),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(title, style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor)),
-                            if (!isMoonActive)
-                              Text(
-                                subtitle,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: effectiveFgColor,
-                                  fontFeatures: [FontFeature.tabularFigures()],
-                                ),
-                              )
-                            else
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    getMoonPhaseName(context, moonStatus!.phaseAngle),
-                                    style: theme.textTheme.bodySmall?.copyWith(color: effectiveFgColor),
-                                    softWrap: false,
-                                  ),
-                                  Text(
-                                    '${(moonStatus.illumination * 100.0).toStringAsFixed(0)}%',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: effectiveFgColor,
-                                      fontFeatures: [FontFeature.tabularFigures()],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                          ],
+
+        return DashboardTile(
+          backgroundColor: bgColor,
+          disabled: isDisabled,
+          onPressed: props.isOnline && props.isOn
+              ? () async {
+                  if (context.mounted) {
+                    final vm = context.read<LyfiViewModel>();
+                    final route = MaterialPageRoute(builder: (context) => MoonScreen(deviceID: vm.deviceID));
+                    await Navigator.push(context, route);
+                  }
+                }
+              : null,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                child: Icon(iconData, size: 32, color: effectiveIconColor, key: ValueKey(iconData)),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor)),
+                    if (!isMoonActive)
+                      Text(
+                        subtitle,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: effectiveFgColor,
+                          fontFeatures: [FontFeature.tabularFigures()],
                         ),
+                      )
+                    else
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            getMoonPhaseName(context, moonStatus!.phaseAngle),
+                            style: theme.textTheme.bodySmall?.copyWith(color: effectiveFgColor),
+                            softWrap: false,
+                          ),
+                          Text(
+                            '${(moonStatus.illumination * 100.0).toStringAsFixed(0)}%',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: effectiveFgColor,
+                              fontFeatures: [FontFeature.tabularFigures()],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
-            ),
+            ],
           ),
         );
       },

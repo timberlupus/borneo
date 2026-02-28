@@ -1,6 +1,5 @@
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
 
 import '../../view_models/lyfi_view_model.dart';
@@ -76,50 +75,7 @@ class LyfiStatusBannersSliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SliverToBoxAdapter(child: _TimezoneSyncBanner());
-  }
-}
-
-class _TimezoneSyncBanner extends StatelessWidget {
-  const _TimezoneSyncBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    return Selector<LyfiViewModel, ({bool hasTimezoneMismatch, bool isOnline})>(
-      selector: (_, vm) => (hasTimezoneMismatch: vm.hasTimezoneMismatch, isOnline: vm.isOnline),
-      builder: (context, props, _) {
-        if (!props.hasTimezoneMismatch || !props.isOnline) return const SizedBox.shrink();
-        return Container(
-          margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.access_time, size: 20, color: Theme.of(context).colorScheme.onPrimaryContainer),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Device timezone is different from app timezone',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer),
-                ),
-              ),
-              const SizedBox(width: 12),
-              FilledButton.tonal(
-                onPressed: () {
-                  final vm = context.read<LyfiViewModel>();
-                  vm.syncDeviceTimezone();
-                },
-                child: Text(context.translate('Sync Timezone')),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+    // timezone mismatch banner has been removed; no status banners at the moment
+    return const SliverToBoxAdapter(child: SizedBox.shrink());
   }
 }
