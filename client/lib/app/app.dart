@@ -35,9 +35,11 @@ import 'package:borneo_app/core/config/language_config.dart';
 final kSupportedLocales = LanguageConfig.supportedLocales;
 
 class BorneoApp extends StatefulWidget {
-  final EventBus _globalEventBus = EventBus();
+  /// The shared event bus used by both Riverpod and provider consumers.
+  final EventBus globalEventBus;
+
   final Locale? initialLocale;
-  BorneoApp({super.key, this.initialLocale});
+  const BorneoApp({super.key, required this.globalEventBus, this.initialLocale});
 
   @override
   State<BorneoApp> createState() => _BorneoAppState();
@@ -67,12 +69,12 @@ class _BorneoAppState extends State<BorneoApp> {
       // spurious second rebuild that can upset nested navigators.
       if (loc != _locale) setState(() => _locale = loc);
     });
-    _localeSub = widget._globalEventBus.on<AppLocaleChangedEvent>().listen((event) {
+    _localeSub = widget.globalEventBus.on<AppLocaleChangedEvent>().listen((event) {
       setState(() {
         _locale = event.locale;
       });
     });
-    _themeSub = widget._globalEventBus.on<ThemeChangedEvent>().listen((event) {
+    _themeSub = widget.globalEventBus.on<ThemeChangedEvent>().listen((event) {
       setState(() {
         _themeMode = event.themeMode;
       });
@@ -115,7 +117,7 @@ class _BorneoAppState extends State<BorneoApp> {
     */
     return MultiProvider(
       providers: [
-        Provider<EventBus>(create: (_) => widget._globalEventBus),
+        Provider<EventBus>(create: (_) => widget.globalEventBus),
         Provider<IBlobManager>(create: (_) => FlutterAppBlobManager()),
       ],
       child: Builder(

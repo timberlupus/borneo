@@ -25,6 +25,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
+// riverpod providers for the root services; added as part of the
+// step‑1 migration plan described in .design-docs/riverpod-migration-plan.md
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/providers.dart';
+
 import 'dart:async';
 
 import 'package:sembast/sembast.dart';
@@ -167,9 +172,23 @@ Future<Widget> buildAppWidget({
     provider.ProxyProvider<Logger, IBleProvisioner>(update: (_, logger, prev) => prev ?? BleProvisioner(), lazy: true),
   ];
 
-  return provider.MultiProvider(
-    providers: providers,
-    child: BorneoApp(initialLocale: initialLocale),
+  // Wrap the existing provider graph in a ProviderScope so that
+  // new Riverpod consumers can begin accessing the same service instances.
+  // The overrides ensure objects already created above are reused rather
+  // than recreated.
+  return ProviderScope(
+    overrides: [
+      databaseProvider.overrideWithValue(db),
+      sharedPreferencesProvider.overrideWithValue(prefs),
+      eventBusProvider.overrideWithValue(bus),
+      deviceModuleRegistryProvider.overrideWithValue(registry),
+      platformDeviceInfoProvider.overrideWithValue(platformInfo),
+      // other overrides may be added as the migration continues
+    ],
+    child: provider.MultiProvider(
+      providers: providers,
+      child: BorneoApp(initialLocale: initialLocale, globalEventBus: bus),
+    ),
   );
 }
 
