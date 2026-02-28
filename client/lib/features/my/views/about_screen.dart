@@ -59,13 +59,11 @@ class _LinkSection extends StatelessWidget {
       );
     }
 
-    return SliverToBoxAdapter(
-      child: Container(
-        color: Theme.of(context).colorScheme.surface,
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-        child: Material(
-          child: Center(child: Column(children: [titleWidget, ?linkWidget])),
-        ),
+    return Container(
+      color: Theme.of(context).colorScheme.surface,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      child: Material(
+        child: Center(child: Column(children: [titleWidget, ?linkWidget])),
       ),
     );
   }
@@ -76,93 +74,65 @@ class AboutScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // watch the async provider; the notifier will automatically load the
-    // package info on first use.
     final aboutInfo = ref.watch(aboutProvider);
-
     return buildBody(context, aboutInfo);
   }
 
   Widget buildBody(BuildContext context, AsyncValue<PackageInfo> aboutInfo) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            pinned: false,
-            snap: false,
-            floating: false,
-            expandedHeight: 200,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            backgroundColor: Color.fromARGB(0xff, 0x3e, 0x36, 0x58),
-            flexibleSpace: FlexibleSpaceBar(
-              expandedTitleScale: 1.0,
-              title: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset('assets/images/main-logo.png', height: 80),
-                  const SizedBox(height: 8),
-                  // package name / version information is driven by the
-                  // Riverpod `aboutProvider` value.  We show nothing while
-                  // the provider is loading (mirroring the previous behaviour
-                  // where the consumers returned empty containers).
-                  aboutInfo.when(
-                    data: (info) => Column(
-                      children: [
-                        Text(
-                          info.appName,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
-                        ),
-                        Text(
-                          context.translate(
-                            'Version: {verText} Build: {buildNumberText}',
-                            nArgs: {'verText': info.version, 'buildNumberText': info.buildNumber},
-                          ),
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white30),
-                        ),
-                      ],
-                    ),
-                    loading: () => Container(),
-                    error: (_, __) => Container(),
+      appBar: AppBar(),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              children: [
+                Container(
+                  height: 80,
+                  width: 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Theme.of(context).colorScheme.surface,
                   ),
-                ],
-              ),
-              centerTitle: true,
-            ),
-          ),
-
-          // Copyrights info
-          SliverToBoxAdapter(
-            child: Container(
-              color: Theme.of(context).colorScheme.surface,
-              margin: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-              child: Center(
-                child: Column(
-                  spacing: 4,
-                  children: [
-                    Text(
-                      context.translate('Copyright © Yunnan BinaryStars Technologies, Co., Ltd.'),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    Text(context.translate('All rights reserved.'), style: Theme.of(context).textTheme.bodySmall),
-                  ],
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset('assets/images/icon-512x512.png', height: 80, width: 80, fit: BoxFit.cover),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 16),
+                aboutInfo.when(
+                  data: (info) => Column(
+                    children: [
+                      Text(info.appName, style: Theme.of(context).textTheme.titleLarge),
+                      Text(
+                        context.translate(
+                          'Version {verText}+{buildNumberText}',
+                          nArgs: {'verText': info.version, 'buildNumberText': info.buildNumber},
+                        ),
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ],
+                  ),
+                  loading: () => Container(),
+                  error: (e, _) => Container(),
+                ),
+                const SizedBox(height: 32),
+
+                _LinkSection(title: context.translate('Website'), url: _websiteUrl),
+
+                _LinkSection(title: context.translate('Documentation'), url: _docsUrl),
+
+                _LinkSection(title: context.translate('Privacy Policy'), url: _privacyUrl, hideLink: true),
+              ],
             ),
-          ),
 
-          _LinkSection(title: context.translate('Website'), url: _websiteUrl),
+            const Spacer(),
 
-          _LinkSection(title: context.translate('Documentation'), url: _docsUrl),
-
-          _LinkSection(title: context.translate('Privacy Policy'), url: _privacyUrl, hideLink: true),
-
-          SliverToBoxAdapter(
-            child: Container(
+            Container(
               color: Theme.of(context).colorScheme.surface,
-              margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Text(
                 context.translate(
                   '''This mobile application is free software licensed under GNU General Public License version 3 or later, with no warranty.
@@ -171,8 +141,17 @@ The author assumes no responsibility or liability for any direct or indirect con
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
-          ),
-        ],
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                context.translate('Copyright © Yunnan BinaryStars Technologies, Co., Ltd. All rights reserved.'),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
