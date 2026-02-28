@@ -1,10 +1,12 @@
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/core/services/url_launcher_service.dart';
 import 'package:flutter_gettext/flutter_gettext.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 
-import 'package:borneo_app/features/my/view_models/about_view_model.dart';
+import 'package:borneo_app/features/my/providers/about_provider.dart';
 
 final Uri _websiteUrl = Uri.parse('https://www.borneoiot.com');
 final Uri _docsUrl = Uri.parse('https://docs.borneoiot.com');
@@ -38,7 +40,7 @@ class _LinkSection extends StatelessWidget {
       titleWidget = InkWell(
         onTap: () async {
           final urlLauncher = UrlLauncherService(
-            notification: Provider.of<IAppNotificationService>(context, listen: false),
+            notification: provider.Provider.of<IAppNotificationService>(context, listen: false),
           );
           await urlLauncher.open(url.toString());
         },
@@ -49,7 +51,7 @@ class _LinkSection extends StatelessWidget {
       linkWidget = InkWell(
         onTap: () async {
           final urlLauncher = UrlLauncherService(
-            notification: Provider.of<IAppNotificationService>(context, listen: false),
+            notification: provider.Provider.of<IAppNotificationService>(context, listen: false),
           );
           await urlLauncher.open(url.toString());
         },
@@ -69,18 +71,19 @@ class _LinkSection extends StatelessWidget {
   }
 }
 
-class AboutScreen extends StatelessWidget {
+class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => ChangeNotifierProvider<AboutViewModel>(
-    create: (_) => AboutViewModel(gt: GettextLocalizations.of(context))..initialize(),
-    builder: (context, child) {
-      return buildBody(context);
-    },
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    // watch the async provider; the notifier will automatically load the
+    // package info on first use.
+    final aboutInfo = ref.watch(aboutProvider);
 
-  Widget buildBody(BuildContext context) {
+    return buildBody(context, aboutInfo);
+  }
+
+  Widget buildBody(BuildContext context, AsyncValue<PackageInfo> aboutInfo) {
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
@@ -99,29 +102,30 @@ class AboutScreen extends StatelessWidget {
                 children: [
                   Image.asset('assets/images/main-logo.png', height: 80),
                   const SizedBox(height: 8),
-                  Consumer<AboutViewModel>(
-                    builder: (context, vm, child) => vm.isInitialized
-                        ? Text(
-                            vm.packageInfo.appName,
-                            style: Theme.of(
-                              context,
-                            ).textTheme.titleLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
-                          )
-                        : Container(),
-                  ),
-                  Consumer<AboutViewModel>(
-                    builder: (context, vm, child) => vm.isInitialized
-                        ? Text(
-                            context.translate(
-                              'Version: {verText} Build: {buildNumberText}',
-                              nArgs: {
-                                'verText': vm.packageInfo.version.toString(),
-                                'buildNumberText': vm.packageInfo.buildNumber.toString(),
-                              },
-                            ),
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white30),
-                          )
-                        : Container(),
+                  // package name / version information is driven by the
+                  // Riverpod `aboutProvider` value.  We show nothing while
+                  // the provider is loading (mirroring the previous behaviour
+                  // where the consumers returned empty containers).
+                  aboutInfo.when(
+                    data: (info) => Column(
+                      children: [
+                        Text(
+                          info.appName,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                        ),
+                        Text(
+                          context.translate(
+                            'Version: {verText} Build: {buildNumberText}',
+                            nArgs: {'verText': info.version, 'buildNumberText': info.buildNumber},
+                          ),
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white30),
+                        ),
+                      ],
+                    ),
+                    loading: () => Container(),
+                    error: (_, __) => Container(),
                   ),
                 ],
               ),
