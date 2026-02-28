@@ -157,13 +157,21 @@ class AcclimationScreen extends StatelessWidget {
   }
 
   Future<void> onSubmit(AcclimationViewModel vm, BuildContext context) async {
-    await vm.submitToDevice();
-    if (context.mounted) {
-      Provider.of<IAppNotificationService>(
-        context,
-        listen: false,
-      ).showSuccess(context.translate('Update acclimation settings succeed.'));
-      Navigator.of(context).pop();
+    try {
+      await vm.submitToDevice();
+      if (context.mounted) {
+        Provider.of<IAppNotificationService>(
+          context,
+          listen: false,
+        ).showSuccess(context.translate('Update acclimation settings succeed.'));
+        Navigator.of(context).pop();
+      }
+    } catch (e, st) {
+      if (context.mounted) {
+        context.read<IAppNotificationService>().showError(context.translate('Error'), body: e.toString());
+        // log for diagnostics if logger is available on the VM
+        vm.logger?.e('Failed to submit acclimation settings', error: e, stackTrace: st);
+      }
     }
   }
 }
