@@ -79,7 +79,12 @@ class _ProvisioningScreenBody extends StatelessWidget {
           children: [
             _WizardTimeline(currentStep: vm.step),
             const Divider(height: 1),
-            Expanded(child: _StepContent(vm: vm)),
+            Expanded(
+              child: Container(
+                color: Theme.of(context).colorScheme.surfaceContainer,
+                child: _StepContent(vm: vm),
+              ),
+            ),
           ],
         ),
       ),
@@ -95,8 +100,6 @@ class _WizardTimeline extends StatelessWidget {
   final ProvisioningWizardStep currentStep;
 
   const _WizardTimeline({required this.currentStep});
-
-  static const _labels = ['Select WiFi', 'Enter Password', 'Provisioning', 'Done'];
 
   // Semantic icon for each step (shown when not yet completed).
   static const _icons = [
@@ -120,6 +123,14 @@ class _WizardTimeline extends StatelessWidget {
     //
     // Adjacent half-connectors from neighbouring steps share the same colour,
     // so they appear as one continuous line perfectly centred on the indicators.
+    // compute translated labels once per build
+    final labels = [
+      context.translate('Select WiFi'),
+      context.translate('Enter Password'),
+      context.translate('Provisioning'),
+      context.translate('Done'),
+    ];
+
     return IndicatorTheme(
       data: IndicatorThemeData(size: _indicatorSize, color: cs.primary),
       child: Padding(
@@ -165,8 +176,9 @@ class _WizardTimeline extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 5),
+                  // compute labels here so they can be translated
                   Text(
-                    context.translate(_labels[i]),
+                    labels[i],
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -201,14 +213,17 @@ class _StepContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
-      child: KeyedSubtree(
-        key: ValueKey(vm.step),
-        child: switch (vm.step) {
-          ProvisioningWizardStep.selectWifi => _SelectWifiStep(vm: vm),
-          ProvisioningWizardStep.enterPassword => _EnterPasswordStep(vm: vm),
-          ProvisioningWizardStep.provisioning => _ProvisioningStep(vm: vm),
-          ProvisioningWizardStep.done => _DoneStep(vm: vm),
-        },
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: KeyedSubtree(
+          key: ValueKey(vm.step),
+          child: switch (vm.step) {
+            ProvisioningWizardStep.selectWifi => _SelectWifiStep(vm: vm),
+            ProvisioningWizardStep.enterPassword => _EnterPasswordStep(vm: vm),
+            ProvisioningWizardStep.provisioning => _ProvisioningStep(vm: vm),
+            ProvisioningWizardStep.done => _DoneStep(vm: vm),
+          },
+        ),
       ),
     );
   }
@@ -289,6 +304,7 @@ class _EnterPasswordStep extends StatefulWidget {
 
 class _EnterPasswordStepState extends State<_EnterPasswordStep> {
   final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   bool _obscure = true;
 
   @override
@@ -302,59 +318,74 @@ class _EnterPasswordStepState extends State<_EnterPasswordStep> {
     final ssid = widget.vm.selectedSsid ?? '';
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // WiFi name indicator
-          Row(
-            children: [
-              const Icon(Icons.wifi, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  ssid,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // WiFi name indicator
+            Row(
+              children: [
+                const Icon(Icons.wifi, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    ssid,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            // Password field
+            TextFormField(
+              autofocus: true,
+              controller: _passwordController,
+              obscureText: _obscure,
+              textInputAction: TextInputAction.go,
+              decoration: InputDecoration(
+                labelText: context.translate('Password'),
+                // no explicit border here so the decoration theme (used by
+                // other screens such as group_edit_screen) applies consistently
+                suffixIcon: IconButton(
+                  icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+                  onPressed: () => setState(() => _obscure = !_obscure),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          // Password field
-          TextField(
-            autofocus: true,
-            controller: _passwordController,
-            obscureText: _obscure,
-            textInputAction: TextInputAction.go,
-            decoration: InputDecoration(
-              labelText: context.translate('Password'),
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
-                onPressed: () => setState(() => _obscure = !_obscure),
-              ),
+              onFieldSubmitted: (_) => _submit(),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return context.translate('Please enter a password');
+                }
+                return null;
+              },
             ),
-            onSubmitted: (_) => _submit(),
-          ),
-          const SizedBox(height: 32),
-          // Action buttons
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(onPressed: widget.vm.backToWifiSelection, child: Text(context.translate('Back'))),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: FilledButton(onPressed: _submit, child: Text(context.translate('Provision'))),
-              ),
-            ],
-          ),
-        ],
+            const SizedBox(height: 32),
+            // Action buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: widget.vm.backToWifiSelection,
+                    child: Text(context.translate('Back')),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: FilledButton(onPressed: _submit, child: Text(context.translate('Provision'))),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   void _submit() {
-    widget.vm.startProvisioning(_passwordController.text);
+    if (_formKey.currentState?.validate() ?? false) {
+      widget.vm.startProvisioning(_passwordController.text);
+    }
   }
 }
 
@@ -378,7 +409,8 @@ class _ProvisioningStep extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(Icons.wifi_tethering_outlined, size: 96, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 32),
@@ -463,9 +495,10 @@ class _DoneStepState extends State<_DoneStep> {
     final succeeded = widget.vm.provisioningSucceeded;
 
     return Padding(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Icon(succeeded ? Icons.check_circle : Icons.error, size: 72, color: succeeded ? cs.primary : cs.error),
           const SizedBox(height: 24),
@@ -489,7 +522,7 @@ class _DoneStepState extends State<_DoneStep> {
               ),
               const SizedBox(height: 24),
             ],
-            FilledButton.icon(
+            ElevatedButton.icon(
               onPressed: (widget.vm.autoAdded || widget.vm.registerRemainingSeconds <= 0)
                   ? () {
                       Navigator.of(
@@ -497,7 +530,6 @@ class _DoneStepState extends State<_DoneStep> {
                       ).popUntil((route) => route.settings.name == AppRoutes.kDevices || route.isFirst);
                     }
                   : null,
-              icon: const Icon(Icons.check),
               label: Text(context.translate('Done')),
             ),
             if (!widget.vm.autoAdded && widget.vm.registerRemainingSeconds <= 0) ...[
