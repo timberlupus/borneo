@@ -145,9 +145,8 @@ The author assumes no responsibility or liability for any direct or indirect con
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                context.translate('Copyright © Yunnan BinaryStars Technologies, Co., Ltd.\nAll rights reserved.'),
+                context.translate('Copyright © Yunnan BinaryStars Technologies, Co., Ltd. All rights reserved.'),
                 style: Theme.of(context).textTheme.bodySmall,
-                textAlign: TextAlign.left,
               ),
             ),
           ],
