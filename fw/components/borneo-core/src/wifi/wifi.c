@@ -362,6 +362,7 @@ static void bo_wifi_events_handler(void* arg, esp_event_base_t event_base, int32
         BO_MUST(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_events_handler, NULL));
         portENTER_CRITICAL(&s_status_lock);
         s_wifi_state = WIFI_STATE_CONNECTING;
+        s_auto_reconnect = true;
         portEXIT_CRITICAL(&s_status_lock);
         if (_has_ssid()) {
             BO_MUST(esp_wifi_connect());
