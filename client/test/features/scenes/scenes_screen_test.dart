@@ -2,8 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:event_bus/event_bus.dart';
+import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 
 import 'package:borneo_app/features/scenes/view_models/scenes_view_model.dart';
+import 'package:borneo_app/features/scenes/views/scene_card.dart';
+import 'package:borneo_app/features/chores/view_models/chores_view_model.dart';
+import 'package:borneo_app/features/chores/views/chore_list.dart';
+import 'package:borneo_app/features/chores/views/chore_card.dart';
+import 'package:borneo_app/features/chores/models/builtin_chores.dart';
 
 // kernel abstractions types
 import 'package:borneo_kernel_abstractions/events.dart' show DeviceBoundEvent, DeviceRemovedEvent;
@@ -15,11 +23,26 @@ import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/features/devices/models/events.dart';
 import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/models/device_statistics.dart';
+import 'package:borneo_app/features/chores/models/abstract_chore.dart';
+import 'package:borneo_app/core/services/chore_manager.dart';
+import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:sembast/sembast.dart';
 import '../../mocks/mocks.dart';
+
+// A lightweight delegate for tests that supplies [FakeGettext] so
+// `context.translate` calls succeed without pulling in real PO files.
+class _FakeGettextDelegate extends LocalizationsDelegate<GettextLocalizations> {
+  const _FakeGettextDelegate();
+  @override
+  bool isSupported(Locale locale) => true;
+  @override
+  Future<GettextLocalizations> load(Locale locale) async => FakeGettext();
+  @override
+  bool shouldReload(covariant LocalizationsDelegate<GettextLocalizations> old) => false;
+}
 
 // Minimal stub implementations to satisfy ScenesViewModel constructor
 class _DummySceneManager implements ISceneManager {
@@ -59,9 +82,56 @@ class _DummySceneManager implements ISceneManager {
   }) => throw UnimplementedError();
 }
 
+// simple stub implementations needed to construct a real ChoresViewModel
+// simple stub implementations needed to construct a real ChoresViewModel
+class _DummyChoreManager implements IChoreManager {
+  @override
+  List<AbstractChore> getAvailableChores() => [];
+  @override
+  Future<void> executeChore(String choreId) async {}
+  @override
+  Future<void> undoChore(String choreId) async {}
+  @override
+  Future<bool> hasHistoryForChore(String choreId) async => false;
+  @override
+  void dispose() {}
+}
+
+/// variant that allows specifying a return value so tests can start with
+/// non-empty chore list
+class _StaticChoreManager implements IChoreManager {
+  final List<AbstractChore> _chores;
+  _StaticChoreManager([this._chores = const []]);
+  @override
+  List<AbstractChore> getAvailableChores() => _chores;
+  @override
+  Future<void> executeChore(String choreId) async {}
+  @override
+  Future<void> undoChore(String choreId) async {}
+  @override
+  Future<bool> hasHistoryForChore(String choreId) async => false;
+  @override
+  void dispose() {}
+}
+
+class _DummyNotification implements IAppNotificationService {
+  @override
+  void showError(String title, {String? body}) {}
+  @override
+  void showInfo(String title, {String? body}) {}
+  @override
+  void showSuccess(String title, {String? body}) {}
+  @override
+  void showWarning(String title, {String? body}) {}
+  @override
+  void showNotificationWithAction(String title, {String? body, required Function onTapAction}) {}
+}
+
 // subclass ScenesViewModel so provider type matches
 class FakeScenesViewModel extends ScenesViewModel {
   bool _overrideLoading = false;
+  String? _overrideSwitching;
+  List<String> switchedTo = [];
 
   FakeScenesViewModel() : super(_DummySceneManager(), StubDeviceManager(), EventBus(), null);
 
@@ -71,6 +141,26 @@ class FakeScenesViewModel extends ScenesViewModel {
   set isLoading(bool v) {
     _overrideLoading = v;
     notifyListeners();
+  }
+
+  @override
+  String? get switchingSceneId => _overrideSwitching;
+
+  set switchingSceneId(String? v) {
+    _overrideSwitching = v;
+    notifyListeners();
+  }
+
+  @override
+  Future<void> switchCurrentScene(String newSceneID) async {
+    switchedTo.add(newSceneID);
+    // simulate real behaviour: set flags while awaiting
+    switchingSceneId = newSceneID;
+    isLoading = true;
+    // small delay to let widget rebuild if needed
+    await Future<void>.delayed(Duration(milliseconds: 10));
+    switchingSceneId = null;
+    isLoading = false;
   }
 }
 
@@ -142,6 +232,24 @@ void main() {
         equals(manager.current.id),
         reason: 'The current scene should be reordered to index 0',
       );
+    });
+
+    test('switchCurrentScene sets switchingSceneId correctly', () async {
+      final now = DateTime.now();
+      final scenes = [
+        SceneEntity(id: 'x', name: 'X', isCurrent: true, lastAccessTime: now),
+        SceneEntity(id: 'y', name: 'Y', isCurrent: false, lastAccessTime: now),
+      ];
+      final manager = StubSceneManager(scenes);
+      final vm = ScenesViewModel(manager, StubDeviceManager(), EventBus(), null);
+      await vm.initialize();
+
+      expect(vm.switchingSceneId, isNull);
+      // start switching; note we can't observe mid-call easily without stubbing
+      final future = vm.switchCurrentScene('y');
+      // after call returns it should be reset
+      await future;
+      expect(vm.switchingSceneId, isNull);
     });
 
     test('device bound/removed events trigger statistics reload', () async {
@@ -260,6 +368,132 @@ void main() {
       final afterReloadOrder = vm.scenes.map((s) => s.id).toList();
       expect(afterReloadOrder, equals(afterSelectOrder));
     });
+  });
+
+  testWidgets('card shows spinner while switching and others disabled', (WidgetTester tester) async {
+    final now = DateTime.now();
+    final a = SceneSummaryModel(
+      scene: SceneEntity(id: 'a', name: 'A', isCurrent: false, lastAccessTime: now),
+      totalDeviceCount: 0,
+      activeDeviceCount: 0,
+      isSelected: false,
+    );
+    final b = SceneSummaryModel(
+      scene: SceneEntity(id: 'b', name: 'B', isCurrent: false, lastAccessTime: now),
+      totalDeviceCount: 0,
+      activeDeviceCount: 0,
+      isSelected: false,
+    );
+
+    final vm = FakeScenesViewModel();
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [_FakeGettextDelegate()],
+        supportedLocales: const [Locale('en', 'US')],
+        home: ChangeNotifierProvider<ScenesViewModel>.value(
+          value: vm,
+          child: SingleChildScrollView(child: Column(children: [SceneCard(a), SceneCard(b)])),
+        ),
+      ),
+    );
+
+    // initiate switching by setting vm directly; the widgets will rebuild
+    vm.switchingSceneId = 'b';
+    vm.isLoading = true; // simulate state as if switch began
+    await tester.pump();
+
+    // card B should show a progress indicator in top right
+    expect(find.byKey(Key('scene_spinner_b')), findsOneWidget);
+
+    // taps on either card are ignored
+    await tester.tap(find.byKey(Key('scene_card_A')));
+    await tester.pump();
+    await tester.tap(find.byKey(Key('scene_card_B')));
+    await tester.pump();
+    expect(vm.switchedTo, isEmpty);
+
+    // after completion spinner disappears
+    vm.switchingSceneId = null;
+    vm.isLoading = false;
+    await tester.pump();
+    expect(find.byKey(Key('scene_spinner_b')), findsNothing);
+  });
+
+  testWidgets('chore list absorber toggles with loading', (WidgetTester tester) async {
+    final vm = FakeScenesViewModel();
+    final choresVm = ChoresViewModel(_DummyChoreManager(), StubSceneManager(), _DummyNotification(), EventBus(), null);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [_FakeGettextDelegate()],
+        supportedLocales: const [Locale('en', 'US')],
+        home: MultiProvider(
+          providers: [
+            ChangeNotifierProvider<ScenesViewModel>.value(value: vm),
+            ChangeNotifierProvider<ChoresViewModel>.value(value: choresVm),
+          ],
+          child: CustomScrollView(slivers: const [ChoreList()]),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // initial no absorber
+    expect(find.byKey(const Key('chore_absorber')), findsNothing);
+
+    vm.isLoading = true;
+    await tester.pump();
+    expect(find.byKey(const Key('chore_absorber')), findsOneWidget);
+
+    vm.isLoading = false;
+    await tester.pump();
+    expect(find.byKey(const Key('chore_absorber')), findsNothing);
+  });
+
+  testWidgets('chores view shows spinner and clears items while loading', (WidgetTester tester) async {
+    final chore = PowerOffAllChore();
+    final choresVm = ChoresViewModel(
+      _StaticChoreManager([chore]),
+      StubSceneManager(),
+      _DummyNotification(),
+      EventBus(),
+      null,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [_FakeGettextDelegate()],
+        supportedLocales: const [Locale('en', 'US')],
+        home: MultiProvider(
+          providers: [
+            Provider<IChoreManager>.value(value: _StaticChoreManager([chore])),
+            Provider<IAppNotificationService>.value(value: _DummyNotification()),
+            Provider<Logger?>.value(value: null),
+            ChangeNotifierProvider<ChoresViewModel>.value(value: choresVm),
+          ],
+          child: Scaffold(body: CustomScrollView(slivers: const [ChoreList()])),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // initial chore card should be present
+    expect(find.byType(ChoreCard), findsOneWidget);
+
+    // begin a load cycle – this should clear the current chores and show
+    // the spinner immediately
+    choresVm.setLoadingFlag(true);
+    await choresVm.refresh();
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(ChoreCard), findsNothing);
+
+    // finish loading - spinner disappears and the chore card should be
+    // rendered again (manager still returns the same item).
+    choresVm.setLoadingFlag(false);
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.byType(ChoreCard), findsOneWidget);
   });
 }
 

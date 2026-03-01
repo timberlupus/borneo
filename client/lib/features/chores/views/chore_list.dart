@@ -34,12 +34,13 @@ class _ChoreListState extends State<ChoreList> {
     // Also watch scenes to trigger animation when scene changes
     final scenesVm = context.watch<ScenesViewModel?>();
     String? selectedSceneId;
+    final bool scenesLoading = scenesVm?.isLoading ?? false;
     if (scenesVm != null) {
       try {
         selectedSceneId = scenesVm.scenes.firstWhere((s) => s.isSelected).id;
       } catch (_) {}
     }
-    return SliverToBoxAdapter(
+    Widget content = SliverToBoxAdapter(
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         child: Column(
@@ -53,10 +54,19 @@ class _ChoreListState extends State<ChoreList> {
         ),
       ),
     );
+    if (scenesLoading) {
+      content = SliverIgnorePointer(key: const Key('chore_absorber'), ignoring: true, sliver: content);
+    }
+    return content;
   }
 
   Widget _buildContent(BuildContext context, ChoresViewModel vm, String? selectedSceneId) {
     final theme = Theme.of(context);
+    if (vm.isLoading) {
+      // clear existing chores and show spinner while the new set is loading
+      return const Center(child: CircularProgressIndicator());
+    }
+
     if (vm.error != null && vm.chores.isEmpty && !vm.isLoading) {
       return Center(
         child: Padding(

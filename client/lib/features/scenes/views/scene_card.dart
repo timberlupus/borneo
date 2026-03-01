@@ -17,6 +17,9 @@ class SceneCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final vm = context.watch<ScenesViewModel>();
+    final bool isBusy = vm.isLoading;
+    final bool showSpinner = vm.switchingSceneId == scene.id && vm.isLoading;
     return Card(
       key: Key('scene_card_${scene.name}'),
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -30,20 +33,32 @@ class SceneCard extends StatelessWidget {
           color: scene.isSelected ? theme.colorScheme.primaryContainer : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16.0),
           child: InkWell(
-            onTap: () async {
-              onCentered?.call();
-              if (!scene.isSelected) {
-                await context.read<ScenesViewModel>().switchCurrentScene(scene.id);
-              }
-            },
-            child: _buildContent(context),
+            onTap: (!scene.isSelected && !isBusy)
+                ? () async {
+                    onCentered?.call();
+                    await vm.switchCurrentScene(scene.id);
+                  }
+                : null,
+            child: _buildContent(context, showSpinner, isBusy),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context) {
+  Widget _buildContent(BuildContext context, bool showSpinner, bool interactionsDisabled) {
+    Widget editWidget;
+    if (showSpinner) {
+      editWidget = SizedBox(
+        key: Key('scene_spinner_${scene.id}'),
+        width: 44,
+        height: 44,
+        child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+      );
+    } else {
+      editWidget = _buildEditButton(context, disabled: interactionsDisabled);
+    }
+
     if (scene.isSelected) {
       return Stack(
         alignment: Alignment.topRight,
@@ -65,7 +80,7 @@ class SceneCard extends StatelessWidget {
               child: Container(color: Colors.transparent),
             ),
           ),
-          Positioned(top: 0.0, right: 0.0, child: _buildEditButton(context)),
+          Positioned(top: 0.0, right: 0.0, child: editWidget),
         ],
       );
     }
@@ -120,7 +135,7 @@ class SceneCard extends StatelessWidget {
                     child: Container(color: Colors.transparent),
                   ),
                 ),
-              Positioned(top: 0.0, right: 0.0, child: _buildEditButton(context)),
+              Positioned(top: 0.0, right: 0.0, child: editWidget),
             ],
           ),
         );
@@ -128,7 +143,7 @@ class SceneCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEditButton(BuildContext context) {
+  Widget _buildEditButton(BuildContext context, {bool disabled = false}) {
     // Corner overlay matching card's 16px radius, flush to edges
     return ClipRRect(
       borderRadius: const BorderRadius.only(
@@ -140,7 +155,7 @@ class SceneCard extends StatelessWidget {
       child: Material(
         color: Colors.black.withValues(alpha: 0.32),
         child: InkWell(
-          onTap: () => _showEditSceneScreen(context),
+          onTap: disabled ? null : () => _showEditSceneScreen(context),
           key: Key('btn_edit_scene_${scene.name}'),
           child: const SizedBox(
             width: 44,

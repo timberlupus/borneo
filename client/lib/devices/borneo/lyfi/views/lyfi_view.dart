@@ -159,7 +159,7 @@ class _LyfiDeviceDetailsScreen extends StatelessWidget {
 
   void goBack(BuildContext context) async {
     final vm = context.read<LyfiViewModel>();
-    if (vm.isLocked) {
+    if (!vm.isOnline || vm.isLocked) {
       Navigator.of(context).pop();
     } else {
       if (!vm.isSuspectedOffline) {

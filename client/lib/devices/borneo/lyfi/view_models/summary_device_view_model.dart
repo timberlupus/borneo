@@ -6,10 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:lw_wot/wot.dart';
 
 class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
-  final ValueNotifier<LyfiState?> ledState = ValueNotifier(null);
-  final ValueNotifier<LyfiMode?> ledMode = ValueNotifier(null);
-  final ValueNotifier<List<int>?> channelBrightness = ValueNotifier(null);
-  final ValueNotifier<LyfiDeviceInfo?> lyfiDeviceInfo = ValueNotifier(null);
+  // replace ValueNotifiers with simple nullable fields; UI uses Selector
+  LyfiState? ledState;
+  LyfiMode? ledMode;
+  List<int>? channelBrightness;
+  LyfiDeviceInfo? lyfiDeviceInfo;
 
   LyfiSummaryDeviceViewModel(
     super.deviceEntity,
@@ -26,49 +27,71 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
       wotThing?.removeSubscriber(_onModeChanged);
       wotThing?.removeSubscriber(_onColorChanged);
       wotThing?.removeSubscriber(_onDeviceInfoChanged);
-      ledState.dispose();
-      ledMode.dispose();
-      channelBrightness.dispose();
-      lyfiDeviceInfo.dispose();
+      // plain fields don't require disposal
       super.dispose();
     }
   }
 
   void _onStateChanged(WotMessage msg) {
+    if (isDisposed) {
+      return;
+    }
     final stateValue = wotThing?.getProperty(LyfiKnownProperties.kState);
     if (stateValue != null) {
       final state = LyfiState.fromString(stateValue as String);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ledState.value = state;
+        if (ledState != state) {
+          ledState = state;
+          notifyListeners();
+        }
       });
     }
   }
 
   void _onModeChanged(WotMessage msg) {
+    if (isDisposed) {
+      return;
+    }
     final modeValue = wotThing?.getProperty(LyfiKnownProperties.kMode);
     if (modeValue != null) {
       final mode = LyfiMode.fromString(modeValue as String);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ledMode.value = mode;
+        if (ledMode != mode) {
+          ledMode = mode;
+          notifyListeners();
+        }
       });
     }
   }
 
   void _onColorChanged(WotMessage msg) {
+    if (isDisposed) {
+      return;
+    }
     final color = wotThing?.getProperty<List<int>>('color');
     if (color != null) {
-      // defer assignment to avoid modifying notifier during build
+      // defer assignment to avoid modifying state during build
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        channelBrightness.value = List<int>.from(color);
+        final newList = List<int>.from(color);
+        if (channelBrightness == null || !listEquals(channelBrightness, newList)) {
+          channelBrightness = newList;
+          notifyListeners();
+        }
       });
     }
   }
 
   void _onDeviceInfoChanged(WotMessage msg) {
+    if (isDisposed) {
+      return;
+    }
     final info = wotThing?.getProperty<LyfiDeviceInfo>('lyfiDeviceInfo');
     if (info != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        lyfiDeviceInfo.value = info;
+        if (lyfiDeviceInfo != info) {
+          lyfiDeviceInfo = info;
+          notifyListeners();
+        }
       });
     }
   }
@@ -88,6 +111,10 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
   }
 
   void _syncFromThing() {
+    if (isDisposed) {
+      return;
+    }
+
     LyfiState? newState;
     LyfiMode? newMode;
     List<int>? newColor;
@@ -115,10 +142,24 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
 
     if (newState != null || newMode != null || newColor != null || newInfo != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (newState != null) ledState.value = newState;
-        if (newMode != null) ledMode.value = newMode;
-        if (newColor != null) channelBrightness.value = newColor;
-        if (newInfo != null) lyfiDeviceInfo.value = newInfo;
+        bool changed = false;
+        if (newState != null && ledState != newState) {
+          ledState = newState;
+          changed = true;
+        }
+        if (newMode != null && ledMode != newMode) {
+          ledMode = newMode;
+          changed = true;
+        }
+        if (newColor != null && (channelBrightness == null || !listEquals(channelBrightness, newColor))) {
+          channelBrightness = newColor;
+          changed = true;
+        }
+        if (newInfo != null && lyfiDeviceInfo != newInfo) {
+          lyfiDeviceInfo = newInfo;
+          changed = true;
+        }
+        if (changed) notifyListeners();
       });
     }
   }

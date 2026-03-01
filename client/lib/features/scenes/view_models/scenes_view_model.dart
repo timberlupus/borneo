@@ -151,8 +151,17 @@ class ScenesViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  String? _switchingSceneId;
+
+  /// When non-null the view model is actively switching to the scene with
+  /// this ID.  Used by UI code to give per-card feedback while a change is
+  /// in progress.  Note that `_isLoading` remains true for the same window so
+  /// existing consumers that only looked at `isLoading` continue to function.
+  String? get switchingSceneId => _switchingSceneId;
+
   Future<void> switchCurrentScene(String newSceneID) async {
     if (newSceneID == _sceneManager.current.id || _isLoading) return;
+    _switchingSceneId = newSceneID;
     _isLoading = true;
     notifyListeners();
     try {
@@ -160,6 +169,7 @@ class ScenesViewModel extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
     } finally {
+      _switchingSceneId = null;
       _isLoading = false;
       notifyListeners();
     }

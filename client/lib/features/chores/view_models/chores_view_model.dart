@@ -59,6 +59,8 @@ class ChoresViewModel extends ChangeNotifier {
   }
 
   Future<void> _reloadChores() async {
+    // clear the list up-front so the UI can drop whatever was showing
+    _chores = [];
     try {
       _chores = _choreManager.getAvailableChores();
     } catch (e, stackTrace) {
@@ -73,6 +75,8 @@ class ChoresViewModel extends ChangeNotifier {
       try {
         _isLoading = true;
         _error = null;
+        // notify early so callers can show a spinner immediately
+        notifyListeners();
         await _reloadChores();
       } finally {
         _isLoading = false;
@@ -85,5 +89,15 @@ class ChoresViewModel extends ChangeNotifier {
   void dispose() {
     _choresChangedSub.cancel();
     super.dispose();
+  }
+
+  /// **TEST ONLY**: allow forcing the loading flag so widgets can react.
+  ///
+  /// The normal code path sets this when chores change events occur.  This
+  /// helper makes it easier to write deterministic unit/widget tests.
+  @visibleForTesting
+  void setLoadingFlag(bool loading) {
+    _isLoading = loading;
+    notifyListeners();
   }
 }
