@@ -15,7 +15,7 @@ import '../models/events.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 
-const int kDiscoveryTimeoutSeconds = 10;
+const int kDiscoveryTimeoutSeconds = 30;
 
 /// When automatic post‑provisioning mode is enabled we keep the mDNS listener
 /// active for this many seconds in order to pick up the newly‑added device.
@@ -293,7 +293,10 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
       // to the BLE name if resolution fails).  This avoids flicker in the UI.
       _unprovisioned.clear();
       for (var name in devices) {
-        if (_scanCancelToken.isCancelled) break;
+        if (_scanCancelToken.isCancelled) {
+          break;
+        }
+        _logger.d('Fetching device info for BLE device: `$name`');
         final info = await _bleProvisioner.fetchDeviceInfo(deviceName: name, cancelToken: _scanCancelToken);
         // require successful info; if name blank treat as failure too
         if (info.name.isNotEmpty) {
