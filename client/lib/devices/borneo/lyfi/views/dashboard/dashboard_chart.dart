@@ -12,42 +12,43 @@ class DashboardChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<LyfiViewModel, ({bool isOnline, LyfiMode mode, LyfiState? state, bool isOn, bool cloudActivated})>(
+    final lyfi = context.watch<LyfiViewModel>();
+    if (!lyfi.isOnline) {
+      return Container(
+        constraints: const BoxConstraints(minHeight: 200),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.wifi_off, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+              const SizedBox(height: 8),
+              Text(
+                context.translate('Device Offline'),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                context.translate('Please check device connection'),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Selector<LyfiViewModel, ({LyfiMode mode, LyfiState? state, bool isOn, bool cloudActivated})>(
       selector: (_, vm) => (
-        isOnline: vm.isOnline,
         mode: vm.mode,
         state: vm.state,
         isOn: vm.isOn,
         cloudActivated: vm.lyfiThing.getProperty<bool>('cloudActivated')!,
       ),
       builder: (context, props, _) {
-        if (!props.isOnline) {
-          return Container(
-            constraints: const BoxConstraints(minHeight: 200),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.wifi_off, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.translate('Device Offline'),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.translate('Please check device connection'),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
         final chartWidget = switch (props.mode) {
           LyfiMode.manual => ManualRunningChart(),
           LyfiMode.scheduled => ScheduleRunningChart(),

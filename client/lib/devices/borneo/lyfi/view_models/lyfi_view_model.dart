@@ -378,7 +378,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       for (final cvn in _channels) {
         cvn.dispose();
       }
-      if (!super.isLocked && super.isOnline && !isSuspectedOffline) {
+      if (super.isOnline && !super.isLocked && !isSuspectedOffline) {
         try {
           if (super.state != LyfiState.normal) {
             super.setState(LyfiState.normal);
