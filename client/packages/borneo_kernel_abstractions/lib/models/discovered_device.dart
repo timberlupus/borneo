@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 sealed class DiscoveredDevice {
   final String host;
   final int? port;
@@ -14,7 +12,7 @@ sealed class DiscoveredDevice {
 }
 
 class MdnsDiscoveredDevice extends DiscoveredDevice {
-  final Map<String, Uint8List?>? txt;
+  final Map<String, String>? txt;
   final String? serviceType;
   const MdnsDiscoveredDevice({required super.host, super.port, super.name, this.txt, this.serviceType});
 }

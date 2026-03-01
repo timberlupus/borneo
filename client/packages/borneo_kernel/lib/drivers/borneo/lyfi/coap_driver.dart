@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:borneo_kernel/drivers/borneo/lyfi/base_lyfi_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/coap_client.dart';
 import 'package:borneo_kernel/drivers/borneo/coap_config.dart';
@@ -169,19 +167,19 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
 
   static SupportedDeviceDescriptor? matches(DiscoveredDevice discovered) {
     if (discovered is MdnsDiscoveredDevice) {
-      final compatible = utf8.decode(discovered.txt?['compatible'] ?? [], allowMalformed: true);
-      final fwVer = Version.parse(utf8.decode(discovered.txt?['fwver'] ?? [], allowMalformed: true));
+      final compatible = discovered.txt?['compatible'] ?? '';
+      final fwVer = Version.parse(discovered.txt?['fwver'] ?? '');
       if (compatible == lyfiCompatibleString) {
         final matched = SupportedDeviceDescriptor(
           driverDescriptor: borneoLyfiDriverDescriptor,
           address: Uri(scheme: 'coap', host: discovered.host, port: discovered.port),
-          name: utf8.decode(discovered.txt?['name'] ?? [], allowMalformed: true),
+          name: discovered.txt?['name'] ?? '',
           compatible: compatible,
-          model: utf8.decode(discovered.txt?['model'] ?? [], allowMalformed: true),
-          fingerprint: utf8.decode(discovered.txt?['serno'] ?? [], allowMalformed: true),
-          manuf: utf8.decode(discovered.txt?['manuf'] ?? [], allowMalformed: true),
+          model: discovered.txt?['model'] ?? '',
+          fingerprint: discovered.txt?['serno'] ?? '',
+          manuf: discovered.txt?['manuf'] ?? '',
           fwVer: fwVer,
-          isCE: utf8.decode(discovered.txt?['ce'] ?? [], allowMalformed: true) == 'true' ? true : false,
+          isCE: discovered.txt?['ce'] == 'true' ? true : false,
         );
         return matched;
       }

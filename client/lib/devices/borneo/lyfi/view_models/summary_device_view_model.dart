@@ -142,6 +142,9 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
 
     if (newState != null || newMode != null || newColor != null || newInfo != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (isDisposed) {
+          return;
+        }
         bool changed = false;
         if (newState != null && ledState != newState) {
           ledState = newState;
