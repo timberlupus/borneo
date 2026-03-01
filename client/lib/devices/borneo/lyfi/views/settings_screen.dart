@@ -16,6 +16,7 @@ import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:logger/logger.dart';
 
 import 'package:provider/provider.dart';
+import 'package:borneo_app/routes/app_routes.dart';
 
 class SettingsScreen extends StatelessWidget {
   final SettingsViewModel vm;
@@ -288,11 +289,15 @@ class SettingsScreen extends StatelessWidget {
             ),
             onPressed: () {
               Navigator.of(context).pop();
+              // after the factory reset completes navigate all the way back to the
+              // device list (rather than just popping a single route). this matches
+              // other flows such as provisioning where the user is returned to the
+              // main list when a long‑running action finishes.
               vm.factoryReset().then((_) {
                 if (context.mounted) {
-                  if (Navigator.of(context).canPop()) {
-                    Navigator.of(context).pop();
-                  }
+                  Navigator.of(context).popUntil(
+                    (route) => route.settings.name == AppRoutes.kDevices || route.isFirst,
+                  );
                 }
               });
             },
@@ -313,7 +318,9 @@ class SettingsScreen extends StatelessWidget {
 
     vm.networkReset().then((_) {
       if (context.mounted) {
-        if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+        Navigator.of(context).popUntil(
+          (route) => route.settings.name == AppRoutes.kDevices || route.isFirst,
+        );
       }
     });
   }
