@@ -167,17 +167,17 @@ final class DeviceManagerImpl extends IDeviceManager {
   Future<void> unbind(String deviceID) => _kernel.unbind(deviceID);
 
   @override
-  Future<void> delete(String id, {Transaction? tx}) async {
+  Future<void> delete(String id, {Transaction? tx, CancellationToken? cancelToken}) async {
     if (tx == null) {
-      await _db.transaction((tx) => delete(id, tx: tx));
+      await _db.transaction((tx) => delete(id, tx: tx, cancelToken: cancelToken)).asCancellable(cancelToken);
     } else {
       if (_kernel.isBound(id)) {
-        await _kernel.unbind(id);
+        await _kernel.unbind(id, cancelToken: cancelToken);
       }
       _kernel.unregisterDevice(id);
       _disposeWotThing(id);
       final store = stringMapStoreFactory.store(StoreNames.devices);
-      await store.record(id).delete(tx);
+      await store.record(id).delete(tx).asCancellable(cancelToken);
       allDeviceEvents.fire(DeviceEntityDeletedEvent(id));
     }
   }

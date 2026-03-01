@@ -322,18 +322,20 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     }
   }
 
-  Future<void> delete() async {
+  Future<void> delete({bool shouldUpdate = false}) async {
     assert(!isBusy);
 
     isBusy = true;
     try {
-      await deviceManager.delete(deviceID);
+      await deviceManager.delete(deviceID, cancelToken: masterCancellation);
     } catch (e, stackTrace) {
       logger?.e('$e', error: e, stackTrace: stackTrace);
       notifyAppError('$e', stackTrace: stackTrace);
     } finally {
       isBusy = false;
-      notifyListeners();
+      if (shouldUpdate) {
+        notifyListeners();
+      }
     }
   }
 

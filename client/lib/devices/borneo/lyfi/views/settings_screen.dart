@@ -227,6 +227,13 @@ class SettingsScreen extends StatelessWidget {
           tiles: [
             SettingsTile.navigation(
               title: Text(
+                context.translate('Delete device'),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+              onPressed: (bc) => _showDeleteDialog(bc, vm),
+            ),
+            SettingsTile.navigation(
+              title: Text(
                 context.translate('Reset device network settings'),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
@@ -295,9 +302,7 @@ class SettingsScreen extends StatelessWidget {
               // main list when a long‑running action finishes.
               vm.factoryReset().then((_) {
                 if (context.mounted) {
-                  Navigator.of(context).popUntil(
-                    (route) => route.settings.name == AppRoutes.kDevices || route.isFirst,
-                  );
+                  Navigator.of(context).popUntil((route) => route.settings.name == AppRoutes.kDevices || route.isFirst);
                 }
               });
             },
@@ -318,11 +323,37 @@ class SettingsScreen extends StatelessWidget {
 
     vm.networkReset().then((_) {
       if (context.mounted) {
-        Navigator.of(context).popUntil(
-          (route) => route.settings.name == AppRoutes.kDevices || route.isFirst,
-        );
+        Navigator.of(context).popUntil((route) => route.settings.name == AppRoutes.kDevices || route.isFirst);
       }
     });
+  }
+
+  void _showDeleteDialog(BuildContext context, SettingsViewModel vm) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.translate('Delete Device')),
+        content: Text(context.translate('Are you sure you want to delete this device?')),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.translate('Cancel'))),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.errorContainer,
+              foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              vm.delete().then((_) {
+                if (context.mounted) {
+                  Navigator.of(context).popUntil((route) => route.settings.name == AppRoutes.kDevices || route.isFirst);
+                }
+              });
+            },
+            child: Text(context.translate('Delete')),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showManualFanPowerDialog(BuildContext context, SettingsViewModel vm, int currentValue) {
