@@ -5,6 +5,7 @@
 import FlutterMacOS
 import Foundation
 
+import app_review
 import file_selector_macos
 import flutter_timezone
 import geolocator_apple
@@ -15,6 +16,7 @@ import url_launcher_macos
 import window_size
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+  AppReviewPlugin.register(with: registry.registrar(forPlugin: "AppReviewPlugin"))
   FileSelectorPlugin.register(with: registry.registrar(forPlugin: "FileSelectorPlugin"))
   FlutterTimezonePlugin.register(with: registry.registrar(forPlugin: "FlutterTimezonePlugin"))
   GeolocatorPlugin.register(with: registry.registrar(forPlugin: "GeolocatorPlugin"))

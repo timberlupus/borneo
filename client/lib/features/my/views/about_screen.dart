@@ -10,7 +10,8 @@ import 'package:borneo_app/features/my/providers/about_provider.dart';
 
 final Uri _websiteUrl = Uri.parse('https://www.borneoiot.com');
 final Uri _docsUrl = Uri.parse('https://docs.borneoiot.com');
-final Uri _privacyUrl = Uri.parse('https://www.borneoiot.com/app-privacy-policy/');
+final Uri _privacyUrl = Uri.parse('https://www.borneoiot.com/app/privacy');
+final Uri _tosUrl = Uri.parse('https://www.borneoiot.com/app/tos');
 
 /// A reusable section displayed on the about screen with a title and a link.
 ///
@@ -124,15 +125,16 @@ class AboutScreen extends ConsumerWidget {
 
                 _LinkSection(title: context.translate('Documentation'), url: _docsUrl),
 
+                _LinkSection(title: context.translate('Term of Services.'), url: _tosUrl, hideLink: true),
+
                 _LinkSection(title: context.translate('Privacy Policy'), url: _privacyUrl, hideLink: true),
               ],
             ),
 
             const Spacer(),
 
-            Container(
-              color: Theme.of(context).colorScheme.surface,
-              margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Text(
                 context.translate(
                   '''This mobile application is free software licensed under GNU General Public License version 3 or later, with no warranty.

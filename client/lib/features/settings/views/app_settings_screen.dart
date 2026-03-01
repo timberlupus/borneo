@@ -123,8 +123,8 @@ class AppSettingsScreen extends ConsumerWidget {
           ),
           SettingsTile.navigation(
             leading: const Icon(Icons.settings_brightness_outlined),
-            title: Text(context.translate('Report an issue on GitHub')),
-            onPressed: (bc) => _openUrl(bc, githubIssuesUrl),
+            title: Text(context.translate('Feedback via Email')),
+            onPressed: (bc) => _openUrl(bc, 'mailto:support@binarystarstech.com'),
           ),
         ],
       ),

@@ -116,6 +116,7 @@ dependencies:
   community_material_icon: ^5.9.55
   persistent_bottom_nav_bar: ^6.2.0
   timelines_plus: ^1.0.8
+  app_review: ^3.0.0
 
 
 dev_dependencies:
