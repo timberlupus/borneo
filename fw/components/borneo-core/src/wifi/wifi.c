@@ -29,7 +29,7 @@
 #define NVS_NS "borneo.wifi"
 #define NVS_COUNT_KEY "shutdown-count"
 #define TAG "wifi"
-#define WIFI_RECONNECT_INTERVAL_MS 5000
+#define WIFI_RECONNECT_INTERVAL_MS 15000
 
 static int bo_wifi_start();
 static int _update_nvs_early(int32_t* shutdown_count);
@@ -104,6 +104,7 @@ int bo_wifi_start()
     }
     else {
         s_wifi_state = WIFI_STATE_CONNECTING;
+        BO_TRY(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_events_handler, NULL));
         BO_TRY(esp_wifi_connect());
 
         int32_t shutdown_count = 0;
