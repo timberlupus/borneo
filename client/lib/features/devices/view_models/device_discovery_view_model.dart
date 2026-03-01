@@ -294,23 +294,18 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
       _unprovisioned.clear();
       for (var name in devices) {
         if (_scanCancelToken.isCancelled) break;
-        try {
-          final info = await _bleProvisioner.fetchDeviceInfo(deviceName: name, cancelToken: _scanCancelToken);
-          // require successful info; if name blank treat as failure too
-          if (info.name.isNotEmpty) {
-            _resolvedDeviceNames[name] = info.name;
-            _unprovisioned.add(name);
-            _updateDiscoverableList();
-          } else {
-            _logger.w('Resolved info had empty name for $name, skipping');
-          }
-        } catch (e, st) {
-          _logger.w('Failed to resolve name for $name - omitting', error: e, stackTrace: st);
-          // skip device entirely
+        final info = await _bleProvisioner.fetchDeviceInfo(deviceName: name, cancelToken: _scanCancelToken);
+        // require successful info; if name blank treat as failure too
+        if (info.name.isNotEmpty) {
+          _resolvedDeviceNames[name] = info.name;
+          _unprovisioned.add(name);
+          _updateDiscoverableList();
+        } else {
+          _logger.w('Resolved info had empty name for $name, skipping');
         }
       }
     } on CancelledException {
-      _logger.i('BLE scan was cancelled by user.');
+      _logger.w('BLE scan was cancelled by user.');
       return;
     } catch (e, stackTrace) {
       _logger.e('BLE provisioning scan failed', error: e, stackTrace: stackTrace);

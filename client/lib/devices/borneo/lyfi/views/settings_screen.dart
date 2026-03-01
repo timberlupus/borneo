@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:borneo_app/core/services/app_notification_service.dart';
+import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/controller_settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/controller_settings_screen.dart';
@@ -321,13 +323,20 @@ class SettingsScreen extends StatelessWidget {
       message: context.translate("Are you sure you want to reset this device's network settings?"),
     );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
-    vm.networkReset().then((_) {
-      if (context.mounted) {
-        Navigator.of(context).popUntil((route) => route.settings.name == AppRoutes.kDevices || route.isFirst);
-      }
-    });
+    final deviceID = vm.deviceID;
+    await vm.networkReset();
+
+    if (context.mounted) {
+      Navigator.of(context).popUntil((route) => route.settings.name == AppRoutes.kDevices || route.isFirst);
+    }
+    if (context.mounted) {
+      var dm = context.read<IDeviceManager>();
+      await dm.delete(deviceID);
+    }
   }
 
   Future<void> _showDeleteDialog(BuildContext context, SettingsViewModel vm) async {
