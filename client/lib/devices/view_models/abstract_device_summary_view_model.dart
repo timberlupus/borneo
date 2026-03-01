@@ -23,8 +23,7 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
 
   WotThing? wotThing;
 
-  bool _isOnline;
-  bool get isOnline => _isOnline;
+  bool get isOnline => wotThing?.getProperty<bool>('online') ?? false;
 
   String get name => deviceEntity.name;
 
@@ -45,7 +44,7 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
     EventBus globalEventBus, {
     required super.gt,
     super.logger,
-  }) : _isOnline = deviceManager.isBound(deviceEntity.id) {
+  }) {
     super.globalEventBus = globalEventBus;
     _boundEventSub = deviceManager.allDeviceEvents.on<DeviceBoundEvent>().listen(_onBound);
     _removedEventSub = deviceManager.allDeviceEvents.on<DeviceRemovedEvent>().listen(_onRemoved);
@@ -74,14 +73,12 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
 
   void _onBound(DeviceBoundEvent event) {
     if (event.device.id == deviceEntity.id) {
-      _isOnline = true;
       notifyListeners();
     }
   }
 
   void _onRemoved(DeviceRemovedEvent event) {
     if (event.device.id == deviceEntity.id) {
-      _isOnline = false;
       _refreshWotThing();
       notifyListeners();
     }

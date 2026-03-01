@@ -188,16 +188,20 @@ class DeviceCard extends StatelessWidget {
       icon: Icon(Icons.more_vert, color: fgColor.withValues(alpha: 0.7)),
       onSelected: (value) => _handleMenuAction(context, value),
       itemBuilder: (BuildContext ctx) {
-        final showChangeGroup = ctx.read<GroupedDevicesViewModel>().groups.length > 1;
+        final gvm = ctx.read<GroupedDevicesViewModel>();
+        final dvm = ctx.read<AbstractDeviceSummaryViewModel>();
+        final showChangeGroup = gvm.groups.length > 1;
 
         final entries = <PopupMenuEntry<String>>[
-          PopupMenuItem<String>(value: 'reconnect', child: Text(context.translate('Reconnect'))),
+          if (!dvm.isOnline) PopupMenuItem<String>(value: 'reconnect', child: Text(context.translate('Reconnect'))),
+
+          if (!dvm.isOnline) const PopupMenuDivider(),
+
+          if (showChangeGroup)
+            PopupMenuItem<String>(value: 'change-group', child: Text(context.translate('Change group...'))),
+
+          PopupMenuItem<String>(value: 'delete', child: Text(context.translate('Delete...'))),
         ];
-        entries.add(const PopupMenuDivider());
-        if (showChangeGroup) {
-          entries.add(PopupMenuItem<String>(value: 'change-group', child: Text(context.translate('Change group...'))));
-        }
-        entries.add(PopupMenuItem<String>(value: 'delete', child: Text(context.translate('Delete...'))));
         return entries;
       },
     );
