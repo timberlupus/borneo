@@ -19,11 +19,12 @@ final Uri _tosUrl = Uri.parse('https://www.borneoiot.com/app/tos');
 /// when tapped. It also shows the host portion of the URL with underline styling.
 class _LinkSection extends StatelessWidget {
   // URI parsing is runtime, so constructor can't be const.
-  const _LinkSection({required this.title, required this.url, this.hideLink = false});
+  const _LinkSection({required this.title, this.url, this.hideLink = false, this.onTap});
 
   final String title; // Already translated by callers when needed
-  final Uri url;
+  final Uri? url;
   final bool hideLink;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -37,26 +38,27 @@ class _LinkSection extends StatelessWidget {
     Widget titleWidget;
     Widget? linkWidget;
 
+    final callback =
+        onTap ??
+        () async {
+          if (url != null) {
+            final urlLauncher = UrlLauncherService(
+              notification: provider.Provider.of<IAppNotificationService>(context, listen: false),
+            );
+            await urlLauncher.open(url.toString());
+          }
+        };
+
     if (hideLink) {
       titleWidget = InkWell(
-        onTap: () async {
-          final urlLauncher = UrlLauncherService(
-            notification: provider.Provider.of<IAppNotificationService>(context, listen: false),
-          );
-          await urlLauncher.open(url.toString());
-        },
+        onTap: callback,
         child: Text(titleText, style: linkStyle),
       );
     } else {
       titleWidget = Text(titleText, style: titleStyle);
       linkWidget = InkWell(
-        onTap: () async {
-          final urlLauncher = UrlLauncherService(
-            notification: provider.Provider.of<IAppNotificationService>(context, listen: false),
-          );
-          await urlLauncher.open(url.toString());
-        },
-        child: Text(url.host, style: linkStyle),
+        onTap: callback,
+        child: Text(url?.host ?? '', style: linkStyle),
       );
     }
 
@@ -65,6 +67,37 @@ class _LinkSection extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       child: Material(
         child: Center(child: Column(children: [titleWidget, ?linkWidget])),
+      ),
+    );
+  }
+}
+
+/// Displays the content of a text file bundled as an asset. Used for showing
+/// the GPL license text from `assets/docs/gpl3.txt`.
+class _AssetTextScreen extends StatelessWidget {
+  const _AssetTextScreen({required this.title, required this.assetPath});
+
+  final String title;
+  final String assetPath;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(context.translate(title))),
+      body: FutureBuilder<String>(
+        future: DefaultAssetBundle.of(context).loadString(assetPath),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text(context.translate('Error loading document')));
+          }
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Text(snapshot.data ?? '', style: Theme.of(context).textTheme.bodyMedium),
+          );
+        },
       ),
     );
   }
@@ -128,6 +161,22 @@ class AboutScreen extends ConsumerWidget {
                 _LinkSection(title: context.translate('Term of Services.'), url: _tosUrl, hideLink: true),
 
                 _LinkSection(title: context.translate('Privacy Policy'), url: _privacyUrl, hideLink: true),
+
+                // show GPL license text from asset when tapped
+                _LinkSection(
+                  title: context.translate('License'),
+                  hideLink: true,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const _AssetTextScreen(
+                          title: 'GNU General Public License v3',
+                          assetPath: 'assets/docs/license.txt',
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
 

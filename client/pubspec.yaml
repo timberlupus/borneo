@@ -197,6 +197,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/docs/
+    - assets/docs/license.txt
     - assets/i18n/
     - assets/images/
     - assets/images/2k_earth-day.jpg
