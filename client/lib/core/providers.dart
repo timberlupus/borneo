@@ -9,6 +9,7 @@
 // legacy providers and eliminate this file or repurpose it per feature.
 
 import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
+import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/routes/route_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -103,6 +104,11 @@ final bleProvisionerProvider = Provider<IBleProvisioner>((ref) {
   // original provider had a Logger dependency but did not use it directly
   return BleProvisioner();
 });
+
+/// Group manager; overridden at the widget-tree level for screens that need it.
+final groupManagerProvider = Provider<IGroupManager>(
+  (ref) => throw UnimplementedError('groupManagerProvider must be overridden'),
+);
 
 // Additional providers (if needed) can be added here as the migration
 // proceeds (e.g. StateNotifierProviders for view models).
