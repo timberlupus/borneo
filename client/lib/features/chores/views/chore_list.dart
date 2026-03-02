@@ -1,72 +1,66 @@
 import 'package:flutter/material.dart';
 
-import 'package:provider/provider.dart' hide Consumer;
+import 'package:provider/provider.dart' as legacy;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
-import '../view_models/chores_view_model.dart';
+import '../providers/chores_provider.dart';
+import '../providers/chore_summary_provider.dart';
 import '../../scenes/providers/scenes_provider.dart';
 import 'chore_card.dart';
 import '../models/abstract_chore.dart';
+import '../../../core/providers.dart';
 import '../../../core/services/chore_manager.dart';
-import '../../../core/services/scene_manager.dart';
 import '../../../core/services/app_notification_service.dart';
-import 'package:logger/logger.dart';
-import 'package:event_bus/event_bus.dart';
 
-class ChoreList extends StatefulWidget {
+class ChoreList extends ConsumerStatefulWidget {
   const ChoreList({super.key});
   @override
-  State<ChoreList> createState() => _ChoreListState();
+  ConsumerState<ChoreList> createState() => _ChoreListState();
 }
 
-class _ChoreListState extends State<ChoreList> {
+class _ChoreListState extends ConsumerState<ChoreList> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ChoresViewModel>().initialize();
+      if (mounted) ref.read(choresProvider.notifier).initialize();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<ChoresViewModel>();
-    // Watch scenes loading state via Riverpod; defaults to false when
-    // scenesProvider is not in scope (e.g. isolated widget tests).
-    return Consumer(
-      builder: (context, ref, _) {
-        final scenesLoading = ref.watch(scenesIsLoadingProvider);
-        Widget content = SliverToBoxAdapter(
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(context.translate('Chores'), style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 16),
-                // Always render the chores content; remove the loading animation.
-                _buildContent(context, state),
-              ],
-            ),
-          ),
-        );
-        if (scenesLoading) {
-          content = SliverIgnorePointer(key: const Key('chore_absorber'), ignoring: true, sliver: content);
-        }
-        return content;
-      },
+    final state = ref.watch(choresProvider);
+    final scenesLoading = ref.watch(scenesIsLoadingProvider);
+
+    Widget content = SliverToBoxAdapter(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(context.translate('Chores'), style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 16),
+            _buildContent(context, state),
+          ],
+        ),
+      ),
     );
+
+    if (scenesLoading) {
+      content = SliverIgnorePointer(key: const Key('chore_absorber'), ignoring: true, sliver: content);
+    }
+
+    return content;
   }
 
-  Widget _buildContent(BuildContext context, ChoresViewModel vm) {
+  Widget _buildContent(BuildContext context, ChoresState state) {
     final theme = Theme.of(context);
-    if (vm.isLoading) {
-      // clear existing chores and show spinner while the new set is loading
+    if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (vm.error != null && vm.chores.isEmpty && !vm.isLoading) {
+    if (state.error != null && state.chores.isEmpty && !state.isLoading) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 32),
@@ -75,7 +69,7 @@ class _ChoreListState extends State<ChoreList> {
               Text(context.translate('Error loading chores'), style: TextStyle(color: theme.colorScheme.error)),
               const SizedBox(height: 8),
               ElevatedButton(
-                onPressed: () => context.read<ChoresViewModel>().refresh(),
+                onPressed: () => ref.read(choresProvider.notifier).refresh(),
                 child: Text(context.translate('Retry')),
               ),
             ],
@@ -83,7 +77,8 @@ class _ChoreListState extends State<ChoreList> {
         ),
       );
     }
-    final List<AbstractChore> chores = vm.chores;
+
+    final List<AbstractChore> chores = state.chores;
     if (chores.isEmpty) {
       return Center(
         child: Padding(
@@ -111,6 +106,7 @@ class _ChoreListState extends State<ChoreList> {
         ),
       );
     }
+
     return Column(
       children: [
         GridView.builder(
@@ -129,7 +125,7 @@ class _ChoreListState extends State<ChoreList> {
             return ChoreCard(chore);
           },
         ),
-        if (vm.error != null && chores.isNotEmpty)
+        if (state.error != null && chores.isNotEmpty)
           Container(
             margin: const EdgeInsets.only(top: 16),
             padding: const EdgeInsets.all(12),
@@ -139,10 +135,10 @@ class _ChoreListState extends State<ChoreList> {
                 Icon(Icons.error_outline, color: theme.colorScheme.onErrorContainer),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(vm.error!, style: TextStyle(color: theme.colorScheme.onErrorContainer)),
+                  child: Text(state.error!, style: TextStyle(color: theme.colorScheme.onErrorContainer)),
                 ),
                 TextButton(
-                  onPressed: () => context.read<ChoresViewModel>().initialize(),
+                  onPressed: () => ref.read(choresProvider.notifier).initialize(),
                   child: Text(context.translate('Retry')),
                 ),
               ],
@@ -153,20 +149,24 @@ class _ChoreListState extends State<ChoreList> {
   }
 }
 
-/// Helper wrapper to provide ChoresViewModel in a scope where underlying services exist.
+/// Bridges the legacy [IChoreManager] and [IAppNotificationService] from the
+/// old `provider` tree into Riverpod, then scopes [choresProvider] and
+/// [choreSummaryProvider] so [ChoreList] and [ChoreCard] can consume them.
 class ProvideChoresViewModel extends StatelessWidget {
   final Widget child;
   const ProvideChoresViewModel({required this.child, super.key});
+
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ChoresViewModel>(
-      create: (ctx) => ChoresViewModel(
-        ctx.read<IChoreManager>(),
-        ctx.read<ISceneManager>(),
-        ctx.read<IAppNotificationService>(),
-        ctx.read<EventBus>(),
-        ctx.read<Logger?>(),
-      ),
+    final choreManager = legacy.Provider.of<IChoreManager>(context, listen: false);
+    final notification = legacy.Provider.of<IAppNotificationService>(context, listen: false);
+    return ProviderScope(
+      overrides: [
+        choreManagerProvider.overrideWithValue(choreManager),
+        appNotificationServiceProvider.overrideWithValue(notification),
+        choresProvider.overrideWith(ChoresNotifier.new),
+        choreSummaryProvider.overrideWith2((arg) => ChoreSummaryNotifier(arg)),
+      ],
       child: child,
     );
   }

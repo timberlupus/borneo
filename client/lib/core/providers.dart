@@ -8,6 +8,8 @@
 // incrementally.  Once every consumer has been migrated we can remove the
 // legacy providers and eliminate this file or repurpose it per feature.
 
+import 'package:borneo_app/core/services/app_notification_service.dart';
+import 'package:borneo_app/core/services/chore_manager.dart';
 import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
@@ -120,6 +122,16 @@ final sceneManagerProvider = Provider<ISceneManager>(
 /// Device manager; overridden at the widget-tree level for screens that need it.
 final deviceManagerProvider = Provider<IDeviceManager>(
   (ref) => throw UnimplementedError('deviceManagerProvider must be overridden'),
+);
+
+/// Chore manager; overridden at the widget-tree level for screens that need it.
+final choreManagerProvider = Provider<IChoreManager>(
+  (ref) => throw UnimplementedError('choreManagerProvider must be overridden'),
+);
+
+/// App notification service; overridden at the widget-tree level.
+final appNotificationServiceProvider = Provider<IAppNotificationService>(
+  (ref) => throw UnimplementedError('appNotificationServiceProvider must be overridden'),
 );
 
 // Additional providers (if needed) can be added here as the migration

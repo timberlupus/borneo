@@ -3,14 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Provider;
 
 import 'package:event_bus/event_bus.dart';
-import 'package:logger/logger.dart';
-import 'package:provider/provider.dart' hide Consumer;
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 
 import 'package:borneo_app/features/scenes/view_models/scenes_view_model.dart';
 import 'package:borneo_app/features/scenes/providers/scenes_provider.dart';
 import 'package:borneo_app/features/scenes/views/scene_card.dart';
-import 'package:borneo_app/features/chores/view_models/chores_view_model.dart';
+import 'package:borneo_app/features/chores/providers/chores_provider.dart';
+import 'package:borneo_app/features/chores/providers/chore_summary_provider.dart';
 import 'package:borneo_app/features/chores/views/chore_list.dart';
 import 'package:borneo_app/features/chores/views/chore_card.dart';
 import 'package:borneo_app/features/chores/models/builtin_chores.dart';
@@ -46,19 +45,6 @@ class _FakeGettextDelegate extends LocalizationsDelegate<GettextLocalizations> {
 // ---------------------------------------------------------------------------
 // Chore-manager stubs
 // ---------------------------------------------------------------------------
-
-class _DummyChoreManager implements IChoreManager {
-  @override
-  List<AbstractChore> getAvailableChores() => [];
-  @override
-  Future<void> executeChore(String choreId) async {}
-  @override
-  Future<void> undoChore(String choreId) async {}
-  @override
-  Future<bool> hasHistoryForChore(String choreId) async => false;
-  @override
-  void dispose() {}
-}
 
 class _StaticChoreManager implements IChoreManager {
   final List<AbstractChore> _chores;
@@ -99,6 +85,25 @@ class _BoolNotifier extends Notifier<bool> {
 }
 
 final _boolNotifierProvider = NotifierProvider<_BoolNotifier, bool>(_BoolNotifier.new);
+
+// ---------------------------------------------------------------------------
+// Fake ChoresNotifier for isolated widget tests.
+// ---------------------------------------------------------------------------
+
+class _FakeChoresNotifier extends ChoresNotifier {
+  final List<AbstractChore> _initialChores;
+  _FakeChoresNotifier([this._initialChores = const []]);
+
+  @override
+  ChoresState build() => ChoresState(chores: _initialChores, isLoading: false);
+
+  /// Overridden to be a no-op so tests control state manually.
+  @override
+  Future<void> initialize() async {}
+
+  void setLoadingFlag(bool loading) => state = state.copyWith(isLoading: loading);
+  void setChores(List<AbstractChore> chores) => state = state.copyWith(chores: chores);
+}
 
 // ---------------------------------------------------------------------------
 // Fake ScenesNotifier - overrides build() so no event subscriptions or
@@ -245,11 +250,12 @@ void main() {
 
   testWidgets('chore list absorber toggles with scenes loading state', (WidgetTester tester) async {
     final container = ProviderContainer(
-      overrides: [scenesIsLoadingProvider.overrideWith((ref) => ref.watch(_boolNotifierProvider))],
+      overrides: [
+        scenesIsLoadingProvider.overrideWith((ref) => ref.watch(_boolNotifierProvider)),
+        choresProvider.overrideWith(() => _FakeChoresNotifier()),
+      ],
     );
     addTearDown(container.dispose);
-
-    final choresVm = ChoresViewModel(_DummyChoreManager(), StubSceneManager(), _DummyNotification(), EventBus(), null);
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -257,10 +263,7 @@ void main() {
         child: MaterialApp(
           localizationsDelegates: const [_FakeGettextDelegate()],
           supportedLocales: const [Locale('en', 'US')],
-          home: ChangeNotifierProvider<ChoresViewModel>.value(
-            value: choresVm,
-            child: const CustomScrollView(slivers: [ChoreList()]),
-          ),
+          home: const CustomScrollView(slivers: [ChoreList()]),
         ),
       ),
     );
@@ -280,30 +283,25 @@ void main() {
 
   testWidgets('chores view shows spinner and clears items while loading', (WidgetTester tester) async {
     final chore = PowerOffAllChore();
-    final choresVm = ChoresViewModel(
-      _StaticChoreManager([chore]),
-      StubSceneManager(),
-      _DummyNotification(),
-      EventBus(),
-      null,
+    final fakeNotifier = _FakeChoresNotifier([chore]);
+
+    final container = ProviderContainer(
+      overrides: [
+        choreManagerProvider.overrideWithValue(_StaticChoreManager([chore])),
+        appNotificationServiceProvider.overrideWithValue(_DummyNotification()),
+        choreSummaryProvider.overrideWith2((arg) => ChoreSummaryNotifier(arg)),
+        choresProvider.overrideWith(() => fakeNotifier),
+      ],
     );
+    addTearDown(container.dispose);
 
     await tester.pumpWidget(
-      // A bare ProviderScope so ChoreList's Consumer can find scenesIsLoadingProvider
-      // (defaults to false - no scene scope needed for this test).
-      ProviderScope(
+      UncontrolledProviderScope(
+        container: container,
         child: MaterialApp(
           localizationsDelegates: const [_FakeGettextDelegate()],
           supportedLocales: const [Locale('en', 'US')],
-          home: MultiProvider(
-            providers: [
-              Provider<IChoreManager>.value(value: _StaticChoreManager([chore])),
-              Provider<IAppNotificationService>.value(value: _DummyNotification()),
-              Provider<Logger?>.value(value: null),
-              ChangeNotifierProvider<ChoresViewModel>.value(value: choresVm),
-            ],
-            child: const Scaffold(body: CustomScrollView(slivers: [ChoreList()])),
-          ),
+          home: const Scaffold(body: CustomScrollView(slivers: [ChoreList()])),
         ),
       ),
     );
@@ -312,14 +310,14 @@ void main() {
     expect(find.byType(ChoreCard), findsOneWidget);
 
     // Start a load cycle - spinner appears and chore cards disappear.
-    choresVm.setLoadingFlag(true);
-    await choresVm.refresh();
+    fakeNotifier.setLoadingFlag(true);
+    await fakeNotifier.refresh();
     await tester.pump();
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.byType(ChoreCard), findsNothing);
 
     // Finish loading - spinner disappears and card reappears.
-    choresVm.setLoadingFlag(false);
+    fakeNotifier.setLoadingFlag(false);
     await tester.pump();
     expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(find.byType(ChoreCard), findsOneWidget);
