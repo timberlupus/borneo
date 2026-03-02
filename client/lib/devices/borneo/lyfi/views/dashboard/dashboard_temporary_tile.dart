@@ -19,11 +19,11 @@ class DashboardTemporaryTile extends StatelessWidget {
       ({LyfiState? state, bool canSwitch, Duration total, Duration remain, bool isOnline})
     >(
       selector: (context, vm) => (
+        isOnline: vm.isOnline,
         state: vm.state,
         canSwitch: vm.canSwitchTemporaryState,
         total: vm.temporaryDuration,
         remain: vm.temporaryRemaining,
-        isOnline: vm.isOnline,
       ),
       builder: (context, props, _) {
         final theme = Theme.of(context);

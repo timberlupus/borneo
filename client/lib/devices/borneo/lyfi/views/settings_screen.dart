@@ -126,7 +126,12 @@ class SettingsScreen extends StatelessWidget {
             SettingsTile.navigation(
               title: Text(context.translate('Time zone')),
               descriptionInlineIos: true,
-              value: Text(lvm.timezone ?? context.translate('No time zone')),
+              value: Text(
+                lvm.timezone ?? context.translate('No time zone'),
+                style: lvm.hasTimezoneMismatch || lvm.timezone == null
+                    ? TextStyle(color: Theme.of(context).colorScheme.error)
+                    : null,
+              ),
               // if device timezone differs from local, show a brief warning description
               description: lvm.hasTimezoneMismatch
                   ? Text(
@@ -158,11 +163,11 @@ class SettingsScreen extends StatelessWidget {
           tiles: [
             SettingsTile.navigation(
               title: Text(context.translate('Device Location')),
-              description: Text(context.translate('Geo location')),
+              description: Text(context.translate('Geographical location')),
               descriptionInlineIos: true,
               value: lvm.location != null
                   ? Text("(${lvm.location!.lat.toStringAsFixed(0)}, ${lvm.location!.lng.toStringAsFixed(0)})")
-                  : Text(context.translate('Unknown')),
+                  : Text(context.translate('Unknown'), style: TextStyle(color: Theme.of(context).colorScheme.error)),
               enabled: lvm.canUpdateGeoLocation,
               onPressed: (bc) async {
                 if (bc.mounted) {

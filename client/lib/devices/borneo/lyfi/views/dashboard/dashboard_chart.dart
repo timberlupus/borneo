@@ -41,8 +41,9 @@ class DashboardChart extends StatelessWidget {
       );
     }
 
-    return Selector<LyfiViewModel, ({LyfiMode mode, LyfiState? state, bool isOn, bool cloudActivated})>(
+    return Selector<LyfiViewModel, ({bool isOnline, LyfiMode mode, LyfiState? state, bool isOn, bool cloudActivated})>(
       selector: (_, vm) => (
+        isOnline: vm.isOnline,
         mode: vm.mode,
         state: vm.state,
         isOn: vm.isOn,
