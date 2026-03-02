@@ -26,7 +26,11 @@ class GroupEditScreen extends StatelessWidget {
     final groupManager = legacy.Provider.of<IGroupManager>(context, listen: false);
 
     return ProviderScope(
-      overrides: [groupManagerProvider.overrideWithValue(groupManager), groupEditArgsProvider.overrideWithValue(args)],
+      overrides: [
+        groupManagerProvider.overrideWithValue(groupManager),
+        groupEditArgsProvider.overrideWithValue(args),
+        groupEditProvider.overrideWith(GroupEditNotifier.new),
+      ],
       child: _GroupEditBody(args: args),
     );
   }
