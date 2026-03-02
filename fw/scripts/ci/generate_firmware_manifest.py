@@ -6,6 +6,7 @@ import shutil
 import argparse
 import hashlib
 import datetime
+import gzip
 
 def main():
     parser = argparse.ArgumentParser(description='Generate firmware manifest and copy binary')
@@ -93,24 +94,50 @@ def main():
         sys.exit(1)
 
     # Destination binary name
-    bin_name = f"{product_id.replace('/', '-')}_firmware_ce_v{version}.bin"
-    dest_bin = os.path.join(output_dir, bin_name)
+    merged_bin_name = f"{product_id.replace('/', '-')}_firmware_ce_v{version}.bin"
+    merged_dest_bin = os.path.join(output_dir, merged_bin_name)
 
     # Copy the binary
-    shutil.copy2(source_bin, dest_bin)
-    print(f"Copied {source_bin} to {dest_bin}")
+    shutil.copy2(source_bin, merged_dest_bin)
+    print(f"Copied {source_bin} to {merged_dest_bin}")
 
     # Calculate sha256 of the copied binary
     sha256_hash = hashlib.sha256()
-    with open(dest_bin, "rb") as f:
+    with open(merged_dest_bin, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
             sha256_hash.update(chunk)
-    binary_sha256 = sha256_hash.hexdigest()
-    print(f"SHA256 of {dest_bin}: {binary_sha256}")
+    merged_binary_sha256 = sha256_hash.hexdigest()
+    print(f"SHA256 of {merged_dest_bin}: {merged_binary_sha256}")
+
+    # Handle optional "app" binary which should be compressed and hashed
+    app_source = os.path.join(
+        base_dir, 'build', f"{product_id.replace('/', '_')}.bin")
+    if not os.path.exists(app_source):
+        print(f"App binary {app_source} does not exist")
+        sys.exit(1)
+
+    ota_filename = f"{product_id.replace('/', '-')}_ota_ce_v{version}.bin.gz"
+    ota_dest = os.path.join(output_dir, ota_filename)
+
+    # gzip-compress the app binary
+    with open(app_source, "rb") as src, gzip.open(ota_dest, "wb") as dst:
+        shutil.copyfileobj(src, dst)
+    print(f"Compressed {app_source} to {ota_dest}")
+
+    # Calculate sha256 of the compressed app
+    ota_sha256 = hashlib.sha256()
+    with open(ota_dest, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            ota_sha256.update(chunk)
+    ota_hash = ota_sha256.hexdigest()
+    print(f"SHA256 of {ota_dest}: {ota_hash}")
 
     # Generate manifest
     # timestamp in milliseconds since epoch
     timestamp_ms = int(datetime.datetime.utcnow().timestamp() * 1000)
+    # The manifest now includes an optional gzip-compressed "app" binary
+    # alongside the merged firmware.  app_path is the filename (relative to
+    # output_dir) and app_hash is the SHA256 of the compressed file.
 
     manifest = {
         "name": device_name,
@@ -119,7 +146,10 @@ def main():
         "manufacturer": manufacturer,
         "compatible": compatible,
         "version": version,
-        "sha256": binary_sha256,
+        "sha256": merged_binary_sha256,
+        "ota_filename": ota_filename,
+        "ota_sha256": ota_hash,
+        "merged_filename": merged_bin_name,
         "timestamp": timestamp_ms,
         "new_install_prompt_erase": True,
         "new_install_improv_wait_time": 0,
@@ -128,7 +158,7 @@ def main():
                 "chipFamily": chip_family,
                 "parts": [
                     {
-                        "path": "/firmware/" + bin_name,
+                        "path": "/firmware/" + merged_bin_name,
                         "offset": 0
                     }
                 ]
