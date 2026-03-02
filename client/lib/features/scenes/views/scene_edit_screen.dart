@@ -3,48 +3,80 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as legacy;
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
+import '../../../core/providers.dart';
 import '../../../core/services/scene_manager.dart';
 import '../../../core/services/app_notification_service.dart';
 import '../../../core/exceptions/scene_deletion_exceptions.dart';
 import '../models/scene_edit_arguments.dart';
-import '../view_models/scene_edit_view_model.dart';
+import '../providers/scene_edit_provider.dart';
 import '../../../shared/widgets/confirmation_sheet.dart';
 
-class SceneEditScreen extends StatefulWidget {
-  final SceneEditArguments args;
-  const SceneEditScreen({required this.args, super.key});
-  @override
-  State<SceneEditScreen> createState() => _SceneEditScreenState();
-}
+// ---------------------------------------------------------------------------
+// Public entry point
+// ---------------------------------------------------------------------------
 
-class _SceneEditScreenState extends State<SceneEditScreen> {
-  final _formKey = GlobalKey<FormState>();
+/// Route-level shell.  Reads the legacy [ISceneManager] service from the
+/// existing provider tree, then exposes both it and the route arguments as
+/// Riverpod provider overrides so that the inner [_SceneEditBody] can be a
+/// pure Riverpod consumer.
+class SceneEditScreen extends StatelessWidget {
+  final SceneEditArguments args;
+
+  const SceneEditScreen({required this.args, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<SceneEditViewModel>(
-      create: (ctx) =>
-          SceneEditViewModel(ctx.read<ISceneManager>(), isCreation: widget.args.isCreation, model: widget.args.model),
-      child: Builder(
-        builder: (context) {
-          final vm = context.watch<SceneEditViewModel>();
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(widget.args.isCreation ? context.translate('New Scene') : context.translate('Edit Scene')),
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              actions: _buildActions(context, vm),
-            ),
-            body: _buildBody(context, vm),
-          );
-        },
+    final sceneManager = legacy.Provider.of<ISceneManager>(context, listen: false);
+
+    return ProviderScope(
+      overrides: [
+        sceneManagerProvider.overrideWithValue(sceneManager),
+        sceneEditArgsProvider.overrideWithValue(args),
+        sceneEditProvider.overrideWith(SceneEditNotifier.new),
+      ],
+      child: _SceneEditBody(args: args),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Screen body
+// ---------------------------------------------------------------------------
+
+class _SceneEditBody extends ConsumerStatefulWidget {
+  final SceneEditArguments args;
+
+  const _SceneEditBody({required this.args});
+
+  @override
+  ConsumerState<_SceneEditBody> createState() => _SceneEditBodyState();
+}
+
+class _SceneEditBodyState extends ConsumerState<_SceneEditBody> {
+  final _formKey = GlobalKey<FormState>();
+
+  // ---------------------------------------------------------------------------
+  // Build
+  // ---------------------------------------------------------------------------
+
+  @override
+  Widget build(BuildContext context) {
+    final isCreation = widget.args.isCreation;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(isCreation ? context.translate('New Scene') : context.translate('Edit Scene')),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        actions: _buildActions(context),
       ),
+      body: _buildBody(context),
     );
   }
 
-  Widget _buildBody(BuildContext context, SceneEditViewModel vm) {
+  Widget _buildBody(BuildContext context) {
     return Container(
       color: Theme.of(context).colorScheme.surfaceContainer,
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
@@ -52,20 +84,25 @@ class _SceneEditScreenState extends State<SceneEditScreen> {
         key: _formKey,
         child: ListView(
           children: [
-            _buildImageSection(context, vm),
+            _buildImageSection(context),
             const SizedBox(height: 16),
-            _buildNameField(context, vm),
+            _buildNameField(context),
             const SizedBox(height: 16),
-            _buildNotesField(context, vm),
+            _buildNotesField(context),
             const SizedBox(height: 24),
-            _buildSubmitButton(context, vm),
+            _buildSubmitButton(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildImageSection(BuildContext context, SceneEditViewModel vm) {
+  // ---------------------------------------------------------------------------
+  // Image section
+  // ---------------------------------------------------------------------------
+
+  Widget _buildImageSection(BuildContext context) {
+    final imagePath = ref.watch(sceneEditProvider.select((s) => s.imagePath));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -75,7 +112,7 @@ class _SceneEditScreenState extends State<SceneEditScreen> {
           children: [
             InkWell(
               borderRadius: BorderRadius.circular(8),
-              onTap: () => _pickImage(vm, Theme.of(context)),
+              onTap: () => _pickImage(Theme.of(context)),
               child: Container(
                 width: double.infinity,
                 height: 120,
@@ -84,15 +121,15 @@ class _SceneEditScreenState extends State<SceneEditScreen> {
                   borderRadius: BorderRadius.circular(8),
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 ),
-                child: vm.imagePath != null && vm.imagePath!.isNotEmpty && File(vm.imagePath!).existsSync()
+                child: imagePath != null && imagePath.isNotEmpty && File(imagePath).existsSync()
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.file(File(vm.imagePath!), fit: BoxFit.cover, width: double.infinity, height: 120),
+                        child: Image.file(File(imagePath), fit: BoxFit.cover, width: double.infinity, height: 120),
                       )
                     : Center(child: Icon(Icons.add_a_photo_outlined, size: 40, color: Theme.of(context).hintColor)),
               ),
             ),
-            if (vm.imagePath != null && vm.imagePath!.isNotEmpty && File(vm.imagePath!).existsSync())
+            if (imagePath != null && imagePath.isNotEmpty && File(imagePath).existsSync())
               Positioned(
                 top: 4,
                 right: 4,
@@ -101,7 +138,7 @@ class _SceneEditScreenState extends State<SceneEditScreen> {
                   shape: const CircleBorder(),
                   child: InkWell(
                     customBorder: const CircleBorder(),
-                    onTap: () => vm.setImagePath(null),
+                    onTap: () => ref.read(sceneEditProvider.notifier).setImagePath(null),
                     child: const Padding(
                       padding: EdgeInsets.all(4),
                       child: Icon(Icons.close, color: Colors.white, size: 20),
@@ -115,9 +152,13 @@ class _SceneEditScreenState extends State<SceneEditScreen> {
     );
   }
 
-  Widget _buildNameField(BuildContext context, SceneEditViewModel vm) {
+  // ---------------------------------------------------------------------------
+  // Form fields
+  // ---------------------------------------------------------------------------
+
+  Widget _buildNameField(BuildContext context) {
     return TextFormField(
-      initialValue: vm.name,
+      initialValue: widget.args.model?.name ?? '',
       decoration: InputDecoration(
         labelText: context.translate('Name'),
         hintStyle: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
@@ -131,14 +172,14 @@ class _SceneEditScreenState extends State<SceneEditScreen> {
         return null;
       },
       onSaved: (value) {
-        vm.updateName(value ?? '');
+        ref.read(sceneEditProvider.notifier).updateName(value ?? '');
       },
     );
   }
 
-  Widget _buildNotesField(BuildContext context, SceneEditViewModel vm) {
+  Widget _buildNotesField(BuildContext context) {
     return TextFormField(
-      initialValue: vm.notes,
+      initialValue: widget.args.model?.notes ?? '',
       maxLines: null,
       keyboardType: TextInputType.multiline,
       decoration: InputDecoration(
@@ -148,114 +189,150 @@ class _SceneEditScreenState extends State<SceneEditScreen> {
       ),
       key: const Key('field_scene_notes'),
       onSaved: (value) {
-        vm.updateNotes(value ?? '');
+        ref.read(sceneEditProvider.notifier).updateNotes(value ?? '');
       },
     );
   }
 
-  Widget _buildSubmitButton(BuildContext context, SceneEditViewModel vm) {
+  // ---------------------------------------------------------------------------
+  // Submit
+  // ---------------------------------------------------------------------------
+
+  Widget _buildSubmitButton(BuildContext context) {
+    final isBusy = ref.watch(sceneEditProvider.select((s) => s.isBusy));
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: vm.isLoading
-            ? null
-            : () async {
-                if (_formKey.currentState?.validate() ?? false) {
-                  _formKey.currentState!.save();
-                  final success = await vm.submit();
-                  if (success) {
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                    }
-                  }
-                }
-              },
         key: const Key('btn_submit'),
-        child: vm.isLoading
+        onPressed: isBusy ? null : () => _onSubmitPressed(context),
+        child: isBusy
             ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
             : Text(context.translate('Submit')),
       ),
     );
   }
 
-  List<Widget> _buildActions(BuildContext context, SceneEditViewModel vm) {
+  void _onSubmitPressed(BuildContext context) {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    _formKey.currentState!.save();
+
+    final navigator = Navigator.of(context);
+    final notificationService = legacy.Provider.of<IAppNotificationService>(context, listen: false);
+    final failureText = context.translate('Operation failed');
+
+    _showLoadingDialog(context);
+
+    ref
+        .read(sceneEditProvider.notifier)
+        .submit()
+        .then((_) {
+          if (navigator.mounted) {
+            navigator.pop(); // dismiss loading dialog
+            navigator.pop(true); // return success to caller
+          }
+        })
+        .catchError((error) {
+          if (navigator.mounted) {
+            navigator.pop(); // dismiss loading dialog
+            notificationService.showError(failureText, body: error.toString());
+          }
+        });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Actions / delete
+  // ---------------------------------------------------------------------------
+
+  List<Widget> _buildActions(BuildContext context) {
+    final deletionAvailable = ref.watch(sceneEditProvider.select((s) => s.deletionAvailable));
+    if (!deletionAvailable) return const [];
+    final isBusy = ref.watch(sceneEditProvider.select((s) => s.isBusy));
     return [
-      if (vm.deletionAvailable)
-        IconButton(
-          key: const Key('btn_delete_scene'),
-          onPressed: vm.isLoading ? null : () => _onDeletePressed(context, vm),
-          icon: const Icon(Icons.delete_outline),
-        ),
+      IconButton(
+        key: const Key('btn_delete_scene'),
+        onPressed: isBusy ? null : () => _onDeletePressed(context),
+        icon: const Icon(Icons.delete_outline),
+      ),
     ];
   }
 
-  /// Handles deletion logic separated from UI builder.
-  Future<void> _onDeletePressed(BuildContext context, SceneEditViewModel vm) async {
-    final notificationService = context.read<IAppNotificationService>();
+  Future<void> _onDeletePressed(BuildContext context) async {
+    final notificationService = legacy.Provider.of<IAppNotificationService>(context, listen: false);
+    final name = ref.read(sceneEditProvider).name;
 
-    // confirmation using bottom sheet similar to group edit screen
     final confirmed = await AsyncConfirmationSheet.show(
       context,
       message: context.translate(
         'Are you sure you want to delete "{0}" scene? This action cannot be undone.',
-        pArgs: [vm.name],
+        pArgs: [name],
       ),
     );
     if (!confirmed) return;
+    if (!context.mounted) return;
 
-    // show loading indicator on the same navigator so sheet isn't orphaned
-    if (context.mounted) {
-      final loadingContext = context;
-      final loadingNavigator = Navigator.of(loadingContext, rootNavigator: false);
-      showDialog(
-        context: loadingContext,
-        useRootNavigator: false,
-        barrierDismissible: false,
-        builder: (dialogContext) => const Center(child: CircularProgressIndicator()),
-      );
-      try {
-        await vm.delete();
-        if (loadingContext.mounted) {
-          loadingNavigator.pop();
-          if (Navigator.of(loadingContext).canPop()) {
-            Navigator.of(loadingContext).pop(true);
-          }
-          notificationService.showSuccess(loadingContext.translate('Scene deleted'));
-        }
-      } on CannotDeleteLastSceneException {
-        if (loadingContext.mounted) {
-          loadingNavigator.pop();
-          notificationService.showWarning(
-            loadingContext.translate('Cannot Delete Scene'),
-            body: loadingContext.translate('Cannot delete the last remaining scene.'),
-          );
-        }
-      } on SceneContainsDevicesOrGroupsException {
-        if (loadingContext.mounted) {
-          loadingNavigator.pop();
-          notificationService.showWarning(
-            loadingContext.translate('Cannot Delete Scene'),
-            body: loadingContext.translate(
-              'This scene contains devices or device groups. Please remove all devices and groups from this scene before deleting it.',
-            ),
-          );
-        }
-      } catch (error) {
-        if (loadingContext.mounted) {
-          loadingNavigator.pop();
-          notificationService.showError(loadingContext.translate('Delete failed'), body: error.toString());
-        }
+    final loadingNavigator = Navigator.of(context, rootNavigator: false);
+    final navigator = Navigator.of(context);
+
+    showDialog(
+      context: context,
+      useRootNavigator: false,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await ref.read(sceneEditProvider.notifier).delete();
+      if (context.mounted) {
+        loadingNavigator.pop();
+        if (navigator.canPop()) navigator.pop(true);
+        notificationService.showSuccess(context.translate('Scene deleted'));
+      }
+    } on CannotDeleteLastSceneException {
+      if (context.mounted) {
+        loadingNavigator.pop();
+        notificationService.showWarning(
+          context.translate('Cannot Delete Scene'),
+          body: context.translate('Cannot delete the last remaining scene.'),
+        );
+      }
+    } on SceneContainsDevicesOrGroupsException {
+      if (context.mounted) {
+        loadingNavigator.pop();
+        notificationService.showWarning(
+          context.translate('Cannot Delete Scene'),
+          body: context.translate(
+            'This scene contains devices or device groups. Please remove all devices and groups from this scene before deleting it.',
+          ),
+        );
+      }
+    } catch (error) {
+      if (context.mounted) {
+        loadingNavigator.pop();
+        notificationService.showError(context.translate('Delete failed'), body: error.toString());
       }
     }
   }
 
-  Future<void> _pickImage(SceneEditViewModel vm, ThemeData theme) async {
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      useRootNavigator: false,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Future<void> _pickImage(ThemeData theme) async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
 
     if (picked != null) {
       if (!kIsWeb && Platform.isWindows) {
-        vm.setImagePath(picked.path);
+        ref.read(sceneEditProvider.notifier).setImagePath(picked.path);
       } else {
         final cropped = await ImageCropper().cropImage(
           sourcePath: picked.path,
@@ -283,7 +360,7 @@ class _SceneEditScreenState extends State<SceneEditScreen> {
           ],
         );
         if (cropped != null) {
-          vm.setImagePath(cropped.path);
+          ref.read(sceneEditProvider.notifier).setImagePath(cropped.path);
         }
       }
     }

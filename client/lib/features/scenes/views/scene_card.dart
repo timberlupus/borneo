@@ -1,13 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import '../view_models/scenes_view_model.dart';
+import '../providers/scenes_provider.dart';
 import 'scene_edit_screen.dart';
 import '../models/scene_edit_arguments.dart';
 
-class SceneCard extends StatelessWidget {
+class SceneCard extends ConsumerWidget {
   final SceneSummaryModel scene;
   final VoidCallback? onCentered;
   static const _smallShadow = Shadow(offset: Offset(1.0, 1.0), blurRadius: 2.0, color: Color.fromARGB(128, 0, 0, 0));
@@ -15,11 +16,10 @@ class SceneCard extends StatelessWidget {
   const SceneCard(this.scene, {super.key, this.onCentered});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final vm = context.watch<ScenesViewModel>();
-    final bool isBusy = vm.isLoading;
-    final bool showSpinner = vm.switchingSceneId == scene.id && vm.isLoading;
+    final isBusy = ref.watch(scenesProvider.select((s) => s.isLoading));
+    final showSpinner = ref.watch(scenesProvider.select((s) => s.switchingSceneId)) == scene.id && isBusy;
     return Card(
       key: Key('scene_card_${scene.name}'),
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -36,7 +36,7 @@ class SceneCard extends StatelessWidget {
             onTap: (!scene.isSelected && !isBusy)
                 ? () async {
                     onCentered?.call();
-                    await vm.switchCurrentScene(scene.id);
+                    await ref.read(scenesProvider.notifier).switchCurrentScene(scene.id);
                   }
                 : null,
             child: _buildContent(context, showSpinner, isBusy),

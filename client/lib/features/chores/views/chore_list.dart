@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' hide Consumer;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 
 import '../view_models/chores_view_model.dart';
-import '../../scenes/view_models/scenes_view_model.dart';
+import '../../scenes/providers/scenes_provider.dart';
 import 'chore_card.dart';
 import '../models/abstract_chore.dart';
 import '../../../core/services/chore_manager.dart';
@@ -31,36 +32,34 @@ class _ChoreListState extends State<ChoreList> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<ChoresViewModel>();
-    // Also watch scenes to trigger animation when scene changes
-    final scenesVm = context.watch<ScenesViewModel?>();
-    String? selectedSceneId;
-    final bool scenesLoading = scenesVm?.isLoading ?? false;
-    if (scenesVm != null) {
-      try {
-        selectedSceneId = scenesVm.scenes.firstWhere((s) => s.isSelected).id;
-      } catch (_) {}
-    }
-    Widget content = SliverToBoxAdapter(
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(context.translate('Chores'), style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 16),
-            // Always render the chores content; remove the loading animation.
-            _buildContent(context, state, selectedSceneId),
-          ],
-        ),
-      ),
+    // Watch scenes loading state via Riverpod; defaults to false when
+    // scenesProvider is not in scope (e.g. isolated widget tests).
+    return Consumer(
+      builder: (context, ref, _) {
+        final scenesLoading = ref.watch(scenesIsLoadingProvider);
+        Widget content = SliverToBoxAdapter(
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(context.translate('Chores'), style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 16),
+                // Always render the chores content; remove the loading animation.
+                _buildContent(context, state),
+              ],
+            ),
+          ),
+        );
+        if (scenesLoading) {
+          content = SliverIgnorePointer(key: const Key('chore_absorber'), ignoring: true, sliver: content);
+        }
+        return content;
+      },
     );
-    if (scenesLoading) {
-      content = SliverIgnorePointer(key: const Key('chore_absorber'), ignoring: true, sliver: content);
-    }
-    return content;
   }
 
-  Widget _buildContent(BuildContext context, ChoresViewModel vm, String? selectedSceneId) {
+  Widget _buildContent(BuildContext context, ChoresViewModel vm) {
     final theme = Theme.of(context);
     if (vm.isLoading) {
       // clear existing chores and show spinner while the new set is loading

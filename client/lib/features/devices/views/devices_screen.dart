@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:borneo_app/features/devices/providers/group_edit_provider.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
 import 'package:borneo_app/routes/app_routes.dart';
-import 'package:borneo_app/features/devices/view_models/group_edit_view_model.dart';
 import 'package:borneo_app/features/devices/view_models/group_view_model.dart';
 import 'package:borneo_app/features/devices/views/device_card.dart';
 import 'package:borneo_app/features/devices/view_models/grouped_devices_view_model.dart';
