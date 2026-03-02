@@ -30,7 +30,7 @@ class LyfiThing extends BorneoThing implements WotWriteGuard, WotActionGuard {
   IBorneoDeviceApi? _borneoApi;
   ILyfiDeviceApi? _lyfiApi;
   Device? _device;
-  bool canWrite() => !super.isOffline && kernel.isBound(deviceId);
+  bool canWrite() => isActive && !super.isOffline && kernel.isBound(deviceId);
 
   StreamSubscription<DeviceBoundEvent>? _deviceBoundSub;
   StreamSubscription<DeviceOfflineEvent>? _deviceOfflineSub;
@@ -60,15 +60,40 @@ class LyfiThing extends BorneoThing implements WotWriteGuard, WotActionGuard {
   @override
   String? getActionGuardError(String actionName) => 'Device is offline or unbound.';
 
+  // ---------------------------------------------------------------------------
+  // Activate / Deactivate hooks (called by DeviceManagerImpl on scene switch)
+  // ---------------------------------------------------------------------------
+
+  @override
+  void onActivated() {
+    // Immediately kick off a full sync and restart periodic polling.
+    unawaited(sync());
+  }
+
+  @override
+  void onDeactivated() {
+    // Stop all periodic polling; keep last-known property values intact.
+    _stopPeriodicSync();
+  }
+
+  void _stopPeriodicSync() {
+    _syncTimer?.cancel();
+    _syncTimer = null;
+    _lowFrequencySyncTimer?.cancel();
+    _lowFrequencySyncTimer = null;
+  }
+
   /// Mozilla WebThing style initialization - sync constructor with async hardware binding
   @override
   Future<void> sync({CancellationToken? cancelToken}) async {
     _syncFromKernel();
-    if (!isOffline) {
+    if (isActive && !isOffline) {
       await _bindToHardware(cancelToken: cancelToken);
     }
 
-    _startPeriodicSyncIfNeeded();
+    if (isActive) {
+      _startPeriodicSyncIfNeeded();
+    }
   }
 
   /// Bind properties to actual hardware state (like Mozilla WebThing ready callback)
@@ -182,9 +207,12 @@ class LyfiThing extends BorneoThing implements WotWriteGuard, WotActionGuard {
 
   /// Lightweight periodic sync - only check critical properties
   void _startPeriodicSyncIfNeeded() {
+    // Only start timers when the Thing is active.
+    if (!isActive) return;
+
     if (!(_syncTimer?.isActive ?? false)) {
       _syncTimer = Timer.periodic(kLightweightInterval, (timer) async {
-        if (!isDisposed && !isOffline) {
+        if (!isDisposed && isActive && !isOffline) {
           await _lightweightSync();
         } else {
           timer.cancel();
@@ -197,7 +225,7 @@ class LyfiThing extends BorneoThing implements WotWriteGuard, WotActionGuard {
 
     if (!(_lowFrequencySyncTimer?.isActive ?? false)) {
       _lowFrequencySyncTimer = Timer.periodic(kLowFrequencyInterval, (timer) async {
-        if (!isDisposed && !isOffline) {
+        if (!isDisposed && isActive && !isOffline) {
           await _lowFrequencySync();
         } else {
           timer.cancel();

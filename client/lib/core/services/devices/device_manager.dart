@@ -24,6 +24,10 @@ abstract class IDeviceManager implements IDisposable {
   bool get isDiscoverying;
 
   // WotThing related properties
+  /// All WotThings across every scene (globally persistent).
+  Iterable<WotThing> get allWotThings;
+
+  /// WotThings that belong to the currently active scene (i.e. [WotThing.isActive] == true).
   Iterable<WotThing> get wotThingsInCurrentScene;
   Iterable<String> get deviceIDsWithWotThings;
   int get wotThingCount;

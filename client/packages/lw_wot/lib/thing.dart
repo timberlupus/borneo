@@ -96,6 +96,53 @@ class WotThing {
     // Do nothing
   }
 
+  // ---------------------------------------------------------------------------
+  // Active / Inactive state machine
+  // ---------------------------------------------------------------------------
+
+  /// Whether this Thing is currently *active* (i.e. belongs to the currently
+  /// selected scene).
+  ///
+  /// Active Things are allowed to poll the physical device periodically.
+  /// Inactive Things retain their last-known property values but do not
+  /// initiate any network requests.
+  bool _isActive = false;
+  bool get isActive => _isActive;
+
+  /// Transition this Thing to the *active* state.
+  ///
+  /// Calls [onActivated] exactly once per activation.  Safe to call when
+  /// already active (no-op).
+  void activate() {
+    if (!_isActive) {
+      _isActive = true;
+      onActivated();
+    }
+  }
+
+  /// Transition this Thing to the *inactive* state.
+  ///
+  /// Calls [onDeactivated] exactly once per deactivation.  Safe to call when
+  /// already inactive (no-op).
+  void deactivate() {
+    if (_isActive) {
+      _isActive = false;
+      onDeactivated();
+    }
+  }
+
+  /// Called when this Thing transitions from inactive → active.
+  ///
+  /// Subclasses should override to restart periodic timers, trigger an
+  /// initial [sync], etc.
+  void onActivated() {}
+
+  /// Called when this Thing transitions from active → inactive.
+  ///
+  /// Subclasses should override to cancel periodic timers while keeping
+  /// property values intact.
+  void onDeactivated() {}
+
   /// Get this thing's href.
   String get href {
     if (_hrefPrefix.isNotEmpty) {

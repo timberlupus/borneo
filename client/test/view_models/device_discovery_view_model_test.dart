@@ -76,6 +76,9 @@ class FakeDeviceManager implements IDeviceManager {
   Iterable<BoundDevice> get boundDevices => const [];
 
   @override
+  Iterable<WotThing> get allWotThings => const [];
+
+  @override
   Iterable<WotThing> get wotThingsInCurrentScene => const [];
 
   @override

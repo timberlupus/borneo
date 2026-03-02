@@ -27,6 +27,9 @@ class StubDeviceManager implements IDeviceManager {
   Iterable<BoundDevice> get boundDevices => bound;
 
   @override
+  Iterable<WotThing> get allWotThings => things;
+
+  @override
   Iterable<WotThing> get wotThingsInCurrentScene => things;
 
   @override
