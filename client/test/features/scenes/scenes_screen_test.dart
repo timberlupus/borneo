@@ -237,6 +237,7 @@ void main() {
     // Tapping either card should be ignored while busy (onTap == null).
     await tester.tap(find.byKey(const Key('scene_card_A')));
     await tester.pump();
+    await tester.ensureVisible(find.byKey(const Key('scene_card_B')));
     await tester.tap(find.byKey(const Key('scene_card_B')));
     await tester.pump();
     expect(fakeNotifier.switchedTo, isEmpty);
