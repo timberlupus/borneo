@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:borneo_app/core/events/app_events.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:borneo_app/core/services/devices/ota_providers.dart';
 import 'package:borneo_kernel_abstractions/models/bound_device.dart';
-import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
 
 import '../../shared/view_models/base_view_model.dart';
@@ -14,6 +14,10 @@ enum OtaState { idle, checking, upToDate, updateAvailable, upgrading, success, e
 class DeviceOtaViewModel extends BaseViewModel with ViewModelEventBusMixin {
   final OtaProvider otaProvider;
   final BoundDevice boundDevice;
+
+  /// Returns whether the device is currently reachable.
+  /// Provided as a callback so the getter stays live after construction.
+  final bool Function() _isOnlineProvider;
 
   OtaState _state = OtaState.idle;
   OtaState get state => _state;
@@ -35,19 +39,25 @@ class DeviceOtaViewModel extends BaseViewModel with ViewModelEventBusMixin {
 
   bool get canCheck => _state != OtaState.checking && _state != OtaState.upgrading;
 
-  bool get canUpgrade => _state == OtaState.updateAvailable && (_upgradeInfo?.canUpgrade ?? false);
+  bool get isOnline => _isOnlineProvider();
+
+  bool get canUpgrade => isOnline && _state == OtaState.updateAvailable && (_upgradeInfo?.canUpgrade ?? false);
 
   /// In debug builds the user can force-push firmware even when already up to date.
   bool get canForceUpgrade =>
-      kDebugMode && _upgradeInfo != null && (_state == OtaState.upToDate || _state == OtaState.updateAvailable);
+      kDebugMode &&
+      isOnline &&
+      _upgradeInfo != null &&
+      (_state == OtaState.upToDate || _state == OtaState.updateAvailable);
 
   DeviceOtaViewModel({
     required this.otaProvider,
     required this.boundDevice,
+    required bool Function() isOnlineProvider,
     required EventBus eventBus,
     required super.gt,
     super.logger,
-  }) {
+  }) : _isOnlineProvider = isOnlineProvider {
     super.globalEventBus = eventBus;
   }
 
@@ -84,11 +94,21 @@ class DeviceOtaViewModel extends BaseViewModel with ViewModelEventBusMixin {
       await service.upgrade(boundDevice, cancelToken: _cancelToken, force: force);
       if (isDisposed) return;
       _setState(OtaState.success);
+    } on CancelledException {
+      if (isDisposed) return;
+      // Restore to updateAvailable so the user can retry
+      _setState(_upgradeInfo?.canUpgrade == true ? OtaState.updateAvailable : OtaState.upToDate);
     } catch (e, st) {
       _errorMessage = e.toString();
       _setState(OtaState.error);
       logger?.e('OTA upgrade failed', error: e, stackTrace: st);
     }
+  }
+
+  /// Cancels an in-progress upgrade.
+  void cancelUpgrade() {
+    if (!isUpgrading) return;
+    _cancelToken?.cancel();
   }
 
   void _setState(OtaState newState) {

@@ -268,6 +268,7 @@ class SettingsScreen extends StatelessWidget {
     final otaVm = DeviceOtaViewModel(
       otaProvider: context.read<OtaProvider>(),
       boundDevice: bound,
+      isOnlineProvider: () => svm.isOnline,
       eventBus: context.read<EventBus>(),
       gt: context.read<GettextLocalizations>(),
       logger: context.read<Logger>(),

@@ -116,8 +116,8 @@ class _DeviceOtaScreenState extends State<DeviceOtaScreen> with TickerProviderSt
                   'Firmware update is in progress. Interrupting the update may permanently damage the device. Are you sure you want to abort?',
                 ),
               );
-              if (confirmed && context.mounted) {
-                Navigator.of(context).pop();
+              if (confirmed) {
+                vm.cancelUpgrade();
               }
             },
             child: Scaffold(
@@ -418,7 +418,20 @@ class _DeviceOtaScreenState extends State<DeviceOtaScreen> with TickerProviderSt
     if (vm.isUpgrading) {
       return SizedBox(
         width: double.infinity,
-        child: FilledButton.tonal(onPressed: null, child: Text(context.translate('Updating...'))),
+        child: FilledButton.tonal(
+          onPressed: () async {
+            final confirmed = await AsyncConfirmationSheet.show(
+              context,
+              message: context.translate(
+                'Firmware update is in progress. Interrupting the update may permanently damage the device. Are you sure you want to cancel?',
+              ),
+            );
+            if (confirmed) {
+              vm.cancelUpgrade();
+            }
+          },
+          child: Text(context.translate('Cancel')),
+        ),
       );
     }
 
