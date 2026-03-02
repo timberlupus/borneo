@@ -64,22 +64,28 @@ abstract class BaseDeviceViewModel extends BaseViewModel
 
     _onDeviceBoundEventSub = deviceManager.allDeviceEvents.on<DeviceBoundEvent>().listen((event) {
       if (event.device.id == deviceID) {
-        final changed = markOnline(notify: false);
+        // Inline side effects instead of relying on markOnline()'s `changed`
+        // return value: LyfiThing subscribes to the same event bus and updates
+        // WotThing.online synchronously *before* this callback runs, so
+        // markOnline() would see isOnline==true and return changed==false,
+        // silently skipping both onDeviceConnectionRecovered and notifyListeners.
+        _isSuspectedOffline = false;
+        _stopReconnectCountdown(notify: false);
+        onDeviceConnectionRecovered();
         onDeviceBound();
-
-        if (changed) {
-          notifyListeners();
-        }
+        if (!isDisposed) notifyListeners();
       }
     });
 
     _onDeviceRemovedEventSub = deviceManager.allDeviceEvents.on<DeviceRemovedEvent>().listen((event) {
       if (event.device.id == deviceID) {
-        final changed = markOffline(notify: false);
+        // Same race as above: WotThing.online is already false by the time
+        // this callback runs, so markOffline() returns changed==false and
+        // never calls notifyListeners(), freezing the UI.
+        _isSuspectedOffline = false;
+        _stopReconnectCountdown(notify: false);
         onDeviceRemoved();
-        if (changed) {
-          notifyListeners();
-        }
+        if (!isDisposed) notifyListeners();
       }
     });
 
