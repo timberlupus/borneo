@@ -49,6 +49,11 @@ int bo_rpc_borneo_info_get(const CborValue* args, CborEncoder* retvals)
     }
 
     {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "pid"));
+        BO_TRY(cbor_encode_text_stringz(&root_map, CONFIG_BORNEO_PRODUCT_ID));
+    }
+
+    {
         BO_TRY(cbor_encode_text_stringz(&root_map, "serno"));
         BO_TRY(cbor_encode_text_stringz(&root_map, sysinfo->hex_id));
     }
