@@ -1,21 +1,25 @@
 import 'dart:convert';
-import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
+import 'package:borneo_app/core/services/devices/ota_providers.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/controller_settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/controller_settings_screen.dart';
+import 'package:borneo_app/devices/view_models/device_ota_view_model.dart';
+import 'package:borneo_app/devices/views/device_ota_screen.dart';
 import 'package:borneo_app/shared/widgets/bottom_sheet_picker.dart';
 import 'package:borneo_app/shared/widgets/confirmation_sheet.dart';
 import 'package:borneo_app/shared/widgets/map_location_picker.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_earth_globe/globe_coordinates.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:logger/logger.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 import 'package:provider/provider.dart';
 import 'package:borneo_app/routes/app_routes.dart';
@@ -218,9 +222,11 @@ class SettingsScreen extends StatelessWidget {
               title: Text(context.translate('Hardware version')),
               trailing: Text(lvm.borneoInfo.hwVer.toString()),
             ),
-            SettingsTile(
+            SettingsTile.navigation(
               title: Text(context.translate('Firmware version')),
-              trailing: Text(lvm.borneoInfo.fwVer.toString() + (lvm.borneoInfo.isCE ? " (CE)" : " (PRO)")),
+              value: Text(lvm.borneoInfo.fwVer.toString() + (lvm.borneoInfo.isCE ? " (CE)" : " (PRO)")),
+              descriptionInlineIos: false,
+              onPressed: !vm.isOnline ? null : (cb) => _goToOtaScreen(context, vm),
             ),
           ],
         ),
@@ -253,6 +259,25 @@ class SettingsScreen extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  void _goToOtaScreen(BuildContext context, SettingsViewModel svm) {
+    final bound = svm.boundDevice;
+    if (bound == null) return;
+    final otaVm = DeviceOtaViewModel(
+      otaProvider: context.read<OtaProvider>(),
+      boundDevice: bound,
+      eventBus: context.read<EventBus>(),
+      gt: context.read<GettextLocalizations>(),
+      logger: context.read<Logger>(),
+    );
+
+    PersistentNavBarNavigator.pushNewScreen(
+      context,
+      screen: DeviceOtaScreen(otaVm),
+      withNavBar: false,
+      pageTransitionAnimation: PageTransitionAnimation.slideRight,
     );
   }
 

@@ -237,6 +237,7 @@ class MockBorneoDeviceApi implements IBorneoDeviceApi {
       hwVer: Version.parse('1.0.0'),
       fwVer: Version.parse('1.0.0'),
       isCE: true,
+      pid: 'bst/xiaoc3',
     );
   }
 

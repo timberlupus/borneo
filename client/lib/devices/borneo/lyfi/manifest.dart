@@ -1,3 +1,4 @@
+import 'package:borneo_app/core/services/devices/ota_providers.dart';
 import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/core/utils/hex_color.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';

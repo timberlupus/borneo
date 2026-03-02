@@ -7,6 +7,7 @@ import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_app/core/services/devices/device_module_harvesters.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/core/services/devices/mdns.dart';
+import 'package:borneo_app/core/services/devices/ota_providers.dart';
 import 'package:borneo_app/core/services/devices/static_modular_driver_registry.dart';
 import 'package:borneo_kernel/kernel.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
@@ -170,6 +171,8 @@ Future<Widget> buildAppWidget({
 
     // IBleProvisioner
     provider.ProxyProvider<Logger, IBleProvisioner>(update: (_, logger, prev) => prev ?? BleProvisioner(), lazy: true),
+
+    provider.Provider<OtaProvider>(create: (_) => OtaProvider(), lazy: true),
   ];
 
   // Wrap the existing provider graph in a ProviderScope so that

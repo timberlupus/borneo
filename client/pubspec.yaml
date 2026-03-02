@@ -117,10 +117,12 @@ dependencies:
   persistent_bottom_nav_bar: ^6.2.0
   timelines_plus: ^1.0.8
   app_review: ^3.0.0
+  pub_semver: ^2.2.0
+  libcompress: ^1.0.0
+  crypto: ^3.0.0
 
 
 dev_dependencies:
-  pub_semver: ^2.2.0
   build_runner: ^2.4.13
   mockito: ^5.4.0
   melos: ^7.4.0
