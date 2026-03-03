@@ -51,4 +51,11 @@ post_install do |installer|
       ]
     end
   end
+
+  build_number = `git rev-list --count HEAD`.strip
+  puts "Git Build Number: #{build_number}"
+  info_plist_path = File.join(__dir__, 'Runner/Info.plist')
+  if File.exist?(info_plist_path) && !build_number.empty?
+    system("/usr/libexec/PlistBuddy", "-c", "Set :CFBundleVersion #{build_number}", info_plist_path)
+  end
 end
