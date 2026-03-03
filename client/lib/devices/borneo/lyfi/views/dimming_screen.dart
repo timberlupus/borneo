@@ -76,13 +76,15 @@ class DimmingHeroPanel extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Selector<LyfiViewModel, LyfiMode>(
-            selector: (context, vm) => vm.mode,
-            builder: (context, mode, _) {
-              final vm = context.read<LyfiViewModel>();
+          Selector<LyfiViewModel, ({LyfiMode mode, bool canSwitch})>(
+            selector: (context, vm) => (
+              mode: vm.mode,
+              canSwitch: vm.isOnline && !vm.isSuspectedOffline && vm.isOn && vm.state == LyfiState.dimming,
+            ),
+            builder: (context, vm, _) {
               return SegmentedButton<LyfiMode>(
                 showSelectedIcon: false,
-                selected: <LyfiMode>{mode},
+                selected: <LyfiMode>{vm.mode},
                 segments: [
                   ButtonSegment<LyfiMode>(
                     value: LyfiMode.manual,
@@ -100,10 +102,10 @@ class DimmingHeroPanel extends StatelessWidget {
                     icon: const Icon(Icons.wb_sunny_outlined, size: 16),
                   ),
                 ],
-                onSelectionChanged: vm.isOn && !vm.isBusy && !vm.isLocked && !vm.isSuspectedOffline
+                onSelectionChanged: vm.canSwitch
                     ? (Set<LyfiMode> newSelection) {
-                        if (mode != newSelection.single) {
-                          vm.switchMode(newSelection.single);
+                        if (vm.mode != newSelection.single) {
+                          context.read<LyfiViewModel>().switchMode(newSelection.single);
                         }
                       }
                     : null,

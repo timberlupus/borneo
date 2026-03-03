@@ -584,29 +584,37 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   }
 
   Future<void> _switchMode(LyfiMode newMode) async {
-    if (isLocked) {
-      return;
-    }
-
-    if (isSuspectedOffline) {
+    if (!isOnline || isSuspectedOffline) {
       notifyAppError('Device is offline. Please retry after reconnection.');
       return;
     }
 
-    if (newMode == LyfiMode.sun) {
-      if (borneoDeviceStatus?.timezone.isEmpty ?? true) {
-        notifyAppError("Unable to switch to Sun Simulation mode, the device's timezone is not set.");
-        return;
-      }
-      final location = super.lyfiThing.getProperty<GeoLocation?>('location');
-      if (location == null) {
-        notifyAppError("Unable to switch to Sun Simulation mode, the device's geographic location is not set.");
-        return;
-      }
+    if (isLocked || isBusy) {
+      return;
     }
 
-    super.setMode(newMode);
-    notifyListeners();
+    try {
+      isBusy = true;
+      notifyListeners();
+
+      if (newMode == LyfiMode.sun) {
+        if (borneoDeviceStatus?.timezone.isEmpty ?? true) {
+          notifyAppError("Unable to switch to Sun Simulation mode, the device's timezone is not set.");
+          return;
+        }
+        final location = super.lyfiThing.getProperty<GeoLocation?>('location');
+        if (location == null) {
+          notifyAppError("Unable to switch to Sun Simulation mode, the device's geographic location is not set.");
+          return;
+        }
+      }
+      super.setMode(newMode);
+    } catch (e, st) {
+      notifyAppError(gt.translate('Failed to switch mode'), error: e, stackTrace: st);
+    } finally {
+      isBusy = false;
+      notifyListeners();
+    }
   }
 
   Future<void> _onModeChanged(String value) async {

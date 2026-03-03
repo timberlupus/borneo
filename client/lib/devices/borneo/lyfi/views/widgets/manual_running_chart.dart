@@ -74,25 +74,23 @@ class ManualRunningChart extends StatelessWidget {
     assert(vm.isOnline);
     return MultiValueListenableBuilder<int>(
       valueNotifiers: vm.channels,
-      builder: (context, values, _) => Expanded(
-        child: LyfiColorChart(
-          BarChartData(
-            barGroups: buildGroupDataItems(context),
-            titlesData: FlTitlesData(
-              show: true,
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(showTitles: true, getTitlesWidget: (value, _) => buildTitles(context, value)),
-              ),
-              leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      builder: (context, values, _) => LyfiColorChart(
+        BarChartData(
+          barGroups: buildGroupDataItems(context),
+          titlesData: FlTitlesData(
+            show: true,
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: true, getTitlesWidget: (value, _) => buildTitles(context, value)),
             ),
-            borderData: FlBorderData(show: false),
-            barTouchData: BarTouchData(enabled: true),
-            gridData: FlGridData(show: false),
+            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-          duration: Duration(seconds: 1),
+          borderData: FlBorderData(show: false),
+          barTouchData: BarTouchData(enabled: true),
+          gridData: FlGridData(show: false),
         ),
+        duration: Duration(seconds: 1),
       ),
     );
   }
