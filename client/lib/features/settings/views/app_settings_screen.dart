@@ -41,6 +41,7 @@ class AppSettingsScreen extends ConsumerWidget {
   }
 
   SettingsList buildItems(BuildContext context, WidgetRef ref, AppSettingsState state) => SettingsList(
+    platform: DevicePlatform.iOS,
     sections: [
       SettingsSection(
         title: Text(context.translate('APPEARANCE')),

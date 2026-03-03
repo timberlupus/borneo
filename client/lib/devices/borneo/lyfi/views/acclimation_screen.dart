@@ -71,6 +71,7 @@ class AcclimationScreen extends StatelessWidget {
     final vm = context.watch<AcclimationViewModel>();
 
     return SettingsList(
+      platform: DevicePlatform.iOS,
       sections: [
         SettingsSection(
           title: Text(context.translate('SETTINGS')),

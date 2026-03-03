@@ -18,6 +18,7 @@ class MyScreen extends StatelessWidget {
   Widget buildItems(BuildContext context) {
     // Use a SettingsList for consistency with other settings screens
     return SettingsList(
+      platform: DevicePlatform.iOS,
       contentPadding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
       sections: [
         SettingsSection(
