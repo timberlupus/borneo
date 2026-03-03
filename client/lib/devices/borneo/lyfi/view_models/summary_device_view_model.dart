@@ -88,9 +88,11 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
     final info = wotThing?.getProperty<LyfiDeviceInfo>('lyfiDeviceInfo');
     if (info != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (lyfiDeviceInfo != info) {
-          lyfiDeviceInfo = info;
-          notifyListeners();
+        if (!isDisposed) {
+          if (lyfiDeviceInfo != info) {
+            lyfiDeviceInfo = info;
+            notifyListeners();
+          }
         }
       });
     }
