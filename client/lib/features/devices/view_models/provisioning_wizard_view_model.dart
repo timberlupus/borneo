@@ -82,7 +82,7 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
     try {
       _networks = await _bleProvisioner.scanWifiNetworks(deviceName, cancelToken: _cancelToken);
     } on CancelledException {
-      notificationService?.showWarning(gt.translate('The WiFi scanning has been cancelled.'));
+      logger?.i('The WiFi scanning has been cancelled.');
     } catch (e, stackTrace) {
       logger?.e('Failed to scan wifi networks', error: e, stackTrace: stackTrace);
       notifyAppError(e.toString());
