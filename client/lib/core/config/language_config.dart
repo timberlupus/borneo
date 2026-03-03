@@ -7,9 +7,9 @@ class LanguageConfig {
   /// Only store necessary information, don't create Locale objects
   static const Map<String, String> _languages = {
     'en_US': 'English (US)',
-    'zh_CN': '中文 (简体)',
     'es': 'Español',
     'de': 'Deutsch',
+    'zh_CN': '中文 (简体)',
   };
 
   /// Get all supported locales
