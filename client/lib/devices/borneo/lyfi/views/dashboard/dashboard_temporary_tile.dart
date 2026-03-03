@@ -46,8 +46,8 @@ class DashboardTemporaryTile extends StatelessWidget {
         return DashboardTile(
           backgroundColor: bgColor,
           disabled: !props.canSwitch || !props.isOnline,
-          onPressed: props.canSwitch ? () => context.read<LyfiViewModel>().switchTemporaryState() : null,
-          onLongPressed: props.canSwitch ? () => gotoDiscoScreen(context) : null,
+          onPressed: props.canSwitch ? () => _switchTemporary(context) : null,
+          onLongPressed: props.canSwitch ? () => _gotoDiscoScreen(context) : null,
           child: Stack(
             children: [
               Row(
@@ -62,7 +62,7 @@ class DashboardTemporaryTile extends StatelessWidget {
                             width: 32,
                             height: 32,
                             child: Padding(
-                              padding: EdgeInsets.all(4),
+                              padding: const EdgeInsets.all(4),
                               child: CircularProgressIndicator(
                                 strokeAlign: 1,
                                 strokeWidth: 2,
@@ -93,7 +93,7 @@ class DashboardTemporaryTile extends StatelessWidget {
                             remainText,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: effectiveFgColor,
-                              fontFeatures: [FontFeature.tabularFigures()],
+                              fontFeatures: [const FontFeature.tabularFigures()],
                             ),
                           ),
                       ],
@@ -118,7 +118,7 @@ class DashboardTemporaryTile extends StatelessWidget {
     );
   }
 
-  Future<void> gotoDiscoScreen(BuildContext context) async {
+  Future<void> _gotoDiscoScreen(BuildContext context) async {
     HapticFeedback.mediumImpact();
     final vm = context.read<LyfiViewModel>();
     if (!vm.canSwitchDiscoState) {
@@ -132,5 +132,9 @@ class DashboardTemporaryTile extends StatelessWidget {
         withNavBar: false,
       );
     }
+  }
+
+  void _switchTemporary(BuildContext context) {
+    context.read<LyfiViewModel>().switchTemporaryState();
   }
 }

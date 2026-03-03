@@ -491,21 +491,27 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       (super.state == LyfiState.temporary || super.state == LyfiState.normal);
 
   void switchTemporaryState() {
-    if (!(super.state == LyfiState.normal || super.state == LyfiState.temporary)) {
-      throw StateError(gt.translate('Bad device state'));
-    }
-    // Turn the temp mode on
-    if (super.state == LyfiState.normal) {
-      super.setState(LyfiState.temporary);
-    } else {
-      // Restore running mode
-      super.setState(LyfiState.normal);
+    try {
+      if (!(super.state == LyfiState.normal || super.state == LyfiState.temporary)) {
+        throw StateError(gt.translate('Bad device state'));
+      }
+      // Turn the temp mode on
+      if (super.state == LyfiState.normal) {
+        super.setState(LyfiState.temporary);
+      } else {
+        // Restore running mode
+        super.setState(LyfiState.normal);
+      }
+    } catch (e, st) {
+      notifyAppError(gt.translate('Failed to switch to temporary state'));
+      logger?.e(e.toString(), error: e, stackTrace: st);
     }
   }
 
   bool get canSwitchDiscoState =>
-      !isBusy &&
       !isSuspectedOffline &&
+      isOnline &&
+      !isBusy &&
       super.isOn &&
       (super.state == LyfiState.temporary || super.state == LyfiState.normal);
 
