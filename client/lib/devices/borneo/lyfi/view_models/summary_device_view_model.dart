@@ -40,6 +40,9 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
     if (stateValue != null) {
       final state = LyfiState.fromString(stateValue as String);
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (this.isDisposed) {
+          return;
+        }
         if (ledState != state) {
           ledState = state;
           notifyListeners();
@@ -56,6 +59,9 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
     if (modeValue != null) {
       final mode = LyfiMode.fromString(modeValue as String);
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (this.isDisposed) {
+          return;
+        }
         if (ledMode != mode) {
           ledMode = mode;
           notifyListeners();
@@ -72,6 +78,9 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
     if (color != null) {
       // defer assignment to avoid modifying state during build
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (this.isDisposed) {
+          return;
+        }
         final newList = List<int>.from(color);
         if (channelBrightness == null || !listEquals(channelBrightness, newList)) {
           channelBrightness = newList;
@@ -88,11 +97,12 @@ class LyfiSummaryDeviceViewModel extends BaseBorneoSummaryDeviceViewModel {
     final info = wotThing?.getProperty<LyfiDeviceInfo>('lyfiDeviceInfo');
     if (info != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!isDisposed) {
-          if (lyfiDeviceInfo != info) {
-            lyfiDeviceInfo = info;
-            notifyListeners();
-          }
+        if (this.isDisposed) {
+          return;
+        }
+        if (lyfiDeviceInfo != info) {
+          lyfiDeviceInfo = info;
+          notifyListeners();
         }
       });
     }

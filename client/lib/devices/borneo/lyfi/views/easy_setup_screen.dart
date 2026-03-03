@@ -118,7 +118,7 @@ class EasySetupScreen extends StatelessWidget {
             ),
             clockNumberDecoration: TimePickerClockNumberDecoration(
               defaultTextColor: Theme.of(context).colorScheme.onSurface,
-              positionFactor: 0.45,
+              positionFactor: 0.5,
               showNumberIndicators: true,
               clockTimeFormat: clockTimeFormat,
               clockIncrementTimeFormat: clockIncrementTimeFormat,
@@ -235,6 +235,7 @@ class EasySetupScreen extends StatelessWidget {
             // local to the EasySetupViewModel until the user taps Apply.
             final tempEditor = _EasySetupTempEditor(editor);
             return ScreenTopRoundedContainer(
+              padding: EdgeInsets.fromLTRB(0, 24, 0, 0),
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               child: SingleChildScrollView(
                 child: BrightnessSliderList(tempEditor, disabled: !canEdit, padding: EdgeInsets.fromLTRB(0, 24, 0, 24)),
