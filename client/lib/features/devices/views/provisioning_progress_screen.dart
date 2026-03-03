@@ -56,10 +56,25 @@ class ProvisioningProgressScreen extends StatelessWidget {
                   Center(
                     child: Column(
                       children: [
-                        _buildStep(context, vm, BleProvisioningState.sendingCredentials, 'Sending Credentials'),
-                        _buildStep(context, vm, BleProvisioningState.connectingToWifi, 'Connecting to WiFi'),
+                        _buildStep(
+                          context,
+                          vm,
+                          BleProvisioningState.sendingCredentials,
+                          context.translate('Sending Credentials'),
+                        ),
+                        _buildStep(
+                          context,
+                          vm,
+                          BleProvisioningState.connectingToWifi,
+                          context.translate('Connecting to WiFi'),
+                        ),
                         //_buildStep(context, vm, BleProvisioningState.checkingStatus, 'Checking Status'),
-                        _buildStep(context, vm, BleProvisioningState.registeringDevice, 'Registering Device'),
+                        _buildStep(
+                          context,
+                          vm,
+                          BleProvisioningState.registeringDevice,
+                          context.translate('Registering Device'),
+                        ),
                       ],
                     ),
                   ),
