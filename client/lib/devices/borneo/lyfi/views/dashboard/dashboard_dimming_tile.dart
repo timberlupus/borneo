@@ -34,13 +34,11 @@ class DashboardDimmingTile extends StatelessWidget {
                   // Request entering dimming (unlock) then wait for readiness event-driven
                   await vm.toggleLock(false);
                   await vm.onDimmingReady();
-
                   if (context.mounted) {
                     await PersistentNavBarNavigator.pushNewScreen(
                       context,
                       screen: ChangeNotifierProvider.value(value: vm, child: const DimmingScreen()),
                       withNavBar: false,
-                      pageTransitionAnimation: PageTransitionAnimation.slideRight,
                     );
                   }
                 }

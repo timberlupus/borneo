@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 
 import 'package:borneo_app/features/devices/widgets/dashboard_tile.dart';
@@ -73,8 +74,15 @@ class DashboardAcclimationTile extends StatelessWidget {
               ? () async {
                   if (context.mounted) {
                     final vm = context.read<LyfiViewModel>();
-                    final route = MaterialPageRoute(builder: (context) => AcclimationScreen(deviceID: vm.deviceID));
-                    await Navigator.push(context, route);
+                    final deviceID = vm.deviceID;
+                    await PersistentNavBarNavigator.pushNewScreen(
+                      context,
+                      screen: ChangeNotifierProvider.value(
+                        value: vm,
+                        child: AcclimationScreen(deviceID: deviceID),
+                      ),
+                      withNavBar: false,
+                    );
                   }
                 }
               : null,

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/events.dart';
@@ -21,6 +22,11 @@ class _DiscoPageState extends State<DiscoPage> with SingleTickerProviderStateMix
   @override
   void initState() {
     super.initState();
+
+    // hide system UI (status bar & navigation) while this page is visible
+    // ImmersiveSticky works on both Android and iOS to suppress bottom nav
+    // When we pop the page dispose() will restore the default mode.
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
     // Initialize animation controller but don't start yet
     _animationController = AnimationController(vsync: this, duration: const Duration(seconds: 3));
@@ -46,6 +52,9 @@ class _DiscoPageState extends State<DiscoPage> with SingleTickerProviderStateMix
 
   @override
   void dispose() {
+    // restore system UI overlays when leaving
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
     _stateChangedSub?.cancel();
     _stateChangedSub = null;
     _animationController.dispose();

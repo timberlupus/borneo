@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
   final AsyncRateLimiter _colorChangeRateLimiter = AsyncRateLimiter(interval: kLocalDimmingTrackingInterval);
   AsyncRateLimiter get colorChangeRateLimiter => _colorChangeRateLimiter;
+  bool _isDisposed = false;
 
   final List<ValueNotifier<int>> _channels;
   final List<int> blackColor;
@@ -21,6 +22,7 @@ abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
 
   bool get isOnline => parent.isOnline && !parent.isSuspectedOffline;
   bool get isBusy => parent.isBusy;
+  bool get isDisposed => _isDisposed;
 
   bool _isChanged = false;
 
@@ -50,8 +52,11 @@ abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
 
   @override
   void dispose() {
-    colorChangeRateLimiter.dispose();
-    super.dispose();
+    if (_isDisposed) {
+      colorChangeRateLimiter.dispose();
+      super.dispose();
+      _isDisposed = true;
+    }
   }
 
   @override

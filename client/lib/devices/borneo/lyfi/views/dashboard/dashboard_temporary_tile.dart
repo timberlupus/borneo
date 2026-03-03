@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 
 import 'package:borneo_app/features/devices/widgets/dashboard_tile.dart';
@@ -46,23 +47,7 @@ class DashboardTemporaryTile extends StatelessWidget {
           backgroundColor: bgColor,
           disabled: !props.canSwitch || !props.isOnline,
           onPressed: props.canSwitch ? () => context.read<LyfiViewModel>().switchTemporaryState() : null,
-          onLongPressed: props.canSwitch
-              ? () async {
-                  HapticFeedback.mediumImpact();
-                  final vm = context.read<LyfiViewModel>();
-                  if (!vm.canSwitchDiscoState) return;
-
-                  vm.switchDiscoState();
-                  if (context.mounted) {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ChangeNotifierProvider.value(value: vm, child: const DiscoPage()),
-                      ),
-                    );
-                  }
-                }
-              : null,
+          onLongPressed: props.canSwitch ? () => gotoDiscoScreen(context) : null,
           child: Stack(
             children: [
               Row(
@@ -131,5 +116,21 @@ class DashboardTemporaryTile extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> gotoDiscoScreen(BuildContext context) async {
+    HapticFeedback.mediumImpact();
+    final vm = context.read<LyfiViewModel>();
+    if (!vm.canSwitchDiscoState) {
+      return;
+    }
+    vm.switchDiscoState();
+    if (context.mounted) {
+      await PersistentNavBarNavigator.pushNewScreen(
+        context,
+        screen: ChangeNotifierProvider.value(value: vm, child: const DiscoPage()),
+        withNavBar: false,
+      );
+    }
   }
 }

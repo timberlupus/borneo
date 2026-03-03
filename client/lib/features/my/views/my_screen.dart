@@ -26,24 +26,14 @@ class MyScreen extends StatelessWidget {
               leading: const Icon(Icons.settings_outlined),
               title: Text(context.translate('Settings')),
               onPressed: (bc) async {
-                await PersistentNavBarNavigator.pushNewScreen(
-                  context,
-                  screen: AppSettingsScreen(),
-                  withNavBar: false,
-                  pageTransitionAnimation: PageTransitionAnimation.slideRight,
-                );
+                await PersistentNavBarNavigator.pushNewScreen(context, screen: AppSettingsScreen(), withNavBar: false);
               },
             ),
             SettingsTile.navigation(
               leading: const Icon(Icons.info_outline),
               title: Text(context.translate('About')),
               onPressed: (bc) async {
-                await PersistentNavBarNavigator.pushNewScreen(
-                  context,
-                  screen: AboutScreen(),
-                  withNavBar: false,
-                  pageTransitionAnimation: PageTransitionAnimation.slideRight,
-                );
+                await PersistentNavBarNavigator.pushNewScreen(context, screen: AboutScreen(), withNavBar: false);
               },
             ),
           ],

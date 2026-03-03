@@ -279,12 +279,7 @@ class SettingsScreen extends StatelessWidget {
       logger: context.read<Logger>(),
     );
 
-    PersistentNavBarNavigator.pushNewScreen(
-      context,
-      screen: DeviceOtaScreen(otaVm),
-      withNavBar: false,
-      pageTransitionAnimation: PageTransitionAnimation.slideRight,
-    );
+    PersistentNavBarNavigator.pushNewScreen(context, screen: DeviceOtaScreen(otaVm), withNavBar: false);
   }
 
   void _goControllerSettings(BuildContext context, SettingsViewModel svm) {
