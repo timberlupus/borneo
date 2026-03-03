@@ -108,7 +108,7 @@ class DashboardTemporaryTile extends StatelessWidget {
                   child: Icon(
                     Icons.flashlight_on,
                     size: 64,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.15),
+                    color: theme.colorScheme.inversePrimary.withValues(alpha: 0.24),
                   ),
                 ),
             ],

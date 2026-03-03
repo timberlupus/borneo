@@ -1,3 +1,4 @@
+import 'package:borneo_app/shared/widgets/screen_top_rounded_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -62,7 +63,7 @@ class GenericBottomSheetPicker<T> extends StatelessWidget {
 
     return showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       builder: (context) => GenericBottomSheetPicker<T>(
         title: title,
         entries: entries,
@@ -92,80 +93,70 @@ class GenericBottomSheetPicker<T> extends StatelessWidget {
     final info = Provider.of<PlatformDeviceInfo?>(context, listen: false);
     final double corner = info?.screenCornerRadius.topLeft ?? 16.0;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(corner)),
-      child: Container(
-        // only keep a little spacing from the top of the screen
-        margin: const EdgeInsets.only(top: 8),
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(corner)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close, color: colorScheme.onSurfaceVariant),
-                    onPressed: () => Navigator.of(context).pop(),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                  ),
-                ],
-              ),
-            ),
-
-            // items
-            Flexible(
-              child: Container(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                child: ListView.separated(
-                  // ``shrinkWrap`` is intentionally left true to allow the list to
-                  // size itself to its contents when there are few entries.  in
-                  // earlier versions we clipped only the outer container which
-                  // still allowed the overscroll glow to bleed when the list was
-                  // smaller than the viewport.  adding ``clipBehavior`` ensures
-                  // the scroll effects are clipped regardless of shrink-wrap
-                  // behavior.
-                  shrinkWrap: true,
-                  clipBehavior: Clip.hardEdge,
-                  padding: EdgeInsets.zero,
-                  itemCount: entries.length,
-                  separatorBuilder: (context, index) =>
-                      Divider(height: 1, indent: 20, endIndent: 20, color: Theme.of(context).colorScheme.surfaceDim),
-                  itemBuilder: (context, index) {
-                    final entry = entries[index];
-                    final isSelected = entry.value == effective;
-                    return ListTile(
-                      title: Text(
-                        entry.label,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: isSelected ? colorScheme.primary : colorScheme.onSurface,
-                          fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
-                        ),
-                      ),
-                      trailing: isSelected ? Icon(Icons.check, color: colorScheme.primary, size: 20) : null,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                      onTap: () => onValueSelected(entry.value),
-                      dense: true,
-                    );
-                  },
+    return ScreenTopRoundedContainer(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
                 ),
+                IconButton(
+                  icon: Icon(Icons.close, color: colorScheme.onSurfaceVariant),
+                  onPressed: () => Navigator.of(context).pop(),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                ),
+              ],
+            ),
+          ),
+
+          // items
+          Flexible(
+            child: Container(
+              color: Theme.of(context).colorScheme.surfaceContainer,
+              child: ListView.separated(
+                // ``shrinkWrap`` is intentionally left true to allow the list to
+                // size itself to its contents when there are few entries.  in
+                // earlier versions we clipped only the outer container which
+                // still allowed the overscroll glow to bleed when the list was
+                // smaller than the viewport.  adding ``clipBehavior`` ensures
+                // the scroll effects are clipped regardless of shrink-wrap
+                // behavior.
+                shrinkWrap: true,
+                clipBehavior: Clip.hardEdge,
+                padding: EdgeInsets.zero,
+                itemCount: entries.length,
+                separatorBuilder: (context, index) =>
+                    Divider(height: 1, indent: 20, endIndent: 20, color: Theme.of(context).colorScheme.surfaceDim),
+                itemBuilder: (context, index) {
+                  final entry = entries[index];
+                  final isSelected = entry.value == effective;
+                  return ListTile(
+                    title: Text(
+                      entry.label,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+                        fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                      ),
+                    ),
+                    trailing: isSelected ? Icon(Icons.check, color: colorScheme.primary, size: 20) : null,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                    onTap: () => onValueSelected(entry.value),
+                    dense: true,
+                  );
+                },
               ),
             ),
+          ),
 
-            // divider separating the sheet contents from the bottom nav bar
-            const Divider(height: 1, thickness: 1),
-          ],
-        ),
+          // divider separating the sheet contents from the bottom nav bar
+          const Divider(height: 1, thickness: 1),
+        ],
       ),
     );
   }

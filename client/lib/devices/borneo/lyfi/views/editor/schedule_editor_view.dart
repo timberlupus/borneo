@@ -160,7 +160,7 @@ class ScheduleEditorView extends StatelessWidget {
             // Bottom buttons
             Consumer<ScheduleEditorViewModel>(
               builder: (context, vm, child) => ScreenTopRoundedContainer(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                color: Theme.of(context).colorScheme.surfaceContainer,
                 padding: const EdgeInsets.fromLTRB(8, 24, 8, 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,

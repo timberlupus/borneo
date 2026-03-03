@@ -30,7 +30,7 @@ class DeviceCard extends StatelessWidget {
       selector: (_, vm) => (isOnline: vm.isOnline, isPowerOn: vm.isPowerOn, name: vm.deviceEntity.name),
       builder: (context, status, _) {
         final colorScheme = Theme.of(context).colorScheme;
-        final bgColor = colorScheme.surfaceContainer;
+        final bgColor = colorScheme.surfaceContainerHighest;
         final fgColor = colorScheme.onSurface;
 
         return ClipRRect(
@@ -84,7 +84,7 @@ class DeviceCard extends StatelessWidget {
                                 ),
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 4),
                       // Status row
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
@@ -172,7 +172,8 @@ class DeviceCard extends StatelessWidget {
             if (i > 0)
               SizedBox(
                 height: 12,
-                child: VerticalDivider(thickness: 1.5, width: 8, color: fgColor.withValues(alpha: 0.38)),
+                width: 12,
+                child: Icon(Icons.circle, size: 4, color: fgColor.withValues(alpha: 0.38)),
               ),
             widgets[i],
           ],
@@ -226,6 +227,7 @@ class DeviceCard extends StatelessWidget {
       case 'change-group':
         final groupEntities = parentVM.groups.where((gvm) => !gvm.isDummy).map((gvm) => gvm.model).toList();
         showModalBottomSheet(
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
           context: context,
           builder: (BuildContext ctx) => DeviceGroupSelectionSheet(
             availableGroups: groupEntities,

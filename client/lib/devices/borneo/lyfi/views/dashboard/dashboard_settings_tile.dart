@@ -32,56 +32,32 @@ class DashboardSettingsTile extends StatelessWidget {
         Widget tile = DashboardTile(
           disabled: isDisabled,
           onPressed: isDisabled ? null : () => _openSettings(context, gt),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(Icons.settings, size: 32, color: effectiveIconColor),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.translate("Settings"),
-                      style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-
-        if (showDot) {
-          // use a tiny notification-style badge rather than a huge circle.
-          // typical apps use something like 6–10px diameter with a white border.
-          const double dotDiameter = 10.0;
-          const double borderWidth = 1.5;
-          // keep the badge fully inside the tile so it doesn't hit siblings on
-          // large screens.  Use a small inset relative to corner radius.
-          final double inset = DashboardTile.cornerRadius / 4;
-          tile = Stack(
-            clipBehavior: Clip.none,
-            children: [
-              tile,
-              Positioned(
-                top: inset,
-                right: inset,
-                child: Container(
-                  key: const Key('settings_red_dot'),
-                  width: dotDiameter,
-                  height: dotDiameter,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.error,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: borderWidth),
+          child: Badge(
+            key: Key('settings_red_dot'),
+            largeSize: 12,
+            smallSize: 12,
+            isLabelVisible: showDot,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(Icons.settings, size: 32, color: effectiveIconColor),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.translate("Settings"),
+                        style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
-          );
-        }
+              ],
+            ),
+          ),
+        );
 
         return tile;
       },

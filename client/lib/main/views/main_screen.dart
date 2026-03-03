@@ -223,16 +223,16 @@ class _MainScreenState extends State<MainScreen> {
         }
 
         return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: const SystemUiOverlayStyle(
+          value: SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
-            statusBarIconBrightness: Brightness.dark,
+            statusBarIconBrightness: Theme.of(context).brightness,
           ),
           child: PersistentTabView(
             context,
             controller: _persistentController,
             screens: buildScreens(),
             items: navBarItems(),
-            backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor!,
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
             //Theme.of(context).bottomNavigationBarTheme.backgroundColor ??
             //Theme.of(context).colorScheme.surfaceContainerHighest,
             // Back-button handling is fully managed by the outer PopScope

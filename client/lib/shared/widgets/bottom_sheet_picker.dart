@@ -60,7 +60,7 @@ class BottomSheetPicker extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(color: colorScheme.surface, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(16)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -88,31 +88,20 @@ class BottomSheetPicker extends StatelessWidget {
               shrinkWrap: true,
               padding: EdgeInsets.zero,
               itemCount: items.length,
-              separatorBuilder: (context, index) => Divider(height: 1, indent: 20, endIndent: 20),
+              separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1, indent: 20, endIndent: 20),
               itemBuilder: (context, index) {
                 final isSelected = index == selectedIndex;
-                return Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => onItemSelected(index),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              items[index],
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: isSelected ? colorScheme.primary : colorScheme.onSurface,
-                                fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
-                              ),
-                            ),
-                          ),
-                          if (isSelected) Icon(Icons.check, color: colorScheme.primary, size: 20),
-                        ],
-                      ),
+                return ListTile(
+                  dense: true,
+                  onTap: () => onItemSelected(index),
+                  title: Text(
+                    items[index],
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+                      fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
                     ),
                   ),
+                  //      if (isSelected) Icon(Icons.check, color: colorScheme.primary, size: 20),
                 );
               },
             ),

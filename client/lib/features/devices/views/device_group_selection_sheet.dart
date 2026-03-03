@@ -26,6 +26,7 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
         <Widget>[
               if (effectiveExcludeGroupId != '')
                 ListTile(
+                  dense: true,
                   tileColor: Colors.transparent,
                   title: Text(context.translate('No group')),
                   onTap: () {
@@ -37,6 +38,7 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
             .followedBy(
               filteredGroups.map((g) {
                 return ListTile(
+                  dense: true,
                   tileColor: Colors.transparent,
                   title: Text(g.name),
                   onTap: () {
@@ -71,7 +73,7 @@ class DeviceGroupSelectionSheet extends StatelessWidget {
             shrinkWrap: true,
             physics: const ClampingScrollPhysics(),
             itemBuilder: (BuildContext context, int index) => tiles[index],
-            separatorBuilder: (BuildContext context, int index) => const Divider(indent: 16, height: 8, thickness: 1),
+            separatorBuilder: (BuildContext context, int index) => const Divider(indent: 16, height: 1, thickness: 1),
             itemCount: tiles.length,
           ),
         ),

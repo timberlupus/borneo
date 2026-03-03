@@ -56,16 +56,16 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
   }
 
   static List<Widget> _secondaryStatesBuilder(BuildContext context, AbstractDeviceSummaryViewModel vm) {
-    final modeWidget = Selector<AbstractDeviceSummaryViewModel, LyfiMode?>(
-      selector: (_, vm) => (vm as LyfiSummaryDeviceViewModel).ledMode,
-      builder: (context, mode, child) => Text(_modeText(context, mode), style: Theme.of(context).textTheme.labelSmall),
-    );
     final stateWidget = Selector<AbstractDeviceSummaryViewModel, LyfiState?>(
       selector: (_, vm) => (vm as LyfiSummaryDeviceViewModel).ledState,
       builder: (context, state, child) =>
           Text(_stateText(context, state), style: Theme.of(context).textTheme.labelSmall),
     );
-    return [modeWidget, stateWidget];
+    final modeWidget = Selector<AbstractDeviceSummaryViewModel, LyfiMode?>(
+      selector: (_, vm) => (vm as LyfiSummaryDeviceViewModel).ledMode,
+      builder: (context, mode, child) => Text(_modeText(context, mode), style: Theme.of(context).textTheme.labelSmall),
+    );
+    return [stateWidget, modeWidget];
   }
 
   /// Custom card center: bar chart of per-channel brightness.
@@ -115,20 +115,13 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
     }
   }
 
-  static String _stateText(BuildContext context, LyfiState? state) {
-    switch (state) {
-      case LyfiState.normal:
-        return context.translate('NORM');
-      case LyfiState.dimming:
-        return context.translate('DIMM');
-      case LyfiState.temporary:
-        return context.translate('TEMP');
-      case LyfiState.preview:
-        return context.translate('PREV');
-      default:
-        return '-';
-    }
-  }
+  static String _stateText(BuildContext context, LyfiState? state) => switch (state) {
+    LyfiState.normal => context.translate('NORM'),
+    LyfiState.dimming => context.translate('DIMM'),
+    LyfiState.temporary => context.translate('TEMP'),
+    LyfiState.preview => context.translate('PREV'),
+    _ => '-',
+  };
 
   static Future<WotThing> _createWotThing(
     DeviceEntity device,
@@ -161,7 +154,7 @@ class _LyfiBrightnessChart extends StatelessWidget {
     final fraction = (value / kLyfiBrightnessMax).clamp(0.0, 1.0).toDouble();
     final pct = (fraction * 100).round();
     final primaryColor = HexColor.fromHex(ch.color);
-    final trackColor = Theme.of(context).colorScheme.surfaceContainerLow;
+    final trackColor = Theme.of(context).colorScheme.surfaceContainerHigh;
     return Center(
       child: LayoutBuilder(
         builder: (context, constraints) {

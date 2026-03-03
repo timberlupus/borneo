@@ -146,7 +146,7 @@ class DashboardAcclimationTile extends StatelessWidget {
                   child: Icon(
                     Icons.calendar_month_outlined,
                     size: 64,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.15),
+                    color: theme.colorScheme.inversePrimary.withValues(alpha: 0.24),
                   ),
                 ),
             ],

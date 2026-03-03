@@ -27,9 +27,9 @@ class BrightnessSliderListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final handlerSize = 24.0;
+    final trackBarBorder = Border.all(color: Theme.of(context).colorScheme.surfaceContainerHigh, width: 1.5);
     return ListTile(
       dense: true,
-      tileColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       minVerticalPadding: 0,
       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
       title: FlutterSlider(
@@ -46,7 +46,7 @@ class BrightnessSliderListTile extends StatelessWidget {
             child: Center(
               child: Icon(
                 Icons.circle,
-                color: disabled ? color : color.withValues(alpha: 0.38),
+                color: disabled ? color.withValues(alpha: 0.38) : color,
                 size: handlerSize * 0.60,
               ),
             ),
@@ -66,15 +66,10 @@ class BrightnessSliderListTile extends StatelessWidget {
         trackBar: FlutterSliderTrackBar(
           activeTrackBarHeight: 8,
           inactiveTrackBarHeight: 8,
-          activeTrackBar: BoxDecoration(
-            border: Border.all(color: Theme.of(context).colorScheme.surfaceDim, width: 1.5),
-            color: disabled ? color.withValues(alpha: 0.38) : color,
-            borderRadius: BorderRadius.circular(3),
-          ),
-          inactiveTrackBar: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceDim,
-            borderRadius: BorderRadius.circular(3),
-          ),
+          activeDisabledTrackBarColor: color.withValues(alpha: 0.15),
+          inactiveDisabledTrackBarColor: color.withValues(alpha: 0.15),
+          activeTrackBar: BoxDecoration(border: trackBarBorder, color: color),
+          inactiveTrackBar: BoxDecoration(border: trackBarBorder, color: color.withValues(alpha: 0.24)),
         ),
         onDragging: (index, low, _) => onChanged(low.toInt()),
         onDragCompleted: (index, low, _) => onChanged(low.toInt()),

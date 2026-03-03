@@ -39,7 +39,6 @@ class MoonScreen extends StatelessWidget {
       create: (cb) => vm,
       builder: (context, child) {
         return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
             title: Text(context.translate('Moonlight')),
             actions: [
@@ -67,22 +66,17 @@ class MoonScreen extends StatelessWidget {
                 return Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Container(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      padding: const EdgeInsets.all(0),
-                      child: AspectRatio(
-                        aspectRatio: 1.5,
-                        child: Consumer<MoonViewModel>(builder: (context, vm, _) => buildGraph(context, vm)),
-                      ),
+                    AspectRatio(
+                      aspectRatio: 1.5,
+                      child: Consumer<MoonViewModel>(builder: (context, vm, _) => buildGraph(context, vm)),
                     ),
                     const SizedBox(height: 24),
                     Expanded(
                       child: Consumer<MoonViewModel>(
                         builder: (context, vm, _) => ScreenTopRoundedContainer(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                          child: SingleChildScrollView(
-                            child: BrightnessSliderList(vm.editor, disabled: !vm.enabled || !vm.canEdit),
-                          ),
+                          color: Theme.of(context).colorScheme.surfaceContainer,
+                          padding: EdgeInsets.fromLTRB(0, 24, 0, 24),
+                          child: BrightnessSliderList(vm.editor, disabled: !vm.enabled || !vm.canEdit),
                         ),
                       ),
                     ),

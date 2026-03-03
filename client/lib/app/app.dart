@@ -106,16 +106,6 @@ class _BorneoAppState extends State<BorneoApp> {
 
   @override
   Widget build(BuildContext context) {
-    /*
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff493b72), brightness: Brightness.light),
-        useMaterial3: true, // 推荐使用 Material 3
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff493b72), brightness: Brightness.dark),
-        useMaterial3: true, // 推荐使用 Material 3
-      ),
-    */
     return MultiProvider(
       providers: [
         Provider<EventBus>(create: (_) => widget.globalEventBus),
@@ -126,8 +116,16 @@ class _BorneoAppState extends State<BorneoApp> {
           return MaterialApp(
             title: 'Borneo Aqua',
             navigatorKey: _navigatorKey,
-            theme: BorneoTheme(Theme.of(context).textTheme).light(),
-            darkTheme: BorneoTheme(Theme.of(context).textTheme).dark(),
+            //theme: BorneoTheme(Theme.of(context).textTheme).light(),
+            //darkTheme: BorneoTheme(Theme.of(context).textTheme).dark(),
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff493b72), brightness: Brightness.light),
+              useMaterial3: true, // 推荐使用 Material 3
+            ),
+            darkTheme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff493b72), brightness: Brightness.dark),
+              useMaterial3: true, // 推荐使用 Material 3
+            ),
             themeMode: _themeMode,
             locale: _locale,
             supportedLocales: kSupportedLocales,
@@ -150,10 +148,13 @@ class _BorneoAppState extends State<BorneoApp> {
                 SystemChrome.setSystemUIOverlayStyle(
                   SystemUiOverlayStyle(
                     statusBarColor: Colors.transparent,
-                    statusBarIconBrightness: Brightness.dark,
-                    systemNavigationBarColor: effectiveBrightness == Brightness.light
+                    statusBarIconBrightness: theme.brightness,
+                    systemNavigationBarColor: theme.colorScheme.surfaceContainer,
+                    /*
+                    effectiveBrightness == Brightness.light
                         ? Colors.white
-                        : theme.colorScheme.surfaceContainerHighest,
+                        : theme.colorScheme.surfaceContainer,
+                        */
                     systemNavigationBarIconBrightness: effectiveBrightness == Brightness.light
                         ? Brightness.dark
                         : Brightness.light,

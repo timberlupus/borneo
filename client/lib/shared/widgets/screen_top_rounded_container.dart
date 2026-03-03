@@ -20,7 +20,7 @@ class ScreenTopRoundedContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = color ?? Theme.of(context).colorScheme.surface;
+    final bg = color ?? Theme.of(context).colorScheme.surfaceContainer;
 
     // radius comes from the shared provider; fall back to zero if not
     // available so the widget remains usable in isolation (tests, etc.)

@@ -270,7 +270,7 @@ class DevicesScreen extends StatelessWidget {
                           child: Divider(
                             height: 8,
                             thickness: 8,
-                            color: Theme.of(context).colorScheme.surfaceDim,
+                            color: Theme.of(context).colorScheme.surfaceContainer,
                             radius: const BorderRadius.all(Radius.circular(2.5)),
                           ),
                         ),
