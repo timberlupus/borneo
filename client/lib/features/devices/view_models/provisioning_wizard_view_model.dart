@@ -41,6 +41,11 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
   bool _autoAdded = false;
   bool get autoAdded => _autoAdded;
 
+  // Serial number of the device being provisioned, fetched via BLE before
+  // sending WiFi credentials.  Used to filter mDNS discoveries so that only
+  // the exact provisioned device is auto-added.
+  String? _provisionedSerno;
+
   StreamSubscription<NewDeviceFoundEvent>? _autoAddSub;
 
   List<WifiNetwork>? _networks;
@@ -116,6 +121,9 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
     isBusy = true;
 
     try {
+      final info = await _bleProvisioner.fetchDeviceInfo(deviceName: deviceName, cancelToken: _cancelToken);
+      _provisionedSerno = info.serno.isNotEmpty ? info.serno : null;
+
       _updateProvisioningState(BleProvisioningState.sendingCredentials);
       await _bleProvisioner.provisionWifi(deviceName, _selectedSsid!, password, cancelToken: _cancelToken);
       _updateProvisioningState(BleProvisioningState.connectingToWifi);
@@ -152,6 +160,7 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
     _provisioningSucceeded = false;
     // Create a fresh cancel token so the new scan/provision is not pre-cancelled.
     _cancelToken = CancellationToken();
+    _provisionedSerno = null;
     notifyListeners();
     scanNetworks();
   }
@@ -198,12 +207,13 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
   }
 
   void _listenForAutoAdd() {
-    // we want two things during the registration phase:
-    // 1. automatically add any new device we discover via mDNS to the
-    //    database (which will subsequently fire NewDeviceEntityAddedEvent)
-    // 2. let the UI know that something has been found so the "done" button
-    //    can be enabled even if the add is still in progress.
     _autoAddSub = _deviceManager.allDeviceEvents.on<NewDeviceFoundEvent>().listen((event) async {
+      // If we know the target device's serno, skip any other mDNS discovery
+      // that arrives concurrently during the registration phase.
+      if (_provisionedSerno != null && event.device.fingerprint != _provisionedSerno) {
+        return;
+      }
+
       if (!_autoAdded) {
         _autoAdded = true;
         notifyListeners();

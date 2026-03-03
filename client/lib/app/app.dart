@@ -51,6 +51,7 @@ class _BorneoAppState extends State<BorneoApp> {
   late StreamSubscription _localeSub;
   late StreamSubscription _themeSub;
   ThemeData _currentTheme = ThemeData();
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
@@ -124,6 +125,7 @@ class _BorneoAppState extends State<BorneoApp> {
         builder: (context) {
           return MaterialApp(
             title: 'Borneo Aqua',
+            navigatorKey: _navigatorKey,
             theme: BorneoTheme(Theme.of(context).textTheme).light(),
             darkTheme: BorneoTheme(Theme.of(context).textTheme).dark(),
             themeMode: _themeMode,
@@ -162,7 +164,10 @@ class _BorneoAppState extends State<BorneoApp> {
                 providers: [
                   Provider<GettextLocalizations>(create: (context) => gt),
 
-                  Provider<IAppNotificationService>(create: (_) => AppNotificationServiceImpl(() => _currentTheme)),
+                  Provider<IAppNotificationService>(
+                    create: (_) =>
+                        AppNotificationServiceImpl(getTheme: () => _currentTheme, navigatorKey: _navigatorKey),
+                  ),
 
                   Provider<UrlLauncherService>(
                     create: (context) => UrlLauncherService(
