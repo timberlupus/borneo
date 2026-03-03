@@ -82,10 +82,15 @@ class AcclimationScreen extends StatelessWidget {
             ),
             SettingsTile.navigation(
               title: Text(context.translate('Start date')),
-              value: Text(
-                vm.startTimestamp.toLocal().year < 2025
-                    ? context.translate('Null')
-                    : DateFormat.yMd().format(vm.startTimestamp.toLocal()),
+              value: Builder(
+                builder: (ctx) {
+                  final locale = Localizations.localeOf(ctx).toString();
+                  return Text(
+                    vm.startTimestamp.toLocal().year < 2025
+                        ? context.translate('Not set')
+                        : DateFormat.yMd(locale).format(vm.startTimestamp.toLocal()),
+                  );
+                },
               ),
               onPressed: !vm.isBusy && vm.isOnline
                   ? (bc) async {
@@ -152,13 +157,21 @@ class AcclimationScreen extends StatelessWidget {
   }
 
   Future<void> onSubmit(AcclimationViewModel vm, BuildContext context) async {
-    await vm.submitToDevice();
-    if (context.mounted) {
-      Provider.of<IAppNotificationService>(
-        context,
-        listen: false,
-      ).showSuccess(context.translate('Update acclimation settings succeed.'));
-      Navigator.of(context).pop();
+    try {
+      await vm.submitToDevice();
+      if (context.mounted) {
+        Provider.of<IAppNotificationService>(
+          context,
+          listen: false,
+        ).showSuccess(context.translate('Update acclimation settings succeed.'));
+        Navigator.of(context).pop();
+      }
+    } catch (e, st) {
+      if (context.mounted) {
+        context.read<IAppNotificationService>().showError(context.translate('Error'), body: e.toString());
+        // log for diagnostics if logger is available on the VM
+        vm.logger?.e('Failed to submit acclimation settings', error: e, stackTrace: st);
+      }
     }
   }
 }

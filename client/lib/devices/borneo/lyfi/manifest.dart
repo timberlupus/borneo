@@ -56,13 +56,12 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
   }
 
   static List<Widget> _secondaryStatesBuilder(BuildContext context, AbstractDeviceSummaryViewModel vm) {
-    final lvm = vm as LyfiSummaryDeviceViewModel;
-    final modeWidget = ValueListenableBuilder<LyfiMode?>(
-      valueListenable: lvm.ledMode,
+    final modeWidget = Selector<AbstractDeviceSummaryViewModel, LyfiMode?>(
+      selector: (_, vm) => (vm as LyfiSummaryDeviceViewModel).ledMode,
       builder: (context, mode, child) => Text(_modeText(context, mode), style: Theme.of(context).textTheme.labelSmall),
     );
-    final stateWidget = ValueListenableBuilder<LyfiState?>(
-      valueListenable: lvm.ledState,
+    final stateWidget = Selector<AbstractDeviceSummaryViewModel, LyfiState?>(
+      selector: (_, vm) => (vm as LyfiSummaryDeviceViewModel).ledState,
       builder: (context, state, child) =>
           Text(_stateText(context, state), style: Theme.of(context).textTheme.labelSmall),
     );
@@ -73,11 +72,11 @@ class LyfiDeviceModuleMetadata extends DeviceModuleMetadata {
   /// Falls back to large device icon when offline, powered off, or data unavailable.
   static Widget _buildCardCenter(BuildContext context, AbstractDeviceSummaryViewModel vm) {
     final lvm = vm as LyfiSummaryDeviceViewModel;
-    return ValueListenableBuilder<LyfiDeviceInfo?>(
-      valueListenable: lvm.lyfiDeviceInfo,
+    return Selector<AbstractDeviceSummaryViewModel, LyfiDeviceInfo?>(
+      selector: (_, vm) => (vm as LyfiSummaryDeviceViewModel).lyfiDeviceInfo,
       builder: (context, deviceInfo, _) {
-        return ValueListenableBuilder<List<int>?>(
-          valueListenable: lvm.channelBrightness,
+        return Selector<AbstractDeviceSummaryViewModel, List<int>?>(
+          selector: (_, vm) => (vm as LyfiSummaryDeviceViewModel).channelBrightness,
           builder: (context, brightness, _) {
             // Show large icon when offline, powered off, or data not yet available
             final showIcon =

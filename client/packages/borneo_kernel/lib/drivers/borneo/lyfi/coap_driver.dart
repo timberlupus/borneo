@@ -1,7 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:borneo_common/io/net/network_interface_helper.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/base_lyfi_driver.dart';
 import 'package:borneo_kernel/drivers/borneo/coap_client.dart';
 import 'package:borneo_kernel/drivers/borneo/coap_config.dart';
@@ -63,19 +59,11 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
 
   @override
   Future<bool> probe(Device dev, {CancellationToken? cancelToken}) async {
-    InternetAddress? bindAddress;
-    try {
-      final inferred = await NetworkInterfaceHelper.inferNetworkInterface(dev.address.host);
-      bindAddress = inferred != null ? InternetAddress.tryParse(inferred) : null;
-    } catch (_) {
-      bindAddress = null;
-    }
     final probeCoapClient = BorneoCoapClient(
       dev.address,
       config: BorneoProbeCoapConfig.coapConfig,
       device: dev,
       offlineDetectionEnabled: false,
-      bindAddress: bindAddress,
     );
     bool succeed = false;
     try {
@@ -90,7 +78,6 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
         config: BorneoCoapConfig.coapConfig,
         device: dev,
         offlineDetectionEnabled: true,
-        bindAddress: bindAddress,
       );
       // Verify firmware version
       final fwver = await _getFirmwareVersion(coapClient, cancelToken: cancelToken);
@@ -180,19 +167,19 @@ class BorneoLyfiCoapDriver extends BaseLyfiDriver with BorneoDeviceCoapApi imple
 
   static SupportedDeviceDescriptor? matches(DiscoveredDevice discovered) {
     if (discovered is MdnsDiscoveredDevice) {
-      final compatible = utf8.decode(discovered.txt?['compatible'] ?? [], allowMalformed: true);
-      final fwVer = Version.parse(utf8.decode(discovered.txt?['fwver'] ?? [], allowMalformed: true));
+      final compatible = discovered.txt?['compatible'] ?? '';
+      final fwVer = Version.parse(discovered.txt?['fwver'] ?? '');
       if (compatible == lyfiCompatibleString) {
         final matched = SupportedDeviceDescriptor(
           driverDescriptor: borneoLyfiDriverDescriptor,
           address: Uri(scheme: 'coap', host: discovered.host, port: discovered.port),
-          name: utf8.decode(discovered.txt?['name'] ?? [], allowMalformed: true),
+          name: discovered.txt?['name'] ?? '',
           compatible: compatible,
-          model: utf8.decode(discovered.txt?['model'] ?? [], allowMalformed: true),
-          fingerprint: utf8.decode(discovered.txt?['serno'] ?? [], allowMalformed: true),
-          manuf: utf8.decode(discovered.txt?['manuf'] ?? [], allowMalformed: true),
+          model: discovered.txt?['model'] ?? '',
+          fingerprint: discovered.txt?['serno'] ?? '',
+          manuf: discovered.txt?['manuf'] ?? '',
           fwVer: fwVer,
-          isCE: utf8.decode(discovered.txt?['ce'] ?? [], allowMalformed: true) == 'true' ? true : false,
+          isCE: discovered.txt?['ce'] == 'true' ? true : false,
         );
         return matched;
       }

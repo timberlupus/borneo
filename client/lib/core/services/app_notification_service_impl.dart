@@ -4,22 +4,34 @@ import 'package:toastification/toastification.dart';
 
 class AppNotificationServiceImpl implements IAppNotificationService {
   final ThemeData Function() _getTheme;
+  final GlobalKey<NavigatorState> _navigatorKey;
 
-  AppNotificationServiceImpl(this._getTheme);
+  bool _errorDialogShowing = false;
+
+  AppNotificationServiceImpl({required ThemeData Function() getTheme, required GlobalKey<NavigatorState> navigatorKey})
+    : _getTheme = getTheme,
+      _navigatorKey = navigatorKey;
+
   @override
   void showError(String title, {String? body}) {
+    // Deduplicate: if an error dialog is already visible, ignore repeat calls.
+    if (_errorDialogShowing) return;
+
+    final context = _navigatorKey.currentContext;
+    if (context == null) return;
+
+    _errorDialogShowing = true;
     final theme = _getTheme();
-    toastification.show(
-      type: ToastificationType.error,
-      style: ToastificationStyle.minimal,
-      title: Text(title),
-      description: body != null ? Text(body) : null,
-      autoCloseDuration: Duration(seconds: 5),
-      primaryColor: theme.colorScheme.error,
-      backgroundColor: theme.colorScheme.errorContainer,
-      foregroundColor: theme.colorScheme.onErrorContainer,
-      borderSide: BorderSide(color: theme.colorScheme.outline),
-    );
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        icon: Icon(Icons.error_outline, color: theme.colorScheme.error, size: 32),
+        title: Text(title),
+        content: body != null ? SingleChildScrollView(child: Text(body)) : null,
+        actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Close'))],
+      ),
+    ).whenComplete(() => _errorDialogShowing = false);
   }
 
   @override

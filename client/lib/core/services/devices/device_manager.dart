@@ -24,6 +24,10 @@ abstract class IDeviceManager implements IDisposable {
   bool get isDiscoverying;
 
   // WotThing related properties
+  /// All WotThings across every scene (globally persistent).
+  Iterable<WotThing> get allWotThings;
+
+  /// WotThings that belong to the currently active scene (i.e. [WotThing.isActive] == true).
   Iterable<WotThing> get wotThingsInCurrentScene;
   Iterable<String> get deviceIDsWithWotThings;
   int get wotThingCount;
@@ -37,7 +41,7 @@ abstract class IDeviceManager implements IDisposable {
   Future<bool> tryBind(DeviceEntity device);
   Future<void> bind(DeviceEntity device);
   Future<void> unbind(String deviceID);
-  Future<void> delete(String id, {Transaction? tx});
+  Future<void> delete(String id, {Transaction? tx, CancellationToken? cancelToken});
   Future<void> update(String id, {Transaction? tx, String? name, String? groupID});
   Future<void> moveToGroup(String id, String newGroupID);
   Future<bool> isNewDevice(SupportedDeviceDescriptor matched, {Transaction? tx});

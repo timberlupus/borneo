@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 
 class NvsSettingEntry<T> {
   final String namespace;
@@ -84,8 +83,6 @@ class ChannelSettingsEntry {
 }
 
 class ControllerSettingsViewModel extends BaseLyfiDeviceViewModel {
-  ILyfiDeviceApi get api => deviceManager.getBoundDevice(deviceID).api<ILyfiDeviceApi>();
-
   late final int maxChannelCount;
   late final NvsSettingEntry<int> pwmFreq;
   late final NvsSettingEntry<bool> overpowerEnabled;

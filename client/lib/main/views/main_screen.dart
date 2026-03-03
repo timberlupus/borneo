@@ -1,11 +1,11 @@
 import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/core/services/local_service.dart';
+import 'package:borneo_app/features/devices/providers/group_edit_provider.dart';
 import 'package:borneo_app/routes/app_routes.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
-import 'package:borneo_app/features/devices/view_models/group_edit_view_model.dart';
 import 'package:borneo_app/features/scenes/models/scene_edit_arguments.dart';
 import 'package:borneo_app/features/scenes/views/scenes_screen.dart';
 import 'package:borneo_app/features/devices/views/group_edit_screen.dart';
@@ -15,15 +15,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import '../../core/services/devices/device_manager.dart';
 import '../../core/services/scene_manager.dart';
 import '../../features/devices/view_models/grouped_devices_view_model.dart';
-import '../../features/my/view_models/my_view_model.dart';
+import '../../features/my/providers/my_provider.dart';
 import '../../features/devices/views/devices_screen.dart';
 import '../../features/my/views/my_screen.dart';
 
@@ -337,7 +339,7 @@ class _MainScreenState extends State<MainScreen> {
               final shouldPop = await vm.handleWillPop();
               if (!shouldPop) {
                 if (context.mounted) {
-                  Provider.of<IAppNotificationService>(
+                  provider.Provider.of<IAppNotificationService>(
                     context,
                     listen: false,
                   ).showInfo(context.translate('Press back again to exit'));
@@ -360,33 +362,40 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildInitializedContent(BuildContext context) {
     final gt = GettextLocalizations.of(context);
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => MyViewModel(gt: gt), lazy: true),
-        ChangeNotifierProvider(
-          create: (context) {
-            final logger = context.read<Logger>();
-            final globalEventBus = context.read<EventBus>();
-            final sm = context.read<ISceneManager>();
-            final gm = context.read<IGroupManager>();
-            final dm = context.read<IDeviceManager>();
-            final dmr = context.read<IDeviceModuleRegistry>();
-            final clock = context.read<IClock>();
-            return GroupedDevicesViewModel(
-              globalEventBus,
-              sm,
-              gm,
-              dm,
-              dmr,
-              clock: clock,
-              gt: context.read<GettextLocalizations>(),
-              logger: logger,
-            );
-          },
-          lazy: false,
-        ),
-      ],
-      child: buildScaffold(context),
+    // override the Riverpod provider for MyViewModel using the current
+    // localization instance.  downstream widgets can read it via
+    // `ref.watch(myViewModelProvider)` once they have been migrated.
+    return ProviderScope(
+      overrides: [myViewModelProvider.overrideWithValue(MyViewModel(gt: gt))],
+      child: MultiProvider(
+        providers: [
+          // MyViewModel is now supplied by Riverpod; we leave the other
+          // ChangeNotifierProviders unchanged until they're migrated.
+          ChangeNotifierProvider(
+            create: (context) {
+              final logger = context.read<Logger>();
+              final globalEventBus = context.read<EventBus>();
+              final sm = context.read<ISceneManager>();
+              final gm = context.read<IGroupManager>();
+              final dm = context.read<IDeviceManager>();
+              final dmr = context.read<IDeviceModuleRegistry>();
+              final clock = context.read<IClock>();
+              return GroupedDevicesViewModel(
+                globalEventBus,
+                sm,
+                gm,
+                dm,
+                dmr,
+                clock: clock,
+                gt: context.read<GettextLocalizations>(),
+                logger: logger,
+              );
+            },
+            lazy: false,
+          ),
+        ],
+        child: buildScaffold(context),
+      ),
     );
   }
 }

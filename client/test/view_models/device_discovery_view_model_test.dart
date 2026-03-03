@@ -76,6 +76,9 @@ class FakeDeviceManager implements IDeviceManager {
   Iterable<BoundDevice> get boundDevices => const [];
 
   @override
+  Iterable<WotThing> get allWotThings => const [];
+
+  @override
   Iterable<WotThing> get wotThingsInCurrentScene => const [];
 
   @override
@@ -111,7 +114,7 @@ class FakeDeviceManager implements IDeviceManager {
   Future<void> unbind(String deviceID) async {}
 
   @override
-  Future<void> delete(String id, {Transaction? tx}) async {}
+  Future<void> delete(String id, {Transaction? tx, CancellationToken? cancelToken}) async {}
 
   @override
   Future<void> update(String id, {Transaction? tx, String? name, String? groupID}) async {}

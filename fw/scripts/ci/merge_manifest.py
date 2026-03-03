@@ -38,8 +38,7 @@ def main():
 
     try:
         with open(args.output, 'w', encoding='utf-8') as f:
-            json.dump(merged_data, f, separators=(
-                ',', ':'), ensure_ascii=False)
+            json.dump(merged_data, f, indent=4)
         print(f"Successfully merged {len(merged_data)} manifest files into '{args.output}'.")
     except Exception as e:
         print(f"Error writing to output file '{args.output}': {e}")

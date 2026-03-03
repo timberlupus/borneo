@@ -2,7 +2,6 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/editor/ieditor.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/lyfi_view_model.dart';
 import 'package:borneo_common/async/async_rate_limiter.dart';
-import 'package:borneo_kernel/drivers/borneo/lyfi/api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
 import 'package:borneo_wot/borneo/lyfi/wot_thing.dart';
 import 'package:cancellation_token/cancellation_token.dart';
@@ -32,8 +31,6 @@ abstract class BaseEditorViewModel extends ChangeNotifier implements IEditor {
 
   @override
   List<ValueNotifier<int>> get channels => _channels;
-
-  ILyfiDeviceApi get deviceApi => parent.boundDevice!.driver as ILyfiDeviceApi;
 
   BaseEditorViewModel(this.parent, this.lyfiThing)
     : _channels = List.generate(parent.lyfiDeviceInfo.channelCount, growable: false, (index) => ValueNotifier(0)),

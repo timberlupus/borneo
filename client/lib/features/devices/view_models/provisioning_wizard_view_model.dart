@@ -1,19 +1,52 @@
+import 'dart:async';
+
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
+import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/features/devices/models/ble_provision_state.dart';
+import 'package:borneo_app/features/devices/models/events.dart';
 import 'package:borneo_app/shared/view_models/abstract_screen_view_model.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter_esp_ble_prov/flutter_esp_ble_prov.dart';
+
+/// Maximum number of seconds to wait for a registered device to appear on the
+/// network after successful WiFi connection.  This is only used for the UI
+/// countdown; the wizard will advance as soon as the device is detected.
+const int kRegisterWaitSeconds = 30;
 
 enum ProvisioningWizardStep { selectWifi, enterPassword, provisioning, done }
 
 class ProvisioningWizardViewModel extends AbstractScreenViewModel {
   final IBleProvisioner _bleProvisioner;
+  final IDeviceManager _deviceManager;
   final String deviceName;
   final IAppNotificationService? notificationService;
 
+  /// Duration we will wait (for display) while registering the device on
+  /// the network. Provided for testing.
+  final int registerTimeoutSeconds;
+
   ProvisioningWizardStep _step = ProvisioningWizardStep.selectWifi;
   ProvisioningWizardStep get step => _step;
+
+  // countdown timer used while registering device
+  Timer? _registerTimer;
+  int _registerRemainingSeconds = 0;
+  int get registerRemainingSeconds => _registerRemainingSeconds;
+
+  StreamSubscription<NewDeviceEntityAddedEvent>? _registerSub;
+
+  // auto‑add tracking: true once a device has been successfully added during
+  // the registration phase.  Exposed so UI can enable Done button.
+  bool _autoAdded = false;
+  bool get autoAdded => _autoAdded;
+
+  // Serial number of the device being provisioned, fetched via BLE before
+  // sending WiFi credentials.  Used to filter mDNS discoveries so that only
+  // the exact provisioned device is auto-added.
+  String? _provisionedSerno;
+
+  StreamSubscription<NewDeviceFoundEvent>? _autoAddSub;
 
   List<WifiNetwork>? _networks;
   List<WifiNetwork>? get networks => _networks;
@@ -34,11 +67,13 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
 
   ProvisioningWizardViewModel(
     this._bleProvisioner,
+    this._deviceManager,
     this.deviceName, {
     required super.globalEventBus,
     required super.gt,
     super.logger,
     this.notificationService,
+    this.registerTimeoutSeconds = kRegisterWaitSeconds,
   });
 
   @override
@@ -52,7 +87,7 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
     try {
       _networks = await _bleProvisioner.scanWifiNetworks(deviceName, cancelToken: _cancelToken);
     } on CancelledException {
-      notificationService?.showWarning(gt.translate('The WiFi scanning has been cancelled.'));
+      logger?.i('The WiFi scanning has been cancelled.');
     } catch (e, stackTrace) {
       logger?.e('Failed to scan wifi networks', error: e, stackTrace: stackTrace);
       notifyAppError(e.toString());
@@ -86,12 +121,20 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
     isBusy = true;
 
     try {
+      final info = await _bleProvisioner.fetchDeviceInfo(deviceName: deviceName, cancelToken: _cancelToken);
+      _provisionedSerno = info.serno.isNotEmpty ? info.serno : null;
+
       _updateProvisioningState(BleProvisioningState.sendingCredentials);
       await _bleProvisioner.provisionWifi(deviceName, _selectedSsid!, password, cancelToken: _cancelToken);
       _updateProvisioningState(BleProvisioningState.connectingToWifi);
-      _updateProvisioningState(BleProvisioningState.success);
-      _provisioningSucceeded = true;
-      _step = ProvisioningWizardStep.done;
+
+      // after wifi connection we begin registration phase
+      _updateProvisioningState(BleProvisioningState.registeringDevice);
+      // ensure mDNS scan is active so we can catch the new device
+      _deviceManager.startDiscovery();
+      _startRegisterTimer();
+      _listenForRegisterEvent();
+      _listenForAutoAdd();
     } on CancelledException {
       logger?.i('Provisioning cancelled.');
     } catch (e, stackTrace) {
@@ -109,6 +152,7 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
 
   /// Retry from the beginning: back to WiFi scan.
   void retry() {
+    _cancelRegisterTimer();
     _step = ProvisioningWizardStep.selectWifi;
     _selectedSsid = null;
     _provisioningState = BleProvisioningState.idle;
@@ -116,6 +160,7 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
     _provisioningSucceeded = false;
     // Create a fresh cancel token so the new scan/provision is not pre-cancelled.
     _cancelToken = CancellationToken();
+    _provisionedSerno = null;
     notifyListeners();
     scanNetworks();
   }
@@ -125,11 +170,70 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
     notifyListeners();
   }
 
+  void _startRegisterTimer() {
+    _registerRemainingSeconds = registerTimeoutSeconds;
+    _registerTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _registerRemainingSeconds--;
+      if (_registerRemainingSeconds <= 0) {
+        // timeout does not change step; user may still press done later
+        _cancelRegisterTimer();
+      }
+      notifyListeners();
+    });
+  }
+
+  void _cancelRegisterTimer() {
+    _registerTimer?.cancel();
+    _registerTimer = null;
+  }
+
+  void _listenForRegisterEvent() {
+    // listen for the moment the device actually makes it into the database.
+    // once that happens we can transition the UI out of the provisioning step.
+    _registerSub = _deviceManager.allDeviceEvents.on<NewDeviceEntityAddedEvent>().listen((_) {
+      if (_step == ProvisioningWizardStep.provisioning) {
+        _provisioningState = BleProvisioningState.success;
+        _provisioningSucceeded = true;
+        _step = ProvisioningWizardStep.done;
+        _cancelRegisterTimer();
+        _registerSub?.cancel();
+        // stop listening for discoveries now that we're done
+        _autoAddSub?.cancel();
+        // scanning is no longer needed
+        _deviceManager.stopDiscovery();
+        notifyListeners();
+      }
+    });
+  }
+
+  void _listenForAutoAdd() {
+    _autoAddSub = _deviceManager.allDeviceEvents.on<NewDeviceFoundEvent>().listen((event) async {
+      // If we know the target device's serno, skip any other mDNS discovery
+      // that arrives concurrently during the registration phase.
+      if (_provisionedSerno != null && event.device.fingerprint != _provisionedSerno) {
+        return;
+      }
+
+      if (!_autoAdded) {
+        _autoAdded = true;
+        notifyListeners();
+      }
+      try {
+        await _deviceManager.addNewDevice(event.device);
+      } catch (e, st) {
+        logger?.e('Auto-add during registration failed', error: e, stackTrace: st);
+      }
+    });
+  }
+
   @override
   void dispose() {
     if (isBusy) {
       _cancelToken.cancel();
     }
+    _cancelRegisterTimer();
+    _registerSub?.cancel();
+    _autoAddSub?.cancel();
     super.dispose();
   }
 }

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
+
+import 'package:borneo_app/features/devices/widgets/dashboard_tile.dart';
+
 import '../../view_models/lyfi_view_model.dart';
 import '../dimming_screen.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
@@ -22,79 +25,65 @@ class DashboardDimmingTile extends StatelessWidget {
         final Color effectiveFgColor = isDisabled ? fgColor.withValues(alpha: disabledAlpha) : fgColor;
         final Color iconColor = theme.colorScheme.primary;
         final Color effectiveIconColor = isDisabled ? iconColor.withValues(alpha: disabledAlpha) : iconColor;
-        return AspectRatio(
-          aspectRatio: 2.0,
-          child: Container(
-            decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16)),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: (canUnlock && context.read<LyfiViewModel>().isOnline)
-                    ? () async {
-                        final vm = context.read<LyfiViewModel>();
-                        // Request entering dimming (unlock) then wait for readiness event-driven
-                        await vm.toggleLock(false);
-                        await vm.onDimmingReady();
+        return DashboardTile(
+          backgroundColor: bgColor,
+          disabled: !(canUnlock && context.read<LyfiViewModel>().isOnline),
+          onPressed: (canUnlock && context.read<LyfiViewModel>().isOnline)
+              ? () async {
+                  final vm = context.read<LyfiViewModel>();
+                  // Request entering dimming (unlock) then wait for readiness event-driven
+                  await vm.toggleLock(false);
+                  await vm.onDimmingReady();
 
-                        if (context.mounted) {
-                          await PersistentNavBarNavigator.pushNewScreen(
-                            context,
-                            screen: ChangeNotifierProvider.value(value: vm, child: const DimmingScreen()),
-                            withNavBar: false,
-                            pageTransitionAnimation: PageTransitionAnimation.slideRight,
-                          );
-                        }
-                      }
-                    : null,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Selector<LyfiViewModel, LyfiMode>(
-                        selector: (_, vm) => vm.mode,
-                        builder: (context, mode, _) {
-                          final modeIcon = switch (mode) {
-                            LyfiMode.manual => Icons.bar_chart_outlined,
-                            LyfiMode.scheduled => Icons.alarm_outlined,
-                            LyfiMode.sun => Icons.wb_sunny_outlined,
-                          };
-                          return Icon(modeIcon, size: 32, color: effectiveIconColor);
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              context.translate('Dimming'),
-                              style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor),
-                            ),
-                            Selector<LyfiViewModel, LyfiMode>(
-                              selector: (_, vm) => vm.mode,
-                              builder: (context, mode, _) {
-                                final modeText = switch (mode) {
-                                  LyfiMode.manual => context.translate('Manual'),
-                                  LyfiMode.scheduled => context.translate('Scheduled'),
-                                  LyfiMode.sun => context.translate('Sun Simulation'),
-                                };
-                                return Text(
-                                  modeText,
-                                  style: theme.textTheme.bodySmall?.copyWith(color: effectiveFgColor),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                  if (context.mounted) {
+                    await PersistentNavBarNavigator.pushNewScreen(
+                      context,
+                      screen: ChangeNotifierProvider.value(value: vm, child: const DimmingScreen()),
+                      withNavBar: false,
+                      pageTransitionAnimation: PageTransitionAnimation.slideRight,
+                    );
+                  }
+                }
+              : null,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Selector<LyfiViewModel, LyfiMode>(
+                selector: (_, vm) => vm.mode,
+                builder: (context, mode, _) {
+                  final modeIcon = switch (mode) {
+                    LyfiMode.manual => Icons.bar_chart_outlined,
+                    LyfiMode.scheduled => Icons.alarm_outlined,
+                    LyfiMode.sun => Icons.wb_sunny_outlined,
+                  };
+                  return Icon(modeIcon, size: 32, color: effectiveIconColor);
+                },
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.translate('Dimming'),
+                      style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor),
+                    ),
+                    Selector<LyfiViewModel, LyfiMode>(
+                      selector: (_, vm) => vm.mode,
+                      builder: (context, mode, _) {
+                        final modeText = switch (mode) {
+                          LyfiMode.manual => context.translate('Manual'),
+                          LyfiMode.scheduled => context.translate('Scheduled'),
+                          LyfiMode.sun => context.translate('Sun Simulation'),
+                        };
+                        return Text(modeText, style: theme.textTheme.bodySmall?.copyWith(color: effectiveFgColor));
+                      },
+                    ),
+                  ],
                 ),
               ),
-            ),
+            ],
           ),
         );
       },

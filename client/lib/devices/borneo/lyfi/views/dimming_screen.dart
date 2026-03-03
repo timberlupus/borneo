@@ -35,7 +35,11 @@ class DimmingScreen extends StatelessWidget {
       child: Scaffold(
         body: Stack(
           children: [
+            // keep the sliver headers but disable scrolling entirely; this mirrors
+            // the pattern used by the details screen and ensures the UI is fixed
+            // in place instead of being scrollable.
             NestedScrollView(
+              physics: const NeverScrollableScrollPhysics(),
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 LyfiAppBar(
                   onBack: () async {
@@ -223,7 +227,7 @@ class _ConnectionGuardOverlay extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (showSuspected)
+                  if (showSuspected && !state.isReconnecting)
                     const Padding(padding: EdgeInsets.only(bottom: 16), child: CircularProgressIndicator()),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -233,7 +237,7 @@ class _ConnectionGuardOverlay extends StatelessWidget {
                       style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white),
                     ),
                   ),
-                  if (showOffline)
+                  if (showOffline || showSuspected)
                     Padding(
                       padding: const EdgeInsets.only(top: 16),
                       child: FilledButton.tonalIcon(

@@ -3,10 +3,10 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  bonsoir_windows
   file_selector_windows
   flutter_timezone
   geolocator_windows
-  nsd_windows
   permission_handler_windows
   url_launcher_windows
   window_size

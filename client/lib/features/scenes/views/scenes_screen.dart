@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as legacy;
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
-import 'package:event_bus/event_bus.dart';
-import 'package:logger/logger.dart';
 
-import '../view_models/scenes_view_model.dart';
+import '../providers/scenes_provider.dart';
+import '../../../core/providers.dart';
 import '../../../core/services/scene_manager.dart';
 import '../../../core/services/devices/device_manager.dart';
 import 'scene_edit_screen.dart';
@@ -13,24 +13,24 @@ import '../../chores/views/chore_list.dart';
 import '../models/scene_edit_arguments.dart';
 import 'scene_card.dart';
 
-class ScenesScreen extends StatefulWidget {
+class ScenesScreen extends ConsumerStatefulWidget {
   const ScenesScreen({super.key});
   @override
-  State<ScenesScreen> createState() => _ScenesScreenState();
+  ConsumerState<ScenesScreen> createState() => _ScenesScreenState();
 }
 
-class _ScenesScreenState extends State<ScenesScreen> {
+class _ScenesScreenState extends ConsumerState<ScenesScreen> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) context.read<ScenesViewModel>().initialize();
+      if (mounted) ref.read(scenesProvider.notifier).initialize();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<ScenesViewModel>();
+    final vm = ref.watch(scenesProvider);
     if (vm.isLoading && vm.scenes.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -42,7 +42,7 @@ class _ScenesScreenState extends State<ScenesScreen> {
             Text(context.translate('Error: {errMsg}', nArgs: {'errMsg': vm.error!})),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => context.read<ScenesViewModel>().initialize(),
+              onPressed: () => ref.read(scenesProvider.notifier).initialize(),
               child: Text(context.translate('Retry')),
             ),
           ],
@@ -50,7 +50,7 @@ class _ScenesScreenState extends State<ScenesScreen> {
       );
     }
     return RefreshIndicator(
-      onRefresh: () => context.read<ScenesViewModel>().initialize(),
+      onRefresh: () => ref.read(scenesProvider.notifier).initialize(),
       child: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -87,7 +87,7 @@ class _ScenesScreenState extends State<ScenesScreen> {
                       child: Text(vm.error!, style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer)),
                     ),
                     TextButton(
-                      onPressed: () => context.read<ScenesViewModel>().initialize(),
+                      onPressed: () => ref.read(scenesProvider.notifier).initialize(),
                       child: Text(context.translate('Retry')),
                     ),
                   ],
@@ -107,13 +107,13 @@ class _ScenesScreenState extends State<ScenesScreen> {
   }
 }
 
-class _SceneList extends StatefulWidget {
+class _SceneList extends ConsumerStatefulWidget {
   const _SceneList();
   @override
-  State<_SceneList> createState() => _SceneListState();
+  ConsumerState<_SceneList> createState() => _SceneListState();
 }
 
-class _SceneListState extends State<_SceneList> {
+class _SceneListState extends ConsumerState<_SceneList> {
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -141,8 +141,7 @@ class _SceneListState extends State<_SceneList> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<ScenesViewModel>();
-    final scenes = vm.scenes;
+    final scenes = ref.watch(scenesProvider.select((s) => s.scenes));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final selectedIndex = scenes.indexWhere((s) => s.isSelected);
       if (selectedIndex != -1) {
@@ -187,13 +186,15 @@ class ProvideScenesViewModel extends StatelessWidget {
   const ProvideScenesViewModel({required this.child, super.key});
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ScenesViewModel>(
-      create: (ctx) => ScenesViewModel(
-        ctx.read<ISceneManager>(),
-        ctx.read<IDeviceManager>(),
-        ctx.read<EventBus>(),
-        ctx.read<Logger?>(),
-      ),
+    final sceneManager = legacy.Provider.of<ISceneManager>(context, listen: false);
+    final deviceManager = legacy.Provider.of<IDeviceManager>(context, listen: false);
+    return ProviderScope(
+      overrides: [
+        sceneManagerProvider.overrideWithValue(sceneManager),
+        deviceManagerProvider.overrideWithValue(deviceManager),
+        scenesProvider.overrideWith(ScenesNotifier.new),
+        scenesIsLoadingProvider.overrideWith((ref) => ref.watch(scenesProvider.select((s) => s.isLoading))),
+      ],
       child: child,
     );
   }

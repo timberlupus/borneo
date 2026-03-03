@@ -238,6 +238,14 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         await Future.delayed(_rapidProbeInterval);
       }
     }
+    // All probe attempts exhausted without success. Trigger a reconnect so
+    // the UI shows a countdown and the user can see/retry the reconnect,
+    // rather than being stuck indefinitely in the "Connection unstable" overlay
+    // with no interactive controls.
+    logger?.w('Lyfi rapid probe: all $_rapidProbeAttempts attempts failed; triggering reconnect');
+    if (!isDisposed && !isReconnecting) {
+      unawaited(reconnect());
+    }
   }
 
   @override
@@ -378,7 +386,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
       for (final cvn in _channels) {
         cvn.dispose();
       }
-      if (!super.isLocked && super.isOnline && !isSuspectedOffline) {
+      if (super.isOnline && !super.isLocked && !isSuspectedOffline) {
         try {
           if (super.state != LyfiState.normal) {
             super.setState(LyfiState.normal);

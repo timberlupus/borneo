@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:logger/logger.dart';
 import 'package:cancellation_token/cancellation_token.dart';
+import 'package:meta/meta.dart';
 
 import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
@@ -36,6 +37,11 @@ final class DefaultKernel implements IKernel {
   late final DiscoveryManager _discoveryManager;
   late final BindingEngine _bindingEngine;
 
+  // devices the caller has told us about.  the map is mutated by
+  // registerDevice()/unregisterDevice() at any time, including while the
+  // heartbeat tick is iterating; callers must not rely on holding an iterator
+  // across an await.  the _onHeartbeatTick implementation takes a snapshot
+  // of the values before iterating to avoid ConcurrentModificationError.
   final Map<String, BoundDeviceDescriptor> _registeredDevices = {};
   // use the new interface for dispatching events; currently we create
   // a DefaultEventDispatcher but expose it as EventDispatcher so callers
@@ -123,46 +129,80 @@ final class DefaultKernel implements IKernel {
           observationTimeoutMultiplier: this.observationTimeoutMultiplier,
         );
 
-    _heartbeatService.onFailure.listen((device) {
-      _events.fire(DeviceOfflineEvent(device));
-    });
+    _heartbeatService.onFailure.listen(_onHeartbeatFailure);
 
-    _deviceOfflineSub = _events.on<DeviceOfflineEvent>().listen((event) async {
-      try {
-        await unbind(event.device.id);
-      } catch (e, stackTrace) {
-        _logger.e('Failed to unbind offline device ${event.device.id}: $e', error: e, stackTrace: stackTrace);
-      }
-    });
+    _deviceOfflineSub = _events.on<DeviceOfflineEvent>().listen(_handleDeviceOfflineEvent);
 
-    _deviceCommunicationSub = _events.on<DeviceCommunicationEvent>().listen((event) {
-      _heartbeatService.onDeviceCommunication(event.device.id);
-    });
+    _deviceCommunicationSub = _events.on<DeviceCommunicationEvent>().listen(_handleDeviceCommunication);
 
     _foundDeviceEventSub = _events.on<FoundDeviceEvent>().listen(_onDeviceFound);
 
     // hook engine events so kernel can start/stop heartbeat
-    _deviceBoundSub = _events.on<DeviceBoundEvent>().listen((e) {
-      final bound = _bindingEngine.getBoundDevice(e.device.id);
-      if (bound == null) return;
-      final drvDesc = _driverRegistry.metaDrivers[bound.driverID];
-      final method = drvDesc?.heartbeatMethod ?? HeartbeatMethod.poll;
-      _heartbeatService.registerDevice(bound, method);
-    });
-    _deviceRemovedSub = _events.on<DeviceRemovedEvent>().listen((e) => _heartbeatService.unregisterDevice(e.device.id));
+    _deviceBoundSub = _events.on<DeviceBoundEvent>().listen(_handleDeviceBoundEvent);
+    _deviceRemovedSub = _events.on<DeviceRemovedEvent>().listen(_handleDeviceRemovedEvent);
 
     // subscribe to heartbeat ticks so we can probe unbound devices
     // backoff counters for unbound devices (stored as fields)
 
-    _heartbeatService.onTick.listen((_) async {
-      if (!_isInitialized || _isDisposed) return;
-      if (isBusy) return; // let binding engine deal with concurrency
+    _heartbeatService.onTick.listen((_) => _onHeartbeatTick());
 
+    // forward discovery manager lost events to kernel event bus
+    _discoveryManager.onDeviceLost.listen((id) {
+      _events.fire(UnboundDeviceLostEvent(id));
+    });
+  }
+
+  // --------- private event handlers extracted from constructor ----------
+
+  void _onHeartbeatFailure(Device device) {
+    _events.fire(DeviceOfflineEvent(device));
+  }
+
+  Future<void> _handleDeviceOfflineEvent(DeviceOfflineEvent event) async {
+    try {
+      await unbind(event.device.id);
+    } catch (e, stackTrace) {
+      _logger.e('Failed to unbind offline device ${event.device.id}: $e', error: e, stackTrace: stackTrace);
+    }
+  }
+
+  void _handleDeviceCommunication(DeviceCommunicationEvent event) {
+    _heartbeatService.onDeviceCommunication(event.device.id);
+  }
+
+  void _handleDeviceBoundEvent(DeviceBoundEvent e) {
+    final bound = _bindingEngine.getBoundDevice(e.device.id);
+    if (bound == null) return;
+    final drvDesc = _driverRegistry.metaDrivers[bound.driverID];
+    final method = drvDesc?.heartbeatMethod ?? HeartbeatMethod.poll;
+    _heartbeatService.registerDevice(bound, method);
+  }
+
+  void _handleDeviceRemovedEvent(DeviceRemovedEvent e) {
+    _heartbeatService.unregisterDevice(e.device.id);
+  }
+
+  // guard against overlapping tick executions. a second timer firing while
+  // the first is still awaiting may also modify the registered map and would
+  // be wasteful.
+  bool _heartbeatTickRunning = false;
+
+  Future<void> _onHeartbeatTick() async {
+    if (!_isInitialized || _isDisposed) return;
+    if (isBusy) return; // let binding engine deal with concurrency
+    if (_heartbeatTickRunning) return;
+    _heartbeatTickRunning = true;
+    try {
       final now = DateTime.now();
       const baseInterval = Duration(seconds: 1);
 
+      // take a snapshot because tryBind/other async work may async-await, and
+      // callers can register/unregister devices concurrently. iterating over the
+      // live map would throw ConcurrentModificationError if its length changes.
+      final toProbe = _registeredDevices.values.where((d) => !isBound(d.device.id)).toList();
+
       // try to bind any registered but currently unbound devices
-      for (final descriptor in _registeredDevices.values.where((d) => !isBound(d.device.id))) {
+      for (final descriptor in toProbe) {
         final id = descriptor.device.id;
         final next = _nextBindAttempt[id] ?? DateTime.fromMillisecondsSinceEpoch(0);
         if (now.isBefore(next)) continue;
@@ -196,13 +236,12 @@ final class DefaultKernel implements IKernel {
           }
         }
       }
-    });
-
-    // forward discovery manager lost events to kernel event bus
-    _discoveryManager.onDeviceLost.listen((id) {
-      _events.fire(UnboundDeviceLostEvent(id));
-    });
+    } finally {
+      _heartbeatTickRunning = false;
+    }
   }
+
+  // ---------------------------------------------------------------------
 
   @override
   Future<void> start({CancellationToken? cancelToken}) async {
@@ -326,6 +365,12 @@ final class DefaultKernel implements IKernel {
   // helper moved to HeartbeatService
 
   // full heartbeat polling and observation logic moved into service
+
+  /// Exposed for testing so we can drive the heartbeat service without
+  /// relying on a real timer.  The implementation simply forwards to the
+  /// private `_onHeartbeatTick` method.
+  @visibleForTesting
+  Future<void> runHeartbeatTick() => _onHeartbeatTick();
 
   void _ensureStarted() {
     if (_isInitialized == false) {

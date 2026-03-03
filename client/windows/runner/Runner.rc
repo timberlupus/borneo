@@ -95,7 +95,7 @@ BEGIN
             VALUE "InternalName", "borneo_app" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 Yunnan BinaryStars Technologies, Co., Ltd. All rights reserved." "\0"
             VALUE "OriginalFilename", "borneo_app.exe" "\0"
-            VALUE "ProductName", "borneo_app" "\0"
+            VALUE "ProductName", "Borneo Aqua CE (Windows)" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

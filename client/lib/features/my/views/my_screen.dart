@@ -4,6 +4,7 @@ import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 
 import 'package:borneo_app/features/my/views/about_screen.dart';
 import 'package:borneo_app/features/settings/views/app_settings_screen.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class MyScreen extends StatelessWidget {
   const MyScreen({super.key});
@@ -24,19 +25,25 @@ class MyScreen extends StatelessWidget {
             SettingsTile.navigation(
               leading: const Icon(Icons.settings_outlined),
               title: Text(context.translate('Settings')),
-              onPressed: (bc) {
-                final route = MaterialPageRoute(builder: (context) => AppSettingsScreen());
-                Navigator.push(context, route);
+              onPressed: (bc) async {
+                await PersistentNavBarNavigator.pushNewScreen(
+                  context,
+                  screen: AppSettingsScreen(),
+                  withNavBar: false,
+                  pageTransitionAnimation: PageTransitionAnimation.slideRight,
+                );
               },
             ),
             SettingsTile.navigation(
               leading: const Icon(Icons.info_outline),
               title: Text(context.translate('About')),
-              onPressed: (bc) {
-                final route = MaterialPageRoute(builder: (context) => AboutScreen());
-                if (context.mounted) {
-                  Navigator.push(context, route);
-                }
+              onPressed: (bc) async {
+                await PersistentNavBarNavigator.pushNewScreen(
+                  context,
+                  screen: AboutScreen(),
+                  withNavBar: false,
+                  pageTransitionAnimation: PageTransitionAnimation.slideRight,
+                );
               },
             ),
           ],

@@ -27,6 +27,9 @@ class StubDeviceManager implements IDeviceManager {
   Iterable<BoundDevice> get boundDevices => bound;
 
   @override
+  Iterable<WotThing> get allWotThings => things;
+
+  @override
   Iterable<WotThing> get wotThingsInCurrentScene => things;
 
   @override
@@ -37,6 +40,16 @@ class StubDeviceManager implements IDeviceManager {
 
   @override
   Future<List<DeviceEntity>> fetchAllDevicesInScene({String? sceneID}) async => [];
+
+  // a few very-common helpers used by view models
+  @override
+  bool isBound(String deviceID) => false;
+
+  @override
+  bool hasWotThing(String deviceID) => false;
+
+  @override
+  WotThing getWotThing(String deviceID) => throw UnimplementedError();
 
   // provide the minimal required members; most calls will simply hit noSuchMethod
   @override

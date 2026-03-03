@@ -29,8 +29,7 @@
 #define NVS_NS "borneo.wifi"
 #define NVS_COUNT_KEY "shutdown-count"
 #define TAG "wifi"
-#define WIFI_RECONNECT_INTERVAL_MS 5000
-#define RECONNECT_ATTEMPTS_MAX 5
+#define WIFI_RECONNECT_INTERVAL_MS 15000
 
 static int bo_wifi_start();
 static int _update_nvs_early(int32_t* shutdown_count);
@@ -44,7 +43,6 @@ static esp_timer_handle_t _wifi_reconnect_timer = NULL;
 static esp_timer_handle_t _shutdown_checking_timer = NULL;
 static esp_timer_handle_t _forget_timer = NULL;
 static bool _has_ssid();
-static int s_reconnect_attempts = 0;
 static bool s_auto_reconnect = false;
 
 static void _forget_timer_callback(void* arg);
@@ -106,6 +104,7 @@ int bo_wifi_start()
     }
     else {
         s_wifi_state = WIFI_STATE_CONNECTING;
+        BO_TRY(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_events_handler, NULL));
         BO_TRY(esp_wifi_connect());
 
         int32_t shutdown_count = 0;
@@ -230,30 +229,27 @@ int bo_wifi_forget_later(uint32_t delay_ms)
 }
 
 /**
- * @brief Attempt to reconnect to WiFi with retry logic
- * @return 0 on success, -1 if max attempts reached or no SSID configured
+ * @brief Attempt to reconnect to WiFi. Retries indefinitely via timer until
+ *        connected or credentials are cleared / auto-reconnect is disabled.
+ * @return 0 if esp_wifi_connect() was called, -1 if reconnect should not proceed.
  */
 static int _attempt_wifi_reconnect()
 {
+    portENTER_CRITICAL(&s_status_lock);
+    bool auto_reconnect = s_auto_reconnect;
+    portEXIT_CRITICAL(&s_status_lock);
+
+    if (!auto_reconnect) {
+        ESP_LOGI(TAG, "Auto-reconnect is disabled, skipping.");
+        return -1;
+    }
+
     if (!_has_ssid()) {
         ESP_LOGI(TAG, "No SSID configured, cannot reconnect.");
         return -1;
     }
 
-    portENTER_CRITICAL(&s_status_lock);
-    bool should_reconnect = s_reconnect_attempts < RECONNECT_ATTEMPTS_MAX;
-    if (should_reconnect) {
-        s_reconnect_attempts++;
-    }
-    int attempts = s_reconnect_attempts;
-    portEXIT_CRITICAL(&s_status_lock);
-
-    if (!should_reconnect) {
-        ESP_LOGW(TAG, "Maximum reconnect attempts (%d) reached. Stopping reconnection.", RECONNECT_ATTEMPTS_MAX);
-        return -1;
-    }
-
-    ESP_LOGI(TAG, "Attempting to reconnect (attempt %d/%d)...", attempts, RECONNECT_ATTEMPTS_MAX);
+    ESP_LOGI(TAG, "Attempting to reconnect to WiFi...");
     int rc = esp_wifi_connect();
     if (rc != ESP_OK) {
         ESP_LOGE(TAG, "Failed to initiate WiFi connection. errno=%d. Will retry later...", rc);
@@ -287,19 +283,20 @@ static void wifi_on_disconnected(void* event_data)
     // Stop shutdown timer once we are disconnected to avoid unnecessary reset callback
     _shutdown_timer_cleanup();
 
-    // Attempt to reconnect
-    int rc = _attempt_wifi_reconnect();
-    if (rc != 0) {
-        // Max attempts reached or no SSID, start timer for later retry
-        if (_wifi_reconnect_timer == NULL) {
-            esp_timer_create_args_t timer_args = {
-                .callback = &_wifi_reconnect_callback,
-                .arg = NULL,
-                .name = "wifi_reconnect",
-            };
-            BO_MUST(esp_timer_create(&timer_args, &_wifi_reconnect_timer));
-            BO_MUST(esp_timer_start_once(_wifi_reconnect_timer, WIFI_RECONNECT_INTERVAL_MS * 1000));
-        }
+    // Attempt an immediate reconnect first
+    _attempt_wifi_reconnect();
+
+    // Schedule a persistent retry timer so we keep trying indefinitely
+    if (_wifi_reconnect_timer == NULL) {
+        esp_timer_create_args_t timer_args = {
+            .callback = &_wifi_reconnect_callback,
+            .arg = NULL,
+            .name = "wifi_reconnect",
+        };
+        BO_MUST(esp_timer_create(&timer_args, &_wifi_reconnect_timer));
+    }
+    if (!esp_timer_is_active(_wifi_reconnect_timer)) {
+        BO_MUST(esp_timer_start_once(_wifi_reconnect_timer, WIFI_RECONNECT_INTERVAL_MS * 1000));
     }
 }
 
@@ -325,7 +322,6 @@ static void wifi_events_handler(void* arg, esp_event_base_t event_base, int32_t 
     case WIFI_EVENT_STA_CONNECTED: {
         portENTER_CRITICAL(&s_status_lock);
         s_wifi_state = WIFI_STATE_CONNECTED;
-        s_reconnect_attempts = 0; // Reset reconnect attempts on successful connection
         bool was_reconnect_disabled = !s_auto_reconnect;
         s_auto_reconnect = true;
         portEXIT_CRITICAL(&s_status_lock);
@@ -366,6 +362,7 @@ static void bo_wifi_events_handler(void* arg, esp_event_base_t event_base, int32
         BO_MUST(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_events_handler, NULL));
         portENTER_CRITICAL(&s_status_lock);
         s_wifi_state = WIFI_STATE_CONNECTING;
+        s_auto_reconnect = true;
         portEXIT_CRITICAL(&s_status_lock);
         if (_has_ssid()) {
             BO_MUST(esp_wifi_connect());
@@ -454,20 +451,43 @@ EXIT_AND_CLOSE:
 
 void _wifi_reconnect_callback(void* arg)
 {
-    ESP_LOGI(TAG, "Checking Wi-Fi connection...");
-    int rc = _attempt_wifi_reconnect();
-    if (rc != 0) {
-        // Max attempts reached, clean up timer
+    ESP_LOGI(TAG, "WiFi reconnect timer fired, retrying connection...");
+
+    portENTER_CRITICAL(&s_status_lock);
+    bool auto_reconnect = s_auto_reconnect;
+    bo_wifi_state_t state = s_wifi_state;
+    portEXIT_CRITICAL(&s_status_lock);
+
+    // Stop retrying if credentials were cleared or provisioning has started
+    if (!auto_reconnect || !_has_ssid()) {
+        ESP_LOGI(TAG, "Stopping reconnect timer (auto-reconnect disabled or no SSID).");
         if (_wifi_reconnect_timer != NULL) {
-            BO_MUST(esp_timer_stop(_wifi_reconnect_timer));
-            BO_MUST(esp_timer_delete(_wifi_reconnect_timer));
+            esp_timer_delete(_wifi_reconnect_timer);
             _wifi_reconnect_timer = NULL;
         }
+        return;
     }
-    else {
-        // Reconnect initiated, restart timer for next check if needed
+
+    // Already connected — timer is no longer needed
+    if (state == WIFI_STATE_CONNECTED) {
+        if (_wifi_reconnect_timer != NULL) {
+            esp_timer_delete(_wifi_reconnect_timer);
+            _wifi_reconnect_timer = NULL;
+        }
+        return;
+    }
+
+    // Previous connect attempt still in progress, wait for it to complete
+    if (state == WIFI_STATE_CONNECTING) {
+        ESP_LOGI(TAG, "Connection already in progress, will check again later.");
         BO_MUST(esp_timer_start_once(_wifi_reconnect_timer, WIFI_RECONNECT_INTERVAL_MS * 1000));
+        return;
     }
+
+    _attempt_wifi_reconnect();
+
+    // Reschedule unconditionally — keep retrying until connected or credentials cleared
+    BO_MUST(esp_timer_start_once(_wifi_reconnect_timer, WIFI_RECONNECT_INTERVAL_MS * 1000));
 }
 
 bool _has_ssid()

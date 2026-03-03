@@ -55,8 +55,8 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   @override
   void dispose() {
     if (!isDisposed) {
-      super.dispose();
       _unsubscribeFromGeneralStatus();
+      super.dispose();
     }
   }
 
@@ -78,10 +78,12 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
 
   void _subscribeToGeneralStatus() {
     _generalStatusSubscription = wotThing.findProperty('generalStatus')?.value.onUpdate.listen((status) {
+      if (isDisposed) return;
       notifyListeners();
     });
 
     _onOffSubscription = wotThing.findProperty('on')?.value.onUpdate.listen((value) {
+      if (isDisposed) return;
       notifyListeners();
     });
   }

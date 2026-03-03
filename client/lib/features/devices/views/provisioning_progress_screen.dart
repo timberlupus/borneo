@@ -49,6 +49,7 @@ class ProvisioningProgressScreen extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Icon(Icons.wifi_tethering_outlined, size: 128, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(height: 32),

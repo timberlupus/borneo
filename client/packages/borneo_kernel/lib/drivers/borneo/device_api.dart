@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:borneo_kernel/drivers/borneo/coap_driver_data.dart';
 import 'package:borneo_kernel_abstractions/device_api.dart';
 import 'package:borneo_kernel_abstractions/driver.dart';
@@ -31,6 +33,9 @@ class BorneoPaths {
   static final Uri rtcLocal = Uri(path: '/borneo/rtc/local');
   static final Uri rtcTimestamp = Uri(path: '/borneo/rtc/ts');
   static final Uri networkReset = Uri(path: '/borneo/network/reset');
+
+  static final Uri coapOtaStatus = Uri(path: '/borneo/ota/coap/status');
+  static final Uri coapOtaDownload = Uri(path: '/borneo/ota/coap/download');
 
   static final Uri nvsU8 = Uri(path: '/borneo/factory/nvs/u8');
   static final Uri nvsU16 = Uri(path: '/borneo/factory/nvs/u16');
@@ -100,14 +105,12 @@ enum PowerBehavior {
   /// - 2: [maintainPowerOff]
   ///
   /// Throws an [ArgumentError] if the provided [value] is not a valid ordinal.
-  static PowerBehavior fromInt(int value) {
-    return switch (value) {
-      0 => PowerBehavior.lastPowerState,
-      1 => PowerBehavior.autoPowerOn,
-      2 => PowerBehavior.maintainPowerOff,
-      _ => throw ArgumentError('Invalid value for PowerBehavior: $value'),
-    };
-  }
+  static PowerBehavior fromInt(int value) => switch (value) {
+    0 => PowerBehavior.lastPowerState,
+    1 => PowerBehavior.autoPowerOn,
+    2 => PowerBehavior.maintainPowerOff,
+    _ => throw ArgumentError('Invalid value for PowerBehavior: $value'),
+  };
 
   /// Converts this [PowerBehavior] to its corresponding integer value.
   ///
@@ -115,13 +118,11 @@ enum PowerBehavior {
   /// - [lastPowerState]: 0
   /// - [autoPowerOn]: 1
   /// - [maintainPowerOff]: 2
-  int toInt() {
-    return switch (this) {
-      PowerBehavior.lastPowerState => 0,
-      PowerBehavior.autoPowerOn => 1,
-      PowerBehavior.maintainPowerOff => 2,
-    };
-  }
+  int toInt() => switch (this) {
+    PowerBehavior.lastPowerState => 0,
+    PowerBehavior.autoPowerOn => 1,
+    PowerBehavior.maintainPowerOff => 2,
+  };
 }
 
 class GeneralBorneoDeviceInfo {
@@ -129,6 +130,7 @@ class GeneralBorneoDeviceInfo {
   final String name;
   final String compatible;
   final String serno;
+  final String pid;
   final ProductMode productMode;
   final bool hasBT;
   final List<int> btMac;
@@ -145,6 +147,7 @@ class GeneralBorneoDeviceInfo {
     required this.name,
     required this.compatible,
     required this.serno,
+    required this.pid,
     required this.productMode,
     this.hasBT = false,
     this.btMac = const [],
@@ -163,6 +166,7 @@ class GeneralBorneoDeviceInfo {
       compatible: map['compatible'],
       name: map['name'],
       serno: map['serno'],
+      pid: map['pid'] ?? '',
       productMode: ProductMode.fromInt(map['productMode']),
       hasBT: map['hasBT'],
       hasWifi: map['hasWifi'],
@@ -247,6 +251,40 @@ class BorneoRtcLocalNtpResponse {
   }
 }
 
+enum BorneoOtaCoapUpdateStatus {
+  idle,
+  inProgress;
+
+  static BorneoOtaCoapUpdateStatus fromString(String value) => switch (value) {
+    'idle' => BorneoOtaCoapUpdateStatus.idle,
+    'in_progress' => BorneoOtaCoapUpdateStatus.inProgress,
+    _ => throw ArgumentError('Invalid value for BorneoOtaCoapUpdateStatus: $value'),
+  };
+}
+
+final class BorneoOtaCoapStatus {
+  final String runningPartition;
+  final BorneoOtaCoapUpdateStatus updateStatus;
+  final int bytesReceived;
+  final dynamic otaPartitions;
+
+  const BorneoOtaCoapStatus({
+    required this.runningPartition,
+    required this.updateStatus,
+    required this.bytesReceived,
+    required this.otaPartitions,
+  });
+
+  factory BorneoOtaCoapStatus.fromMap(Map map) {
+    return BorneoOtaCoapStatus(
+      runningPartition: map['running_partition'] as String,
+      updateStatus: BorneoOtaCoapUpdateStatus.fromString(map['update_status'] as String),
+      bytesReceived: map['bytes_received'] as int,
+      otaPartitions: map['ota_partitions'] as String,
+    );
+  }
+}
+
 abstract class IBorneoDeviceApi extends IDeviceApi {
   Future<String> getCompatible(Device dev, {CancellationToken? cancelToken});
   Future<Version> getFirmwareVersion(Device dev, {CancellationToken? cancelToken});
@@ -278,6 +316,9 @@ abstract class IBorneoDeviceApi extends IDeviceApi {
   Future<void> reboot(Device dev, {CancellationToken? cancelToken});
   Future<void> factoryReset(Device dev, {CancellationToken? cancelToken});
   Future<void> networkReset(Device dev, {CancellationToken? cancelToken});
+
+  Future<BorneoOtaCoapStatus> getOtaCoapStatus(Device dev, {CancellationToken? cancelToken});
+  Future<void> otaCoapEngage(Device dev, final Uint8List firmwareBuffer, {CancellationToken? cancelToken});
 
   Future<void> beginCheckNewVersion({CancellationToken? cancelToken});
   Future<bool> isCheckingNewVersionAsync({CancellationToken? cancelToken});
@@ -655,6 +696,45 @@ mixin BorneoDeviceCoapApi on Driver implements IBorneoDeviceApi {
       );
       if (!response.isSuccess) {
         throw DeviceError("Failed to set to `$newName`", dev);
+      }
+    }, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<BorneoOtaCoapStatus> getOtaCoapStatus(Device dev, {CancellationToken? cancelToken}) async {
+    return await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      final payload = await dd.coap.getCbor<Map>(BorneoPaths.coapOtaStatus, cancelToken: cancelToken);
+      return BorneoOtaCoapStatus.fromMap(payload);
+    }, cancelToken: cancelToken);
+  }
+
+  @override
+  Future<void> otaCoapEngage(Device dev, final Uint8List firmwareBuffer, {CancellationToken? cancelToken}) async {
+    await this.withQueue(dev, () async {
+      final dd = dev.driverData as BorneoCoapDriverData;
+      // Step 1: PUT the firmware data; the CoAP library handles Block1 block transfer automatically.
+      final putResponse = await dd.coap
+          .putBytes(
+            BorneoPaths.coapOtaDownload,
+            payload: firmwareBuffer,
+            accept: CoapMediaType.applicationCbor,
+            format: CoapMediaType.applicationCbor,
+          )
+          .asCancellable(cancelToken);
+      if (!putResponse.isSuccess) {
+        throw DeviceError('OTA firmware upload failed (${putResponse.codeString})', dev);
+      }
+      // Step 2: POST to complete the update (triggers esp_ota_end + set boot partition).
+      final postResponse = await dd.coap
+          .postBytes(
+            BorneoPaths.coapOtaDownload,
+            payload: simple_cbor.cbor.encode(null),
+            accept: CoapMediaType.applicationCbor,
+          )
+          .asCancellable(cancelToken);
+      if (!postResponse.isSuccess) {
+        throw DeviceError('OTA firmware completion failed (${postResponse.codeString})', dev);
       }
     }, cancelToken: cancelToken);
   }

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:screen_corner_radius/screen_corner_radius.dart';
 
+import '../../core/models/platform_device_info.dart';
+
 /// A container that matches the device's screen top corner radii.
-/// - Uses screen_corner_radius to query radii asynchronously.
-/// - Falls back to 0 if plugin is unavailable or returns nulls.
+///
+/// The corner radius is pulled from the shared [PlatformDeviceInfo]
+/// provider which is populated at startup.  This class no longer queries the
+/// plugin itself; if the provider is missing (tests, standalone usage) it
+/// defaults to zero.
 class ScreenTopRoundedContainer extends StatelessWidget {
   final Widget child;
   final Color? color;
@@ -15,23 +21,18 @@ class ScreenTopRoundedContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bg = color ?? Theme.of(context).colorScheme.surface;
-    final future = ScreenCornerRadius.get().catchError((_) {
-      return ScreenRadius.value(0.0);
-    });
 
-    return FutureBuilder<ScreenRadius?>(
-      future: future,
-      builder: (context, snapshot) {
-        final r = snapshot.data ?? ScreenRadius.value(0.0);
-        return Container(
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.only(topLeft: Radius.circular(r.topLeft), topRight: Radius.circular(r.topRight)),
-            boxShadow: shadows,
-          ),
-          child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
-        );
-      },
+    // radius comes from the shared provider; fall back to zero if not
+    // available so the widget remains usable in isolation (tests, etc.)
+    final info = Provider.of<PlatformDeviceInfo?>(context, listen: false);
+    final r = info?.screenCornerRadius ?? ScreenRadius.value(0.0);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(r.topLeft), topRight: Radius.circular(r.topRight)),
+      child: Container(
+        decoration: BoxDecoration(color: bg, boxShadow: shadows),
+        child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
+      ),
     );
   }
 }

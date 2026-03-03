@@ -1,33 +1,64 @@
-import 'package:borneo_app/core/services/group_manager.dart';
-import 'package:borneo_app/features/devices/view_models/group_edit_view_model.dart';
+import 'package:borneo_app/core/providers.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
-import 'package:event_bus/event_bus.dart';
+import 'package:borneo_app/core/services/group_manager.dart';
+import 'package:borneo_app/features/devices/providers/group_edit_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext.dart';
-import 'package:logger/logger.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as legacy;
 
 import 'package:borneo_app/shared/widgets/confirmation_sheet.dart';
 
-class GroupEditScreen extends StatefulWidget {
+// ---------------------------------------------------------------------------
+// Public entry point
+// ---------------------------------------------------------------------------
+
+/// Route-level shell.  Reads the legacy [IGroupManager] service from the
+/// existing provider tree, then exposes both it and the route arguments as
+/// Riverpod provider overrides so that the inner [_GroupEditBody] can be a
+/// pure Riverpod consumer.
+class GroupEditScreen extends StatelessWidget {
   const GroupEditScreen({super.key});
 
   @override
-  State<GroupEditScreen> createState() => _GroupEditScreenState();
+  Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as GroupEditArguments;
+    final groupManager = legacy.Provider.of<IGroupManager>(context, listen: false);
+
+    return ProviderScope(
+      overrides: [
+        groupManagerProvider.overrideWithValue(groupManager),
+        groupEditArgsProvider.overrideWithValue(args),
+        groupEditProvider.overrideWith(GroupEditNotifier.new),
+      ],
+      child: _GroupEditBody(args: args),
+    );
+  }
 }
 
-class _GroupEditScreenState extends State<GroupEditScreen> {
+// ---------------------------------------------------------------------------
+// Screen body
+// ---------------------------------------------------------------------------
+
+class _GroupEditBody extends ConsumerStatefulWidget {
+  final GroupEditArguments args;
+
+  const _GroupEditBody({required this.args});
+
+  @override
+  ConsumerState<_GroupEditBody> createState() => _GroupEditBodyState();
+}
+
+class _GroupEditBodyState extends ConsumerState<_GroupEditBody> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _notesController;
 
-  bool _controllersInitialized = false;
-
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
-    _notesController = TextEditingController();
+    _nameController = TextEditingController(text: widget.args.model?.name ?? '');
+    _notesController = TextEditingController(text: widget.args.model?.notes ?? '');
   }
 
   @override
@@ -37,8 +68,11 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
     super.dispose();
   }
 
-  List<Widget> makePropertyTiles(BuildContext context) {
-    final vm = context.read<GroupEditViewModel>();
+  // ---------------------------------------------------------------------------
+  // Form fields
+  // ---------------------------------------------------------------------------
+
+  List<Widget> _buildFormFields(BuildContext context) {
     return [
       TextFormField(
         key: const Key('field_group_name'),
@@ -54,11 +88,8 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
           }
           return null;
         },
-        onSaved: (value) {
-          vm.name = value ?? '';
-        },
       ),
-      SizedBox(height: 16),
+      const SizedBox(height: 16),
       TextFormField(
         controller: _notesController,
         maxLines: null,
@@ -68,18 +99,14 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
           hintText: context.translate('Enter the optional notes for this scene'),
           labelText: context.translate('Notes'),
         ),
-        onSaved: (value) {
-          vm.notes = value ?? '';
-        },
       ),
-      SizedBox(height: 24),
-      Selector<GroupEditViewModel, bool>(
-        selector: (_, vm) => vm.isBusy,
-        builder: (context, isBusy, _) {
-          final vm = context.read<GroupEditViewModel>();
+      const SizedBox(height: 24),
+      Consumer(
+        builder: (context, ref, _) {
+          final isBusy = ref.watch(groupEditProvider.select((s) => s.isBusy));
           return ElevatedButton(
             key: const Key('btn_submit'),
-            onPressed: isBusy ? null : () => _onSubmitPressed(context, vm),
+            onPressed: isBusy ? null : () => _onSubmitPressed(context),
             child: isBusy
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                 : Text(context.translate('Submit')),
@@ -89,111 +116,44 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
     ];
   }
 
-  ListView buildList(BuildContext context) {
-    final items = makePropertyTiles(context);
-    return ListView.builder(
-      shrinkWrap: true,
-      itemBuilder: (BuildContext context, int index) => items[index],
-      itemCount: items.length,
-    );
-  }
-
-  FutureBuilder buildBody(BuildContext context) {
-    final vm = context.read<GroupEditViewModel>();
-    return FutureBuilder(
-      future: vm.initFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else {
-          if (!_controllersInitialized) {
-            final vm = context.read<GroupEditViewModel>();
-            _nameController.text = vm.name;
-            _notesController.text = vm.notes;
-            _controllersInitialized = true;
-          }
-          return Container(
-            color: Theme.of(context).colorScheme.surfaceContainer,
-            padding: EdgeInsets.fromLTRB(16, 24, 16, 24),
-            child: Form(key: _formKey, child: buildList(context)),
-          );
-        }
-      },
-    );
-  }
-
-  List<Widget> buildActions(BuildContext context, GroupEditArguments args) {
-    return [
-      if (!args.isCreation)
-        Builder(
-          builder: (BuildContext context) {
-            return IconButton(
-              key: const Key('btn_delete_group'),
-              onPressed: () async {
-                final vm = context.read<GroupEditViewModel>();
-                final notificationService = context.read<IAppNotificationService>();
-                final navigator = Navigator.of(context);
-
-                // show confirmation using a bottom sheet instead of an alert dialog
-                final confirmed = await AsyncConfirmationSheet.show(
-                  context,
-                  message: context.translate(
-                    'Are you sure you want to delete "{0}" group?\n\nDevices in this group will be moved to the "Ungrouped" area.',
-                    pArgs: [vm.name],
-                  ),
-                );
-
-                if (confirmed) {
-                  // Show loading indicator on the same (tab) navigator so the
-                  // sheet doesn’t get orphaned when we pop the edit screen.
-                  if (context.mounted) {
-                    final loadingContext = context;
-                    final loadingNavigator = Navigator.of(loadingContext, rootNavigator: false);
-                    showDialog(
-                      context: loadingContext,
-                      useRootNavigator: false,
-                      barrierDismissible: false,
-                      builder: (dialogContext) => const Center(child: CircularProgressIndicator()),
-                    );
-                    try {
-                      await vm.delete();
-                      if (loadingContext.mounted) {
-                        loadingNavigator.pop(); // Close loading dialog
-                        // Pop the edit screen only if there's something to pop.
-                        if (navigator.mounted && navigator.canPop()) {
-                          navigator.pop(true); // Return success
-                        }
-                        notificationService.showSuccess(loadingContext.translate('Group deleted'));
-                      }
-                    } catch (error) {
-                      if (loadingContext.mounted) {
-                        loadingNavigator.pop(); // Close loading dialog
-                        notificationService.showError(
-                          loadingContext.translate('Delete failed'),
-                          body: error.toString(),
-                        );
-                      }
-                    }
-                  }
-                }
-              },
-              icon: const Icon(Icons.delete_outline),
-            );
-          },
+  Widget _buildBody(BuildContext context) {
+    final fields = _buildFormFields(context);
+    return Container(
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+      child: Form(
+        key: _formKey,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemBuilder: (context, index) => fields[index],
+          itemCount: fields.length,
         ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // AppBar actions
+  // ---------------------------------------------------------------------------
+
+  List<Widget> _buildActions(BuildContext context) {
+    if (widget.args.isCreation) return const [];
+
+    return [
+      IconButton(
+        key: const Key('btn_delete_group'),
+        onPressed: () => _onDeletePressed(context),
+        icon: const Icon(Icons.delete_outline),
+      ),
     ];
   }
 
-  // Private helpers for the submit button logic --------------------------------
+  // ---------------------------------------------------------------------------
+  // Submit logic
+  // ---------------------------------------------------------------------------
 
-  bool _validateAndSave() {
-    if (_formKey.currentState?.validate() ?? false) {
-      _formKey.currentState!.save();
-      return true;
-    }
-    return false;
+  bool _validateForm() {
+    return _formKey.currentState?.validate() ?? false;
   }
 
   void _showLoadingDialog(BuildContext context) {
@@ -201,70 +161,100 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
       context: context,
       useRootNavigator: false,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
+      builder: (_) => const Center(child: CircularProgressIndicator()),
     );
   }
 
-  void _onSubmitSuccess(NavigatorState navigator) {
-    if (navigator.mounted) {
-      navigator.pop();
-      navigator.pop(true);
-    }
-  }
+  void _onSubmitPressed(BuildContext context) {
+    if (!_validateForm()) return;
 
-  void _onSubmitError(
-    Object error,
-    NavigatorState navigator,
-    IAppNotificationService notificationService,
-    String failureText,
-  ) {
-    if (navigator.mounted) {
-      navigator.pop();
-      notificationService.showError(failureText, body: error.toString());
-    }
-  }
-
-  void _onSubmitPressed(BuildContext context, GroupEditViewModel vm) {
-    if (!_validateAndSave()) return;
-
+    final name = _nameController.text;
+    final notes = _notesController.text;
     final navigator = Navigator.of(context);
-    final notificationService = context.read<IAppNotificationService>();
+    final notificationService = legacy.Provider.of<IAppNotificationService>(context, listen: false);
     final failureText = context.translate('Operation failed');
 
     _showLoadingDialog(context);
 
-    vm.submit().then((_) => _onSubmitSuccess(navigator)).catchError((error) {
-      _onSubmitError(error, navigator, notificationService, failureText);
-    });
+    ref
+        .read(groupEditProvider.notifier)
+        .submit(name: name, notes: notes)
+        .then((_) {
+          if (navigator.mounted) {
+            navigator.pop(); // dismiss loading dialog
+            navigator.pop(true); // return success to caller
+          }
+        })
+        .catchError((error) {
+          if (navigator.mounted) {
+            navigator.pop(); // dismiss loading dialog
+            notificationService.showError(failureText, body: error.toString());
+          }
+        });
   }
+
+  // ---------------------------------------------------------------------------
+  // Delete logic
+  // ---------------------------------------------------------------------------
+
+  Future<void> _onDeletePressed(BuildContext context) async {
+    final state = ref.read(groupEditProvider);
+    final notificationService = legacy.Provider.of<IAppNotificationService>(context, listen: false);
+    final navigator = Navigator.of(context);
+
+    final confirmed = await AsyncConfirmationSheet.show(
+      context,
+      message: context.translate(
+        'Are you sure you want to delete "{0}" group?\n\nDevices in this group will be moved to the "Ungrouped" area.',
+        pArgs: [state.name],
+      ),
+    );
+
+    if (!confirmed) return;
+    if (!context.mounted) return;
+
+    final loadingNavigator = Navigator.of(context, rootNavigator: false);
+    showDialog(
+      context: context,
+      useRootNavigator: false,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await ref.read(groupEditProvider.notifier).delete();
+      if (context.mounted) {
+        loadingNavigator.pop(); // dismiss loading dialog
+        if (navigator.mounted && navigator.canPop()) {
+          navigator.pop(true); // return success to caller
+        }
+        notificationService.showSuccess(context.translate('Group deleted'));
+      }
+    } catch (error) {
+      if (context.mounted) {
+        loadingNavigator.pop(); // dismiss loading dialog
+        notificationService.showError(context.translate('Delete failed'), body: error.toString());
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Build
+  // ---------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
-    final GroupEditArguments args = ModalRoute.of(context)!.settings.arguments as GroupEditArguments;
     final gt = GettextLocalizations.of(context);
+    final isCreation = ref.watch(groupEditProvider.select((s) => s.isCreation));
 
-    return ChangeNotifierProvider<GroupEditViewModel>(
-      create: (context) => GroupEditViewModel(
-        context.read<IGroupManager>(),
-        isCreation: args.isCreation,
-        model: args.model,
-        globalEventBus: context.read<EventBus>(),
-        gt: gt,
-        logger: context.read<Logger>(),
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        title: Text(isCreation ? gt.translate('New Device Group') : gt.translate('Edit Device Group')),
+        actions: _buildActions(context),
       ),
-      builder: (context, child) => Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          title: Text(
-            (ModalRoute.of(context)!.settings.arguments as GroupEditArguments).isCreation
-                ? context.translate('New Device Group')
-                : context.translate('Edit Device Group'),
-          ),
-          actions: buildActions(context, args),
-        ),
-        body: SafeArea(child: buildBody(context)),
-      ),
+      body: SafeArea(child: _buildBody(context)),
     );
   }
 }

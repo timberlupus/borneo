@@ -1,21 +1,28 @@
 import 'dart:convert';
+import 'package:borneo_app/core/services/devices/device_manager.dart';
+import 'package:borneo_app/core/services/devices/ota_providers.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/controller_settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/controller_settings_screen.dart';
+import 'package:borneo_app/devices/view_models/device_ota_view_model.dart';
+import 'package:borneo_app/devices/views/device_ota_screen.dart';
 import 'package:borneo_app/shared/widgets/bottom_sheet_picker.dart';
 import 'package:borneo_app/shared/widgets/confirmation_sheet.dart';
 import 'package:borneo_app/shared/widgets/map_location_picker.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_earth_globe/globe_coordinates.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:logger/logger.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 import 'package:provider/provider.dart';
+import 'package:borneo_app/routes/app_routes.dart';
 
 class SettingsScreen extends StatelessWidget {
   final SettingsViewModel vm;
@@ -117,15 +124,21 @@ class SettingsScreen extends StatelessWidget {
           title: Text(context.translate('DEVICE STATUS')),
           tiles: [
             SettingsTile.navigation(
-              title: Text(context.translate('Device time & time zone')),
+              title: Text(context.translate('Time zone')),
               descriptionInlineIos: true,
-              description: Row(
-                spacing: 8,
-                children: [
-                  Text(lvm.borneoStatus.timestamp.toString()),
-                  Text(lvm.timezone ?? context.translate('Unknown time zone')),
-                ],
+              value: Text(
+                lvm.timezone ?? context.translate('No time zone'),
+                style: lvm.hasTimezoneMismatch || lvm.timezone == null
+                    ? TextStyle(color: Theme.of(context).colorScheme.error)
+                    : null,
               ),
+              // if device timezone differs from local, show a brief warning description
+              description: lvm.hasTimezoneMismatch
+                  ? Text(
+                      context.translate('Timezone mismatch'),
+                      style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    )
+                  : null,
               enabled: lvm.canUpdateTimezone,
               onPressed: (bc) => vm.updateTimezone(),
             ),
@@ -150,11 +163,11 @@ class SettingsScreen extends StatelessWidget {
           tiles: [
             SettingsTile.navigation(
               title: Text(context.translate('Device Location')),
-              description: Text(context.translate('Geo location')),
+              description: Text(context.translate('Geographical location')),
               descriptionInlineIos: true,
               value: lvm.location != null
                   ? Text("(${lvm.location!.lat.toStringAsFixed(0)}, ${lvm.location!.lng.toStringAsFixed(0)})")
-                  : Text(context.translate('Unknown')),
+                  : Text(context.translate('Unknown'), style: TextStyle(color: Theme.of(context).colorScheme.error)),
               enabled: lvm.canUpdateGeoLocation,
               onPressed: (bc) async {
                 if (bc.mounted) {
@@ -214,15 +227,26 @@ class SettingsScreen extends StatelessWidget {
               title: Text(context.translate('Hardware version')),
               trailing: Text(lvm.borneoInfo.hwVer.toString()),
             ),
-            SettingsTile(
+            SettingsTile.navigation(
               title: Text(context.translate('Firmware version')),
-              trailing: Text(lvm.borneoInfo.fwVer.toString() + (lvm.borneoInfo.isCE ? " (CE)" : " (PRO)")),
+              value: Text(lvm.borneoInfo.fwVer.toString() + (lvm.borneoInfo.isCE ? " (CE)" : " (PRO)")),
+              descriptionInlineIos: false,
+              onPressed: !vm.isOnline ? null : (cb) => _goToOtaScreen(context, vm),
             ),
           ],
         ),
         SettingsSection(
           title: Text(context.translate('DANGER ZONE')),
           tiles: [
+            /*
+            SettingsTile.navigation(
+              title: Text(
+                context.translate('Delete device'),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+              onPressed: (bc) => _showDeleteDialog(bc, vm),
+            ),
+            */
             SettingsTile.navigation(
               title: Text(
                 context.translate('Reset device network settings'),
@@ -240,6 +264,26 @@ class SettingsScreen extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  void _goToOtaScreen(BuildContext context, SettingsViewModel svm) {
+    final bound = svm.boundDevice;
+    if (bound == null) return;
+    final otaVm = DeviceOtaViewModel(
+      otaProvider: context.read<OtaProvider>(),
+      boundDevice: bound,
+      isOnlineProvider: () => svm.isOnline,
+      eventBus: context.read<EventBus>(),
+      gt: context.read<GettextLocalizations>(),
+      logger: context.read<Logger>(),
+    );
+
+    PersistentNavBarNavigator.pushNewScreen(
+      context,
+      screen: DeviceOtaScreen(otaVm),
+      withNavBar: false,
+      pageTransitionAnimation: PageTransitionAnimation.slideRight,
     );
   }
 
@@ -287,11 +331,13 @@ class SettingsScreen extends StatelessWidget {
             ),
             onPressed: () {
               Navigator.of(context).pop();
+              // after the factory reset completes navigate all the way back to the
+              // device list (rather than just popping a single route). this matches
+              // other flows such as provisioning where the user is returned to the
+              // main list when a long‑running action finishes.
               vm.factoryReset().then((_) {
                 if (context.mounted) {
-                  if (Navigator.of(context).canPop()) {
-                    Navigator.of(context).pop();
-                  }
+                  Navigator.of(context).popUntil((route) => route.settings.name == AppRoutes.kDevices || route.isFirst);
                 }
               });
             },
@@ -308,11 +354,33 @@ class SettingsScreen extends StatelessWidget {
       message: context.translate("Are you sure you want to reset this device's network settings?"),
     );
 
+    if (!confirmed) {
+      return;
+    }
+
+    final deviceID = vm.deviceID;
+    await vm.networkReset();
+
+    if (context.mounted) {
+      Navigator.of(context).popUntil((route) => route.settings.name == AppRoutes.kDevices || route.isFirst);
+    }
+    if (context.mounted) {
+      var dm = context.read<IDeviceManager>();
+      await dm.delete(deviceID);
+    }
+  }
+
+  Future<void> _showDeleteDialog(BuildContext context, SettingsViewModel vm) async {
+    final confirmed = await AsyncConfirmationSheet.show(
+      context,
+      message: context.translate('Are you sure you want to delete this device?'),
+    );
+
     if (!confirmed) return;
 
-    vm.networkReset().then((_) {
+    vm.delete().then((_) {
       if (context.mounted) {
-        if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+        Navigator.of(context).popUntil((route) => route.settings.name == AppRoutes.kDevices || route.isFirst);
       }
     });
   }

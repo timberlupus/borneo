@@ -1,7 +1,12 @@
+import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
+import 'package:logger/web.dart';
 import 'package:provider/provider.dart';
+
+import 'package:borneo_app/features/devices/widgets/dashboard_tile.dart';
+
 import '../../view_models/lyfi_view_model.dart';
 import '../settings_screen.dart';
 
@@ -11,64 +16,91 @@ class DashboardSettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Selector<LyfiViewModel, bool>(
-      selector: (_, vm) => vm.canChangeSettings,
-      builder: (context, canChangeSettings, _) {
-        final isDisabled = !canChangeSettings;
+    return Selector<LyfiViewModel, ({bool hasMismatch, bool isOnline, bool canChangeSettings})>(
+      selector: (_, vm) =>
+          (hasMismatch: vm.hasTimezoneMismatch, isOnline: vm.isOnline, canChangeSettings: vm.canChangeSettings),
+      builder: (context, props, _) {
+        final isDisabled = !props.canChangeSettings;
+        final showDot = props.hasMismatch && props.isOnline;
         final Color fgColor = theme.colorScheme.onSurface;
         final double disabledAlpha = 0.38;
         final Color effectiveFgColor = isDisabled ? fgColor.withValues(alpha: disabledAlpha) : fgColor;
         final Color iconColor = theme.colorScheme.primary;
         final Color effectiveIconColor = isDisabled ? iconColor.withValues(alpha: disabledAlpha) : iconColor;
         final gt = GettextLocalizations.of(context);
-        return AspectRatio(
-          aspectRatio: 2,
-          child: Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: isDisabled
-                    ? null
-                    : () async {
-                        final lyfi = context.read<LyfiViewModel>();
-                        final vm = await lyfi.loadSettings(gt);
-                        final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
-                        if (context.mounted) {
-                          Navigator.push(context, route);
-                        }
-                      },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(Icons.settings, size: 32, color: effectiveIconColor),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              context.translate("Settings"),
-                              style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+
+        Widget tile = DashboardTile(
+          disabled: isDisabled,
+          onPressed: isDisabled ? null : () => _openSettings(context, gt),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.settings, size: 32, color: effectiveIconColor),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.translate("Settings"),
+                      style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+
+        if (showDot) {
+          // use a tiny notification-style badge rather than a huge circle.
+          // typical apps use something like 6–10px diameter with a white border.
+          const double dotDiameter = 10.0;
+          const double borderWidth = 1.5;
+          // keep the badge fully inside the tile so it doesn't hit siblings on
+          // large screens.  Use a small inset relative to corner radius.
+          final double inset = DashboardTile.cornerRadius / 4;
+          tile = Stack(
+            clipBehavior: Clip.none,
+            children: [
+              tile,
+              Positioned(
+                top: inset,
+                right: inset,
+                child: Container(
+                  key: const Key('settings_red_dot'),
+                  width: dotDiameter,
+                  height: dotDiameter,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.error,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: borderWidth),
                   ),
                 ),
               ),
-            ),
-          ),
-        );
+            ],
+          );
+        }
+
+        return tile;
       },
     );
+  }
+
+  Future<void> _openSettings(BuildContext context, GettextLocalizations gt) async {
+    final lyfiVM = context.read<LyfiViewModel>();
+    try {
+      final vm = await lyfiVM.loadSettings(gt);
+      final route = MaterialPageRoute(builder: (context) => SettingsScreen(vm));
+      if (context.mounted) {
+        Navigator.push(context, route);
+      }
+    } catch (e, st) {
+      if (context.mounted) {
+        context.read<IAppNotificationService>().showError(context.translate('Error'), body: e.toString());
+        context.read<Logger?>()?.e('Failed to open settings', error: e, stackTrace: st);
+      }
+    }
   }
 }

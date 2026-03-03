@@ -282,7 +282,7 @@ class DefaultHeartbeatService implements HeartbeatService {
   void _onHeartbeatMissed(String deviceId) {
     _observationLock.synchronized(() {
       _missedObservations[deviceId] = (_missedObservations[deviceId] ?? 0) + 1;
-      _logger.w('Heartbeat missed for device $deviceId. Total missed: ${_missedObservations[deviceId]}');
+      _logger.i('Heartbeat missed for device $deviceId. Total missed: ${_missedObservations[deviceId]}');
 
       if (_missedObservations[deviceId]! >= maxMissedObservations) {
         _logger.w('Device $deviceId marked offline after $maxMissedObservations missed observations');
@@ -354,13 +354,12 @@ class DefaultHeartbeatService implements HeartbeatService {
           devices.add(bd);
         }
 
-        _logger.d('Polling heartbeat for (${devices.length}) bound devices...');
         final results = await Future.wait(futures).asCancellable(_pollCancelToken);
         for (int i = 0; i < results.length; i++) {
           final deviceId = devices[i].device.id;
           if (!results[i]) {
             _consecutiveFailures[deviceId] = (_consecutiveFailures[deviceId] ?? 0) + 1;
-            _logger.w(
+            _logger.i(
               'The device(${devices[i].device}) is not responding. Consecutive failures: ${_consecutiveFailures[deviceId]}',
             );
 

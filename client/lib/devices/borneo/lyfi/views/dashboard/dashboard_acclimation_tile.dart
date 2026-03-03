@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:provider/provider.dart';
+
+import 'package:borneo_app/features/devices/widgets/dashboard_tile.dart';
+
 import '../../view_models/lyfi_view_model.dart';
 import '../acclimation_screen.dart';
 import 'package:borneo_kernel/drivers/borneo/lyfi/models.dart';
@@ -63,95 +66,82 @@ class DashboardAcclimationTile extends StatelessWidget {
           }
         }
 
-        return AspectRatio(
-          aspectRatio: 2.0,
-          child: Container(
-            decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16)),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: props.isOnline && props.isOn
-                    ? () async {
-                        if (context.mounted) {
-                          final vm = context.read<LyfiViewModel>();
-                          final route = MaterialPageRoute(
-                            builder: (context) => AcclimationScreen(deviceID: vm.deviceID),
-                          );
-                          await Navigator.push(context, route);
-                        }
-                      }
-                    : null,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Stack(
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 300),
-                            transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                            child: isActive
-                                ? SizedBox(
-                                    key: const ValueKey('active'),
-                                    width: 32,
-                                    height: 32,
-                                    child: Padding(
-                                      padding: EdgeInsets.all(4),
-                                      child: CircularProgressIndicator(
-                                        strokeAlign: 1,
-                                        strokeWidth: 2,
-                                        value: progress,
-                                        backgroundColor: theme.colorScheme.shadow,
-                                        valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimaryContainer),
-                                      ),
-                                    ),
-                                  )
-                                : Container(
-                                    key: const ValueKey('inactive'),
-                                    alignment: Alignment.center,
-                                    child: Icon(Icons.calendar_month_outlined, size: 32, color: effectiveIconColor),
-                                  ),
+        return DashboardTile(
+          backgroundColor: bgColor,
+          disabled: !props.isOnline || !props.isOn,
+          onPressed: props.isOnline && props.isOn
+              ? () async {
+                  if (context.mounted) {
+                    final vm = context.read<LyfiViewModel>();
+                    final route = MaterialPageRoute(builder: (context) => AcclimationScreen(deviceID: vm.deviceID));
+                    await Navigator.push(context, route);
+                  }
+                }
+              : null,
+          child: Stack(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                    child: isActive
+                        ? SizedBox(
+                            key: const ValueKey('active'),
+                            width: 32,
+                            height: 32,
+                            child: Padding(
+                              padding: EdgeInsets.all(4),
+                              child: CircularProgressIndicator(
+                                strokeAlign: 1,
+                                strokeWidth: 2,
+                                value: progress,
+                                backgroundColor: theme.colorScheme.shadow,
+                                valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimaryContainer),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            key: const ValueKey('inactive'),
+                            alignment: Alignment.center,
+                            child: Icon(Icons.calendar_month_outlined, size: 32, color: effectiveIconColor),
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  context.translate("Acclimation"),
-                                  style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor),
-                                ),
-                                if (isActive && remainingText.isNotEmpty)
-                                  Text(
-                                    remainingText,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: effectiveFgColor,
-                                      fontFeatures: [FontFeature.tabularFigures()],
-                                    ),
-                                  ),
-                              ],
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.translate("Acclimation"),
+                          style: theme.textTheme.titleMedium?.copyWith(color: effectiveFgColor),
+                        ),
+                        if (isActive && remainingText.isNotEmpty)
+                          Text(
+                            remainingText,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: effectiveFgColor,
+                              fontFeatures: [FontFeature.tabularFigures()],
                             ),
                           ),
-                        ],
-                      ),
-                      if (isActive)
-                        Positioned(
-                          right: -16,
-                          bottom: -16,
-                          child: Icon(
-                            Icons.calendar_month_outlined,
-                            size: 64,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.15),
-                          ),
-                        ),
-                    ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              if (isActive)
+                Positioned(
+                  right: -16,
+                  bottom: -16,
+                  child: Icon(
+                    Icons.calendar_month_outlined,
+                    size: 64,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.15),
                   ),
                 ),
-              ),
-            ),
+            ],
           ),
         );
       },

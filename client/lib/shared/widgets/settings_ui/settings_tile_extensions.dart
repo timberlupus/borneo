@@ -36,8 +36,6 @@ AbstractSettingsTile settingsSliderTile({
   Key? key,
 }) {
   return CustomSettingsTile(
-    child: Container(
-      child: AdaptiveSlider(value: value, min: min, max: max, onChanged: onChanged),
-    ),
+    child: AdaptiveSlider(value: value, min: min, max: max, onChanged: onChanged),
   );
 }

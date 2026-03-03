@@ -11,19 +11,24 @@ class DiscoverableDevice {
   // For BLE devices, we initially only have the bluetooth name.
   final String? bleName;
 
+  // After calling fetchDeviceInfo we may be able to resolve a human-friendly
+  // name.  This is transient and only used for display.
+  final String? resolvedName;
+
   // For mDNS devices (provisioned), we have the full descriptor.
   final SupportedDeviceDescriptor? provisionedData;
 
-  const DiscoverableDevice.unprovisioned(this.bleName)
+  const DiscoverableDevice.unprovisioned(this.bleName, {this.resolvedName})
     : type = DiscoverableDeviceType.unprovisioned,
       provisionedData = null;
 
   const DiscoverableDevice.provisioned(this.provisionedData)
     : type = DiscoverableDeviceType.provisioned,
-      bleName = null;
+      bleName = null,
+      resolvedName = null;
 
   String get name => type == DiscoverableDeviceType.unprovisioned
-      ? (bleName ?? 'Unknown Device')
+      ? (resolvedName ?? bleName ?? 'Unknown Device')
       : (provisionedData?.name ?? 'Unknown Device');
 
   String get id =>

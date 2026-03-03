@@ -20,7 +20,6 @@ import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
-import 'package:borneo_common/io/net/network_interface_helper.dart';
 
 final class DeviceManagerImpl extends IDeviceManager {
   final Logger? logger;
@@ -87,8 +86,10 @@ final class DeviceManagerImpl extends IDeviceManager {
       await _kernel.start();
 
       unawaited(() async {
-        // Load WotThings for current scene alongside device load, regardless of online state.
-        await _loadWotThingsForCurrentScene(cancelToken: cancelToken);
+        // Load WotThings for ALL scenes so they persist across scene switches.
+        await _loadAllWotThings(cancelToken: cancelToken);
+        // Activate only the current scene's WotThings.
+        await _activateSceneWotThings(_sceneManager.current.id);
         await _rebindAll(devices, cancelToken: cancelToken);
 
         final currentScene = _sceneManager.current;
@@ -127,10 +128,9 @@ final class DeviceManagerImpl extends IDeviceManager {
 
   @override
   Future<void> reloadAllDevices({CancellationToken? cancelToken}) async {
-    // suppress periodic heartbeat while performing expensive device
-    // operations; this prevents the timer from racing with the rebind loop
-    // and eliminates spurious CoAP timeouts.
-    // enter batch mode so heartbeat service can suppress ticks
+    // Suppress periodic heartbeat while performing expensive device operations;
+    // this prevents the timer from racing with the rebind loop and eliminates
+    // spurious CoAP timeouts.
     _kernel.enterHeartbeatBatch();
     try {
       await _deviceOperLock
@@ -139,8 +139,11 @@ final class DeviceManagerImpl extends IDeviceManager {
             _kernel.unregisterAllDevices();
             final devices = await fetchAllDevicesInScene().asCancellable(cancelToken);
             _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
-            await _reloadWotThingsForCurrentScene(cancelToken: cancelToken);
             await _rebindAll(devices, cancelToken: cancelToken);
+            // WotThings are never disposed here; only sync the active ones.
+            for (final thing in wotThingsInCurrentScene) {
+              unawaited(thing.sync(cancelToken: cancelToken));
+            }
           })
           .asCancellable(cancelToken);
     } finally {
@@ -168,17 +171,17 @@ final class DeviceManagerImpl extends IDeviceManager {
   Future<void> unbind(String deviceID) => _kernel.unbind(deviceID);
 
   @override
-  Future<void> delete(String id, {Transaction? tx}) async {
+  Future<void> delete(String id, {Transaction? tx, CancellationToken? cancelToken}) async {
     if (tx == null) {
-      await _db.transaction((tx) => delete(id, tx: tx));
+      await _db.transaction((tx) => delete(id, tx: tx, cancelToken: cancelToken)).asCancellable(cancelToken);
     } else {
       if (_kernel.isBound(id)) {
-        await _kernel.unbind(id);
+        await _kernel.unbind(id, cancelToken: cancelToken);
       }
       _kernel.unregisterDevice(id);
       _disposeWotThing(id);
       final store = stringMapStoreFactory.store(StoreNames.devices);
-      await store.record(id).delete(tx);
+      await store.record(id).delete(tx).asCancellable(cancelToken);
       allDeviceEvents.fire(DeviceEntityDeletedEvent(id));
     }
   }
@@ -275,6 +278,10 @@ final class DeviceManagerImpl extends IDeviceManager {
 
     // Always create a WotThing twin, even when the device is unbound/offline.
     await _loadWotThingForDevice(device, replaceExisting: true);
+    // Activate immediately when the new device belongs to the current scene.
+    if (device.sceneID == _sceneManager.current.id) {
+      _wotThings[device.id]?.activate();
+    }
 
     final bindResult = await tryBind(device);
     if (!bindResult) {
@@ -296,9 +303,6 @@ final class DeviceManagerImpl extends IDeviceManager {
   }) async {
     assert(isInitialized);
     final store = stringMapStoreFactory.store(StoreNames.devices);
-
-    final networkInterface = await NetworkInterfaceHelper.inferNetworkInterface(discovered.address.host);
-    logger?.d('Inferred network interface for new device ${discovered.fingerprint}: $networkInterface');
 
     final device = DeviceEntity(
       id: BaseEntity.generateID(),
@@ -359,9 +363,6 @@ final class DeviceManagerImpl extends IDeviceManager {
     logger?.i('Device discovered: ${event.matched}');
     assert(isInitialized);
 
-    final networkInterface = await NetworkInterfaceHelper.inferNetworkInterface(event.matched.address.host);
-    logger?.d('Inferred network interface for device ${event.matched.fingerprint}: $networkInterface');
-
     return await _db.transaction((tx) async {
       final existed = await singleOrDefaultByFingerprint(event.matched.fingerprint, tx: tx);
       if (existed != null) {
@@ -396,7 +397,10 @@ final class DeviceManagerImpl extends IDeviceManager {
   bool hasWotThing(String deviceID) => _wotThings.containsKey(deviceID);
 
   @override
-  Iterable<WotThing> get wotThingsInCurrentScene => _wotThings.values;
+  Iterable<WotThing> get allWotThings => _wotThings.values;
+
+  @override
+  Iterable<WotThing> get wotThingsInCurrentScene => _wotThings.values.where((t) => t.isActive);
 
   @override
   Iterable<String> get deviceIDsWithWotThings => _wotThings.keys;
@@ -404,26 +408,88 @@ final class DeviceManagerImpl extends IDeviceManager {
   @override
   int get wotThingCount => _wotThings.length;
 
-  /// Handle scene change event - reload WotThings for new scene
+  // ---------------------------------------------------------------------------
+  // Scene-change handler
+  // ---------------------------------------------------------------------------
+
+  /// Handle scene change: deactivate old scene's Things, switch kernel,
+  /// ensure + activate new scene's Things.
   Future<void> _onCurrentSceneChanged(CurrentSceneChangedEvent event) async {
-    logger?.i('Scene changed from ${event.from.name} to ${event.to.name}, reloading WotThings...');
-    await reloadAllDevices();
+    logger?.i('Scene changed: ${event.from.name} → ${event.to.name}');
+
+    // 1. Deactivate WotThings of the old scene.
+    await _deactivateSceneWotThings(event.from.id);
+
+    // 2. Kernel-layer switch: unbind old devices, register & bind new scene.
+    _kernel.enterHeartbeatBatch();
+    try {
+      await _deviceOperLock.synchronized(() async {
+        await _kernel.unbindAll();
+        _kernel.unregisterAllDevices();
+        final devices = await fetchAllDevicesInScene(sceneID: event.to.id);
+        _kernel.registerDevices(devices.map((x) => BoundDeviceDescriptor(device: x, driverID: x.driverID)));
+        await _rebindAll(devices);
+      });
+    } finally {
+      _kernel.exitHeartbeatBatch();
+    }
+
+    // 3. Ensure WotThings exist for the new scene (lazy-create if missing).
+    await _ensureWotThingsForScene(event.to.id);
+
+    // 4. Activate the new scene's WotThings.
+    await _activateSceneWotThings(event.to.id);
+
+    _globalBus.fire(CurrentSceneDevicesReloadedEvent(event.to));
   }
 
-  /// Reload WotThings for current scene only
-  Future<void> _reloadWotThingsForCurrentScene({CancellationToken? cancelToken}) async {
-    // Dispose of all existing WotThings
-    _disposeAllWotThings();
+  // ---------------------------------------------------------------------------
+  // WotThing lifecycle helpers
+  // ---------------------------------------------------------------------------
 
-    // Load WotThings for devices in current scene
-    await _loadWotThingsForCurrentScene(cancelToken: cancelToken);
-
-    // Fire event to notify that devices for current scene have been reloaded
-    final currentScene = _sceneManager.current;
-    _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
+  /// Load WotThings for ALL scenes so they persist globally.
+  Future<void> _loadAllWotThings({CancellationToken? cancelToken}) async {
+    try {
+      final allScenes = await _sceneManager.all();
+      for (final scene in allScenes) {
+        final devices = await fetchAllDevicesInScene(sceneID: scene.id);
+        for (final device in devices) {
+          await _loadWotThingForDevice(device, replaceExisting: false, cancelToken: cancelToken);
+        }
+      }
+      logger?.d('Loaded ${_wotThings.length} WotThings for all scenes');
+    } catch (e) {
+      logger?.e('Failed to load WotThings for all scenes: $e');
+    }
   }
 
-  /// Dispose all existing WotThings
+  /// Activate every WotThing whose device belongs to [sceneID].
+  Future<void> _activateSceneWotThings(String sceneID) async {
+    final devices = await fetchAllDevicesInScene(sceneID: sceneID);
+    for (final device in devices) {
+      _wotThings[device.id]?.activate();
+    }
+  }
+
+  /// Deactivate every WotThing whose device belongs to [sceneID].
+  Future<void> _deactivateSceneWotThings(String sceneID) async {
+    final devices = await fetchAllDevicesInScene(sceneID: sceneID);
+    for (final device in devices) {
+      _wotThings[device.id]?.deactivate();
+    }
+  }
+
+  /// Ensure WotThings are created for all devices in [sceneID] (lazy patch).
+  Future<void> _ensureWotThingsForScene(String sceneID, {CancellationToken? cancelToken}) async {
+    final devices = await fetchAllDevicesInScene(sceneID: sceneID);
+    for (final device in devices) {
+      if (!_wotThings.containsKey(device.id)) {
+        await _loadWotThingForDevice(device, replaceExisting: false, cancelToken: cancelToken);
+      }
+    }
+  }
+
+  /// Dispose all existing WotThings (called only on full app shutdown).
   void _disposeAllWotThings() {
     for (final wotThing in _wotThings.values) {
       try {
@@ -433,7 +499,7 @@ final class DeviceManagerImpl extends IDeviceManager {
       }
     }
     _wotThings.clear();
-    logger?.d('Disposed ${_wotThings.length} WotThings');
+    logger?.d('Disposed all WotThings');
   }
 
   /// Dispose a single WotThing for a device
@@ -447,35 +513,6 @@ final class DeviceManagerImpl extends IDeviceManager {
       } catch (e) {
         logger?.w('Failed to dispose WotThing for device $deviceID: $e');
       }
-    }
-  }
-
-  /// Load WotThings for devices in current scene
-  Future<void> _loadWotThingsForCurrentScene({CancellationToken? cancelToken}) async {
-    try {
-      final devices = await fetchAllDevicesInScene();
-      logger?.d('Loading WotThings for ${devices.length} devices in current scene');
-
-      for (final device in devices) {
-        try {
-          final metaModule = _deviceModuleRegistry.metaModules[device.driverID];
-          if (metaModule != null) {
-            final wotThing = await metaModule.createWotThing(device, this, logger: logger, cancelToken: cancelToken);
-            _wotThings[device.id] = wotThing;
-
-            // If device is bound, sync WotThing with actual device state
-            if (isBound(device.id)) {
-              await _syncWotThingWithBoundDevice(device.id, wotThing);
-            }
-          }
-        } catch (e) {
-          logger?.w('Failed to create WotThing for device ${device.id}: $e');
-        }
-      }
-
-      logger?.d('Successfully loaded ${_wotThings.length} WotThings');
-    } catch (e) {
-      logger?.e('Failed to load WotThings for current scene: $e');
     }
   }
 

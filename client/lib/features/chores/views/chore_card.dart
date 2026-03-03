@@ -1,85 +1,36 @@
-// (no async timers needed anymore)
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
 
 import '../models/abstract_chore.dart';
-import '../view_models/chore_summary_view_model.dart';
-import '../../../core/services/chore_manager.dart';
-import '../../../core/services/app_notification_service.dart';
-import 'package:logger/logger.dart';
+import '../providers/chore_summary_provider.dart';
 
-class ChoreCard extends StatelessWidget {
+class ChoreCard extends ConsumerStatefulWidget {
   final AbstractChore chore;
   const ChoreCard(this.chore, {super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ChoreSummaryViewModel>(
-      create: (ctx) => ChoreSummaryViewModel(
-        chore,
-        choreManager: ctx.read<IChoreManager>(),
-        notification: ctx.read<IAppNotificationService>(),
-        logger: ctx.read<Logger?>(),
-      ),
-      child: const _ChoreCardContentWrapper(),
-    );
-  }
+  ConsumerState<ChoreCard> createState() => _ChoreCardState();
 }
 
-class _ChoreCardContentWrapper extends StatelessWidget {
-  const _ChoreCardContentWrapper();
-  @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<ChoreSummaryViewModel>();
-    final colorScheme = Theme.of(context).colorScheme;
-    final isActive = vm.isActive;
-    final bgColor = isActive ? colorScheme.primaryContainer : colorScheme.surfaceContainer;
-    final fgColor = isActive ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
-    return _ChoreCardContent(vm: vm, bgColor: bgColor, fgColor: fgColor, isActive: isActive, colorScheme: colorScheme);
-  }
-}
-
-class _ChoreCardContent extends StatefulWidget {
-  final ChoreSummaryViewModel vm;
-  final Color bgColor;
-  final Color fgColor;
-  final bool isActive;
-  final ColorScheme colorScheme;
-  const _ChoreCardContent({
-    required this.vm,
-    required this.bgColor,
-    required this.fgColor,
-    required this.isActive,
-    required this.colorScheme,
-  });
-  @override
-  State<_ChoreCardContent> createState() => _ChoreCardContentState();
-}
-
-class _ChoreCardContentState extends State<_ChoreCardContent> {
-  // Removed delayed progress overlay to avoid execution animation
-
+class _ChoreCardState extends ConsumerState<ChoreCard> {
   @override
   void initState() {
     super.initState();
-    widget.vm.init();
-  }
-
-  @override
-  void dispose() {
-    // no timers to cancel
-    super.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(choreSummaryProvider(widget.chore.id).notifier).init();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = widget.vm;
-    final isActive = widget.isActive;
-    final fgColor = widget.fgColor;
-    final bgColor = widget.bgColor;
-    final colorScheme = widget.colorScheme;
+    final state = ref.watch(choreSummaryProvider(widget.chore.id));
+    final notifier = ref.read(choreSummaryProvider(widget.chore.id).notifier);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isActive = state.isActive;
+    final bgColor = isActive ? colorScheme.primaryContainer : colorScheme.surfaceContainer;
+    final fgColor = isActive ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
     const kAnimateDuration = Duration(milliseconds: 300);
     final textTheme = Theme.of(context).textTheme;
     return ClipRRect(
@@ -101,13 +52,13 @@ class _ChoreCardContentState extends State<_ChoreCardContent> {
                         final iconSize = (constraints.maxHeight - 16.0).clamp(0.0, double.infinity);
                         return Align(
                           alignment: Alignment.centerLeft,
-                          child: _buildIcon(vm.iconAssetPath, iconSize, fgColor),
+                          child: _buildIcon(widget.chore.iconAssetPath, iconSize, fgColor),
                         );
                       },
                     ),
                   ),
                   Text(
-                    vm.name,
+                    widget.chore.name,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: textTheme.labelLarge?.fontSize, color: fgColor),
                   ),
@@ -133,7 +84,7 @@ class _ChoreCardContentState extends State<_ChoreCardContent> {
                       const Spacer(),
                       Switch(
                         value: isActive,
-                        onChanged: vm.isBusy ? null : (v) => v ? vm.executeChore() : vm.undoChore(),
+                        onChanged: state.isBusy ? null : (v) => v ? notifier.executeChore() : notifier.undoChore(),
                         activeThumbColor: colorScheme.primary,
                         inactiveThumbColor: colorScheme.primary,
                         inactiveTrackColor: colorScheme.surfaceBright,
