@@ -117,10 +117,12 @@ class AppSettingsScreen extends ConsumerWidget {
       SettingsSection(
         title: Text(context.translate('FEEDBACK')),
         tiles: [
+          /*
           SettingsTile.navigation(
             leading: const Icon(Icons.star_outline),
             title: Text(context.translate('Rate in application store')),
           ),
+          */
           SettingsTile.navigation(
             leading: const Icon(Icons.settings_brightness_outlined),
             title: Text(context.translate('Feedback via Email')),

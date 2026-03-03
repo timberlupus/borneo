@@ -60,8 +60,13 @@ Borneo Client is a cross-platform Flutter application for controlling Borneo-IoT
 
 ### Localization
 
-- To handle localization: First, run the script `python .\scripts\update_translations.py .` to extract and update translation files.
-- Then, translate the `.po` files.
+- To manage translation assets, use the helper script under `scripts/bopo.py`.
+  - `python .\scripts\bopo.py update <project_path>` – generate/update the
+    `messages.pot` and all `.po` files based on Dart source strings.
+  - `python .\scripts\bopo.py missing <project_path>` – list any
+    untranslated entries (`msgstr` empty) across `.po` files along with path and line
+    number. This is useful for spotting work still to be done.
+- After running the update command, translate or review the `.po` files as needed.
 - During development tasks, do not modify `.po` files temporarily; translate them uniformly before release.
 
 Use the following patterns for localizing user-visible text with `flutter_gettext`:
