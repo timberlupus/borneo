@@ -48,7 +48,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   late final StreamSubscription<NewDeviceFoundEvent> _newDeviceFoundEventSub;
 
   // Internal lists
-  List<String> _unprovisioned = [];
+  final List<String> _unprovisioned = [];
   final List<SupportedDeviceDescriptor> _provisioned = [];
 
   // Exposed list
