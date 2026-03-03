@@ -35,7 +35,11 @@ class DimmingScreen extends StatelessWidget {
       child: Scaffold(
         body: Stack(
           children: [
+            // keep the sliver headers but disable scrolling entirely; this mirrors
+            // the pattern used by the details screen and ensures the UI is fixed
+            // in place instead of being scrollable.
             NestedScrollView(
+              physics: const NeverScrollableScrollPhysics(),
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 LyfiAppBar(
                   onBack: () async {
