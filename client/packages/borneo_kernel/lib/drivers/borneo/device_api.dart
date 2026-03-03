@@ -166,7 +166,7 @@ class GeneralBorneoDeviceInfo {
       compatible: map['compatible'],
       name: map['name'],
       serno: map['serno'],
-      pid: map['pid'],
+      pid: map['pid'] ?? '',
       productMode: ProductMode.fromInt(map['productMode']),
       hasBT: map['hasBT'],
       hasWifi: map['hasWifi'],
