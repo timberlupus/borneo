@@ -148,7 +148,7 @@ class EditorHost extends StatelessWidget {
         );
         break;
       case EditorStatus.ready:
-        child = _buildEditor(state);
+        child = SafeArea(top: false, left: false, right: false, child: _buildEditor(state));
         break;
       case EditorStatus.idle:
         child = const SizedBox.shrink(key: ValueKey('editor-idle'));
