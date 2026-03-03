@@ -23,6 +23,7 @@ class LyfiSwitchStateAction extends WotAction<Map<String, dynamic>> {
   @override
   Future<void> performAction() async {
     await lyfiApi.switchState(device, targetState);
+    thing.findProperty('state')?.value.notifyOfExternalUpdate(targetState);
   }
 }
 
@@ -45,6 +46,7 @@ class LyfiSwitchModeAction extends WotAction<Map<String, dynamic>?> {
   @override
   Future<void> performAction() async {
     await lyfiApi.switchMode(device, targetMode);
+    thing.findProperty('mode')?.value.notifyOfExternalUpdate(targetMode);
     if (color != null && targetMode == LyfiMode.manual) {
       await lyfiApi.setColor(device, color!);
     }
