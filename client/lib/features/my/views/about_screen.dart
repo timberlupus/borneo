@@ -115,8 +115,7 @@ class AboutScreen extends ConsumerWidget {
   Widget buildBody(BuildContext context, AsyncValue<PackageInfo> aboutInfo) {
     return Scaffold(
       appBar: AppBar(),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24),
+      body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -200,6 +199,7 @@ The author assumes no responsibility or liability for any direct or indirect con
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
