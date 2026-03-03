@@ -522,15 +522,18 @@ class _DoneStepState extends State<_DoneStep> {
               ),
               const SizedBox(height: 24),
             ],
-            ElevatedButton.icon(
-              onPressed: (widget.vm.autoAdded || widget.vm.registerRemainingSeconds <= 0)
-                  ? () {
-                      Navigator.of(
-                        context,
-                      ).popUntil((route) => route.settings.name == AppRoutes.kDevices || route.isFirst);
-                    }
-                  : null,
-              label: Text(context.translate('Done')),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: (widget.vm.autoAdded || widget.vm.registerRemainingSeconds <= 0)
+                    ? () {
+                        Navigator.of(
+                          context,
+                        ).popUntil((route) => route.settings.name == AppRoutes.kDevices || route.isFirst);
+                      }
+                    : null,
+                label: Text(context.translate('Done')),
+              ),
             ),
             if (!widget.vm.autoAdded && widget.vm.registerRemainingSeconds <= 0) ...[
               const SizedBox(height: 12),

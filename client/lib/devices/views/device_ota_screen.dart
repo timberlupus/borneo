@@ -438,7 +438,7 @@ class _DeviceOtaScreenState extends State<DeviceOtaScreen> with TickerProviderSt
     if (vm.isSucceeded) {
       return SizedBox(
         width: double.infinity,
-        child: FilledButton.icon(
+        child: ElevatedButton.icon(
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.check),
           label: Text(context.translate('Done')),
@@ -449,7 +449,7 @@ class _DeviceOtaScreenState extends State<DeviceOtaScreen> with TickerProviderSt
     if (vm.hasUpdate) {
       return SizedBox(
         width: double.infinity,
-        child: FilledButton.icon(
+        child: ElevatedButton.icon(
           onPressed: () async {
             final ok = await _confirmUpgrade(context);
             if (ok && context.mounted) {
