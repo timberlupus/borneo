@@ -118,9 +118,9 @@ int populate_hostname()
 {
     uint8_t mac[6] = { 0 };
     BO_TRY(esp_read_mac(mac, ESP_MAC_WIFI_STA));
-    const struct system_info* sysinfo = bo_system_get_info();
     portENTER_CRITICAL(&s_mdns_lock);
-    snprintf(s_mdns_ctx.hostname, sizeof(s_mdns_ctx.hostname), "%s-%02X%02X", sysinfo->name, mac[4], mac[5]);
+    snprintf(s_mdns_ctx.hostname, sizeof(s_mdns_ctx.hostname), "%s-%02X%02X", CONFIG_LWIP_LOCAL_HOSTNAME, mac[4],
+             mac[5]);
     portEXIT_CRITICAL(&s_mdns_lock);
     return 0;
 }
@@ -134,7 +134,7 @@ static int add_mdns_services()
 
     const struct system_info* sysinfo = bo_system_get_info();
     // Add the mDNS service
-    BO_TRY_ESP(mdns_service_add(sysinfo->name, MDNS_SERVICE_TYPE, "_udp", MDNS_UDP_PORT, NULL, 0));
+    BO_TRY_ESP(mdns_service_add(NULL, MDNS_SERVICE_TYPE, "_udp", MDNS_UDP_PORT, NULL, 0));
 
     // Note: You must add the service first, then you can set its properties.
     // The web server uses a custom instance name.
