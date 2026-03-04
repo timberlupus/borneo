@@ -183,6 +183,8 @@ final class DeviceManagerImpl extends IDeviceManager {
       final store = stringMapStoreFactory.store(StoreNames.devices);
       await store.record(id).delete(tx).asCancellable(cancelToken);
       allDeviceEvents.fire(DeviceEntityDeletedEvent(id));
+      final currentScene = _sceneManager.current;
+      _globalBus.fire(CurrentSceneDevicesReloadedEvent(currentScene));
     }
   }
 

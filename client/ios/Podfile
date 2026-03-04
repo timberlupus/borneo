@@ -52,7 +52,8 @@ post_install do |installer|
     end
   end
 
-  build_number = `git rev-list --count HEAD`.strip
+  repo_root = File.expand_path('../..', File.dirname(File.realpath(__FILE__)))
+  build_number = `git -C "#{repo_root}" rev-list --count HEAD -- client`.strip
   puts "Git Build Number: #{build_number}"
   info_plist_path = File.join(__dir__, 'Runner/Info.plist')
   if File.exist?(info_plist_path) && !build_number.empty?

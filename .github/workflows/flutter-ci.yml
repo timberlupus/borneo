@@ -71,8 +71,22 @@ jobs:
           xvfb-run flutter test integration_test/app_test.dart -d linux -r github
 
 
+  get-build-number:
+    runs-on: ubuntu-latest
+    outputs:
+      build_number: ${{ steps.get_build_number.outputs.build_number }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get build number from git
+        id: get_build_number
+        run: echo "build_number=$(git rev-list --count HEAD -- client)" >> $GITHUB_OUTPUT
+
+
   build-apk:
-    needs: test
+    needs: [test, get-build-number]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -83,10 +97,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Get build number from git
-        id: get_build_number
-        run: echo "build_number=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
 
       - name: Decode keystore from base64
         shell: bash
@@ -153,7 +163,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Build APK
-        run: flutter build apk --release --target-platform android-arm64 --build-number ${{ steps.get_build_number.outputs.build_number }}
+        run: flutter build apk --release --target-platform android-arm64 --build-number ${{ needs.get-build-number.outputs.build_number }}
 
       - name: Rename APK with version
         run: |
@@ -167,7 +177,7 @@ jobs:
           path: ${{ github.workspace }}/${{ env.FLUTTER_WORKING_DIR }}/build/app/outputs/flutter-apk/borneo-app-ce-${{ steps.get_version.outputs.version }}.apk
 
   build-windows:
-    needs: test
+    needs: [test, get-build-number]
     runs-on: windows-latest
     defaults:
       run:
@@ -178,12 +188,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Get build number from git
-        id: get_build_number
-        run: |
-          $count = git rev-list --count HEAD
-          echo "build_number=$count" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -233,7 +237,7 @@ jobs:
           echo "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Build Windows executable
-        run: flutter build windows --release --build-number ${{ steps.get_build_number.outputs.build_number }}
+        run: flutter build windows --release --build-number ${{ needs.get-build-number.outputs.build_number }}
 
       - name: Create and zip Windows release
         run: |
@@ -246,7 +250,7 @@ jobs:
           path: client/build/windows/dist/borneo-app-ce-${{ steps.get_version.outputs.version }}-windows-x64.zip
 
   build-ios:
-    needs: test
+    needs: [test, get-build-number]
     runs-on: macos-14
     defaults:
       run:
@@ -257,10 +261,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Get build number from git
-        id: get_build_number
-        run: echo "build_number=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -304,7 +304,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Build iOS app (no codesign)
-        run: flutter build ios --release --no-codesign --build-number ${{ steps.get_build_number.outputs.build_number }}
+        run: flutter build ios --release --no-codesign --build-number ${{ needs.get-build-number.outputs.build_number }}
 
   release:
     needs: [build-apk, build-windows, build-ios]
