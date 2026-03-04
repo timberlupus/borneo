@@ -160,7 +160,9 @@ jobs:
         id: get_version
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | head -n1 | awk '{print $2}' | cut -d'+' -f1)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          # append build number from previous job
+          VERSION_PLUS="${VERSION}+${{ needs.get-build-number.outputs.build_number }}"
+          echo "version=${VERSION_PLUS}" >> $GITHUB_OUTPUT
 
       - name: Build APK
         run: flutter build apk --release --target-platform android-arm64 --build-number ${{ needs.get-build-number.outputs.build_number }}
@@ -234,7 +236,10 @@ jobs:
         id: get_version
         run: |
           $version = (Select-String -Path pubspec.yaml -Pattern '^version:' | Select-Object -First 1).Line.Split(':')[1].Trim().Split('+')[0]
-          echo "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          # append build number from previous job
+          $build = "${{ needs.get-build-number.outputs.build_number }}"
+          $versionPlus = "${version}+${build}"
+          echo "version=$versionPlus" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Build Windows executable
         run: flutter build windows --release --build-number ${{ needs.get-build-number.outputs.build_number }}
@@ -301,7 +306,8 @@ jobs:
         id: get_version
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | head -n1 | awk '{print $2}' | cut -d'+' -f1)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          VERSION_PLUS="${VERSION}+${{ needs.get-build-number.outputs.build_number }}"
+          echo "version=${VERSION_PLUS}" >> $GITHUB_OUTPUT
 
       - name: Build iOS app (no codesign)
         run: flutter build ios --release --no-codesign --build-number ${{ needs.get-build-number.outputs.build_number }}
