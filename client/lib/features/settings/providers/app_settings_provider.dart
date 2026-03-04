@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_flags.dart';
 import '../../../core/config/language_config.dart';
 import '../../../core/providers.dart';
 import '../../../core/events/app_events.dart';
@@ -8,20 +9,23 @@ import '../../../core/events/app_events.dart';
 // reuse the same keys that were defined in the old ChangeNotifier-based view
 const _kBrightnessKey = "app.brightness";
 const _kLocaleKey = "app.locale";
+const _kDemoModeKey = "app.demoMode";
 
 @immutable
 class AppSettingsState {
   final ThemeMode themeMode;
   final Locale? locale;
   final String temperatureUnit;
+  final bool demoMode;
 
-  const AppSettingsState({required this.themeMode, this.locale, required this.temperatureUnit});
+  const AppSettingsState({required this.themeMode, this.locale, required this.temperatureUnit, this.demoMode = false});
 
-  AppSettingsState copyWith({ThemeMode? themeMode, Locale? locale, String? temperatureUnit}) {
+  AppSettingsState copyWith({ThemeMode? themeMode, Locale? locale, String? temperatureUnit, bool? demoMode}) {
     return AppSettingsState(
       themeMode: themeMode ?? this.themeMode,
       locale: locale ?? this.locale,
       temperatureUnit: temperatureUnit ?? this.temperatureUnit,
+      demoMode: demoMode ?? this.demoMode,
     );
   }
 }
@@ -70,7 +74,10 @@ class AppSettingsNotifier extends AsyncNotifier<AppSettingsState> {
     // temperature unit comes from the locale service
     final tempUnit = ref.read(localeServiceProvider).temperatureUnit;
 
-    return AppSettingsState(themeMode: themeMode, locale: locale, temperatureUnit: tempUnit);
+    // demo mode
+    final demoMode = prefs.getBool(_kDemoModeKey) ?? kDefaultDemoMode;
+
+    return AppSettingsState(themeMode: themeMode, locale: locale, temperatureUnit: tempUnit, demoMode: demoMode);
   }
 
   Future<void> changeBrightness(ThemeMode mode) async {
@@ -99,5 +106,14 @@ class AppSettingsNotifier extends AsyncNotifier<AppSettingsState> {
     await ref.read(localeServiceProvider).setTemperatureUnit(unit);
     final current = state.value!;
     state = AsyncValue.data(current.copyWith(temperatureUnit: unit));
+  }
+
+  /// Persists the demo-mode toggle without side-effects.  The settings screen
+  /// is responsible for seeding / clearing demo devices before calling this.
+  Future<void> changeDemoMode(bool enabled) async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setBool(_kDemoModeKey, enabled);
+    final current = state.value!;
+    state = AsyncValue.data(current.copyWith(demoMode: enabled));
   }
 }

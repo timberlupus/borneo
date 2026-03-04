@@ -16,6 +16,8 @@ import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/core/services/scene_manager.dart';
 import 'package:borneo_app/routes/route_manager.dart';
+import 'package:borneo_app/core/app_flags.dart';
+import 'package:borneo_app/features/settings/providers/app_settings_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:borneo_app/core/infrastructure/logging.dart';
 import 'package:logger/logger.dart';
@@ -136,3 +138,16 @@ final appNotificationServiceProvider = Provider<IAppNotificationService>(
 
 // Additional providers (if needed) can be added here as the migration
 // proceeds (e.g. StateNotifierProviders for view models).
+
+// ---------------------------------------------------------------------------
+// Demo mode derived provider
+// ---------------------------------------------------------------------------
+//
+// A simple synchronous boolean so the UI does not have to unwrap an
+// AsyncValue everywhere it needs to check demo mode.
+
+/// `true` when demo mode is currently enabled.  Derived from
+/// [appSettingsProvider] so that it updates reactively.
+final demoModeProvider = Provider<bool>((ref) {
+  return ref.watch(appSettingsProvider).asData?.value.demoMode ?? kDefaultDemoMode;
+});
