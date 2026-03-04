@@ -1,5 +1,7 @@
 
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/queue.h>
 #include <esp_system.h>
 #include <esp_event.h>
 #include <esp_log.h>
@@ -188,7 +190,13 @@ static int register_resource(coap_context_t* ctx, const struct coap_resource_des
 
 int bo_coap_notify_resource_changed(const coap_str_const_t* resource_uri)
 {
-    BaseType_t rc = xQueueSendToBackFromISR(s_notify_queue, resource_uri, NULL);
+    BaseType_t rc;
+    if (xPortInIsrContext()) {
+        rc = xQueueSendToBackFromISR(s_notify_queue, resource_uri, NULL);
+    }
+    else {
+        rc = xQueueSendToBack(s_notify_queue, resource_uri, 0);
+    }
     if (rc != pdTRUE) {
         return -EIO;
     }

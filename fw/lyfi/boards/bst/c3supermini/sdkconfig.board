@@ -23,11 +23,6 @@ CONFIG_BORNEO_ADC_ENABLED=n
 CONFIG_BORNEO_MEAS_VOLTAGE_SUPPORT=n
 CONFIG_LYFI_MEAS_CURRENT_SUPPORT=n
 
-################## Provisioning #################################
-CONFIG_BORNEO_PROV_METHOD_NP=y
-CONFIG_BT_ENABLED=y
-CONFIG_BT_NIMBLE_ENABLED=y
-
 ################## NTC #########################
 CONFIG_LYFI_NTC_SUPPORT=n
 

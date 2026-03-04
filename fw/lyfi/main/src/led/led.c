@@ -720,19 +720,25 @@ void led_render_task()
         bool skip_hw_update = (esp_timer_get_time() - frame_start_us) >= LED_UPDATE_PERIOD_US;
 
         if (!skip_hw_update) {
-            // Sync color to hardware if changed
+            // Copy shared color state under lock only - HW update must NOT be inside critical section
+            // because ledc_set_duty_and_update lazily allocates FreeRTOS objects (semaphores) on the
+            // first call per channel, and creating FreeRTOS primitives with interrupts disabled is
+            // undefined behaviour that corrupts scheduler state.
+            led_color_t new_color;
             portENTER_CRITICAL(&g_led_spinlock);
-            bool color_changed = memcmp(last_color, _led.color, sizeof(led_color_t)) != 0;
+            memcpy(new_color, _led.color, sizeof(led_color_t));
+            portEXIT_CRITICAL(&g_led_spinlock);
+
+            // Sync color to hardware outside critical section
+            bool color_changed = memcmp(last_color, new_color, sizeof(led_color_t)) != 0;
             if (color_changed) {
                 for (size_t ch = 0; ch < led_channel_count(); ch++) {
-                    led_brightness_t new_val = _led.color[ch];
-                    if (last_color[ch] != new_val) {
-                        last_color[ch] = new_val;
+                    if (last_color[ch] != new_color[ch]) {
+                        last_color[ch] = new_color[ch];
                         BO_MUST(led_set_channel_brightness(ch, last_color[ch]));
                     }
                 }
             }
-            portEXIT_CRITICAL(&g_led_spinlock);
         }
         else {
             int64_t over_us = (esp_timer_get_time() - frame_start_us) - LED_UPDATE_PERIOD_US;
