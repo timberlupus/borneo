@@ -145,13 +145,10 @@ class ScheduleEditorView extends StatelessWidget {
               child: Selector<ScheduleEditorViewModel, bool>(
                 selector: (_, editor) => editor.canChangeColor,
                 builder: (_, canChangeColor, _) => SingleChildScrollView(
-                  child: Container(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    child: BrightnessSliderList(
-                      context.read<ScheduleEditorViewModel>(),
-                      disabled: !canChangeColor,
-                      padding: EdgeInsets.all(0),
-                    ),
+                  child: BrightnessSliderList(
+                    context.read<ScheduleEditorViewModel>(),
+                    disabled: !canChangeColor,
+                    padding: EdgeInsets.all(0),
                   ),
                 ),
               ),
