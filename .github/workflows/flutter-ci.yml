@@ -71,28 +71,38 @@ jobs:
           xvfb-run flutter test integration_test/app_test.dart -d linux -r github
 
 
-  get-build-number:
+  get-version:
     runs-on: ubuntu-latest
     outputs:
-      build_number: ${{ steps.get_build_number.outputs.build_number }}
+      version: ${{ steps.extract.outputs.version }}
+      version_base: ${{ steps.extract.outputs.version_base }}
+      build_number: ${{ steps.extract.outputs.build_number }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get build number from git
-        id: get_build_number
-        run: echo "build_number=$(git rev-list --count HEAD -- .)" >> $GITHUB_OUTPUT
+      - name: Extract version & build number
+        id: extract
+        run: |
+          # read base version from pubspec (client folder)
+          VERSION_BASE=$(grep '^version:' client/pubspec.yaml | head -n1 | awk '{print $2}' | cut -d'+' -f1)
+          BUILD_NUM=$(git rev-list --count HEAD -- client)
+          VERSION_PLUS="${VERSION_BASE}+${BUILD_NUM}"
+          echo "version_base=${VERSION_BASE}" >> $GITHUB_OUTPUT
+          echo "build_number=${BUILD_NUM}"       >> $GITHUB_OUTPUT
+          echo "version=${VERSION_PLUS}"         >> $GITHUB_OUTPUT
 
 
   build-apk:
-    needs: [test, get-build-number]
+    needs: [test, get-version]
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ${{ env.FLUTTER_WORKING_DIR }}
     outputs:
-      version: ${{ steps.get_version.outputs.version }}
+      version: ${{ needs.get-version.outputs.version }}
+      version_base: ${{ needs.get-version.outputs.version_base }}
 
     steps:
       - name: Checkout code
@@ -156,36 +166,28 @@ jobs:
       - name: Get Flutter dependencies
         run: flutter pub get
 
-      - name: Get version from pubspec.yaml
-        id: get_version
-        run: |
-          VERSION=$(grep '^version:' pubspec.yaml | head -n1 | awk '{print $2}' | cut -d'+' -f1)
-          # append build number from previous job
-          VERSION_PLUS="${VERSION}+${{ needs.get-build-number.outputs.build_number }}"
-          echo "version=${VERSION_PLUS}" >> $GITHUB_OUTPUT
-
       - name: Build APK
-        run: flutter build apk --release --target-platform android-arm64 --build-number ${{ needs.get-build-number.outputs.build_number }}
+        run: flutter build apk --release --target-platform android-arm64 --build-number ${{ needs.get-version.outputs.build_number }}
 
       - name: Rename APK with version
         run: |
           mv build/app/outputs/flutter-apk/app-release.apk \
-             build/app/outputs/flutter-apk/borneo-app-ce-${{ steps.get_version.outputs.version }}.apk
+             build/app/outputs/flutter-apk/borneo-app-ce-${{ needs.get-version.outputs.version }}.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: borneo-app-ce-${{ steps.get_version.outputs.version }}
-          path: ${{ github.workspace }}/${{ env.FLUTTER_WORKING_DIR }}/build/app/outputs/flutter-apk/borneo-app-ce-${{ steps.get_version.outputs.version }}.apk
+          name: borneo-app-ce-${{ needs.get-version.outputs.version }}
+          path: ${{ github.workspace }}/${{ env.FLUTTER_WORKING_DIR }}/build/app/outputs/flutter-apk/borneo-app-ce-${{ needs.get-version.outputs.version }}.apk
 
   build-windows:
-    needs: [test, get-build-number]
+    needs: [test, get-version]
     runs-on: windows-latest
     defaults:
       run:
         working-directory: ${{ env.FLUTTER_WORKING_DIR }}
     outputs:
-      version: ${{ steps.get_version.outputs.version }}
+      version: ${{ needs.get-version.outputs.version }}
 
     steps:
       - name: Checkout code
@@ -232,36 +234,27 @@ jobs:
       - name: Get Flutter dependencies
         run: flutter pub get
 
-      - name: Get version from pubspec.yaml
-        id: get_version
-        run: |
-          $version = (Select-String -Path pubspec.yaml -Pattern '^version:' | Select-Object -First 1).Line.Split(':')[1].Trim().Split('+')[0]
-          # append build number from previous job
-          $build = "${{ needs.get-build-number.outputs.build_number }}"
-          $versionPlus = "${version}+${build}"
-          echo "version=$versionPlus" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-
       - name: Build Windows executable
-        run: flutter build windows --release --build-number ${{ needs.get-build-number.outputs.build_number }}
+        run: flutter build windows --release --build-number ${{ needs.get-version.outputs.build_number }}
 
       - name: Create and zip Windows release
         run: |
-          pwsh ./scripts/windows-dist-pack.ps1 ce-${{ steps.get_version.outputs.version }}
+          pwsh ./scripts/windows-dist-pack.ps1 ce-${{ needs.get-version.outputs.version }}
 
       - name: Upload Windows zip artifact
         uses: actions/upload-artifact@v4
         with:
-          name: borneo-app-ce-${{ steps.get_version.outputs.version }}-windows-x64
-          path: client/build/windows/dist/borneo-app-ce-${{ steps.get_version.outputs.version }}-windows-x64.zip
+          name: borneo-app-ce-${{ needs.get-version.outputs.version }}-windows-x64
+          path: client/build/windows/dist/borneo-app-ce-${{ needs.get-version.outputs.version }}-windows-x64.zip
 
   build-ios:
-    needs: [test, get-build-number]
+    needs: [test, get-version]
     runs-on: macos-14
     defaults:
       run:
         working-directory: ${{ env.FLUTTER_WORKING_DIR }}
     outputs:
-      version: ${{ steps.get_version.outputs.version }}
+      version: ${{ needs.get-version.outputs.version }}
 
     steps:
       - name: Checkout code
@@ -302,15 +295,8 @@ jobs:
       - name: Get Flutter dependencies
         run: flutter pub get
 
-      - name: Get version from pubspec.yaml
-        id: get_version
-        run: |
-          VERSION=$(grep '^version:' pubspec.yaml | head -n1 | awk '{print $2}' | cut -d'+' -f1)
-          VERSION_PLUS="${VERSION}+${{ needs.get-build-number.outputs.build_number }}"
-          echo "version=${VERSION_PLUS}" >> $GITHUB_OUTPUT
-
       - name: Build iOS app (no codesign)
-        run: flutter build ios --release --no-codesign --build-number ${{ needs.get-build-number.outputs.build_number }}
+        run: flutter build ios --release --no-codesign --build-number ${{ needs.get-version.outputs.build_number }}
 
   release:
     needs: [build-apk, build-windows, build-ios]
@@ -336,8 +322,8 @@ jobs:
       - name: Create Versionized GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: app-ce-v${{ needs.build-apk.outputs.version }}
-          name: Borneo-IoT App Release app-ce-v${{ needs.build-apk.outputs.version }}
+          tag_name: app-ce-v${{ needs.build-apk.outputs.version_base }}
+          name: Borneo-IoT App Release app-ce-v${{ needs.build-apk.outputs.version_base }}
           draft: false
           overwrite_files: true
           prerelease: ${{ steps.set_prerelease.outputs.prerelease }}
