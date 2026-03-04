@@ -82,7 +82,7 @@ jobs:
 
       - name: Get build number from git
         id: get_build_number
-        run: echo "build_number=$(git rev-list --count HEAD -- client)" >> $GITHUB_OUTPUT
+        run: echo "build_number=$(git rev-list --count HEAD -- .)" >> $GITHUB_OUTPUT
 
 
   build-apk:
