@@ -332,7 +332,7 @@ jobs:
             release-artifacts/borneo-app-ce-${{ needs.build-apk.outputs.version }}.apk
             release-artifacts/borneo-app-ce-${{ needs.build-windows.outputs.version }}-windows-x64.zip
 
-      - name: Manage latest tag via API
+      - name: Delete previous latest app release and tag
         uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -340,26 +340,8 @@ jobs:
             const tag = 'release-app-latest';
             const refName = `tags/${tag}`;
             const fullRef = `refs/tags/${tag}`;
-            try {
-              await github.rest.git.deleteRef({ owner: context.repo.owner, repo: context.repo.repo, ref: refName });
-              console.log(`Deleted existing tag ${tag}`);
-            } catch (err) {
-              // GitHub returns 404 _or_ 422 when the tag doesn't exist; ignore both
-              if (err.status === 404 || err.status === 422) {
-                console.log(`Tag ${tag} did not exist, proceeding to create`);
-              } else {
-                throw err;
-              }
-            }
-            await github.rest.git.createRef({ owner: context.repo.owner, repo: context.repo.repo, ref: fullRef, sha: context.sha });
-            console.log(`Created tag ${tag} pointing to ${context.sha}`);
 
-      - name: Delete previous latest app release
-        uses: actions/github-script@v8
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const tag = 'release-app-latest';
+            // Delete the release first (while tag still points to old SHA, so getReleaseByTag works)
             try {
               const rel = await github.rest.repos.getReleaseByTag({ owner: context.repo.owner, repo: context.repo.repo, tag });
               await github.rest.repos.deleteRelease({
@@ -376,11 +358,25 @@ jobs:
               }
             }
 
+            // Then delete and recreate the tag pointing to the current commit
+            try {
+              await github.rest.git.deleteRef({ owner: context.repo.owner, repo: context.repo.repo, ref: refName });
+              console.log(`Deleted existing tag ${tag}`);
+            } catch (err) {
+              // GitHub returns 404 _or_ 422 when the tag doesn't exist; ignore both
+              if (err.status === 404 || err.status === 422) {
+                console.log(`Tag ${tag} did not exist, proceeding to create`);
+              } else {
+                throw err;
+              }
+            }
+            await github.rest.git.createRef({ owner: context.repo.owner, repo: context.repo.repo, ref: fullRef, sha: context.sha });
+            console.log(`Created tag ${tag} pointing to ${context.sha}`);
+
       - name: Create GitHub Latest App Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: release-app-latest
           name: Latest App Release
           draft: false
-          overwrite_files: true
           files: release-artifacts/*
