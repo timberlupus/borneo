@@ -2,8 +2,12 @@ import 'package:borneo_app/features/devices/views/devices_screen.dart';
 import 'package:borneo_app/features/devices/view_models/grouped_devices_view_model.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/models/events.dart';
+import 'package:borneo_app/core/providers.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../mocks/mocks.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter_test/flutter_test.dart' hide EventDispatcher;
@@ -42,10 +46,13 @@ void main() {
     await vm.initialize();
 
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: const [_FakeGettextDelegate()],
-        supportedLocales: const [Locale('en', 'US')],
-        home: ChangeNotifierProvider<GroupedDevicesViewModel>.value(value: vm, child: DevicesScreen()),
+      ProviderScope(
+        overrides: [demoModeProvider.overrideWithValue(false)],
+        child: MaterialApp(
+          localizationsDelegates: const [_FakeGettextDelegate()],
+          supportedLocales: const [Locale('en', 'US')],
+          home: ChangeNotifierProvider<GroupedDevicesViewModel>.value(value: vm, child: DevicesScreen()),
+        ),
       ),
     );
     // give the framework a chance to lay out slivers, etc.
