@@ -81,15 +81,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Extract version & build number
         id: extract
         run: |
           # read base version from pubspec (client folder)
           VERSION_BASE=$(grep '^version:' client/pubspec.yaml | head -n1 | awk '{print $2}' | cut -d'+' -f1)
-          BUILD_NUM=$(git rev-list --count HEAD -- client)
+          # use the workflow run number provided by GitHub Actions
+          BUILD_NUM="$GITHUB_RUN_NUMBER"
           VERSION_PLUS="${VERSION_BASE}+${BUILD_NUM}"
           echo "version_base=${VERSION_BASE}" >> $GITHUB_OUTPUT
           echo "build_number=${BUILD_NUM}"       >> $GITHUB_OUTPUT
