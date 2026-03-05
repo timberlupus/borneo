@@ -6,8 +6,6 @@ CONFIG_ESP32C3_REV_MIN_3=y
 CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_160=y
 CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ=160
 
-CONFIG_BORNEO_OTA_FIRMWARE_UPGRADE_URL="https://borneo-device-upgrade.borneoiot.com/images/blc05mk2/borneo_lyfi_fw_blc05mk2.bin"
-
 ################ Flash ####################################
 CONFIG_ESPTOOLPY_FLASHMODE="dio"
 CONFIG_ESPTOOLPY_FLASHMODE_DIO=y

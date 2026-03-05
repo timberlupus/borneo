@@ -9,9 +9,6 @@ CONFIG_LWIP_LOCAL_HOSTNAME="DOSER6-OLD"
 #CONFIG_ESP32C3_REV_MIN_3=y
 #CONFIG_ESP32C3_REV_MIN=3
 
-CONFIG_BORNEO_OTA_FIRMWARE_UPGRADE_URL="https://borneo-device-upgrade.borneoiot.com/images/blc05emk1/borneo_doser_fw_doser4-old.bin"
-
-
 ################## BLE #################################
 CONFIG_BT_ENABLED=n
 
