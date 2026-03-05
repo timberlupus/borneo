@@ -30,7 +30,7 @@ class DeviceCard extends StatelessWidget {
       selector: (_, vm) => (isOnline: vm.isOnline, isPowerOn: vm.isPowerOn, name: vm.deviceEntity.name),
       builder: (context, status, _) {
         final colorScheme = Theme.of(context).colorScheme;
-        final bgColor = colorScheme.surfaceContainerHighest;
+        final bgColor = colorScheme.surfaceContainer;
         final fgColor = colorScheme.onSurface;
 
         return ClipRRect(

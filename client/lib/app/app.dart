@@ -28,7 +28,6 @@ import '../core/services/devices/device_manager.dart';
 import '../core/services/group_manager.dart';
 import '../core/services/chore_manager.dart';
 import '../core/services/scene_manager.dart';
-import 'app_theme.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/core/config/language_config.dart';
 

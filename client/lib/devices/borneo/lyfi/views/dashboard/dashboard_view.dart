@@ -31,7 +31,7 @@ class DashboardView extends StatelessWidget {
               child: const ClipRect(child: DashboardChart()),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           ScreenTopRoundedContainer(
             color: colorScheme.surfaceContainer,
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
