@@ -61,7 +61,7 @@ class LyfiBusyIndicatorSliver extends StatelessWidget {
         selector: (_, vm) => vm.isBusy,
         builder: (context, isBusy, _) {
           if (!isBusy) {
-            return const SizedBox.shrink();
+            return const SizedBox(height: 2);
           }
           return const LinearProgressIndicator(minHeight: 2);
         },

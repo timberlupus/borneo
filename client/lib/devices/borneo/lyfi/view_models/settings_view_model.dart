@@ -20,36 +20,37 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
 
   GeoLocation? _location;
   GeoLocation? get location => _location;
-  bool get canUpdateGeoLocation => !isBusy && isOnline;
+  bool get canUpdateGeoLocation => !isBusy && isOnline && !isSuspectedOffline;
 
   String? _timezone;
   String? get timezone => _timezone;
-  bool get canUpdateTimezone => !isBusy && isOnline;
+  bool get canUpdateTimezone => !isBusy && isOnline && !isSuspectedOffline;
 
   LedCorrectionMethod _correctionMethod = LedCorrectionMethod.log;
   LedCorrectionMethod get correctionMethod => _correctionMethod;
-  bool get canUpdateCorrectionMethod => !isBusy && isOnline;
+  bool get canUpdateCorrectionMethod => !isBusy && isOnline && !isSuspectedOffline;
 
   Duration _temporaryDuration = Duration(minutes: 20);
   Duration get temporaryDuration => _temporaryDuration;
-  bool get canUpdateTemporaryDuration => !isBusy && isOnline;
+  bool get canUpdateTemporaryDuration => !isBusy && isOnline && !isSuspectedOffline;
 
   bool _cloudEnabled = false;
   bool get cloudEnabled => _cloudEnabled;
-  bool get canUpdateCloudEnabled => !isBusy && isOnline;
+  bool get canUpdateCloudEnabled => !isBusy && isOnline && !isSuspectedOffline;
 
   FanMode _fanMode = FanMode.manual;
   FanMode get fanMode => _fanMode;
-  bool get canUpdateFanMode => !isBusy && isOnline;
+  bool get canUpdateFanMode => !isBusy && isOnline && !isSuspectedOffline;
 
   int _manualFanPower = 0;
   int get manualFanPower => _manualFanPower;
-  bool get canUpdateManualFanPower => !isBusy && isOnline && _fanMode == FanMode.manual;
+  bool get canUpdateManualFanPower => !isBusy && !isSuspectedOffline && isOnline && _fanMode == FanMode.manual;
 
   PowerBehavior _powerBehavior;
   PowerBehavior get powerBehavior => _powerBehavior;
   bool get canUpdatePowerBehavior => !isBusy && isOnline;
-  bool get isControllerSettingsAvailable => borneoInfo.productMode == ProductMode.standalone;
+  bool get isControllerSettingsAvailable =>
+      !isBusy && isOnline && !isSuspectedOffline && !isDemo && borneoInfo.productMode == ProductMode.standalone;
 
   SettingsViewModel({
     required super.deviceManager,

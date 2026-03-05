@@ -1,3 +1,4 @@
+import 'package:borneo_app/shared/widgets/app_bar_apply_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_earth_globe/flutter_earth_globe.dart';
 import 'package:flutter_earth_globe/flutter_earth_globe_controller.dart';
@@ -140,9 +141,8 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
-            child: FilledButton.icon(
-              icon: const Icon(Icons.check, size: 28),
-              label: Text(context.translate("Apply")),
+            child: AppBarApplyButton(
+              label: context.translate('Apply'),
               onPressed: (_selectedLocation == null || _isSameLocation(_selectedLocation, widget.initialLocation))
                   ? null
                   : () => Navigator.pop(context, _selectedLocation),

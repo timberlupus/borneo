@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
+import 'package:logger/logger.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 
@@ -28,21 +29,7 @@ class DashboardDimmingTile extends StatelessWidget {
         return DashboardTile(
           backgroundColor: bgColor,
           disabled: !(canUnlock && context.read<LyfiViewModel>().isOnline),
-          onPressed: (canUnlock && context.read<LyfiViewModel>().isOnline)
-              ? () async {
-                  final vm = context.read<LyfiViewModel>();
-                  // Request entering dimming (unlock) then wait for readiness event-driven
-                  await vm.toggleLock(false);
-                  await vm.onDimmingReady();
-                  if (context.mounted) {
-                    await PersistentNavBarNavigator.pushNewScreen(
-                      context,
-                      screen: ChangeNotifierProvider.value(value: vm, child: const DimmingScreen()),
-                      withNavBar: false,
-                    );
-                  }
-                }
-              : null,
+          onPressed: (canUnlock && context.read<LyfiViewModel>().isOnline) ? () => _onTilePressed(context) : null,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -86,5 +73,26 @@ class DashboardDimmingTile extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _onTilePressed(BuildContext context) async {
+    final vm = context.read<LyfiViewModel>();
+    try {
+      // Request entering dimming (unlock) then wait for readiness event-driven
+      await vm.toggleLock(false);
+      await vm.onDimmingReady();
+      if (context.mounted) {
+        await PersistentNavBarNavigator.pushNewScreen(
+          context,
+          screen: ChangeNotifierProvider.value(value: vm, child: const DimmingScreen()),
+          withNavBar: false,
+        );
+      }
+    } catch (error, stackTrace) {
+      if (context.mounted) {
+        context.read<Logger>().e(error.toString(), error: error, stackTrace: stackTrace);
+        vm.notifyAppError(context.translate('Failed to open dimming page: {msg}', nArgs: {'msg': error.toString()}));
+      }
+    }
   }
 }

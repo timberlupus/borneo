@@ -1,3 +1,4 @@
+import 'package:borneo_app/shared/widgets/app_bar_apply_button.dart';
 import 'package:borneo_app/shared/widgets/screen_top_rounded_container.dart';
 import 'package:borneo_common/duration_ext.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,8 @@ class EasySetupScreen extends StatelessWidget {
           appBar: AppBar(
             title: Text(context.translate('Easy Setup')),
             actions: [
-              TextButton.icon(
+              AppBarApplyButton(
+                label: context.translate('Apply'),
                 onPressed: () {
                   if (Navigator.canPop(context)) {
                     Navigator.of(context).pop(true);
@@ -46,13 +48,6 @@ class EasySetupScreen extends StatelessWidget {
                     Navigator.of(context).pop(true);
                   }
                 },
-                icon: Icon(Icons.check, size: 18, color: Theme.of(context).colorScheme.onPrimary),
-                label: Text(
-                  context.translate('Apply'),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
-                ),
               ),
             ],
           ),

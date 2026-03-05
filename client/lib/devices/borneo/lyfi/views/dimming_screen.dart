@@ -124,7 +124,7 @@ class DimmingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      spacing: 16,
+      spacing: 8,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         const DimmingHeroPanel(),

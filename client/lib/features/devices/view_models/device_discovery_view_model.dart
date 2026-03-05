@@ -91,7 +91,6 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   @override
   Future<void> onInitialize() async {
     try {
-      // 延迟到下一帧，确保 UI 完全初始化
       await Future.delayed(Duration.zero);
       await startDiscovery();
     } finally {}

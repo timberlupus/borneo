@@ -2,6 +2,7 @@ import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/acclimation_view_model.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
+import 'package:borneo_app/shared/widgets/app_bar_apply_button.dart';
 import 'package:borneo_app/shared/widgets/generic_bottom_sheet_picker.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
@@ -49,10 +50,9 @@ class AcclimationScreen extends StatelessWidget {
                   title: Text(context.translate('Acclimation')),
                   actions: [
                     Consumer<AcclimationViewModel>(
-                      builder: (context, vm, _) => TextButton.icon(
+                      builder: (context, vm, _) => AppBarApplyButton(
                         onPressed: vm.canSubmit ? () => onSubmit(vm, context) : null,
-                        icon: const Icon(Icons.check, size: 24),
-                        label: Text(context.translate('Apply')),
+                        label: context.translate('Apply'),
                       ),
                     ),
                   ],

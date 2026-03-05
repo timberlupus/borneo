@@ -699,26 +699,33 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   }
 
   Future<SettingsViewModel> loadSettings(final GettextLocalizations gt) async {
-    if (!super.isOnline || isSuspectedOffline || boundDevice == null) {
-      throw StateError('Device is not reachable at the moment.');
+    if (isBusy || !super.isOnline || isSuspectedOffline || boundDevice == null) {
+      throw StateError(gt.translate('Device is not reachable at the moment.'));
     }
-    final vm = SettingsViewModel(
-      deviceManager: deviceManager,
-      globalEventBus: globalEventBus,
-      notification: notification,
-      wotThing: wotThing,
-      address: deviceEntity.address,
-      borneoStatus: borneoDeviceStatus!,
-      borneoInfo: super.lyfiThing.getProperty<GeneralBorneoDeviceInfo>('generalDeviceInfo')!,
-      ledInfo: lyfiDeviceInfo,
-      ledStatus: lyfiDeviceStatus!,
-      powerBehavior: super.lyfiThing.getProperty<PowerBehavior>('powerBehavior')!,
-      location: super.lyfiThing.getProperty<GeoLocation?>('location'),
-      gt: gt,
-      logger: super.logger,
-    );
-    await vm.initialize();
-    return vm;
+    try {
+      isBusy = true;
+      notifyListeners();
+      final vm = SettingsViewModel(
+        deviceManager: deviceManager,
+        globalEventBus: globalEventBus,
+        notification: notification,
+        wotThing: wotThing,
+        address: deviceEntity.address,
+        borneoStatus: borneoDeviceStatus!,
+        borneoInfo: super.lyfiThing.getProperty<GeneralBorneoDeviceInfo>('generalDeviceInfo')!,
+        ledInfo: lyfiDeviceInfo,
+        ledStatus: lyfiDeviceStatus!,
+        powerBehavior: super.lyfiThing.getProperty<PowerBehavior>('powerBehavior')!,
+        location: super.lyfiThing.getProperty<GeoLocation?>('location'),
+        gt: gt,
+        logger: super.logger,
+      );
+      await vm.initialize();
+      return vm;
+    } finally {
+      isBusy = false;
+      notifyListeners();
+    }
   }
 
   void _initializeChannels() {

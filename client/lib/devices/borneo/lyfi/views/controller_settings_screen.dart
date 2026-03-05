@@ -1,4 +1,5 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/controller_settings_view_model.dart';
+import 'package:borneo_app/shared/widgets/app_bar_apply_button.dart';
 import 'package:borneo_app/shared/widgets/bottom_sheet_picker.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:flutter/material.dart';
@@ -76,13 +77,12 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
     return [
       Selector<ControllerSettingsViewModel, bool>(
         selector: (context, vm) => vm.hasChanges,
-        builder: (context, hasChanges, child) => TextButton.icon(
+        builder: (context, hasChanges, child) => AppBarApplyButton(
           key: const ValueKey('submit'),
           onPressed: context.read<ControllerSettingsViewModel>().canSubmit
               ? () => _showSubmitConfirmationDialog(context)
               : null,
-          icon: const Icon(Icons.check, size: 24),
-          label: Text(context.translate('Apply')),
+          label: context.translate('Apply'),
         ),
       ),
     ];
