@@ -7,11 +7,13 @@ import 'package:borneo_app/features/chores/models/builtin_chores.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/chore_history_store.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
 import 'package:synchronized/synchronized.dart';
 
 final class ChoreManagerImpl implements IChoreManager {
+  final GettextLocalizations gettext;
   final Logger? logger;
   final IClock clock;
 
@@ -36,9 +38,15 @@ final class ChoreManagerImpl implements IChoreManager {
     this._sceneManager,
     this._deviceManager, {
     required this.clock,
+    required this.gettext,
     this.logger,
   }) : _historyStore = ChoreHistoryStore(_db) {
-    allChores.addAll([PowerOffAllChore(), FeedModeChore(), WaterChangeModeChore(), DryScapeModeChore()]);
+    allChores.addAll([
+      PowerOffAllChore(name: gettext.translate('Power Off All')),
+      FeedModeChore(name: gettext.translate('Feed Mode')),
+      WaterChangeModeChore(name: gettext.translate('Water Change Mode')),
+      DryScapeModeChore(name: gettext.translate('Dry Scape Mode')),
+    ]);
 
     // Subscribe to device reload events and publish a ChoresChangedEvent so UI can refresh
     _globalBus.on<CurrentSceneDevicesReloadedEvent>().listen((event) {

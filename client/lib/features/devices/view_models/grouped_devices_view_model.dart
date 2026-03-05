@@ -153,7 +153,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     _clearAllItems();
 
     final newDummyGroup = GroupViewModel(
-      DeviceGroupEntity(id: '', sceneID: _sceneManager.current.id, name: 'Ungrouped devices'),
+      DeviceGroupEntity(id: '', sceneID: _sceneManager.current.id, name: gt.translate('Ungrouped devices')),
       clock: this.clock,
       gt: super.gt,
     );

@@ -4,12 +4,8 @@ import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
 
 final class PowerOffAllChore extends AbstractBuiltinChore {
-  PowerOffAllChore()
-    : super(
-        name: 'Power off all',
-        iconAssetPath: 'assets/images/chores/icons/power-off.svg',
-        requiredCapabilities: ["OnOffSwitch"],
-      );
+  PowerOffAllChore({required super.name})
+    : super(iconAssetPath: 'assets/images/chores/icons/power-off.svg', requiredCapabilities: ["OnOffSwitch"]);
 
   /// Execute chore
   @override
@@ -30,13 +26,8 @@ final class PowerOffAllChore extends AbstractBuiltinChore {
 }
 
 final class FeedModeChore extends AbstractBuiltinChore {
-  FeedModeChore()
-    : super(
-        name: 'Feed mode',
-        iconAssetPath: 'assets/images/chores/icons/feed.svg',
-
-        requiredCapabilities: ["OnOffSwitch"],
-      );
+  FeedModeChore({required super.name})
+    : super(iconAssetPath: 'assets/images/chores/icons/feed.svg', requiredCapabilities: ["OnOffSwitch"]);
 
   @override
   Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, IDeviceManager deviceManager) async {
@@ -46,12 +37,8 @@ final class FeedModeChore extends AbstractBuiltinChore {
 }
 
 final class WaterChangeModeChore extends AbstractBuiltinChore {
-  WaterChangeModeChore()
-    : super(
-        name: 'Water change mode',
-        iconAssetPath: 'assets/images/chores/icons/water-change.svg',
-        requiredCapabilities: ["OnOffSwitch"],
-      );
+  WaterChangeModeChore({required super.name})
+    : super(iconAssetPath: 'assets/images/chores/icons/water-change.svg', requiredCapabilities: ["OnOffSwitch"]);
 
   @override
   Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, IDeviceManager deviceManager) async {
@@ -61,13 +48,8 @@ final class WaterChangeModeChore extends AbstractBuiltinChore {
 }
 
 final class DryScapeModeChore extends AbstractBuiltinChore {
-  DryScapeModeChore()
-    : super(
-        name: 'Dry scape mode',
-        iconAssetPath: 'assets/images/chores/icons/dry-scape.svg',
-
-        requiredCapabilities: ["OnOffSwitch"],
-      );
+  DryScapeModeChore({required super.name})
+    : super(iconAssetPath: 'assets/images/chores/icons/dry-scape.svg', requiredCapabilities: ["OnOffSwitch"]);
 
   @override
   Future<List<Map<String, dynamic>>> execute(SceneEntity currentScene, IDeviceManager deviceManager) async {

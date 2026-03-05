@@ -71,7 +71,7 @@ class DeviceOtaViewModel extends BaseViewModel with ViewModelEventBusMixin {
     _upgradeInfo = null;
     _setState(OtaState.checking);
     _cancelToken = CancellationToken();
-    final service = otaProvider.create(logger: logger);
+    final service = otaProvider.create(gt: gt, logger: logger);
     try {
       final info = await service.checkNewVersion(boundDevice, cancelToken: _cancelToken);
       _upgradeInfo = info;
@@ -89,7 +89,7 @@ class DeviceOtaViewModel extends BaseViewModel with ViewModelEventBusMixin {
     _errorMessage = null;
     _setState(OtaState.upgrading);
     _cancelToken = CancellationToken();
-    final service = otaProvider.create(logger: logger);
+    final service = otaProvider.create(gt: gt, logger: logger);
     try {
       await service.upgrade(boundDevice, cancelToken: _cancelToken, force: force);
       if (isDisposed) return;

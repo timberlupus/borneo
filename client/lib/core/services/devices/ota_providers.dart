@@ -5,6 +5,7 @@ import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:http/http.dart' as http;
 import 'package:libcompress/libcompress.dart';
 import 'package:logger/logger.dart';
@@ -38,15 +39,19 @@ abstract class IOtaService {
 
 final class CoapOtaService implements IOtaService {
   final Logger? _logger;
+  final GettextLocalizations gt;
 
-  CoapOtaService({Logger? logger}) : _logger = logger;
+  CoapOtaService({required this.gt, Logger? logger}) : _logger = logger;
 
   /// Fetches the manifest JSON and returns the entry whose `product_id` and
   /// `compatible` both match the given values. Returns `null` if not found.
   Future<Map<String, dynamic>?> _fetchMatchingManifestEntry(String productId, String compatible) async {
     final response = await http.get(Uri.parse(_kManifestUrl));
     if (response.statusCode != 200) {
-      final msg = 'Failed to fetch firmware manifest: HTTP ${response.statusCode}';
+      final msg = gt.translate(
+        'Failed to fetch firmware manifest: HTTP code `{code}`',
+        nArgs: {'code': response.statusCode},
+      );
       _logger?.e(msg);
       throw StateError(msg);
     }
@@ -72,7 +77,7 @@ final class CoapOtaService implements IOtaService {
 
     final entry = await _fetchMatchingManifestEntry(localProductId, localCompatible);
     if (entry == null) {
-      final msg = 'No firmware entry found for product_id=$localProductId compatible=$localCompatible';
+      final msg = gt.translate('No firmware entry found for product ID `{pid}`', nArgs: {'pid': localProductId});
       _logger?.w(msg);
       throw StateError(msg);
     }
@@ -122,7 +127,7 @@ final class CoapOtaService implements IOtaService {
     // Step 3: Verify SHA256 of compressed file
     final digest = sha256.convert(compressedData);
     if (digest.toString() != upgradeInfo.otaSha256) {
-      final msg = 'Firmware SHA256 mismatch: expected ${upgradeInfo.otaSha256}, got $digest';
+      final msg = gt.translate('Firmware hash mismatch');
       _logger?.e(msg);
       throw StateError(msg);
     }
@@ -142,8 +147,8 @@ final class OtaProvider {
   static const String kCoapType = 'coap';
   const OtaProvider();
 
-  IOtaService create({String type = kCoapType, Logger? logger}) => switch (type) {
-    kCoapType => CoapOtaService(logger: logger),
+  IOtaService create({String type = kCoapType, required GettextLocalizations gt, Logger? logger}) => switch (type) {
+    kCoapType => CoapOtaService(logger: logger, gt: gt),
     _ => throw Error(),
   };
 }

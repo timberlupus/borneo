@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:provider/provider.dart';
 
 import 'package:borneo_app/features/devices/widgets/dashboard_tile.dart';
@@ -70,7 +71,7 @@ class DashboardPowerSwitchTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isOn ? 'ON' : 'OFF',
+                        isOn ? context.translate('ON') : context.translate('OFF'),
                         style: theme.textTheme.titleSmall?.copyWith(
                           color: isDisabled ? disabledColor : (isOn ? theme.colorScheme.onSurface : Colors.red),
                           fontWeight: FontWeight.bold,

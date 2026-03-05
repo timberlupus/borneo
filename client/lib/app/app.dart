@@ -13,6 +13,7 @@ import 'package:borneo_kernel_abstractions/kernel.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
@@ -223,8 +224,10 @@ class _BorneoAppState extends State<BorneoApp> {
                       context.read<IDeviceManager>(),
                       clock: context.read<IClock>(),
                       logger: context.read<Logger>(),
+                      gettext: gt,
                     ),
                     dispose: (context, rm) => rm.dispose(),
+                    lazy: true,
                   ),
                 ],
                 child: ToastificationWrapper(

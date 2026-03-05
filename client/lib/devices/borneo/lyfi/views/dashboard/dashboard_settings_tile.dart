@@ -32,7 +32,7 @@ class DashboardSettingsTile extends StatelessWidget {
 
         Widget tile = DashboardTile(
           disabled: isDisabled,
-          onPressed: isDisabled ? null : () => _openSettings(context, gt),
+          onPressed: isDisabled ? null : () async => await _openSettings(context, gt),
           child: Badge(
             key: Key('settings_red_dot'),
             largeSize: 12,

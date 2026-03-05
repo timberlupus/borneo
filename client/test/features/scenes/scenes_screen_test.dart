@@ -283,7 +283,7 @@ void main() {
   });
 
   testWidgets('chores view shows spinner and clears items while loading', (WidgetTester tester) async {
-    final chore = PowerOffAllChore();
+    final chore = PowerOffAllChore(name: 'Power off all');
     final fakeNotifier = _FakeChoresNotifier([chore]);
 
     final container = ProviderContainer(

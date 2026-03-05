@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/devices/ota_providers.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/controller_settings_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/settings_view_model.dart';
@@ -359,10 +358,6 @@ class SettingsScreen extends StatelessWidget {
 
     if (context.mounted) {
       Navigator.of(context).popUntil((route) => route.settings.name == AppRoutes.kDevices || route.isFirst);
-    }
-    if (context.mounted) {
-      var dm = context.read<IDeviceManager>();
-      await dm.delete(deviceID);
     }
   }
 
