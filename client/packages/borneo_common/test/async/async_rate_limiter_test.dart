@@ -53,6 +53,57 @@ void main() {
       rateLimiter.dispose();
     });
 
+    test('rapid succession adds do not lose tasks', () async {
+      // this verifies the *default* queueing behaviour (keepLatest = false).
+      final rateLimiter = AsyncRateLimiter(interval: Duration(milliseconds: 50));
+      var executionCount = 0;
+      const total = 5;
+
+      for (var i = 0; i < total; i++) {
+        rateLimiter.add(() async {
+          executionCount++;
+        });
+      }
+
+      // allow enough time for all items to run
+      await Future.delayed(Duration(milliseconds: total * 60));
+      expect(executionCount, equals(total));
+      rateLimiter.dispose();
+    });
+
+    test('keepLatest mode drops intermediate tasks', () async {
+      final rateLimiter = AsyncRateLimiter(interval: Duration(milliseconds: 50), keepLatest: true);
+      var executionCount = 0;
+      var executed = <int>[];
+      const total = 5;
+
+      for (var i = 0; i < total; i++) {
+        rateLimiter.add(() async {
+          executionCount++;
+          executed.add(i);
+          final now = DateTime.now();
+          print('executing task $i at $now');
+        });
+        // add them very quickly, faster than interval
+        await Future.delayed(Duration(milliseconds: 10));
+      }
+
+      // allow time for several execution windows to elapse
+      await Future.delayed(Duration(milliseconds: 200));
+
+      // the first value should run immediately and the last value must run
+      expect(executed.first, equals(0));
+      expect(executed.last, equals(total - 1), reason: 'last index should be the most recent addition');
+
+      // there should be fewer executions than additions (some were dropped)
+      expect(executed.length, lessThan(total));
+
+      // ensure the sequence is monotonic (we never go backwards)
+      expect(executed, orderedEquals(executed.toList()..sort()));
+
+      rateLimiter.dispose();
+    });
+
     test('dispose should not execute pending tasks', () async {
       final rateLimiter = AsyncRateLimiter(interval: Duration(milliseconds: 200));
       final firstDone = Completer<void>();
