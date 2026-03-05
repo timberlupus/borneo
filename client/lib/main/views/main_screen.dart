@@ -260,7 +260,7 @@ class _MainScreenState extends State<MainScreen> {
       builder: (context) {
         return PopScope(
           canPop: false,
-          child: AlertDialog(
+          child: AlertDialog.adaptive(
             content: Row(
               children: [CircularProgressIndicator(), SizedBox(width: 20), Text(context.translate('Loading...'))],
             ),

@@ -19,27 +19,32 @@ class DashboardChart extends StatelessWidget {
         if (!isActuallyOnline) {
           return Container(
             constraints: const BoxConstraints(minHeight: 200),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.wifi_off, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.translate('Device Offline'),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.fill,
+                    child: Icon(
+                      Icons.wifi_off,
+                      size: null,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.translate('Please check device connection'),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
+                ),
+                Text(
+                  context.translate('Device Offline'),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
-                ],
-              ),
+                ),
+                Text(
+                  context.translate('Please check device connection'),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
+                ),
+              ],
             ),
           );
         } else {

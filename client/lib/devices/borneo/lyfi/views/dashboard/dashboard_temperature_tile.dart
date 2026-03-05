@@ -26,6 +26,8 @@ class DashboardTemperatureTile extends StatelessWidget {
           (vm) =>
               (vm.isOnline, vm.currentTempRaw, vm.currentTemp, vm.localeService.temperatureUnitText, vm.fanPowerRatio),
         );
+    final disabledColor = theme.colorScheme.onSurface.withValues(alpha: 0.38);
+    final Color fgColor = theme.colorScheme.onSurface;
 
     Color progressColor;
     if (currentTempRaw != null && currentTempRaw <= 45) {
@@ -41,7 +43,7 @@ class DashboardTemperatureTile extends StatelessWidget {
     return DashboardToufu(
       title: context.translate("Temperature & Fan"),
       icon: Icons.thermostat,
-      foregroundColor: theme.colorScheme.onSurface,
+      foregroundColor: isOnline ? fgColor : disabledColor,
       backgroundColor: theme.colorScheme.surfaceContainerHighest,
       arcColor: null,
       progressColor: progressColor,

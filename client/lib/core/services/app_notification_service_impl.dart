@@ -25,7 +25,7 @@ class AppNotificationServiceImpl implements IAppNotificationService {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => AlertDialog.adaptive(
         icon: Icon(Icons.error_outline, color: theme.colorScheme.error, size: 32),
         title: Text(title),
         content: body != null ? SingleChildScrollView(child: Text(body)) : null,

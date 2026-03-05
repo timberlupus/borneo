@@ -8,10 +8,13 @@ class DeviceErrorDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(context.translate('Device Error')),
+    return AlertDialog.adaptive(
+      title: Text(
+        context.translate('Device Error'),
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.error),
+      ),
       content: Text(errorMessage),
-      actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.translate('OK')))],
+      actions: [FilledButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.translate('OK')))],
     );
   }
 }

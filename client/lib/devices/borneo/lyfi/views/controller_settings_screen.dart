@@ -239,7 +239,7 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        return AlertDialog(
+        return AlertDialog.adaptive(
           title: Text(context.translate('Confirm Submit')),
           content: Text(
             context.translate(

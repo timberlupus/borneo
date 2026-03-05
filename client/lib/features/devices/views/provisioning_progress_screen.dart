@@ -118,7 +118,7 @@ class ProvisioningProgressScreen extends StatelessWidget {
                             style: TextStyle(color: Theme.of(context).colorScheme.error),
                           ),
                           const SizedBox(height: 16),
-                          ElevatedButton(
+                          FilledButton(
                             onPressed: () => Navigator.pop(context),
                             child: Text(context.translate('Close')),
                           ),

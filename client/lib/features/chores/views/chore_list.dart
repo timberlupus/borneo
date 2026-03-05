@@ -68,7 +68,7 @@ class _ChoreListState extends ConsumerState<ChoreList> {
             children: [
               Text(context.translate('Error loading chores'), style: TextStyle(color: theme.colorScheme.error)),
               const SizedBox(height: 8),
-              ElevatedButton(
+              FilledButton(
                 onPressed: () => ref.read(choresProvider.notifier).refresh(),
                 child: Text(context.translate('Retry')),
               ),

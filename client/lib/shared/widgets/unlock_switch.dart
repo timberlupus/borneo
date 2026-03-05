@@ -4,7 +4,7 @@ class UnlockSwitch extends Switch {
   const UnlockSwitch({super.key, required super.value, required super.onChanged});
 
   @override
-  Widget build(BuildContext context) => Switch(
+  Widget build(BuildContext context) => Switch.adaptive(
     value: super.value,
     onChanged: super.onChanged,
     thumbIcon: WidgetStateProperty.resolveWith<Icon?>((Set<WidgetState> states) {

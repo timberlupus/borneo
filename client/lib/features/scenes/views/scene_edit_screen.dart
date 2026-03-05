@@ -202,7 +202,7 @@ class _SceneEditBodyState extends ConsumerState<_SceneEditBody> {
     final isBusy = ref.watch(sceneEditProvider.select((s) => s.isBusy));
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
+      child: FilledButton(
         key: const Key('btn_submit'),
         onPressed: isBusy ? null : () => _onSubmitPressed(context),
         child: isBusy

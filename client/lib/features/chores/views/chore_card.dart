@@ -82,7 +82,7 @@ class _ChoreCardState extends ConsumerState<ChoreCard> {
                         ),
                       ),
                       const Spacer(),
-                      Switch(
+                      Switch.adaptive(
                         value: isActive,
                         onChanged: state.isBusy ? null : (v) => v ? notifier.executeChore() : notifier.undoChore(),
                         activeThumbColor: colorScheme.primary,

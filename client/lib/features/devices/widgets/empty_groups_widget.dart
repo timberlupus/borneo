@@ -25,7 +25,7 @@ class EmptyGroupsWidget extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            ElevatedButton.icon(
+            FilledButton.icon(
               onPressed: onCreateGroup,
               icon: const Icon(Icons.add),
               label: Text(context.translate('Add Devices')),

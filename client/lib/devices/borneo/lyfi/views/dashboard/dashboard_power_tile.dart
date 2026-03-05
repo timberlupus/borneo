@@ -37,7 +37,7 @@ class DashboardPowerTile extends StatelessWidget {
           builder: (context, _) => DashboardToufu(
             title: context.translate("LED Power"),
             icon: Icons.power_outlined,
-            foregroundColor: fgColor,
+            foregroundColor: isOnline ? fgColor : disabledColor,
             backgroundColor: theme.colorScheme.surfaceContainerHighest,
             arcColor: arcColor,
             progressColor: progressColor,

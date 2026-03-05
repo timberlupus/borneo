@@ -104,7 +104,7 @@ class _GroupEditBodyState extends ConsumerState<_GroupEditBody> {
       Consumer(
         builder: (context, ref, _) {
           final isBusy = ref.watch(groupEditProvider.select((s) => s.isBusy));
-          return ElevatedButton(
+          return FilledButton(
             key: const Key('btn_submit'),
             onPressed: isBusy ? null : () => _onSubmitPressed(context),
             child: isBusy

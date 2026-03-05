@@ -44,8 +44,10 @@ class MoonScreen extends StatelessWidget {
             title: Text(context.translate('Moonlight')),
             actions: [
               Consumer<MoonViewModel>(
-                builder: (context, vm, _) =>
-                    Switch(value: vm.enabled, onChanged: !vm.isBusy && vm.isOnline && vm.isOn ? vm.setEnabled : null),
+                builder: (context, vm, _) => Switch.adaptive(
+                  value: vm.enabled,
+                  onChanged: !vm.isBusy && vm.isOnline && vm.isOn ? vm.setEnabled : null,
+                ),
               ),
               Consumer<MoonViewModel>(
                 builder: (context, vm, _) => AppBarApplyButton(

@@ -41,7 +41,7 @@ class _ScenesScreenState extends ConsumerState<ScenesScreen> {
           children: [
             Text(context.translate('Error: {errMsg}', nArgs: {'errMsg': vm.error!})),
             const SizedBox(height: 16),
-            ElevatedButton(
+            FilledButton(
               onPressed: () => ref.read(scenesProvider.notifier).initialize(),
               child: Text(context.translate('Retry')),
             ),

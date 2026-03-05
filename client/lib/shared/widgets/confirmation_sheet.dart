@@ -45,7 +45,7 @@ class ConfirmationSheet extends StatelessWidget {
                   child: Text(context.translate('Cancel')),
                 ),
                 const SizedBox(width: 8),
-                ElevatedButton(
+                FilledButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                     okPressed();

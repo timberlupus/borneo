@@ -46,7 +46,7 @@ class _DeviceOtaScreenState extends State<DeviceOtaScreen> with TickerProviderSt
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => AlertDialog.adaptive(
         title: Text(context.translate('Firmware Update')),
         content: SingleChildScrollView(
           child: Column(
@@ -438,7 +438,7 @@ class _DeviceOtaScreenState extends State<DeviceOtaScreen> with TickerProviderSt
     if (vm.isSucceeded) {
       return SizedBox(
         width: double.infinity,
-        child: ElevatedButton.icon(
+        child: FilledButton.icon(
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.check),
           label: Text(context.translate('Done')),
@@ -449,7 +449,7 @@ class _DeviceOtaScreenState extends State<DeviceOtaScreen> with TickerProviderSt
     if (vm.hasUpdate) {
       return SizedBox(
         width: double.infinity,
-        child: ElevatedButton.icon(
+        child: FilledButton.icon(
           onPressed: () async {
             final ok = await _confirmUpgrade(context);
             if (ok && context.mounted) {
@@ -468,7 +468,7 @@ class _DeviceOtaScreenState extends State<DeviceOtaScreen> with TickerProviderSt
       children: [
         SizedBox(
           width: double.infinity,
-          child: ElevatedButton.icon(
+          child: FilledButton.icon(
             onPressed: vm.canCheck ? () => vm.checkUpdate() : null,
             icon: const Icon(Icons.refresh),
             label: Text(

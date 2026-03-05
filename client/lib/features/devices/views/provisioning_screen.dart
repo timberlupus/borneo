@@ -519,7 +519,7 @@ class _DoneStepState extends State<_DoneStep> {
             ],
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
+              child: FilledButton.icon(
                 onPressed: (widget.vm.autoAdded || widget.vm.registerRemainingSeconds <= 0)
                     ? () {
                         Navigator.of(

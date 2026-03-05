@@ -297,7 +297,7 @@ class SettingsScreen extends StatelessWidget {
   void _showFactoryResetDialog(BuildContext context, SettingsViewModel vm) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AlertDialog.adaptive(
         title: Text(context.translate('Restore Factory Settings')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -381,17 +381,18 @@ class SettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(context.translate('Set Manual Fan Power')),
+        builder: (context, setState) => AlertDialog.adaptive(
+          title: Text(context.translate('Set Manual Fan Power'), style: Theme.of(context).textTheme.titleMedium),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('${tempValue.toInt()}%'),
-              Slider(
+              Slider.adaptive(
                 value: tempValue,
                 min: 0,
                 max: 100,
                 divisions: 100,
+                label: '${tempValue.toInt()}%',
                 onChanged: (value) {
                   setState(() {
                     tempValue = value;
@@ -438,7 +439,7 @@ class SettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
+        builder: (context, setState) => AlertDialog.adaptive(
           title: Text(context.translate('Set Device Name')),
           content: Column(
             mainAxisSize: MainAxisSize.min,

@@ -196,7 +196,7 @@ class _ProvisioningHomePageState extends State<ProvisioningHomePage> {
   void _showSuccessDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AlertDialog.adaptive(
         title: const Row(
           children: [
             Icon(Icons.check_circle, color: Colors.green),

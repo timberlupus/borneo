@@ -123,9 +123,9 @@ class DeviceCard extends StatelessWidget {
             },
             borderRadius: BorderRadius.circular(4),
             child: Row(
+              spacing: 4,
               children: [
-                Icon(Icons.error_outline, size: 12, color: colorScheme.error),
-                const SizedBox(width: 4),
+                Icon(Icons.error_outline, size: 24, color: colorScheme.error),
                 Text(
                   context.translate('OFF-LINE'),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(color: colorScheme.error),
