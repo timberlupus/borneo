@@ -353,7 +353,6 @@ class SettingsScreen extends StatelessWidget {
       return;
     }
 
-    final deviceID = vm.deviceID;
     await vm.networkReset();
 
     if (context.mounted) {

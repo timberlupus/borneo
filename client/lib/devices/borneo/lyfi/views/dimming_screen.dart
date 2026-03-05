@@ -1,3 +1,4 @@
+import 'package:borneo_common/io/net/rssi.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
@@ -13,6 +14,66 @@ import 'editor/manual_editor_view.dart';
 import 'editor/schedule_editor_view.dart';
 import 'editor/sun_editor_view.dart';
 // screen_top_rounded_container is used inside slider lists
+
+class DimmingAppBar extends StatelessWidget {
+  final VoidCallback? onBack;
+  const DimmingAppBar({super.key, this.onBack});
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      pinned: false,
+      floating: false,
+      snap: false,
+      foregroundColor: Theme.of(context).colorScheme.onSurface,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      centerTitle: true,
+      leading: Selector<LyfiViewModel, bool>(
+        selector: (context, vm) => vm.isBusy,
+        builder: (context, isBusy, child) =>
+            IconButton(icon: const Icon(Icons.arrow_back), onPressed: isBusy ? null : onBack),
+      ),
+      title: Selector<LyfiViewModel, ({LyfiMode mode, bool canSwitch})>(
+        selector: (context, vm) => (
+          mode: vm.mode,
+          canSwitch: vm.isOnline && !vm.isSuspectedOffline && vm.isOn && vm.state == LyfiState.dimming,
+        ),
+        builder: (context, data, _) {
+          return SegmentedButton<LyfiMode>(
+            showSelectedIcon: false,
+            selected: <LyfiMode>{data.mode},
+            segments: [
+              ButtonSegment<LyfiMode>(value: LyfiMode.manual, icon: const Icon(Icons.bar_chart_outlined, size: 20)),
+              ButtonSegment<LyfiMode>(value: LyfiMode.scheduled, icon: const Icon(Icons.alarm_outlined, size: 20)),
+              ButtonSegment<LyfiMode>(value: LyfiMode.sun, icon: const Icon(Icons.wb_sunny_outlined, size: 20)),
+            ],
+            onSelectionChanged: data.canSwitch
+                ? (Set<LyfiMode> newSelection) {
+                    if (data.mode != newSelection.single) {
+                      context.read<LyfiViewModel>().switchMode(newSelection.single);
+                    }
+                  }
+                : null,
+          );
+        },
+      ),
+      actions: [
+        Selector<LyfiViewModel, RssiLevel?>(
+          selector: (_, vm) => vm.rssiLevel,
+          builder: (context, rssi, _) => Center(
+            child: switch (rssi) {
+              null => Icon(Icons.wifi_off, size: 24, color: Theme.of(context).colorScheme.error),
+              RssiLevel.strong => const Icon(Icons.wifi_rounded, size: 24),
+              RssiLevel.medium => const Icon(Icons.wifi_2_bar_rounded, size: 24),
+              RssiLevel.weak => const Icon(Icons.wifi_1_bar_rounded, size: 24),
+            },
+          ),
+        ),
+        const SizedBox(width: 16),
+      ],
+    );
+  }
+}
 
 class DimmingScreen extends StatelessWidget {
   static const routeName = '/lyfi/dimming';
@@ -35,13 +96,14 @@ class DimmingScreen extends StatelessWidget {
       child: Scaffold(
         body: Stack(
           children: [
-            // keep the sliver headers but disable scrolling entirely; this mirrors
-            // the pattern used by the details screen and ensures the UI is fixed
-            // in place instead of being scrollable.
-            NestedScrollView(
+            // CustomScrollView with NeverScrollableScrollPhysics keeps the
+            // header slivers pinned while the body itself cannot scroll.
+            // The SingleChildScrollView inside each editor view handles local
+            // scrolling for just the slider-list area.
+            CustomScrollView(
               physics: const NeverScrollableScrollPhysics(),
-              headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                LyfiAppBar(
+              slivers: [
+                DimmingAppBar(
                   onBack: () async {
                     final vm = context.read<LyfiViewModel>();
                     if (!vm.isLocked && !vm.isSuspectedOffline) {
@@ -54,65 +116,12 @@ class DimmingScreen extends StatelessWidget {
                 ),
                 const LyfiBusyIndicatorSliver(),
                 const LyfiStatusBannersSliver(),
+                const SliverFillRemaining(hasScrollBody: true, child: DimmingView()),
               ],
-              body: DimmingView(),
             ),
             const _ConnectionGuardOverlay(),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class DimmingHeroPanel extends StatelessWidget {
-  const DimmingHeroPanel({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Selector<LyfiViewModel, ({LyfiMode mode, bool canSwitch})>(
-            selector: (context, vm) => (
-              mode: vm.mode,
-              canSwitch: vm.isOnline && !vm.isSuspectedOffline && vm.isOn && vm.state == LyfiState.dimming,
-            ),
-            builder: (context, vm, _) {
-              return SegmentedButton<LyfiMode>(
-                showSelectedIcon: false,
-                selected: <LyfiMode>{vm.mode},
-                segments: [
-                  ButtonSegment<LyfiMode>(
-                    value: LyfiMode.manual,
-                    label: Text(context.translate('MANU')),
-                    icon: const Icon(Icons.bar_chart_outlined, size: 16),
-                  ),
-                  ButtonSegment<LyfiMode>(
-                    value: LyfiMode.scheduled,
-                    label: Text(context.translate('SCHED')),
-                    icon: const Icon(Icons.alarm_outlined, size: 16),
-                  ),
-                  ButtonSegment<LyfiMode>(
-                    value: LyfiMode.sun,
-                    label: Text(context.translate('SUN')),
-                    icon: const Icon(Icons.wb_sunny_outlined, size: 16),
-                  ),
-                ],
-                onSelectionChanged: vm.canSwitch
-                    ? (Set<LyfiMode> newSelection) {
-                        if (vm.mode != newSelection.single) {
-                          context.read<LyfiViewModel>().switchMode(newSelection.single);
-                        }
-                      }
-                    : null,
-              );
-            },
-          ),
-        ],
       ),
     );
   }
@@ -123,14 +132,7 @@ class DimmingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      spacing: 8,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        const DimmingHeroPanel(),
-        Expanded(child: const EditorHost()),
-      ],
-    );
+    return const EditorHost();
   }
 }
 

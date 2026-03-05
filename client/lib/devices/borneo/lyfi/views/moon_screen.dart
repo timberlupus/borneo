@@ -65,24 +65,30 @@ class MoonScreen extends StatelessWidget {
               } else if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else {
-                return Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    AspectRatio(
-                      aspectRatio: 1.5,
-                      child: Consumer<MoonViewModel>(builder: (context, vm, _) => buildGraph(context, vm)),
-                    ),
-                    const SizedBox(height: 24),
-                    Expanded(
-                      child: Consumer<MoonViewModel>(
-                        builder: (context, vm, _) => ScreenTopRoundedContainer(
-                          color: Theme.of(context).colorScheme.surfaceContainer,
-                          padding: EdgeInsets.fromLTRB(0, 24, 0, 24),
-                          child: BrightnessSliderList(vm.editor, disabled: !vm.enabled || !vm.canEdit),
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Column(
+                      spacing: 8,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        SizedBox(
+                          height: 180,
+                          child: Consumer<MoonViewModel>(builder: (context, vm, _) => buildGraph(context, vm)),
                         ),
-                      ),
-                    ),
-                  ],
+                        Expanded(
+                          child: Consumer<MoonViewModel>(
+                            builder: (context, vm, _) => ScreenTopRoundedContainer(
+                              color: Theme.of(context).colorScheme.surfaceContainer,
+                              padding: EdgeInsets.fromLTRB(0, 24, 0, 24),
+                              child: SingleChildScrollView(
+                                child: BrightnessSliderList(vm.editor, disabled: !vm.enabled || !vm.canEdit),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 );
               }
             },

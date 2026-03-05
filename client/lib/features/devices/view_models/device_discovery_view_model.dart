@@ -321,24 +321,6 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     }
   }
 
-  /// Attempts to resolve a set of BLE names using [IBleProvisioner.fetchDeviceInfo].
-  ///
-  /// Each result is stored in [_resolvedDeviceNames] and triggers a UI refresh.
-  Future<void> _resolveDeviceNames(List<String> names) async {
-    for (var name in names) {
-      if (_scanCancelToken.isCancelled) return;
-      try {
-        final info = await _bleProvisioner.fetchDeviceInfo(deviceName: name, cancelToken: _scanCancelToken);
-        if (info.name.isNotEmpty) {
-          _resolvedDeviceNames[name] = info.name;
-          _updateDiscoverableList();
-        }
-      } catch (e, st) {
-        _logger.w('Failed to resolve name for $name', error: e, stackTrace: st);
-      }
-    }
-  }
-
   Future<void> addNewDevice(SupportedDeviceDescriptor deviceInfo) async {
     await _deviceManager.addNewDevice(deviceInfo, groupID: null);
   }

@@ -1,8 +1,5 @@
 import 'package:borneo_app/shared/widgets/screen_top_rounded_container.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../../core/models/platform_device_info.dart';
 
 /// An entry used by [GenericBottomSheetPicker].
 ///
@@ -84,14 +81,6 @@ class GenericBottomSheetPicker<T> extends StatelessWidget {
     final T? effective = (selectedValue != null && entries.any((e) => e.value == selectedValue))
         ? selectedValue
         : (entries.isNotEmpty ? entries.first.value : null);
-
-    // Clip the contents so any scrolling glow or background does not
-    // overflow the rounded corners of the sheet.  The radius is pulled from
-    // the shared [PlatformDeviceInfo] provider so we match the actual device
-    // corners; if for whatever reason the provider isn't available we fall
-    // back to the previous hardcoded value.
-    final info = Provider.of<PlatformDeviceInfo?>(context, listen: false);
-    final double corner = info?.screenCornerRadius.topLeft ?? 16.0;
 
     return ScreenTopRoundedContainer(
       child: Column(
