@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-05 17:11+0800\n"
+"POT-Creation-Date: 2026-03-05 21:53+0800\n"
 "PO-Revision-Date: 2024-12-22 15:38+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -86,123 +86,123 @@ msgstr "温度"
 msgid "PREV"
 msgstr "之前"
 
-#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:496
+#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:509
 msgid "Bad device state"
 msgstr "设备状态异常"
 
-#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:506
+#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:519
 msgid "Failed to switch to temporary state"
 msgstr "切换临时开灯状态失败"
 
-#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:619
+#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:632
 msgid "Failed to switch mode"
 msgstr "切换模式失败"
 
-#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:703
+#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:716
 msgid "Device is not reachable at the moment."
 msgstr "设备当前不可达"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:87
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:84
 msgid "Location updated successfully"
 msgstr "定位更新成功"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:89
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:86
 msgid "Failed to update device location: $e"
 msgstr "更新设备位置失败：$e"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:100
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:97
 msgid "Please enable location services"
 msgstr "请开启定位服务"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:108
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:105
 msgid "Location permissions are denied"
 msgstr "已拒绝给予定位权限"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:113
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:110
 msgid "Location permissions are permanently denied"
 msgstr "已永久拒绝给予定位权限"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:127
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:124
 msgid "Failed to get location: $e"
 msgstr "获取位置失败：$e"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:141
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:138
 msgid "Time zone updated successfully"
 msgstr "时区已成功更新"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:143
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:140
 msgid "Failed to update device time zone: $e"
 msgstr "更新设备时区失败：$e"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:156
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:153
 msgid "LED correction method updated successfully"
 msgstr "LED 矫正方法已成功更新"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:158
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:155
 msgid "Failed to update LED correction method: $e"
 msgstr "更新 LED 矫正方法失败：$e"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:171
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:168
 msgid "Temporary duration updated successfully"
 msgstr "临时持续时间更新成功"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:173
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:170
 msgid "Failed to update temporary duration: $e"
 msgstr "更新临时持续时间失败：$e"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:186
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:183
 msgid "Cloud simulation mode updated successfully"
 msgstr "云模拟模式更新成功"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:188
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:185
 msgid "Failed to update cloud simulation mode: $e"
 msgstr "更新云模拟模式失败：$e"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:201
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:198
 msgid "Fan mode updated successfully"
 msgstr "风扇模式更新成功"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:203
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:200
 msgid "Failed to update fan mode: $e"
 msgstr "更新风扇模式失败：$e"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:216
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:213
 msgid "Manual fan power updated successfully"
 msgstr "手动风扇功率更新成功"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:218
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:215
 msgid "Failed to update manual fan power: $e"
 msgstr "更新手动风扇功率失败：$e"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:231
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:228
 msgid "Power behavior updated successfully"
 msgstr "电源行为更新成功"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:233
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:230
 msgid "Failed to update power behavior: $e"
 msgstr "更新电源行为失败：$e"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:246
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:243
 msgid "Device name updated successfully"
 msgstr "设备名更新成功"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:248
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:245
 msgid "Failed to update device name: $e"
 msgstr "更新设备名称失败：$e"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:260
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:257
 msgid "Device restored to factory settings"
 msgstr "设备已恢复到出厂设置"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:262
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:259
 msgid "Failed to restore device to factory settings: $e"
 msgstr "恢复设备到出厂设置失败：$e"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:274
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:271
 msgid "Device network settings reset"
 msgstr "设备网络设置已重置"
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:276
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:273
 msgid "Failed to reset device network settings: $e"
 msgstr "重置设备网络设置失败：$e"
 
@@ -330,8 +330,9 @@ msgstr ""
 #: devices\borneo\lyfi\views\settings_screen.dart:404
 #: devices\borneo\lyfi\views\settings_screen.dart:461
 #: devices\views\device_ota_screen.dart:91
-#: devices\views\device_ota_screen.dart:433 main\views\main_screen.dart:272
-#: shared\widgets\confirmation_sheet.dart:45
+#: devices\views\device_ota_screen.dart:433
+#: features\devices\views\provisioning_screen.dart:70
+#: main\views\main_screen.dart:272 shared\widgets\confirmation_sheet.dart:45
 #: shared\widgets\confirmation_sheet.dart:94
 #: shared\widgets\generic_settings_screen.dart:72
 msgid "Cancel"
@@ -886,7 +887,7 @@ msgstr "设备离线，请检查网络连接和设备电源。"
 #: devices\views\device_offline_view.dart:36
 #: features\devices\views\device_discovery_screen.dart:123
 #: features\devices\views\provisioning_progress_screen.dart:123
-#: features\devices\views\provisioning_screen.dart:549
+#: features\devices\views\provisioning_screen.dart:544
 msgid "Close"
 msgstr "关闭"
 
@@ -1011,8 +1012,8 @@ msgstr ""
 "固件更新正在进行中。中断更新可能会对设备造成永久性损坏。您确定要取消吗？"
 
 #: devices\views\device_ota_screen.dart:444
-#: features\devices\views\provisioning_screen.dart:131
-#: features\devices\views\provisioning_screen.dart:535
+#: features\devices\views\provisioning_screen.dart:126
+#: features\devices\views\provisioning_screen.dart:530
 msgid "Done"
 msgstr "完成"
 
@@ -1028,7 +1029,7 @@ msgstr "检查中..."
 #: devices\views\device_ota_screen.dart:478
 #: features\chores\views\chore_list.dart:73
 #: features\chores\views\chore_list.dart:142
-#: features\devices\views\provisioning_screen.dart:554
+#: features\devices\views\provisioning_screen.dart:549
 #: features\scenes\views\scenes_screen.dart:46
 #: features\scenes\views\scenes_screen.dart:91
 msgid "Retry"
@@ -1079,7 +1080,7 @@ msgstr "发现设备需要蓝牙权限。"
 
 #: features\devices\view_models\grouped_devices_view_model.dart:156
 msgid "Ungrouped devices"
-msgstr ""
+msgstr "未分组设备"
 
 #: features\devices\view_models\wifi_selection_view_model.dart:46
 msgid "The WiFi scanning has been cancelled."
@@ -1103,16 +1104,16 @@ msgstr "更改分组..."
 msgid "Delete..."
 msgstr "删除..."
 
-#: features\devices\views\device_card.dart:219
+#: features\devices\views\device_card.dart:218
 #, python-brace-format
 msgid "Are you sure to delete the device \"{deviceName}\"?"
 msgstr "你确定要删除设备“{deviceName}”？"
 
-#: features\devices\views\device_card.dart:235
+#: features\devices\views\device_card.dart:234
 msgid "Change Device Group"
 msgstr "新建设备组"
 
-#: features\devices\views\device_card.dart:237
+#: features\devices\views\device_card.dart:236
 #, python-brace-format
 msgid "Select the group to which device \"{deviceName}\" belongs:"
 msgstr "选择设备“{deviceName}”所属的分组："
@@ -1124,7 +1125,7 @@ msgid "Add Device"
 msgstr "添加设备"
 
 #: features\devices\views\device_discovery_screen.dart:79
-#: features\devices\views\provisioning_screen.dart:266
+#: features\devices\views\provisioning_screen.dart:261
 msgid "Refresh"
 msgstr "刷新"
 
@@ -1149,7 +1150,6 @@ msgstr "还剩 {0} 秒"
 
 #: features\devices\views\device_discovery_screen.dart:203
 #: features\devices\views\provisioning_progress_screen.dart:41
-#: features\devices\views\provisioning_screen.dart:72
 msgid "Stop"
 msgstr "停止"
 
@@ -1253,78 +1253,78 @@ msgid "Edit Device Group"
 msgstr "新建设备组"
 
 #: features\devices\views\provisioning_progress_screen.dart:35
-#: features\devices\views\provisioning_screen.dart:130
+#: features\devices\views\provisioning_screen.dart:125
 msgid "Provisioning"
 msgstr "配置"
 
 #: features\devices\views\provisioning_progress_screen.dart:63
 msgid "Sending Credentials"
-msgstr ""
+msgstr "发送凭据"
 
 #: features\devices\views\provisioning_progress_screen.dart:69
 msgid "Connecting to WiFi"
-msgstr ""
+msgstr "连接到 WiFi"
 
 #: features\devices\views\provisioning_progress_screen.dart:76
 msgid "Registering Device"
-msgstr ""
+msgstr "注册设备"
 
 #: features\devices\views\provisioning_progress_screen.dart:89
-#: features\devices\views\provisioning_screen.dart:507
+#: features\devices\views\provisioning_screen.dart:502
 msgid "Provisioning Successful!"
 msgstr "配置成功！"
 
 #: features\devices\views\provisioning_progress_screen.dart:117
-#: features\devices\views\provisioning_screen.dart:508
+#: features\devices\views\provisioning_screen.dart:503
 msgid "Unknown Error"
 msgstr "未知错误"
 
-#: features\devices\views\provisioning_screen.dart:64
+#: features\devices\views\provisioning_screen.dart:65
 msgid "Device Setup"
 msgstr "设备设置"
 
-#: features\devices\views\provisioning_screen.dart:128
+#: features\devices\views\provisioning_screen.dart:123
 msgid "Select WiFi"
 msgstr "选择 WiFi"
 
-#: features\devices\views\provisioning_screen.dart:129
+#: features\devices\views\provisioning_screen.dart:124
 msgid "Enter Password"
 msgstr "输入密码"
 
-#: features\devices\views\provisioning_screen.dart:260
+#: features\devices\views\provisioning_screen.dart:255
 msgid "No WiFi networks found"
 msgstr "未找到 WiFi 网络"
 
-#: features\devices\views\provisioning_screen.dart:347
+#: features\devices\views\provisioning_screen.dart:342
 msgid "Password"
 msgstr "密码"
 
-#: features\devices\views\provisioning_screen.dart:358
+#: features\devices\views\provisioning_screen.dart:353
 msgid "Please enter a password"
 msgstr "请输入密码"
 
-#: features\devices\views\provisioning_screen.dart:370
+#: features\devices\views\provisioning_screen.dart:365
 msgid "Back"
 msgstr "返回"
 
-#: features\devices\views\provisioning_screen.dart:375
+#: features\devices\views\provisioning_screen.dart:370
 msgid "Provision"
 msgstr "配置"
 
-#: features\devices\views\provisioning_screen.dart:422
+#: features\devices\views\provisioning_screen.dart:417
 #, python-brace-format
 msgid "Time remaining: {0} seconds"
 msgstr "剩余时间：{0} 秒"
 
-#: features\devices\views\provisioning_screen.dart:423
+#: features\devices\views\provisioning_screen.dart:418
 msgid "Waiting for device to join network"
 msgstr "正在等待设备加入网络"
 
-#: features\devices\views\provisioning_screen.dart:520
+#: features\devices\views\provisioning_screen.dart:515
 msgid "Adding device to your list..."
 msgstr "正在将设备添加到您的列表..."
 
-#: features\devices\views\provisioning_screen.dart:541
+#: features\devices\views\provisioning_screen.dart:536
 msgid "You can finish now without waiting."
 msgstr "您现在可以完成，无需等待。"
 

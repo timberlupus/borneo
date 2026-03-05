@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-05 17:12+0800\n"
+"POT-Creation-Date: 2026-03-05 21:53+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -87,123 +87,123 @@ msgstr ""
 msgid "PREV"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:496
+#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:509
 msgid "Bad device state"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:506
+#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:519
 msgid "Failed to switch to temporary state"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:619
+#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:632
 msgid "Failed to switch mode"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:703
+#: devices\borneo\lyfi\view_models\lyfi_view_model.dart:716
 msgid "Device is not reachable at the moment."
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:87
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:84
 msgid "Location updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:89
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:86
 msgid "Failed to update device location: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:100
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:97
 msgid "Please enable location services"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:108
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:105
 msgid "Location permissions are denied"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:113
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:110
 msgid "Location permissions are permanently denied"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:127
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:124
 msgid "Failed to get location: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:141
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:138
 msgid "Time zone updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:143
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:140
 msgid "Failed to update device time zone: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:156
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:153
 msgid "LED correction method updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:158
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:155
 msgid "Failed to update LED correction method: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:171
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:168
 msgid "Temporary duration updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:173
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:170
 msgid "Failed to update temporary duration: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:186
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:183
 msgid "Cloud simulation mode updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:188
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:185
 msgid "Failed to update cloud simulation mode: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:201
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:198
 msgid "Fan mode updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:203
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:200
 msgid "Failed to update fan mode: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:216
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:213
 msgid "Manual fan power updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:218
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:215
 msgid "Failed to update manual fan power: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:231
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:228
 msgid "Power behavior updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:233
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:230
 msgid "Failed to update power behavior: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:246
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:243
 msgid "Device name updated successfully"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:248
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:245
 msgid "Failed to update device name: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:260
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:257
 msgid "Device restored to factory settings"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:262
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:259
 msgid "Failed to restore device to factory settings: $e"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:274
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:271
 msgid "Device network settings reset"
 msgstr ""
 
-#: devices\borneo\lyfi\view_models\settings_view_model.dart:276
+#: devices\borneo\lyfi\view_models\settings_view_model.dart:273
 msgid "Failed to reset device network settings: $e"
 msgstr ""
 
@@ -329,8 +329,9 @@ msgstr ""
 #: devices\borneo\lyfi\views\settings_screen.dart:404
 #: devices\borneo\lyfi\views\settings_screen.dart:461
 #: devices\views\device_ota_screen.dart:91
-#: devices\views\device_ota_screen.dart:433 main\views\main_screen.dart:272
-#: shared\widgets\confirmation_sheet.dart:45
+#: devices\views\device_ota_screen.dart:433
+#: features\devices\views\provisioning_screen.dart:70
+#: main\views\main_screen.dart:272 shared\widgets\confirmation_sheet.dart:45
 #: shared\widgets\confirmation_sheet.dart:94
 #: shared\widgets\generic_settings_screen.dart:72
 msgid "Cancel"
@@ -885,7 +886,7 @@ msgstr ""
 #: devices\views\device_offline_view.dart:36
 #: features\devices\views\device_discovery_screen.dart:123
 #: features\devices\views\provisioning_progress_screen.dart:123
-#: features\devices\views\provisioning_screen.dart:549
+#: features\devices\views\provisioning_screen.dart:544
 msgid "Close"
 msgstr ""
 
@@ -1008,8 +1009,8 @@ msgid ""
 msgstr ""
 
 #: devices\views\device_ota_screen.dart:444
-#: features\devices\views\provisioning_screen.dart:131
-#: features\devices\views\provisioning_screen.dart:535
+#: features\devices\views\provisioning_screen.dart:126
+#: features\devices\views\provisioning_screen.dart:530
 msgid "Done"
 msgstr ""
 
@@ -1025,7 +1026,7 @@ msgstr ""
 #: devices\views\device_ota_screen.dart:478
 #: features\chores\views\chore_list.dart:73
 #: features\chores\views\chore_list.dart:142
-#: features\devices\views\provisioning_screen.dart:554
+#: features\devices\views\provisioning_screen.dart:549
 #: features\scenes\views\scenes_screen.dart:46
 #: features\scenes\views\scenes_screen.dart:91
 msgid "Retry"
@@ -1100,16 +1101,16 @@ msgstr ""
 msgid "Delete..."
 msgstr ""
 
-#: features\devices\views\device_card.dart:219
+#: features\devices\views\device_card.dart:218
 #, python-brace-format
 msgid "Are you sure to delete the device \"{deviceName}\"?"
 msgstr ""
 
-#: features\devices\views\device_card.dart:235
+#: features\devices\views\device_card.dart:234
 msgid "Change Device Group"
 msgstr ""
 
-#: features\devices\views\device_card.dart:237
+#: features\devices\views\device_card.dart:236
 #, python-brace-format
 msgid "Select the group to which device \"{deviceName}\" belongs:"
 msgstr ""
@@ -1121,7 +1122,7 @@ msgid "Add Device"
 msgstr ""
 
 #: features\devices\views\device_discovery_screen.dart:79
-#: features\devices\views\provisioning_screen.dart:266
+#: features\devices\views\provisioning_screen.dart:261
 msgid "Refresh"
 msgstr ""
 
@@ -1146,7 +1147,6 @@ msgstr ""
 
 #: features\devices\views\device_discovery_screen.dart:203
 #: features\devices\views\provisioning_progress_screen.dart:41
-#: features\devices\views\provisioning_screen.dart:72
 msgid "Stop"
 msgstr ""
 
@@ -1247,7 +1247,7 @@ msgid "Edit Device Group"
 msgstr ""
 
 #: features\devices\views\provisioning_progress_screen.dart:35
-#: features\devices\views\provisioning_screen.dart:130
+#: features\devices\views\provisioning_screen.dart:125
 msgid "Provisioning"
 msgstr ""
 
@@ -1264,61 +1264,61 @@ msgid "Registering Device"
 msgstr ""
 
 #: features\devices\views\provisioning_progress_screen.dart:89
-#: features\devices\views\provisioning_screen.dart:507
+#: features\devices\views\provisioning_screen.dart:502
 msgid "Provisioning Successful!"
 msgstr ""
 
 #: features\devices\views\provisioning_progress_screen.dart:117
-#: features\devices\views\provisioning_screen.dart:508
+#: features\devices\views\provisioning_screen.dart:503
 msgid "Unknown Error"
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:64
+#: features\devices\views\provisioning_screen.dart:65
 msgid "Device Setup"
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:128
+#: features\devices\views\provisioning_screen.dart:123
 msgid "Select WiFi"
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:129
+#: features\devices\views\provisioning_screen.dart:124
 msgid "Enter Password"
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:260
+#: features\devices\views\provisioning_screen.dart:255
 msgid "No WiFi networks found"
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:347
+#: features\devices\views\provisioning_screen.dart:342
 msgid "Password"
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:358
+#: features\devices\views\provisioning_screen.dart:353
 msgid "Please enter a password"
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:370
+#: features\devices\views\provisioning_screen.dart:365
 msgid "Back"
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:375
+#: features\devices\views\provisioning_screen.dart:370
 msgid "Provision"
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:422
+#: features\devices\views\provisioning_screen.dart:417
 #, python-brace-format
 msgid "Time remaining: {0} seconds"
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:423
+#: features\devices\views\provisioning_screen.dart:418
 msgid "Waiting for device to join network"
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:520
+#: features\devices\views\provisioning_screen.dart:515
 msgid "Adding device to your list..."
 msgstr ""
 
-#: features\devices\views\provisioning_screen.dart:541
+#: features\devices\views\provisioning_screen.dart:536
 msgid "You can finish now without waiting."
 msgstr ""
 

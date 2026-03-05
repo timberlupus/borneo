@@ -11,7 +11,7 @@ abstract class ILocaleService {
 
 class AppLocaleService implements ILocaleService {
   static const _kTemperatureUnitKey = 'app.temperature_unit';
-  String _temperatureUnit = 'C'; // 默认摄氏度
+  String _temperatureUnit = 'C';
   bool _initialized = false;
 
   @override
@@ -21,7 +21,6 @@ class AppLocaleService implements ILocaleService {
     if (tempUnit == 'F' || tempUnit == 'C') {
       _temperatureUnit = tempUnit!;
     } else {
-      // 根据系统区域自动判断
       final sysLocale = WidgetsBinding.instance.platformDispatcher.locale;
       if (sysLocale.countryCode == 'US') {
         _temperatureUnit = 'F';
@@ -56,6 +55,5 @@ class AppLocaleService implements ILocaleService {
     await prefs.setString(_kTemperatureUnitKey, unit);
   }
 
-  // 可选：确保已初始化
   bool get isInitialized => _initialized;
 }

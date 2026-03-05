@@ -18,7 +18,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
 
   ILyfiDeviceApi get api => deviceManager.getBoundDevice(deviceID).api<ILyfiDeviceApi>();
 
-  GeoLocation? get location => lyfiThing.findProperty('location')?.value as GeoLocation?;
+  GeoLocation? get location => lyfiThing.getProperty<GeoLocation?>('location');
   bool get canUpdateGeoLocation => !isBusy && isOnline && !isSuspectedOffline;
 
   String? _timezone;
