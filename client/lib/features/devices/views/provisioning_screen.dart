@@ -4,6 +4,7 @@ import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/features/devices/models/ble_provision_state.dart';
 import 'package:borneo_app/features/devices/view_models/provisioning_wizard_view_model.dart';
 import 'package:borneo_app/routes/app_routes.dart';
+import 'package:borneo_app/shared/widgets/app_bar_apply_button.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
@@ -66,13 +67,7 @@ class _ProvisioningScreenBody extends StatelessWidget {
           automaticallyImplyLeading: !provisioning,
           actions: [
             if (provisioning)
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(
-                  context.translate('Stop'),
-                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                ),
-              ),
+              AppBarApplyButton(onPressed: () => Navigator.of(context).pop(), label: context.translate('Cancel')),
           ],
         ),
         body: Column(

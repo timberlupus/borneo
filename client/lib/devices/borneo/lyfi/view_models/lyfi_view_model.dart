@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:borneo_app/core/events/app_events.dart';
 import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/base_lyfi_device_view_model.dart';
 import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
@@ -157,6 +158,12 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   int? _currentTemperature;
   StreamSubscription<int?>? _temperatureSubscription;
 
+  /// fired when the global temperature unit preference changes. we simply
+  /// forward the notification so any widgets that depend on
+  /// `temperatureUnitText` or `currentTemp` will rebuild via
+  /// `ChangeNotifier` notifications.
+  StreamSubscription<AppTemperatureUnitChangedEvent>? _temperatureUnitSub;
+
   StreamSubscription<double?>? _voltageSubscription;
   StreamSubscription<double?>? _currentSubscription;
   StreamSubscription<double?>? _powerSubscription;
@@ -251,6 +258,11 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   @override
   Future<void> onInitialize() async {
     await super.onInitialize();
+
+    // listen for unit change so we can refresh any formatted values
+    _temperatureUnitSub = globalEventBus.on<AppTemperatureUnitChangedEvent>().listen((event) {
+      notifyListeners();
+    });
 
     _fanPowerSubscription =
         super.lyfiThing.findProperty('fanPower')?.value.onUpdate.listen((_) {
@@ -370,6 +382,7 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   void dispose() {
     //
     if (!_isDisposed) {
+      _temperatureUnitSub?.cancel();
       _fanModeSubscription?.cancel();
       _fanPowerSubscription?.cancel();
       _temperatureSubscription?.cancel();
@@ -716,7 +729,6 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
         ledInfo: lyfiDeviceInfo,
         ledStatus: lyfiDeviceStatus!,
         powerBehavior: super.lyfiThing.getProperty<PowerBehavior>('powerBehavior')!,
-        location: super.lyfiThing.getProperty<GeoLocation?>('location'),
         gt: gt,
         logger: super.logger,
       );

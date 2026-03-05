@@ -13,7 +13,7 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
 
   IBorneoDeviceApi get borneoDeviceApi => super.boundDevice!.driver as IBorneoDeviceApi;
 
-  bool get isOn => wotThing.getProperty<bool>('on')!;
+  bool get isOn => wotThing.getProperty<bool>('on') ?? false;
 
   bool get canMeasureVoltage => super.isOnline && isOn && borneoDeviceStatus?.powerVoltage != null;
 

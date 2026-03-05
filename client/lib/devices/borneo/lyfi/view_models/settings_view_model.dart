@@ -18,8 +18,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
 
   ILyfiDeviceApi get api => deviceManager.getBoundDevice(deviceID).api<ILyfiDeviceApi>();
 
-  GeoLocation? _location;
-  GeoLocation? get location => _location;
+  GeoLocation? get location => lyfiThing.findProperty('location')?.value as GeoLocation?;
   bool get canUpdateGeoLocation => !isBusy && isOnline && !isSuspectedOffline;
 
   String? _timezone;
@@ -62,12 +61,10 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
     required this.borneoInfo,
     required this.ledInfo,
     required this.ledStatus,
-    required GeoLocation? location,
     required PowerBehavior powerBehavior,
     required super.gt,
     super.logger,
-  }) : _location = location,
-       _powerBehavior = powerBehavior,
+  }) : _powerBehavior = powerBehavior,
        _timezone = borneoStatus.timezone;
 
   @override
@@ -83,7 +80,7 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
   Future<void> updateGeoLocation(GeoLocation location, {CancellationToken? cancel}) async {
     try {
       await super.lyfiDeviceApi.setLocation(super.boundDevice!.device, location, cancelToken: cancel);
-      _location = location;
+      lyfiThing.findProperty('location')?.value.notifyOfExternalUpdate(location);
       notification.showSuccess(_gt.translate("Location updated successfully"));
     } catch (e) {
       notification.showError(_gt.translate("Failed to update device location: $e"));

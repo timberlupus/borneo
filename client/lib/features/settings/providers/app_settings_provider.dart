@@ -103,7 +103,14 @@ class AppSettingsNotifier extends AsyncNotifier<AppSettingsState> {
   }
 
   Future<void> changeTemperatureUnit(String unit) async {
+    // update the persistent locale service first so any getter returns
+    // the new value immediately.
     await ref.read(localeServiceProvider).setTemperatureUnit(unit);
+
+    // fire an event so that anything listening (root widget, view models,
+    // etc.) can rebuild just like language/theme changes.
+    ref.read(eventBusProvider).fire(AppTemperatureUnitChangedEvent(unit));
+
     final current = state.value!;
     state = AsyncValue.data(current.copyWith(temperatureUnit: unit));
   }

@@ -38,6 +38,8 @@ abstract class AbstractDeviceSummaryViewModel extends BaseViewModel with ViewMod
   late bool _isPowerOn = false;
   bool get isPowerOn => _isPowerOn;
 
+  bool get canDelete => !deviceEntity.isDemo;
+
   AbstractDeviceSummaryViewModel(
     this.deviceEntity,
     this.deviceManager,

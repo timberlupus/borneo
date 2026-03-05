@@ -110,6 +110,16 @@ void main() {
 
     test('changeTemperatureUnit updates state and locale service', () async {
       final notifier = container.read(appSettingsProvider.notifier);
+      // listen for the new temperature event
+      bus
+          .on<AppTemperatureUnitChangedEvent>()
+          .take(1)
+          .listen(
+            expectAsync1((evt) {
+              expect(evt.unit, 'F');
+            }),
+          );
+
       await notifier.changeTemperatureUnit('F');
       final state = container.read(appSettingsProvider).value!;
       expect(state.temperatureUnit, 'F');

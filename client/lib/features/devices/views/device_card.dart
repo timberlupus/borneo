@@ -193,7 +193,7 @@ class DeviceCard extends StatelessWidget {
         final dvm = ctx.read<AbstractDeviceSummaryViewModel>();
         final showChangeGroup = gvm.groups.length > 1;
 
-        final entries = <PopupMenuEntry<String>>[
+        return <PopupMenuEntry<String>>[
           if (!dvm.isOnline) PopupMenuItem<String>(value: 'reconnect', child: Text(context.translate('Reconnect'))),
 
           if (!dvm.isOnline) const PopupMenuDivider(),
@@ -201,9 +201,8 @@ class DeviceCard extends StatelessWidget {
           if (showChangeGroup)
             PopupMenuItem<String>(value: 'change-group', child: Text(context.translate('Change group...'))),
 
-          PopupMenuItem<String>(value: 'delete', child: Text(context.translate('Delete...'))),
+          if (dvm.canDelete) PopupMenuItem<String>(value: 'delete', child: Text(context.translate('Delete...'))),
         ];
-        return entries;
       },
     );
   }
