@@ -12,14 +12,13 @@ extension LyfiThingActions on LyfiThing {
           input: {'state': 'string'},
         ),
         (thing, input) {
-          final stateName = input['state'] as String;
-          final targetState = LyfiState.values.firstWhere((e) => e.name == stateName);
           return LyfiSwitchStateAction(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             thing: thing,
-            targetState: targetState,
             lyfiApi: _requireLyfiApi(),
             device: _requireDevice(),
+            logger: logger,
+            input: input,
           );
         },
       );
@@ -33,16 +32,13 @@ extension LyfiThingActions on LyfiThing {
           input: {'mode': 'string', 'color': 'array'},
         ),
         (thing, input) {
-          final modeName = input['mode'] as String;
-          final targetMode = LyfiMode.values.firstWhere((e) => e.name == modeName);
-          final color = input['color'] as List<int>?;
           return LyfiSwitchModeAction(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             thing: thing,
-            targetMode: targetMode,
             lyfiApi: _requireLyfiApi(),
             device: _requireDevice(),
-            color: color,
+            input: input,
+            logger: logger,
           );
         },
       );
@@ -63,6 +59,7 @@ extension LyfiThingActions on LyfiThing {
             color: color,
             lyfiApi: _requireLyfiApi(),
             device: _requireDevice(),
+            logger: logger,
           );
         },
       );
@@ -83,6 +80,7 @@ extension LyfiThingActions on LyfiThing {
             schedule: schedule,
             lyfiApi: _requireLyfiApi(),
             device: _requireDevice(),
+            logger: logger,
           );
         },
       );
@@ -108,6 +106,7 @@ extension LyfiThingActions on LyfiThing {
             settings: settings,
             lyfiApi: _requireLyfiApi(),
             device: _requireDevice(),
+            logger: logger,
           );
         },
       );
@@ -128,6 +127,7 @@ extension LyfiThingActions on LyfiThing {
             location: location,
             lyfiApi: _requireLyfiApi(),
             device: _requireDevice(),
+            logger: logger,
           );
         },
       );
@@ -149,6 +149,7 @@ extension LyfiThingActions on LyfiThing {
             method: method,
             lyfiApi: _requireLyfiApi(),
             device: _requireDevice(),
+            logger: logger,
           );
         },
       );
@@ -170,6 +171,7 @@ extension LyfiThingActions on LyfiThing {
             behavior: behavior,
             borneoApi: _requireBorneoApi(),
             device: _requireDevice(),
+            logger: logger,
           );
         },
       );
@@ -190,6 +192,7 @@ extension LyfiThingActions on LyfiThing {
             config: config,
             lyfiApi: _requireLyfiApi(),
             device: _requireDevice(),
+            logger: logger,
           );
         },
       );

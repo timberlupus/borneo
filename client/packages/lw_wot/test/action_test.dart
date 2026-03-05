@@ -6,20 +6,20 @@ import 'package:lw_wot/types.dart';
 class TestAction extends WotAction<Map<String, dynamic>> {
   bool _performed = false;
   bool _cancelled = false;
-  String? _error;
+  String? _errorMessage;
 
   TestAction({required super.id, required super.thing, required super.name, required super.input});
 
   bool get wasPerformed => _performed;
   bool get wasCancelled => _cancelled;
-  String? get error => _error;
+  String? get errorMessage => _errorMessage;
 
   @override
   Future<void> performAction() async {
     await Future.delayed(Duration(milliseconds: 10));
     if (input['shouldFail'] == true) {
-      _error = 'Test error';
-      throw Exception(_error);
+      _errorMessage = 'Test error';
+      throw Exception(_errorMessage);
     }
     _performed = true;
   }
@@ -116,9 +116,9 @@ void main() {
       // Wait for action to fail and finish
       await Future.delayed(Duration(milliseconds: 50));
 
-      expect(action.status, equals('completed'));
+      expect(action.status, equals('error'));
       expect(action.wasPerformed, isFalse);
-      expect(action.error, equals('Test error'));
+      expect(action.error, contains('Test error'));
       expect(action.timeCompleted, isNotNull);
     });
 

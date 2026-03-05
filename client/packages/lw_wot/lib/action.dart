@@ -15,6 +15,7 @@ class WotAction<InputType> {
   String status = 'created';
   final String timeRequested;
   String? timeCompleted;
+  String? error;
 
   WotAction({required this.id, required this.thing, required this.name, required this.input})
     : timeRequested = utils.timestamp() {
@@ -34,6 +35,10 @@ class WotAction<InputType> {
       (description[name] as Map<String, dynamic>)['timeCompleted'] = timeCompleted;
     }
 
+    if (error != null) {
+      (description[name] as Map<String, dynamic>)['error'] = error;
+    }
+
     return description;
   }
 
@@ -46,7 +51,7 @@ class WotAction<InputType> {
   void start() {
     status = 'pending';
     thing.actionNotify(this);
-    performAction().then((_) => finish(), onError: (_) => finish());
+    performAction().then((_) => finish(), onError: (e, st) => finishWithError(e, st));
   }
 
   Future<void> performAction() async {}
@@ -58,10 +63,23 @@ class WotAction<InputType> {
     thing.actionNotify(this);
   }
 
+  void finishWithError(Object e, [StackTrace? stackTrace]) {
+    status = 'error';
+    error = e.toString();
+    timeCompleted = utils.timestamp();
+    thing.actionNotify(this);
+  }
+
   Future<void> invoke() async {
     status = 'pending';
     thing.actionNotify(this);
-    await performAction().then((_) => finish(), onError: (_) => finish());
+    try {
+      await performAction();
+      finish();
+    } catch (e, st) {
+      finishWithError(e, st);
+      rethrow;
+    }
   }
 }
 
