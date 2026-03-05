@@ -73,13 +73,11 @@ void main() {
 
     test('keepLatest mode drops intermediate tasks', () async {
       final rateLimiter = AsyncRateLimiter(interval: Duration(milliseconds: 50), keepLatest: true);
-      var executionCount = 0;
       var executed = <int>[];
       const total = 5;
 
       for (var i = 0; i < total; i++) {
         rateLimiter.add(() async {
-          executionCount++;
           executed.add(i);
           final now = DateTime.now();
           print('executing task $i at $now');
