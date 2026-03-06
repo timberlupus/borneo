@@ -1,13 +1,13 @@
 import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/features/devices/providers/group_edit_provider.dart';
-import 'package:borneo_app/routes/app_routes.dart';
 import 'package:borneo_app/core/services/blob_manager.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/core/services/group_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/features/scenes/models/scene_edit_arguments.dart';
 import 'package:borneo_app/features/scenes/views/scenes_screen.dart';
+import 'package:borneo_app/features/devices/views/device_discovery_screen.dart';
 import 'package:borneo_app/features/devices/views/group_edit_screen.dart';
 import 'package:borneo_app/features/scenes/views/scene_edit_screen.dart';
 import 'package:event_bus/event_bus.dart';
@@ -48,16 +48,15 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Future<void> showDiscoveryScreen(BuildContext context) async {
-    await Navigator.of(context).pushNamed(AppRoutes.kDeviceDiscovery);
+    await PersistentNavBarNavigator.pushNewScreen(context, screen: const DeviceDiscoveryScreen(), withNavBar: false);
   }
 
   Future<void> showNewGroupScreen(BuildContext context) async {
-    final result = await Navigator.push<bool>(
+    final result = await PersistentNavBarNavigator.pushNewScreen<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => GroupEditScreen(),
-        settings: RouteSettings(arguments: GroupEditArguments(isCreation: true)),
-      ),
+      screen: const GroupEditScreen(args: GroupEditArguments(isCreation: true)),
+      withNavBar: false,
+      pageTransitionAnimation: PageTransitionAnimation.cupertino,
     );
     // Refresh the device list when a group was successfully created.
     if (result == true && context.mounted) {
@@ -66,9 +65,11 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Future<void> showNewSceneScreen(BuildContext context) async {
-    await Navigator.push(
+    await PersistentNavBarNavigator.pushNewScreen(
       context,
-      MaterialPageRoute(builder: (context) => SceneEditScreen(args: SceneEditArguments(isCreation: true))),
+      screen: SceneEditScreen(args: SceneEditArguments(isCreation: true)),
+      withNavBar: false,
+      pageTransitionAnimation: PageTransitionAnimation.cupertino,
     );
   }
 

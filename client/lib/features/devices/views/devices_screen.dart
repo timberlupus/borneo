@@ -2,18 +2,19 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:borneo_app/features/devices/providers/group_edit_provider.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:borneo_app/features/devices/models/device_group_entity.dart';
-import 'package:borneo_app/routes/app_routes.dart';
 import 'package:borneo_app/features/devices/view_models/group_view_model.dart';
 import 'package:borneo_app/features/devices/views/device_card.dart';
 import 'package:borneo_app/features/devices/view_models/grouped_devices_view_model.dart';
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/devices/view_models/abstract_device_summary_view_model.dart';
 import 'package:borneo_app/features/devices/widgets/empty_groups_widget.dart';
+import 'package:borneo_app/features/devices/views/device_discovery_screen.dart';
 import 'group_edit_screen.dart';
 
 class GroupSnapshot {
@@ -43,7 +44,11 @@ class NoDataHintView extends StatelessWidget {
       hasScrollBody: false,
       child: EmptyGroupsWidget(
         onCreateGroup: () async {
-          await Navigator.of(context).pushNamed(AppRoutes.kDeviceDiscovery);
+          await PersistentNavBarNavigator.pushNewScreen(
+            context,
+            screen: const DeviceDiscoveryScreen(),
+            withNavBar: false,
+          );
           // Refresh after adding devices
           if (context.mounted) {
             context.read<GroupedDevicesViewModel>().refresh();
@@ -60,16 +65,15 @@ class DevicesScreen extends StatelessWidget {
   static const _smallShadow = Shadow(offset: Offset(1.0, 1.0), blurRadius: 2.0, color: Color.fromARGB(128, 0, 0, 0));
 
   Future<void> _showDiscoveryPage(BuildContext context) async {
-    await Navigator.of(context).pushNamed(AppRoutes.kDeviceDiscovery);
+    await PersistentNavBarNavigator.pushNewScreen(context, screen: const DeviceDiscoveryScreen(), withNavBar: false);
   }
 
   Future<void> _showNewGroupScreen(BuildContext context) async {
-    final result = await Navigator.push<bool>(
+    final result = await PersistentNavBarNavigator.pushNewScreen<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => GroupEditScreen(),
-        settings: RouteSettings(arguments: GroupEditArguments(isCreation: true)),
-      ),
+      screen: const GroupEditScreen(args: GroupEditArguments(isCreation: true)),
+      withNavBar: false,
+      pageTransitionAnimation: PageTransitionAnimation.cupertino,
     );
 
     // Refresh if group was created
@@ -321,12 +325,11 @@ class DevicesScreen extends StatelessWidget {
   }
 
   void _showEditGroupPage(BuildContext context, DeviceGroupEntity group) async {
-    final result = await Navigator.push<bool>(
+    final result = await PersistentNavBarNavigator.pushNewScreen<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => GroupEditScreen(),
-        settings: RouteSettings(arguments: GroupEditArguments(isCreation: false, model: group)),
-      ),
+      screen: GroupEditScreen(args: GroupEditArguments(isCreation: false, model: group)),
+      withNavBar: false,
+      pageTransitionAnimation: PageTransitionAnimation.cupertino,
     );
 
     // Refresh if group was deleted or updated

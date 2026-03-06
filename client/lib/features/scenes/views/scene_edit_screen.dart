@@ -338,7 +338,7 @@ class _SceneEditBodyState extends ConsumerState<_SceneEditBody> {
           sourcePath: picked.path,
           uiSettings: [
             AndroidUiSettings(
-              toolbarTitle: 'Crop Image',
+              toolbarTitle: context.translate('Crop Image'),
               toolbarColor: theme.colorScheme.primary,
               toolbarWidgetColor: Colors.white,
               initAspectRatio: CropAspectRatioPreset.ratio16x9,
@@ -351,6 +351,8 @@ class _SceneEditBodyState extends ConsumerState<_SceneEditBody> {
             ),
             IOSUiSettings(
               title: 'Crop Image',
+              doneButtonTitle: context.translate('Done'),
+              cancelButtonTitle: context.translate('Cancel'),
               aspectRatioPresets: [
                 CropAspectRatioPreset.ratio16x9,
                 CropAspectRatioPreset.original,

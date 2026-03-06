@@ -18,11 +18,12 @@ import 'package:borneo_app/shared/widgets/confirmation_sheet.dart';
 /// Riverpod provider overrides so that the inner [_GroupEditBody] can be a
 /// pure Riverpod consumer.
 class GroupEditScreen extends StatelessWidget {
-  const GroupEditScreen({super.key});
+  final GroupEditArguments args;
+
+  const GroupEditScreen({super.key, required this.args});
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments as GroupEditArguments;
     final groupManager = legacy.Provider.of<IGroupManager>(context, listen: false);
 
     return ProviderScope(

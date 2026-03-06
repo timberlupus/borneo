@@ -200,26 +200,14 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/docs/
-    - assets/docs/license.txt
     - assets/i18n/
     - assets/images/
-    - assets/images/2k_earth-day.jpg
-    - assets/images/main-logo.png
     - assets/images/scenes/
-    - assets/images/scenes/scene-default-noimage.jpg
-    - assets/images/scenes/scene-default-home.jpg
-    - assets/images/scenes/scene-default-office.jpg
     # Chore icons
     - assets/images/chores/
     - assets/images/chores/icons/
-    - assets/images/chores/icons/dry-scape.svg
-    - assets/images/chores/icons/feed.svg
-    - assets/images/chores/icons/power-off.svg
-    - assets/images/chores/icons/water-change.svg
     # data
     - assets/data/
-    - assets/data/zones.json
-  #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

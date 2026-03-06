@@ -89,7 +89,7 @@ class _DeviceOtaScreenState extends State<DeviceOtaScreen> with TickerProviderSt
         ),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(context.translate('Cancel'))),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(context.translate('Update Now'))),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(context.translate('Update Now'))),
         ],
       ),
     );

@@ -319,11 +319,7 @@ class SettingsScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.translate('Cancel'))),
-          FilledButton.tonal(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.errorContainer,
-              foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
-            ),
+          TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               // after the factory reset completes navigate all the way back to the
@@ -402,7 +398,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           actions: [
             TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.translate('Cancel'))),
-            FilledButton(
+            TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
                 await vm.updateManualFanPower(tempValue.toInt());
@@ -460,7 +456,7 @@ class SettingsScreen extends StatelessWidget {
               onPressed: vm.isBusy ? null : () => Navigator.of(context).pop(),
               child: Text(context.translate('Cancel')),
             ),
-            FilledButton(
+            TextButton(
               onPressed: vm.isBusy || errorText != null
                   ? null
                   : () async {
