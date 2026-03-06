@@ -120,7 +120,7 @@ int bo_wifi_np_init()
 int bo_wifi_np_start()
 {
     /* Use security level 0 (no security, no POP) */
-    network_prov_security_t security = NETWORK_PROV_SECURITY_1;
+    network_prov_security_t security = NETWORK_PROV_SECURITY_0;
     const void* sec_params = NULL;
     const char* service_key = NULL;
     BO_TRY_ESP(network_prov_mgr_endpoint_create("cbor"));
