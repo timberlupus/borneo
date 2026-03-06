@@ -20,6 +20,7 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    if: ${{ vars.BO_EDITION == 'ce' }}
     defaults:
       run:
         working-directory: ${{ env.FLUTTER_WORKING_DIR }}
@@ -72,6 +73,7 @@ jobs:
 
 
   get-version:
+    if: ${{ vars.BO_EDITION == 'ce' }}
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.extract.outputs.version }}
@@ -96,6 +98,7 @@ jobs:
 
 
   build-apk:
+    if: ${{ vars.BO_EDITION == 'ce' }}
     needs: [test, get-version]
     runs-on: ubuntu-latest
     defaults:
@@ -182,6 +185,7 @@ jobs:
           path: ${{ github.workspace }}/${{ env.FLUTTER_WORKING_DIR }}/build/app/outputs/flutter-apk/borneo-app-ce-${{ needs.get-version.outputs.version }}.apk
 
   build-windows:
+    if: ${{ vars.BO_EDITION == 'ce' }}
     needs: [test, get-version]
     runs-on: windows-latest
     defaults:
@@ -249,6 +253,7 @@ jobs:
           path: client/build/windows/dist/borneo-app-ce-${{ needs.get-version.outputs.version }}-windows-x64.zip
 
   build-ios:
+    if: ${{ vars.BO_EDITION == 'ce' }}
     needs: [test, get-version]
     runs-on: macos-14
     defaults:
@@ -302,7 +307,7 @@ jobs:
   release:
     needs: [build-apk, build-windows, build-ios]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    if: ${{ github.ref == 'refs/heads/master' && vars.BO_EDITION == 'ce' }}
 
     steps:
       - name: Download artifacts

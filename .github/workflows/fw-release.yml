@@ -15,6 +15,7 @@ permissions:
 
 jobs:
   release:
+    if: ${{ vars.BO_EDITION == 'ce' }}
     runs-on: ubuntu-latest
     container: 'espressif/idf:v5.5.2'
     env:
