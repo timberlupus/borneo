@@ -14,7 +14,7 @@ class DeviceErrorDialog extends StatelessWidget {
         style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.error),
       ),
       content: Text(errorMessage),
-      actions: [FilledButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.translate('OK')))],
+      actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.translate('OK')))],
     );
   }
 }

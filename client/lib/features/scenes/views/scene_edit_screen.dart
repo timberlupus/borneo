@@ -248,10 +248,10 @@ class _SceneEditBodyState extends ConsumerState<_SceneEditBody> {
     if (!deletionAvailable) return const [];
     final isBusy = ref.watch(sceneEditProvider.select((s) => s.isBusy));
     return [
-      IconButton(
+      TextButton(
         key: const Key('btn_delete_scene'),
         onPressed: isBusy ? null : () => _onDeletePressed(context),
-        icon: const Icon(Icons.delete_outline),
+        child: Text('Delete'),
       ),
     ];
   }

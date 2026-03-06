@@ -104,6 +104,7 @@ class GenericBottomSheetPicker<T> extends StatelessWidget {
             ),
           ),
 
+          const Divider(height: 1, thickness: 1),
           // items
           Flexible(
             child: Container(
@@ -121,7 +122,7 @@ class GenericBottomSheetPicker<T> extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 itemCount: entries.length,
                 separatorBuilder: (context, index) =>
-                    Divider(height: 1, indent: 20, endIndent: 20, color: Theme.of(context).colorScheme.surfaceDim),
+                    Divider(height: 1, indent: 16, endIndent: 16, color: Theme.of(context).colorScheme.surfaceDim),
                 itemBuilder: (context, index) {
                   final entry = entries[index];
                   final isSelected = entry.value == effective;
@@ -134,7 +135,7 @@ class GenericBottomSheetPicker<T> extends StatelessWidget {
                       ),
                     ),
                     trailing: isSelected ? Icon(Icons.check, color: colorScheme.primary, size: 20) : null,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                     onTap: () => onValueSelected(entry.value),
                     dense: true,
                   );

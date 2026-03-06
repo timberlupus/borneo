@@ -27,11 +27,13 @@ class ScreenTopRoundedContainer extends StatelessWidget {
     final info = Provider.of<PlatformDeviceInfo?>(context, listen: false);
     final r = info?.screenCornerRadius ?? ScreenRadius.value(0.0);
 
-    return ClipRRect(
-      borderRadius: BorderRadius.only(topLeft: Radius.circular(r.topLeft), topRight: Radius.circular(r.topRight)),
-      child: Container(
-        decoration: BoxDecoration(color: bg, boxShadow: shadows),
-        child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
+    return SafeArea(
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(r.topLeft), topRight: Radius.circular(r.topRight)),
+        child: Container(
+          decoration: BoxDecoration(color: bg, boxShadow: shadows),
+          child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
+        ),
       ),
     );
   }
