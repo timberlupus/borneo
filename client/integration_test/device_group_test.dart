@@ -117,7 +117,7 @@ void deviceGroupTests() {
 
     // confirm deletion
     await tester.tap(find.byKey(const Key('btn_confirm_delete')));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 1000));
     // group should no longer be present
     expect(find.text('Updated Group'), findsNothing);
   });

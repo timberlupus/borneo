@@ -52,7 +52,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Future<void> showNewGroupScreen(BuildContext context) async {
-    final result = await PersistentNavBarNavigator.pushNewScreen<bool>(
+    final result = await PersistentNavBarNavigator.pushNewScreen(
       context,
       screen: const GroupEditScreen(args: GroupEditArguments(isCreation: true)),
       withNavBar: false,

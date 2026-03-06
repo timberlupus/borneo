@@ -69,7 +69,7 @@ class DevicesScreen extends StatelessWidget {
   }
 
   Future<void> _showNewGroupScreen(BuildContext context) async {
-    final result = await PersistentNavBarNavigator.pushNewScreen<bool>(
+    final result = await PersistentNavBarNavigator.pushNewScreen(
       context,
       screen: const GroupEditScreen(args: GroupEditArguments(isCreation: true)),
       withNavBar: false,
@@ -325,7 +325,7 @@ class DevicesScreen extends StatelessWidget {
   }
 
   void _showEditGroupPage(BuildContext context, DeviceGroupEntity group) async {
-    final result = await PersistentNavBarNavigator.pushNewScreen<bool>(
+    final result = await PersistentNavBarNavigator.pushNewScreen(
       context,
       screen: GroupEditScreen(args: GroupEditArguments(isCreation: false, model: group)),
       withNavBar: false,
