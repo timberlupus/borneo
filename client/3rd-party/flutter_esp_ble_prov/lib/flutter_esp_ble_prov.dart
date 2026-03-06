@@ -14,7 +14,7 @@ class FlutterEspBleProv {
   /// firmware using SECURITY_0.
   final SecurityLevel defaultSecurity;
 
-  FlutterEspBleProv({this.defaultSecurity = SecurityLevel.unsecure});
+  FlutterEspBleProv({this.defaultSecurity = SecurityLevel.secure1});
 
   /// Initiates a scan of BLE devices with the given [prefix].
   ///

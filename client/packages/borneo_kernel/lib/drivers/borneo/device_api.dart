@@ -48,6 +48,14 @@ class BorneoPaths {
   static final Uri nvsExists = Uri(path: '/borneo/factory/nvs/exists');
 }
 
+enum TransportChannel {
+  wifi,
+  eth,
+  ble;
+
+  static TransportChannel fromInt(int value) => TransportChannel.values[value];
+}
+
 enum SystemMode {
   init,
   normal,
@@ -132,10 +140,10 @@ class GeneralBorneoDeviceInfo {
   final String serno;
   final String pid;
   final ProductMode productMode;
+  final TransportChannel transportChannel;
   final bool hasBT;
-  final List<int> btMac;
   final bool hasWifi;
-  final List<int> wifiMac;
+  final bool hasMqtt;
   final String manufName;
   final String modelName;
   final Version hwVer;
@@ -149,10 +157,10 @@ class GeneralBorneoDeviceInfo {
     required this.serno,
     required this.pid,
     required this.productMode,
-    this.hasBT = false,
-    this.btMac = const [],
-    this.hasWifi = false,
-    this.wifiMac = const [],
+    required this.transportChannel,
+    required this.hasBT,
+    required this.hasWifi,
+    required this.hasMqtt,
     required this.manufName,
     required this.modelName,
     required this.hwVer,
@@ -168,9 +176,10 @@ class GeneralBorneoDeviceInfo {
       serno: map['serno'],
       pid: map['pid'] ?? '',
       productMode: ProductMode.fromInt(map['productMode']),
-      hasBT: map['hasBT'],
-      hasWifi: map['hasWifi'],
-      wifiMac: map['wifiMac'], // Convert bytes to String
+      transportChannel: TransportChannel.fromInt(map['transport'] ?? 0),
+      hasBT: map['hasBT'] ?? false,
+      hasWifi: map['hasWifi'] ?? false,
+      hasMqtt: map['hasMqtt'] ?? false,
       manufName: map['manuf'],
       modelName: map['model'],
       hwVer: Version.parse(map['hwVer']),

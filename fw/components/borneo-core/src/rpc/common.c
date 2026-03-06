@@ -22,6 +22,7 @@
 #include <borneo/nvs.h>
 #include <borneo/timer.h>
 #include <borneo/product.h>
+#include <borneo/transport.h>
 
 #define TAG "borneo-rpc-common"
 
@@ -71,19 +72,16 @@ int bo_rpc_borneo_info_get(const CborValue* args, CborEncoder* retvals)
     }
 
     {
+        BO_TRY(cbor_encode_text_stringz(&root_map, "transport"));
+        BO_TRY(cbor_encode_uint(&root_map, BO_TRANSPORT_CHANNEL_WIFI));
+    }
+
+    {
         BO_TRY(cbor_encode_text_stringz(&root_map, "hasBT"));
 #if CONFIG_BT_BLE_ENABLED
         BO_TRY(cbor_encode_boolean(&root_map, true));
 #else
         BO_TRY(cbor_encode_boolean(&root_map, false));
-#endif
-
-#if CONFIG_BT_BLE_ENABLED
-        // bt-mac
-        uint8_t bt_mac[6];
-        BO_TRY(esp_read_mac(bt_mac, ESP_MAC_BT));
-        BO_TRY(cbor_encode_text_stringz(&root_map, "btMac"));
-        BO_TRY(cbor_encode_byte_string(&root_map, bt_mac, 6));
 #endif
     }
 
@@ -93,10 +91,8 @@ int bo_rpc_borneo_info_get(const CborValue* args, CborEncoder* retvals)
     }
 
     {
-        uint8_t wifi_mac[6];
-        esp_read_mac(wifi_mac, ESP_MAC_WIFI_STA);
-        BO_TRY(cbor_encode_text_stringz(&root_map, "wifiMac"));
-        BO_TRY(cbor_encode_byte_string(&root_map, wifi_mac, 6));
+        BO_TRY(cbor_encode_text_stringz(&root_map, "hasMqtt"));
+        BO_TRY(cbor_encode_boolean(&root_map, false));
     }
 
     {

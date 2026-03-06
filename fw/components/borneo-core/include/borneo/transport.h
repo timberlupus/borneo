@@ -1,0 +1,7 @@
+#pragma once
+
+enum {
+    BO_TRANSPORT_CHANNEL_WIFI = 0,
+    BO_TRANSPORT_CHANNEL_ETH = 1,
+    BO_TRANSPORT_CHANNEL_BLE = 2,
+};
