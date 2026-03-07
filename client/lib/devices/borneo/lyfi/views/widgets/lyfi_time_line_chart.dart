@@ -67,8 +67,9 @@ class LyfiTimeLineChart extends StatelessWidget {
           drawHorizontalLine: true,
           horizontalInterval: (maxY - minY) * 0.25,
           verticalInterval: xInterval,
-          getDrawingHorizontalLine: (value) => FlLine(color: cs.outlineVariant, strokeWidth: 1.5),
-          getDrawingVerticalLine: (value) => FlLine(color: cs.outlineVariant, strokeWidth: 1.5),
+          getDrawingHorizontalLine: (value) =>
+              FlLine(color: cs.outlineVariant, strokeWidth: 1, dashArray: const [1, 2]),
+          getDrawingVerticalLine: (value) => FlLine(color: cs.outlineVariant, strokeWidth: 1, dashArray: const [1, 2]),
         ),
         titlesData: FlTitlesData(
           bottomTitles: AxisTitles(
@@ -94,6 +95,7 @@ class LyfiTimeLineChart extends StatelessWidget {
             ),
           ),
           leftTitles: AxisTitles(
+            sideTitleAlignment: SideTitleAlignment.outside,
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 32,
@@ -207,9 +209,9 @@ class LyfiTimeLineChart extends StatelessWidget {
       return intervals.first;
     }
     for (final interval in intervals) {
-      if (span <= interval * 2) {
-        return interval;
-      }
+      // if (span <= interval * 2) {
+      return interval;
+      //}
     }
     return intervals.last;
   }

@@ -446,6 +446,13 @@ class LyfiViewModel extends BaseLyfiDeviceViewModel {
   void onDeviceRemoved() {
     super.onDeviceRemoved();
 
+    _rapidProbeTask = null;
+  }
+
+  @override
+  void onDeviceDeleted() {
+    super.onDeviceDeleted();
+
     for (final cvn in _channels) {
       cvn.dispose();
     }

@@ -123,6 +123,27 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     _tryReloadAll();
   }
 
+  Future<void> refreshDiscovery() async {
+    if (this.isBusy) {
+      return;
+    }
+
+    try {
+      super.setBusy(true);
+      if (_deviceManager.isDiscoverying) {
+        await _deviceManager.stopDiscovery();
+      }
+      await _deviceManager.startDiscovery();
+      await _reloadAll();
+    } on CancelledException {
+      logger?.i("Refreshing task cancelled");
+    } catch (err, st) {
+      this.notifyAppError(gt.translate('Failed to refresh discovery'), error: err, stackTrace: st);
+    } finally {
+      super.setBusy(false);
+    }
+  }
+
   Future<void> _tryReloadAll() async {
     if (isBusy) {
       return;
@@ -201,13 +222,16 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
         // 3. Only notify the relevant groups to update, reducing global refreshes
         originalGroupVM.notifyListeners();
         newGroupVM.notifyListeners();
-
-        logger?.i('Device ${device.name} moved from ${originalGroupVM.name} to ${newGroupVM.name}');
       } catch (e, stackTrace) {
         // Reload all data to maintain consistency in case of failure
         logger?.e('Failed to change device group, reloading all devices', error: e, stackTrace: stackTrace);
         await _reloadAll();
-        notifyAppError('Failed to change the group for device "${device.name}"', error: e, stackTrace: stackTrace);
+        await Future.delayed(Duration.zero);
+        notifyAppError(
+          gt.translate("Failed to change the group for device '{deviceName}'", nArgs: {'deviceName': device.name}),
+          error: e,
+          stackTrace: stackTrace,
+        );
       }
     });
   }
@@ -273,7 +297,7 @@ class GroupedDevicesViewModel extends BaseViewModel with ViewModelEventBusMixin,
     try {
       await _deviceManager.delete(id);
     } catch (e, stackTrace) {
-      notifyAppError('Failed to delete device', error: e, stackTrace: stackTrace);
+      notifyAppError(gt.translate('Failed to delete device'), error: e, stackTrace: stackTrace);
     } finally {
       setBusy(false, notify: false);
     }

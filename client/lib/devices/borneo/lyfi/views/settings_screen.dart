@@ -7,6 +7,7 @@ import 'package:borneo_app/devices/view_models/device_ota_view_model.dart';
 import 'package:borneo_app/devices/views/device_ota_screen.dart';
 import 'package:borneo_app/shared/widgets/bottom_sheet_picker.dart';
 import 'package:borneo_app/shared/widgets/confirmation_sheet.dart';
+import 'package:borneo_app/features/devices/views/device_availability_guard.dart';
 import 'package:borneo_app/shared/widgets/map_location_picker.dart';
 import 'package:borneo_common/io/net/rssi.dart';
 import 'package:borneo_kernel/drivers/borneo/device_api.dart';
@@ -31,9 +32,12 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: vm,
-      builder: (context, child) => Scaffold(
-        appBar: AppBar(title: Text(context.translate('Settings')), elevation: 1),
-        body: _buildSettingsList(context),
+      builder: (context, child) => DeviceAvailabilityGuard<SettingsViewModel>(
+        viewModel: vm,
+        child: Scaffold(
+          appBar: AppBar(title: Text(context.translate('Settings')), elevation: 1),
+          body: _buildSettingsList(context),
+        ),
       ),
     );
   }
@@ -150,7 +154,7 @@ class SettingsScreen extends StatelessWidget {
             ),
             SettingsTile(
               title: Text(context.translate('Last shutdown')),
-              trailing: Text(lvm.borneoStatus.shutdownTimestamp?.toString() ?? context.translate('N/A')),
+              trailing: Text(lvm.borneoStatus.shutdownTimestamp?.toLocal().toString() ?? context.translate('N/A')),
               descriptionInlineIos: true,
               description: Text(
                 context.translate("Reason code: {reasonCode}", nArgs: {"reasonCode": lvm.borneoStatus.shutdownReason}),
@@ -342,7 +346,9 @@ class SettingsScreen extends StatelessWidget {
   Future<void> _showNetworkResetDialog(BuildContext context, SettingsViewModel vm) async {
     final confirmed = await AsyncConfirmationSheet.show(
       context,
-      message: context.translate("Are you sure you want to reset this device's network settings?"),
+      message: context.translate(
+        "Are you sure you want to reset this device's network settings?\nThe device will be removed and must be provisioned again.",
+      ),
     );
 
     if (!confirmed) {

@@ -80,11 +80,11 @@ class EasySetupScreen extends StatelessWidget {
           primarySectors: clockTimeFormat.value,
           secondarySectors: clockTimeFormat.value * 2,
           decoration: TimePickerDecoration(
-            baseColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+            baseColor: Theme.of(context).colorScheme.surfaceContainerLow,
             pickerBaseCirclePadding: 0,
             sweepDecoration: TimePickerSweepDecoration(
               pickerStrokeWidth: 48.0,
-              pickerColor: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.5),
+              pickerColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
               showConnector: false,
             ),
             initHandlerDecoration: TimePickerHandlerDecoration(
@@ -231,9 +231,9 @@ class EasySetupScreen extends StatelessWidget {
             final tempEditor = _EasySetupTempEditor(editor);
             return ScreenTopRoundedContainer(
               padding: EdgeInsets.fromLTRB(0, 24, 0, 0),
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              color: Theme.of(context).colorScheme.surfaceContainer,
               child: SingleChildScrollView(
-                child: BrightnessSliderList(tempEditor, disabled: !canEdit, padding: EdgeInsets.fromLTRB(0, 24, 0, 24)),
+                child: BrightnessSliderList(tempEditor, disabled: !canEdit, padding: EdgeInsets.fromLTRB(0, 24, 0, 16)),
               ),
             );
           },

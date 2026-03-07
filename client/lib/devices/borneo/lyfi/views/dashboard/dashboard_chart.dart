@@ -90,8 +90,8 @@ class DashboardChart extends StatelessWidget {
                         children: [
                           Positioned.fill(child: chartWidget),
                           Positioned(
-                            right: 12,
-                            top: 12,
+                            right: 8,
+                            top: 24,
                             child: AnimatedOpacity(
                               opacity: props.cloudActivated ? 1.0 : 0.0,
                               duration: const Duration(milliseconds: 300),

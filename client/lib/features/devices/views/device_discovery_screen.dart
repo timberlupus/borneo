@@ -57,7 +57,7 @@ class DeviceDiscoveryScreen extends StatelessWidget {
             children: [
               Selector<DeviceDiscoveryViewModel, bool>(
                 selector: (_, vm) => vm.isBusy,
-                builder: (_, isBusy, __) =>
+                builder: (_, isBusy, _) =>
                     SizedBox(height: 2, child: isBusy ? const LinearProgressIndicator() : const SizedBox.expand()),
               ),
               Expanded(

@@ -72,6 +72,7 @@ void main() {
         testSceneManager,
         testGroupManager,
         testDeviceModuleRegistry,
+        gettext: FakeGettext(),
         logger: testLogger,
       );
     });
@@ -118,6 +119,10 @@ void main() {
         expect(result.name, equals(testDevice.name));
         expect(result.sceneID, equals(testDevice.sceneID));
         expect(result.isDemo, isFalse);
+      });
+
+      test('should throw KeyNotFoundException for missing device', () async {
+        await expectLater(deviceManager.getDevice('missing-device-id'), throwsA(isA<KeyNotFoundException>()));
       });
 
       test('should update device name', () async {

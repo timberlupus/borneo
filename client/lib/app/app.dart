@@ -219,6 +219,7 @@ class _BorneoAppState extends State<BorneoApp> {
                       context.read<ISceneManager>(),
                       context.read<IGroupManager>(),
                       context.read<IDeviceModuleRegistry>(),
+                      gettext: gt,
                       logger: context.read<Logger>(),
                     ),
                     dispose: (context, dm) => dm.dispose(),

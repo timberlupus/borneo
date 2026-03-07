@@ -4,6 +4,7 @@ import 'dart:core';
 import 'package:borneo_common/exceptions.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:flutter_gettext/flutter_gettext.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
 import 'package:synchronized/synchronized.dart';
@@ -22,6 +23,7 @@ import 'package:borneo_app/shared/models/base_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 
 final class DeviceManagerImpl extends IDeviceManager {
+  final GettextLocalizations gettext;
   final Logger? logger;
   bool _isDisposed = false;
   final Database _db;
@@ -53,6 +55,7 @@ final class DeviceManagerImpl extends IDeviceManager {
     this._sceneManager,
     this._groupManager,
     this._deviceModuleRegistry, {
+    required this.gettext,
     this.logger,
   }) {
     logger?.i("Creating DeviceManagerImpl...");
@@ -355,7 +358,10 @@ final class DeviceManagerImpl extends IDeviceManager {
     } else {
       final store = stringMapStoreFactory.store(StoreNames.devices);
       final record = await store.record(id).get(tx);
-      final device = DeviceEntity.fromMap(id, record!);
+      if (record == null) {
+        throw KeyNotFoundException(message: 'Cannot find device with ID `$id`', key: id);
+      }
+      final device = DeviceEntity.fromMap(id, record);
       return device;
     }
   }

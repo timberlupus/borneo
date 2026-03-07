@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/features/devices/view_models/base_device_view_model.dart';
+import 'package:borneo_app/features/devices/views/device_availability_guard.dart';
 
 class GenericDeviceScreen<TDeviceViewModel extends BaseDeviceViewModel> extends StatelessWidget {
   const GenericDeviceScreen({super.key});
@@ -17,17 +18,23 @@ class GenericDeviceScreen<TDeviceViewModel extends BaseDeviceViewModel> extends 
       create: (context) => module.detailsViewModelBuilder(context, device.id),
       builder: (context, child) {
         final vm = context.read<TDeviceViewModel>();
-        return FutureBuilder(
-          future: vm.initFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else {
-              return module.detailsViewBuilder(context);
-            }
-          },
+        return DeviceAvailabilityGuard<TDeviceViewModel>(
+          viewModel: vm,
+          child: FutureBuilder(
+            future: vm.initFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                if (!vm.isAvailable) {
+                  return const SizedBox.shrink();
+                }
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else {
+                return module.detailsViewBuilder(context);
+              }
+            },
+          ),
         );
       },
     );

@@ -57,13 +57,19 @@ class LyfiBusyIndicatorSliver extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
-      child: Selector<LyfiViewModel, bool>(
-        selector: (_, vm) => vm.isBusy,
-        builder: (context, isBusy, _) {
-          if (!isBusy) {
-            return const SizedBox(height: 2);
-          }
-          return const LinearProgressIndicator(minHeight: 2);
+      child: Selector<LyfiViewModel, ({bool isBusy, EditorStatus editorStatus})>(
+        selector: (_, vm) => (isBusy: vm.isBusy, editorStatus: vm.editorState.status),
+        builder: (context, state, _) {
+          final theme = Theme.of(context);
+          final isActive = state.isBusy || state.editorStatus == EditorStatus.loading;
+          return SizedBox(
+            height: 2,
+            child: LinearProgressIndicator(
+              minHeight: 2,
+              backgroundColor: Colors.transparent,
+              valueColor: AlwaysStoppedAnimation<Color>(isActive ? theme.colorScheme.primary : Colors.transparent),
+            ),
+          );
         },
       ),
     );

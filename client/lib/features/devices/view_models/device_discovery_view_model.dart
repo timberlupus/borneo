@@ -129,10 +129,13 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     // reset resolved name cache when starting a fresh scan
     _resolvedDeviceNames.clear();
 
-    if (_isRefreshing) return; // Already refreshing
-
     // Create new cancellation token for this operation
     _scanCancelToken = CancellationToken();
+
+    if (_deviceManager.isDiscoverying) {
+      await _deviceManager.stopDiscovery();
+    }
+    await _deviceManager.startDiscovery(cancelToken: _scanCancelToken);
 
     // Clear session-scoped BLE results only.
     _unprovisioned.clear();

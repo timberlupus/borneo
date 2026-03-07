@@ -147,7 +147,7 @@ class EditorHost extends StatelessWidget {
     Widget child;
     switch (state.status) {
       case EditorStatus.loading:
-        child = const Center(key: ValueKey('editor-loading'), child: CircularProgressIndicator());
+        child = const SizedBox.expand(key: ValueKey('editor-loading'));
         break;
       case EditorStatus.error:
         child = Center(
@@ -231,8 +231,6 @@ class _ConnectionGuardOverlay extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (showSuspected && !state.isReconnecting)
-                    const Padding(padding: EdgeInsets.only(bottom: 16), child: CircularProgressIndicator()),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Text(
@@ -246,17 +244,7 @@ class _ConnectionGuardOverlay extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 16),
                       child: FilledButton.tonalIcon(
                         onPressed: isReconnecting ? null : () => vm.reconnect(),
-                        icon: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          child: isReconnecting
-                              ? const SizedBox(
-                                  key: ValueKey('overlay-progress'),
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Icon(Icons.refresh, key: ValueKey('overlay-icon')),
-                        ),
+                        icon: const Icon(Icons.refresh),
                         label: Text(
                           isReconnecting
                               ? '${context.translate("Connecting...")} (${countdown}s)'

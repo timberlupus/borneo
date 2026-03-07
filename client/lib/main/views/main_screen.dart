@@ -73,47 +73,6 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  PopupMenuButton buildAddButtons(BuildContext context) {
-    return PopupMenuButton<PlusMenuIndexes>(
-      icon: Icon(Icons.add_outlined),
-      onSelected: (value) {
-        switch (value) {
-          case PlusMenuIndexes.addGroup:
-            {
-              showNewGroupScreen(context);
-              break;
-            }
-          case PlusMenuIndexes.addScene:
-            {
-              showNewSceneScreen(context);
-              break;
-            }
-          case PlusMenuIndexes.addDevice:
-            {
-              showDiscoveryScreen(context);
-              break;
-            }
-        }
-        // Handle menu item selection
-      },
-      itemBuilder: (BuildContext context) {
-        return <PopupMenuEntry<PlusMenuIndexes>>[
-          PopupMenuItem<PlusMenuIndexes>(
-            value: PlusMenuIndexes.addDevice,
-            child: Text(context.translate('Add New Devices')),
-          ),
-          PopupMenuDivider(),
-          PopupMenuItem<PlusMenuIndexes>(value: PlusMenuIndexes.addScene, child: Text(context.translate('Add Scene'))),
-          PopupMenuItem<PlusMenuIndexes>(
-            key: const Key('menu_item_add_group'),
-            value: PlusMenuIndexes.addGroup,
-            child: Text(context.translate('Add Devices Group')),
-          ),
-        ];
-      },
-    );
-  }
-
   @override
   Widget build(Object context) {
     final bc = context as BuildContext;
@@ -128,6 +87,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         */
       title: Column(children: [Text(_getTitle(context, vm))]),
+      /*
       actions: [
         Selector<MainViewModel, bool>(
           selector: (_, vm) => vm.isInitialized,
@@ -136,6 +96,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
               : buildAddButtons(context),
         ),
       ],
+      */
     );
   }
 

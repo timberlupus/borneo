@@ -4,6 +4,7 @@ import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/shared/widgets/app_bar_apply_button.dart';
 import 'package:borneo_app/shared/widgets/generic_bottom_sheet_picker.dart';
+import 'package:borneo_app/features/devices/views/device_availability_guard.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
@@ -30,37 +31,43 @@ class AcclimationScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (cb) => vm,
       builder: (context, child) {
-        return FutureBuilder(
-          future: vm.initFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Scaffold(
-                appBar: AppBar(title: Text(context.translate('Acclimation'))),
-                body: Center(child: CircularProgressIndicator()),
-              );
-            } else if (snapshot.hasError) {
-              return Scaffold(
-                appBar: AppBar(title: Text(context.translate('Acclimation'))),
-                body: Center(child: Text('Error: ${snapshot.error}')),
-              );
-            } else {
-              return Scaffold(
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                appBar: AppBar(
-                  title: Text(context.translate('Acclimation')),
-                  actions: [
-                    Consumer<AcclimationViewModel>(
-                      builder: (context, vm, _) => AppBarApplyButton(
-                        onPressed: vm.canSubmit ? () => onSubmit(vm, context) : null,
-                        label: context.translate('Apply'),
+        return DeviceAvailabilityGuard<AcclimationViewModel>(
+          viewModel: vm,
+          child: FutureBuilder(
+            future: vm.initFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Scaffold(
+                  appBar: AppBar(title: Text(context.translate('Acclimation'))),
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              } else if (snapshot.hasError) {
+                if (!vm.isAvailable) {
+                  return const SizedBox.shrink();
+                }
+                return Scaffold(
+                  appBar: AppBar(title: Text(context.translate('Acclimation'))),
+                  body: Center(child: Text('Error: ${snapshot.error}')),
+                );
+              } else {
+                return Scaffold(
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  appBar: AppBar(
+                    title: Text(context.translate('Acclimation')),
+                    actions: [
+                      Consumer<AcclimationViewModel>(
+                        builder: (context, vm, _) => AppBarApplyButton(
+                          onPressed: vm.canSubmit ? () => onSubmit(vm, context) : null,
+                          label: context.translate('Apply'),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                body: _buildSettingsList(context),
-              );
-            }
-          },
+                    ],
+                  ),
+                  body: _buildSettingsList(context),
+                );
+              }
+            },
+          ),
         );
       },
     );

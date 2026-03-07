@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:borneo_common/exceptions.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:borneo_kernel_abstractions/device_api.dart';
 import 'package:cancellation_token/cancellation_token.dart';
@@ -25,15 +26,18 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   late final StreamSubscription<DeviceBoundEvent> _onDeviceBoundEventSub;
   late final StreamSubscription<DeviceRemovedEvent> _onDeviceRemovedEventSub;
   late final StreamSubscription<DeviceEntityUpdatedEvent> _onDeviceEntityUpdatedEventSub;
+  late final StreamSubscription<DeviceEntityDeletedEvent> _onDeviceEntityDeletedEventSub;
 
   bool isInitialized = false;
   bool _isLoaded = false;
+  bool _isAvailable = true;
 
   String get deviceID => wotThing.id;
 
   RssiLevel? get rssiLevel;
 
   bool get isLoaded => _isLoaded;
+  bool get isAvailable => _isAvailable;
 
   bool get isDemo => deviceEntity.isDemo;
 
@@ -50,7 +54,17 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   String get name => deviceEntity.name;
   String get model => deviceEntity.model;
 
-  BoundDevice? get boundDevice => deviceManager.getBoundDevice(deviceID);
+  BoundDevice? get boundDevice {
+    if (!_isAvailable || isDisposed || !deviceManager.isBound(deviceID)) {
+      return null;
+    }
+
+    try {
+      return deviceManager.getBoundDevice(deviceID);
+    } catch (_) {
+      return null;
+    }
+  }
 
   WotThing wotThing;
 
@@ -65,7 +79,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     WidgetsBinding.instance.addObserver(this);
 
     _onDeviceBoundEventSub = deviceManager.allDeviceEvents.on<DeviceBoundEvent>().listen((event) {
-      if (event.device.id == deviceID) {
+      if (_isAvailable && event.device.id == deviceID) {
         // Inline side effects instead of relying on markOnline()'s `changed`
         // return value: LyfiThing subscribes to the same event bus and updates
         // WotThing.online synchronously *before* this callback runs, so
@@ -80,7 +94,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     });
 
     _onDeviceRemovedEventSub = deviceManager.allDeviceEvents.on<DeviceRemovedEvent>().listen((event) {
-      if (event.device.id == deviceID) {
+      if (_isAvailable && event.device.id == deviceID) {
         // Same race as above: WotThing.online is already false by the time
         // this callback runs, so markOffline() returns changed==false and
         // never calls notifyListeners(), freezing the UI.
@@ -92,9 +106,15 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     });
 
     _onDeviceEntityUpdatedEventSub = deviceManager.allDeviceEvents.on<DeviceEntityUpdatedEvent>().listen((event) {
-      if (event.updated.id == deviceID) {
+      if (_isAvailable && event.updated.id == deviceID) {
         deviceEntity = event.updated;
         notifyListeners();
+      }
+    });
+
+    _onDeviceEntityDeletedEventSub = deviceManager.allDeviceEvents.on<DeviceEntityDeletedEvent>().listen((event) {
+      if (event.id == deviceID) {
+        markUnavailable();
       }
     });
   }
@@ -103,16 +123,22 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     assert(!isInitialized);
     try {
       deviceEntity = await deviceManager.getDevice(deviceID);
+      if (!_isAvailable || isDisposed) {
+        return;
+      }
       _isLoaded = true;
       _isSuspectedOffline = false;
       await onInitialize();
+    } on KeyNotFoundException {
+      markUnavailable(notify: false);
+      rethrow;
     } on IOException catch (ioex, stackTrace) {
       logger?.e(ioex.toString(), error: ioex, stackTrace: stackTrace);
       if (isOnline) {
         super.notifyAppError('Failed to initialize device: $ioex', stackTrace: stackTrace);
       }
     } catch (e, stackTrace) {
-      logger?.e('Failed to initialize device(${deviceEntity.toString()}): $e', error: e, stackTrace: stackTrace);
+      logger?.e('Failed to initialize device($deviceID): $e', error: e, stackTrace: stackTrace);
       super.notifyAppError('Failed to initialize device: $e', stackTrace: stackTrace);
     } finally {
       isInitialized = true;
@@ -128,6 +154,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     _onDeviceBoundEventSub.cancel();
     _onDeviceRemovedEventSub.cancel();
     _onDeviceEntityUpdatedEventSub.cancel();
+    _onDeviceEntityDeletedEventSub.cancel();
     _reconnectTimer?.cancel();
     if (masterCancellation.hasCancellables) {
       masterCancellation.cancel();
@@ -140,7 +167,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     Future<void> Function(T, {CancellationToken? cancelToken}) operation, {
     CancellationToken? cancelToken,
   }) async {
-    if (!isOnline || isBusy || !isInitialized) {
+    if (!_isAvailable || !isOnline || isBusy || !isInitialized) {
       return false;
     }
 
@@ -151,6 +178,9 @@ abstract class BaseDeviceViewModel extends BaseViewModel
 
     try {
       await operation(api, cancelToken: cancelToken);
+      if (!_isAvailable || isDisposed) {
+        return false;
+      }
     } on CancelledException catch (e, stackTrace) {
       logger?.i('A periodic refresh task has been cancelled.', error: e, stackTrace: stackTrace);
     } catch (e, stackTrace) {
@@ -163,6 +193,8 @@ abstract class BaseDeviceViewModel extends BaseViewModel
 
   void onDeviceRemoved() {}
 
+  void onDeviceDeleted() {}
+
   @protected
   void onDeviceSuspectedOffline() {}
 
@@ -170,7 +202,28 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   void onDeviceConnectionRecovered() {}
 
   @protected
+  bool markUnavailable({bool notify = true}) {
+    if (!_isAvailable) {
+      return false;
+    }
+
+    _isAvailable = false;
+    _isLoaded = false;
+    _isSuspectedOffline = false;
+    _isReconnecting = false;
+    _stopReconnectCountdown(notify: false);
+    onDeviceDeleted();
+    if (notify && !isDisposed) {
+      notifyListeners();
+    }
+    return true;
+  }
+
+  @protected
   bool markOnline({bool notify = true}) {
+    if (!_isAvailable) {
+      return false;
+    }
     final bool wasOffline = !isOnline;
     final bool wasSuspected = _isSuspectedOffline;
     _isSuspectedOffline = false;
@@ -187,6 +240,9 @@ abstract class BaseDeviceViewModel extends BaseViewModel
 
   @protected
   bool markOffline({bool notify = true}) {
+    if (!_isAvailable) {
+      return false;
+    }
     final bool changed = isOnline || _isSuspectedOffline;
     if (!changed) {
       return false;
@@ -202,7 +258,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
 
   @protected
   void markSuspectedOffline({bool notify = true}) {
-    if (_isSuspectedOffline || isDisposed) {
+    if (!_isAvailable || _isSuspectedOffline || isDisposed) {
       return;
     }
     _isSuspectedOffline = true;
@@ -215,7 +271,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
 
   @protected
   void clearSuspectedOffline({bool notify = true}) {
-    if (!_isSuspectedOffline || isDisposed) {
+    if (!_isAvailable || !_isSuspectedOffline || isDisposed) {
       return;
     }
     _isSuspectedOffline = false;
@@ -231,9 +287,16 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     Duration? timeout,
     bool resetSuspectedOnSuccess = true,
   }) async {
+    if (!_isAvailable) {
+      throw StateError('Device is no longer available.');
+    }
+
     try {
       final future = action();
       final result = timeout != null ? await future.timeout(timeout) : await future;
+      if (!_isAvailable || isDisposed) {
+        throw StateError('Device is no longer available.');
+      }
       if (resetSuspectedOnSuccess && _isSuspectedOffline) {
         clearSuspectedOffline();
       }
@@ -251,11 +314,17 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   }
 
   void _handleConnectivityFailure(Object error, StackTrace stackTrace) {
+    if (!_isAvailable) {
+      return;
+    }
     logger?.w('Device command failed: $error', error: error, stackTrace: stackTrace);
     markSuspectedOffline();
   }
 
   void _startReconnectCountdown(Duration timeout) {
+    if (!_isAvailable) {
+      return;
+    }
     _reconnectDeadline = DateTime.now().add(timeout);
     _reconnectCountdown = timeout;
     _reconnectTimer?.cancel();
@@ -268,7 +337,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   }
 
   void _updateReconnectCountdown() {
-    if (_reconnectDeadline == null) {
+    if (!_isAvailable || _reconnectDeadline == null) {
       return;
     }
     final remaining = _reconnectDeadline!.difference(DateTime.now());
@@ -297,7 +366,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
   }
 
   Future<void> reconnect({Duration? timeout}) async {
-    if (isDisposed || _isReconnecting) {
+    if (!_isAvailable || isDisposed || _isReconnecting) {
       return;
     }
 
@@ -310,7 +379,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
 
     try {
       final bound = await deviceManager.tryBind(deviceEntity).timeout(effectiveTimeout, onTimeout: () => false);
-      if (!isDisposed) {
+      if (!isDisposed && _isAvailable) {
         if (bound) {
           markOnline(notify: false);
         }
@@ -322,7 +391,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
     } catch (e, stackTrace) {
       logger?.e('Reconnect failed: $e', error: e, stackTrace: stackTrace);
     } finally {
-      if (!isDisposed) {
+      if (!isDisposed && _isAvailable) {
         _isReconnecting = false;
         _stopReconnectCountdown();
         notifyListeners();
@@ -341,7 +410,7 @@ abstract class BaseDeviceViewModel extends BaseViewModel
       notifyAppError('$e', stackTrace: stackTrace);
     } finally {
       isBusy = false;
-      if (shouldUpdate) {
+      if (shouldUpdate && _isAvailable && !isDisposed) {
         notifyListeners();
       }
     }

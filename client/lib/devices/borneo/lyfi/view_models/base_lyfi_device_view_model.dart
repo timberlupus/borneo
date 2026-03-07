@@ -9,7 +9,22 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   ILyfiDeviceApi get lyfiDeviceApi => super.boundDevice!.driver as ILyfiDeviceApi;
   LyfiDeviceInfo get lyfiDeviceInfo => lyfiThing.getProperty<LyfiDeviceInfo>('lyfiDeviceInfo')!;
 
-  LyfiDeviceStatus? get lyfiDeviceStatus => lyfiThing.getProperty<LyfiDeviceStatus>('lyfiStatus');
+  LyfiDeviceStatus? get lyfiDeviceStatus => isAvailable ? lyfiThing.getProperty<LyfiDeviceStatus>('lyfiStatus') : null;
+
+  AcclimationSettings? get acclimationSettings =>
+      isAvailable ? lyfiThing.getProperty<AcclimationSettings>('acclimation') : null;
+
+  bool get acclimationEnabled => isAvailable && (lyfiThing.getProperty<bool>('acclimationEnabled') ?? false);
+
+  bool get acclimationActivated => isAvailable && (lyfiThing.getProperty<bool>('acclimationActivated') ?? false);
+
+  MoonConfig? get moonConfig => isAvailable ? lyfiThing.getProperty<MoonConfig>('moonConfig') : null;
+
+  MoonStatus? get moonStatus => isAvailable ? lyfiThing.getProperty<MoonStatus>('moonStatus') : null;
+
+  bool get cloudActivated => isAvailable && (lyfiThing.getProperty<bool>('cloudActivated') ?? false);
+
+  DateTime? get deviceTimestamp => isAvailable ? lyfiThing.getProperty<DateTime>('timestamp') : null;
 
   LyfiThing get lyfiThing => wotThing as LyfiThing;
 
@@ -36,14 +51,14 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   void _subscribeToLyfiThing() {
     _stateSubscription =
         lyfiThing.findProperty('state')?.value.onUpdate.listen((stateName) {
-              if (!isDisposed) {
+              if (isAvailable && !isDisposed) {
                 notifyListeners();
               }
             })
             as StreamSubscription<String>?;
     _modeSubscription =
         lyfiThing.findProperty('mode')?.value.onUpdate.listen((modeName) {
-              if (!isDisposed) {
+              if (isAvailable && !isDisposed) {
                 notifyListeners();
               }
             })
@@ -51,7 +66,7 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
 
     _statusSubscription =
         lyfiThing.findProperty('lyfiStatus')?.value.onUpdate.listen((status) {
-              if (!isDisposed) {
+              if (isAvailable && !isDisposed) {
                 notifyListeners();
               }
             })
@@ -61,13 +76,20 @@ abstract class BaseLyfiDeviceViewModel extends BaseBorneoDeviceViewModel {
   @override
   void onDeviceBound() {
     super.onDeviceBound();
+    _unsubscribeFromLyfiThing();
     _subscribeToLyfiThing();
   }
 
   @override
   void onDeviceRemoved() {
-    super.onDeviceRemoved();
     _unsubscribeFromLyfiThing();
+    super.onDeviceRemoved();
+  }
+
+  @override
+  void onDeviceDeleted() {
+    _unsubscribeFromLyfiThing();
+    super.onDeviceDeleted();
   }
 
   void _unsubscribeFromLyfiThing() {

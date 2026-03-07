@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import 'package:borneo_app/devices/borneo/lyfi/views/dashboard/dashboard_view.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
+import 'package:borneo_app/features/devices/views/device_availability_guard.dart';
 
 import '../view_models/lyfi_view_model.dart';
 import 'widgets/lyfi_header.dart';
@@ -222,33 +223,51 @@ class LyfiView extends StatelessWidget {
       ),
       builder: (context, child) {
         final vm = context.read<LyfiViewModel>();
-        return FutureBuilder(
-          future: vm.initFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Scaffold(
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                appBar: AppBar(backgroundColor: Theme.of(context).scaffoldBackgroundColor, title: Text(device.name)),
-                body: Column(
-                  children: [
-                    SizedBox(
-                      height: 1,
-                      width: double.infinity,
-                      child: LinearProgressIndicator(
-                        backgroundColor: Colors.transparent,
-                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+        return DeviceAvailabilityGuard<LyfiViewModel>(
+          viewModel: vm,
+          child: Selector<LyfiViewModel, ({bool isAvailable, bool isDisposed})>(
+            selector: (_, viewModel) => (isAvailable: viewModel.isAvailable, isDisposed: viewModel.isDisposed),
+            builder: (context, state, child) {
+              if (!state.isAvailable || state.isDisposed) {
+                return const SizedBox.shrink();
+              }
+
+              return FutureBuilder(
+                future: vm.initFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Scaffold(
+                      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                      appBar: AppBar(
+                        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                        title: Text(device.name),
                       ),
-                    ),
-                    Expanded(child: const SizedBox.shrink()),
-                  ],
-                ),
+                      body: Column(
+                        children: [
+                          SizedBox(
+                            height: 1,
+                            width: double.infinity,
+                            child: LinearProgressIndicator(
+                              backgroundColor: Colors.transparent,
+                              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+                            ),
+                          ),
+                          Expanded(child: const SizedBox.shrink()),
+                        ],
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    if (!vm.isAvailable || vm.isDisposed) {
+                      return const SizedBox.shrink();
+                    }
+                    return Scaffold(body: Center(child: Text('Error: [${snapshot.error}]')));
+                  } else {
+                    return _LyfiDeviceDetailsScreen();
+                  }
+                },
               );
-            } else if (snapshot.hasError) {
-              return Scaffold(body: Center(child: Text('Error: [${snapshot.error}]')));
-            } else {
-              return _LyfiDeviceDetailsScreen();
-            }
-          },
+            },
+          ),
         );
       },
     );

@@ -1,4 +1,5 @@
 import 'package:borneo_app/devices/borneo/lyfi/view_models/controller_settings_view_model.dart';
+import 'package:borneo_app/features/devices/views/device_availability_guard.dart';
 import 'package:borneo_app/shared/widgets/app_bar_apply_button.dart';
 import 'package:borneo_app/shared/widgets/bottom_sheet_picker.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
@@ -39,37 +40,43 @@ class _ControllerSettingsScreenState extends State<ControllerSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<void>(
-      future: _initFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return Scaffold(
-            appBar: AppBar(title: Text(context.translate("Controller Settings"))),
-            body: const Center(child: CircularProgressIndicator()),
-          );
-        }
+    return ChangeNotifierProvider.value(
+      value: widget.vm,
+      builder: (context, child) => DeviceAvailabilityGuard<ControllerSettingsViewModel>(
+        viewModel: widget.vm,
+        child: FutureBuilder<void>(
+          future: _initFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return Scaffold(
+                appBar: AppBar(title: Text(context.translate("Controller Settings"))),
+                body: const Center(child: CircularProgressIndicator()),
+              );
+            }
 
-        if (snapshot.hasError) {
-          return Scaffold(
-            appBar: AppBar(title: Text(context.translate("Controller Settings"))),
-            body: Center(child: Text(context.translate('Initialization failed'))),
-          );
-        }
+            if (snapshot.hasError) {
+              if (!widget.vm.isAvailable) {
+                return const SizedBox.shrink();
+              }
+              return Scaffold(
+                appBar: AppBar(title: Text(context.translate("Controller Settings"))),
+                body: Center(child: Text(context.translate('Initialization failed'))),
+              );
+            }
 
-        return ChangeNotifierProvider.value(
-          value: widget.vm,
-          builder: (context, child) => Consumer<ControllerSettingsViewModel>(
-            builder: (context, vm, child) => Scaffold(
-              appBar: AppBar(
-                title: Text(context.translate("Controller Settings")),
-                actions: _buildAppBarActions(context),
-                elevation: 1,
+            return Consumer<ControllerSettingsViewModel>(
+              builder: (context, vm, child) => Scaffold(
+                appBar: AppBar(
+                  title: Text(context.translate("Controller Settings")),
+                  actions: _buildAppBarActions(context),
+                  elevation: 1,
+                ),
+                body: _buildSettingsList(context),
               ),
-              body: _buildSettingsList(context),
-            ),
-          ),
-        );
-      },
+            );
+          },
+        ),
+      ),
     );
   }
 

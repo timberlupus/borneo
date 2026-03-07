@@ -9,11 +9,11 @@ import 'package:flutter/material.dart';
 
 abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   GeneralBorneoDeviceStatus? get borneoDeviceStatus =>
-      isOnline ? wotThing.getProperty<GeneralBorneoDeviceStatus>('generalStatus') : null;
+      isAvailable && isOnline ? wotThing.getProperty<GeneralBorneoDeviceStatus>('generalStatus') : null;
 
   IBorneoDeviceApi get borneoDeviceApi => super.boundDevice!.driver as IBorneoDeviceApi;
 
-  bool get isOn => wotThing.getProperty<bool>('on') ?? false;
+  bool get isOn => isAvailable && (wotThing.getProperty<bool>('on') ?? false);
 
   bool get canMeasureVoltage => super.isOnline && isOn && borneoDeviceStatus?.powerVoltage != null;
 
@@ -27,7 +27,7 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   RssiLevel? get rssiLevel =>
       borneoDeviceStatus?.wifiRssi != null ? RssiLevelExtension.fromRssi(borneoDeviceStatus!.wifiRssi!) : null;
 
-  String? get deviceTimezone => wotThing.getProperty<String>('timezone');
+  String? get deviceTimezone => isAvailable ? wotThing.getProperty<String>('timezone') : null;
 
   String? _localPosixTimezone;
   String? get localPosixTimezone => _localPosixTimezone;
@@ -66,6 +66,12 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
   @override
   void onDeviceRemoved() {}
 
+  @override
+  void onDeviceDeleted() {
+    _unsubscribeFromGeneralStatus();
+    super.onDeviceDeleted();
+  }
+
   Future<void> _initializeTimezone() async {
     try {
       final tzc = TimezoneConverter();
@@ -78,12 +84,12 @@ abstract class BaseBorneoDeviceViewModel extends BaseDeviceViewModel {
 
   void _subscribeToGeneralStatus() {
     _generalStatusSubscription = wotThing.findProperty('generalStatus')?.value.onUpdate.listen((status) {
-      if (isDisposed) return;
+      if (!isAvailable || isDisposed) return;
       notifyListeners();
     });
 
     _onOffSubscription = wotThing.findProperty('on')?.value.onUpdate.listen((value) {
-      if (isDisposed) return;
+      if (!isAvailable || isDisposed) return;
       notifyListeners();
     });
   }

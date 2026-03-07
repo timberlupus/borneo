@@ -1,5 +1,6 @@
 import 'package:borneo_app/devices/view_models/device_ota_view_model.dart';
 import 'package:borneo_app/shared/widgets/confirmation_sheet.dart';
+import 'package:borneo_app/shared/widgets/buttons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
@@ -418,7 +419,8 @@ class _DeviceOtaScreenState extends State<DeviceOtaScreen> with TickerProviderSt
     if (vm.isUpgrading) {
       return SizedBox(
         width: double.infinity,
-        child: FilledButton.tonal(
+        child: FilledButtonDanger.danger(
+          context: context,
           onPressed: () async {
             final confirmed = await AsyncConfirmationSheet.show(
               context,
@@ -457,7 +459,7 @@ class _DeviceOtaScreenState extends State<DeviceOtaScreen> with TickerProviderSt
             }
           },
           icon: const Icon(Icons.system_update),
-          label: Text(context.translate('Update to {0}', pArgs: [vm.upgradeInfo!.remoteVersion.toString()])),
+          label: Text(context.translate('Upgrade to {0}', pArgs: [vm.upgradeInfo!.remoteVersion.toString()])),
         ),
       );
     }
