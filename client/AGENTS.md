@@ -69,6 +69,7 @@ Borneo Client is a cross-platform Flutter application for controlling Borneo-IoT
     number. This is useful for spotting work still to be done.
 - After running the update command, translate or review the `.po` files as needed.
 - During development tasks, do not modify `.po` files temporarily; translate them uniformly before release.
+- **Ignore translations in `en.po` and `en_US.po`:** these files are handled automatically and should not be updated manually.
 
 Use the following patterns for localizing user-visible text with `flutter_gettext`:
 

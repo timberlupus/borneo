@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-08 01:18+0800\n"
+"POT-Creation-Date: 2026-03-08 01:42+0800\n"
 "PO-Revision-Date: 2024-12-22 15:38+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -104,8 +104,8 @@ msgid "Location updated successfully"
 msgstr "定位更新成功"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:86
-msgid "Failed to update device location: $e"
-msgstr "更新设备位置失败：$e"
+msgid "Failed to update device location"
+msgstr "更新设备位置失败"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:97
 msgid "Please enable location services"
@@ -120,80 +120,80 @@ msgid "Location permissions are permanently denied"
 msgstr "已永久拒绝给予定位权限"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:124
-msgid "Failed to get location: $e"
-msgstr "获取位置失败：$e"
+msgid "Failed to get location"
+msgstr "获取位置失败"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:138
 msgid "Time zone updated successfully"
 msgstr "时区已成功更新"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:140
-msgid "Failed to update device time zone: $e"
-msgstr "更新设备时区失败：$e"
+msgid "Failed to update device time zone"
+msgstr "更新设备时区失败"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:153
 msgid "LED correction method updated successfully"
 msgstr "LED 矫正方法已成功更新"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:155
-msgid "Failed to update LED correction method: $e"
-msgstr "更新 LED 矫正方法失败：$e"
+msgid "Failed to update LED correction method"
+msgstr "更新 LED 校正方法失败"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:168
 msgid "Temporary duration updated successfully"
 msgstr "临时持续时间更新成功"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:170
-msgid "Failed to update temporary duration: $e"
-msgstr "更新临时持续时间失败：$e"
+msgid "Failed to update temporary duration"
+msgstr "更新临时持续时间失败"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:183
 msgid "Cloud simulation mode updated successfully"
 msgstr "云模拟模式更新成功"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:185
-msgid "Failed to update cloud simulation mode: $e"
-msgstr "更新云模拟模式失败：$e"
+msgid "Failed to update cloud simulation mode"
+msgstr "更新云模拟模式失败"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:198
 msgid "Fan mode updated successfully"
 msgstr "风扇模式更新成功"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:200
-msgid "Failed to update fan mode: $e"
-msgstr "更新风扇模式失败：$e"
+msgid "Failed to update fan modee"
+msgstr "更新风扇模式失败"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:213
 msgid "Manual fan power updated successfully"
 msgstr "手动风扇功率更新成功"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:215
-msgid "Failed to update manual fan power: $e"
-msgstr "更新手动风扇功率失败：$e"
+msgid "Failed to update manual fan power"
+msgstr "更新手动风扇功率失败"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:228
 msgid "Power behavior updated successfully"
 msgstr "电源行为更新成功"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:230
-msgid "Failed to update power behavior: $e"
-msgstr "更新电源行为失败：$e"
+msgid "Failed to update power behavior"
+msgstr "更新电源行为失败"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:243
 msgid "Device name updated successfully"
 msgstr "设备名更新成功"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:245
-msgid "Failed to update device name: $e"
-msgstr "更新设备名称失败：$e"
+msgid "Failed to update device name"
+msgstr "更新设备名称失败"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:260
-msgid "Failed to restore device to factory settings: $e"
-msgstr "恢复设备到出厂设置失败：$e"
+msgid "Failed to restore device to factory settings"
+msgstr "将设备恢复到出厂设置失败"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:275
-msgid "Failed to reset device network settings: $e"
-msgstr "重置设备网络设置失败：$e"
+msgid "Failed to reset device network settings"
+msgstr "重置设备网络设置失败"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:41
 #: devices\borneo\lyfi\views\acclimation_screen.dart:49
@@ -1558,6 +1558,42 @@ msgstr "当前位置"
 #: shared\widgets\map_location_picker.dart:220
 msgid "Tap globe to select location"
 msgstr "点击地球以选择位置"
+
+#~ msgid "Failed to update device location: $e"
+#~ msgstr "更新设备位置失败：$e"
+
+#~ msgid "Failed to get location: $e"
+#~ msgstr "获取位置失败：$e"
+
+#~ msgid "Failed to update device time zone: $e"
+#~ msgstr "更新设备时区失败：$e"
+
+#~ msgid "Failed to update LED correction method: $e"
+#~ msgstr "更新 LED 矫正方法失败：$e"
+
+#~ msgid "Failed to update temporary duration: $e"
+#~ msgstr "更新临时持续时间失败：$e"
+
+#~ msgid "Failed to update cloud simulation mode: $e"
+#~ msgstr "更新云模拟模式失败：$e"
+
+#~ msgid "Failed to update fan mode: $e"
+#~ msgstr "更新风扇模式失败：$e"
+
+#~ msgid "Failed to update manual fan power: $e"
+#~ msgstr "更新手动风扇功率失败：$e"
+
+#~ msgid "Failed to update power behavior: $e"
+#~ msgstr "更新电源行为失败：$e"
+
+#~ msgid "Failed to update device name: $e"
+#~ msgstr "更新设备名称失败：$e"
+
+#~ msgid "Failed to restore device to factory settings: $e"
+#~ msgstr "恢复设备到出厂设置失败：$e"
+
+#~ msgid "Failed to reset device network settings: $e"
+#~ msgstr "重置设备网络设置失败：$e"
 
 #~ msgid "Device restored to factory settings"
 #~ msgstr "设备已恢复到出厂设置"

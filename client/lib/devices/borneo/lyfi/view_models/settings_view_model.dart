@@ -82,8 +82,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       await super.lyfiDeviceApi.setLocation(super.boundDevice!.device, location, cancelToken: cancel);
       lyfiThing.findProperty('location')?.value.notifyOfExternalUpdate(location);
       notification.showSuccess(_gt.translate("Location updated successfully"));
-    } catch (e) {
-      notification.showError(_gt.translate("Failed to update device location: $e"));
+    } catch (e, st) {
+      notifyAppError(_gt.translate("Failed to update device location"), error: e, stackTrace: st);
     }
   }
 
@@ -120,8 +120,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
         ),
       ).asCancellable(cancel);
       return position;
-    } catch (e) {
-      notification.showError(_gt.translate("Failed to get location: $e"));
+    } catch (e, st) {
+      notifyAppError(_gt.translate("Failed to get location"), error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -136,8 +136,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       await api.setTimeZone(boundDevice!.device, posixTZ!, cancelToken: cancel);
       _timezone = posixTZ;
       notification.showSuccess(_gt.translate("Time zone updated successfully"));
-    } catch (e) {
-      notification.showError(_gt.translate("Failed to update device time zone: $e"));
+    } catch (e, st) {
+      notifyAppError(_gt.translate("Failed to update device time zone"), error: e, stackTrace: st);
     } finally {
       isBusy = false;
       notifyListeners();
@@ -151,8 +151,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       await api.setCorrectionMethod(boundDevice!.device, newMethod, cancelToken: cancel);
       _correctionMethod = newMethod;
       notification.showSuccess(_gt.translate("LED correction method updated successfully"));
-    } catch (e) {
-      notification.showError(_gt.translate("Failed to update LED correction method: $e"));
+    } catch (e, st) {
+      notifyAppError(_gt.translate("Failed to update LED correction method"), error: e, stackTrace: st);
     } finally {
       isBusy = false;
       notifyListeners();
@@ -166,8 +166,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       await api.setTemporaryDuration(boundDevice!.device, dur, cancelToken: cancel);
       _temporaryDuration = dur;
       notification.showSuccess(_gt.translate("Temporary duration updated successfully"));
-    } catch (e) {
-      notification.showError(_gt.translate("Failed to update temporary duration: $e"));
+    } catch (e, st) {
+      notifyAppError(_gt.translate("Failed to update temporary duration"), error: e, stackTrace: st);
     } finally {
       isBusy = false;
       notifyListeners();
@@ -181,8 +181,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       await api.setCloudEnabled(boundDevice!.device, enabled, cancelToken: cancel);
       _cloudEnabled = enabled;
       notification.showSuccess(_gt.translate("Cloud simulation mode updated successfully"));
-    } catch (e) {
-      notification.showError(_gt.translate("Failed to update cloud simulation mode: $e"));
+    } catch (e, st) {
+      notifyAppError(_gt.translate("Failed to update cloud simulation mode"), error: e, stackTrace: st);
     } finally {
       isBusy = false;
       notifyListeners();
@@ -196,8 +196,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       await api.setFanMode(boundDevice!.device, mode, cancelToken: cancel);
       _fanMode = mode;
       notification.showSuccess(_gt.translate("Fan mode updated successfully"));
-    } catch (e) {
-      notification.showError(_gt.translate("Failed to update fan mode: $e"));
+    } catch (e, st) {
+      notifyAppError(_gt.translate("Failed to update fan modee"), error: e, stackTrace: st);
     } finally {
       isBusy = false;
       notifyListeners();
@@ -211,8 +211,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       await api.setFanManualPower(boundDevice!.device, power, cancelToken: cancel);
       _manualFanPower = power;
       notification.showSuccess(_gt.translate("Manual fan power updated successfully"));
-    } catch (e) {
-      notification.showError(_gt.translate("Failed to update manual fan power: $e"));
+    } catch (e, st) {
+      notifyAppError(_gt.translate("Failed to update manual fan power"), error: e, stackTrace: st);
     } finally {
       isBusy = false;
       notifyListeners();
@@ -226,8 +226,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       await api.setPowerBehavior(boundDevice!.device, behavior, cancelToken: cancel);
       _powerBehavior = behavior;
       notification.showSuccess(_gt.translate("Power behavior updated successfully"));
-    } catch (e) {
-      notification.showError(_gt.translate("Failed to update power behavior: $e"));
+    } catch (e, st) {
+      notifyAppError(_gt.translate("Failed to update power behavior"), error: e, stackTrace: st);
     } finally {
       isBusy = false;
       notifyListeners();
@@ -241,8 +241,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       await borneoDeviceApi.setName(boundDevice!.device, newName, cancelToken: cancel);
       await deviceManager.update(deviceID, name: newName);
       notification.showSuccess(_gt.translate("Device name updated successfully"));
-    } catch (e) {
-      notification.showError(_gt.translate("Failed to update device name: $e"));
+    } catch (e, st) {
+      notifyAppError(_gt.translate("Failed to update device name"), error: e, stackTrace: st);
     } finally {
       isBusy = false;
       notifyListeners();
@@ -256,8 +256,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       await api.factoryReset(boundDevice!.device);
       await deviceManager.delete(this.deviceID, cancelToken: masterCancellation);
       await Future.delayed(const Duration(milliseconds: 100)).asCancellable(masterCancellation);
-    } catch (e) {
-      notification.showError(_gt.translate("Failed to restore device to factory settings: $e"));
+    } catch (e, st) {
+      notifyAppError(_gt.translate("Failed to restore device to factory settings"), error: e, stackTrace: st);
     } finally {
       isBusy = false;
       notifyListeners();
@@ -271,8 +271,8 @@ class SettingsViewModel extends BaseLyfiDeviceViewModel {
       await api.networkReset(boundDevice!.device, cancelToken: masterCancellation);
       await deviceManager.delete(this.deviceID, cancelToken: masterCancellation);
       await Future.delayed(const Duration(milliseconds: 100)).asCancellable(masterCancellation);
-    } catch (e) {
-      notification.showError(_gt.translate("Failed to reset device network settings: $e"));
+    } catch (e, st) {
+      notifyAppError(_gt.translate("Failed to reset device network settings"), error: e, stackTrace: st);
     } finally {
       isBusy = false;
       notifyListeners();

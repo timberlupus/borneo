@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-08 01:18+0800\n"
+"POT-Creation-Date: 2026-03-08 01:42+0800\n"
 "PO-Revision-Date: 2026-01-03 14:43+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -105,8 +105,8 @@ msgid "Location updated successfully"
 msgstr "Ubicación actualizada exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:86
-msgid "Failed to update device location: $e"
-msgstr "Error al actualizar la ubicación del dispositivo: $e"
+msgid "Failed to update device location"
+msgstr "Falló al actualizar la ubicación del dispositivo"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:97
 msgid "Please enable location services"
@@ -121,80 +121,80 @@ msgid "Location permissions are permanently denied"
 msgstr "Los permisos de ubicación están permanentemente denegados"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:124
-msgid "Failed to get location: $e"
-msgstr "Error al obtener la ubicación: $e"
+msgid "Failed to get location"
+msgstr "Falló al obtener la ubicación"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:138
 msgid "Time zone updated successfully"
 msgstr "Zona horaria actualizada exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:140
-msgid "Failed to update device time zone: $e"
-msgstr "Error al actualizar la zona horaria del dispositivo: $e"
+msgid "Failed to update device time zone"
+msgstr "Falló al actualizar la zona horaria del dispositivo"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:153
 msgid "LED correction method updated successfully"
 msgstr "Método de corrección LED actualizado exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:155
-msgid "Failed to update LED correction method: $e"
-msgstr "Error al actualizar el método de corrección LED: $e"
+msgid "Failed to update LED correction method"
+msgstr "Falló al actualizar el método de corrección de LED"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:168
 msgid "Temporary duration updated successfully"
 msgstr "Duración temporal actualizada exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:170
-msgid "Failed to update temporary duration: $e"
-msgstr "Error al actualizar la duración temporal: $e"
+msgid "Failed to update temporary duration"
+msgstr "Falló al actualizar la duración temporal"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:183
 msgid "Cloud simulation mode updated successfully"
 msgstr "Modo de simulación de nube actualizado exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:185
-msgid "Failed to update cloud simulation mode: $e"
-msgstr "Error al actualizar el modo de simulación de nube: $e"
+msgid "Failed to update cloud simulation mode"
+msgstr "Falló al actualizar el modo de simulación en la nube"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:198
 msgid "Fan mode updated successfully"
 msgstr "Modo de ventilador actualizado exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:200
-msgid "Failed to update fan mode: $e"
-msgstr "Error al actualizar el modo de ventilador: $e"
+msgid "Failed to update fan modee"
+msgstr "Falló al actualizar el modo del ventilador"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:213
 msgid "Manual fan power updated successfully"
 msgstr "Potencia manual del ventilador actualizada exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:215
-msgid "Failed to update manual fan power: $e"
-msgstr "Error al actualizar la potencia manual del ventilador: $e"
+msgid "Failed to update manual fan power"
+msgstr "Falló al actualizar la potencia manual del ventilador"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:228
 msgid "Power behavior updated successfully"
 msgstr "Comportamiento de energía actualizado exitosamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:230
-msgid "Failed to update power behavior: $e"
-msgstr "Error al actualizar el comportamiento de energía: $e"
+msgid "Failed to update power behavior"
+msgstr "Falló al actualizar el comportamiento de energía"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:243
 msgid "Device name updated successfully"
 msgstr "Nombre del dispositivo actualizado correctamente"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:245
-msgid "Failed to update device name: $e"
-msgstr "Error al actualizar el nombre del dispositivo: $e"
+msgid "Failed to update device name"
+msgstr "Falló al actualizar el nombre del dispositivo"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:260
-msgid "Failed to restore device to factory settings: $e"
-msgstr "Error al restaurar el dispositivo a configuración de fábrica: $e"
+msgid "Failed to restore device to factory settings"
+msgstr "Falló al restaurar el dispositivo a la configuración de fábrica"
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:275
-msgid "Failed to reset device network settings: $e"
-msgstr "Error al restablecer los ajustes de red del dispositivo: $e"
+msgid "Failed to reset device network settings"
+msgstr "Falló al restablecer la configuración de red del dispositivo"
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:41
 #: devices\borneo\lyfi\views\acclimation_screen.dart:49
@@ -1593,6 +1593,42 @@ msgstr "Ubicación actual"
 #: shared\widgets\map_location_picker.dart:220
 msgid "Tap globe to select location"
 msgstr "Toque el globo para seleccionar la ubicación"
+
+#~ msgid "Failed to update device location: $e"
+#~ msgstr "Error al actualizar la ubicación del dispositivo: $e"
+
+#~ msgid "Failed to get location: $e"
+#~ msgstr "Error al obtener la ubicación: $e"
+
+#~ msgid "Failed to update device time zone: $e"
+#~ msgstr "Error al actualizar la zona horaria del dispositivo: $e"
+
+#~ msgid "Failed to update LED correction method: $e"
+#~ msgstr "Error al actualizar el método de corrección LED: $e"
+
+#~ msgid "Failed to update temporary duration: $e"
+#~ msgstr "Error al actualizar la duración temporal: $e"
+
+#~ msgid "Failed to update cloud simulation mode: $e"
+#~ msgstr "Error al actualizar el modo de simulación de nube: $e"
+
+#~ msgid "Failed to update fan mode: $e"
+#~ msgstr "Error al actualizar el modo de ventilador: $e"
+
+#~ msgid "Failed to update manual fan power: $e"
+#~ msgstr "Error al actualizar la potencia manual del ventilador: $e"
+
+#~ msgid "Failed to update power behavior: $e"
+#~ msgstr "Error al actualizar el comportamiento de energía: $e"
+
+#~ msgid "Failed to update device name: $e"
+#~ msgstr "Error al actualizar el nombre del dispositivo: $e"
+
+#~ msgid "Failed to restore device to factory settings: $e"
+#~ msgstr "Error al restaurar el dispositivo a configuración de fábrica: $e"
+
+#~ msgid "Failed to reset device network settings: $e"
+#~ msgstr "Error al restablecer los ajustes de red del dispositivo: $e"
 
 #~ msgid "Device restored to factory settings"
 #~ msgstr "Dispositivo restaurado a configuración de fábrica"

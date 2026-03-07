@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-08 01:18+0800\n"
+"POT-Creation-Date: 2026-03-08 01:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -105,7 +105,7 @@ msgid "Location updated successfully"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:86
-msgid "Failed to update device location: $e"
+msgid "Failed to update device location"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:97
@@ -121,7 +121,7 @@ msgid "Location permissions are permanently denied"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:124
-msgid "Failed to get location: $e"
+msgid "Failed to get location"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:138
@@ -129,7 +129,7 @@ msgid "Time zone updated successfully"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:140
-msgid "Failed to update device time zone: $e"
+msgid "Failed to update device time zone"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:153
@@ -137,7 +137,7 @@ msgid "LED correction method updated successfully"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:155
-msgid "Failed to update LED correction method: $e"
+msgid "Failed to update LED correction method"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:168
@@ -145,7 +145,7 @@ msgid "Temporary duration updated successfully"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:170
-msgid "Failed to update temporary duration: $e"
+msgid "Failed to update temporary duration"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:183
@@ -153,7 +153,7 @@ msgid "Cloud simulation mode updated successfully"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:185
-msgid "Failed to update cloud simulation mode: $e"
+msgid "Failed to update cloud simulation mode"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:198
@@ -161,7 +161,7 @@ msgid "Fan mode updated successfully"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:200
-msgid "Failed to update fan mode: $e"
+msgid "Failed to update fan modee"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:213
@@ -169,7 +169,7 @@ msgid "Manual fan power updated successfully"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:215
-msgid "Failed to update manual fan power: $e"
+msgid "Failed to update manual fan power"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:228
@@ -177,7 +177,7 @@ msgid "Power behavior updated successfully"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:230
-msgid "Failed to update power behavior: $e"
+msgid "Failed to update power behavior"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:243
@@ -185,15 +185,15 @@ msgid "Device name updated successfully"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:245
-msgid "Failed to update device name: $e"
+msgid "Failed to update device name"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:260
-msgid "Failed to restore device to factory settings: $e"
+msgid "Failed to restore device to factory settings"
 msgstr ""
 
 #: devices\borneo\lyfi\view_models\settings_view_model.dart:275
-msgid "Failed to reset device network settings: $e"
+msgid "Failed to reset device network settings"
 msgstr ""
 
 #: devices\borneo\lyfi\views\acclimation_screen.dart:41
