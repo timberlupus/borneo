@@ -50,3 +50,6 @@ packages/*/build
 .claude
 CLAUDE.md
 .design-docs
+
+# FVM Version Cache
+.fvm/

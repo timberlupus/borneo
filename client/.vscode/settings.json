@@ -1,5 +1,5 @@
 {
-    "dart.flutterSdkPath": null,
+    "dart.flutterSdkPath": ".fvm/versions/3.38.8",
     "dart.lineLength": 120,
     "editor.defaultFormatter": "Dart-Code.dart-code",
     "files.exclude": {
@@ -19,5 +19,8 @@
     "extensions.autoUpdate": true,
     "[xml]": {
         "editor.defaultFormatter": "DotJoshJohnson.xml"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
     }
 }
