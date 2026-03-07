@@ -1,6 +1,7 @@
 import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_kernel_abstractions/kernel.dart';
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:lw_wot/wot.dart';
 
 /// Very small ``IDeviceManager`` stub used in multiple tests.  Most of the
@@ -40,6 +41,9 @@ class StubDeviceManager implements IDeviceManager {
 
   @override
   Future<List<DeviceEntity>> fetchAllDevicesInScene({String? sceneID}) async => [];
+
+  @override
+  Future<void> updateAddress(String id, Uri address, {CancellationToken? cancelToken}) async {}
 
   // a few very-common helpers used by view models
   @override

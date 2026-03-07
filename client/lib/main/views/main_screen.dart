@@ -129,10 +129,9 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
         */
       title: Column(children: [Text(_getTitle(context, vm))]),
       actions: [
-        Selector<MainViewModel, ({bool isInit, bool isScanningDevices, TabIndices index})>(
-          selector: (_, vm) =>
-              (isInit: vm.isInitialized, isScanningDevices: vm.isScanningDevices, index: vm.currentTabIndex),
-          builder: (_, vm, _) => !vm.isInit || vm.isScanningDevices
+        Selector<MainViewModel, bool>(
+          selector: (_, vm) => vm.isInitialized,
+          builder: (_, isInitialized, _) => !isInitialized
               ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator())
               : buildAddButtons(context),
         ),

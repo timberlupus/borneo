@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:borneo_app/features/devices/providers/group_edit_provider.dart';
+import 'package:borneo_app/features/devices/providers/new_device_candidates_store.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:flutter_gettext/flutter_gettext/context_ext.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +35,33 @@ class GroupSnapshot {
 }
 
 enum PlusMenuIndexes { addGroup, addDevice }
+
+/// A small badge showing the number of new device candidates.
+///
+/// This is used both as the icon of the "add" button on the app bar and
+/// appended to the "Add New Devices" popup menu item.
+///
+/// The [child] widget, if provided, is wrapped by the `Badge` so it can be
+/// reused for the icon; when omitted an empty box is used, which is handy for
+/// the menu item where only the count bubble is desired.
+class _NewDevicesBadge extends StatelessWidget {
+  final Widget? child;
+
+  const _NewDevicesBadge({this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<NewDeviceCandidatesStore, int>(
+      selector: (_, store) => store.count,
+      builder: (_, count, _) => Badge(
+        isLabelVisible: count > 0,
+        label: Text(count > 9 ? '9+' : '$count'),
+        backgroundColor: Colors.green[400],
+        child: child ?? const SizedBox.shrink(),
+      ),
+    );
+  }
+}
 
 class NoDataHintView extends StatelessWidget {
   const NoDataHintView({super.key});
@@ -147,7 +175,9 @@ class DevicesScreen extends StatelessWidget {
 
   PopupMenuButton _buildAddButtons(BuildContext context) {
     return PopupMenuButton<PlusMenuIndexes>(
-      icon: Icon(Icons.add_outlined, color: Colors.white, shadows: [_smallShadow]),
+      icon: const _NewDevicesBadge(
+        child: Icon(Icons.add_outlined, color: Colors.white, shadows: [_smallShadow]),
+      ),
       onSelected: (value) {
         switch (value) {
           case PlusMenuIndexes.addDevice:
@@ -166,7 +196,7 @@ class DevicesScreen extends StatelessWidget {
         return <PopupMenuEntry<PlusMenuIndexes>>[
           PopupMenuItem<PlusMenuIndexes>(
             value: PlusMenuIndexes.addDevice,
-            child: Text(context.translate('Add New Devices')),
+            child: _NewDevicesBadge(child: Text(context.translate('Add New Devices'))),
           ),
           PopupMenuItem<PlusMenuIndexes>(
             key: const Key('menu_item_add_group'),

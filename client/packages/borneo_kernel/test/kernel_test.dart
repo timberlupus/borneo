@@ -314,6 +314,17 @@ void main() {
         expect(mgr.isActive, isFalse);
       });
 
+      test('kernel disposes injected DiscoveryManager', () async {
+        await kernel.start();
+        final mgr = MockDiscoveryManager();
+        final k2 = DefaultKernel(mockLogger, mockDriverRegistry, mdnsProvider: mockMdnsProvider, discoveryManager: mgr);
+        await k2.start();
+
+        k2.dispose();
+
+        expect(mgr.disposed, isTrue);
+      });
+
       test('supports custom BindingEngine injection', () async {
         await kernel.start();
         final eng = MockBindingEngine();
@@ -334,10 +345,53 @@ void main() {
         k2.events.on<UnboundDeviceLostEvent>().listen((e) {
           got = e;
         });
-        mgr.emitLost('abc');
+        mgr.emitLost(TestMdnsDiscoveredDevice(host: 'abc', port: 80, name: 'lost-device'));
         await Future.delayed(Duration.zero);
-        expect(got?.deviceId, 'abc');
+        expect(got?.deviceId, 'test-test-driver');
       });
+
+      test('kernel emits known device discovery update events', () async {
+        await kernel.start();
+
+        final device = TestDevice('test-driver', 'http://192.168.1.10');
+        kernel.registerDevice(BoundDeviceDescriptor(device: device, driverID: 'test-driver'));
+
+        KnownDeviceDiscoveryUpdatedEvent? receivedEvent;
+        kernel.events.on<KnownDeviceDiscoveryUpdatedEvent>().listen((event) {
+          receivedEvent = event;
+        });
+
+        kernel.events.fire(FoundDeviceEvent(TestMdnsDiscoveredDevice(host: '192.168.1.20', port: 8080, name: 'known')));
+
+        await Future.delayed(Duration(milliseconds: 10));
+
+        expect(receivedEvent, isNotNull);
+        expect(receivedEvent!.device.id, equals('test-driver'));
+        expect(receivedEvent!.matched.address.host, equals('192.168.1.20'));
+      });
+
+      test('kernel treats lost bound devices as offline candidates', () async {
+        await kernel.start();
+        final mgr = MockDiscoveryManager();
+        final k2 = DefaultKernel(mockLogger, mockDriverRegistry, mdnsProvider: mockMdnsProvider, discoveryManager: mgr);
+        await k2.start();
+
+        final device = TestDevice('test-driver', 'http://192.168.1.10');
+        k2.registerDevice(BoundDeviceDescriptor(device: device, driverID: 'test-driver'));
+        await k2.bind(device, 'test-driver');
+
+        DeviceOfflineEvent? receivedEvent;
+        k2.events.on<DeviceOfflineEvent>().listen((event) {
+          receivedEvent = event;
+        });
+
+        mgr.emitLost(TestMdnsDiscoveredDevice(host: '192.168.1.20', port: 8080, name: 'lost-bound'));
+        await Future.delayed(Duration(milliseconds: 10));
+
+        expect(receivedEvent, isNotNull);
+        expect(receivedEvent!.device.id, equals('test-driver'));
+      });
+
       test('should start and stop device scanning', () async {
         await kernel.start();
 

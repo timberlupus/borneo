@@ -11,10 +11,12 @@ import 'package:borneo_app/core/services/local_service.dart';
 import 'package:borneo_app/shared/view_models/base_view_model.dart';
 import 'package:borneo_kernel_abstractions/events.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:flutter/widgets.dart';
 
 enum TabIndices { scenes, devices, my }
 
-class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModelInitFutureMixin {
+class MainViewModel extends BaseViewModel
+    with WidgetsBindingObserver, ViewModelEventBusMixin, ViewModelInitFutureMixin {
   static final Duration kStartupScanningDuration = Duration(seconds: 5);
   final IBlobManager _blobManager;
   final ISceneManager _sceneManager;
@@ -66,6 +68,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
     super.logger,
   }) {
     this.globalEventBus = globalEventBus;
+    WidgetsBinding.instance.addObserver(this);
     _appErrorEventSub = globalEventBus.on<AppErrorEvent>().listen(_onAppError);
     _deviceDiscoveringStartedEventSub = _deviceManager.allDeviceEvents.on<DeviceDiscoveringStartedEvent>().listen(
       _onDeviceDiscoveringStarted,
@@ -85,6 +88,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
       await _sceneManager.initialize(_groupManager, _deviceManager);
       await _groupManager.initialize();
       await _deviceManager.initialize();
+      await _deviceManager.startDiscovery();
       await _localeService.initialize();
       await _preloadHomeData();
       logger?.i('MainViewModel initialized.');
@@ -109,6 +113,7 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   void dispose() {
     if (!isDisposed) {
       _exitTimer?.cancel();
+      WidgetsBinding.instance.removeObserver(this);
       _appErrorEventSub.cancel();
       _errorsStack.clear();
       _deviceDiscoveringStartedEventSub.cancel();
@@ -151,6 +156,30 @@ class MainViewModel extends BaseViewModel with ViewModelEventBusMixin, ViewModel
   void _onDeviceDiscoveringStopped(DeviceDiscoveringStoppedEvent event) {
     if (!isDisposed && !isBusy) {
       notifyListeners();
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_isInitialized) {
+      return;
+    }
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        if (!_deviceManager.isDiscoverying) {
+          unawaited(_deviceManager.startDiscovery());
+        }
+        break;
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+        if (_deviceManager.isDiscoverying) {
+          unawaited(_deviceManager.stopDiscovery());
+        }
+        break;
+      case AppLifecycleState.inactive:
+        break;
     }
   }
 

@@ -51,6 +51,7 @@ final class DefaultKernel implements IKernel {
   final CancellationToken _masterCancelToken = CancellationToken();
   late final StreamSubscription<DeviceOfflineEvent> _deviceOfflineSub;
   late final StreamSubscription<FoundDeviceEvent> _foundDeviceEventSub;
+  late final StreamSubscription<DiscoveredDevice> _lostDeviceSub;
   late final StreamSubscription<DeviceCommunicationEvent> _deviceCommunicationSub;
   late final StreamSubscription<DeviceBoundEvent> _deviceBoundSub;
   late final StreamSubscription<DeviceRemovedEvent> _deviceRemovedSub;
@@ -147,9 +148,7 @@ final class DefaultKernel implements IKernel {
     _heartbeatService.onTick.listen((_) => _onHeartbeatTick());
 
     // forward discovery manager lost events to kernel event bus
-    _discoveryManager.onDeviceLost.listen((id) {
-      _events.fire(UnboundDeviceLostEvent(id));
-    });
+    _lostDeviceSub = _discoveryManager.onDeviceLost.listen(_onDeviceLost);
   }
 
   // --------- private event handlers extracted from constructor ----------
@@ -268,9 +267,12 @@ final class DefaultKernel implements IKernel {
 
       _deviceOfflineSub.cancel();
       _foundDeviceEventSub.cancel();
+      _lostDeviceSub.cancel();
       _deviceCommunicationSub.cancel();
       _deviceBoundSub.cancel();
       _deviceRemovedSub.cancel();
+
+      _discoveryManager.dispose();
 
       // binding engine manages its own subscriptions and drivers
       _bindingEngine.dispose();
@@ -413,17 +415,59 @@ final class DefaultKernel implements IKernel {
     );
     final matched = _matchesDriver(event.discovered);
     if (matched != null) {
-      final alreadyBound = _bindingEngine.boundDevices.any((x) => x.device.fingerprint == matched.fingerprint);
-      if (!alreadyBound) {
+      final knownDevice = _findRegisteredDeviceByFingerprint(matched.fingerprint);
+      if (knownDevice != null) {
+        if (knownDevice.address != matched.address) {
+          _logger.i('Known device address changed: `${knownDevice.address}` -> `${matched.address}`');
+          _events.fire(KnownDeviceDiscoveryUpdatedEvent(knownDevice, matched));
+        }
+        return;
+      }
+
+      if (_bindingEngine.boundDevices.every((x) => x.device.fingerprint != matched.fingerprint)) {
         _logger.i('Unbound device found: `${matched.address}`');
         _events.fire(UnboundDeviceDiscoveredEvent(matched));
       }
     }
   }
 
+  void _onDeviceLost(DiscoveredDevice discovered) {
+    _ensureStarted();
+    final matched = _matchesDriver(discovered);
+    if (matched == null) {
+      return;
+    }
+
+    final knownDevice = _findRegisteredDeviceByFingerprint(matched.fingerprint);
+    if (knownDevice == null) {
+      _events.fire(UnboundDeviceLostEvent(matched.fingerprint));
+      return;
+    }
+
+    final bound = _bindingEngine.getBoundDevice(knownDevice.id);
+    if (bound != null) {
+      _logger.w('Bound device lost from discovery: `${knownDevice.id}`');
+      _events.fire(DeviceOfflineEvent(bound.device));
+      return;
+    }
+
+    _events.fire(UnboundDeviceLostEvent(matched.fingerprint));
+  }
+
+  Device? _findRegisteredDeviceByFingerprint(String fingerprint) {
+    for (final descriptor in _registeredDevices.values) {
+      if (descriptor.device.fingerprint == fingerprint) {
+        return descriptor.device;
+      }
+    }
+    return null;
+  }
+
   @override
   Future<void> startDevicesScanning({Duration? timeout, CancellationToken? cancelToken}) async {
-    assert(!_isScanning);
+    if (_isScanning || _discoveryManager.isActive) {
+      return;
+    }
     _isScanning = true;
     await _discoveryManager.start(timeout: timeout);
     _events.fire(DeviceDiscoveringStartedEvent());
@@ -435,7 +479,9 @@ final class DefaultKernel implements IKernel {
 
   @override
   Future<void> stopDevicesScanning({CancellationToken? cancelToken}) async {
-    assert(_isScanning);
+    if (!_isScanning && !_discoveryManager.isActive) {
+      return;
+    }
     try {
       await _discoveryManager.stop();
       _isScanning = false;

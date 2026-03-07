@@ -2,6 +2,7 @@ import 'package:borneo_app/core/services/app_notification_service.dart';
 import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/features/devices/models/ble_provision_state.dart';
+import 'package:borneo_app/features/devices/providers/new_device_candidates_store.dart';
 import 'package:borneo_app/features/devices/view_models/provisioning_wizard_view_model.dart';
 import 'package:borneo_app/routes/app_routes.dart';
 import 'package:borneo_app/shared/widgets/app_bar_apply_button.dart';
@@ -33,6 +34,7 @@ class ProvisioningScreen extends StatelessWidget {
       create: (context) => ProvisioningWizardViewModel(
         context.read<IBleProvisioner>(),
         context.read<IDeviceManager>(),
+        context.read<NewDeviceCandidatesStore>(),
         deviceName,
         globalEventBus: context.read<EventBus>(),
         gt: gt,

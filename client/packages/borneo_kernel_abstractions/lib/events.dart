@@ -20,9 +20,19 @@ class FoundDeviceEvent {
   const FoundDeviceEvent(this.discovered);
 }
 
+class LostDeviceEvent {
+  final DiscoveredDevice discovered;
+  const LostDeviceEvent(this.discovered);
+}
+
 class UnboundDeviceDiscoveredEvent {
   final SupportedDeviceDescriptor matched;
   const UnboundDeviceDiscoveredEvent(this.matched);
+}
+
+class KnownDeviceDiscoveryUpdatedEvent extends KnownDeviceEvent {
+  final SupportedDeviceDescriptor matched;
+  const KnownDeviceDiscoveryUpdatedEvent(super.device, this.matched);
 }
 
 abstract class KnownDeviceEvent {
@@ -65,7 +75,7 @@ class DeviceDiscoveringStoppedEvent {
 }
 
 /// Fired when a previously discovered (but unbound) device disappears from
-/// a discovery bus.  The listener receives the lost device's id.
+/// a discovery bus.  The listener receives the lost device fingerprint.
 class UnboundDeviceLostEvent {
   final String deviceId;
   const UnboundDeviceLostEvent(this.deviceId);

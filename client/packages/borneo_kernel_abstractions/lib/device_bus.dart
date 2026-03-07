@@ -18,8 +18,9 @@ abstract class DeviceBus {
   /// Stream that emits a [DiscoveredDevice] when one is found.
   Stream<DiscoveredDevice> get onDeviceFound;
 
-  /// Stream emitting the ID of a device that was lost.
-  Stream<String> get onDeviceLost;
+  /// Stream emitting a [DiscoveredDevice] when a previously discovered device
+  /// is reported as lost by the underlying transport.
+  Stream<DiscoveredDevice> get onDeviceLost;
 
   /// Obtain a connection handle for the specified device.
   Future<dynamic> connect(String deviceId);

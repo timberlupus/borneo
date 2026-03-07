@@ -5,6 +5,7 @@ import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/features/devices/models/ble_provision_state.dart';
 import 'package:borneo_app/features/devices/models/events.dart';
+import 'package:borneo_app/features/devices/providers/new_device_candidates_store.dart';
 import 'package:borneo_app/shared/view_models/abstract_screen_view_model.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter_esp_ble_prov/flutter_esp_ble_prov.dart';
@@ -19,6 +20,7 @@ enum ProvisioningWizardStep { selectWifi, enterPassword, provisioning, done }
 class ProvisioningWizardViewModel extends AbstractScreenViewModel {
   final IBleProvisioner _bleProvisioner;
   final IDeviceManager _deviceManager;
+  final NewDeviceCandidatesStore _newDeviceCandidatesStore;
   final String deviceName;
   final IAppNotificationService? notificationService;
 
@@ -41,12 +43,8 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
   bool _autoAdded = false;
   bool get autoAdded => _autoAdded;
 
-  // Serial number of the device being provisioned, fetched via BLE before
-  // sending WiFi credentials.  Used to filter mDNS discoveries so that only
-  // the exact provisioned device is auto-added.
-  String? _provisionedSerno;
-
-  StreamSubscription<NewDeviceFoundEvent>? _autoAddSub;
+  String? _provisionedFingerprint;
+  bool _isAutoAdding = false;
 
   List<WifiNetwork>? _networks;
   List<WifiNetwork>? get networks => _networks;
@@ -68,6 +66,7 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
   ProvisioningWizardViewModel(
     this._bleProvisioner,
     this._deviceManager,
+    this._newDeviceCandidatesStore,
     this.deviceName, {
     required super.globalEventBus,
     required super.gt,
@@ -122,19 +121,16 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
 
     try {
       final info = await _bleProvisioner.fetchDeviceInfo(deviceName: deviceName, cancelToken: _cancelToken);
-      _provisionedSerno = info.serno.isNotEmpty ? info.serno : null;
+      _provisionedFingerprint = info.serno.isNotEmpty ? info.serno : null;
 
       _updateProvisioningState(BleProvisioningState.sendingCredentials);
       await _bleProvisioner.provisionWifi(deviceName, _selectedSsid!, password, cancelToken: _cancelToken);
       _updateProvisioningState(BleProvisioningState.connectingToWifi);
 
-      // after wifi connection we begin registration phase
       _updateProvisioningState(BleProvisioningState.registeringDevice);
-      // ensure mDNS scan is active so we can catch the new device
-      _deviceManager.startDiscovery();
       _startRegisterTimer();
       _listenForRegisterEvent();
-      _listenForAutoAdd();
+      _listenForCandidate();
     } on CancelledException {
       logger?.i('Provisioning cancelled.');
     } catch (e, stackTrace) {
@@ -160,7 +156,10 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
     _provisioningSucceeded = false;
     // Create a fresh cancel token so the new scan/provision is not pre-cancelled.
     _cancelToken = CancellationToken();
-    _provisionedSerno = null;
+    _provisionedFingerprint = null;
+    _autoAdded = false;
+    _isAutoAdding = false;
+    _newDeviceCandidatesStore.removeListener(_onCandidatesChanged);
     notifyListeners();
     scanNetworks();
   }
@@ -190,40 +189,61 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
   void _listenForRegisterEvent() {
     // listen for the moment the device actually makes it into the database.
     // once that happens we can transition the UI out of the provisioning step.
-    _registerSub = _deviceManager.allDeviceEvents.on<NewDeviceEntityAddedEvent>().listen((_) {
+    _registerSub = _deviceManager.allDeviceEvents.on<NewDeviceEntityAddedEvent>().listen((event) {
+      if (_provisionedFingerprint != null && event.device.fingerprint != _provisionedFingerprint) {
+        return;
+      }
+
       if (_step == ProvisioningWizardStep.provisioning) {
         _provisioningState = BleProvisioningState.success;
         _provisioningSucceeded = true;
         _step = ProvisioningWizardStep.done;
         _cancelRegisterTimer();
         _registerSub?.cancel();
-        // stop listening for discoveries now that we're done
-        _autoAddSub?.cancel();
-        // scanning is no longer needed
-        _deviceManager.stopDiscovery();
+        _newDeviceCandidatesStore.removeListener(_onCandidatesChanged);
         notifyListeners();
       }
     });
   }
 
-  void _listenForAutoAdd() {
-    _autoAddSub = _deviceManager.allDeviceEvents.on<NewDeviceFoundEvent>().listen((event) async {
-      // If we know the target device's serno, skip any other mDNS discovery
-      // that arrives concurrently during the registration phase.
-      if (_provisionedSerno != null && event.device.fingerprint != _provisionedSerno) {
-        return;
-      }
+  void _listenForCandidate() {
+    _newDeviceCandidatesStore.removeListener(_onCandidatesChanged);
+    _newDeviceCandidatesStore.addListener(_onCandidatesChanged);
+    unawaited(_tryAutoAddFromCandidates());
+  }
 
-      if (!_autoAdded) {
-        _autoAdded = true;
-        notifyListeners();
-      }
-      try {
-        await _deviceManager.addNewDevice(event.device);
-      } catch (e, st) {
-        logger?.e('Auto-add during registration failed', error: e, stackTrace: st);
-      }
-    });
+  void _onCandidatesChanged() {
+    unawaited(_tryAutoAddFromCandidates());
+  }
+
+  Future<void> _tryAutoAddFromCandidates() async {
+    if (_step != ProvisioningWizardStep.provisioning || _autoAdded || _isAutoAdding) {
+      return;
+    }
+
+    final fingerprint = _provisionedFingerprint;
+    if (fingerprint == null || fingerprint.isEmpty) {
+      logger?.w('Provisioned device fingerprint is empty, cannot match discovery candidate.');
+      return;
+    }
+
+    final candidate = _newDeviceCandidatesStore.byFingerprint(fingerprint);
+    if (candidate == null) {
+      return;
+    }
+
+    _isAutoAdding = true;
+    try {
+      _autoAdded = true;
+      notifyListeners();
+      await _deviceManager.addNewDevice(candidate);
+    } catch (e, st) {
+      _autoAdded = false;
+      logger?.e('Auto-add during registration failed', error: e, stackTrace: st);
+      notifyListeners();
+    } finally {
+      _isAutoAdding = false;
+    }
   }
 
   @override
@@ -233,7 +253,7 @@ class ProvisioningWizardViewModel extends AbstractScreenViewModel {
     }
     _cancelRegisterTimer();
     _registerSub?.cancel();
-    _autoAddSub?.cancel();
+    _newDeviceCandidatesStore.removeListener(_onCandidatesChanged);
     super.dispose();
   }
 }

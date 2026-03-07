@@ -1,4 +1,5 @@
 import 'package:borneo_app/features/devices/models/discoverable_device.dart';
+import 'package:borneo_app/features/devices/providers/new_device_candidates_store.dart';
 import 'package:borneo_app/features/devices/views/provisioning_screen.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ class DeviceDiscoveryScreen extends StatelessWidget {
       create: (cb) => DeviceDiscoveryViewModel(
         cb.read<Logger>(),
         cb.read<IDeviceManager>(),
+        cb.read<NewDeviceCandidatesStore>(),
         cb.read<IBleProvisioner>(),
         cb.read<IDeviceModuleRegistry>(),
         cb.read<PlatformService>(), // injected platform helper
@@ -33,23 +35,47 @@ class DeviceDiscoveryScreen extends StatelessWidget {
       ),
       builder: (context, _) {
         final vm = context.read<DeviceDiscoveryViewModel>();
-        return FutureBuilder<void>(
-          future: vm.initFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Scaffold(
-                appBar: AppBar(title: Text(context.translate('Add Device'))),
-                body: const Center(child: CircularProgressIndicator()),
-              );
-            }
-            if (snapshot.hasError) {
-              return Scaffold(
-                appBar: AppBar(title: Text(context.translate('Add Device'))),
-                body: Center(child: Text(snapshot.error.toString())),
-              );
-            }
-            return const _DeviceDiscoveryContent();
-          },
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(context.translate('Add Device')),
+            actions: [
+              Selector<DeviceDiscoveryViewModel, (bool, bool, bool)>(
+                selector: (_, vm) => (vm.isDiscovering, vm.isInitialized, vm.isBusy),
+                builder: (ctx, state, child) {
+                  final (isDiscovering, isInitialized, isBusy) = state;
+                  if (!isInitialized || isDiscovering) return const SizedBox();
+                  return IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: isBusy ? null : () => ctx.read<DeviceDiscoveryViewModel>().startDiscovery(),
+                    tooltip: context.translate('Refresh'),
+                  );
+                },
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              Selector<DeviceDiscoveryViewModel, bool>(
+                selector: (_, vm) => vm.isBusy,
+                builder: (_, isBusy, __) =>
+                    SizedBox(height: 2, child: isBusy ? const LinearProgressIndicator() : const SizedBox.expand()),
+              ),
+              Expanded(
+                child: FutureBuilder<void>(
+                  future: vm.initFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text(snapshot.error.toString()));
+                    }
+                    return const _DeviceDiscoveryContent();
+                  },
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -63,166 +89,143 @@ class _DeviceDiscoveryContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.read<DeviceDiscoveryViewModel>();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.translate('Add Device')),
-        actions: [
-          Selector<DeviceDiscoveryViewModel, bool>(
-            selector: (_, vm) => vm.isDiscovering,
-            builder: (ctx, isDiscovering, child) {
-              if (isDiscovering) {
-                return const SizedBox();
-              } else {
-                return IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: () => ctx.read<DeviceDiscoveryViewModel>().startDiscovery(),
-                  tooltip: context.translate('Refresh'),
-                );
-              }
-            },
+    return Column(
+      children: [
+        if (!vm.isMobile)
+          Container(
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            padding: EdgeInsets.all(8),
+            width: double.infinity,
+            child: Text(
+              context.translate('Bluetooth is not supported on this system; device WiFi provisioning is unavailable.'),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer),
+            ),
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          if (!vm.isMobile)
-            Container(
-              color: Theme.of(context).colorScheme.secondaryContainer,
+        ValueListenableBuilder<String?>(
+          valueListenable: vm.scanError,
+          builder: (context, error, child) {
+            if (error == null) return const SizedBox();
+            return Container(
+              color: Theme.of(context).colorScheme.errorContainer,
               padding: EdgeInsets.all(8),
               width: double.infinity,
-              child: Text(
-                context.translate(
-                  'Bluetooth is not supported on this system; device WiFi provisioning is unavailable.',
-                ),
-                style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline, color: Theme.of(context).colorScheme.onErrorContainer, size: 20),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      error,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onErrorContainer),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => vm.scanError.value = null,
+                    icon: Icon(Icons.close, color: Theme.of(context).colorScheme.error, size: 20),
+                    tooltip: context.translate('Close'),
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(minWidth: 48, minHeight: 48),
+                  ),
+                ],
               ),
-            ),
-          ValueListenableBuilder<String?>(
-            valueListenable: vm.scanError,
-            builder: (context, error, child) {
-              if (error == null) return const SizedBox();
-              return Container(
-                color: Theme.of(context).colorScheme.errorContainer,
-                padding: EdgeInsets.all(8),
-                width: double.infinity,
-                child: Row(
-                  children: [
-                    Icon(Icons.error_outline, color: Theme.of(context).colorScheme.onErrorContainer, size: 20),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        error,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onErrorContainer),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => vm.scanError.value = null,
-                      icon: Icon(Icons.close, color: Theme.of(context).colorScheme.error, size: 20),
-                      tooltip: context.translate('Close'),
-                      padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(minWidth: 48, minHeight: 48),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          Expanded(
-            child: Selector<DeviceDiscoveryViewModel, (bool, List<DiscoverableDevice>, int)>(
-              selector: (_, vm) => (vm.isDiscovering, vm.discoverableDevices.value, vm.remainingSeconds),
-              builder: (context, state, child) {
-                final (isDiscovering, devices, remainingSeconds) = state;
+            );
+          },
+        ),
+        Expanded(
+          child: Selector<DeviceDiscoveryViewModel, (bool, List<DiscoverableDevice>, int, bool)>(
+            selector: (_, vm) => (vm.isDiscovering, vm.discoverableDevices.value, vm.remainingSeconds, vm.isBusy),
+            builder: (context, state, child) {
+              final (isDiscovering, devices, remainingSeconds, isBusy) = state;
 
-                return Stack(
-                  children: [
-                    if (devices.isEmpty && vm.isInitialized && !vm.isDiscovering && !vm.isBusy && !vm.isDisposed)
-                      Center(
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 60),
-                            Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.media_bluetooth_off,
-                                    size: 64,
-                                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.38),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    context.translate('No devices found'),
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.outline),
-                                  ),
-                                ],
-                              ),
+              return Stack(
+                children: [
+                  if (devices.isEmpty && vm.isInitialized && !vm.isDiscovering && !vm.isBusy && !vm.isDisposed)
+                    Center(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 60),
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.media_bluetooth_off,
+                                  size: 64,
+                                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.38),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  context.translate('No devices found'),
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.outline),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      )
-                    else
-                      ListView.separated(
-                        primary: true,
-                        itemCount: devices.length,
-                        separatorBuilder: (context, index) => const SizedBox(height: 1.5),
-                        itemBuilder: (context, index) {
-                          final vm = context.read<DeviceDiscoveryViewModel>();
-                          return _buildDeviceTile(context, vm, devices[index]);
-                        },
+                          ),
+                        ],
                       ),
-                    if (isDiscovering)
-                      Container(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        child: Center(
-                          child: Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5)),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    context.translate('Searching for devices...'),
-                                    style: Theme.of(context).textTheme.bodyLarge,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    context.translate('{0} seconds remaining', pArgs: [remainingSeconds]),
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  TextButton(
-                                    onPressed: () => context.read<DeviceDiscoveryViewModel>().stopDiscovery(),
-                                    child: Text(context.translate('Stop')),
-                                  ),
-                                ],
-                              ),
+                    )
+                  else
+                    ListView.separated(
+                      primary: true,
+                      itemCount: devices.length,
+                      separatorBuilder: (context, index) => const SizedBox(height: 1.5),
+                      itemBuilder: (context, index) {
+                        final vm = context.read<DeviceDiscoveryViewModel>();
+                        return _buildDeviceTile(context, vm, devices[index], isBusy);
+                      },
+                    ),
+                  if (isDiscovering)
+                    Container(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      child: Center(
+                        child: Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5)),
+                                const SizedBox(height: 16),
+                                Text(
+                                  context.translate('Searching for devices...'),
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  context.translate('{0} seconds remaining', pArgs: [remainingSeconds]),
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline),
+                                ),
+                                const SizedBox(height: 16),
+                                TextButton(
+                                  onPressed: () => context.read<DeviceDiscoveryViewModel>().stopDiscovery(),
+                                  child: Text(context.translate('Stop')),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
-                  ],
-                );
-              },
-            ),
+                    ),
+                ],
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildDeviceTile(BuildContext context, DeviceDiscoveryViewModel vm, DiscoverableDevice device) {
+  Widget _buildDeviceTile(BuildContext context, DeviceDiscoveryViewModel vm, DiscoverableDevice device, bool isBusy) {
     // Wrap each tile in a keyed StatefulWidget so only newly inserted items animate.
     final Widget tile = (device.type == DiscoverableDeviceType.provisioned && device.provisionedData != null)
-        ? _buildProvisionedTile(context, vm, device.provisionedData!)
-        : _buildUnprovisionedTile(context, vm, device);
+        ? _buildProvisionedTile(context, vm, device.provisionedData!, isBusy)
+        : _buildUnprovisionedTile(context, vm, device, isBusy);
 
     return _AnimatedDeviceTile(key: ValueKey(device.id), child: tile);
   }
@@ -231,20 +234,28 @@ class _DeviceDiscoveryContent extends StatelessWidget {
     BuildContext context,
     DeviceDiscoveryViewModel vm,
     SupportedDeviceDescriptor deviceDesc,
+    bool isBusy,
   ) {
     return ListTile(
       leading: _buildDeviceIcon(context, vm, deviceDesc),
       title: Text(deviceDesc.name),
       subtitle: Text(context.translate('Detected on network')),
       trailing: const Icon(Icons.add),
-      onTap: () async {
-        await vm.addNewDevice(deviceDesc);
-        if (context.mounted) Navigator.pop(context);
-      },
+      onTap: isBusy
+          ? null
+          : () async {
+              await vm.addNewDevice(deviceDesc);
+              if (context.mounted) Navigator.pop(context);
+            },
     );
   }
 
-  Widget _buildUnprovisionedTile(BuildContext context, DeviceDiscoveryViewModel vm, DiscoverableDevice device) {
+  Widget _buildUnprovisionedTile(
+    BuildContext context,
+    DeviceDiscoveryViewModel vm,
+    DiscoverableDevice device,
+    bool isBusy,
+  ) {
     final bleName = device.bleName ?? '';
     return ListTile(
       leading: Container(
@@ -262,18 +273,20 @@ class _DeviceDiscoveryContent extends StatelessWidget {
       title: Text(device.name),
       subtitle: Text(context.translate('Ready to provision')),
       trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        if (vm.isMobile) {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => ProvisioningScreen(deviceName: bleName)),
-          );
-          // Check if we need to refresh after provisioning; enable auto‑add mode
-          if (result != null && result is Map && result['refresh'] == true) {
-            vm.startDiscovery(autoAdd: true);
-          }
-        }
-      },
+      onTap: isBusy
+          ? null
+          : () async {
+              if (vm.isMobile) {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ProvisioningScreen(deviceName: bleName)),
+                );
+                // Check if we need to refresh after provisioning; enable auto‑add mode
+                if (result != null && result is Map && result['refresh'] == true) {
+                  vm.startDiscovery();
+                }
+              }
+            },
     );
   }
 

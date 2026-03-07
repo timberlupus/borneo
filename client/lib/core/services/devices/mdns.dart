@@ -40,31 +40,37 @@ final class NsdMdnsDiscovery implements IMdnsDiscovery {
     switch (event) {
       case BonsoirDiscoveryServiceFoundEvent():
         {
-          event.service.resolve(
-            _discovery.serviceResolver,
-          ); // Should be called when the user wants to connect to this service.
+          event.service.resolve(_discovery.serviceResolver);
         }
         break;
       case BonsoirDiscoveryServiceResolvedEvent():
         {
-          String host = event.service.host ?? 'UNKNOWN';
-          final discovered = MdnsDiscoveredDevice(
-            host: host,
-            port: event.service.port,
-            serviceType: event.service.type,
-            name: event.service.name,
-            txt: event.service.attributes,
-          );
-          _eventBus.fire(FoundDeviceEvent(discovered));
+          _eventBus.fire(FoundDeviceEvent(_toDiscoveredDevice(event.service)));
         }
         break;
       case BonsoirDiscoveryServiceUpdatedEvent():
+        {
+          _eventBus.fire(FoundDeviceEvent(_toDiscoveredDevice(event.service)));
+        }
         break;
       case BonsoirDiscoveryServiceLostEvent():
+        {
+          _eventBus.fire(LostDeviceEvent(_toDiscoveredDevice(event.service)));
+        }
         break;
       default:
         break;
     }
+  }
+
+  MdnsDiscoveredDevice _toDiscoveredDevice(BonsoirService service) {
+    return MdnsDiscoveredDevice(
+      host: service.host ?? 'UNKNOWN',
+      port: service.port,
+      serviceType: service.type,
+      name: service.name,
+      txt: service.attributes,
+    );
   }
 
   @override

@@ -28,9 +28,14 @@ class TestKernel implements IKernel {
   bool unbindCalled = false;
   bool startScanningCalled = false;
   bool stopScanningCalled = false;
+  int registerDeviceCallCount = 0;
+  int unregisterDeviceCallCount = 0;
 
   String? lastBoundDeviceId;
   String? lastUnboundDeviceId;
+  String? lastRegisteredDeviceId;
+  String? lastUnregisteredDeviceId;
+  BoundDeviceDescriptor? lastRegisteredDescriptor;
   bool tryBindResult = true;
 
   @override
@@ -82,10 +87,7 @@ class TestKernel implements IKernel {
 
   @override
   BoundDevice getBoundDevice(String deviceID) {
-    // Create a mock BoundDevice for testing
-    final device = TestDevice(deviceID);
-    final driver = TestDriver();
-    return BoundDevice('test-driver', device, driver);
+    return _boundDevices.firstWhere((bound) => bound.device.id == deviceID);
   }
 
   @override
@@ -94,9 +96,9 @@ class TestKernel implements IKernel {
     lastBoundDeviceId = device.id;
     if (tryBindResult) {
       boundDeviceIds.add(device.id);
-      final testDevice = TestDevice(device.id);
       final testDriver = TestDriver();
-      _boundDevices.add(BoundDevice(driverID, testDevice, testDriver));
+      _boundDevices.removeWhere((bound) => bound.device.id == device.id);
+      _boundDevices.add(BoundDevice(driverID, device as Device, testDriver));
     }
     return tryBindResult;
   }
@@ -106,9 +108,9 @@ class TestKernel implements IKernel {
     bindCalled = true;
     lastBoundDeviceId = device.id;
     boundDeviceIds.add(device.id);
-    final testDevice = TestDevice(device.id);
     final testDriver = TestDriver();
-    _boundDevices.add(BoundDevice(driverID, testDevice, testDriver));
+    _boundDevices.removeWhere((bound) => bound.device.id == device.id);
+    _boundDevices.add(BoundDevice(driverID, device as Device, testDriver));
   }
 
   @override
@@ -126,13 +128,25 @@ class TestKernel implements IKernel {
   }
 
   @override
-  void registerDevice(dynamic descriptor) {}
+  void registerDevice(dynamic descriptor) {
+    registerDeviceCallCount++;
+    final typed = descriptor as BoundDeviceDescriptor;
+    lastRegisteredDescriptor = typed;
+    lastRegisteredDeviceId = typed.device.id;
+  }
 
   @override
-  void registerDevices(Iterable<dynamic> descriptors) {}
+  void registerDevices(Iterable<dynamic> descriptors) {
+    for (final descriptor in descriptors) {
+      registerDevice(descriptor);
+    }
+  }
 
   @override
-  void unregisterDevice(String deviceID) {}
+  void unregisterDevice(String deviceID) {
+    unregisterDeviceCallCount++;
+    lastUnregisteredDeviceId = deviceID;
+  }
 
   @override
   void unregisterAllDevices() {}

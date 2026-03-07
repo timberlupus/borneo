@@ -27,6 +27,7 @@ import '../core/services/devices/device_manager.dart';
 import '../core/services/group_manager.dart';
 import '../core/services/chore_manager.dart';
 import '../core/services/scene_manager.dart';
+import '../features/devices/providers/new_device_candidates_store.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/core/config/language_config.dart';
 
@@ -221,6 +222,11 @@ class _BorneoAppState extends State<BorneoApp> {
                       logger: context.read<Logger>(),
                     ),
                     dispose: (context, dm) => dm.dispose(),
+                  ),
+
+                  ChangeNotifierProvider<NewDeviceCandidatesStore>(
+                    create: (context) => NewDeviceCandidatesStore(context.read<IDeviceManager>()),
+                    lazy: false,
                   ),
 
                   // ChoreManager

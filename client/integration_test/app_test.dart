@@ -45,6 +45,7 @@ Future<Widget> _buildTestApp({IDeviceModuleRegistry? registry}) async {
 // Tests
 // ---------------------------------------------------------------------------
 
+/*
 /// Repeatedly pumps the tester until [finder] is found or the [timeout]
 /// expires.  This is more reliable than `pumpAndSettle` when the UI shows an
 /// indefinite animation (e.g. a loading spinner) that would otherwise keep
@@ -59,6 +60,7 @@ Future<void> _waitFor(WidgetTester tester, Finder finder, {Duration timeout = co
   await tester.pump();
   expect(tester.any(finder), true, reason: 'Expected $finder to appear within $timeout');
 }
+*/
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

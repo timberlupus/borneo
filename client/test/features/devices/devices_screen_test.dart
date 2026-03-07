@@ -3,6 +3,7 @@ import 'package:borneo_app/features/devices/view_models/grouped_devices_view_mod
 import 'package:borneo_app/core/models/scene_entity.dart';
 import 'package:borneo_app/core/models/events.dart';
 import 'package:borneo_app/core/providers.dart';
+import 'package:borneo_app/features/devices/providers/new_device_candidates_store.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gettext/flutter_gettext/gettext_localizations.dart';
@@ -33,11 +34,13 @@ void main() {
     final bus = EventBus();
     final scene = SceneEntity(id: 's1', name: 'Initial', isCurrent: true, lastAccessTime: DateTime.now());
     final sceneMgr = StubSceneManager([scene]);
+    final sharedDeviceMgr = StubDeviceManager();
+
     final vm = GroupedDevicesViewModel(
       bus,
       sceneMgr,
       StubGroupManager(),
-      StubDeviceManager(),
+      sharedDeviceMgr,
       StubDeviceModuleRegistry(),
       clock: TestClock(),
       gt: FakeGettext(),
@@ -51,7 +54,16 @@ void main() {
         child: MaterialApp(
           localizationsDelegates: const [_FakeGettextDelegate()],
           supportedLocales: const [Locale('en', 'US')],
-          home: ChangeNotifierProvider<GroupedDevicesViewModel>.value(value: vm, child: DevicesScreen()),
+          home: MultiProvider(
+            providers: [
+              ChangeNotifierProvider<GroupedDevicesViewModel>.value(value: vm),
+              ChangeNotifierProvider<NewDeviceCandidatesStore>(
+                create: (_) => NewDeviceCandidatesStore(sharedDeviceMgr),
+                lazy: false,
+              ),
+            ],
+            child: DevicesScreen(),
+          ),
         ),
       ),
     );

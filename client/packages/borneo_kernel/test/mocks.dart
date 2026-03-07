@@ -479,14 +479,15 @@ class MockKernel implements IKernel {
 
 class MockDiscoveryManager implements DiscoveryManager {
   final _controller = StreamController<DiscoveredDevice>.broadcast();
-  final _lostController = StreamController<String>.broadcast();
+  final _lostController = StreamController<DiscoveredDevice>.broadcast();
   bool _active = false;
+  bool disposed = false;
 
   @override
   Stream<DiscoveredDevice> get onDeviceFound => _controller.stream;
 
   @override
-  Stream<String> get onDeviceLost => _lostController.stream;
+  Stream<DiscoveredDevice> get onDeviceLost => _lostController.stream;
 
   @override
   bool get isActive => _active;
@@ -514,11 +515,13 @@ class MockDiscoveryManager implements DiscoveryManager {
     _controller.add(device);
   }
 
-  void emitLost(String id) {
-    _lostController.add(id);
+  void emitLost(DiscoveredDevice device) {
+    _lostController.add(device);
   }
 
+  @override
   void dispose() {
+    disposed = true;
     _controller.close();
     _lostController.close();
   }
@@ -694,7 +697,7 @@ class MockDeviceBus implements DeviceBus {
   String get id => 'mock';
 
   final _found = StreamController<DiscoveredDevice>.broadcast();
-  final _lost = StreamController<String>.broadcast();
+  final _lost = StreamController<DiscoveredDevice>.broadcast();
 
   @override
   Future<void> connect(String deviceId) async {}
@@ -703,7 +706,7 @@ class MockDeviceBus implements DeviceBus {
   Stream<DiscoveredDevice> get onDeviceFound => _found.stream;
 
   @override
-  Stream<String> get onDeviceLost => _lost.stream;
+  Stream<DiscoveredDevice> get onDeviceLost => _lost.stream;
 
   @override
   Future<void> disconnect(String deviceId) async {}

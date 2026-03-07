@@ -43,6 +43,7 @@ abstract class IDeviceManager implements IDisposable {
   Future<void> unbind(String deviceID);
   Future<void> delete(String id, {Transaction? tx, CancellationToken? cancelToken});
   Future<void> update(String id, {Transaction? tx, String? name, String? groupID});
+  Future<void> updateAddress(String id, Uri address, {CancellationToken? cancelToken});
   Future<void> moveToGroup(String id, String newGroupID);
   Future<bool> isNewDevice(SupportedDeviceDescriptor matched, {Transaction? tx});
   Future<DeviceEntity?> singleOrDefaultByFingerprint(String fingerprint, {Transaction? tx});

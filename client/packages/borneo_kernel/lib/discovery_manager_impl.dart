@@ -26,13 +26,15 @@ class DefaultDiscoveryManager implements DiscoveryManager {
   final EventDispatcher _events;
 
   bool _active = false;
+  bool _disposed = false;
 
   /// Registered discovery buses.  We use a map so unregistration can be
   /// performed by id.
   final Map<String, DeviceBus> _buses = {};
+  final Map<String, List<StreamSubscription<dynamic>>> _busSubscriptions = {};
 
   final StreamController<DiscoveredDevice> _foundCtrl = StreamController.broadcast();
-  final StreamController<String> _lostCtrl = StreamController.broadcast();
+  final StreamController<DiscoveredDevice> _lostCtrl = StreamController.broadcast();
 
   DefaultDiscoveryManager(this._logger, this._driverRegistry, this._events, {this.mdnsProvider}) {
     // register built‑in mDNS bus if provider is available
@@ -45,14 +47,14 @@ class DefaultDiscoveryManager implements DiscoveryManager {
   Stream<DiscoveredDevice> get onDeviceFound => _foundCtrl.stream;
 
   @override
-  Stream<String> get onDeviceLost => _lostCtrl.stream;
+  Stream<DiscoveredDevice> get onDeviceLost => _lostCtrl.stream;
 
   @override
   bool get isActive => _active;
 
   @override
   Future<void> start({Duration? timeout, CancellationToken? cancelToken}) async {
-    if (_active) return;
+    if (_disposed || _active) return;
     _active = true;
 
     // start every registered bus in parallel
@@ -74,30 +76,55 @@ class DefaultDiscoveryManager implements DiscoveryManager {
 
   @override
   void registerBus(DeviceBus bus) {
-    if (_buses.containsKey(bus.id)) return;
+    if (_disposed || _buses.containsKey(bus.id)) return;
     _buses[bus.id] = bus;
 
     // forward events from bus to our controllers and also fire kernel events
-    bus.onDeviceFound.listen((d) {
+    final foundSub = bus.onDeviceFound.listen((d) {
+      if (_disposed) return;
       _foundCtrl.add(d);
       _events.fire(FoundDeviceEvent(d));
     });
-    bus.onDeviceLost.listen((id) {
-      _lostCtrl.add(id);
+    final lostSub = bus.onDeviceLost.listen((device) {
+      if (_disposed) return;
+      _lostCtrl.add(device);
     });
+    _busSubscriptions[bus.id] = [foundSub, lostSub];
 
     if (_active) {
       // start immediately if already active
-      bus.start();
+      unawaited(bus.start());
     }
   }
 
   @override
   void unregisterBus(String busId) {
     final bus = _buses.remove(busId);
-    if (bus != null && _active) {
-      bus.stop();
+    final subscriptions = _busSubscriptions.remove(busId);
+    if (subscriptions != null) {
+      unawaited(Future.wait(subscriptions.map((sub) => sub.cancel())));
     }
+    if (bus != null && _active) {
+      unawaited(bus.stop());
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    _active = false;
+
+    unawaited(Future.wait(_buses.values.map((bus) => bus.stop())));
+
+    for (final subscriptions in _busSubscriptions.values) {
+      unawaited(Future.wait(subscriptions.map((sub) => sub.cancel())));
+    }
+
+    _busSubscriptions.clear();
+    _buses.clear();
+    _foundCtrl.close();
+    _lostCtrl.close();
   }
 }
 
@@ -112,11 +139,14 @@ class _MdnsBus implements DeviceBus {
   final List<IMdnsDiscovery> _discoveries = [];
 
   final StreamController<DiscoveredDevice> _found = StreamController.broadcast();
-  final StreamController<String> _lost = StreamController.broadcast();
+  final StreamController<DiscoveredDevice> _lost = StreamController.broadcast();
 
   _MdnsBus(this._provider, this._driverRegistry, this._logger) {
     _bus.on<FoundDeviceEvent>().listen((e) {
       _found.add(e.discovered);
+    });
+    _bus.on<LostDeviceEvent>().listen((e) {
+      _lost.add(e.discovered);
     });
   }
 
@@ -127,7 +157,7 @@ class _MdnsBus implements DeviceBus {
   Stream<DiscoveredDevice> get onDeviceFound => _found.stream;
 
   @override
-  Stream<String> get onDeviceLost => _lost.stream;
+  Stream<DiscoveredDevice> get onDeviceLost => _lost.stream;
 
   @override
   Future<void> start() async {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:borneo_common/borneo_common.dart';
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:borneo_kernel_abstractions/models/discovered_device.dart';
 import 'package:borneo_kernel_abstractions/device_bus.dart';
@@ -7,7 +8,7 @@ import 'package:borneo_kernel_abstractions/device_bus.dart';
 /// Manages the discovery portion of the kernel.  A concrete implementation
 /// aggregates one or more [DeviceBus] instances and exposes a unified stream
 /// of discovered devices.  Buses may be added or removed dynamically.
-abstract class DiscoveryManager {
+abstract class DiscoveryManager implements IDisposable {
   /// Starts discovery.  Subsequent calls are no‑ops until [stop] is invoked.
   ///
   /// [timeout] will automatically stop discovery after the duration elapses
@@ -22,8 +23,8 @@ abstract class DiscoveryManager {
   /// Stream that fires whenever a new device is discovered.
   Stream<DiscoveredDevice> get onDeviceFound;
 
-  /// Stream that emits the ID of a device that a bus reports as lost.
-  Stream<String> get onDeviceLost;
+  /// Stream that emits a [DiscoveredDevice] that a bus reports as lost.
+  Stream<DiscoveredDevice> get onDeviceLost;
 
   /// Indicates whether discovery is currently active.
   bool get isActive;

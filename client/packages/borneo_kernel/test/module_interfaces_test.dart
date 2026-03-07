@@ -16,13 +16,13 @@ class DummyBus implements DeviceBus {
   String get id => 'dummy';
 
   final _f = StreamController<DiscoveredDevice>.broadcast();
-  final _l = StreamController<String>.broadcast();
+  final _l = StreamController<DiscoveredDevice>.broadcast();
 
   @override
   Stream<DiscoveredDevice> get onDeviceFound => _f.stream;
 
   @override
-  Stream<String> get onDeviceLost => _l.stream;
+  Stream<DiscoveredDevice> get onDeviceLost => _l.stream;
 
   bool started = false;
   @override
@@ -43,7 +43,7 @@ class DummyBus implements DeviceBus {
 
   // helpers for tests
   void emitFound(DiscoveredDevice d) => _f.add(d);
-  void emitLost(String id) => _l.add(id);
+  void emitLost(DiscoveredDevice d) => _l.add(d);
 }
 
 void main() {
@@ -162,7 +162,7 @@ void main() {
       expect(bus.started, isTrue);
 
       final found = <DiscoveredDevice>[];
-      final lost = <String>[];
+      final lost = <DiscoveredDevice>[];
       mgr.onDeviceFound.listen(found.add);
       mgr.onDeviceLost.listen(lost.add);
 
@@ -171,9 +171,9 @@ void main() {
       await Future.delayed(Duration.zero);
       expect(found, contains(dev));
 
-      bus.emitLost('gone');
+      bus.emitLost(dev);
       await Future.delayed(Duration.zero);
-      expect(lost, contains('gone'));
+      expect(lost, contains(dev));
     });
 
     test('DeviceBus stub provides streams', () async {

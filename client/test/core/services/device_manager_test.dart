@@ -133,6 +133,61 @@ void main() {
         expect(updatedDevice.name, equals('Updated Name'));
       });
 
+      test('should update device address and refresh kernel registration', () async {
+        // Arrange
+        final store = stringMapStoreFactory.store('devices');
+        await store.record(testDevice.id).put(testDb, testDevice.toMap());
+        await deviceManager.bind(testDevice);
+
+        final newAddress = Uri.parse('coap://192.168.1.200:5683');
+
+        // Act
+        await deviceManager.updateAddress(testDevice.id, newAddress);
+
+        // Assert
+        final updatedDevice = await deviceManager.getDevice(testDevice.id);
+        expect(updatedDevice.address, equals(newAddress));
+        expect(testKernel.unbindCalled, isTrue);
+        expect(testKernel.lastUnboundDeviceId, equals(testDevice.id));
+        expect(testKernel.unregisterDeviceCallCount, equals(1));
+        expect(testKernel.lastUnregisteredDeviceId, equals(testDevice.id));
+        expect(testKernel.registerDeviceCallCount, greaterThanOrEqualTo(1));
+        expect(testKernel.lastRegisteredDeviceId, equals(testDevice.id));
+        expect(testKernel.lastRegisteredDescriptor?.device.address, equals(newAddress));
+        expect(testKernel.tryBindCalled, isTrue);
+      });
+
+      test('should update address from known device discovery update event', () async {
+        // Arrange
+        final store = stringMapStoreFactory.store('devices');
+        await store.record(testDevice.id).put(testDb, testDevice.toMap());
+
+        final matched = TestSupportedDeviceDescriptor(testDevice.fingerprint);
+        final event = KnownDeviceDiscoveryUpdatedEvent(
+          testDevice,
+          SupportedDeviceDescriptor(
+            driverDescriptor: matched.driverDescriptor,
+            name: matched.name,
+            address: Uri.parse('coap://192.168.1.210:5683'),
+            fingerprint: testDevice.fingerprint,
+            compatible: matched.compatible,
+            model: matched.model,
+            fwVer: matched.fwVer,
+            isCE: matched.isCE,
+            manuf: matched.manuf,
+            serno: matched.serno,
+          ),
+        );
+
+        // Act
+        testKernel.events.fire(event);
+        await Future.delayed(Duration(milliseconds: 10));
+
+        // Assert
+        final updatedDevice = await deviceManager.getDevice(testDevice.id);
+        expect(updatedDevice.address, equals(Uri.parse('coap://192.168.1.210:5683')));
+      });
+
       test('should delete device from database', () async {
         // Arrange
         final store = stringMapStoreFactory.store('devices');

@@ -37,6 +37,7 @@ final class DeviceManagerImpl extends IDeviceManager {
 
   // event subscriptions
   late final StreamSubscription<UnboundDeviceDiscoveredEvent> _unboundDeviceDiscoveredEventSub;
+  late final StreamSubscription<KnownDeviceDiscoveryUpdatedEvent> _knownDeviceDiscoveryUpdatedEventSub;
   late final StreamSubscription<CurrentSceneChangedEvent> _currentSceneChangedEventSub;
 
   // WotThing management
@@ -57,6 +58,9 @@ final class DeviceManagerImpl extends IDeviceManager {
     logger?.i("Creating DeviceManagerImpl...");
     _unboundDeviceDiscoveredEventSub = allDeviceEvents.on<UnboundDeviceDiscoveredEvent>().listen(
       _onUnboundDeviceDiscovered,
+    );
+    _knownDeviceDiscoveryUpdatedEventSub = allDeviceEvents.on<KnownDeviceDiscoveryUpdatedEvent>().listen(
+      _onKnownDeviceDiscoveryUpdated,
     );
 
     // Listen for scene changes to manage WotThing lifecycle
@@ -105,6 +109,7 @@ final class DeviceManagerImpl extends IDeviceManager {
   void dispose() {
     if (!_isDisposed) {
       _unboundDeviceDiscoveredEventSub.cancel();
+      _knownDeviceDiscoveryUpdatedEventSub.cancel();
       _currentSceneChangedEventSub.cancel();
 
       _disposeAllWotThings();
@@ -191,13 +196,29 @@ final class DeviceManagerImpl extends IDeviceManager {
   @override
   Future<void> update(String id, {Transaction? tx, String? name, String? groupID}) async {
     if (tx == null) {
-      return await _db.transaction((tx) => _update(id, tx: tx, name: name, groupID: groupID));
+      await _db.transaction((tx) async {
+        await _update(id, tx: tx, name: name, groupID: groupID);
+      });
     } else {
       await _update(id, tx: tx, name: name, groupID: groupID);
     }
   }
 
-  Future<void> _update(String id, {required Transaction tx, String? name, String? groupID}) async {
+  @override
+  Future<void> updateAddress(String id, Uri address, {CancellationToken? cancelToken}) async {
+    final updatedEntity = await _db
+        .transaction((tx) => _update(id, tx: tx, address: address))
+        .asCancellable(cancelToken);
+    await _refreshKernelRegistration(updatedEntity, cancelToken: cancelToken);
+  }
+
+  Future<DeviceEntity> _update(
+    String id, {
+    required Transaction tx,
+    String? name,
+    String? groupID,
+    Uri? address,
+  }) async {
     final store = stringMapStoreFactory.store(StoreNames.devices);
     final originalRecord = await store.record(id).get(tx);
     if (originalRecord == null) {
@@ -212,10 +233,14 @@ final class DeviceManagerImpl extends IDeviceManager {
     if (groupID != null) {
       fieldsToUpdate[DeviceEntity.kGroupIDFieldName] = groupID;
     }
+    if (address != null) {
+      fieldsToUpdate[DeviceEntity.kAddressFieldName] = address.toString();
+    }
 
     final updatedRecord = await store.record(id).update(tx, fieldsToUpdate);
     final updatedEntity = DeviceEntity.fromMap(id, updatedRecord!);
     allDeviceEvents.fire(DeviceEntityUpdatedEvent(oldEntity, updatedEntity));
+    return updatedEntity;
   }
 
   Future<bool> _groupExists(Transaction tx, String groupID) async {
@@ -226,7 +251,7 @@ final class DeviceManagerImpl extends IDeviceManager {
 
   @override
   Future<void> moveToGroup(String id, String newGroupID) async {
-    return await _db.transaction((tx) async {
+    await _db.transaction((tx) async {
       // Allow empty string for ungrouped devices
       if (newGroupID.isNotEmpty) {
         final exists = await _groupExists(tx, newGroupID);
@@ -234,7 +259,7 @@ final class DeviceManagerImpl extends IDeviceManager {
           throw KeyNotFoundException(message: 'Cannot find group with ID `$newGroupID`');
         }
       }
-      return await _update(id, tx: tx, groupID: newGroupID);
+      await _update(id, tx: tx, groupID: newGroupID);
     });
   }
 
@@ -367,20 +392,45 @@ final class DeviceManagerImpl extends IDeviceManager {
 
     return await _db.transaction((tx) async {
       final existed = await singleOrDefaultByFingerprint(event.matched.fingerprint, tx: tx);
-      if (existed != null) {
-        final updates = <String, dynamic>{};
-        if (event.matched.address != existed.address) {
-          updates[DeviceEntity.kAddressFieldName] = event.matched.address.toString();
-        }
-        if (updates.isNotEmpty) {
-          final store = stringMapStoreFactory.store(StoreNames.devices);
-          final record = store.record(existed.id);
-          await record.update(tx, updates);
-        }
-      } else {
+      if (existed == null) {
         allDeviceEvents.fire(NewDeviceFoundEvent(event.matched));
       }
     });
+  }
+
+  Future<void> _onKnownDeviceDiscoveryUpdated(KnownDeviceDiscoveryUpdatedEvent event) async {
+    logger?.i('Known device discovery updated: ${event.device.id} -> ${event.matched.address}');
+    assert(isInitialized);
+
+    if (event.device.address == event.matched.address) {
+      return;
+    }
+
+    await updateAddress(event.device.id, event.matched.address);
+  }
+
+  Future<void> _refreshKernelRegistration(DeviceEntity updatedEntity, {CancellationToken? cancelToken}) async {
+    final wasBound = _kernel.boundDevices.any((bound) => bound.device.id == updatedEntity.id);
+
+    _kernel.enterHeartbeatBatch();
+    try {
+      await _deviceOperLock
+          .synchronized(() async {
+            if (wasBound) {
+              await _kernel.unbind(updatedEntity.id, cancelToken: cancelToken);
+            }
+
+            _kernel.unregisterDevice(updatedEntity.id);
+            _kernel.registerDevice(BoundDeviceDescriptor(device: updatedEntity, driverID: updatedEntity.driverID));
+
+            if (wasBound) {
+              await _kernel.tryBind(updatedEntity, updatedEntity.driverID, cancelToken: cancelToken);
+            }
+          })
+          .asCancellable(cancelToken);
+    } finally {
+      _kernel.exitHeartbeatBatch();
+    }
   }
 
   @override

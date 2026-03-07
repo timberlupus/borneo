@@ -356,6 +356,7 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
+  /*
   Future<void> _showDeleteDialog(BuildContext context, SettingsViewModel vm) async {
     final confirmed = await AsyncConfirmationSheet.show(
       context,
@@ -370,6 +371,7 @@ class SettingsScreen extends StatelessWidget {
       }
     });
   }
+  */
 
   void _showManualFanPowerDialog(BuildContext context, SettingsViewModel vm, int currentValue) {
     double tempValue = currentValue.toDouble();

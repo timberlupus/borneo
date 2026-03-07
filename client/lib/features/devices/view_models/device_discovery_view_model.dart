@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
-import 'package:borneo_app/features/devices/models/device_entity.dart';
 import 'package:borneo_app/features/devices/models/discoverable_device.dart';
+import 'package:borneo_app/features/devices/providers/new_device_candidates_store.dart';
 import 'package:borneo_app/core/services/devices/device_module_registry.dart';
 import 'package:borneo_app/shared/view_models/abstract_screen_view_model.dart';
 import 'package:borneo_kernel_abstractions/models/supported_device_descriptor.dart';
@@ -17,11 +17,6 @@ import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
 
 const int kDiscoveryTimeoutSeconds = 30;
 
-/// When automatic post‑provisioning mode is enabled we keep the mDNS listener
-/// active for this many seconds in order to pick up the newly‑added device.
-/// 30 s should be plenty in almost all environments.
-const int kAutoAddTimeoutSeconds = 30;
-
 class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   bool _disposed = false;
   late CancellationToken _scanCancelToken = CancellationToken();
@@ -29,6 +24,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   int _remainingSeconds = kDiscoveryTimeoutSeconds;
   final Logger _logger;
   final IDeviceManager _deviceManager;
+  final NewDeviceCandidatesStore _newDeviceCandidatesStore;
   final IBleProvisioner _bleProvisioner;
   final IDeviceModuleRegistry deviceMdoules;
   final PlatformService _platformService;
@@ -36,20 +32,13 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   // cache BLE name -> resolved device name as obtained via fetchDeviceInfo
   final Map<String, String> _resolvedDeviceNames = {};
 
-  // when true we will automatically add any provisioned device we see
-  // via mDNS (used after provisioning completes).
-  bool _autoAddWhenFound = false;
-  Timer? _autoAddTimer;
-
   bool get _isDiscovering => _deviceManager.isDiscoverying;
   bool _isRefreshing = false;
 
   late final StreamSubscription<NewDeviceEntityAddedEvent> _deviceAddedEventSub;
-  late final StreamSubscription<NewDeviceFoundEvent> _newDeviceFoundEventSub;
 
   // Internal lists
   final List<String> _unprovisioned = [];
-  final List<SupportedDeviceDescriptor> _provisioned = [];
 
   // Exposed list
   final ValueNotifier<List<DiscoverableDevice>> _discoverableDevices = ValueNotifier([]);
@@ -57,9 +46,6 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
 
   final ValueNotifier<String?> _scanError = ValueNotifier(null);
   ValueNotifier<String?> get scanError => _scanError;
-
-  DeviceEntity? _lastestAddedDevice;
-  DeviceEntity? get lastestAddedDevice => _lastestAddedDevice;
 
   bool get isDiscovering => _isRefreshing;
   int get remainingSeconds => _remainingSeconds;
@@ -70,6 +56,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   DeviceDiscoveryViewModel(
     this._logger,
     this._deviceManager,
+    this._newDeviceCandidatesStore,
     this._bleProvisioner,
     this.deviceMdoules,
     this._platformService, {
@@ -82,16 +69,14 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     _deviceAddedEventSub = _deviceManager.allDeviceEvents.on<NewDeviceEntityAddedEvent>().listen(
       (event) => _onNewDeviceEntityAdded(event),
     );
-
-    _newDeviceFoundEventSub = _deviceManager.allDeviceEvents.on<NewDeviceFoundEvent>().listen(
-      (event) => _onNewDeviceFound(event),
-    );
+    _newDeviceCandidatesStore.addListener(_onCandidatesChanged);
   }
 
   @override
   Future<void> onInitialize() async {
     try {
       await Future.delayed(Duration.zero);
+      _updateDiscoverableList();
       await startDiscovery();
     } finally {}
   }
@@ -101,10 +86,8 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     if (!_disposed) {
       _countdownTimer?.cancel();
       _countdownTimer = null;
-      _autoAddTimer?.cancel();
-      _autoAddTimer = null;
       _deviceAddedEventSub.cancel();
-      _newDeviceFoundEventSub.cancel();
+      _newDeviceCandidatesStore.removeListener(_onCandidatesChanged);
       _discoverableDevices.dispose();
       _scanError.dispose();
       if (_isRefreshing || _isDiscovering) {
@@ -122,21 +105,8 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     _isRefreshing = false;
     _scanCancelToken.cancel();
 
-    // also cancel auto‑add mode
-    _autoAddTimer?.cancel();
-    _autoAddTimer = null;
-    _autoAddWhenFound = false;
-
-    try {
-      if (_isDiscovering) {
-        await _deviceManager.stopDiscovery();
-      }
-    } catch (e, stackTrace) {
-      _logger.e('Error stopping discovery', error: e, stackTrace: stackTrace);
-    } finally {
-      if (!_disposed) {
-        notifyListeners();
-      }
+    if (!_disposed) {
+      notifyListeners();
     }
   }
 
@@ -150,22 +120,11 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     return true;
   }
 
-  /// Begins discovery.  Normally this just runs the regular mDNS scan and
-  /// optionally a BLE scan if running on mobile.  If [autoAdd] is true we
-  /// additionally keep the mDNS listener active for [autoAddTimeoutSeconds]
-  /// and add any newly‑found device to the ungrouped pool.
-  Future<void> startDiscovery({bool autoAdd = false, int autoAddTimeoutSeconds = kAutoAddTimeoutSeconds}) async {
+  /// Begins a UI discovery session. mDNS itself is managed globally by the
+  /// app lifecycle; this method refreshes the page state and optionally runs
+  /// BLE discovery on mobile.
+  Future<void> startDiscovery() async {
     if (_isRefreshing) return; // Already refreshing
-
-    // cancel any previous auto‑add timer
-    _autoAddTimer?.cancel();
-    _autoAddWhenFound = autoAdd;
-    if (autoAdd) {
-      _autoAddTimer = Timer(Duration(seconds: autoAddTimeoutSeconds), () {
-        _autoAddWhenFound = false;
-        _autoAddTimer = null;
-      });
-    }
 
     // reset resolved name cache when starting a fresh scan
     _resolvedDeviceNames.clear();
@@ -175,9 +134,8 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     // Create new cancellation token for this operation
     _scanCancelToken = CancellationToken();
 
-    // Clear all results
+    // Clear session-scoped BLE results only.
     _unprovisioned.clear();
-    _provisioned.clear();
     _scanError.value = null; // Clear previous error
     _updateDiscoverableList();
 
@@ -202,24 +160,11 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     }
 
     try {
-      // Stop any existing discovery first
-      if (_isDiscovering) {
-        await _deviceManager.stopDiscovery();
-      }
-
-      // Start mDNS discovery (runs continuously in background, don't await)
-      _deviceManager.startDiscovery();
+      // Ensure global mDNS discovery is active.
 
       // Start BLE discovery (Mobile only) - run in background
       if (isMobile) {
-        unawaited(
-          _startBleScan().catchError((error, stackTrace) {
-            _logger.e('BLE scan error', error: error, stackTrace: stackTrace);
-            if (!_disposed) {
-              _scanError.value = gt.translate('Bluetooth scan error, please check if Bluetooth device is enabled.');
-            }
-          }),
-        );
+        await _beginBleScan();
       }
 
       if (_scanCancelToken.isCancelled) {
@@ -276,7 +221,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     return true;
   }
 
-  Future<void> _startBleScan() async {
+  Future<void> _beginBleScan() async {
     final granted = await _ensureBlePermissions();
     if (!granted) {
       if (!_disposed) {
@@ -285,6 +230,17 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
       return;
     }
 
+    unawaited(
+      _startBleScan().catchError((error, stackTrace) {
+        _logger.e('BLE scan error', error: error, stackTrace: stackTrace);
+        if (!_disposed) {
+          _scanError.value = gt.translate('Bluetooth scan error, please check if Bluetooth device is enabled.');
+        }
+      }),
+    );
+  }
+
+  Future<void> _startBleScan() async {
     try {
       final devices = await _bleProvisioner.scanBleDevices('BOPROV_', cancelToken: _scanCancelToken);
       // Instead of publishing raw names immediately, resolve each one and only
@@ -322,34 +278,32 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
   }
 
   Future<void> addNewDevice(SupportedDeviceDescriptor deviceInfo) async {
-    await _deviceManager.addNewDevice(deviceInfo, groupID: null);
+    if (this.isBusy) {
+      return;
+    }
+
+    this.isBusy = true;
+    this.notifyListeners();
+    try {
+      await _deviceManager.addNewDevice(deviceInfo, groupID: null);
+      await Future.delayed(const Duration(seconds: 3));
+    } finally {
+      this.isBusy = false;
+      this.notifyListeners();
+    }
   }
 
   Future<void> _onNewDeviceEntityAdded(NewDeviceEntityAddedEvent event) async {
     try {
-      _provisioned.removeWhere((x) => x.fingerprint == event.device.fingerprint);
-      _lastestAddedDevice = event.device;
       _updateDiscoverableList();
     } finally {
       notifyListeners();
     }
   }
 
-  Future<void> _onNewDeviceFound(NewDeviceFoundEvent event) async {
-    try {
-      // Avoid duplicates
-      if (!_provisioned.any((d) => d.fingerprint == event.device.fingerprint)) {
-        _provisioned.add(event.device);
-        if (_autoAddWhenFound) {
-          try {
-            await addNewDevice(event.device);
-          } catch (e, st) {
-            _logger.e('Auto‑add failed', error: e, stackTrace: st);
-          }
-        }
-        _updateDiscoverableList();
-      }
-    } finally {
+  void _onCandidatesChanged() {
+    if (!_disposed) {
+      _updateDiscoverableList();
       notifyListeners();
     }
   }
@@ -358,7 +312,7 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     List<DiscoverableDevice> list = [];
 
     // Provisioned first
-    list.addAll(_provisioned.map((d) => DiscoverableDevice.provisioned(d)));
+    list.addAll(_newDeviceCandidatesStore.candidates.map((d) => DiscoverableDevice.provisioned(d)));
 
     // Unprovisioned second; include any resolved names we have cached
     list.addAll(
@@ -366,10 +320,5 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     );
 
     _discoverableDevices.value = list;
-  }
-
-  void clearAddedDevice() {
-    _lastestAddedDevice = null;
-    notifyListeners();
   }
 }

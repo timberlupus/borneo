@@ -269,8 +269,6 @@ class DefaultHeartbeatService implements HeartbeatService {
   void _onHeartbeatReceived(String deviceId, dynamic timestamp) {
     _lastSeen[deviceId] = DateTime.now();
     _observationLock.synchronized(() {
-      _logger.d('Heartbeat received for device $deviceId: $timestamp');
-
       // Reset missed observations counter
       _missedObservations[deviceId] = 0;
 

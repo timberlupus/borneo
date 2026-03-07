@@ -9,7 +9,10 @@ import 'package:event_bus/event_bus.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pub_semver/pub_semver.dart';
 
+import 'package:borneo_app/features/devices/models/events.dart';
+import 'package:borneo_app/features/devices/providers/new_device_candidates_store.dart';
 import 'package:borneo_app/features/devices/view_models/device_discovery_view_model.dart';
 import 'package:borneo_app/core/services/devices/device_manager.dart';
 import 'package:borneo_app/core/services/devices/ble_provisioner.dart';
@@ -63,14 +66,13 @@ class FakePlatformService implements PlatformService {
 }
 
 class FakeDeviceManager implements IDeviceManager {
-  // ignore: unused_field
-  final EventBus _bus = EventBus();
+  final DefaultEventDispatcher _events = DefaultEventDispatcher();
 
   @override
   bool get isDiscoverying => false;
 
   @override
-  EventDispatcher get allDeviceEvents => DefaultEventDispatcher();
+  EventDispatcher get allDeviceEvents => _events;
 
   @override
   Iterable<BoundDevice> get boundDevices => const [];
@@ -120,6 +122,9 @@ class FakeDeviceManager implements IDeviceManager {
   Future<void> update(String id, {Transaction? tx, String? name, String? groupID}) async {}
 
   @override
+  Future<void> updateAddress(String id, Uri address, {CancellationToken? cancelToken}) async {}
+
+  @override
   Future<void> moveToGroup(String id, String newGroupID) async {}
 
   @override
@@ -164,6 +169,10 @@ class FakeDeviceManager implements IDeviceManager {
 
   @override
   void dispose() {}
+
+  void emitNewDeviceFound(SupportedDeviceDescriptor device) {
+    _events.fire(NewDeviceFoundEvent(device));
+  }
 }
 
 class FakeBleProvisioner implements IBleProvisioner {
@@ -205,10 +214,32 @@ class FakeDeviceModuleRegistry extends IDeviceModuleRegistry {
   UnmodifiableMapView<String, DeviceModuleMetadata> get metaModules => UnmodifiableMapView({});
 }
 
+SupportedDeviceDescriptor makeSupportedDevice({String fingerprint = 'fp-1', String name = 'Candidate'}) {
+  return SupportedDeviceDescriptor(
+    driverDescriptor: DriverDescriptor(
+      id: 'test-driver',
+      name: 'Test Driver',
+      heartbeatMethod: HeartbeatMethod.poll,
+      discoveryMethod: const MdnsDeviceDiscoveryMethod('_test._tcp'),
+      matches: (_) => null,
+      factory: ({Logger? logger}) => throw UnimplementedError(),
+    ),
+    name: name,
+    address: Uri.parse('coap://192.168.1.10:5683'),
+    fingerprint: fingerprint,
+    compatible: 'lyfi',
+    model: 'test-model',
+    fwVer: Version.parse('1.0.0'),
+    isCE: true,
+  );
+}
+
 void main() {
   group('DeviceDiscoveryViewModel permissions', () {
     late DeviceDiscoveryViewModel vm;
     late FakeBleProvisioner bleProv;
+    late FakeDeviceManager deviceManager;
+    late NewDeviceCandidatesStore candidatesStore;
 
     // helper to construct a VM configured for mobile/desktop and an optional
     // permission stub.
@@ -218,9 +249,12 @@ void main() {
       FakeBleProvisioner? ble,
     }) {
       bleProv = ble ?? FakeBleProvisioner();
+      deviceManager = FakeDeviceManager();
+      candidatesStore = NewDeviceCandidatesStore(deviceManager);
       return DeviceDiscoveryViewModel(
         Logger(),
-        FakeDeviceManager(),
+        deviceManager,
+        candidatesStore,
         bleProv,
         FakeDeviceModuleRegistry(),
         FakePlatformService(isAndroid: mobile, isIOS: false, isWindows: !mobile),
@@ -241,9 +275,12 @@ void main() {
     test('blePermissionList returns iOS permissions on iOS', () {
       // manual iOS platform service, bypassing makeVm helper
       bleProv = FakeBleProvisioner();
+      deviceManager = FakeDeviceManager();
+      candidatesStore = NewDeviceCandidatesStore(deviceManager);
       vm = DeviceDiscoveryViewModel(
         Logger(),
-        FakeDeviceManager(),
+        deviceManager,
+        candidatesStore,
         bleProv,
         FakeDeviceModuleRegistry(),
         FakePlatformService(isIOS: true),
@@ -289,6 +326,15 @@ void main() {
       await vm.startDiscovery();
       expect(bleProv.scanCalled, isFalse);
       expect(vm.scanError.value, isNull);
+    });
+
+    test('startDiscovery keeps global new-device candidates visible', () async {
+      vm = makeVm(mobile: false, permissions: () async => true);
+      deviceManager.emitNewDeviceFound(makeSupportedDevice());
+
+      await vm.startDiscovery();
+
+      expect(vm.discoverableDevices.value.map((device) => device.id), contains('fp-1'));
     });
   });
 }
