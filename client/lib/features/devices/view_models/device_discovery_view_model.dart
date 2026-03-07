@@ -286,7 +286,6 @@ class DeviceDiscoveryViewModel extends AbstractScreenViewModel {
     this.notifyListeners();
     try {
       await _deviceManager.addNewDevice(deviceInfo, groupID: null);
-      await Future.delayed(const Duration(seconds: 3));
     } finally {
       this.isBusy = false;
       this.notifyListeners();

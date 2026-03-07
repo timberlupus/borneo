@@ -115,8 +115,8 @@ void deviceGroupTests() {
     await tester.tap(find.byKey(const Key('btn_delete_group')));
     await tester.pumpAndSettle();
 
-    // confirm deletion
-    await tester.tap(find.byKey(const Key('btn_confirm_delete')));
+    // confirm deletion (confirmation sheet uses btn_ok key)
+    await tester.tap(find.byKey(const Key('btn_ok')));
     await tester.pump(const Duration(milliseconds: 1000));
     // group should no longer be present
     expect(find.text('Updated Group'), findsNothing);

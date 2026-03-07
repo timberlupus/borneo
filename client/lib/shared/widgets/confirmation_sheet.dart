@@ -74,12 +74,14 @@ class AsyncConfirmationSheet extends StatelessWidget {
       message: message,
       actions: [
         TextButton(
+          key: const Key('btn_cancel'),
           child: Text(context.translate('Cancel')),
           onPressed: () {
             Navigator.of(context).pop(false);
           },
         ),
         TextButton(
+          key: const Key('btn_ok'),
           child: Text(context.translate('OK')),
           onPressed: () {
             Navigator.of(context).pop(true);
