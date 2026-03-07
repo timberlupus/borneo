@@ -35,6 +35,7 @@ Borneo Client is a cross-platform Flutter application for controlling Borneo-IoT
 - Format code with `dart format .` after each code modification
 - Implement with Flutter best practices
 - Use Provider for state management
+- All strings and comments in code must be written in English
 
 ### Building and Running
 
