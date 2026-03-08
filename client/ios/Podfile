@@ -39,16 +39,20 @@ post_install do |installer|
 
     if target.name == "geolocator_apple"
       target.build_configurations.each do |config|
-        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)', 'BYPASS_PERMISSION_LOCATION_ALWAYS=1']
+        definitions = Array(config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'])
+        definitions << '$(inherited)' unless definitions.include?('$(inherited)')
+        definitions << 'BYPASS_PERMISSION_LOCATION_ALWAYS=1' unless definitions.include?('BYPASS_PERMISSION_LOCATION_ALWAYS=1')
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = definitions
       end
     end
 
     target.build_configurations.each do |config|
-      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
-        '$(inherited)',
-        'PERMISSION_LOCATION=1',
-        'PERMISSION_BLUETOOTH=1',
-      ]
+      definitions = Array(config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'])
+      definitions << '$(inherited)' unless definitions.include?('$(inherited)')
+      definitions << 'PERMISSION_LOCATION_WHENINUSE=1' unless definitions.include?('PERMISSION_LOCATION_WHENINUSE=1')
+      definitions << 'PERMISSION_BLUETOOTH=1' unless definitions.include?('PERMISSION_BLUETOOTH=1')
+      definitions.delete('PERMISSION_LOCATION=1')
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = definitions
     end
   end
 
