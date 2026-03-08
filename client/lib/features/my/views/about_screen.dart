@@ -153,6 +153,19 @@ class AboutScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
 
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  child: Text(
+                    context.translate(
+                      '''This mobile application is free software licensed under GNU General Public License version 3 or later, with no warranty.
+The author assumes no responsibility or liability for any direct or indirect consequences resulting from the use of this software.''',
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
                 _LinkSection(title: context.translate('Website'), url: _websiteUrl),
 
                 _LinkSection(title: context.translate('Documentation'), url: _docsUrl),
@@ -180,17 +193,6 @@ class AboutScreen extends ConsumerWidget {
             ),
 
             const Spacer(),
-
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Text(
-                context.translate(
-                  '''This mobile application is free software licensed under GNU General Public License version 3 or later, with no warranty.
-The author assumes no responsibility or liability for any direct or indirect consequences resulting from the use of this software.''',
-                ),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
