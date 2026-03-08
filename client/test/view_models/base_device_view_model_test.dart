@@ -34,7 +34,7 @@ void main() {
       viewModel = _TestDeviceViewModel(
         deviceManager: deviceManager,
         globalEventBus: EventBus(),
-        wotThing: WotThing(id: device.id, title: device.name, type: 'test-device', description: ''),
+        wotThing: WotThing(id: device.id, title: device.name, type: ['test-device'], description: ''),
         gt: _DummyGettextLocalizations(),
       );
       await viewModel.initialize();

@@ -45,7 +45,7 @@ void main() {
 
     group('Constructor and Basic Properties', () {
       test('constructor with string type', () {
-        final singleTypeThing = WotThing(id: 'id1', title: 'TestThing', type: 'SingleType', description: 'desc');
+        final singleTypeThing = WotThing(id: 'id1', title: 'TestThing', type: ['SingleType'], description: 'desc');
         expect(singleTypeThing.id, equals('id1'));
         expect(singleTypeThing.title, equals('TestThing'));
         expect(singleTypeThing.type, equals(['SingleType']));

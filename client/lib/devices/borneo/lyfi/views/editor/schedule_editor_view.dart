@@ -83,86 +83,86 @@ class ScheduleEditorView extends StatelessWidget {
     return ChangeNotifierProvider.value(
       value: viewModel,
       builder: (context, child) {
-        return Column(
-          children: [
-            // The chart
-            SizedBox(
-              height: 150,
-              child: Container(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                padding: EdgeInsets.fromLTRB(8, 24, 8, 0),
-                child: Consumer<ScheduleEditorViewModel>(
-                  builder: (context, vm, child) {
-                    const minSpanSeconds = 3 * 3600.0;
-                    final sortedEntries = _sortedEntries(vm);
-                    double minX = 0.0;
-                    double maxX = 24 * 3600.0;
-                    if (sortedEntries.isNotEmpty) {
-                      final hasCrossDay = sortedEntries.any((e) => e.instant.inHours >= 24);
-                      if (hasCrossDay) {
-                        minX = sortedEntries.first.instant.inSeconds.toDouble();
-                        maxX = sortedEntries.last.instant.inSeconds.toDouble();
-                        if (maxX - minX < minSpanSeconds) {
-                          maxX = minX + minSpanSeconds;
+        return SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              // The chart
+              SizedBox(
+                height: 150,
+                child: Container(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  padding: EdgeInsets.fromLTRB(8, 24, 8, 0),
+                  child: Consumer<ScheduleEditorViewModel>(
+                    builder: (context, vm, child) {
+                      const minSpanSeconds = 3 * 3600.0;
+                      final sortedEntries = _sortedEntries(vm);
+                      double minX = 0.0;
+                      double maxX = 24 * 3600.0;
+                      if (sortedEntries.isNotEmpty) {
+                        final hasCrossDay = sortedEntries.any((e) => e.instant.inHours >= 24);
+                        if (hasCrossDay) {
+                          minX = sortedEntries.first.instant.inSeconds.toDouble();
+                          maxX = sortedEntries.last.instant.inSeconds.toDouble();
+                          if (maxX - minX < minSpanSeconds) {
+                            maxX = minX + minSpanSeconds;
+                          }
                         }
                       }
-                    }
-                    final maxScale = ((maxX - minX) / minSpanSeconds).clamp(1.0, double.infinity);
-                    return LyfiTimeLineChart(
-                      lineBarsData: buildLineDatas(vm),
-                      minX: minX,
-                      maxX: maxX,
-                      minY: 0,
-                      maxY: kLyfiBrightnessMax.toDouble(),
-                      currentTime: vm.currentEntry?.instant,
-                      allowZoom: true,
-                      maxScale: maxScale,
-                      lineTouchData: LineTouchData(
-                        handleBuiltInTouches: true,
-                        touchTooltipData: LineTouchTooltipData(getTooltipItems: (_) => []),
-                        touchCallback: (event, response) async {
-                          if (response == null || response.lineBarSpots == null || response.lineBarSpots!.isEmpty) {
-                            return;
-                          }
-                          final spot = response.lineBarSpots!.first;
-                          final x = spot.x.toInt();
-                          final idx = vm.entries.indexWhere((e) => e.instant.inSeconds == x);
-                          if (idx != -1) {
-                            await vm.setCurrentEntryAndSyncDimmingColor(idx);
-                          }
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-            // Controls
-            Expanded(
-              child: Selector<ScheduleEditorViewModel, bool>(
-                selector: (_, editor) => editor.canChangeColor,
-                builder: (_, canChangeColor, _) => SingleChildScrollView(
-                  child: BrightnessSliderList(
-                    context.read<ScheduleEditorViewModel>(),
-                    disabled: !canChangeColor,
-                    padding: EdgeInsets.all(0),
+                      final maxScale = ((maxX - minX) / minSpanSeconds).clamp(1.0, double.infinity);
+                      return LyfiTimeLineChart(
+                        lineBarsData: buildLineDatas(vm),
+                        minX: minX,
+                        maxX: maxX,
+                        minY: 0,
+                        maxY: kLyfiBrightnessMax.toDouble(),
+                        currentTime: vm.currentEntry?.instant,
+                        allowZoom: true,
+                        maxScale: maxScale,
+                        lineTouchData: LineTouchData(
+                          handleBuiltInTouches: true,
+                          touchTooltipData: LineTouchTooltipData(getTooltipItems: (_) => []),
+                          touchCallback: (event, response) async {
+                            if (response == null || response.lineBarSpots == null || response.lineBarSpots!.isEmpty) {
+                              return;
+                            }
+                            final spot = response.lineBarSpots!.first;
+                            final x = spot.x.toInt();
+                            final idx = vm.entries.indexWhere((e) => e.instant.inSeconds == x);
+                            if (idx != -1) {
+                              await vm.setCurrentEntryAndSyncDimmingColor(idx);
+                            }
+                          },
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
-            ),
 
-            // Bottom buttons
-            Consumer<ScheduleEditorViewModel>(
-              builder: (context, vm, child) => SafeArea(
-                top: false,
-                child: Card(
-                  margin: EdgeInsets.fromLTRB(16, 0, 16, 0),
+              const SizedBox(height: 16),
+              // Controls
+              Expanded(
+                child: Selector<ScheduleEditorViewModel, bool>(
+                  selector: (_, editor) => editor.canChangeColor,
+                  builder: (_, canChangeColor, _) => SingleChildScrollView(
+                    child: BrightnessSliderList(
+                      context.read<ScheduleEditorViewModel>(),
+                      disabled: !canChangeColor,
+                      padding: EdgeInsets.all(0),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Bottom buttons
+              Consumer<ScheduleEditorViewModel>(
+                builder: (context, vm, child) => Card(
+                  margin: EdgeInsets.fromLTRB(8, 0, 8, 8),
                   elevation: 1,
                   color: Theme.of(context).colorScheme.surfaceContainer,
                   child: Padding(
-                    padding: EdgeInsetsGeometry.fromLTRB(8, 16, 8, 16),
+                    padding: EdgeInsetsGeometry.fromLTRB(8, 16, 8, 8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -250,8 +250,8 @@ class ScheduleEditorView extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );

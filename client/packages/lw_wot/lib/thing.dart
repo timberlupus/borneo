@@ -30,9 +30,8 @@ class WotThing {
   /// [title] The thing's title
   /// [type] The thing's type(s)
   /// [description] Description of the thing
-  WotThing({required this.id, required this.title, required dynamic type, required this.description})
-    : type = type is List<String> ? type : [if (type is String) type],
-      context = 'https://webthings.io/schemas';
+  WotThing({required this.id, required this.title, required this.type, required this.description})
+    : context = 'https://webthings.io/schemas';
 
   /// Return the thing state as a Thing Description.
   Map<String, dynamic> asThingDescription() {

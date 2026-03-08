@@ -43,9 +43,21 @@ class DimmingAppBar extends StatelessWidget {
             showSelectedIcon: false,
             selected: <LyfiMode>{data.mode},
             segments: [
-              ButtonSegment<LyfiMode>(value: LyfiMode.manual, icon: const Icon(Icons.bar_chart_outlined, size: 20)),
-              ButtonSegment<LyfiMode>(value: LyfiMode.scheduled, icon: const Icon(Icons.alarm_outlined, size: 20)),
-              ButtonSegment<LyfiMode>(value: LyfiMode.sun, icon: const Icon(Icons.wb_sunny_outlined, size: 20)),
+              ButtonSegment<LyfiMode>(
+                value: LyfiMode.manual,
+                icon: const Icon(Icons.bar_chart_outlined, size: 20),
+                tooltip: context.translate('Manual mode'),
+              ),
+              ButtonSegment<LyfiMode>(
+                value: LyfiMode.scheduled,
+                icon: const Icon(Icons.alarm_outlined, size: 20),
+                tooltip: context.translate('Scheduled mode'),
+              ),
+              ButtonSegment<LyfiMode>(
+                value: LyfiMode.sun,
+                icon: const Icon(Icons.wb_sunny_outlined, size: 20),
+                tooltip: context.translate('Sun simulation mode'),
+              ),
             ],
             onSelectionChanged: data.canSwitch
                 ? (Set<LyfiMode> newSelection) {

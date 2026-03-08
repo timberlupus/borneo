@@ -6,7 +6,7 @@ import 'package:lw_wot/thing.dart';
 void main() {
   group('Dispose Functionality', () {
     test('WotProperty dispose should dispose its value', () {
-      final thing = WotThing(id: 'test', title: 'Test', type: 'Test', description: 'Test');
+      final thing = WotThing(id: 'test', title: 'Test', type: ['Test'], description: 'Test');
       final value = WotValue<int>(initialValue: 42);
       final property = WotProperty<int>(thing: thing, name: 'test', value: value, metadata: WotPropertyMetadata());
 
@@ -18,7 +18,7 @@ void main() {
     });
 
     test('WotThing dispose should dispose all its properties', () {
-      final thing = WotThing(id: 'test', title: 'Test', type: 'Test', description: 'Test');
+      final thing = WotThing(id: 'test', title: 'Test', type: ['Test'], description: 'Test');
       final value1 = WotValue<int>(initialValue: 42);
       final value2 = WotValue<String>(initialValue: 'hello');
 
