@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:borneo_app/app/assets.dart';
 import 'package:borneo_app/core/services/clock.dart';
 import 'package:borneo_app/shared/models/base_entity.dart';
@@ -110,6 +112,46 @@ class SceneManagerImpl extends ISceneManager {
     return SceneEntity.fromMap(currentRecord.key, currentRecord.value);
   }
 
+  Future<String> _createBlobFromFile(String imagePath) async {
+    final bytes = await File(imagePath).readAsBytes();
+    return _blobManager.create(ByteData.sublistView(bytes));
+  }
+
+  Future<({String? imageID, String? imagePath})> _prepareSceneImage(
+    String? imagePath, {
+    String? existingImageID,
+    String? existingImagePath,
+  }) async {
+    final normalizedImagePath = imagePath?.trim();
+    final normalizedExistingImageID = existingImageID?.trim();
+    final normalizedExistingImagePath = existingImagePath?.trim();
+
+    if (normalizedImagePath == null || normalizedImagePath.isEmpty) {
+      if (normalizedExistingImageID != null && normalizedExistingImageID.isNotEmpty) {
+        await _blobManager.delete(normalizedExistingImageID);
+      }
+      return (imageID: null, imagePath: null);
+    }
+
+    if (normalizedExistingImageID != null && normalizedExistingImageID.isNotEmpty) {
+      final resolvedExistingPath = _blobManager.getPath(normalizedExistingImageID);
+      if (normalizedImagePath == resolvedExistingPath) {
+        return (imageID: normalizedExistingImageID, imagePath: resolvedExistingPath);
+      }
+    } else if (normalizedExistingImagePath == normalizedImagePath) {
+      return (imageID: null, imagePath: normalizedExistingImagePath);
+    }
+
+    final newImageID = await _createBlobFromFile(normalizedImagePath);
+    final newImagePath = _blobManager.getPath(newImageID);
+
+    if (normalizedExistingImageID != null && normalizedExistingImageID.isNotEmpty) {
+      await _blobManager.delete(normalizedExistingImageID);
+    }
+
+    return (imageID: newImageID, imagePath: newImagePath);
+  }
+
   @override
   Future<SceneEntity> single(String key, {Transaction? tx}) async {
     assert(isInitialized);
@@ -198,13 +240,15 @@ class SceneManagerImpl extends ISceneManager {
   Future<SceneEntity> create({required String name, required String notes, String? imagePath}) async {
     final store = stringMapStoreFactory.store(StoreNames.scenes);
     return await _db.transaction((tx) async {
+      final preparedImage = await _prepareSceneImage(imagePath);
       final scene = SceneEntity(
         id: BaseEntity.generateID(),
         name: name,
         isCurrent: false,
         lastAccessTime: this.clock.now(),
         notes: notes,
-        imagePath: imagePath,
+        imageID: preparedImage.imageID,
+        imagePath: preparedImage.imagePath,
       );
       await store.record(scene.id).put(tx, scene.toMap());
       _globalEventBus.fire(SceneCreatedEvent(scene));
@@ -224,10 +268,18 @@ class SceneManagerImpl extends ISceneManager {
       return await _db.transaction((tx) => update(id: id, name: name, notes: notes, imagePath: imagePath, tx: tx));
     } else {
       final store = stringMapStoreFactory.store(StoreNames.scenes);
+      final existingMap = (await store.record(id).get(tx))!;
+      final existingScene = SceneEntity.fromMap(id, existingMap);
+      final preparedImage = await _prepareSceneImage(
+        imagePath,
+        existingImageID: existingScene.imageID,
+        existingImagePath: existingScene.imagePath,
+      );
       final record = await store.record(id).update(tx, {
         SceneEntity.kNameField: name,
         SceneEntity.kNotesFieldName: notes,
-        SceneEntity.kImagePathFieldName: imagePath,
+        SceneEntity.kImageIDFieldName: preparedImage.imageID,
+        SceneEntity.kImagePathFieldName: preparedImage.imagePath,
       });
       if (record == null) {
         throw InvalidOperationException(message: 'Failed to update record');
