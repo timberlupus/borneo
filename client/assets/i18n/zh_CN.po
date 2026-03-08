@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-08 01:42+0800\n"
+"POT-Creation-Date: 2026-03-08 13:16+0800\n"
 "PO-Revision-Date: 2024-12-22 15:38+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -230,6 +230,12 @@ msgstr "未设置"
 msgid "Duration"
 msgstr "持续时间"
 
+#: devices\borneo\lyfi\views\acclimation_screen.dart:120
+#: devices\borneo\lyfi\views\acclimation_screen.dart:132
+#, python-brace-format
+msgid "{d} days"
+msgstr "{d}天"
+
 #: devices\borneo\lyfi\views\acclimation_screen.dart:127
 msgid "Select Duration"
 msgstr "选择时长"
@@ -430,6 +436,11 @@ msgstr "残月"
 #: devices\borneo\lyfi\views\moon_screen.dart:47
 msgid "Moonlight"
 msgstr "月光"
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:81
+#, python-brace-format
+msgid "Rises at {t}"
+msgstr "在 {t} 升起"
 
 #: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:82
 msgid "Daytime"

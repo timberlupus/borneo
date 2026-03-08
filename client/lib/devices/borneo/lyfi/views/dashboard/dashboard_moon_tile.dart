@@ -78,7 +78,7 @@ class DashboardMoonTile extends StatelessWidget {
         final String subtitle = isMoonActive && moonStatus != null
             ? '${moonStatus.illumination.toStringAsFixed(0)}%'
             : props.nextMoonTime != null
-            ? '${context.translate('Rises at')} ${props.nextMoonTime!}'
+            ? context.translate('Rises at {t}', nArgs: {'t': props.nextMoonTime!.toString()})
             : context.translate('Daytime');
 
         return DashboardTile(

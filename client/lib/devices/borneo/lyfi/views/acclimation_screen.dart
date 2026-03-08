@@ -117,7 +117,7 @@ class AcclimationScreen extends StatelessWidget {
             ),
             SettingsTile.navigation(
               title: Text(context.translate('Duration')),
-              value: Text('${vm.days.round().toString()} ${context.translate('days')}'),
+              value: Text(context.translate('{d} days', nArgs: {'d': vm.days.round().toString()})),
               onPressed: !vm.isBusy && vm.isOnline
                   ? (bc) async {
                       final options = [5, 7, 15, 30, 60, 100].map((e) => e.toDouble()).toList();
@@ -129,7 +129,7 @@ class AcclimationScreen extends StatelessWidget {
                             .map(
                               (d) => GenericBottomSheetPickerEntry(
                                 value: d,
-                                label: '${d.round()} ${context.translate('days')}',
+                                label: context.translate('{d} days', nArgs: {'d': d.round().toString()}),
                               ),
                             )
                             .toList(),

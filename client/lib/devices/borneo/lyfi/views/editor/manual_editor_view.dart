@@ -124,16 +124,17 @@ class ManualEditorView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: viewModel,
-      builder: (context, child) => Column(
-        spacing: 16,
-        children: [
-          Container(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: AspectRatio(aspectRatio: 2.75, child: buildGraph(context)),
-          ),
-          Expanded(child: buildSliders(context)),
-        ],
+      builder: (context, child) => Expanded(
+        child: Column(
+          spacing: 24,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: SizedBox(height: 150, child: buildGraph(context)),
+            ),
+            Expanded(child: buildSliders(context)),
+          ],
+        ),
       ),
     );
   }

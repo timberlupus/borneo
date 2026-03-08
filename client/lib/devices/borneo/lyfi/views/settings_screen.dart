@@ -36,7 +36,7 @@ class SettingsScreen extends StatelessWidget {
         viewModel: vm,
         child: Scaffold(
           appBar: AppBar(title: Text(context.translate('Settings')), elevation: 1),
-          body: _buildSettingsList(context),
+          body: SafeArea(child: _buildSettingsList(context)),
         ),
       ),
     );

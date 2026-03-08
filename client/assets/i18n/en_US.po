@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-08 01:42+0800\n"
+"POT-Creation-Date: 2026-03-08 13:16+0800\n"
 "PO-Revision-Date: 2025-06-01 20:57+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -231,6 +231,12 @@ msgstr ""
 msgid "Duration"
 msgstr ""
 
+#: devices\borneo\lyfi\views\acclimation_screen.dart:120
+#: devices\borneo\lyfi\views\acclimation_screen.dart:132
+#, python-brace-format
+msgid "{d} days"
+msgstr ""
+
 #: devices\borneo\lyfi\views\acclimation_screen.dart:127
 msgid "Select Duration"
 msgstr ""
@@ -428,6 +434,11 @@ msgstr ""
 #: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:74
 #: devices\borneo\lyfi\views\moon_screen.dart:47
 msgid "Moonlight"
+msgstr ""
+
+#: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:81
+#, python-brace-format
+msgid "Rises at {t}"
 msgstr ""
 
 #: devices\borneo\lyfi\views\dashboard\dashboard_moon_tile.dart:82
