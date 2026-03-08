@@ -303,23 +303,26 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog.adaptive(
         title: Text(context.translate('Restore Factory Settings')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(context.translate('Are you sure you want to restore this device to factory settings?')),
-            SizedBox(height: 16),
-            Text(context.translate('This action will:'), style: Theme.of(context).textTheme.titleSmall),
-            SizedBox(height: 8),
-            Text(context.translate('• Delete all custom settings and configurations')),
-            Text(context.translate('• Disconnect the device from your network')),
-            Text(context.translate('• Reset all schedules and modes to defaults')),
-            SizedBox(height: 8),
-            Text(
-              context.translate('The device will need to be reconfigured after this operation.'),
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
-          ],
+        content: Material(
+          color: Colors.transparent,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(context.translate('Are you sure you want to restore this device to factory settings?')),
+              SizedBox(height: 16),
+              Text(context.translate('This action will:'), style: Theme.of(context).textTheme.titleSmall),
+              SizedBox(height: 8),
+              Text(context.translate('• Delete all custom settings and configurations')),
+              Text(context.translate('• Disconnect the device from your network')),
+              Text(context.translate('• Reset all schedules and modes to defaults')),
+              SizedBox(height: 8),
+              Text(
+                context.translate('The device will need to be reconfigured after this operation.'),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.translate('Cancel'))),
@@ -386,23 +389,26 @@ class SettingsScreen extends StatelessWidget {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog.adaptive(
           title: Text(context.translate('Set Manual Fan Power'), style: Theme.of(context).textTheme.titleMedium),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('${tempValue.toInt()}%'),
-              Slider.adaptive(
-                value: tempValue,
-                min: 0,
-                max: 100,
-                divisions: 100,
-                label: '${tempValue.toInt()}%',
-                onChanged: (value) {
-                  setState(() {
-                    tempValue = value;
-                  });
-                },
-              ),
-            ],
+          content: Material(
+            color: Colors.transparent,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('${tempValue.toInt()}%'),
+                Slider.adaptive(
+                  value: tempValue,
+                  min: 0,
+                  max: 100,
+                  divisions: 100,
+                  label: '${tempValue.toInt()}%',
+                  onChanged: (value) {
+                    setState(() {
+                      tempValue = value;
+                    });
+                  },
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.translate('Cancel'))),
@@ -444,20 +450,25 @@ class SettingsScreen extends StatelessWidget {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog.adaptive(
           title: Text(context.translate('Set Device Name')),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: controller,
-                decoration: InputDecoration(labelText: context.translate('Device Name'), errorText: errorText),
-                onChanged: (value) {
-                  setState(() {
-                    errorText = validateName(value);
-                  });
-                },
-              ),
-              if (vm.isBusy) ...[SizedBox(height: 16), CircularProgressIndicator()],
-            ],
+          content: Material(
+            color: Colors.transparent,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  autofocus: true,
+                  selectAllOnFocus: true,
+                  controller: controller,
+                  decoration: InputDecoration(labelText: context.translate('Device Name'), errorText: errorText),
+                  onChanged: (value) {
+                    setState(() {
+                      errorText = validateName(value);
+                    });
+                  },
+                ),
+                if (vm.isBusy) ...[SizedBox(height: 16), CircularProgressIndicator()],
+              ],
+            ),
           ),
           actions: [
             TextButton(
