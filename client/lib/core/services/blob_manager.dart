@@ -84,7 +84,13 @@ class FlutterAppBlobManager implements IBlobManager {
     _deleteFilesInDirectory(Directory(_blobsDir));
   }
 
-  String _makeHashDirName(String blobID) => path.join(_blobsDir, blobID.hashCode.toRadixString(16).padLeft(2, '0'));
+  String _makeHashDirName(String blobID) {
+    final normalizedBlobID = blobID.replaceAll('-', '').toLowerCase();
+    final bucketName = normalizedBlobID.length >= 2
+        ? normalizedBlobID.substring(0, 2)
+        : normalizedBlobID.padRight(2, '0');
+    return path.join(_blobsDir, bucketName);
+  }
 
   Future<void> _deleteFilesInDirectory(Directory directory) async {
     Stream<FileSystemEntity> entities = directory.list(recursive: true, followLinks: false);

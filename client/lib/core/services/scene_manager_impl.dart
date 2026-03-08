@@ -109,7 +109,23 @@ class SceneManagerImpl extends ISceneManager {
       logger?.e('Failed to find current scene!');
       throw KeyNotFoundException(message: 'There was no current scene!');
     }
-    return SceneEntity.fromMap(currentRecord.key, currentRecord.value);
+    return _restoreSceneImagePath(tx, SceneEntity.fromMap(currentRecord.key, currentRecord.value));
+  }
+
+  Future<SceneEntity> _restoreSceneImagePath(Transaction tx, SceneEntity scene) async {
+    final imageID = scene.imageID?.trim();
+    if (imageID == null || imageID.isEmpty) {
+      return scene;
+    }
+
+    final resolvedImagePath = _blobManager.getPath(imageID);
+    if (scene.imagePath == resolvedImagePath) {
+      return scene;
+    }
+
+    final store = stringMapStoreFactory.store(StoreNames.scenes);
+    await store.record(scene.id).update(tx, {SceneEntity.kImagePathFieldName: resolvedImagePath});
+    return scene.copyWith(imagePath: resolvedImagePath);
   }
 
   Future<String> _createBlobFromFile(String imagePath) async {
@@ -161,7 +177,7 @@ class SceneManagerImpl extends ISceneManager {
     } else {
       final store = stringMapStoreFactory.store(StoreNames.scenes);
       final map = (await store.record(key).get(tx))!;
-      return SceneEntity.fromMap(key, map);
+      return _restoreSceneImagePath(tx, SceneEntity.fromMap(key, map));
     }
   }
 
@@ -173,7 +189,10 @@ class SceneManagerImpl extends ISceneManager {
     } else {
       final store = stringMapStoreFactory.store(StoreNames.scenes);
       final records = await store.find(tx);
-      final scenes = records.map((record) => SceneEntity.fromMap(record.key, record.value)).toList();
+      final scenes = <SceneEntity>[];
+      for (final record in records) {
+        scenes.add(await _restoreSceneImagePath(tx, SceneEntity.fromMap(record.key, record.value)));
+      }
       return scenes;
     }
   }
@@ -229,7 +248,7 @@ class SceneManagerImpl extends ISceneManager {
         throw KeyNotFoundException(message: 'Failed to found current scene ID `$newSceneID`');
       }
       final fromScene = _current;
-      final toScene = SceneEntity.fromMap(newSceneID, newCurrentRecord);
+      final toScene = await _restoreSceneImagePath(tx, SceneEntity.fromMap(newSceneID, newCurrentRecord));
       _current = toScene;
       _globalEventBus.fire(CurrentSceneChangedEvent(fromScene, toScene));
       return toScene;
@@ -350,7 +369,7 @@ class SceneManagerImpl extends ISceneManager {
         if (cancelToken?.isCancelled == true) {
           throw Exception('Operation cancelled');
         }
-        final scene = SceneEntity.fromMap(record.key, record.value);
+        final scene = await _restoreSceneImagePath(tx, SceneEntity.fromMap(record.key, record.value));
         final accessEpoch = scene.lastAccessTime.millisecondsSinceEpoch;
         if (accessEpoch > lastAccessEpoch) {
           lastAccessEpoch = accessEpoch;
