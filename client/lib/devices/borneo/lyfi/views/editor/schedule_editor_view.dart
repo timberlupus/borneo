@@ -2,7 +2,6 @@ import 'package:borneo_app/devices/borneo/lyfi/view_models/constants.dart';
 import 'package:borneo_app/devices/borneo/lyfi/views/easy_setup_screen.dart';
 import 'package:borneo_app/core/infrastructure/duration.dart';
 import 'package:borneo_app/core/infrastructure/time_of_day.dart';
-import 'package:borneo_app/shared/widgets/screen_top_rounded_container.dart';
 import 'package:borneo_common/duration_ext.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -85,14 +84,13 @@ class ScheduleEditorView extends StatelessWidget {
       value: viewModel,
       builder: (context, child) {
         return Column(
-          spacing: 16,
           children: [
             // The chart
-            Container(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              padding: EdgeInsets.fromLTRB(8, 24, 8, 0),
-              child: AspectRatio(
-                aspectRatio: 2.75,
+            SizedBox(
+              height: 150,
+              child: Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                padding: EdgeInsets.fromLTRB(8, 24, 8, 0),
                 child: Consumer<ScheduleEditorViewModel>(
                   builder: (context, vm, child) {
                     const minSpanSeconds = 3 * 3600.0;
@@ -140,6 +138,7 @@ class ScheduleEditorView extends StatelessWidget {
               ),
             ),
 
+            const SizedBox(height: 16),
             // Controls
             Expanded(
               child: Selector<ScheduleEditorViewModel, bool>(
@@ -156,87 +155,99 @@ class ScheduleEditorView extends StatelessWidget {
 
             // Bottom buttons
             Consumer<ScheduleEditorViewModel>(
-              builder: (context, vm, child) => ScreenTopRoundedContainer(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                padding: const EdgeInsets.fromLTRB(8, 24, 8, 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // Easy Setup
-                    _BottomActionButton(
-                      icon: Icons.auto_fix_high_outlined,
-                      label: context.translate('Easy'),
-                      color: Theme.of(context).colorScheme.primary,
-                      onPressed: () async {
-                        await vm.easySetupEnter();
-                        if (context.mounted) {
-                          final route = MaterialPageRoute(builder: (context) => EasySetupScreen(vm));
-                          final applied = await Navigator.push(context, route);
-                          if (applied == true) {
-                            await vm.easySetupFinish();
-                            // stay on the Dimming screen (do not pop the parent route)
-                          }
-                        }
-                      },
-                    ),
-                    // Add
-                    _BottomActionButton(
-                      icon: Icons.add_outlined,
-                      label: context.translate('Add'),
-                      color: vm.canAddInstant ? Theme.of(context).colorScheme.primary : Theme.of(context).disabledColor,
-                      onPressed: vm.canAddInstant
-                          ? () async {
-                              final initialTime =
-                                  (vm.currentEntry?.instant ?? Duration(hours: 6, minutes: 30)) +
-                                  ScheduleEditorViewModel.defaultInstantSpan;
-                              final safeInitialTime = Duration(
-                                hours: initialTime.inHours % 24,
-                                minutes: initialTime.inMinutes % 60,
-                              );
-                              final selectedTime = await showNewInstantDialog(context, safeInitialTime.toTimeOfDay());
-                              if (selectedTime != null) {
-                                vm.addInstant(selectedTime);
+              builder: (context, vm, child) => SafeArea(
+                top: false,
+                child: Card(
+                  margin: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  elevation: 1,
+                  color: Theme.of(context).colorScheme.surfaceContainer,
+                  child: Padding(
+                    padding: EdgeInsetsGeometry.fromLTRB(8, 16, 8, 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Easy Setup
+                        _BottomActionButton(
+                          icon: Icons.auto_fix_high_outlined,
+                          label: context.translate('Easy'),
+                          color: Theme.of(context).colorScheme.primary,
+                          onPressed: () async {
+                            await vm.easySetupEnter();
+                            if (context.mounted) {
+                              final route = MaterialPageRoute(builder: (context) => EasySetupScreen(vm));
+                              final applied = await Navigator.push(context, route);
+                              if (applied == true) {
+                                await vm.easySetupFinish();
+                                // stay on the Dimming screen (do not pop the parent route)
                               }
                             }
-                          : null,
+                          },
+                        ),
+                        // Add
+                        _BottomActionButton(
+                          icon: Icons.add_outlined,
+                          label: context.translate('Add'),
+                          color: vm.canAddInstant
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).disabledColor,
+                          onPressed: vm.canAddInstant
+                              ? () async {
+                                  final initialTime =
+                                      (vm.currentEntry?.instant ?? Duration(hours: 6, minutes: 30)) +
+                                      ScheduleEditorViewModel.defaultInstantSpan;
+                                  final safeInitialTime = Duration(
+                                    hours: initialTime.inHours % 24,
+                                    minutes: initialTime.inMinutes % 60,
+                                  );
+                                  final selectedTime = await showNewInstantDialog(
+                                    context,
+                                    safeInitialTime.toTimeOfDay(),
+                                  );
+                                  if (selectedTime != null) {
+                                    vm.addInstant(selectedTime);
+                                  }
+                                }
+                              : null,
+                        ),
+                        // Remove
+                        _BottomActionButton(
+                          icon: Icons.remove,
+                          label: context.translate('Remove'),
+                          color: vm.canRemoveCurrentInstant
+                              ? Theme.of(context).colorScheme.secondary
+                              : Theme.of(context).disabledColor,
+                          onPressed: vm.canRemoveCurrentInstant ? vm.removeCurrentInstant : null,
+                        ),
+                        // Clear
+                        _BottomActionButton(
+                          icon: Icons.clear,
+                          label: context.translate('Clear'),
+                          color: vm.canClearInstants
+                              ? Theme.of(context).colorScheme.error
+                              : Theme.of(context).disabledColor,
+                          onPressed: vm.canClearInstants ? () => _confirmClearEntries(context, vm) : null,
+                        ),
+                        // Prev
+                        _BottomActionButton(
+                          icon: Icons.skip_previous_outlined,
+                          label: context.translate('Prev'),
+                          color: vm.canPrevInstant
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).disabledColor,
+                          onPressed: vm.canPrevInstant ? vm.prevInstant : null,
+                        ),
+                        // Next
+                        _BottomActionButton(
+                          icon: Icons.skip_next_outlined,
+                          label: context.translate('Next'),
+                          color: vm.canNextInstant
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).disabledColor,
+                          onPressed: vm.canNextInstant ? vm.nextInstant : null,
+                        ),
+                      ],
                     ),
-                    // Remove
-                    _BottomActionButton(
-                      icon: Icons.remove,
-                      label: context.translate('Remove'),
-                      color: vm.canRemoveCurrentInstant
-                          ? Theme.of(context).colorScheme.secondary
-                          : Theme.of(context).disabledColor,
-                      onPressed: vm.canRemoveCurrentInstant ? vm.removeCurrentInstant : null,
-                    ),
-                    // Clear
-                    _BottomActionButton(
-                      icon: Icons.clear,
-                      label: context.translate('Clear'),
-                      color: vm.canClearInstants
-                          ? Theme.of(context).colorScheme.error
-                          : Theme.of(context).disabledColor,
-                      onPressed: vm.canClearInstants ? () => _confirmClearEntries(context, vm) : null,
-                    ),
-                    // Prev
-                    _BottomActionButton(
-                      icon: Icons.skip_previous_outlined,
-                      label: context.translate('Prev'),
-                      color: vm.canPrevInstant
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).disabledColor,
-                      onPressed: vm.canPrevInstant ? vm.prevInstant : null,
-                    ),
-                    // Next
-                    _BottomActionButton(
-                      icon: Icons.skip_next_outlined,
-                      label: context.translate('Next'),
-                      color: vm.canNextInstant
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).disabledColor,
-                      onPressed: vm.canNextInstant ? vm.nextInstant : null,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -309,6 +320,7 @@ class _BottomActionButton extends StatelessWidget {
     final Color sysDisabled = theme.colorScheme.onSurface.withValues(alpha: 0.38);
     final Color borderColor = isEnabled ? color : sysDisabled;
     final Color iconColor = isEnabled ? color : sysDisabled;
+    final Color iconBgColor = isEnabled ? theme.colorScheme.surfaceBright : Colors.transparent;
     final Color labelColor = isEnabled ? Theme.of(context).colorScheme.onSurface : sysDisabled;
     final TextStyle? labelStyle = theme.textTheme.labelSmall?.copyWith(color: labelColor);
     return Expanded(
@@ -326,7 +338,7 @@ class _BottomActionButton extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   side: BorderSide(color: borderColor, width: 1.5),
                   foregroundColor: iconColor,
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: iconBgColor,
                   padding: EdgeInsets.zero,
                   shadowColor: Colors.transparent,
                   disabledForegroundColor: sysDisabled,

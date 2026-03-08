@@ -18,12 +18,15 @@ class SunEditorView extends StatelessWidget {
         if (vm.isInitialized) {
           return Selector<SunEditorViewModel, bool>(
             selector: (_, editor) => editor.canChangeColor,
-            builder: (_, canChangeColor, _) => SingleChildScrollView(
-              child: BrightnessSliderList(context.read<SunEditorViewModel>(), disabled: !canChangeColor),
+            builder: (_, canChangeColor, _) => SafeArea(
+              top: false,
+              child: SingleChildScrollView(
+                child: BrightnessSliderList(context.read<SunEditorViewModel>(), disabled: !canChangeColor),
+              ),
             ),
           );
         } else {
-          return Container();
+          return const SizedBox.shrink();
         }
       },
     );
@@ -57,8 +60,8 @@ class SunEditorView extends StatelessWidget {
           Container(
             color: Theme.of(context).scaffoldBackgroundColor,
             padding: const EdgeInsets.all(0),
-            child: AspectRatio(
-              aspectRatio: 2.75,
+            child: SizedBox(
+              height: 150,
               child: Consumer<SunEditorViewModel>(builder: (conterxt, vm, _) => buildGraph(context)),
             ),
           ),

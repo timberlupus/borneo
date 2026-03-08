@@ -232,8 +232,14 @@ class EasySetupScreen extends StatelessWidget {
             return ScreenTopRoundedContainer(
               padding: EdgeInsets.fromLTRB(0, 24, 0, 0),
               color: Theme.of(context).colorScheme.surfaceContainer,
-              child: SingleChildScrollView(
-                child: BrightnessSliderList(tempEditor, disabled: !canEdit, padding: EdgeInsets.fromLTRB(0, 24, 0, 16)),
+              child: SafeArea(
+                child: SingleChildScrollView(
+                  child: BrightnessSliderList(
+                    tempEditor,
+                    disabled: !canEdit,
+                    padding: EdgeInsets.fromLTRB(0, 24, 0, 16),
+                  ),
+                ),
               ),
             );
           },

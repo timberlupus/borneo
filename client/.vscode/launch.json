@@ -9,14 +9,20 @@
             "request": "launch",
             "type": "dart",
             "program": "${workspaceFolder}/lib/main.dart",
-            "flutterMode": "debug"
+            "flutterMode": "debug",
+            "args": [
+                "--no-pub"
+            ]
         },
         {
             "name": "app (profile mode)",
             "request": "launch",
             "type": "dart",
             "program": "${workspaceFolder}/lib/main.dart",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "args": [
+                "--no-pub"
+            ]
         },
         {
             "name": "app (release mode)",
